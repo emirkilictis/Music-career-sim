@@ -40,7 +40,7 @@ dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet   # performan
 dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet --save /tmp/c.sqlite   # + kayıt
 ```
 
-## Testler (simülasyon 16/16, kayıt 5/5 geçiyor)
+## Testler (simülasyon 18/18, kayıt 5/5 geçiyor)
 
 - Aynı seed → bit düzeyinde aynı dünya; farklı seed → farklı dünya
 - Sanatçının kariyer stream toplamı = şarkılarının toplamı (aktif + tembel birikimli dormant)
@@ -151,6 +151,12 @@ satırı yazılır — oyuncu her şarkısının haftalık grafiğini görür.
 
 Performans (50 yıl, her hafta kayıtla): aktif şarkı 1.045 → 1.087 (düz), aktif albüm 206 → 354
 (doyuma yaklaşıyor), simülasyon 2,5 → 3,5 ms/hafta, kayıt 24 → 41 ms/hafta, DB 171 MB.
+
+## Kısa video viralleri (yapıldı)
+
+Eski katalog şarkıları rastgele viral olup listelere tırmanabiliyor (game-design §7.3). Viral etki
+şarkının yaşından bağımsız ayrı bir terim; trend 3 hafta büyüyüp söner; %12'si "dev viral". Test:
+2016–2025 arasında 50'den fazla eski şarkı canlanıyor ve en az biri ABD Top 40'a giriyor.
 
 ## Bilinen eksikler / sıradaki adımlar
 

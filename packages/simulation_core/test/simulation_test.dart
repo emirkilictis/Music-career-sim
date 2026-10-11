@@ -124,6 +124,7 @@ void main() {
 
   group('mega debuts', megaDebutTests);
   group('album shape', albumShapeTests);
+  group('viral', viralTests);
 
   group('eras and anticipation', () {
     test('after a successful era anticipation builds up and never decays', () {
@@ -269,5 +270,40 @@ void albumShapeTests() {
     final forty = _albumRun(tracks: 40, skill: 90, weeks: 1).first;
     expect(forty, greaterThan(1.15 * ten));
     expect(forty, lessThan(1.8 * ten));
+  });
+}
+
+/// Short-video virality (docs/game-design.md §7.3): old catalog songs can go
+/// viral and climb the charts in the short-video era, but not before it.
+void viralTests() {
+  test('old songs go viral and some climb the US chart in the short-video era',
+      () {
+    final w = WorldGen.create(seed: 42, startYear: 2016);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2016)) {
+      sim.step();
+    }
+    final revived = <int>{};
+    var bestPos = 0;
+    while (w.week < GameTime.firstWeekOf(2026)) {
+      final r = sim.step();
+      for (final id in r.viralSongs) {
+        if (r.week - w.songs[id].releasedWeek >= 3 * GameTime.weeksPerYear) {
+          revived.add(id);
+        }
+      }
+      for (final id in revived) {
+        final pos = w.songs[id].lastPosOn(Charts.usSongs);
+        if (pos > 0 && (bestPos == 0 || pos < bestPos)) bestPos = pos;
+      }
+    }
+    expect(revived.length, greaterThan(50));
+    expect(bestPos, inInclusiveRange(1, 40));
+  });
+
+  test('viral strength is weak before short-video platforms', () {
+    final c = SimConfig();
+    expect(c.viralEraFactor(2008), lessThan(0.2));
+    expect(c.viralEraFactor(2022), greaterThan(1.0));
   });
 }

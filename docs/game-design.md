@@ -272,6 +272,19 @@ Platformlar konfigürasyondan gelir (isimler kurgusal):
 | 2010+ | Fotoğraf odaklı sosyal medya | Kare/4:5 post |
 | 2018+ | Kısa video platformu (viral etkisi yüksek) | Video kapağı |
 
+### 7.3 Kısa video viralleri (TikTok tarzı)
+
+- Herhangi bir şarkı — **eski katalog şarkıları dahil** — rastgele viral olabilir. Seçim büyük
+  sanatçılara yığılmaz (bilinmeyen bir şarkı da patlayabilir); şarkının viral potansiyeli şansı artırır.
+- Trend birkaç hafta büyür, sonra söner. Çoğu viral küçüktür (listelerin alt/orta sıraları);
+  nadiren "dev viral" olur ve şarkı Top 10'a, çok nadiren zirveye tırmanır.
+- Döneme bağlıdır: kısa video platformlarından önce (2013 öncesi) çok zayıf, erken dönem (2013–2017)
+  orta, 2018 sonrası tam etki.
+- Oyuncunun şarkıları da viral olabilir (eski bir şarkı yıllar sonra geri dönebilir); bildirim:
+  "🔥 'Velvet Diamonds' kısa video platformunda viral oldu".
+- Kalibrasyon (2018–2025): yılda 13–29 eski şarkı canlanıyor, 0–5'i ABD Top 40'a giriyor, yaklaşık iki
+  yılda bir biri Top 10'a çıkıyor (örn. 13 yıllık bir şarkı #2).
+
 ## 8. Yayınlar ve rollout
 
 ### 8.1 Yayın türleri

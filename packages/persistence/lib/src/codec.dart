@@ -138,7 +138,7 @@ abstract final class Codec {
     'virality', 'longevity', 'estimatedGrade',
     'status', 'releasedWeek', 'albumId', 'isSingle', 'singleWeek',
     'lastAttention', 'lastReach', 'weekStreams', 'weekDownloads',
-    'weekPhysical', 'weekRadio', 'weekPoints', 'viralBoost',
+    'weekPhysical', 'weekRadio', 'weekPoints', 'viralBoost', 'viralRamp',
     'weeksBelowCutoff', 'lifetimeRadio', 'dormantRate',
     ...songRegColumns,
     'charts',
@@ -151,7 +151,7 @@ abstract final class Codec {
         s.status.index, s.releasedWeek, s.albumId, s.isSingle ? 1 : 0,
         s.singleWeek,
         s.lastAttention, s.lastReach, s.weekStreams, s.weekDownloads,
-        s.weekPhysical, s.weekRadio, s.weekPoints, s.viralBoost,
+        s.weekPhysical, s.weekRadio, s.weekPoints, s.viralBoost, s.viralRamp,
         s.weeksBelowCutoff, s.lifetimeRadio, s.dormantRate,
         ...s.reg,
         _encodeCharts(s),
@@ -187,6 +187,7 @@ abstract final class Codec {
       ..weekRadio = _d(r['weekRadio'])
       ..weekPoints = _d(r['weekPoints'])
       ..viralBoost = _d(r['viralBoost'])
+      ..viralRamp = r['viralRamp'] as int
       ..weeksBelowCutoff = r['weeksBelowCutoff'] as int
       ..lifetimeRadio = _d(r['lifetimeRadio'])
       ..dormantRate = _d(r['dormantRate']);

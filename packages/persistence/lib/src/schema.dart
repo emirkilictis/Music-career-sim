@@ -46,7 +46,7 @@ String _v1() => '''
     status INTEGER NOT NULL, releasedWeek INTEGER, albumId INTEGER,
     isSingle INTEGER, singleWeek INTEGER,
     lastAttention REAL, lastReach REAL, weekStreams REAL, weekDownloads REAL,
-    weekPhysical REAL, weekRadio REAL, weekPoints REAL, viralBoost REAL,
+    weekPhysical REAL, weekRadio REAL, weekPoints REAL, viralBoost REAL, viralRamp INTEGER,
     weeksBelowCutoff INTEGER, lifetimeRadio REAL, dormantRate REAL,
     ${_cols(Codec.songRegColumns, 'REAL')},
     charts TEXT

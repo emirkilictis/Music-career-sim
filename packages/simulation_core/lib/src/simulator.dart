@@ -19,6 +19,7 @@ class WeekResult {
     required this.charts,
     required this.albumDebuts,
     required this.newNumberOnes,
+    required this.viralSongs,
     required this.activeSongs,
     required this.activeAlbums,
     required this.dormantSongs,
@@ -35,6 +36,9 @@ class WeekResult {
 
   /// Entities reaching #1 for the first time, by chart id.
   final List<List<int>> newNumberOnes;
+
+  /// Songs that started a viral trend this week (new or catalog).
+  final List<int> viralSongs;
   final int activeSongs;
   final int activeAlbums;
   final int dormantSongs;
@@ -62,8 +66,8 @@ class Simulator {
     // 1–2. Scheduled AI activity.
     AiPlanner.step(w);
 
-    // 3. Viral reactivation of a dormant catalog song (event based).
-    _viralReactivation();
+    // 3. Short-video virality can revive old catalog songs (event based).
+    final virals = _viralRevivals();
 
     // 4. Artist pre-step (active artists only).
     for (final id in w.activeArtistIds) {
@@ -129,10 +133,17 @@ class Simulator {
         cas += 0.4 * w.artists[f].casual;
       }
 
-      // Viral spark.
-      s.viralBoost *= 0.85;
-      if (r.chance(c.viralWeeklyChance * (0.3 + 2 * s.virality))) {
-        s.viralBoost += r.range(0.02, 0.10) * (0.5 + s.virality);
+      // Viral trends grow for a few weeks, then fade.
+      if (s.viralRamp > 0) {
+        s.viralBoost *= 1.4;
+        s.viralRamp--;
+      } else {
+        s.viralBoost *= 0.88;
+      }
+      final viralEra = c.viralEraFactor(GameTime.yearOf(w.week));
+      if (r.chance(c.viralWeeklyChance * viralEra * (0.3 + 2 * s.virality))) {
+        _startViral(s, r, viralEra);
+        virals.add(s.id);
       }
 
       // Chart feedback favours the very top (playlists, radio adds, press);
@@ -154,7 +165,6 @@ class Simulator {
       final exposure = (c.baseExposure +
               c.fameExposure * p.fame +
               chartBoost +
-              s.viralBoost +
               0.02 * p.buzz) *
           promo *
           p.labelReach *
@@ -169,10 +179,16 @@ class Simulator {
           (s.isSingle ? 1.0 : c.albumTrackFanShare);
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
       final pubPart = c.publicPool * s.commercial * life * exposure;
+      // A viral trend reaches people regardless of the song's age.
+      final viralPart =
+          c.publicPool * (0.5 + 0.5 * s.commercial) * s.viralBoost * 0.1;
       final noise = r.logNormal(0.10);
-      final a = (fanPart + casPart + pubPart) * qMult * noise * trackShare;
+      final a = (fanPart + casPart + pubPart + viralPart) *
+          qMult *
+          noise *
+          trackShare;
       s.lastAttention = a;
-      s.lastReach = (casPart + pubPart) * qMult * trackShare;
+      s.lastReach = (casPart + pubPart + viralPart) * qMult * trackShare;
 
       final fresh = math.exp(-promoAge / 6.0);
       final d = a * (0.25 + fresh) * (s.isSingle ? 1.0 : 0.5);
@@ -499,6 +515,7 @@ class Simulator {
       charts: published,
       albumDebuts: debuts,
       newNumberOnes: newNo1,
+      viralSongs: virals,
       activeSongs: w.activeSongIds.length,
       activeAlbums: w.activeAlbumIds.length,
       dormantSongs: w.dormantSongCount,
@@ -711,27 +728,64 @@ class Simulator {
     }
   }
 
-  void _viralReactivation() {
+  /// Starts a viral trend: it grows for three weeks, then fades. Most trends
+  /// are small; a few become huge and can push a song up the charts.
+  void _startViral(Song s, RandomStream r, double era) {
+    var strength = r.range(0.02, 0.08) * (0.5 + s.virality);
+    if (r.chance(world.config.megaViralChance)) strength *= r.range(3, 6);
+    s.viralBoost = math.max(s.viralBoost, strength * era / 2.7);
+    s.viralRamp = 3;
+  }
+
+  /// Old catalog songs going viral on short-video platforms. Selection is
+  /// flattened (sqrt) so lesser-known artists' songs can blow up too, and
+  /// favours songs with viral potential.
+  List<int> _viralRevivals() {
     final w = world;
+    final c = w.config;
     final r = RandomStream.keyed(w.seed, w.week, -1, RngPurpose.viral);
-    if (!r.chance(0.35)) return;
-    var total = 0.0;
-    for (final a in w.artists) {
-      total += a.sumDormantRate;
-    }
-    if (total <= 0) return;
-    var pick = r.nextDouble() * total;
-    for (final a in w.artists) {
-      pick -= a.sumDormantRate;
-      if (pick <= 0 && a.dormantSongIds.isNotEmpty) {
-        final ids = List.of(a.dormantSongIds)..sort();
-        final s = w.songs[ids[r.nextInt(ids.length)]];
-        Lifecycle.reactivateSong(w, s);
-        s.viralBoost = r.range(0.03, 0.12);
-        s.weeksBelowCutoff = 0;
-        return;
+    final era = c.viralEraFactor(GameTime.yearOf(w.week));
+    final revived = <int>[];
+    for (var attempt = 0; attempt < 2; attempt++) {
+      if (!r.chance(math.min(1.0, c.viralRevivalChance * era / 2))) continue;
+      var total = 0.0;
+      for (final a in w.artists) {
+        if (a.sumDormantRate > 0) total += math.sqrt(a.sumDormantRate);
       }
+      if (total <= 0) break;
+      var pick = r.nextDouble() * total;
+      Artist? chosen;
+      for (final a in w.artists) {
+        if (a.sumDormantRate <= 0) continue;
+        pick -= math.sqrt(a.sumDormantRate);
+        if (pick <= 0) {
+          chosen = a;
+          break;
+        }
+      }
+      if (chosen == null || chosen.dormantSongIds.isEmpty) continue;
+      final ids = List.of(chosen.dormantSongIds)..sort();
+      var weight = 0.0;
+      for (final id in ids) {
+        final v = 0.2 + w.songs[id].virality;
+        weight += v * v;
+      }
+      var x = r.nextDouble() * weight;
+      var song = w.songs[ids.last];
+      for (final id in ids) {
+        final v = 0.2 + w.songs[id].virality;
+        x -= v * v;
+        if (x <= 0) {
+          song = w.songs[id];
+          break;
+        }
+      }
+      Lifecycle.reactivateSong(w, song);
+      song.weeksBelowCutoff = 0;
+      _startViral(song, r, era);
+      revived.add(song.id);
     }
+    return revived;
   }
 
   void _playerIncome() {

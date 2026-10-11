@@ -21,6 +21,8 @@ class SimConfig {
     this.albumTrackFanShare = 0.6,
     this.catalogTail = 0.05,
     this.viralWeeklyChance = 0.0025,
+    this.viralRevivalChance = 0.4,
+    this.megaViralChance = 0.12,
     this.superfanBuyRate = 0.09,
     this.collectorRate = 0.15,
     this.variantDecay = 0.6,
@@ -87,6 +89,23 @@ class SimConfig {
   /// Long-term catalog level as a fraction of a song's peak-period audience.
   final double catalogTail;
   final double viralWeeklyChance;
+
+  /// Weekly chance (×2 attempts, × era factor) that an old catalog song goes
+  /// viral on short-video platforms (docs/game-design.md §7.3).
+  final double viralRevivalChance;
+
+  /// Share of viral trends that become huge.
+  final double megaViralChance;
+
+  /// Strength of short-video virality by year: none before short-video
+  /// platforms, an early phase, then the full short-video era.
+  double viralEraFactor(int year) => year < 2013
+      ? 0.15
+      : year < 2018
+          ? 0.4
+          : year < 2020
+              ? 1.0
+              : 1.2;
 
   final double superfanBuyRate;
 

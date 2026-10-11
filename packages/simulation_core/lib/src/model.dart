@@ -261,6 +261,9 @@ class Song with Charted {
   /// Global chart points this week.
   double weekPoints = 0;
   double viralBoost = 0;
+
+  /// Weeks a viral trend keeps growing before it starts to fade.
+  int viralRamp = 0;
   int weeksBelowCutoff = 0;
 
   double lifetimeRadio = 0;
