@@ -1,0 +1,8 @@
+name: sim_cli
+description: Headless command-line runner for the simulation (calibration, reports, benchmarks).
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.6.0
+dependencies:
+  simulation_core: any
