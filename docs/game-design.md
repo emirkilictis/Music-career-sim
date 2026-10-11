@@ -469,14 +469,18 @@ pazarlama etkisi, hayran dönüşümü, hit şansı, decay, varyant talep havuzu
 pazarlama etkisi +%50, hayran dönüşümü +%35, çıkış momentumu +%25, daha yavaş decay,
 daha güçlü varyantlar, daha kolay radyo/playlist kabulü, daha güçlü flop desteği.
 
-## 20. Gelir modeli (taslak)
+## 20. Gelir modeli
 
 - Oyun **ücretsiz indirilir ve tek başına eksiksiz oynanır.**
-- **Premium** şunları açar: Yükselen yıldız ve Süperstar başlangıcı, Milyoner başlangıcı,
-  sınırsız kayıt slotu. İleride: ek içerikler.
-- **Önerilen:** tek seferlik satın alma. Çevrimdışı, tek oyunculu bir oyunda abonelik genelde kötü
-  yorum alır; mağazalar da aboneliğin sürekli yeni değer sunmasını bekler.
-  Abonelik ("üyelik") istenirse sürekli içerik güncellemesiyle birlikte düşünülmeli. **Karar açık.**
+- **Premium üyelik** üç şekilde satılır: **aylık**, **yıllık** ve **ömür boyu** (tek seferlik).
+  Rakip oyunlarda aylık üyelik kabul görmüş bir model; ömür boyu seçeneği aboneliği sevmeyen oyuncular için.
+- Premium şunları açar: Yükselen yıldız ve Süperstar başlangıcı, Milyoner başlangıcı,
+  sınırsız kayıt slotu. Üyeliğin değerini sürdürmek için yeni içerikler (dönemler, özellikler)
+  ilk olarak veya sadece Premium'a gelebilir.
+- **Üyelik bitince hiçbir kariyer kilitlenmez.** Premium ile başlatılmış kariyerler ve mevcut slotlar
+  oynanmaya devam eder; sadece **yeni** Premium başlangıç ve ücretsiz limitin üstünde **yeni** slot açılamaz.
+- Simülasyonun kendisi (zorluk, formüller) Premium'dan etkilenmez; para ile oyun içi güç satılmaz,
+  sadece başlangıç seçenekleri ve kolaylıklar.
 - Satın alımları geri yükleme (restore) zorunludur.
 - Reklam yok (karar verilmedi).
 

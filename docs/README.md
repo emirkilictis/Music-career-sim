@@ -47,7 +47,7 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K19 | **Şarkı kalitesi = sanatçı statları + ekip (prodüktör, söz yazarı) + şans.** Tecrübesiz biri de "ilham anı" ile şaheser yazabilir. Kesin kalite gizli, tahmini not gösterilir. |
 | K20 | **Yaratıcı enerji ve burnout:** tek çubuk; art arda çok şarkı yazınca burnout (birkaç hafta yazamama). |
 | K21 | **Kariyer yolu:** Bağımsız veya küçük plak şirketi (sade: avans, gelir payı, 2 albümlük sözleşme). Büyük şirket teklifleri Faz 2. |
-| K22 | **Başlangıç seviyesi ve parası seçilebilir;** Süperstar/Yükselen yıldız ve Milyoner başlangıcı Premium. Oyun ücretsiz ve tek başına eksiksiz. |
+| K22 | **Başlangıç seviyesi ve parası seçilebilir;** Süperstar/Yükselen yıldız ve Milyoner başlangıcı Premium. Oyun ücretsiz ve tek başına eksiksiz. Premium: **aylık / yıllık üyelik + ömür boyu** seçeneği. Üyelik bitince hiçbir kariyer kilitlenmez. |
 | K23 | ChatGPT planındaki ekranlar, rekorlar, kampanyalar, finans, bildirimler, ödüller, Kolay mod ve 10 performans kuralı dokümanlara taşındı. |
 
 ## Yol Haritası
@@ -87,5 +87,5 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 - Zorluk seviyeleri kaç tane olacak ve flop desteği her birinde ne kadar güçlü?
 - Faz 1'de hangi türler (genre) olacak?
 - Kurgusal liste ve platform isimleri (örn. "Streamify", "US Top 100").
-- **Gelir modeli:** Premium tek seferlik mi, abonelik ("üyelik") mi? (Öneri: tek seferlik; bkz. game-design §20.)
+- Premium fiyatları (aylık / yıllık / ömür boyu).
 - Ücretsiz sürümde kaç kayıt slotu olacak?

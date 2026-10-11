@@ -143,7 +143,9 @@ Bütçenin çoğu DB yazımı ve UI yenilemesine gider; 1.500 şarkının matema
 
 ## 11. Uygulama içi satın alma (Premium)
 
-- Flutter `in_app_purchase` eklentisi (App Store ve Google Play).
+- Flutter `in_app_purchase` eklentisi (App Store ve Google Play): aylık/yıllık abonelik + ömür boyu (tek seferlik) ürün.
+- Abonelik bitişi çevrimdışıyken de doğru işlenmeli (son bilinen bitiş tarihi + kısa tolerans süresi).
+- Kural: hak kaybı sadece **yeni** Premium kariyer/slot oluşturmayı engeller; mevcut kariyerler asla kilitlenmez.
 - Haklar (entitlement) **kayıt dosyasında değil**, uygulama düzeyinde tutulur; açılışta mağazadan doğrulanır,
   çevrimdışıyken yerel önbellekten okunur. Sunucu yok.
 - "Satın alımları geri yükle" butonu zorunlu.
