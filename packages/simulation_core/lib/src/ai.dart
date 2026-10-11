@@ -11,8 +11,9 @@ import 'world_gen.dart';
 abstract final class AiPlanner {
   static void step(World w) {
     if (GameTime.weekOfYear(w.week) == 1) _yearlyUpkeep(w);
-    for (final a in w.artists) {
-      if (a.tier == ArtistTier.player || a.isRetired) continue;
+    for (final id in w.activeArtistIds) {
+      final a = w.artists[id];
+      if (a.tier == ArtistTier.player) continue;
       if (a.plan.isEmpty && w.week >= a.nextEraWeek) _planEra(w, a);
       _executeDue(w, a);
     }
@@ -143,7 +144,7 @@ abstract final class AiPlanner {
       final yearsActive = (w.week - a.debutWeek) / GameTime.weeksPerYear;
       final weak = a.fame < 0.06 && yearsActive > 4;
       final p = (weak ? 0.15 : 0.0) + (yearsActive > 25 ? 0.10 : 0.0);
-      if (r.chance(p) && a.plan.isEmpty) a.retiredWeek = w.week;
+      if (r.chance(p) && a.plan.isEmpty) w.retire(a);
     }
     // Population control: keep the number of active AI artists at the target
     // so a 100-year career does not grow the world (docs/simulation.md §8).
@@ -159,7 +160,7 @@ abstract final class AiPlanner {
     for (final a in alive) {
       if (excess <= 0) break;
       if (a.plan.isNotEmpty || a.eraOpen) continue;
-      a.retiredWeek = w.week;
+      w.retire(a);
       excess--;
     }
     // Newcomers.

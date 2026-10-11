@@ -149,6 +149,7 @@ abstract final class Actions {
       estimatedGrade: grade,
     );
     w.songs.add(song);
+    w.dirtySongs.add(song.id);
 
     if (!aiMode) {
       a.creativeEnergy = math.max(0, a.creativeEnergy - energyCostPerSong);
@@ -208,6 +209,7 @@ abstract final class Actions {
     );
     album.hypeAtRelease = a.hype;
     album.variantWeeks = (List.of(variantWeeks)..sort());
+    w.dirtyAlbums.add(album.id);
     if (payForVariants && variantWeeks.length > 1) {
       a.moneyCents -= variantCostCents * (variantWeeks.length - 1);
     }
@@ -215,6 +217,7 @@ abstract final class Actions {
     for (final id in songIds) {
       final s = w.songs[id];
       s.albumId = album.id;
+      w.dirtySongs.add(s.id);
       if (s.status == SongStatus.vault) {
         s.releasedWeek = w.week;
         Lifecycle.activateSong(w, s);

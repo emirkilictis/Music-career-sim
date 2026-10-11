@@ -7,10 +7,12 @@ abstract final class Lifecycle {
   static void activateSong(World w, Song s) {
     s.status = SongStatus.active;
     World.insertSorted(w.activeSongIds, s.id);
+    w.dirtySongs.add(s.id);
   }
 
   static void makeSongDormant(World w, Song s) {
     final a = w.primaryOf(s);
+    w.settleRetired(a);
     final rate = s.lastAttention / a.catalogFactor;
     s.dormantRate = rate;
     s.indexAtSettleStreams = a.catalogIndexStreams;
@@ -20,7 +22,11 @@ abstract final class Lifecycle {
     s.viralBoost = 0;
     s.lastPos = 0;
     a.sumDormantRate += rate;
+    if (a.isRetired) w.retiredDormantAttention += rate * a.catalogFactor;
     a.dormantSongIds.add(s.id);
+    w.dormantSongCount++;
+    w.dirtySongs.add(s.id);
+    w.dirtyArtists.add(a.id);
     if (s.albumId >= 0) {
       final al = w.albums[s.albumId];
       settleAlbum(w, al);
@@ -32,11 +38,17 @@ abstract final class Lifecycle {
   static void reactivateSong(World w, Song s) {
     if (s.status != SongStatus.dormant) return;
     final a = w.primaryOf(s);
+    w.settleRetired(a);
     s.lifetimeStreams = w.songLifetimeStreams(s);
     s.lifetimeDownloads = w.songLifetimeDownloads(s);
     a.sumDormantRate -= s.dormantRate;
     if (a.sumDormantRate < 0) a.sumDormantRate = 0;
+    if (a.isRetired) {
+      w.retiredDormantAttention -= s.dormantRate * a.catalogFactor;
+    }
     a.dormantSongIds.remove(s.id);
+    w.dormantSongCount--;
+    w.dirtyArtists.add(a.id);
     if (s.albumId >= 0) {
       final al = w.albums[s.albumId];
       settleAlbum(w, al);
@@ -52,12 +64,14 @@ abstract final class Lifecycle {
   static void settleAlbum(World w, Album al) {
     if (al.status != AlbumStatus.dormant) return;
     al.lifetimeUnits = w.albumLifetimeUnits(al);
-    al.indexAtSettle = w.artists[al.artistId].catalogIndexStreams;
+    al.indexAtSettle = w.artistIndexStreams(w.artists[al.artistId]);
+    w.dirtyAlbums.add(al.id);
   }
 
   static void makeAlbumDormant(World w, Album al) {
     al.status = AlbumStatus.dormant;
-    al.indexAtSettle = w.artists[al.artistId].catalogIndexStreams;
+    al.indexAtSettle = w.artistIndexStreams(w.artists[al.artistId]);
+    w.dirtyAlbums.add(al.id);
     al.weeksBelowCutoff = 0;
     al.lastPos = 0;
     _removeSorted(w.activeAlbumIds, al.id);
@@ -68,6 +82,7 @@ abstract final class Lifecycle {
     settleAlbum(w, al);
     al.status = AlbumStatus.active;
     World.insertSorted(w.activeAlbumIds, al.id);
+    w.dirtyAlbums.add(al.id);
   }
 
   static void _removeSorted(List<int> list, int id) {

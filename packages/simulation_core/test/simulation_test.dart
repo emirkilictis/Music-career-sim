@@ -42,19 +42,21 @@ void main() {
         () {
       final w = _run(seed: 99, years: 4);
       var checked = 0;
+      var retiredChecked = 0;
       for (final a in w.artists) {
-        if (a.lifetimeStreams < 1e6) continue;
+        final life = w.artistLifetimeStreams(a);
+        if (life < 1e6) continue;
         var sum = 0.0;
         for (final s in w.songs) {
           if (s.primaryArtistId == a.id && s.releasedWeek >= 0) {
             sum += w.songLifetimeStreams(s);
           }
         }
-        expect(
-            (sum - a.lifetimeStreams).abs() / a.lifetimeStreams, lessThan(1e-6),
-            reason: a.name);
+        expect((sum - life).abs() / life, lessThan(1e-6), reason: a.name);
         checked++;
+        if (a.isRetired) retiredChecked++;
       }
+      expect(retiredChecked, greaterThan(0));
       expect(checked, greaterThan(50));
       expect(w.artists.any((a) => a.dormantSongIds.isNotEmpty), isTrue);
     });
@@ -121,6 +123,7 @@ void main() {
   });
 
   group('mega debuts', megaDebutTests);
+  group('album shape', albumShapeTests);
 
   group('eras and anticipation', () {
     test('after a successful era anticipation builds up and never decays', () {
@@ -219,5 +222,46 @@ void megaDebutTests() {
     expect(staggered.week2Pure, greaterThan(launchAll.week2Pure * 1.5));
     expect(
         staggered.album.firstWeekPure, lessThan(launchAll.album.firstWeekPure));
+  });
+}
+
+/// Releases an album of [tracks] songs by a superstar whose skills set the
+/// album quality, and returns weekly units for [weeks] weeks.
+List<double> _albumRun(
+    {required int tracks, required double skill, int weeks = 9}) {
+  final w = WorldGen.create(seed: 77, startYear: 2024);
+  final sim = Simulator(w);
+  while (w.week < GameTime.firstWeekOf(2024)) {
+    sim.step();
+  }
+  final a = WorldGen.addPlayer(w,
+      name: 'Star',
+      genre: 0,
+      tier: StartTier.superstar,
+      money: StartMoney.millionaire);
+  a.skills.songwriting = skill;
+  a.skills.vocals = skill;
+  final songs = [
+    for (var i = 0; i < tracks; i++)
+      Actions.writeSong(w, a, producerSkill: skill, aiMode: true).id,
+  ];
+  final al = Actions.releaseAlbum(w, a, 'X', songs);
+  return [
+    for (var i = 0; i < weeks; i++) (sim..step()).world.albums[al.id].weekUnits,
+  ];
+}
+
+void albumShapeTests() {
+  test('good albums hold their sales better than weak ones', () {
+    final good = _albumRun(tracks: 10, skill: 90);
+    final weak = _albumRun(tracks: 10, skill: 25);
+    expect(good.last / good.first, greaterThan(1.5 * weak.last / weak.first));
+  });
+
+  test('more tracks raise the debut with diminishing returns', () {
+    final ten = _albumRun(tracks: 10, skill: 90, weeks: 1).first;
+    final forty = _albumRun(tracks: 40, skill: 90, weeks: 1).first;
+    expect(forty, greaterThan(1.15 * ten));
+    expect(forty, lessThan(1.8 * ten));
   });
 }

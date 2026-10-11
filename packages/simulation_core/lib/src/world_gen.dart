@@ -87,7 +87,7 @@ abstract final class WorldGen {
         : (isA ? r.range(0.15, 0.6) : r.range(0.05, 0.35));
     a.nextEraWeek =
         w.week + (newcomer ? r.nextInt(30) : r.nextInt(isA ? 150 : 90));
-    w.artists.add(a);
+    w.addArtist(a);
     return a;
   }
 
@@ -158,7 +158,7 @@ abstract final class WorldGen {
       StartTier.risingStar => 0.3,
       StartTier.superstar => 0.6,
     };
-    w.artists.add(a);
+    w.addArtist(a);
     w.playerArtistId = a.id;
     return a;
   }

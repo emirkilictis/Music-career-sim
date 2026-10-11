@@ -18,6 +18,10 @@ int worldHash(World w) {
   }
 
   addInt(w.week);
+  addDouble(w.spaIndex);
+  addDouble(w.dpaIndex);
+  addDouble(w.retiredDormantAttention);
+  addDouble(w.emaAttention);
   for (final a in w.artists) {
     addInt(a.id);
     addDouble(a.fame);

@@ -57,13 +57,12 @@ class Simulator {
     // 3. Viral reactivation of a dormant catalog song (event based).
     _viralReactivation();
 
-    // 4. Artist pre-step.
-    for (final a in w.artists) {
-      // Retired artists still earn catalog streams, so scratch is reset for all.
+    // 4. Artist pre-step (active artists only).
+    for (final id in w.activeArtistIds) {
+      final a = w.artists[id];
       a.weekPoints = 0;
       a.weekReach = 0;
       a.weekStreams = 0;
-      if (a.isRetired) continue;
       a.hype *= 0.92;
       // Fanbases slowly drift unless renewed by successful eras.
       a.devotion = math.max(0.0, a.devotion - 0.0002);
@@ -102,6 +101,14 @@ class Simulator {
               math.exp(-promoAge / s.lifeWeeks) +
           tail;
       final promo = s.isSingle ? c.singleExposure : c.albumTrackExposure;
+      // Long albums: listeners' time is split between tracks. Up to 10 tracks
+      // each gets full attention; beyond that each track gets less, so 40
+      // tracks add streams but nowhere near 4× (docs/game-design.md §10.2).
+      var trackShare = 1.0;
+      if (!s.isSingle && s.albumId >= 0) {
+        final n = w.albums[s.albumId].songIds.length;
+        if (n > 10) trackShare = math.pow(10 / n, 0.6).toDouble();
+      }
 
       var fans = p.coreFans, cas = p.casual;
       for (final f in s.featuredArtistIds) {
@@ -132,9 +139,9 @@ class Simulator {
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
       final pubPart = c.publicPool * s.commercial * life * exposure;
       final noise = r.logNormal(0.10);
-      final att = (fanPart + casPart + pubPart) * qMult * noise;
+      final att = (fanPart + casPart + pubPart) * qMult * noise * trackShare;
       s.lastAttention = att;
-      s.lastReach = (casPart + pubPart) * qMult;
+      s.lastReach = (casPart + pubPart) * qMult * trackShare;
       attention[i] = att;
       sumA += att;
       if (s.isSingle) sumSinglesA += att;
@@ -154,9 +161,10 @@ class Simulator {
       sumR += radioDemand[i];
     }
 
-    // Dormant catalog attention (O(artists)).
-    var dormantA = 0.0;
-    for (final a in w.artists) {
+    // Dormant catalog attention: active artists + frozen retired total.
+    var dormantA = w.retiredDormantAttention;
+    for (final id in w.activeArtistIds) {
+      final a = w.artists[id];
       if (a.sumDormantRate > 0) dormantA += a.sumDormantRate * a.catalogFactor;
     }
     sumA += dormantA;
@@ -176,6 +184,8 @@ class Simulator {
         (sumR + c.outsideAttentionRatio * w.emaRadioDemand + 1e-9);
     final ppa = era.physicalSinglesWeekly /
         (sumSinglesA * (1 + c.outsideAttentionRatio) + 1);
+    w.spaIndex += spa;
+    w.dpaIndex += 0.1 * dpa;
     w.emaAttention = 0.9 * w.emaAttention + 0.1 * sumA;
     w.emaDownloadDemand = 0.9 * w.emaDownloadDemand + 0.1 * sumD;
     w.emaRadioDemand = 0.9 * w.emaRadioDemand + 0.1 * sumR;
@@ -195,14 +205,18 @@ class Simulator {
       s.lifetimeStreams += s.weekStreams;
       s.lifetimeDownloads += s.weekDownloads;
       s.lifetimeRadio += s.weekRadio;
-      p.weekPoints += s.weekPoints;
-      p.weekReach += s.lastReach;
-      p.weekStreams += s.weekStreams;
+      p.lifetimeStreams += s.weekStreams;
       p.lifetimeDownloads += s.weekDownloads;
+      if (!p.isRetired) {
+        p.weekPoints += s.weekPoints;
+        p.weekReach += s.lastReach;
+        p.weekStreams += s.weekStreams;
+      }
     }
 
-    // 8. Dormant catalog per artist (lazy accrual).
-    for (final a in w.artists) {
+    // 8. Dormant catalog per active artist (retired artists accrue lazily).
+    for (final id in w.activeArtistIds) {
+      final a = w.artists[id];
       final f = a.catalogFactor;
       a.catalogIndexStreams += f * spa;
       a.catalogIndexDownloads += f * 0.1 * dpa;
@@ -210,9 +224,11 @@ class Simulator {
         final st = a.sumDormantRate * f * spa;
         a.weekStreams += st;
         a.weekPoints += st / 400;
+        a.lifetimeStreams += st;
         a.lifetimeDownloads += a.sumDormantRate * f * 0.1 * dpa;
       }
-      a.lifetimeStreams += a.weekStreams;
+      a.catalogSettleSpa = w.spaIndex;
+      a.catalogSettleDpa = w.dpaIndex;
     }
 
     // 9. Albums.
@@ -221,9 +237,11 @@ class Simulator {
       final al = w.albums[albumId];
       final p = w.artists[al.artistId];
       final age = w.week - al.releaseWeek;
-      final superCurve = age == 0
-          ? 1.0
-          : c.albumSecondWeekRatio * math.pow(c.albumWeeklyDecay, age - 1);
+      // Good albums hold their sales; weak ones fall off faster.
+      final q01 = al.quality / 100;
+      final secondWeek = c.albumSecondWeekRatio * (0.55 + 0.9 * q01);
+      final decay = 1 - (1 - c.albumWeeklyDecay) * (1.6 - 1.2 * q01);
+      final superCurve = age == 0 ? 1.0 : secondWeek * math.pow(decay, age - 1);
       // Devoted fanbases buy more (and buy variants).
       final superRate = c.superfanBuyRate * p.devotionBuyFactor;
       final superPart = p.coreFans *
@@ -302,8 +320,8 @@ class Simulator {
     // 12. Artist post-step. Popularity is relative to this week's #1 so it
     // does not inflate as markets grow.
     final topPoints = w.songChart.isEmpty ? 1.0 : w.songChart.first.points;
-    for (final a in w.artists) {
-      if (a.isRetired) continue;
+    for (final id in w.activeArtistIds) {
+      final a = w.artists[id];
       final target = 1 - math.exp(-a.weekPoints / (1.5 * topPoints));
       a.popularity +=
           (target > a.popularity ? 0.15 : 0.03) * (target - a.popularity);
@@ -332,7 +350,7 @@ class Simulator {
       newNumberOneAlbums: newNo1Albums,
       activeSongs: w.activeSongIds.length,
       activeAlbums: w.activeAlbumIds.length,
-      dormantSongs: _countDormant(),
+      dormantSongs: w.dormantSongCount,
       streamsPerAttention: spa,
       microseconds: sw.elapsedMicroseconds,
     );
@@ -494,14 +512,6 @@ class Simulator {
         return;
       }
     }
-  }
-
-  int _countDormant() {
-    var n = 0;
-    for (final a in world.artists) {
-      n += a.dormantSongIds.length;
-    }
-    return n;
   }
 
   void _playerIncome() {

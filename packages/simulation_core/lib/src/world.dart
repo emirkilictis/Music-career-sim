@@ -18,6 +18,23 @@ class World {
 
   int playerArtistId = -1;
 
+  /// Non-retired artists, sorted by id. Weekly loops run over these only.
+  final List<int> activeArtistIds = [];
+
+  /// Cumulative streams-per-attention and catalog-downloads-per-attention.
+  double spaIndex = 0;
+  double dpaIndex = 0;
+
+  /// Σ sumDormantRate × catalogFactor over retired artists (frozen factors).
+  double retiredDormantAttention = 0;
+
+  int dormantSongCount = 0;
+
+  // Entities changed outside the active sets since the last save.
+  final Set<int> dirtyArtists = {};
+  final Set<int> dirtySongs = {};
+  final Set<int> dirtyAlbums = {};
+
   /// Released, non-dormant songs, kept sorted by id.
   final List<int> activeSongIds = [];
 
@@ -40,19 +57,70 @@ class World {
 
   Artist primaryOf(Song s) => artists[s.primaryArtistId];
 
+  void addArtist(Artist a) {
+    assert(a.id == artists.length);
+    artists.add(a);
+    insertSorted(activeArtistIds, a.id);
+    a.catalogSettleSpa = spaIndex;
+    a.catalogSettleDpa = dpaIndex;
+    dirtyArtists.add(a.id);
+  }
+
+  /// Retires an artist; from now on their catalog accrues lazily.
+  void retire(Artist a) {
+    if (a.isRetired) return;
+    a.retiredWeek = week;
+    final i = activeArtistIds.indexOf(a.id);
+    if (i >= 0) activeArtistIds.removeAt(i);
+    retiredDormantAttention += a.sumDormantRate * a.catalogFactor;
+    dirtyArtists.add(a.id);
+  }
+
+  /// Brings a retired artist's catalog accounting up to date.
+  void settleRetired(Artist a) {
+    if (!a.isRetired) return;
+    final ds = spaIndex - a.catalogSettleSpa;
+    final dd = dpaIndex - a.catalogSettleDpa;
+    if (ds == 0 && dd == 0) return;
+    final f = a.catalogFactor;
+    a.catalogIndexStreams += f * ds;
+    a.catalogIndexDownloads += f * dd;
+    a.lifetimeStreams += a.sumDormantRate * f * ds;
+    a.lifetimeDownloads += a.sumDormantRate * f * dd;
+    a.catalogSettleSpa = spaIndex;
+    a.catalogSettleDpa = dpaIndex;
+    dirtyArtists.add(a.id);
+  }
+
+  /// Catalog index including lazily accrued weeks for retired artists.
+  double artistIndexStreams(Artist a) => a.isRetired
+      ? a.catalogIndexStreams +
+          a.catalogFactor * (spaIndex - a.catalogSettleSpa)
+      : a.catalogIndexStreams;
+
+  double artistIndexDownloads(Artist a) => a.isRetired
+      ? a.catalogIndexDownloads +
+          a.catalogFactor * (dpaIndex - a.catalogSettleDpa)
+      : a.catalogIndexDownloads;
+
+  double artistLifetimeStreams(Artist a) => a.isRetired
+      ? a.lifetimeStreams +
+          a.sumDormantRate * a.catalogFactor * (spaIndex - a.catalogSettleSpa)
+      : a.lifetimeStreams;
+
   /// Lifetime streams of a song, including lazily accrued dormant streams.
   double songLifetimeStreams(Song s) {
     if (s.status != SongStatus.dormant) return s.lifetimeStreams;
     final a = primaryOf(s);
     return s.lifetimeStreams +
-        s.dormantRate * (a.catalogIndexStreams - s.indexAtSettleStreams);
+        s.dormantRate * (artistIndexStreams(a) - s.indexAtSettleStreams);
   }
 
   double songLifetimeDownloads(Song s) {
     if (s.status != SongStatus.dormant) return s.lifetimeDownloads;
     final a = primaryOf(s);
     return s.lifetimeDownloads +
-        s.dormantRate * (a.catalogIndexDownloads - s.indexAtSettleDownloads);
+        s.dormantRate * (artistIndexDownloads(a) - s.indexAtSettleDownloads);
   }
 
   /// Lifetime units of an album, including lazily accrued SEA while dormant.
@@ -61,7 +129,7 @@ class World {
     final a = artists[al.artistId];
     return al.lifetimeUnits +
         al.sumDormantRate *
-            (a.catalogIndexStreams - al.indexAtSettle) /
+            (artistIndexStreams(a) - al.indexAtSettle) /
             config.streamEquivalentAlbum;
   }
 

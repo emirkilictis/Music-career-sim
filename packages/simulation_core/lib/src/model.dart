@@ -99,6 +99,12 @@ class Artist {
   double sumDormantRate = 0;
   double catalogIndexStreams = 0;
   double catalogIndexDownloads = 0;
+
+  /// World cumulative indices at the last catalog settlement. Active artists
+  /// settle every week; retired artists (whose popularity is frozen) settle
+  /// lazily, so a long history of retired artists costs nothing per week.
+  double catalogSettleSpa = 0;
+  double catalogSettleDpa = 0;
   final List<int> dormantSongIds = [];
 
   // AI planning.
