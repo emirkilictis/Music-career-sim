@@ -17,7 +17,7 @@ sorunlar düzeltilmiş ve oyun tasarımı kararları eklenmiştir.
 |---|---|
 | [game-design.md](game-design.md) | Oynanış: kariyer başlangıcı, statlar, şarkı yapma, hype/beklenti, flop desteği, sosyal medya, rollout, kampanyalar, satış, finans, rekorlar, ekranlar, kayıt slotları, görseller, zorluk, gelir modeli |
 | [simulation.md](simulation.md) | Haftalık pipeline, pazar normalizasyonu, dönem tablosu, yaşam döngüsü, tembel birikim, listeler, AI katmanları, determinizm |
-| [data-model.md](data-model.md) | Varlıklar (feat dahil), SQLite şeması, index'ler, geçmiş saklama stratejisi |
+| [data-model.md](data-model.md) | Varlıklar (feat, statlar, ekip, plak şirketi dahil), SQLite şeması, index'ler, geçmiş saklama stratejisi |
 | [architecture.md](architecture.md) | Modüller, concurrency, persistence, UI performansı, görsel pipeline'ı, test ve benchmark |
 
 ## Karar Kaydı
@@ -53,7 +53,8 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 ## Yol Haritası
 
 ### Faz 0 — Simülasyon prototipi (UI yok)
-- `simulation_core` saf Dart paketi: Artist, Song (feat dahil), Album/Edition/Variant, haftalık pipeline, pazar normalizasyonu, dönem tablosu, listeler, AI rakipler, hype/beklenti/flop.
+- `simulation_core` saf Dart paketi: Artist (statlar dahil), Song (feat dahil), Album/Edition/Variant, haftalık pipeline, pazar normalizasyonu, dönem tablosu, listeler, AI rakipler, hype/beklenti/flop, şarkı kalitesi formülü.
+- Oyuncu yerine basit bir "bot oyuncu" (şarkı yazar, albüm çıkarır) — kalibrasyon için.
 - Headless CLI: seed ile N yıl simüle et, CSV/JSON döküm al.
 - **Kalibrasyon:** gerçek dünya referans tablosuna göre denge (bkz. simulation.md §14).
 - Determinizm testleri, aktif küme büyüklüğü takibi, 50 yıllık stres testi.
