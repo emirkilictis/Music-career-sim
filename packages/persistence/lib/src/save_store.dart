@@ -34,7 +34,7 @@ class SaveStore {
       store._writeArtists(world, world.artists);
       store._writeSongs(world, world.songs, withCredits: true);
       store._writeAlbums(world, world.albums, withTracks: true);
-      store._writeCharts(world.week - 1, world.songChart, world.albumChart);
+      store._writeCharts(world.week - 1, world.charts);
       store._writeHot(world);
     });
     _clearDirty(world);
@@ -92,16 +92,12 @@ class SaveStore {
       seed: meta['seed'] as int,
       week: meta['week'] as int,
     );
-    w
-      ..playerArtistId = meta['playerArtistId'] as int
-      ..spaIndex = _d(meta['spaIndex'])
-      ..dpaIndex = _d(meta['dpaIndex'])
-      ..retiredDormantAttention = _d(meta['retiredDormantAttention'])
-      ..emaAttention = _d(meta['emaAttention'])
-      ..emaDownloadDemand = _d(meta['emaDownloadDemand'])
-      ..emaRadioDemand = _d(meta['emaRadioDemand'])
-      ..songCutoff = _d(meta['songCutoff'])
-      ..albumCutoff = _d(meta['albumCutoff']);
+    w.playerArtistId = meta['playerArtistId'] as int;
+    for (final (key, arr) in _metaArrays(w)) {
+      for (var i = 0; i < arr.length; i++) {
+        arr[i] = _d(meta['$key$i']);
+      }
+    }
 
     for (final r in db.select('SELECT * FROM collaborator ORDER BY id')) {
       w.collaborators.add(Collaborator(
@@ -153,8 +149,7 @@ class SaveStore {
       if (al.status == AlbumStatus.active) w.activeAlbumIds.add(al.id);
     }
 
-    w.songChart = _loadChart(ChartIds.usSongs, w.week - 1);
-    w.albumChart = _loadChart(ChartIds.usAlbums, w.week - 1);
+    w.charts = [for (final def in Charts.all) _loadChart(def.id, w.week - 1)];
     return w;
   }
 
@@ -302,14 +297,8 @@ class SaveStore {
       'seed': w.seed,
       'week': w.week,
       'playerArtistId': w.playerArtistId,
-      'spaIndex': w.spaIndex,
-      'dpaIndex': w.dpaIndex,
-      'retiredDormantAttention': w.retiredDormantAttention,
-      'emaAttention': w.emaAttention,
-      'emaDownloadDemand': w.emaDownloadDemand,
-      'emaRadioDemand': w.emaRadioDemand,
-      'songCutoff': w.songCutoff,
-      'albumCutoff': w.albumCutoff,
+      for (final (key, arr) in _metaArrays(w))
+        for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };
     for (final e in values.entries) {
       st.execute([e.key, e.value]);
@@ -383,22 +372,29 @@ class SaveStore {
     st.dispose();
   }
 
-  void _writeCharts(
-      int week, List<ChartEntry> songChart, List<ChartEntry> albumChart) {
+  /// Regional/per-chart world arrays stored in meta as key0, key1, ….
+  static List<(String, Float64List)> _metaArrays(World w) => [
+        ('spaIndex', w.spaIndex),
+        ('dpaIndex', w.dpaIndex),
+        ('retiredDormantAttention', w.retiredDormantAttention),
+        ('emaAttention', w.emaAttention),
+        ('emaDownloadDemand', w.emaDownloadDemand),
+        ('emaRadioDemand', w.emaRadioDemand),
+        ('chartCutoff', w.chartCutoff),
+      ];
+
+  void _writeCharts(int week, List<List<ChartEntry>> charts) {
     final chart = db.prepare('INSERT OR REPLACE INTO chartEntry '
         '(chartId, week, position, entityId, points, lastPos, peak, weeksOn) '
         'VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-    for (final (id, entries) in [
-      (ChartIds.usSongs, songChart),
-      (ChartIds.usAlbums, albumChart),
-    ]) {
-      for (final e in entries) {
+    for (var id = 0; id < charts.length; id++) {
+      for (final e in charts[id]) {
         chart.execute([
           id,
           week,
           e.position,
           e.entityId,
-          e.points,
+          e.points.round(),
           e.lastPos,
           e.peak,
           e.weeksOn
@@ -409,21 +405,23 @@ class SaveStore {
   }
 
   void _writeHistory(World w, WeekResult r) {
-    _writeCharts(r.week, r.songChart, r.albumChart);
+    _writeCharts(r.week, r.charts);
 
-    // Weekly stats: everything that charted, plus all of the player's
-    // active releases (docs/data-model.md §4.2).
+    // Detailed weekly stats (regional streams, sales) are kept for the
+    // player's releases; AI releases keep their full chart history
+    // (docs/data-model.md §4.2).
     final player = w.playerArtistId;
     final songIds = <int>{
-      for (final e in r.songChart) e.entityId,
       for (final id in w.activeSongIds)
         if (w.songs[id].primaryArtistId == player) id,
     };
     final sw = db.prepare('INSERT OR REPLACE INTO songWeek '
-        '(songId, week, streams, downloads, radio, physical, points) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?)');
+        '(songId, week, streams, downloads, radio, physical, points, '
+        'streamsNA, streamsEU, streamsOT) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     for (final id in songIds) {
       final s = w.songs[id];
+      final wr = s.weekRegion;
       sw.execute([
         id,
         r.week,
@@ -431,22 +429,28 @@ class SaveStore {
         s.weekDownloads,
         s.weekRadio,
         s.weekPhysical,
-        s.weekPoints
+        s.weekPoints,
+        wr?[0] ?? 0.0,
+        wr?[1] ?? 0.0,
+        wr?[2] ?? 0.0,
       ]);
     }
     sw.dispose();
 
     final albumIds = <int>{
-      for (final e in r.albumChart) e.entityId,
       for (final id in w.activeAlbumIds)
         if (w.albums[id].artistId == player) id,
     };
     final aw = db.prepare('INSERT OR REPLACE INTO albumWeek '
-        '(albumId, week, pure, tea, sea, units) VALUES (?, ?, ?, ?, ?, ?)');
+        '(albumId, week, pure, tea, sea, units, '
+        'pureNA, pureEU, pureOT, unitsNA, unitsEU, unitsOT) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     for (final id in albumIds) {
       final al = w.albums[id];
-      aw.execute(
-          [id, r.week, al.weekPure, al.weekTea, al.weekSea, al.weekUnits]);
+      aw.execute([
+        id, r.week, al.weekPure, al.weekTea, al.weekSea, al.weekUnits, //
+        ...al.weekRegion,
+      ]);
     }
     aw.dispose();
 
@@ -461,7 +465,7 @@ class SaveStore {
         p.casual,
         p.devotion,
         p.moneyCents,
-        p.lifetimeStreams,
+        w.artistLifetimeStreams(p),
       ]);
     }
   }

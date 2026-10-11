@@ -1,12 +1,36 @@
+import 'dart:typed_data';
+
 import 'package:simulation_core/simulation_core.dart';
 
 /// Row mapping between the hot world model and SQLite. Every field the
 /// simulation reads across weeks must round-trip exactly (doubles are stored
-/// as 64-bit REAL, so they do).
+/// as 64-bit REAL, so they do). Regional arrays become readable columns with
+/// NA / EU / OT suffixes so the UI can query them directly.
 abstract final class Codec {
+  static const regionSuffixes = ['NA', 'EU', 'OT'];
+
+  static List<String> _regional(List<String> prefixes) => [
+        for (final p in prefixes)
+          for (final s in regionSuffixes) '$p$s',
+      ];
+
+  /// In [ArtistReg] order.
+  static final artistRegColumns = _regional([
+    'idxStreams', 'idxDownloads', 'settleSpa', 'settleDpa', //
+    'lifeStreams', 'lifeDownloads', 'lifePure', 'lifeUnits',
+  ]);
+
+  /// In [SongReg] order.
+  static final songRegColumns =
+      _regional(['lifeStreams', 'lifeDownloads', 'idxStreams', 'idxDownloads']);
+
+  /// In [AlbumReg] order.
+  static final albumRegColumns = _regional(
+      ['lifePure', 'lifeUnits', 'idxStreams', 'firstUnits', 'firstPure']);
+
   // ---------------------------------------------------------------- artist
-  static const artistColumns = [
-    'id', 'name', 'tier', 'genre', 'debutWeek', 'retiredWeek', //
+  static final artistColumns = [
+    'id', 'name', 'tier', 'genre', 'homeCountry', 'debutWeek', 'retiredWeek', //
     'songwriting', 'vocals', 'production', 'performance', 'charisma',
     'fame', 'popularity', 'coreFans', 'casual', 'buzz', 'devotion',
     'hype', 'anticipation', 'anticipationCap',
@@ -16,17 +40,16 @@ abstract final class Codec {
     'creativeEnergy', 'burnoutUntilWeek', 'lastWriteWeek',
     'songsWrittenThisWeek',
     'labelReach', 'artistShare', 'moneyCents',
-    'sumDormantRate', 'catalogIndexStreams', 'catalogIndexDownloads',
-    'catalogSettleSpa', 'catalogSettleDpa',
+    'sumDormantRate',
     'nextEraWeek', 'plan', 'pendingSongs', 'pendingAlbumTitle',
     'pendingAlbumType', 'pendingVariants',
-    'lifetimeStreams', 'lifetimeDownloads', 'lifetimeAlbumPure',
-    'lifetimeAlbumUnits',
+    ...artistRegColumns,
     'no1Singles', 'no1SinglesFeatured', 'no1Albums', 'weeksAtNo1',
   ];
 
   static List<Object?> artistRow(Artist a) => [
-        a.id, a.name, a.tier.index, a.genre, a.debutWeek, a.retiredWeek, //
+        a.id, a.name, a.tier.index, a.genre, a.homeCountry.index, //
+        a.debutWeek, a.retiredWeek,
         a.skills.songwriting, a.skills.vocals, a.skills.production,
         a.skills.performance, a.skills.charisma,
         a.fame, a.popularity, a.coreFans, a.casual, a.buzz, a.devotion,
@@ -38,14 +61,13 @@ abstract final class Codec {
         a.creativeEnergy, a.burnoutUntilWeek, a.lastWriteWeek,
         a.songsWrittenThisWeek,
         a.labelReach, a.artistShare, a.moneyCents,
-        a.sumDormantRate, a.catalogIndexStreams, a.catalogIndexDownloads,
-        a.catalogSettleSpa, a.catalogSettleDpa,
+        a.sumDormantRate,
         a.nextEraWeek, _encodePlan(a.plan), _ints(a.pendingAlbumSongIds),
         a.pendingAlbumTitle, a.pendingAlbumType.index,
         _ints(a.pendingVariantWeeks),
-        a.lifetimeStreams, a.lifetimeDownloads, a.lifetimeAlbumPure,
-        a.lifetimeAlbumUnits,
-        a.no1Singles, a.no1SinglesFeatured, a.no1Albums, a.weeksAtNo1,
+        ...a.reg,
+        _ints(a.no1Singles), _ints(a.no1SinglesFeatured), _ints(a.no1Albums),
+        _ints(a.weeksAtNo1),
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -54,6 +76,7 @@ abstract final class Codec {
       name: r['name'] as String,
       tier: ArtistTier.values[r['tier'] as int],
       genre: r['genre'] as int,
+      homeCountry: HomeCountry.values[r['homeCountry'] as int],
       debutWeek: r['debutWeek'] as int,
       skills: Skills(
         songwriting: _d(r['songwriting']),
@@ -92,39 +115,33 @@ abstract final class Codec {
       ..lastWriteWeek = r['lastWriteWeek'] as int
       ..songsWrittenThisWeek = r['songsWrittenThisWeek'] as int
       ..sumDormantRate = _d(r['sumDormantRate'])
-      ..catalogIndexStreams = _d(r['catalogIndexStreams'])
-      ..catalogIndexDownloads = _d(r['catalogIndexDownloads'])
-      ..catalogSettleSpa = _d(r['catalogSettleSpa'])
-      ..catalogSettleDpa = _d(r['catalogSettleDpa'])
       ..nextEraWeek = r['nextEraWeek'] as int
       ..pendingAlbumTitle = r['pendingAlbumTitle'] as String
       ..pendingAlbumType = AlbumType.values[r['pendingAlbumType'] as int]
-      ..pendingVariantWeeks = _parseInts(r['pendingVariants'] as String)
-      ..lifetimeStreams = _d(r['lifetimeStreams'])
-      ..lifetimeDownloads = _d(r['lifetimeDownloads'])
-      ..lifetimeAlbumPure = _d(r['lifetimeAlbumPure'])
-      ..lifetimeAlbumUnits = _d(r['lifetimeAlbumUnits'])
-      ..no1Singles = r['no1Singles'] as int
-      ..no1SinglesFeatured = r['no1SinglesFeatured'] as int
-      ..no1Albums = r['no1Albums'] as int
-      ..weeksAtNo1 = r['weeksAtNo1'] as int;
+      ..pendingVariantWeeks = _parseInts(r['pendingVariants'] as String);
     a.plan.addAll(_decodePlan(r['plan'] as String));
     a.pendingAlbumSongIds.addAll(_parseInts(r['pendingSongs'] as String));
+    _readReg(r, artistRegColumns, a.reg);
+    _readInts(r['no1Singles'] as String, a.no1Singles);
+    _readInts(r['no1SinglesFeatured'] as String, a.no1SinglesFeatured);
+    _readInts(r['no1Albums'] as String, a.no1Albums);
+    _readInts(r['weeksAtNo1'] as String, a.weeksAtNo1);
+    // Derived from (fame, genre, home): recomputing gives the exact value.
+    a.updateRegionShare();
     return a;
   }
 
   // ------------------------------------------------------------------ song
-  static const songColumns = [
+  static final songColumns = [
     'id', 'title', 'genre', 'primaryArtistId', 'writtenWeek', //
     'quality', 'commercial', 'fanAppeal', 'radioAppeal',
     'virality', 'longevity', 'estimatedGrade',
     'status', 'releasedWeek', 'albumId', 'isSingle', 'singleWeek',
     'lastAttention', 'lastReach', 'weekStreams', 'weekDownloads',
     'weekPhysical', 'weekRadio', 'weekPoints', 'viralBoost',
-    'weeksBelowCutoff',
-    'lastPos', 'peakPos', 'weeksOn', 'weeksAtNo1',
-    'lifetimeStreams', 'lifetimeDownloads', 'lifetimeRadio',
-    'dormantRate', 'indexAtSettleStreams', 'indexAtSettleDownloads',
+    'weeksBelowCutoff', 'lifetimeRadio', 'dormantRate',
+    ...songRegColumns,
+    'charts',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -135,10 +152,9 @@ abstract final class Codec {
         s.singleWeek,
         s.lastAttention, s.lastReach, s.weekStreams, s.weekDownloads,
         s.weekPhysical, s.weekRadio, s.weekPoints, s.viralBoost,
-        s.weeksBelowCutoff,
-        s.lastPos, s.peakPos, s.weeksOn, s.weeksAtNo1,
-        s.lifetimeStreams, s.lifetimeDownloads, s.lifetimeRadio,
-        s.dormantRate, s.indexAtSettleStreams, s.indexAtSettleDownloads,
+        s.weeksBelowCutoff, s.lifetimeRadio, s.dormantRate,
+        ...s.reg,
+        _encodeCharts(s),
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -157,7 +173,7 @@ abstract final class Codec {
       estimatedGrade: r['estimatedGrade'] as int,
       featuredArtistIds: featured,
     );
-    return s
+    s
       ..status = SongStatus.values[r['status'] as int]
       ..releasedWeek = r['releasedWeek'] as int
       ..albumId = r['albumId'] as int
@@ -172,26 +188,21 @@ abstract final class Codec {
       ..weekPoints = _d(r['weekPoints'])
       ..viralBoost = _d(r['viralBoost'])
       ..weeksBelowCutoff = r['weeksBelowCutoff'] as int
-      ..lastPos = r['lastPos'] as int
-      ..peakPos = r['peakPos'] as int
-      ..weeksOn = r['weeksOn'] as int
-      ..weeksAtNo1 = r['weeksAtNo1'] as int
-      ..lifetimeStreams = _d(r['lifetimeStreams'])
-      ..lifetimeDownloads = _d(r['lifetimeDownloads'])
       ..lifetimeRadio = _d(r['lifetimeRadio'])
-      ..dormantRate = _d(r['dormantRate'])
-      ..indexAtSettleStreams = _d(r['indexAtSettleStreams'])
-      ..indexAtSettleDownloads = _d(r['indexAtSettleDownloads']);
+      ..dormantRate = _d(r['dormantRate']);
+    _readReg(r, songRegColumns, s.reg);
+    _decodeCharts(r['charts'] as String, s);
+    return s;
   }
 
   // ----------------------------------------------------------------- album
-  static const albumColumns = [
+  static final albumColumns = [
     'id', 'title', 'artistId', 'type', 'releaseWeek', 'quality', //
     'status', 'hypeAtRelease', 'variants',
     'weekPure', 'weekTea', 'weekSea', 'weekUnits', 'weeksBelowCutoff',
-    'lastPos', 'peakPos', 'weeksOn', 'weeksAtNo1',
-    'firstWeekUnits', 'firstWeekPure', 'debutPos',
-    'lifetimePure', 'lifetimeUnits', 'sumDormantRate', 'indexAtSettle',
+    'firstWeekUnits', 'firstWeekPure', 'sumDormantRate',
+    ...albumRegColumns,
+    'charts',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -199,9 +210,9 @@ abstract final class Codec {
         al.quality,
         al.status.index, al.hypeAtRelease, _ints(al.variantWeeks),
         al.weekPure, al.weekTea, al.weekSea, al.weekUnits, al.weeksBelowCutoff,
-        al.lastPos, al.peakPos, al.weeksOn, al.weeksAtNo1,
-        al.firstWeekUnits, al.firstWeekPure, al.debutPos,
-        al.lifetimePure, al.lifetimeUnits, al.sumDormantRate, al.indexAtSettle,
+        al.firstWeekUnits, al.firstWeekPure, al.sumDormantRate,
+        ...al.reg,
+        _encodeCharts(al),
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -214,7 +225,7 @@ abstract final class Codec {
       songIds: songIds,
       quality: _d(r['quality']),
     );
-    return al
+    al
       ..status = AlbumStatus.values[r['status'] as int]
       ..hypeAtRelease = _d(r['hypeAtRelease'])
       ..variantWeeks = _parseInts(r['variants'] as String)
@@ -223,17 +234,12 @@ abstract final class Codec {
       ..weekSea = _d(r['weekSea'])
       ..weekUnits = _d(r['weekUnits'])
       ..weeksBelowCutoff = r['weeksBelowCutoff'] as int
-      ..lastPos = r['lastPos'] as int
-      ..peakPos = r['peakPos'] as int
-      ..weeksOn = r['weeksOn'] as int
-      ..weeksAtNo1 = r['weeksAtNo1'] as int
       ..firstWeekUnits = _d(r['firstWeekUnits'])
       ..firstWeekPure = _d(r['firstWeekPure'])
-      ..debutPos = r['debutPos'] as int
-      ..lifetimePure = _d(r['lifetimePure'])
-      ..lifetimeUnits = _d(r['lifetimeUnits'])
-      ..sumDormantRate = _d(r['sumDormantRate'])
-      ..indexAtSettle = _d(r['indexAtSettle']);
+      ..sumDormantRate = _d(r['sumDormantRate']);
+    _readReg(r, albumRegColumns, al.reg);
+    _decodeCharts(r['charts'] as String, al);
+    return al;
   }
 
   // ------------------------------------------------------------ helpers
@@ -247,6 +253,47 @@ abstract final class Codec {
 
   static List<int> _parseInts(String s) =>
       s.isEmpty ? <int>[] : s.split(',').map(int.parse).toList();
+
+  static void _readInts(String s, Int32List into) {
+    final v = _parseInts(s);
+    for (var i = 0; i < v.length && i < into.length; i++) {
+      into[i] = v[i];
+    }
+  }
+
+  static void _readReg(
+      Map<String, Object?> r, List<String> cols, Float64List into) {
+    for (var i = 0; i < cols.length; i++) {
+      into[i] = _d(r[cols[i]]);
+    }
+  }
+
+  /// "chart:last:peak:weeksOn:weeksAtNo1:debut;..." for charts with stats.
+  static String _encodeCharts(Charted e) {
+    final cs = e.charts;
+    if (cs == null) return '';
+    final parts = <String>[];
+    for (var c = 0; c < cs.length; c++) {
+      final st = cs[c];
+      if (st == null) continue;
+      parts.add(
+          '$c:${st.lastPos}:${st.peak}:${st.weeksOn}:${st.weeksAtNo1}:${st.debutPos}');
+    }
+    return parts.join(';');
+  }
+
+  static void _decodeCharts(String s, Charted e) {
+    if (s.isEmpty) return;
+    for (final part in s.split(';')) {
+      final f = part.split(':').map(int.parse).toList();
+      e.stats(f[0])
+        ..lastPos = f[1]
+        ..peak = f[2]
+        ..weeksOn = f[3]
+        ..weeksAtNo1 = f[4]
+        ..debutPos = f[5];
+    }
+  }
 
   static String _encodePlan(List<PlannedRelease> plan) =>
       plan.map((p) => '${p.week}:${p.kind.index}:${p.songId}').join(';');

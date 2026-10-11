@@ -1,8 +1,14 @@
+import 'codec.dart';
+
 /// Versioned schema. Each entry migrates the database from version i to i+1
 /// (docs/data-model.md). Never edit a shipped migration; append a new one.
-const List<String> migrations = [
-  // v1
-  '''
+/// (v1 has not shipped yet, so it is still being shaped.)
+final List<String> migrations = [_v1()];
+
+String _cols(List<String> names, String type) =>
+    names.map((n) => '$n $type').join(', ');
+
+String _v1() => '''
   CREATE TABLE meta (key TEXT PRIMARY KEY, value) WITHOUT ROWID;
 
   CREATE TABLE artist (
@@ -10,6 +16,7 @@ const List<String> migrations = [
     name TEXT NOT NULL,
     tier INTEGER NOT NULL,
     genre INTEGER NOT NULL,
+    homeCountry INTEGER NOT NULL,
     debutWeek INTEGER NOT NULL,
     retiredWeek INTEGER NOT NULL,
     songwriting REAL, vocals REAL, production REAL, performance REAL, charisma REAL,
@@ -21,13 +28,11 @@ const List<String> migrations = [
     creativeEnergy REAL, burnoutUntilWeek INTEGER, lastWriteWeek INTEGER,
     songsWrittenThisWeek INTEGER,
     labelReach REAL, artistShare REAL, moneyCents INTEGER,
-    sumDormantRate REAL, catalogIndexStreams REAL, catalogIndexDownloads REAL,
-    catalogSettleSpa REAL, catalogSettleDpa REAL,
+    sumDormantRate REAL,
     nextEraWeek INTEGER, plan TEXT, pendingSongs TEXT, pendingAlbumTitle TEXT,
     pendingAlbumType INTEGER, pendingVariants TEXT,
-    lifetimeStreams REAL, lifetimeDownloads REAL, lifetimeAlbumPure REAL,
-    lifetimeAlbumUnits REAL,
-    no1Singles INTEGER, no1SinglesFeatured INTEGER, no1Albums INTEGER, weeksAtNo1 INTEGER
+    ${_cols(Codec.artistRegColumns, 'REAL')},
+    no1Singles TEXT, no1SinglesFeatured TEXT, no1Albums TEXT, weeksAtNo1 TEXT
   );
 
   CREATE TABLE song (
@@ -42,10 +47,9 @@ const List<String> migrations = [
     isSingle INTEGER, singleWeek INTEGER,
     lastAttention REAL, lastReach REAL, weekStreams REAL, weekDownloads REAL,
     weekPhysical REAL, weekRadio REAL, weekPoints REAL, viralBoost REAL,
-    weeksBelowCutoff INTEGER,
-    lastPos INTEGER, peakPos INTEGER, weeksOn INTEGER, weeksAtNo1 INTEGER,
-    lifetimeStreams REAL, lifetimeDownloads REAL, lifetimeRadio REAL,
-    dormantRate REAL, indexAtSettleStreams REAL, indexAtSettleDownloads REAL
+    weeksBelowCutoff INTEGER, lifetimeRadio REAL, dormantRate REAL,
+    ${_cols(Codec.songRegColumns, 'REAL')},
+    charts TEXT
   );
   CREATE INDEX song_artist ON song(primaryArtistId);
   CREATE INDEX song_album ON song(albumId);
@@ -66,9 +70,9 @@ const List<String> migrations = [
     quality REAL,
     status INTEGER NOT NULL, hypeAtRelease REAL, variants TEXT,
     weekPure REAL, weekTea REAL, weekSea REAL, weekUnits REAL, weeksBelowCutoff INTEGER,
-    lastPos INTEGER, peakPos INTEGER, weeksOn INTEGER, weeksAtNo1 INTEGER,
-    firstWeekUnits REAL, firstWeekPure REAL, debutPos INTEGER,
-    lifetimePure REAL, lifetimeUnits REAL, sumDormantRate REAL, indexAtSettle REAL
+    firstWeekUnits REAL, firstWeekPure REAL, sumDormantRate REAL,
+    ${_cols(Codec.albumRegColumns, 'REAL')},
+    charts TEXT
   );
   CREATE INDEX album_artist ON album(artistId, releaseWeek);
 
@@ -86,10 +90,10 @@ const List<String> migrations = [
     genre INTEGER, feeCents INTEGER, minFame REAL
   );
 
-  -- History: immutable once written.
+  -- History: immutable once written. chartId = Charts.* in simulation_core.
   CREATE TABLE chartEntry (
     chartId INTEGER NOT NULL, week INTEGER NOT NULL, position INTEGER NOT NULL,
-    entityId INTEGER NOT NULL, points REAL NOT NULL,
+    entityId INTEGER NOT NULL, points INTEGER NOT NULL,
     lastPos INTEGER, peak INTEGER, weeksOn INTEGER,
     PRIMARY KEY (chartId, week, position)
   ) WITHOUT ROWID;
@@ -98,12 +102,14 @@ const List<String> migrations = [
   CREATE TABLE songWeek (
     songId INTEGER NOT NULL, week INTEGER NOT NULL,
     streams REAL, downloads REAL, radio REAL, physical REAL, points REAL,
+    streamsNA REAL, streamsEU REAL, streamsOT REAL,
     PRIMARY KEY (songId, week)
   ) WITHOUT ROWID;
 
   CREATE TABLE albumWeek (
     albumId INTEGER NOT NULL, week INTEGER NOT NULL,
     pure REAL, tea REAL, sea REAL, units REAL,
+    pureNA REAL, pureEU REAL, pureOT REAL, unitsNA REAL, unitsEU REAL, unitsOT REAL,
     PRIMARY KEY (albumId, week)
   ) WITHOUT ROWID;
 
@@ -112,10 +118,4 @@ const List<String> migrations = [
     fame REAL, popularity REAL, coreFans REAL, casual REAL, devotion REAL,
     moneyCents INTEGER, lifetimeStreams REAL
   );
-  ''',
-];
-
-abstract final class ChartIds {
-  static const usSongs = 1;
-  static const usAlbums = 2;
-}
+''';

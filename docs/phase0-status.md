@@ -73,17 +73,38 @@ Aktif küme düz. Hafta maliyeti tarih uzunluğundan neredeyse bağımsız
 Bulunan ve düzeltilen büyüme kaynakları: AI nüfusunun şişmesi (nüfus kontrolü eklendi),
 listeye giremeyen eski hitlerin aktif kalması (dormant eşiği yükseltildi).
 
+## Bölgeler ve listeler (yapıldı)
+
+3 bölge (Kuzey Amerika, Avrupa, Diğer) ve 9 liste (ABD/İngiltere/Global şarkı+albüm, platform
+Global/Kuzey Amerika/Avrupa Top 50). Kalibrasyon (seed 42, 2024 medyan #1 haftalık stream):
+
+| Liste | Gerçek (yaklaşık) | Simülasyon |
+|---|---|---|
+| ABD #1 şarkı | 40–60M | 68M (biraz yüksek) |
+| İngiltere #1 şarkı | ~8–12M | 13M |
+| Global #1 şarkı | ~100–150M | 138M |
+
+Bilinen: İngiltere listesinde bir şarkı bir yılda 20 hafta #1 kalabildi (rekor ~16) — rekabet az,
+ayarlanacak. Listeler artık quickselect ile sadece ilk N'yi sıralıyor (sonuç birebir aynı, ~%30 daha hızlı).
+
 ## Kayıt performansı (bu sunucu, 50 yıl, her hafta kayıt)
 
-| On yıl | Kayıt ms/hafta |
-|---|---|
-| 2005–2014 | 18,2 |
-| 2025–2034 | 24,4 |
-| 2045–2054 | 27,8 |
+Bölgeler ve 9 listeyle birlikte (seed 7):
 
-Son 5 yılın dağılımı (ms/hafta): değişenler 2,4 · sıcak blok 5,5 · flush 1,4 · geçmiş 5,9 ·
-commit 2,7 · checkpoint 9,9 (13 haftada bir ~130 ms; bu sunucuda fsync yavaş, fsync kapalıyken
-checkpoint ~0,5 ms). Veritabanı 50 yılda 107 MB.
+| On yıl | Simülasyon ms/hafta | Aktif şarkı / albüm | Kayıt ms/hafta |
+|---|---|---|---|
+| 2005–2014 | 1,8 | 1.034 / 299 | 26 |
+| 2025–2034 | 2,1 | 1.078 / 391 | 34 |
+| 2045–2054 | 2,9 | 1.154 / 435 | 40 |
+
+Son 5 yılın kayıt dağılımı (ms/hafta): değişenler 2,8 · sıcak blok 10,3 · flush 2,1 · geçmiş 9,8 ·
+commit 3,4 · checkpoint 13,6 (bu sunucuda fsync yavaş). Veritabanı 50 yılda 162 MB (9 listenin tam
+geçmişi; ayrıntılı haftalık istatistikler yalnızca oyuncunun şarkı/albümleri için).
+
+Bölgesiz sürümde (karşılaştırma için) simülasyon ~1,0 ms, kayıt ~24 ms, DB 107 MB idi.
+**Bilinen:** aktif şarkı/albüm sayısı 50 yılda %12 / %45 artıyor (global listelerin düşük
+eşiklerine yakın katalog); süre de buna bağlı olarak artıyor. 100 yılda bile hedefin çok altında
+ama sıkılaştırılmalı.
 
 Bulunan ve düzeltilen: her hafta tüm aktif satırları `INSERT OR REPLACE` ile yazmak 50 ms'ye çıkıyordu
 → sıcak blok + değişenler + elle checkpoint ile ~24 ms. Emekli sanatçıların her hafta yazılmasını

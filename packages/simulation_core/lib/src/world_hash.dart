@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'config/charts.dart';
+import 'model.dart';
 import 'world.dart';
 
 /// Stable hash of the simulation-relevant world state, used by determinism
@@ -17,33 +19,57 @@ int worldHash(World w) {
     addInt(bd.getInt64(0));
   }
 
+  void addAll(Float64List v) {
+    for (final x in v) {
+      addDouble(x);
+    }
+  }
+
+  void addCharts(Charted e) {
+    for (var c = 0; c < Charts.count; c++) {
+      final st = e.statsOrNull(c);
+      addInt(st?.peak ?? 0);
+      addInt(st?.weeksOn ?? 0);
+      addInt(st?.lastPos ?? 0);
+    }
+  }
+
   addInt(w.week);
-  addDouble(w.spaIndex);
-  addDouble(w.dpaIndex);
-  addDouble(w.retiredDormantAttention);
-  addDouble(w.emaAttention);
+  addAll(w.spaIndex);
+  addAll(w.dpaIndex);
+  addAll(w.retiredDormantAttention);
+  addAll(w.emaAttention);
+  addAll(w.chartCutoff);
   for (final a in w.artists) {
     addInt(a.id);
     addDouble(a.fame);
     addDouble(a.popularity);
     addDouble(a.coreFans);
     addDouble(a.casual);
+    addDouble(a.devotion);
     addDouble(a.anticipation);
-    addDouble(a.lifetimeStreams);
+    addAll(a.reg);
+    addAll(a.regionShare);
     addInt(a.moneyCents);
+    for (final v in a.no1Singles) {
+      addInt(v);
+    }
   }
   addInt(w.songs.length);
   for (final s in w.songs) {
-    addDouble(s.lifetimeStreams);
-    addInt(s.peakPos);
+    addAll(s.reg);
+    addDouble(s.dormantRate);
+    addCharts(s);
   }
   addInt(w.albums.length);
   for (final al in w.albums) {
-    addDouble(al.lifetimeUnits);
-    addInt(al.peakPos);
+    addAll(al.reg);
+    addCharts(al);
   }
-  for (final e in w.songChart) {
-    addInt(e.entityId);
+  for (final chart in w.charts) {
+    for (final e in chart) {
+      addInt(e.entityId);
+    }
   }
   return h;
 }

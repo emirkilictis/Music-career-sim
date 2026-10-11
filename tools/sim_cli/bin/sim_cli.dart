@@ -40,6 +40,7 @@ void main(List<String> args) {
 
   final allTimes = <int>[];
   final activeByWeek = <int>[];
+  final albumsByWeek = <int>[];
   var report = _YearReport(world, start);
   while (world.week < endWeek) {
     bot.act();
@@ -54,6 +55,7 @@ void main(List<String> args) {
       saveTimes.add(sw.elapsedMicroseconds);
     }
     activeByWeek.add(res.activeSongs);
+    albumsByWeek.add(res.activeAlbums);
     report.add(res);
     if (GameTime.weekOfYear(world.week) == 1) {
       if (!quiet) report.print();
@@ -64,7 +66,7 @@ void main(List<String> args) {
   _printTopArtists(world);
   _printPlayer(world, player);
   _printPerf(allTimes, world);
-  _printDecades(allTimes, activeByWeek, start);
+  _printDecades(allTimes, activeByWeek, albumsByWeek, start);
   if (store != null) {
     store.close();
     final s = List.of(saveTimes)..sort();
@@ -134,20 +136,43 @@ class _YearReport {
   final List<double> no1Downloads = [];
   final List<double> no200Units = [];
   final List<double> no1AlbumUnits = [];
+  final Map<int, int> ukNo1Songs = {};
+  final Map<int, int> ukNo1Albums = {};
+  final Map<int, int> globalNo1Songs = {};
+  final List<double> ukNo1Streams = [];
+  final List<double> globalNo1Streams = [];
+  final List<double> platformNo1Streams = [];
 
   void add(WeekResult r) {
     if (r.songChart.isNotEmpty) {
       final top = r.songChart.first.entityId;
       no1SongWeeks[top] = (no1SongWeeks[top] ?? 0) + 1;
-      no1Streams.add(w.songs[top].weekStreams);
+      no1Streams.add(w.songWeekStreamsIn(w.songs[top], ChartMarket.us));
       no1Downloads.add(w.songs[top].weekDownloads);
-      no100Streams.add(w.songs[r.songChart.last.entityId].weekStreams);
+      no100Streams.add(w.songWeekStreamsIn(
+          w.songs[r.songChart.last.entityId], ChartMarket.us));
     }
     if (r.albumChart.isNotEmpty) {
       final top = r.albumChart.first.entityId;
       no1AlbumWeeks[top] = (no1AlbumWeeks[top] ?? 0) + 1;
       no200Units.add(r.albumChart.last.points);
       no1AlbumUnits.add(r.albumChart.first.points);
+    }
+    void top(int chart, Map<int, int> into,
+        [List<double>? streams, ChartMarket? m]) {
+      final c = r.charts[chart];
+      if (c.isEmpty) return;
+      final id = c.first.entityId;
+      into[id] = (into[id] ?? 0) + 1;
+      if (streams != null) streams.add(w.songWeekStreamsIn(w.songs[id], m!));
+    }
+
+    top(Charts.ukSongs, ukNo1Songs, ukNo1Streams, ChartMarket.uk);
+    top(Charts.ukAlbums, ukNo1Albums);
+    top(Charts.globalSongs, globalNo1Songs, globalNo1Streams,
+        ChartMarket.global);
+    if (r.charts[Charts.platformGlobal].isNotEmpty) {
+      platformNo1Streams.add(r.charts[Charts.platformGlobal].first.points);
     }
     for (final e in r.songChart) {
       songPoints[e.entityId] = (songPoints[e.entityId] ?? 0) + e.points;
@@ -196,13 +221,20 @@ class _YearReport {
     for (final id in topDebuts.take(5)) {
       final al = w.albums[id];
       out.writeln(
-          '  ${_album(id)}  ·  ${fmt(al.firstWeekUnits)} units / ${fmt(al.firstWeekPure)} pure  ·  debut #${al.debutPos} · ${al.variantWeeks.length} ed. · devotion ${w.artists[al.artistId].devotion.toStringAsFixed(2)}');
+          '  ${_album(id)}  ·  ${fmt(al.firstWeekUnits)} units / ${fmt(al.firstWeekPure)} pure  ·  US ${fmt(w.albumFirstWeekIn(al, ChartMarket.us))} · UK ${fmt(w.albumFirstWeekIn(al, ChartMarket.uk))} · global ${fmt(w.albumFirstWeekIn(al, ChartMarket.global))} · debut #${al.statsOrNull(Charts.usAlbums)?.debutPos ?? 0} · ${w.artists[al.artistId].homeCountry.name} · ${al.variantWeeks.length} ed. · devotion ${w.artists[al.artistId].devotion.toStringAsFixed(2)}');
     }
     final topSongs = songPoints.keys.toList()
       ..sort((a, b) => songPoints[b]!.compareTo(songPoints[a]!));
+    out.writeln(
+        'UK #1 SONGS: ${ukNo1Songs.entries.map((e) => '${_song(e.key)} (${e.value})').join(' · ')}');
+    out.writeln(
+        'UK #1 ALBUMS: ${ukNo1Albums.entries.map((e) => '${_album(e.key)} (${e.value})').join(' · ')}');
+    out.writeln(
+        'GLOBAL #1 SONGS: ${globalNo1Songs.entries.map((e) => '${_song(e.key)} (${e.value})').join(' · ')}');
     out.writeln('YEAR-END TOP 5 SONGS:');
     for (final id in topSongs.take(5)) {
-      out.writeln('  ${_song(id)}  ·  peak #${w.songs[id].peakPos}');
+      out.writeln(
+          '  ${_song(id)}  ·  peak #${w.songs[id].peakOn(Charts.usSongs)}');
     }
     final topAlbums = albumUnits.keys.toList()
       ..sort((a, b) => albumUnits[b]!.compareTo(albumUnits[a]!));
@@ -210,6 +242,8 @@ class _YearReport {
     for (final id in topAlbums.take(5)) {
       out.writeln('  ${_album(id)}  ·  ${fmt(albumUnits[id]!)}');
     }
+    out.writeln(
+        'SCALE+: UK #1 streams ${fmt(_median(ukNo1Streams))} · global #1 streams ${fmt(_median(globalNo1Streams))} · platform global #1 ${fmt(_median(platformNo1Streams))}');
     out.writeln(
         'SCALE: #1 song median weekly streams ${fmt(_median(no1Streams))}, '
         'downloads ${fmt(_median(no1Downloads))} · #100 streams ${fmt(_median(no100Streams))} · '
@@ -234,16 +268,16 @@ void _printPlayer(World w, Artist p) {
       'Skills: writing ${p.skills.songwriting.toStringAsFixed(0)}, vocals ${p.skills.vocals.toStringAsFixed(0)}, '
       'production ${p.skills.production.toStringAsFixed(0)} · energy ${p.creativeEnergy.toStringAsFixed(0)}');
   print(
-      'Released songs: ${mine.length} · albums: ${albums.length} · #1 singles: ${p.no1Singles} · '
+      'Released songs: ${mine.length} · albums: ${albums.length} · #1 singles (US): ${p.no1Singles[Charts.usSongs]} · '
       'lifetime streams ${fmt(p.lifetimeStreams)} · album units ${fmt(p.lifetimeAlbumUnits)}');
   for (final s in best.take(5)) {
     print(
         '  "${s.title}" grade ${grade(s.estimatedGrade)} (true ${s.quality.toStringAsFixed(0)}) · '
-        'peak #${s.peakPos == 0 ? '-' : s.peakPos} · ${fmt(w.songLifetimeStreams(s))} streams');
+        'peak #${s.peakOn(Charts.usSongs) == 0 ? '-' : s.peakOn(Charts.usSongs)} · ${fmt(w.songLifetimeStreams(s))} streams');
   }
   for (final al in albums) {
     print(
-        '  Album "${al.title}" (${GameTime.yearOf(al.releaseWeek)}) · debut #${al.debutPos == 0 ? '-' : al.debutPos} · '
+        '  Album "${al.title}" (${GameTime.yearOf(al.releaseWeek)}) · debut #${al.statsOrNull(Charts.usAlbums)?.debutPos ?? '-'} · '
         'first week ${fmt(al.firstWeekUnits)} · total ${fmt(w.albumLifetimeUnits(al))}');
   }
   if (p.lastEraResult != null)
@@ -251,7 +285,8 @@ void _printPlayer(World w, Artist p) {
 }
 
 /// Flatness check: cost per week must not grow with career length.
-void _printDecades(List<int> times, List<int> active, int start) {
+void _printDecades(
+    List<int> times, List<int> active, List<int> albums, int start) {
   const span = GameTime.weeksPerYear * 10;
   print('\nPer decade (avg ms/week · avg active songs):');
   for (var i = 0; i < times.length; i += span) {
@@ -259,9 +294,11 @@ void _printDecades(List<int> times, List<int> active, int start) {
     final a = active.sublist(i, (i + span).clamp(0, active.length));
     final avgT = t.reduce((x, y) => x + y) / t.length / 1000;
     final avgA = a.reduce((x, y) => x + y) / a.length;
+    final al = albums.sublist(i, (i + span).clamp(0, albums.length));
+    final avgAl = al.reduce((x, y) => x + y) / al.length;
     final y0 = start + i ~/ GameTime.weeksPerYear;
     print(
-        '  $y0–${y0 + 9}: ${avgT.toStringAsFixed(2)} ms · ${avgA.toStringAsFixed(0)} active');
+        '  $y0–${y0 + 9}: ${avgT.toStringAsFixed(2)} ms · ${avgA.toStringAsFixed(0)} active songs · ${avgAl.toStringAsFixed(0)} active albums');
   }
 }
 
@@ -272,8 +309,8 @@ void _printTopArtists(World w) {
   for (final a in list.take(10)) {
     print(
         '  ${a.name.padRight(22)} fame ${a.fame.toStringAsFixed(2)} · core fans ${fmt(a.coreFans).padLeft(7)} · '
-        'casual ${fmt(a.casual).padLeft(7)} · #1 singles ${a.no1Singles} · #1 albums ${a.no1Albums} · '
-        'streams ${fmt(a.lifetimeStreams)} · album units ${fmt(a.lifetimeAlbumUnits)}');
+        'casual ${fmt(a.casual).padLeft(7)} · #1 singles ${a.no1Singles[Charts.usSongs]} · #1 albums ${a.no1Albums[Charts.usAlbums]} · ${a.homeCountry.name} · '
+        'streams ${fmt(w.artistLifetimeStreams(a))} · album units ${fmt(a.lifetimeAlbumUnits)}');
   }
 }
 

@@ -1,3 +1,4 @@
+import 'config/regions.dart';
 import 'model.dart';
 import 'world.dart';
 
@@ -15,14 +16,22 @@ abstract final class Lifecycle {
     w.settleRetired(a);
     final rate = s.lastAttention / a.catalogFactor;
     s.dormantRate = rate;
-    s.indexAtSettleStreams = a.catalogIndexStreams;
-    s.indexAtSettleDownloads = a.catalogIndexDownloads;
+    for (var r = 0; r < regionCount; r++) {
+      s.reg[SongReg.indexStreams + r] = a.reg[ArtistReg.indexStreams + r];
+      s.reg[SongReg.indexDownloads + r] = a.reg[ArtistReg.indexDownloads + r];
+    }
     s.status = SongStatus.dormant;
+    s.weekRegion = null;
     s.weeksBelowCutoff = 0;
     s.viralBoost = 0;
-    s.lastPos = 0;
+    _clearLastPos(s);
     a.sumDormantRate += rate;
-    if (a.isRetired) w.retiredDormantAttention += rate * a.catalogFactor;
+    if (a.isRetired) {
+      for (var r = 0; r < regionCount; r++) {
+        w.retiredDormantAttention[r] +=
+            rate * a.catalogFactor * a.regionShare[r];
+      }
+    }
     a.dormantSongIds.add(s.id);
     w.dormantSongCount++;
     w.dirtySongs.add(s.id);
@@ -39,12 +48,19 @@ abstract final class Lifecycle {
     if (s.status != SongStatus.dormant) return;
     final a = w.primaryOf(s);
     w.settleRetired(a);
-    s.lifetimeStreams = w.songLifetimeStreams(s);
-    s.lifetimeDownloads = w.songLifetimeDownloads(s);
+    for (var r = 0; r < regionCount; r++) {
+      final streams = w.songLifetimeStreams(s, r);
+      final downloads = w.songLifetimeDownloads(s, r);
+      s.reg[SongReg.lifeStreams + r] = streams;
+      s.reg[SongReg.lifeDownloads + r] = downloads;
+    }
     a.sumDormantRate -= s.dormantRate;
     if (a.sumDormantRate < 0) a.sumDormantRate = 0;
     if (a.isRetired) {
-      w.retiredDormantAttention -= s.dormantRate * a.catalogFactor;
+      for (var r = 0; r < regionCount; r++) {
+        w.retiredDormantAttention[r] -=
+            s.dormantRate * a.catalogFactor * a.regionShare[r];
+      }
     }
     a.dormantSongIds.remove(s.id);
     w.dormantSongCount--;
@@ -63,17 +79,24 @@ abstract final class Lifecycle {
   /// Folds lazily accrued SEA into the album's settled lifetime units.
   static void settleAlbum(World w, Album al) {
     if (al.status != AlbumStatus.dormant) return;
-    al.lifetimeUnits = w.albumLifetimeUnits(al);
-    al.indexAtSettle = w.artistIndexStreams(w.artists[al.artistId]);
+    final a = w.artists[al.artistId];
+    for (var r = 0; r < regionCount; r++) {
+      final units = w.albumLifetimeUnits(al, r);
+      al.reg[AlbumReg.lifeUnits + r] = units;
+      al.reg[AlbumReg.indexStreams + r] = w.artistIndexStreams(a, r);
+    }
     w.dirtyAlbums.add(al.id);
   }
 
   static void makeAlbumDormant(World w, Album al) {
     al.status = AlbumStatus.dormant;
-    al.indexAtSettle = w.artistIndexStreams(w.artists[al.artistId]);
+    final a = w.artists[al.artistId];
+    for (var r = 0; r < regionCount; r++) {
+      al.reg[AlbumReg.indexStreams + r] = w.artistIndexStreams(a, r);
+    }
     w.dirtyAlbums.add(al.id);
     al.weeksBelowCutoff = 0;
-    al.lastPos = 0;
+    _clearLastPos(al);
     _removeSorted(w.activeAlbumIds, al.id);
   }
 
@@ -83,6 +106,14 @@ abstract final class Lifecycle {
     al.status = AlbumStatus.active;
     World.insertSorted(w.activeAlbumIds, al.id);
     w.dirtyAlbums.add(al.id);
+  }
+
+  static void _clearLastPos(Charted e) {
+    final cs = e.charts;
+    if (cs == null) return;
+    for (final c in cs) {
+      c?.lastPos = 0;
+    }
   }
 
   static void _removeSorted(List<int> list, int id) {

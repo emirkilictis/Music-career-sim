@@ -1,11 +1,17 @@
+import 'dart:typed_data';
+
+import 'config/charts.dart';
+import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'model.dart';
 
 /// The hot, in-memory simulation state ("current world").
 class World {
-  World({required this.config, required this.seed, required this.week});
+  World({required this.config, required this.seed, required this.week})
+      : regionalEra = RegionalEra(config.era);
 
   final SimConfig config;
+  final RegionalEra regionalEra;
   final int seed;
 
   /// Current week (the next week to be simulated).
@@ -21,12 +27,14 @@ class World {
   /// Non-retired artists, sorted by id. Weekly loops run over these only.
   final List<int> activeArtistIds = [];
 
-  /// Cumulative streams-per-attention and catalog-downloads-per-attention.
-  double spaIndex = 0;
-  double dpaIndex = 0;
+  /// Cumulative streams-per-attention and catalog-downloads-per-attention,
+  /// per region.
+  final Float64List spaIndex = Float64List(regionCount);
+  final Float64List dpaIndex = Float64List(regionCount);
 
-  /// Σ sumDormantRate × catalogFactor over retired artists (frozen factors).
-  double retiredDormantAttention = 0;
+  /// Per region: Σ sumDormantRate × catalogFactor × regionShare over retired
+  /// artists (their factors are frozen).
+  final Float64List retiredDormantAttention = Float64List(regionCount);
 
   int dormantSongCount = 0;
 
@@ -41,17 +49,20 @@ class World {
   /// Released, non-dormant albums (album/EP only), kept sorted by id.
   final List<int> activeAlbumIds = [];
 
-  // Smoothed simulated totals used for the "rest of the market" term.
-  double emaAttention = 0;
-  double emaDownloadDemand = 0;
-  double emaRadioDemand = 0;
+  // Smoothed simulated totals per region for the "rest of the market" term.
+  final Float64List emaAttention = Float64List(regionCount);
+  final Float64List emaDownloadDemand = Float64List(regionCount);
+  final Float64List emaRadioDemand = Float64List(regionCount);
 
-  // Last chart cut-offs (points of last place).
-  double songCutoff = 0;
-  double albumCutoff = 0;
+  /// Last week's last-place points for every chart.
+  final Float64List chartCutoff = Float64List(Charts.count);
 
-  List<ChartEntry> songChart = const [];
-  List<ChartEntry> albumChart = const [];
+  /// Latest published charts, by chart id.
+  List<List<ChartEntry>> charts =
+      List.generate(Charts.count, (_) => const <ChartEntry>[]);
+
+  List<ChartEntry> get songChart => charts[Charts.usSongs];
+  List<ChartEntry> get albumChart => charts[Charts.usAlbums];
 
   Artist? get player => playerArtistId >= 0 ? artists[playerArtistId] : null;
 
@@ -61,8 +72,10 @@ class World {
     assert(a.id == artists.length);
     artists.add(a);
     insertSorted(activeArtistIds, a.id);
-    a.catalogSettleSpa = spaIndex;
-    a.catalogSettleDpa = dpaIndex;
+    for (var r = 0; r < regionCount; r++) {
+      a.reg[ArtistReg.settleSpa + r] = spaIndex[r];
+      a.reg[ArtistReg.settleDpa + r] = dpaIndex[r];
+    }
     dirtyArtists.add(a.id);
   }
 
@@ -72,65 +85,155 @@ class World {
     a.retiredWeek = week;
     final i = activeArtistIds.indexOf(a.id);
     if (i >= 0) activeArtistIds.removeAt(i);
-    retiredDormantAttention += a.sumDormantRate * a.catalogFactor;
+    for (var r = 0; r < regionCount; r++) {
+      retiredDormantAttention[r] +=
+          a.sumDormantRate * a.catalogFactor * a.regionShare[r];
+    }
     dirtyArtists.add(a.id);
   }
 
   /// Brings a retired artist's catalog accounting up to date.
   void settleRetired(Artist a) {
     if (!a.isRetired) return;
-    final ds = spaIndex - a.catalogSettleSpa;
-    final dd = dpaIndex - a.catalogSettleDpa;
-    if (ds == 0 && dd == 0) return;
     final f = a.catalogFactor;
-    a.catalogIndexStreams += f * ds;
-    a.catalogIndexDownloads += f * dd;
-    a.lifetimeStreams += a.sumDormantRate * f * ds;
-    a.lifetimeDownloads += a.sumDormantRate * f * dd;
-    a.catalogSettleSpa = spaIndex;
-    a.catalogSettleDpa = dpaIndex;
-    dirtyArtists.add(a.id);
+    var changed = false;
+    for (var r = 0; r < regionCount; r++) {
+      final ds = spaIndex[r] - a.reg[ArtistReg.settleSpa + r];
+      final dd = dpaIndex[r] - a.reg[ArtistReg.settleDpa + r];
+      if (ds == 0 && dd == 0) continue;
+      changed = true;
+      final share = a.regionShare[r];
+      a.reg[ArtistReg.indexStreams + r] += f * share * ds;
+      a.reg[ArtistReg.indexDownloads + r] += f * share * dd;
+      a.reg[ArtistReg.lifeStreams + r] += a.sumDormantRate * f * share * ds;
+      a.reg[ArtistReg.lifeDownloads + r] += a.sumDormantRate * f * share * dd;
+      a.reg[ArtistReg.settleSpa + r] = spaIndex[r];
+      a.reg[ArtistReg.settleDpa + r] = dpaIndex[r];
+    }
+    if (changed) dirtyArtists.add(a.id);
   }
 
-  /// Catalog index including lazily accrued weeks for retired artists.
-  double artistIndexStreams(Artist a) => a.isRetired
-      ? a.catalogIndexStreams +
-          a.catalogFactor * (spaIndex - a.catalogSettleSpa)
-      : a.catalogIndexStreams;
-
-  double artistIndexDownloads(Artist a) => a.isRetired
-      ? a.catalogIndexDownloads +
-          a.catalogFactor * (dpaIndex - a.catalogSettleDpa)
-      : a.catalogIndexDownloads;
-
-  double artistLifetimeStreams(Artist a) => a.isRetired
-      ? a.lifetimeStreams +
-          a.sumDormantRate * a.catalogFactor * (spaIndex - a.catalogSettleSpa)
-      : a.lifetimeStreams;
-
-  /// Lifetime streams of a song, including lazily accrued dormant streams.
-  double songLifetimeStreams(Song s) {
-    if (s.status != SongStatus.dormant) return s.lifetimeStreams;
-    final a = primaryOf(s);
-    return s.lifetimeStreams +
-        s.dormantRate * (artistIndexStreams(a) - s.indexAtSettleStreams);
+  /// Catalog index in region [r], including lazily accrued weeks for
+  /// retired artists.
+  double artistIndexStreams(Artist a, int r) {
+    final v = a.reg[ArtistReg.indexStreams + r];
+    if (!a.isRetired) return v;
+    return v +
+        a.catalogFactor *
+            a.regionShare[r] *
+            (spaIndex[r] - a.reg[ArtistReg.settleSpa + r]);
   }
 
-  double songLifetimeDownloads(Song s) {
-    if (s.status != SongStatus.dormant) return s.lifetimeDownloads;
-    final a = primaryOf(s);
-    return s.lifetimeDownloads +
-        s.dormantRate * (artistIndexDownloads(a) - s.indexAtSettleDownloads);
+  double artistIndexDownloads(Artist a, int r) {
+    final v = a.reg[ArtistReg.indexDownloads + r];
+    if (!a.isRetired) return v;
+    return v +
+        a.catalogFactor *
+            a.regionShare[r] *
+            (dpaIndex[r] - a.reg[ArtistReg.settleDpa + r]);
   }
 
-  /// Lifetime units of an album, including lazily accrued SEA while dormant.
-  double albumLifetimeUnits(Album al) {
-    if (al.status == AlbumStatus.active) return al.lifetimeUnits;
-    final a = artists[al.artistId];
-    return al.lifetimeUnits +
+  /// Lifetime streams of an artist in region [r] (or all regions).
+  double artistLifetimeStreams(Artist a, [int? r]) {
+    if (r == null) {
+      var t = 0.0;
+      for (var i = 0; i < regionCount; i++) {
+        t += artistLifetimeStreams(a, i);
+      }
+      return t;
+    }
+    final v = a.reg[ArtistReg.lifeStreams + r];
+    if (!a.isRetired) return v;
+    return v +
+        a.sumDormantRate *
+            a.catalogFactor *
+            a.regionShare[r] *
+            (spaIndex[r] - a.reg[ArtistReg.settleSpa + r]);
+  }
+
+  /// Lifetime streams of a song in region [r] (or all regions), including
+  /// lazily accrued dormant streams.
+  double songLifetimeStreams(Song s, [int? r]) {
+    if (r == null) {
+      var t = 0.0;
+      for (var i = 0; i < regionCount; i++) {
+        t += songLifetimeStreams(s, i);
+      }
+      return t;
+    }
+    final v = s.reg[SongReg.lifeStreams + r];
+    if (s.status != SongStatus.dormant) return v;
+    return v +
+        s.dormantRate *
+            (artistIndexStreams(primaryOf(s), r) -
+                s.reg[SongReg.indexStreams + r]);
+  }
+
+  double songLifetimeDownloads(Song s, [int? r]) {
+    if (r == null) {
+      var t = 0.0;
+      for (var i = 0; i < regionCount; i++) {
+        t += songLifetimeDownloads(s, i);
+      }
+      return t;
+    }
+    final v = s.reg[SongReg.lifeDownloads + r];
+    if (s.status != SongStatus.dormant) return v;
+    return v +
+        s.dormantRate *
+            (artistIndexDownloads(primaryOf(s), r) -
+                s.reg[SongReg.indexDownloads + r]);
+  }
+
+  /// Lifetime units of an album in region [r] (or all regions), including
+  /// lazily accrued SEA while dormant.
+  double albumLifetimeUnits(Album al, [int? r]) {
+    if (r == null) {
+      var t = 0.0;
+      for (var i = 0; i < regionCount; i++) {
+        t += albumLifetimeUnits(al, i);
+      }
+      return t;
+    }
+    final v = al.reg[AlbumReg.lifeUnits + r];
+    if (al.status == AlbumStatus.active) return v;
+    return v +
         al.sumDormantRate *
-            (artistIndexStreams(a) - al.indexAtSettle) /
+            (artistIndexStreams(artists[al.artistId], r) -
+                al.reg[AlbumReg.indexStreams + r]) /
             config.streamEquivalentAlbum;
+  }
+
+  /// First-week units (or pure sales) of an album in a chart market:
+  /// US/UK are shares of their region, global is the sum.
+  double albumFirstWeekIn(Album al, ChartMarket market, {bool pure = false}) {
+    final home = artists[al.artistId].homeCountry;
+    final base = pure ? AlbumReg.firstWeekPure : AlbumReg.firstWeekUnits;
+    return switch (market) {
+      ChartMarket.us => CountryShares.usOfNorthAmerica(home) *
+          al.reg[base + Region.northAmerica.index],
+      ChartMarket.uk =>
+        CountryShares.ukOfEurope(home) * al.reg[base + Region.europe.index],
+      _ => al.reg[base] + al.reg[base + 1] + al.reg[base + 2],
+    };
+  }
+
+  /// This week's streams of an active song in a chart market.
+  double songWeekStreamsIn(Song s, ChartMarket market) {
+    final wr = s.weekRegion;
+    if (wr == null) return 0;
+    final home = primaryOf(s).homeCountry;
+    return switch (market) {
+      ChartMarket.us ||
+      ChartMarket.platformNorthAmerica =>
+        (market == ChartMarket.us ? CountryShares.usOfNorthAmerica(home) : 1) *
+            wr[Region.northAmerica.index],
+      ChartMarket.uk ||
+      ChartMarket.platformEurope =>
+        (market == ChartMarket.uk ? CountryShares.ukOfEurope(home) : 1) *
+            wr[Region.europe.index],
+      _ => wr[0] + wr[1] + wr[2],
+    };
   }
 
   static void insertSorted(List<int> list, int id) {

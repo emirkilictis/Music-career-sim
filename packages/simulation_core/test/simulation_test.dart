@@ -168,7 +168,7 @@ void main() {
 /// Mega debut scenarios (docs/game-design.md §5, §8.5, §10): with the right
 /// moves a devoted superstar can sell millions in the streaming era; without
 /// them the same artist cannot.
-({Album album, double week2Pure}) _debut({
+({World world, Album album, double week2Pure}) _debut({
   required int year,
   required double devotion,
   required double hype,
@@ -194,7 +194,7 @@ void main() {
       Actions.releaseAlbum(w, a, 'Mega', songs, variantWeeks: variants);
   sim.step();
   sim.step();
-  return (album: album, week2Pure: album.weekPure);
+  return (world: w, album: album, week2Pure: album.weekPure);
 }
 
 void megaDebutTests() {
@@ -204,14 +204,20 @@ void megaDebutTests() {
         devotion: 1.0,
         hype: 0.8,
         variants: const [0, 0, 0, 0, 0, 0, 1, 2]);
-    printOnFailure('first week pure: ${r.album.firstWeekPure}');
-    expect(r.album.firstWeekPure, greaterThan(3e6));
-    expect(r.album.debutPos, 1);
+    final usPure =
+        r.world.albumFirstWeekIn(r.album, ChartMarket.us, pure: true);
+    printOnFailure('US first week pure: $usPure');
+    // Reference: 2025 record debut ≈ 4.0M US units / 3.5M pure.
+    expect(usPure, greaterThan(3e6));
+    expect(r.album.statsOrNull(Charts.usAlbums)?.debutPos, 1);
+    // Worldwide it sells more than in the US alone.
+    expect(r.album.firstWeekPure, greaterThan(usPure * 1.3));
   });
 
   test('same superstar without devotion, hype or variants stays far lower', () {
     final r = _debut(year: 2025, devotion: 0.4, hype: 0, variants: const [0]);
-    expect(r.album.firstWeekPure, lessThan(1.2e6));
+    expect(r.world.albumFirstWeekIn(r.album, ChartMarket.us, pure: true),
+        lessThan(1.2e6));
   });
 
   test('staggered variants boost the second week', () {

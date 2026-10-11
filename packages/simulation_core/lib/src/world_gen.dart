@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'model.dart';
 import 'names.dart';
@@ -68,17 +69,20 @@ abstract final class WorldGen {
       coreFans = 1.5e5 * r.logNormal(0.9) * (0.3 + 3 * fame);
       casual = 1.5e6 * r.logNormal(0.9) * (0.3 + 3 * fame);
     }
+    final scale = w.config.globalAudienceScale;
     final a = Artist(
       id: id,
       name: Names.artist(n),
       tier: tier,
+      homeCountry:
+          _homeCountry(RandomStream.keyed(w.seed, 1, id, RngPurpose.worldGen)),
       genre: r.nextInt(genreNames.length),
       debutWeek:
           newcomer ? w.week : w.week - r.nextInt(GameTime.weeksPerYear * 12),
       skills: skills,
       fame: fame,
-      coreFans: coreFans,
-      casual: casual,
+      coreFans: coreFans * scale,
+      casual: casual * scale,
       labelReach: isA ? r.range(1.1, 1.4) : r.range(0.6, 1.1),
       artistShare: 0.5,
     );
@@ -89,6 +93,16 @@ abstract final class WorldGen {
         w.week + (newcomer ? r.nextInt(30) : r.nextInt(isA ? 150 : 90));
     w.addArtist(a);
     return a;
+  }
+
+  /// AI home countries: half American, a third European, the rest elsewhere.
+  static HomeCountry _homeCountry(RandomStream r) {
+    final x = r.nextDouble();
+    if (x < 0.50) return HomeCountry.us;
+    if (x < 0.55) return HomeCountry.canada;
+    if (x < 0.67) return HomeCountry.uk;
+    if (x < 0.85) return HomeCountry.europe;
+    return HomeCountry.other;
   }
 
   static void _addCollaborators(World w) {
@@ -117,6 +131,7 @@ abstract final class WorldGen {
     StartTier tier = StartTier.unknown,
     StartMoney money = StartMoney.low,
     CareerPath path = CareerPath.independent,
+    HomeCountry home = HomeCountry.us,
     Skills? skills,
   }) {
     final (fame, fans, casual) = switch (tier) {
@@ -136,6 +151,7 @@ abstract final class WorldGen {
       id: w.artists.length,
       name: name,
       tier: ArtistTier.player,
+      homeCountry: home,
       genre: genre,
       debutWeek: w.week,
       skills: skills ??
@@ -146,8 +162,8 @@ abstract final class WorldGen {
               performance: 27,
               charisma: 27),
       fame: fame,
-      coreFans: fans,
-      casual: casual,
+      coreFans: fans * w.config.globalAudienceScale,
+      casual: casual * w.config.globalAudienceScale,
       labelReach: isLabel ? 1.15 : 0.7,
       artistShare: isLabel ? 0.5 : 1.0,
       moneyCents: cash,

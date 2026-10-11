@@ -49,6 +49,8 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K20 | **Yaratıcı enerji ve burnout:** tek çubuk; art arda çok şarkı yazınca burnout (birkaç hafta yazamama). |
 | K21 | **Kariyer yolu:** Bağımsız veya küçük plak şirketi (sade: avans, gelir payı, 2 albümlük sözleşme). Büyük şirket teklifleri Faz 2. |
 | K22 | **Başlangıç seviyesi ve parası seçilebilir;** Süperstar/Yükselen yıldız ve Milyoner başlangıcı Premium. Oyun ücretsiz ve tek başına eksiksiz. Premium: **aylık / yıllık üyelik + ömür boyu** seçeneği. Üyelik bitince hiçbir kariyer kilitlenmez. |
+| K24 | **Bölgeler:** Kuzey Amerika, Avrupa, Diğer (Latin Amerika + Asya + Okyanusya + Afrika). Konfigürasyondan genişletilebilir. Stream, indirme, satış ve radyo bölge bazında hesaplanır; sanatçının kitlesi memleketi, türü ve ünlülüğüne göre bölgelere dağılır. |
+| K25 | **Listeler:** ABD, İngiltere ve Global (şarkı + albüm), ayrıca streaming platformunun Global / Kuzey Amerika / Avrupa Top 50'si. Ülke listeleri, bölgenin bir payıdır (memleket bonusu ile). İsimler kurgusal. |
 | K23 | ChatGPT planındaki ekranlar, rekorlar, kampanyalar, finans, bildirimler, ödüller, Kolay mod ve 10 performans kuralı dokümanlara taşındı. |
 
 ## Yol Haritası

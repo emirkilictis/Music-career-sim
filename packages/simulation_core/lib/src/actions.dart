@@ -245,17 +245,21 @@ abstract final class Actions {
 abstract final class Eras {
   static void open(World w, Artist a, Album album) {
     if (a.eraOpen) close(w, a);
-    final era = w.config.era.forWeek(w.week);
+    final eras = w.regionalEra.forWeek(w.week);
     final c = w.config;
     // Expectations rise with the fanbase's devotion, so a devoted fanbase
     // has to deliver more to count as a success.
-    final baseline = a.coreFans *
-            c.superfanBuyRate *
-            math.sqrt(a.devotionBuyFactor) *
-            era.superfanFactor *
-            2.2 +
-        a.casual * c.casualBuyRate * era.casualPurchaseRate * 2.0 +
-        2000;
+    var baseline = 2000.0;
+    for (var k = 0; k < eras.length; k++) {
+      final share = a.regionShare[k];
+      baseline += a.coreFans *
+              share *
+              c.superfanBuyRate *
+              math.sqrt(a.devotionBuyFactor) *
+              eras[k].superfanFactor *
+              2.2 +
+          a.casual * share * c.casualBuyRate * eras[k].casualPurchaseRate * 2.0;
+    }
     a.eraOpen = true;
     a.eraAlbumId = album.id;
     a.eraStartWeek = w.week;

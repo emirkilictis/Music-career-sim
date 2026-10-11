@@ -48,6 +48,14 @@ streams_i      = marketTotalStreams(yıl) × (1 + α × hype_hafta) × share_i
 - Oyuncunun mega albümü rakiplerin payını gerçekten azaltır.
 - Aynı model indirme, fiziksel single, radyo ve video için ayrı pazar toplamlarıyla uygulanır.
 
+## 3.1 Bölgeler (uygulandı)
+
+Her aktif şarkının ilgisi tek sefer hesaplanır, sonra ana sanatçının bölgesel kitle dağılımına göre
+3 bölgeye bölünür. Her bölge kendi pazar büyüklüğü ve "simüle edilmeyen yerel repertuvar" payıyla
+ayrı normalize edilir. Albüm satışları (süperfan, koleksiyoncu, sıradan alıcı) bölge bazında hesaplanır.
+Dormant katalog ve tembel birikim bölge başına endekslerle tutulur. Bölge pazarları ABD tablosunun
+yıllara göre çarpanlarıdır (`config/regions.dart`), böylece ABD kalibrasyonu korunur.
+
 ## 4. Dönem tablosu (`MarketEraConfig`)
 
 Yıl bazlı konfigürasyon; ara yıllar interpolasyonla, son gerçek yıldan sonrası

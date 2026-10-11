@@ -5,7 +5,8 @@ import 'era_table.dart';
 class SimConfig {
   SimConfig({
     EraTable? era,
-    this.publicPool = 180e6,
+    this.publicPool = 324e6,
+    this.globalAudienceScale = 1.8,
     this.outsideAttentionRatio = 0.35,
     this.outsideDownloadRatio = 1.2,
     this.albumCatalogRate = 0.0008,
@@ -34,7 +35,7 @@ class SimConfig {
     this.recurrentPosition = 50,
     this.activeMinAgeWeeks = 26,
     this.dormantShareOfCutoff = 0.75,
-    this.albumDormantShareOfCutoff = 0.30,
+    this.albumDormantShareOfCutoff = 0.8,
     this.anticipationBuildRate = 0.023,
     this.anticipationCapBase = 0.9,
     this.eraLengthWeeks = 52,
@@ -50,8 +51,12 @@ class SimConfig {
 
   final EraTable era;
 
-  /// General public that can be reached by exposure (people).
+  /// General public that can be reached by exposure (people, worldwide).
   final double publicPool;
+
+  /// Fan counts are worldwide; presets were calibrated on US audiences, so
+  /// they are scaled up by this factor (≈ 1 / typical US share of an artist).
+  final double globalAudienceScale;
 
   /// Unsimulated rest of the market, as a multiple of the simulated attention
   /// (smoothed). Larger = simulated songs get a smaller share.

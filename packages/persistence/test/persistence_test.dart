@@ -119,11 +119,11 @@ void main() {
     }
     final weeks = store.db.select(
         'SELECT COUNT(DISTINCT week) AS n FROM chartEntry WHERE chartId = ?',
-        [ChartIds.usSongs]);
+        [Charts.usSongs]);
     expect(weeks.first['n'], 71); // 70 simulated + the chart at creation
     final top = store.db.select(
         'SELECT COUNT(*) AS n FROM chartEntry WHERE chartId = ? AND week = ?',
-        [ChartIds.usAlbums, w.week - 1]);
+        [Charts.usAlbums, w.week - 1]);
     expect(top.first['n'], 200);
     final playerWeeks = store.db.select('SELECT COUNT(*) AS n FROM playerWeek');
     expect(playerWeeks.first['n'], 70);

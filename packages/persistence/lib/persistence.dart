@@ -3,4 +3,3 @@
 library;
 
 export 'src/save_store.dart';
-export 'src/schema.dart' show ChartIds;

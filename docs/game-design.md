@@ -387,6 +387,34 @@ Her dönem farklı hissettirir:
 
 O dönemde var olmayan metrikler arayüzde gizlenir (örn. 2008'de monthly listeners yok).
 
+### 11.1 Bölgeler ve listeler
+
+**Bölgeler:** Kuzey Amerika (ABD + Kanada), Avrupa, Diğer (Latin Amerika, Asya, Okyanusya, Afrika).
+Her bölgenin yıllara göre kendi pazarı vardır (örn. Avrupa'da streaming erken, fiziksel satış daha
+uzun sürdü; "Diğer"de streaming hacmi geç ama çok büyüdü, koleksiyoncu kültürü güçlü).
+
+**Sanatçının kitlesi:** memleket bölgesinde başlar; ünlendikçe uluslararasılaşır. Tür de etkiler
+(Country Kuzey Amerika'da, Dance Avrupa'da, Latin "Diğer"de güçlü).
+
+**Ekranda:** şarkı ve albümlerin haftalık ve toplam rakamları bölge bölge gösterilir:
+```
+İlk hafta: 2,01M birim · ABD 1,38M · İngiltere 45K · global 2,01M
+Bu hafta: 48,2M stream · Kuzey Amerika 21,4M · Avrupa 13,1M · Diğer 13,7M
+```
+
+**Listeler:**
+
+| Liste | Ölçtüğü |
+|---|---|
+| ABD Şarkılar (100), ABD Albümler (200) | Kuzey Amerika × ABD payı; satış + stream + radyo; recurrent kuralı |
+| İngiltere Şarkılar (100), İngiltere Albümler (100) | Avrupa × İngiltere payı; recurrent kuralı |
+| Global Şarkılar (200), Global Albümler (200) | Tüm bölgeler; stream + satış (radyo yok) |
+| Platform Global / Kuzey Amerika / Avrupa Top 50 | Sadece stream (2009/2011'den itibaren) |
+
+Ülke listeleri bölgenin bir payıdır (ABD ≈ Kuzey Amerika'nın %89'u, İngiltere ≈ Avrupa'nın %16'sı);
+memleket sanatçıları kendi ülkesinde daha güçlüdür (ABD'li ABD'de %92, İngiliz İngiltere'de %35).
+Yeni ülke listesi eklemek bir konfigürasyon satırıdır. Liste ve platform isimleri kurgusaldır.
+
 ## 12. Finans
 
 | Gelir | Gider |
