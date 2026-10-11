@@ -211,6 +211,8 @@ class Simulator {
         p.weekPoints += s.weekPoints;
         p.weekReach += s.lastReach;
         p.weekStreams += s.weekStreams;
+      } else {
+        w.dirtyArtists.add(p.id);
       }
     }
 
@@ -298,6 +300,7 @@ class Simulator {
       al.lifetimeUnits += al.weekUnits;
       p.lifetimeAlbumPure += al.weekPure;
       p.lifetimeAlbumUnits += al.weekUnits;
+      if (p.isRetired) w.dirtyArtists.add(p.id);
       p.weekPoints += al.weekUnits * 0.5;
       if (p.eraOpen && p.eraAlbumId == al.id) p.eraUnits += al.weekUnits;
       if (age == 0) {
@@ -381,11 +384,13 @@ class Simulator {
         s.weeksAtNo1++;
         final p = w.artists[s.primaryArtistId];
         p.weeksAtNo1++;
+        w.dirtyArtists.add(p.id);
         if (s.weeksAtNo1 == 1) {
           newNo1.add(id);
           p.no1Singles++;
           for (final f in s.featuredArtistIds) {
             w.artists[f].no1SinglesFeatured++;
+            w.dirtyArtists.add(f);
           }
         }
       }
@@ -431,6 +436,7 @@ class Simulator {
         if (al.weeksAtNo1 == 1) {
           newNo1.add(id);
           w.artists[al.artistId].no1Albums++;
+          w.dirtyArtists.add(al.artistId);
         }
       }
       al.lastPos = pos;

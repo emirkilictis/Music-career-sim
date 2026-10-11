@@ -21,15 +21,26 @@ Simülasyon motorunun ilk çalışan sürümü. Arayüz ve veritabanı yok; ama�
 | `bot.dart` | Kalibrasyon için basit bot oyuncu (aynı `Actions` API'si) |
 | `world_hash.dart` | Determinizm testleri için durum hash'i |
 
-`tools/sim_cli`: N yıl simüle edip yıllık rapor basar.
+`packages/persistence` (SQLite, `sqlite3` paketi):
+
+| Dosya | İçerik |
+|---|---|
+| `schema.dart` | v1 şeması, numaralı migrasyonlar |
+| `codec.dart` | Sanatçı/şarkı/albüm ↔ satır eşlemesi (tüm simülasyon alanları birebir) |
+| `binary.dart` | Sıcak dünya bloğu için kompakt ikili satır kodlayıcı |
+| `save_store.dart` | `SaveStore` (oluştur, yükle, haftalık atomik kayıt, flush, checkpoint) ve `SaveSlots` (slot klasörleri + `summary.json`) |
+
+`tools/sim_cli`: N yıl simüle edip yıllık rapor basar; `--save dosya.sqlite` ile her hafta kaydeder ve
+kayıt süresini ölçer.
 
 ```bash
 cd tools/sim_cli
 dart run bin/sim_cli.dart --start 2005 --years 20 --seed 42
 dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet   # performans
+dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet --save /tmp/c.sqlite   # + kayıt
 ```
 
-## Testler (`dart test`, 14/14 geçiyor)
+## Testler (simülasyon 16/16, kayıt 5/5 geçiyor)
 
 - Aynı seed → bit düzeyinde aynı dünya; farklı seed → farklı dünya
 - Sanatçının kariyer stream toplamı = şarkılarının toplamı (aktif + tembel birikimli dormant)
@@ -37,6 +48,11 @@ dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet   # performan
 - Aktif küme tarih büyürken sınırlı kalıyor
 - Şarkı yazma: kalite sınırları, haftada en fazla 3 şarkı, burnout, ünlü prodüktör reddi
 - Başarılı eradan sonra beklenti birikiyor ve **hiç düşmüyor**; flop'tan sonra birikmiyor
+- Albüm şekli: iyi albüm satışını zayıftan en az 1,5 kat daha iyi koruyor; 40 şarkı ilk haftayı
+  %15–80 arası artırıyor (4 kat değil)
+- **Kayıt:** oluştur + yükle birebir aynı dünya; **kesintisiz oynamak = her 13 haftada kapatıp kayıttan
+  açmak** (oyuncu hamleleriyle birlikte, bit düzeyinde aynı hash); kayıt ortasında çökme önceki haftayı
+  bozmuyor; liste ve haftalık geçmiş sorgulanabiliyor; slot oluştur/listele/aç/sil
 - Mega çıkış: doğru hamlelerle 2025'te 3M+ saf satış; aynı süperstar hamlesiz çok daha düşük;
   varyantları haftalara yaymak ikinci haftayı güçlendiriyor
 
@@ -56,6 +72,22 @@ Aktif küme düz. Hafta maliyeti tarih uzunluğundan neredeyse bağımsız
 (küçük artış, emekli sanatçıların katalog döngüsünden; ileride optimize edilebilir).
 Bulunan ve düzeltilen büyüme kaynakları: AI nüfusunun şişmesi (nüfus kontrolü eklendi),
 listeye giremeyen eski hitlerin aktif kalması (dormant eşiği yükseltildi).
+
+## Kayıt performansı (bu sunucu, 50 yıl, her hafta kayıt)
+
+| On yıl | Kayıt ms/hafta |
+|---|---|
+| 2005–2014 | 18,2 |
+| 2025–2034 | 24,4 |
+| 2045–2054 | 27,8 |
+
+Son 5 yılın dağılımı (ms/hafta): değişenler 2,4 · sıcak blok 5,5 · flush 1,4 · geçmiş 5,9 ·
+commit 2,7 · checkpoint 9,9 (13 haftada bir ~130 ms; bu sunucuda fsync yavaş, fsync kapalıyken
+checkpoint ~0,5 ms). Veritabanı 50 yılda 107 MB.
+
+Bulunan ve düzeltilen: her hafta tüm aktif satırları `INSERT OR REPLACE` ile yazmak 50 ms'ye çıkıyordu
+→ sıcak blok + değişenler + elle checkpoint ile ~24 ms. Emekli sanatçıların her hafta yazılmasını
+önlemek için katalog hesapları tembel hale getirildi.
 
 ## Kalibrasyon (seed 42, 2005–2024)
 
@@ -86,6 +118,11 @@ listeye giremeyen eski hitlerin aktif kalması (dormant eşiği yükseltildi).
 4. Flop desteğinin etkileri (redemption, feat teklifleri vb.), sosyal medya postları,
    kampanyalar henüz yok (sadece durum değişkenleri var).
 5. Global listeler yok (sadece US).
-6. Persistence (SQLite/drift) yok → "sürekli = kaydet-yükle" testi bekliyor.
+6. ~~Persistence~~ → **yapıldı** (yukarıda). Kalan: kayıt süresi 50 yılda ~%50 artıyor (geçmiş
+   tablolarının büyümesi + checkpoint); kayıt açıkken simülasyon da biraz yavaşlıyor (1,4 → 2,5 ms);
+   veritabanı boyutu (50 yılda 107 MB) ileride geçmiş sıkıştırmasıyla küçültülebilir; checkpoint'ler
+   uygulamada boşta/arka planda yapılmalı.
 7. İsim çeşitliliği az (aynı şarkı isimleri sık tekrar ediyor).
+9. Hamlesiz süperstar 2025 ilk haftası (~620K) biraz yüksek; ileride düşürülecek.
+10. AI rakipler bilerek "mega era" kurmuyor (karar: AI çok güçlü olmasın).
 8. Bot oyuncu 20 yılda fame 0,43'e ulaşıyor, #1 yok — oyuncu dengesi zorluk ayarlarıyla birlikte ele alınacak.

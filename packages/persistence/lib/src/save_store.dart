@@ -1,0 +1,519 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:simulation_core/simulation_core.dart';
+import 'package:sqlite3/sqlite3.dart';
+
+import 'binary.dart';
+import 'codec.dart';
+import 'schema.dart';
+
+/// One career = one SQLite file. The hot world lives in memory; each week is
+/// written in a single transaction (docs/architecture.md §3):
+///   - changed state only (active sets + dirty entities), never the whole world
+///   - immutable history (charts, weekly stats for charted/player releases)
+///   - meta.currentWeek in the same transaction, so a crash leaves the
+///     previous week intact.
+class SaveStore {
+  SaveStore._(this.db);
+
+  final Database db;
+  static const simulationVersion = 1;
+
+  /// Creates a new save file for [world] (fails if the file exists).
+  static SaveStore create(String path, World world) {
+    if (File(path).existsSync()) {
+      throw StateError('Save already exists: $path');
+    }
+    final store = SaveStore._(_open(path));
+    store._migrate();
+    store._transaction(() {
+      store._writeMeta(world);
+      store._writeCollaborators(world);
+      store._writeArtists(world, world.artists);
+      store._writeSongs(world, world.songs, withCredits: true);
+      store._writeAlbums(world, world.albums, withTracks: true);
+      store._writeCharts(world.week - 1, world.songChart, world.albumChart);
+      store._writeHot(world);
+    });
+    _clearDirty(world);
+    return store;
+  }
+
+  /// Opens an existing save.
+  static SaveStore open(String path) {
+    if (!File(path).existsSync()) throw StateError('No save at $path');
+    final store = SaveStore._(_open(path));
+    store._migrate();
+    return store;
+  }
+
+  static Database _open(String path) {
+    final db = sqlite3.open(path);
+    db.execute('PRAGMA journal_mode = WAL');
+    db.execute('PRAGMA synchronous = NORMAL');
+    // Checkpoint the WAL ourselves every few weeks instead of on random
+    // commits (each checkpoint syncs the database file).
+    db.execute('PRAGMA wal_autocheckpoint = 0');
+    db.execute('PRAGMA foreign_keys = OFF');
+    return db;
+  }
+
+  void _migrate() {
+    final v = db.userVersion;
+    for (var i = v; i < migrations.length; i++) {
+      _transaction(() {
+        db.execute(migrations[i]);
+        db.userVersion = i + 1;
+      });
+    }
+  }
+
+  void close() {
+    _checkpoint();
+    db.dispose();
+  }
+
+  // ------------------------------------------------------------------ load
+
+  /// Rebuilds the in-memory world exactly as it was after the last commit.
+  World load({SimConfig? config}) {
+    final meta = {
+      for (final r in db.select('SELECT key, value FROM meta'))
+        r['key'] as String: r['value'],
+    };
+    final version = meta['simulationVersion'] as int;
+    if (version > simulationVersion) {
+      throw StateError('Save made by a newer game version ($version)');
+    }
+    final w = World(
+      config: config ?? SimConfig(),
+      seed: meta['seed'] as int,
+      week: meta['week'] as int,
+    );
+    w
+      ..playerArtistId = meta['playerArtistId'] as int
+      ..spaIndex = _d(meta['spaIndex'])
+      ..dpaIndex = _d(meta['dpaIndex'])
+      ..retiredDormantAttention = _d(meta['retiredDormantAttention'])
+      ..emaAttention = _d(meta['emaAttention'])
+      ..emaDownloadDemand = _d(meta['emaDownloadDemand'])
+      ..emaRadioDemand = _d(meta['emaRadioDemand'])
+      ..songCutoff = _d(meta['songCutoff'])
+      ..albumCutoff = _d(meta['albumCutoff']);
+
+    for (final r in db.select('SELECT * FROM collaborator ORDER BY id')) {
+      w.collaborators.add(Collaborator(
+        id: r['id'] as int,
+        name: r['name'] as String,
+        role: CollaboratorRole.values[r['role'] as int],
+        skill: _d(r['skill']),
+        genre: r['genre'] as int,
+        feeCents: r['feeCents'] as int,
+        minFame: _d(r['minFame']),
+      ));
+    }
+
+    // Relational rows are authoritative for cold entities; the hot snapshot
+    // overrides them for entities that were active at the last commit.
+    final hot = _readHot();
+
+    for (final r in db.select('SELECT * FROM artist ORDER BY id')) {
+      final a = Codec.artistFrom(hot.artists[r['id'] as int] ?? r);
+      w.artists.add(a);
+      if (!a.isRetired) w.activeArtistIds.add(a.id);
+    }
+
+    final featured = <int, List<int>>{};
+    for (final r in db.select(
+        'SELECT songId, artistId FROM songCredit ORDER BY songId, position')) {
+      (featured[r['songId'] as int] ??= []).add(r['artistId'] as int);
+    }
+    for (final r in db.select('SELECT * FROM song ORDER BY id')) {
+      final id = r['id'] as int;
+      final s = Codec.songFrom(hot.songs[id] ?? r, featured[id] ?? []);
+      w.songs.add(s);
+      if (s.status == SongStatus.active) w.activeSongIds.add(s.id);
+      if (s.status == SongStatus.dormant) {
+        w.artists[s.primaryArtistId].dormantSongIds.add(s.id);
+        w.dormantSongCount++;
+      }
+    }
+
+    final tracks = <int, List<int>>{};
+    for (final r in db.select(
+        'SELECT albumId, songId FROM albumTrack ORDER BY albumId, position')) {
+      (tracks[r['albumId'] as int] ??= []).add(r['songId'] as int);
+    }
+    for (final r in db.select('SELECT * FROM album ORDER BY id')) {
+      final id = r['id'] as int;
+      final al = Codec.albumFrom(hot.albums[id] ?? r, tracks[id] ?? []);
+      w.albums.add(al);
+      if (al.status == AlbumStatus.active) w.activeAlbumIds.add(al.id);
+    }
+
+    w.songChart = _loadChart(ChartIds.usSongs, w.week - 1);
+    w.albumChart = _loadChart(ChartIds.usAlbums, w.week - 1);
+    return w;
+  }
+
+  List<ChartEntry> _loadChart(int chartId, int week) => [
+        for (final r in db.select(
+            'SELECT * FROM chartEntry WHERE chartId = ? AND week = ? '
+            'ORDER BY position',
+            [chartId, week]))
+          ChartEntry(
+            position: r['position'] as int,
+            entityId: r['entityId'] as int,
+            points: _d(r['points']),
+            lastPos: r['lastPos'] as int,
+            peak: r['peak'] as int,
+            weeksOn: r['weeksOn'] as int,
+          ),
+      ];
+
+  // ---------------------------------------------------------------- commit
+
+  /// Writes the week that was just simulated. [debugBeforeCommit] is a test
+  /// hook used to simulate a crash in the middle of a save.
+  void commitWeek(World w, WeekResult r,
+      {void Function()? debugBeforeCommit, Map<String, int>? profile}) {
+    final sw = Stopwatch()..start();
+    void lap(String k) {
+      if (profile != null) {
+        profile[k] = (profile[k] ?? 0) + sw.elapsedMicroseconds;
+        sw.reset();
+      }
+    }
+
+    _transaction(() {
+      // 1. New or changed (status) entities: relational rows.
+      _writeArtists(w, [for (final id in w.dirtyArtists) w.artists[id]]);
+      final dirtySongs = [for (final id in w.dirtySongs) w.songs[id]];
+      _writeSongs(w, dirtySongs);
+      _writeCredits(dirtySongs);
+      final dirtyAlbums = [for (final id in w.dirtyAlbums) w.albums[id]];
+      _writeAlbums(w, dirtyAlbums);
+      _writeTracks(dirtyAlbums);
+      lap('dirty');
+
+      // 2. The hot world as one contiguous blob.
+      _writeHot(w);
+      lap('hot');
+
+      // 3. Periodically refresh relational rows of active entities so SQL
+      //    queries (UI, history screens) stay close to current.
+      if (w.week % flushEveryWeeks == 0) _flushActiveRows(w);
+      lap('flush');
+
+      _writeHistory(w, r);
+      lap('history');
+      _writeMeta(w);
+      debugBeforeCommit?.call();
+    });
+    lap('commit');
+    if (w.week % flushEveryWeeks == 0) _checkpoint();
+    lap('checkpoint');
+    _clearDirty(w);
+  }
+
+  /// Relational rows of active entities are refreshed this often, and by
+  /// [flushActive] (call it when the app goes to the background or closes).
+  static const flushEveryWeeks = 13;
+
+  void flushActive(World w) => _transaction(() => _flushActiveRows(w));
+
+  void _checkpoint() => db.execute('PRAGMA wal_checkpoint(PASSIVE)');
+
+  void _flushActiveRows(World w) {
+    _writeArtists(w, [for (final id in w.activeArtistIds) w.artists[id]]);
+    _writeSongs(w, [for (final id in w.activeSongIds) w.songs[id]]);
+    _writeAlbums(w, [for (final id in w.activeAlbumIds) w.albums[id]]);
+  }
+
+  void _writeHot(World w) {
+    final out = RowWriter();
+    out.count(w.activeArtistIds.length);
+    for (final id in w.activeArtistIds) {
+      out.row(Codec.artistRow(w.artists[id]));
+    }
+    out.count(w.activeSongIds.length);
+    for (final id in w.activeSongIds) {
+      out.row(Codec.songRow(w.songs[id]));
+    }
+    out.count(w.activeAlbumIds.length);
+    for (final id in w.activeAlbumIds) {
+      out.row(Codec.albumRow(w.albums[id]));
+    }
+    db.execute(
+        'INSERT OR REPLACE INTO hotState (id, week, data) VALUES (1, ?, ?)',
+        [w.week, out.takeBytes()]);
+  }
+
+  ({
+    Map<int, Map<String, Object?>> artists,
+    Map<int, Map<String, Object?>> songs,
+    Map<int, Map<String, Object?>> albums,
+  }) _readHot() {
+    final rows = db.select('SELECT data FROM hotState WHERE id = 1');
+    final artists = <int, Map<String, Object?>>{};
+    final songs = <int, Map<String, Object?>>{};
+    final albums = <int, Map<String, Object?>>{};
+    if (rows.isNotEmpty) {
+      final r = RowReader(rows.first['data'] as Uint8List);
+      for (final (cols, target) in [
+        (Codec.artistColumns, artists),
+        (Codec.songColumns, songs),
+        (Codec.albumColumns, albums),
+      ]) {
+        final n = r.count();
+        for (var i = 0; i < n; i++) {
+          final row = r.row(cols);
+          target[row['id'] as int] = row;
+        }
+      }
+    }
+    return (artists: artists, songs: songs, albums: albums);
+  }
+
+  static void _clearDirty(World w) {
+    w.dirtyArtists.clear();
+    w.dirtySongs.clear();
+    w.dirtyAlbums.clear();
+  }
+
+  void _transaction(void Function() body) {
+    db.execute('BEGIN IMMEDIATE');
+    try {
+      body();
+      db.execute('COMMIT');
+    } catch (_) {
+      db.execute('ROLLBACK');
+      rethrow;
+    }
+  }
+
+  void _writeMeta(World w) {
+    final st =
+        db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)');
+    final values = <String, Object>{
+      'simulationVersion': simulationVersion,
+      'seed': w.seed,
+      'week': w.week,
+      'playerArtistId': w.playerArtistId,
+      'spaIndex': w.spaIndex,
+      'dpaIndex': w.dpaIndex,
+      'retiredDormantAttention': w.retiredDormantAttention,
+      'emaAttention': w.emaAttention,
+      'emaDownloadDemand': w.emaDownloadDemand,
+      'emaRadioDemand': w.emaRadioDemand,
+      'songCutoff': w.songCutoff,
+      'albumCutoff': w.albumCutoff,
+    };
+    for (final e in values.entries) {
+      st.execute([e.key, e.value]);
+    }
+    st.dispose();
+  }
+
+  void _writeCollaborators(World w) {
+    final st = db.prepare(
+        'INSERT OR REPLACE INTO collaborator VALUES (?, ?, ?, ?, ?, ?, ?)');
+    for (final c in w.collaborators) {
+      st.execute([
+        c.id,
+        c.name,
+        c.role.index,
+        c.skill,
+        c.genre,
+        c.feeCents,
+        c.minFame
+      ]);
+    }
+    st.dispose();
+  }
+
+  void _writeArtists(World w, Iterable<Artist> artists) {
+    final st = db.prepare(Codec.insertSql('artist', Codec.artistColumns));
+    for (final a in artists) {
+      st.execute(Codec.artistRow(a));
+    }
+    st.dispose();
+  }
+
+  void _writeSongs(World w, Iterable<Song> songs, {bool withCredits = false}) {
+    final st = db.prepare(Codec.insertSql('song', Codec.songColumns));
+    for (final s in songs) {
+      st.execute(Codec.songRow(s));
+    }
+    st.dispose();
+    if (withCredits) _writeCredits(songs);
+  }
+
+  void _writeCredits(Iterable<Song> songs) {
+    final st = db.prepare(
+        'INSERT OR IGNORE INTO songCredit (songId, artistId, position) VALUES (?, ?, ?)');
+    for (final s in songs) {
+      for (var i = 0; i < s.featuredArtistIds.length; i++) {
+        st.execute([s.id, s.featuredArtistIds[i], i]);
+      }
+    }
+    st.dispose();
+  }
+
+  void _writeAlbums(World w, Iterable<Album> albums,
+      {bool withTracks = false}) {
+    final st = db.prepare(Codec.insertSql('album', Codec.albumColumns));
+    for (final al in albums) {
+      st.execute(Codec.albumRow(al));
+    }
+    st.dispose();
+    if (withTracks) _writeTracks(albums);
+  }
+
+  void _writeTracks(Iterable<Album> albums) {
+    final st = db.prepare(
+        'INSERT OR IGNORE INTO albumTrack (albumId, position, songId) VALUES (?, ?, ?)');
+    for (final al in albums) {
+      for (var i = 0; i < al.songIds.length; i++) {
+        st.execute([al.id, i, al.songIds[i]]);
+      }
+    }
+    st.dispose();
+  }
+
+  void _writeCharts(
+      int week, List<ChartEntry> songChart, List<ChartEntry> albumChart) {
+    final chart = db.prepare('INSERT OR REPLACE INTO chartEntry '
+        '(chartId, week, position, entityId, points, lastPos, peak, weeksOn) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    for (final (id, entries) in [
+      (ChartIds.usSongs, songChart),
+      (ChartIds.usAlbums, albumChart),
+    ]) {
+      for (final e in entries) {
+        chart.execute([
+          id,
+          week,
+          e.position,
+          e.entityId,
+          e.points,
+          e.lastPos,
+          e.peak,
+          e.weeksOn
+        ]);
+      }
+    }
+    chart.dispose();
+  }
+
+  void _writeHistory(World w, WeekResult r) {
+    _writeCharts(r.week, r.songChart, r.albumChart);
+
+    // Weekly stats: everything that charted, plus all of the player's
+    // active releases (docs/data-model.md §4.2).
+    final player = w.playerArtistId;
+    final songIds = <int>{
+      for (final e in r.songChart) e.entityId,
+      for (final id in w.activeSongIds)
+        if (w.songs[id].primaryArtistId == player) id,
+    };
+    final sw = db.prepare('INSERT OR REPLACE INTO songWeek '
+        '(songId, week, streams, downloads, radio, physical, points) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?)');
+    for (final id in songIds) {
+      final s = w.songs[id];
+      sw.execute([
+        id,
+        r.week,
+        s.weekStreams,
+        s.weekDownloads,
+        s.weekRadio,
+        s.weekPhysical,
+        s.weekPoints
+      ]);
+    }
+    sw.dispose();
+
+    final albumIds = <int>{
+      for (final e in r.albumChart) e.entityId,
+      for (final id in w.activeAlbumIds)
+        if (w.albums[id].artistId == player) id,
+    };
+    final aw = db.prepare('INSERT OR REPLACE INTO albumWeek '
+        '(albumId, week, pure, tea, sea, units) VALUES (?, ?, ?, ?, ?, ?)');
+    for (final id in albumIds) {
+      final al = w.albums[id];
+      aw.execute(
+          [id, r.week, al.weekPure, al.weekTea, al.weekSea, al.weekUnits]);
+    }
+    aw.dispose();
+
+    final p = w.player;
+    if (p != null) {
+      db.execute(
+          'INSERT OR REPLACE INTO playerWeek VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
+        r.week,
+        p.fame,
+        p.popularity,
+        p.coreFans,
+        p.casual,
+        p.devotion,
+        p.moneyCents,
+        p.lifetimeStreams,
+      ]);
+    }
+  }
+
+  static double _d(Object? v) => (v as num).toDouble();
+}
+
+/// Save slots: one folder per career, each with its database and a small
+/// summary.json so the slot list never has to open large databases.
+class SaveSlots {
+  SaveSlots(this.root);
+
+  final Directory root;
+
+  String dbPath(String slotId) => '${root.path}/$slotId/career.sqlite';
+
+  List<Map<String, Object?>> list() {
+    if (!root.existsSync()) return [];
+    final out = <Map<String, Object?>>[];
+    for (final d in root.listSync().whereType<Directory>()) {
+      final f = File('${d.path}/summary.json');
+      if (f.existsSync()) {
+        out.add(jsonDecode(f.readAsStringSync()) as Map<String, Object?>);
+      }
+    }
+    out.sort(
+        (a, b) => (a['slotId'] as String).compareTo(b['slotId'] as String));
+    return out;
+  }
+
+  SaveStore create(String slotId, World world) {
+    Directory('${root.path}/$slotId').createSync(recursive: true);
+    final store = SaveStore.create(dbPath(slotId), world);
+    writeSummary(slotId, world);
+    return store;
+  }
+
+  SaveStore open(String slotId) => SaveStore.open(dbPath(slotId));
+
+  void writeSummary(String slotId, World w) {
+    final p = w.player;
+    File('${root.path}/$slotId/summary.json').writeAsStringSync(jsonEncode({
+      'slotId': slotId,
+      'artistName': p?.name,
+      'year': GameTime.yearOf(w.week),
+      'weekOfYear': GameTime.weekOfYear(w.week),
+      'fame': p?.fame,
+    }));
+  }
+
+  void delete(String slotId) {
+    final d = Directory('${root.path}/$slotId');
+    if (d.existsSync()) d.deleteSync(recursive: true);
+  }
+}

@@ -27,7 +27,7 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 
 | # | Karar |
 |---|---|
-| K1 | **Teknoloji:** **Flutter (Dart)** — iOS ve Android tek kod tabanı. Saf Dart `simulation_core` paketi (UI'dan ve DB'den bağımsız, Linux'ta da çalışır) + SQLite (drift). Önce iOS'ta test, Android aynı koddan. (İlk plandaki SwiftUI, Android isteği nedeniyle değiştirildi.) |
+| K1 | **Teknoloji:** **Flutter (Dart)** — iOS ve Android tek kod tabanı. Saf Dart `simulation_core` paketi (UI'dan ve DB'den bağımsız, Linux'ta da çalışır) + SQLite (`sqlite3` paketi, elle yazılmış SQL; ORM/kod üretimi yok). Önce iOS'ta test, Android aynı koddan. (İlk plandaki SwiftUI, Android isteği nedeniyle değiştirildi.) |
 | K2 | **Kayıt:** Her slot ayrı bir kariyerdir. Her hafta otomatik kayıt. **Kayıt noktası yok, flop geri alınamaz.** |
 | K3 | **Beklenti (anticipation):** Başarılı eradan sonra ara verilirse birikir, ~2–3 yılda tavana ulaşır, **sonra sabit kalır, hiç düşmez** (JT: FutureSex/LoveSounds → 7 yıl → The 20/20 Experience). Tavanı son eranın başarısı belirler. |
 | K4 | **Flop:** Flop eradan sonra beklemek işe yaramaz, beklenti birikmez. Oyun "Comeback Desteği" ile oyuncuya yardım eder; destek beklendikçe azalır, oyuncuyu hızlı comeback'e iter. Sadık hayranlar alt sınır oluşturur (ölüm sarmalı yok). |

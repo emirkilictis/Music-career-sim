@@ -13,7 +13,7 @@ music-career-sim/
 │   │                         Linux/macOS'ta `dart test` ile çalışır.
 │   ├── game_content/         JSON konfigürasyon + yükleyici (türler, dönem tablosu, listeler,
 │   │                         zorluk, sertifika eşikleri)
-│   └── persistence/          SQLite (drift): şema, migrasyonlar, sorgular, kayıt slotları, görsel deposu
+│   └── persistence/          SQLite (`sqlite3` paketi, elle SQL): şema, migrasyonlar, kayıt slotları, geçmiş
 └── tools/
     └── sim_cli/              headless komut satırı: seed ile N yıl simüle et, CSV/JSON döküm, benchmark
 ```
@@ -43,8 +43,17 @@ UI isolate (Flutter)                         Simülasyon isolate'i (uygulama aç
 
 ## 3. Persistence
 
-- SQLite (drift + sqlite3 native kütüphanesi). Şema ve migrasyonlar drift ile; sıcak yazma yolu
-  simülasyon isolate'indeki tek yazma bağlantısında.
+- SQLite, `sqlite3` paketiyle doğrudan (Flutter'da `sqlite3_flutter_libs`). Drift kullanılmadı:
+  kod üretimi istemiyor ve sıcak yazma yolunda tam kontrol veriyor. Migrasyonlar `PRAGMA user_version`
+  ile numaralı SQL listesi (`packages/persistence/lib/src/schema.dart`).
+- **Haftalık kayıt = sıcak dünya bloğu + değişenler + geçmiş** (uygulandı):
+  - Aktif sanatçı/şarkı/albümler tek bir ikili blok (`hotState`) olarak yazılır — dağınık binlerce
+    satır güncellemesi yerine tek ardışık yazım.
+  - Durumu değişen veya yeni varlıklar (dirty) ilişkisel tablolara yazılır.
+  - Aktif varlıkların ilişkisel satırları 13 haftada bir ve `flushActive()` ile (uygulama arka plana
+    geçerken) tazelenir; arayüz güncel değerleri zaten bellekten alır.
+  - Yüklemede ilişkisel satırlar okunur, sıcak blok üzerine uygulanır → bit düzeyinde aynı dünya.
+  - WAL checkpoint'i otomatik değil, 13 haftada bir ve kapanışta yapılır (her checkpoint dosyayı senkronlar).
 - PRAGMA: `journal_mode=WAL`, `synchronous=NORMAL` (uygulama çökmesinde veri kaybı yok;
   elektrik kesintisinde en fazla son hafta, önceki hafta geçerli kalır).
 - Haftalık yazım **tek transaction**; `meta.currentWeek` güncellemesi aynı transaction'da.

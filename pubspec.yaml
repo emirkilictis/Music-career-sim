@@ -4,4 +4,5 @@ environment:
   sdk: ^3.6.0
 workspace:
   - packages/simulation_core
+  - packages/persistence
   - tools/sim_cli

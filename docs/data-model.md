@@ -1,6 +1,9 @@
 # Veri Modeli
 
-Her kayıt slotu tek bir SQLite dosyasıdır (drift). Tüm ID'ler `INTEGER`'dır (UUID değil;
+Her kayıt slotu tek bir SQLite dosyasıdır. **Uygulanan v1 şeması:**
+`packages/persistence/lib/src/schema.dart` (aşağıdaki taslaktan farkları: sıcak durum alanları ayrı
+`songState` tablosu yerine `song`/`album`/`artist` satırlarında; aktif dünya ayrıca haftalık `hotState`
+blobunda; geçmiş için `chartEntry`, `songWeek`, `albumWeek`, `playerWeek`). Tüm ID'ler `INTEGER`'dır (UUID değil;
 milyonlarca satırlık index'lerde boyut farkı büyüktür). Sayımlar ve paralar `INTEGER` (64-bit; Dart `int`,
 para cent cinsinden). Zaman birimi **mutlak hafta indeksi** (`week INTEGER`); takvim yılı ve
 hafta numarası gösterimde türetilir (ISO yıllarının 52/53 hafta sorunu yaşanmaz).
@@ -346,6 +349,6 @@ CREATE TABLE notification (id INTEGER PRIMARY KEY, week INTEGER, kind INTEGER, p
 - Test: tüm sıcak sorgularda `EXPLAIN QUERY PLAN` çalıştırılır; büyük tablolarda `SCAN` görülürse test başarısız olur.
 
 ## 7. Migrasyonlar
-- drift şema versiyonları ve migrasyon adımları; her migrasyon numaralı ve geri alınamaz.
+- `PRAGMA user_version` + numaralı SQL migrasyonları; her migrasyon numaralı ve geri alınamaz.
 - `meta.simulationVersion` formül değişikliklerini, `meta.contentVersion` konfigürasyon değişikliklerini izler.
 - Eski kayıtlar açılırken migrasyon uygulanır; geçmiş satırlar asla yeniden hesaplanmaz.

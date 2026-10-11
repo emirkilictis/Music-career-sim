@@ -363,6 +363,15 @@ Kalibrasyon (2025, süperstar, testlerle doğrulandı):
 
 Gerçek referans: 2025'te rekor ilk hafta ~4,0M birim / ~3,5M saf satış.
 
+### 10.2 Albüm şekli: kalite ve şarkı sayısı
+
+- **Satışı koruma kaliteye bağlıdır:** iyi albümler haftadan haftaya satışını korur, zayıf albümler
+  hızla düşer (ikinci hafta oranı ve haftalık düşüş albüm kalitesinden hesaplanır).
+  Ölçüm (2024, süperstar, 10 şarkı): kalite 93 → 9. hafta ilk haftanın %49'u; kalite 33 → %25.
+- **Şarkı sayısı:** 10 şarkıya kadar her şarkı tam dinlenir. Daha uzun albümlerde dinleyici zamanı
+  bölünür (şarkı başına (10/n)^0,6), yani uzun albüm toplamda daha çok dinlenir ama orantılı değil.
+  Ölçüm: 10 şarkı 1,03M, 20 şarkı 1,18M (+%14), 40 şarkı 1,39M (+%34) ilk hafta birim.
+
 ## 11. Dönemler (oyuncu açısından)
 
 Mimari 1980'den itibaren destekler; içerik aşamalı eklenir (önce 2000+).

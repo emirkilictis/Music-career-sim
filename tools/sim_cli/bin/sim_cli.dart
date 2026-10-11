@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:persistence/persistence.dart';
 import 'package:simulation_core/simulation_core.dart';
 
 /// Headless runner: simulates N years and prints a yearly report.
@@ -23,6 +24,20 @@ void main(List<String> args) {
   final bot = BotPlayer(world);
   final endWeek = GameTime.firstWeekOf(start + years);
 
+  // Optional weekly autosave, to measure persistence cost.
+  final savePath = opts['save'];
+  SaveStore? store;
+  if (savePath != null) {
+    final f = File(savePath);
+    for (final suffix in ['', '-wal', '-shm']) {
+      final x = File('$savePath$suffix');
+      if (x.existsSync()) x.deleteSync();
+    }
+    store = SaveStore.create(f.path, world);
+  }
+  final saveTimes = <int>[];
+  final saveProfile = <String, int>{};
+
   final allTimes = <int>[];
   final activeByWeek = <int>[];
   var report = _YearReport(world, start);
@@ -30,6 +45,14 @@ void main(List<String> args) {
     bot.act();
     final res = sim.step();
     allTimes.add(res.microseconds);
+    if (store != null) {
+      final sw = Stopwatch()..start();
+      store.commitWeek(world, res,
+          profile: GameTime.yearOf(res.week) >= start + years - 5
+              ? saveProfile
+              : null);
+      saveTimes.add(sw.elapsedMicroseconds);
+    }
     activeByWeek.add(res.activeSongs);
     report.add(res);
     if (GameTime.weekOfYear(world.week) == 1) {
@@ -42,6 +65,25 @@ void main(List<String> args) {
   _printPlayer(world, player);
   _printPerf(allTimes, world);
   _printDecades(allTimes, activeByWeek, start);
+  if (store != null) {
+    store.close();
+    final s = List.of(saveTimes)..sort();
+    final avg = s.reduce((a, b) => a + b) / s.length / 1000;
+    final p95 = s[(s.length * 0.95).floor()] / 1000;
+    print(
+        '\nSave per week: avg ${avg.toStringAsFixed(2)} ms · p95 ${p95.toStringAsFixed(2)} ms');
+    const span = GameTime.weeksPerYear * 10;
+    for (var i = 0; i < saveTimes.length; i += span) {
+      final t = saveTimes.sublist(i, (i + span).clamp(0, saveTimes.length));
+      final y0 = start + i ~/ GameTime.weeksPerYear;
+      print(
+          '  $y0–${y0 + 9}: ${(t.reduce((a, b) => a + b) / t.length / 1000).toStringAsFixed(2)} ms');
+    }
+    print(
+        'Last 5 years, per phase (ms/week): ${saveProfile.entries.map((e) => '${e.key} ${(e.value / (5 * GameTime.weeksPerYear) / 1000).toStringAsFixed(2)}').join(' · ')}');
+    print(
+        'Database size: ${(File(savePath!).lengthSync() / 1e6).toStringAsFixed(1)} MB');
+  }
 }
 
 Map<String, String> _parse(List<String> args) {
