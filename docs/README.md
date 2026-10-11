@@ -15,7 +15,7 @@ sorunlar düzeltilmiş ve oyun tasarımı kararları eklenmiştir.
 
 | Dosya | İçerik |
 |---|---|
-| [game-design.md](game-design.md) | Oynanış: hype/beklenti, flop desteği, sosyal medya, rollout, dönemler, satış modeli, kayıt slotları, görsel yükleme, dil |
+| [game-design.md](game-design.md) | Oynanış: kariyer başlangıcı, statlar, şarkı yapma, hype/beklenti, flop desteği, sosyal medya, rollout, kampanyalar, satış, finans, rekorlar, ekranlar, kayıt slotları, görseller, zorluk, gelir modeli |
 | [simulation.md](simulation.md) | Haftalık pipeline, pazar normalizasyonu, dönem tablosu, yaşam döngüsü, tembel birikim, listeler, AI katmanları, determinizm |
 | [data-model.md](data-model.md) | Varlıklar (feat dahil), SQLite şeması, index'ler, geçmiş saklama stratejisi |
 | [architecture.md](architecture.md) | Modüller, concurrency, persistence, UI performansı, görsel pipeline'ı, test ve benchmark |
@@ -44,19 +44,25 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K16 | **Cihazlar:** geliştirme M2 MacBook Air (8 GB), test iPhone 16 Pro. Performans hedefleri eski cihazlar düşünülerek 3–4 kat sıkı tutulur. |
 | K17 | **Oyuncuyu boğma:** derinlik arka planda, yüzey sade (bkz. game-design §0). Akıllı varsayılanlar, az ama anlamlı karar, mikro yönetim yok. |
 | K18 | **Turne şimdilik yok** (Faz 3). Geldiğinde sade olacak: birkaç ayak + mekan büyüklüğü + bilet fiyatı; setlist ve detaylar isteğe bağlı. Turne beklentiyi bozmaz. Hazırlık olarak sanatçının bölgesel hayran dağılımı baştan basit bir değer olarak tutulur. |
+| K19 | **Şarkı kalitesi = sanatçı statları + ekip (prodüktör, söz yazarı) + şans.** Tecrübesiz biri de "ilham anı" ile şaheser yazabilir. Kesin kalite gizli, tahmini not gösterilir. |
+| K20 | **Yaratıcı enerji ve burnout:** tek çubuk; art arda çok şarkı yazınca burnout (birkaç hafta yazamama). |
+| K21 | **Kariyer yolu:** Bağımsız veya küçük plak şirketi (sade: avans, gelir payı, 2 albümlük sözleşme). Büyük şirket teklifleri Faz 2. |
+| K22 | **Başlangıç seviyesi ve parası seçilebilir;** Süperstar/Yükselen yıldız ve Milyoner başlangıcı Premium. Oyun ücretsiz ve tek başına eksiksiz. |
+| K23 | ChatGPT planındaki ekranlar, rekorlar, kampanyalar, finans, bildirimler, ödüller, Kolay mod ve 10 performans kuralı dokümanlara taşındı. |
 
 ## Yol Haritası
 
 ### Faz 0 — Simülasyon prototipi (UI yok)
 - `simulation_core` saf Dart paketi: Artist, Song (feat dahil), Album/Edition/Variant, haftalık pipeline, pazar normalizasyonu, dönem tablosu, listeler, AI rakipler, hype/beklenti/flop.
 - Headless CLI: seed ile N yıl simüle et, CSV/JSON döküm al.
-- **Kalibrasyon:** gerçek dünya referans tablosuna göre denge (bkz. simulation.md §12).
+- **Kalibrasyon:** gerçek dünya referans tablosuna göre denge (bkz. simulation.md §14).
 - Determinizm testleri, aktif küme büyüklüğü takibi, 50 yıllık stres testi.
 - Bu faz Mac olmadan da (Linux'ta) geliştirilebilir.
 
 ### Faz 1 — Oynanabilir MVP
 - Flutter arayüz (önce iOS'ta test, Android derlemesi de), SQLite persistence, kayıt slotları + haftalık autosave.
-- Sanatçı oluşturma, şarkı/single/albüm yayınlama, rollout planlama (temel).
+- Sanatçı oluşturma (statlar, kariyer yolu: bağımsız / küçük şirket, başlangıç seviyesi).
+- Şarkı yazma (ekip, kalite, şans, yaratıcı enerji, kasa), single/albüm yayınlama, rollout planlama (temel), kampanya seviyesi.
 - Kapak ve profil görseli yükleme.
 - Listeler (US Songs, US Albums, Global Songs, Global Albums), istatistikler, kariyer özeti.
 - İngilizce + Türkçe.
@@ -65,14 +71,15 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 ### Faz 2 — Kariyer derinliği
 - Sosyal medya (post atma, takipçi, hype), flop desteği ve "Neden flop oldu?" raporu.
 - Varyantlar, deluxe, sertifikalar, rekorlar, kampanyalar, müzik videoları (views), radyo.
-- Feat oynanışı (teklif alma/verme).
+- Feat oynanışı (teklif alma/verme), büyük şirket teklifleri.
 - Yıl atlama + yıl özeti.
 
 ### Faz 3 — Endüstri derinliği
 - 90'lar ve 80'ler dönemleri (Basın & TV kanalı, kaset/plak, MTV).
 - Turneler (sade versiyon, bkz. K18), ödüller, ek ülkeler, daha derin AI kariyerleri.
 
-### Faz 4 — Cila
+### Faz 4 — Cila ve yayın
+- Premium (uygulama içi satın alma).
 - Animasyonlar, ses, onboarding/tutorial, erişilebilirlik, başarımlar, gelişmiş zorluk ayarları.
 
 ## Açık Sorular
@@ -80,4 +87,5 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 - Zorluk seviyeleri kaç tane olacak ve flop desteği her birinde ne kadar güçlü?
 - Faz 1'de hangi türler (genre) olacak?
 - Kurgusal liste ve platform isimleri (örn. "Streamify", "US Top 100").
-- Gelir modeli (ücretli uygulama / ücretsiz) — mimariyi etkilemiyor, sonra karar verilebilir.
+- **Gelir modeli:** Premium tek seferlik mi, abonelik ("üyelik") mi? (Öneri: tek seferlik; bkz. game-design §20.)
+- Ücretsiz sürümde kaç kayıt slotu olacak?

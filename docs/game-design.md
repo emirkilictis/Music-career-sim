@@ -1,7 +1,7 @@
 # Oyun Tasarımı
 
 Bu doküman oynanış kurallarını tanımlar. Formüllerdeki sabitler **örnektir**; gerçek
-değerler `GameContent` konfigürasyonunda tutulur ve Faz 0 kalibrasyonunda ayarlanır.
+değerler `game_content` konfigürasyonunda tutulur ve Faz 0 kalibrasyonunda ayarlanır.
 
 ## 0. Tasarım ilkesi: derinlik arka planda, yüzey sade
 
@@ -14,11 +14,19 @@ Simülasyon derin olacak ama **oyuncunun beynini yakmayacak**. Her yeni sistem b
 - **Mikro yönetim yok:** tekrarlayan işler (her hafta post, her şehir için ayrı ayar) zorunlu değildir.
 - Yeni bir özellik eklenmeden önce sorulur: "Bu, oyuncuya eğlenceli bir karar mı veriyor, yoksa sadece iş mi?"
 
+### Nihai hedef
+Oyuncu absürt bir geç kariyer durumuna ulaşabilmeli ve "Next Week" yine anında olmalı:
+```
+32 stüdyo albümü · 14 deluxe · 126 single · 41 #1 single · 29 #1 albüm
+92 milyar stream · 4,8 milyar $ turne hasılatı · 2.500 hafta
+```
+Geçmişin büyüklüğü kariyeri daha etkileyici yapmalı, oyunu yavaşlatmamalı.
+
 ## 1. Temel döngü
 
 ```
 Hafta 14, 2007
-→ Oyuncu karar verir (yayın planla, post at, kampanya seç, varyant ekle…)
+→ Oyuncu karar verir (şarkı yaz, yayın planla, post at, kampanya seç…)
 → "Next Week"
 → Simülasyon: stream, satış, radyo, listeler, hayran, para, olaylar
 → Bildirimler ("🔥 Mirrors #1'e yükseldi")
@@ -34,7 +42,60 @@ Hafta 14, 2007
 - Atlama sırasında oyuncu bir şey yapmadığı için sessizlik kuralları (beklenti, post etkisi) normal işler.
 - Bitince **Yıl Özeti** ekranı: en çok dinlenen şarkılar, #1'ler, toplam stream/satış, kazanç, kırılan rekorlar.
 
-## 2. Sanatçı durumu
+## 2. Kariyer başlangıcı
+
+### 2.1 Sanatçı oluşturma (tek ekran + isteğe bağlı detay)
+- İsim, profil fotoğrafı (opsiyonel), tür, başlangıç yılı, zorluk.
+- **Stat dağıtımı:** her stat 25'ten başlar, oyuncu 30 puan dağıtır (başlangıçta hiçbir stat 60'ı geçemez).
+  "Otomatik dağıt" butonu var.
+- **Kariyer yolu** ve **başlangıç seviyesi** (aşağıda).
+
+### 2.2 Kariyer yolu
+
+| Yol | Para | Gelir payı | Erişim (radyo, playlist, pazarlama) | Kısıt |
+|---|---|---|---|---|
+| **Bağımsız** | Düşük | Kayıtlı müzik gelirinin %100'ü | Düşük | Yok, tam özgürlük |
+| **Küçük plak şirketi** | Avans (peşin nakit) | %50 (avans bu paydan geri ödenir) | Orta-yüksek | Sözleşme: 2 albüm |
+
+- Sözleşme bitince yenile veya bağımsızlaş.
+- Faz 2: başarılı sanatçıya **büyük şirket teklifi** olayı gelir (net rakamlarla kabul/ret).
+  Detaylı sözleşme pazarlığı yok.
+
+### 2.3 Başlangıç seviyesi
+
+| Seviye | Ünlülük / hayran | Statlar | Erişim |
+|---|---|---|---|
+| Bilinmeyen | Sıfır | Normal dağıtım | Ücretsiz |
+| Yerel çıkış | Küçük yerel kitle | Normal dağıtım | Ücretsiz |
+| Yükselen yıldız | Orta | +bonus | **Premium** |
+| Süperstar | Çok yüksek | Yüksek | **Premium** |
+
+| Başlangıç parası | Erişim |
+|---|---|
+| Düşük | Ücretsiz |
+| Rahat | Ücretsiz |
+| Milyoner | **Premium** |
+
+- Ünlü başlangıçta diskografi boştur; profil "kariyer burada başlıyor" der (uydurma geçmiş yok).
+- Gelir modeli için bkz. §20.
+
+## 3. Sanatçı
+
+### 3.1 Statlar (0–100)
+
+| Stat | Neyi etkiler |
+|---|---|
+| **Söz yazarlığı** | Şarkı kalitesinin ana bileşeni |
+| **Vokal** | Kalite, radyo uygunluğu |
+| **Prodüksiyon** | Prodüktör tutulmazsa kaliteye katkı |
+| **Sahne** | TV/ödül performansları (ileride turne) |
+| **Karizma** | Sosyal medya ve promosyon etkisi |
+
+- Statlar kullanıldıkça artar (şarkı yazdıkça söz yazarlığı, performans yaptıkça sahne…).
+  100'e yaklaştıkça artış yavaşlar.
+- Ekranda sade gösterilir: 5 çubuk.
+
+### 3.2 Sanatçı durumu
 
 Tek bir "popülerlik = 93" değişkeni yerine ayrı kavramlar:
 
@@ -46,17 +107,78 @@ Tek bir "popülerlik = 93" değişkeni yerine ayrı kavramlar:
 | Casual Audience | Tanıyan ama bağlı olmayan kitle | Orta |
 | Momentum | Kısa vadeli başarı ivmesi | Hızlı |
 | Buzz | Postlar/olaylardan gelen geçici gündem | Çok hızlı (2–4 haftada söner) |
-| Anticipation | Yeni proje beklentisi (bkz. §3) | Kurala bağlı |
+| Anticipation | Yeni proje beklentisi (bkz. §5) | Kurala bağlı |
 | Legacy | Uzun vadeli katalog gücü | Çok yavaş |
 | Followers | Sosyal medya takipçisi | Orta |
+| Yaratıcı enerji | Şarkı yazma kapasitesi (bkz. §4.4) | Haftalık toparlanır |
 
-## 3. Era sistemi, beklenti ve ara verme
+Oyuncuya gösterilen ana sayılar: monthly listeners (dönem uygunsa), hayran, takipçi, para,
+popülerlik göstergesi. Diğerleri arka planda.
 
-### 3.1 Era
+## 4. Şarkı yapma
+
+### 4.1 Akış (tek ekran)
+1. Tür / ruh hali (varsayılan: sanatçının türü)
+2. Ortak söz yazarı (opsiyonel)
+3. Prodüktör (opsiyonel; seçilmezse sanatçı kendisi prodükte eder)
+4. Stüdyo bütçesi: Düşük / Orta / Yüksek
+5. "Yaz ve kaydet" → sonuç kartı
+
+Şarkı **kasaya** (vault) girer; daha sonra single, EP veya albüme konur.
+
+### 4.2 Ekip (NPC'ler)
+- Prodüktörler ve söz yazarları sanatçı değil, ayrı bir NPC listesidir (isimler kurgusal).
+- Her birinin: beceri (0–100), uzmanlık türü, şarkı başı ücret, **minimum ünlülük şartı**
+  ("Bu prodüktör seninle çalışmak için Fame ≥ 40 istiyor") vardır.
+- Yıllar içinde yenileri gelir, eskileri emekli olur.
+- Feat sanatçılar ekip değildir; kaliteye az, kitleye çok etki eder (bkz. §8.4).
+
+### 4.3 Kalite: beceri + ekip + şans
+```
+yazım      = 0.6 × max(sanatçı.sözYazarlığı, ortakYazar) + 0.4 × min(…)
+prodüksiyon= prodüktör.beceri  (yoksa sanatçı.prodüksiyon × 0.8)
+beceri     = 0.45 × yazım + 0.30 × prodüksiyon + 0.25 × sanatçı.vokal
+
+kalite = beceri
+       + bütçeBonusu        (Düşük 0, Orta +3, Yüksek +6)
+       + türUyumu           (prodüktör uzmanlığı eşleşirse +3)
+       + şans               (normal dağılım, σ ≈ 8)
+       + ilhamAnı           (%4 olasılıkla +20 — tecrübesiz biri de şaheser yazabilir)
+       − enerjiCezası       (bkz. §4.4)
+```
+
+Kalite tek başına hit demek değildir. Her şarkının ayrıca kaliteyle kısmen ilişkili, kısmen
+rastgele özellikleri vardır: ticari çekicilik, radyo uygunluğu, streaming uygunluğu,
+viral potansiyel, kalıcılık. Böylece farklı hit türleri doğar:
+- Dev giriş yapıp hızla düşen şarkı
+- #38'den girip yavaşça #1'e tırmanan şarkı
+- Hiç büyük single olmayan ama katalogda yıllarca dinlenen şarkı
+
+**Gösterim:** oyuncu kesin kaliteyi görmez; ekibin tahmini bir not görür (örn. "B+").
+İyi prodüktörün tahmini daha isabetlidir. Gerçek potansiyel yayından sonra ortaya çıkar.
+
+Şans deterministiktir: aynı seed ve aynı hafta aynı sonucu verir; uygulamayı kapatıp açarak
+yeniden zar atılamaz.
+
+### 4.4 Yaratıcı enerji ve burnout
+- Tek bir çubuk (0–100). Her şarkı ~20 enerji harcar; yazılmayan her hafta ~12 toparlanır.
+- Haftada en fazla 3 şarkı yazılabilir.
+- Enerji 30'un altındaysa kalite cezası artar.
+- Enerji 0'a düşerse **burnout**: 3 hafta şarkı yazılamaz (bildirim gelir).
+- Sade tutulur: başka yorgunluk sistemi yok.
+
+### 4.5 Kasa (vault)
+- Yayınlanmamış şarkılar kasada bekler.
+- Eski kasa şarkıları ileride deluxe veya yıldönümü edition'ına "From the Vault" olarak konabilir.
+
+## 5. Era sistemi, beklenti ve ara verme
+
+### 5.1 Era
 Her albüm bir era açar: duyuru → teaser → lead single → çıkış → sonraki single'lar → deluxe → (turne) → era sonu.
+Aktif eralar daha güçlü gündem üretir; eski eralar kataloğa dönüşür.
 Era bittiğinde (oyuncu yeni era başlatınca veya son yayından X hafta sonra) **era skoru** hesaplanır.
 
-### 3.2 Era skoru — beklentiye göre
+### 5.2 Era skoru — beklentiye göre
 Başarı mutlak değil, **beklentiye göre** ölçülür. Süperstar için #5 çıkış flop, yeni sanatçı için zafer olabilir.
 
 ```
@@ -73,7 +195,7 @@ eraScore   = actual / expected
 | 1.15 – 2.0 | Başarılı |
 | > 2.0 | Dev başarı (smash) |
 
-### 3.3 Ara verme — beklenti (anticipation)
+### 5.3 Ara verme — beklenti (anticipation)
 
 **Başarılı/normal eradan sonra** sanatçı yeni bir şey yayınlamıyorsa:
 
@@ -88,17 +210,17 @@ her hafta:
   Yani 7 yıl ara veren sanatçı gündemden düşer ama beklenti tavanda bekler.
 - Comeback'te beklenti harcanır: albüm duyurusuyla birlikte rollout haftalarına yayılarak
   hype'a dönüşür; çıkış haftasında büyük ilk hafta patlaması verir.
-- Örnek hedef davranış: FutureSex/LoveSounds (2006) → 7 yıl → The 20/20 Experience (2013) dev ilk hafta.
+- Örnek hedef davranış: FutureSex/LoveSounds (2006) → 7 yıl → The 20/20 Experience (2013), ilk hafta 968k.
 
 **Hayal kırıklığı eradan sonra:** tavan düşüktür.
-**Flop eradan sonra:** beklenti birikmez (bkz. §4).
+**Flop eradan sonra:** beklenti birikmez (bkz. §6).
 
-## 4. Flop ve Comeback Desteği
+## 6. Flop ve Comeback Desteği
 
 Flop'tan sonra **beklemek işe yaramaz**: beklenti birikmez, current popularity düşmeye devam eder.
 Oyun oyuncuya yardım eder ve onu hızlı bir comeback'e iter.
 
-### 4.1 Comeback Desteği
+### 6.1 Comeback Desteği
 ```
 flop anında: supportLevel = 1.0 × difficulty.flopSupportMultiplier
 her hafta (yeni yayın yoksa): supportLevel *= 0.97     // ~23 haftada yarıya iner
@@ -114,21 +236,22 @@ Etkiler (`supportLevel` ile ölçeklenir):
 - **Kampanya indirimi.**
 - **Katalog viral şansı:** eski bir hitin yeniden gündeme gelme olasılığı artar.
 
-### 4.2 Ölüm sarmalı koruması
+### 6.2 Ölüm sarmalı koruması
 - **Core fans alt sınırı:** sadık hayranlar her yayını belirli oranda dinler/satın alır.
   Bu yüzden ardışık flop'larda bile sanatçı sıfıra düşmez.
 - Güçlü şarkı + iyi promosyon ile comeback her zaman mümkündür.
 - Dozaj Faz 0/2 kalibrasyonunda ayarlanacak (destek çok güçlü olursa flop'un anlamı kalmaz).
 
-## 5. Sosyal medya (2000 öncesi: Basın & TV)
+## 7. Sosyal medya (2000 öncesi: Basın & TV)
 
-### 5.1 Post atma
+### 7.1 Post atma
 Oyuncu fotoğraf yükler (opsiyonel) + açıklama yazar → post atar.
 
 ```
 silenceWeeks = currentWeek − max(lastPostWeek, lastReleaseWeek)
 buzzGain     = basePostBuzz
              × followersFactor(followers)
+             × karizmaFactor(sanatçı.karizma)
              × (1 + k × log(1 + silenceWeeks))   // uzun sessizlik → büyük etki
              × postFatigue                        // spam'in etkisi azalır
 postFatigue: her postta ×0.7, her hafta 1.0'a doğru toparlanır
@@ -138,7 +261,7 @@ postFatigue: her postta ×0.7, her hafta 1.0'a doğru toparlanır
 - Post **beklentiyi tüketmez**; beklenti sadece albüm duyurusu/rollout ile harcanır.
 - Rollout içindeki teaser postlar beklentinin hype'a dönüşümünü hızlandırır.
 
-### 5.2 Dönemlere göre kanal
+### 7.2 Dönemlere göre kanal
 Platformlar konfigürasyondan gelir (isimler kurgusal):
 
 | Dönem | Kanal | Yüklenen fotoğraf nasıl görünür |
@@ -148,17 +271,17 @@ Platformlar konfigürasyondan gelir (isimler kurgusal):
 | 2010+ | Fotoğraf odaklı sosyal medya | Kare/4:5 post |
 | 2018+ | Kısa video platformu (viral etkisi yüksek) | Video kapağı |
 
-## 6. Yayınlar ve rollout
+## 8. Yayınlar ve rollout
 
-### 6.1 Yayın türleri
+### 8.1 Yayın türleri
 Single, EP, albüm, deluxe/edition, compilation. Her şarkı bir veya birden fazla
 sanatçıya ait olabilir (**feat**).
 
-### 6.2 Albüm oluşturma akışı
-Başlık → kapak (yükleme) → tür → şarkı listesi → single seçimi → rollout planı →
-formatlar → varyantlar → kampanya bütçesi → onay.
+### 8.2 Albüm oluşturma akışı
+Başlık → kapak (yükleme) → tür → şarkı listesi (kasadan) → single seçimi → rollout planı →
+formatlar → varyantlar → kampanya → onay. Her adımın akıllı varsayılanı vardır.
 
-### 6.3 Rollout planı
+### 8.3 Rollout planı
 Takvime planlanmış olaylar dizisi:
 ```
 Duyuru → Teaser postlar → Lead single → Pre-save → Albüm çıkışı
@@ -167,22 +290,39 @@ Duyuru → Teaser postlar → Lead single → Pre-save → Albüm çıkışı
 - "Çok fazla single" yorgunluğu **yoktur**.
 - AI rakiplerin albüm planları da takvimde görünür; oyuncu çıkış tarihini rakiplere göre seçebilir.
 
-### 6.4 Feat / düet
+### 8.4 Feat / düet
 - Şarkının bir ana sanatçısı ve sıfır veya daha fazla featured sanatçısı vardır.
+- Feat sanatçının kitlesi şarkıya erişim kazandırır; kaliteye etkisi küçüktür.
 - Liste girişleri tüm kredili sanatçıların liste geçmişine yazılır.
 - Kariyer özetinde "ana sanatçı olarak" ve "featured olarak" ayrı gösterilir
   (örn. "12 #1 single (+3 featured)").
 - Faz 2'de feat teklif alma/verme oynanışı.
 
-### 6.5 Varyantlar
+### 8.5 Varyantlar
 - Edition (standard, deluxe, anniversary) ve fiziksel/dijital varyantlar (CD, renkli vinil, imzalı, mağaza özel…).
+- Her varyant etkiler: koleksiyoncu talebi, saf satış, üretim maliyeti, kâr.
 - Azalan getiri **talep havuzu** ile doğal oluşur: koleksiyoncu hayranların bir harcama
   kapasitesi vardır, her yeni varyant kalan talebin bir kısmını alır.
 - Her varyantın ayrı çıkış haftası olabilir (albümü listede tutmak için varyantları
   haftalara yaymak oyuncu stratejisi olarak mümkündür).
 - Kolay modda talep havuzu daha büyüktür.
 
-## 7. Satış modeli — streaming döneminde de büyük satış
+## 9. Kampanyalar
+
+Tek seçim + isteğe bağlı aksiyonlar:
+
+| Seviye | Maliyet | Etki |
+|---|---|---|
+| Promosyonsuz | 0 | — |
+| Standart | Düşük | Orta |
+| Yoğun | Yüksek | Yüksek |
+| Dev global kampanya | Çok yüksek | Çok yüksek |
+
+İsteğe bağlı aksiyonlar (dönemde mevcutsa): müzik videosu, TV performansı, ödül töreni performansı,
+radyo kampanyası, playlist kampanyası, sosyal medya kampanyası, indirim, remix.
+Plak şirketindeyse erişim çarpanı kampanyaları güçlendirir.
+
+## 10. Satış modeli — streaming döneminde de büyük satış
 
 ```
 pureSales = superfanBuyers + casualBuyers
@@ -198,7 +338,7 @@ casualBuyers   = casualAudience × eraCasualPurchaseRate(yıl)            // dö
   (sadık hayranlar + vinil + varyantlar).
 - Formatlar dönemden gelir: plak, kaset, CD, dijital indirme, vinil dönüşü.
 
-## 8. Dönemler (oyuncu açısından)
+## 11. Dönemler (oyuncu açısından)
 
 Mimari 1980'den itibaren destekler; içerik aşamalı eklenir (önce 2000+).
 Her dönem farklı hissettirir:
@@ -213,7 +353,20 @@ Her dönem farklı hissettirir:
 
 O dönemde var olmayan metrikler arayüzde gizlenir (örn. 2008'de monthly listeners yok).
 
-## 9. Kariyer özeti ve geçmiş
+## 12. Finans
+
+| Gelir | Gider |
+|---|---|
+| Streaming | Kayıt (stüdyo bütçesi, prodüktör/söz yazarı ücreti) |
+| Satış (fiziksel, dijital) | Müzik videoları |
+| Radyo/yayın hakları (basit) | Pazarlama/kampanya |
+| Merch | Üretim (fiziksel varyantlar) |
+| (İleride) turne | (İleride) turne |
+
+- Plak şirketindeyse kayıtlı müzik gelirinin payı ve avans geri ödemesi otomatik uygulanır.
+- Karmaşık telif/royalty hesapları yok.
+
+## 13. Kariyer özeti ve geçmiş
 
 Oyuncu için her şey haftalık ve kalıcı saklanır. Kariyer özeti:
 
@@ -222,20 +375,74 @@ Oyuncu için her şey haftalık ve kalıcı saklanır. Kariyer özeti:
 - Albüm birimleri (SEA/TEA dahil, dönem kurallarına göre)
 - Sertifikalar (Gold / Platinum / Multi-Platinum / Diamond)
 - #1 single, #1 albüm, #1'de kalınan haftalar, Top 10 sayısı (ana + featured)
+- Aktif yıl, albüm/single sayısı, ödüller (ileride), turne hasılatı (ileride)
 - Kazanç ve gider
 
 Görünümler: **tüm kariyer**, **yıl bazında**, **era bazında**, şarkı/albüm detayında haftalık grafik ve liste geçmişi.
 
-## 10. Kayıt slotları
+**Monthly listeners** bireysel dinleyici saklamadan, benzersiz dinleyici formülüyle yaklaşık hesaplanır
+(güncel stream aktivitesi, aktif şarkı sayısı, dinleyici örtüşmesi, katalog gücü). Sadece inandırıcı davranması yeterli.
+
+## 14. Rekorlar ve sertifikalar
+
+Oyun dünyası genelinde (oyuncu + AI) artımlı tutulan rekorlar:
+- #1'de en çok hafta
+- En büyük ilk hafta albüm satışı / albüm birimi
+- En büyük streaming haftası
+- Listede en uzun kalan şarkı
+- Aynı anda en çok Top 10 şarkı / Top 10 albüm
+- En çok #1 albüm, en çok #1 single
+- En çok monthly listeners
+- En çok kariyer stream'i
+- (İleride) en yüksek hasılatlı turne
+
+Rekor kırıldığında bildirim + rekor geçmişi (kim, ne zaman, kaç). Her hafta tüm geçmiş taranmaz.
+
+## 15. Bildirimler
+
+Hafta sonunda sadece ilginç olaylar gösterilir:
+```
+🔥 Mirrors #1'e yükseldi.
+📈 Albüm satışları %34 arttı.
+🏆 Streaming rekorunu kırdın.
+💿 FutureSex/LoveSounds Top 10'a geri döndü.
+📉 Single #3'ten #8'e düştü.
+💿 Albümün Platinum oldu.
+😮‍💨 Burnout: 3 hafta şarkı yazamazsın.
+```
+
+## 16. Ana ekranlar
+
+| Ekran | İçerik |
+|---|---|
+| **Ana sayfa** | Mevcut hafta, popülerlik, monthly listeners, hayran, para, şu anki en büyük şarkı, güncel albüm, yaklaşan olaylar, "Next Week" |
+| **Stüdyo** | Şarkı yaz (§4), kasa, yaratıcı enerji |
+| **Diskografi** | Albüm / EP / single kartları (kapaklarla) |
+| **Yayın detayı** | Çıkış tarihi, zirve, listede hafta, #1'de hafta, bu hafta stream, toplam stream, saf satış, sertifika; grafikler: haftalık stream, liste geçmişi, satış, radyo |
+| **Listeler** | Sekmeler: US Songs, US Albums, Global Songs, Global Albums, Sanatçı sıralaması |
+| **Takvim** | Planlı yayınlar, videolar, performanslar, rakip çıkışları, (ileride) turne ve ödüller |
+| **Sosyal** | Profil, postlar, takipçi |
+| **Kariyer** | Kariyer özeti (§13), yıl/era görünümleri, rekorlar |
+| **Sanatçı profili** | Streaming uygulaması tarzı profil: banner, fotoğraf, monthly listeners, popüler şarkılar, diskografi |
+
+Örnek yayın detayı:
+```
+MIRRORS
+Çıkış: Hafta 11, 2013 · Zirve: #1 · Listede: 68 hafta · #1'de: 14 hafta
+Bu hafta: 19,4M stream · Toplam: 2,31B stream · Saf satış: 5,2M
+```
+
+## 17. Kayıt slotları
 
 - Her slot **ayrı bir kariyerdir**.
 - Her hafta otomatik kayıt; çökme olursa en fazla son hafta kaybolur, önceki hafta geçerli kalır.
 - **Kayıt noktası yok, geri alma yok** — flop'un dönüşü yoktur.
 - Simülasyon deterministik olduğundan, sonucu görmeden uygulamayı kapatıp açmak aynı haftayı
   aynı sonuçla tekrar üretir; hile ile sonuç değiştirilemez.
+- Ücretsiz sürümde sınırlı slot (örn. 3), Premium'da sınırsız.
 - Slot silme ve (ileride) dışa aktarma/yedek.
 
-## 11. Kullanıcı görselleri
+## 18. Kullanıcı görselleri
 
 | Görsel | Kırpma |
 |---|---|
@@ -252,18 +459,39 @@ Görünümler: **tüm kariyer**, **yıl bazında**, **era bazında**, şarkı/al
 - Arayüz "streaming uygulaması tarzında" olabilir; gerçek platform isimleri ve logoları kullanılmaz.
 - Oyun görselin kalitesini değerlendirmez (satışa etkisi yok).
 
-## 12. Zorluk
+## 19. Zorluk
 
 Ayrı motor yok; `DifficultyConfig` çarpanları:
-pazarlama etkisi, hayran dönüşümü, hit şansı, decay, varyant talep havuzu, turne talebi,
-**flop desteği gücü**, beklenti tavanı. Kolay mod ("Domination") güç fantezisine izin verir.
+pazarlama etkisi, hayran dönüşümü, hit şansı, decay, varyant talep havuzu, radyo/playlist kabulü,
+**flop desteği gücü**, beklenti tavanı, (ileride) turne talebi.
 
-## 13. Dil
+**Kolay — "Domination" modu** güç fantezisine bilerek izin verir (örnek yönler, değerler kalibre edilecek):
+pazarlama etkisi +%50, hayran dönüşümü +%35, çıkış momentumu +%25, daha yavaş decay,
+daha güçlü varyantlar, daha kolay radyo/playlist kabulü, daha güçlü flop desteği.
+
+## 20. Gelir modeli (taslak)
+
+- Oyun **ücretsiz indirilir ve tek başına eksiksiz oynanır.**
+- **Premium** şunları açar: Yükselen yıldız ve Süperstar başlangıcı, Milyoner başlangıcı,
+  sınırsız kayıt slotu. İleride: ek içerikler.
+- **Önerilen:** tek seferlik satın alma. Çevrimdışı, tek oyunculu bir oyunda abonelik genelde kötü
+  yorum alır; mağazalar da aboneliğin sürekli yeni değer sunmasını bekler.
+  Abonelik ("üyelik") istenirse sürekli içerik güncellemesiyle birlikte düşünülmeli. **Karar açık.**
+- Satın alımları geri yükleme (restore) zorunludur.
+- Reklam yok (karar verilmedi).
+
+## 21. Dil
 
 - Ana dil İngilizce, ek dil Türkçe.
 - Kullanıcının girdiği isimler (albüm/şarkı adı) çevrilmez.
 - Sayılar ve tarihler dile göre biçimlenir: "Week 14, 2007" / "2007, 14. Hafta"; "1.2M" / "1,2 Mn".
 
-## 14. MVP dışı (sonraki fazlar)
+## 22. Sonraki fazlar
 
-Detaylı turne, ödül törenleri, ilişkiler, skandallar, plak şirketi sözleşmeleri, röportajlar, çok ülke.
+- **Turne (Faz 3, sade):** birkaç bölge + mekan büyüklüğü + bilet fiyatı; setlist isteğe bağlı.
+  Albüm/katalog stream'lerini, bölgesel popülerliği ve hayran dönüşümünü artırır. Beklentiyi bozmaz.
+- **Ödüller (Faz 3):** yıllık; Yılın Albümü, Yılın Kaydı, Yılın Şarkısı, En İyi Pop Albüm,
+  En İyi Pop Performans, Yılın Sanatçısı. Uygunluk verisi yıl boyunca biriktirilir; tören anında tüm
+  yayınlar taranmaz.
+- Büyük şirket teklifleri (Faz 2), ek ülkeler, endüstri trendleri.
+- **Kapsam dışı (şimdilik):** ilişkiler, skandallar, detaylı sözleşme pazarlığı, röportajlar.

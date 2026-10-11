@@ -33,7 +33,9 @@ Era (sanatçı + albüm dönemi; eraScore, flop faktörleri)
 -- Meta
 CREATE TABLE meta (
   key TEXT PRIMARY KEY, value TEXT NOT NULL
-); -- currentWeek, saveSeed, simulationVersion, contentVersion, difficulty, startYear, playerArtistID
+); -- currentWeek, saveSeed, simulationVersion, contentVersion, difficulty, startYear, playerArtistID,
+  --  startTier (bilinmeyen/yerel/yükselen/süperstar), startMoney, careerPath
+  -- Premium satın alımları kayıt dosyasında DEĞİL, uygulama düzeyinde tutulur.
 
 -- Sanatçılar
 CREATE TABLE artist (
@@ -58,7 +60,43 @@ CREATE TABLE artistState (               -- sıcak durum, her hafta güncellenir
   lastReleaseWeek INTEGER, lastPostWeek INTEGER, postFatigue REAL,
   currentEraID INTEGER, lastEraID INTEGER,
   catalogIndex REAL, sumDormantRate REAL,
+  creativeEnergy REAL, burnoutUntilWeek INTEGER,
   moneyCents INTEGER
+);
+
+CREATE TABLE artistSkill (               -- statlar (0–100); AI için basitleştirilmiş değerler
+  artistID INTEGER PRIMARY KEY REFERENCES artist(id),
+  songwriting REAL, vocals REAL, production REAL, performance REAL, charisma REAL
+);
+
+-- Plak şirketleri ve sözleşmeler (sade)
+CREATE TABLE label (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  tier INTEGER NOT NULL,                 -- small, major
+  reachMultiplier REAL NOT NULL          -- radyo/playlist/pazarlama erişimi
+);
+CREATE TABLE labelContract (
+  id INTEGER PRIMARY KEY,
+  artistID INTEGER NOT NULL REFERENCES artist(id),
+  labelID INTEGER NOT NULL REFERENCES label(id),
+  startWeek INTEGER NOT NULL, endWeek INTEGER,
+  albumsOwed INTEGER NOT NULL, albumsDelivered INTEGER NOT NULL DEFAULT 0,
+  advanceCents INTEGER NOT NULL, recoupedCents INTEGER NOT NULL DEFAULT 0,
+  artistShare REAL NOT NULL              -- kayıtlı müzik gelirinden sanatçı payı (örn. 0.5)
+);
+CREATE INDEX labelContract_artist ON labelContract(artistID, startWeek);
+
+-- Ekip NPC'leri (prodüktör, söz yazarı) — sanatçı değildir
+CREATE TABLE collaborator (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  role INTEGER NOT NULL,                 -- producer, songwriter
+  skill REAL NOT NULL,
+  genreID INTEGER NOT NULL,              -- uzmanlık
+  feePerSongCents INTEGER NOT NULL,
+  minFame REAL NOT NULL,                 -- seninle çalışmak için gereken ünlülük
+  activeFromWeek INTEGER NOT NULL, retiredWeek INTEGER
 );
 
 -- Bölgesel hayran dağılımı (turne ve ileride çok ülke için hazırlık; MVP'de basit tutulur)
@@ -77,8 +115,20 @@ CREATE TABLE song (
   createdWeek INTEGER NOT NULL,
   quality REAL, commercialAppeal REAL, fanAppeal REAL, radioAppeal REAL,
   streamingAppeal REAL, longevity REAL, virality REAL,
-  homeAlbumID INTEGER
+  homeAlbumID INTEGER,
+  writtenByArtistID INTEGER,             -- şarkıyı yazan/kaydeden sanatçı (kasa sahibi)
+  budgetTier INTEGER,
+  estimatedGrade INTEGER,                -- oyuncuya gösterilen tahmini not
+  releasedWeek INTEGER                   -- NULL = kasada (vault)
 );
+CREATE INDEX song_vault ON song(writtenByArtistID) WHERE releasedWeek IS NULL;
+
+CREATE TABLE songStaff (                 -- prodüktör / ortak söz yazarı kredileri
+  songID INTEGER NOT NULL REFERENCES song(id),
+  collaboratorID INTEGER NOT NULL REFERENCES collaborator(id),
+  role INTEGER NOT NULL,
+  PRIMARY KEY (songID, collaboratorID)
+) WITHOUT ROWID;
 
 CREATE TABLE songCredit (
   songID INTEGER NOT NULL REFERENCES song(id),

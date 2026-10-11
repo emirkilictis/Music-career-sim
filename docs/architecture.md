@@ -123,7 +123,7 @@ Bütçenin çoğu DB yazımı ve UI yenilemesine gider; 1.500 şarkının matema
    - bellek kullanımı, kayıt süresi, açılış süresi
 4. **Regresyon eşiği:** N koşunun medyanı, göreli fark; belirgin yavaşlama inceleme olmadan birleştirilmez.
 5. **Sorgu planı testi:** sıcak sorgularda `EXPLAIN QUERY PLAN` → büyük tablolarda `SCAN` yasak.
-6. **Kalibrasyon raporu:** sim_cli ile dönem referanslarına karşı dağılımlar (simulation.md §12).
+6. **Kalibrasyon raporu:** sim_cli ile dönem referanslarına karşı dağılımlar (simulation.md §14).
 
 ## 9. Debug ekranı ve log
 
@@ -140,3 +140,29 @@ Bütçenin çoğu DB yazımı ve UI yenilemesine gider; 1.500 şarkının matema
 - `simulation_core` ve `sim_cli` saf Dart olduğu için Mac olmadan da (Linux'ta) geliştirilip test
   edilebilir; Faz 0 buna uygundur.
 - Mağazalar: App Store (yıllık geliştirici ücreti), Google Play (tek seferlik kayıt ücreti).
+
+## 11. Uygulama içi satın alma (Premium)
+
+- Flutter `in_app_purchase` eklentisi (App Store ve Google Play).
+- Haklar (entitlement) **kayıt dosyasında değil**, uygulama düzeyinde tutulur; açılışta mağazadan doğrulanır,
+  çevrimdışıyken yerel önbellekten okunur. Sunucu yok.
+- "Satın alımları geri yükle" butonu zorunlu.
+- Premium kontrolü sadece kariyer oluşturma (başlangıç seçenekleri) ve slot sayısında yapılır;
+  simülasyon çekirdeği Premium'dan habersizdir.
+
+## 12. En önemli 10 performans kuralı
+
+1. Tarihsel haftaları asla yeniden hesaplama.
+2. Sadece aktif yayınları tam simüle et.
+3. Liste adaylarını sırala, tarihteki her şarkıyı değil.
+4. Kariyer toplamlarını artımlı tut.
+5. İndeksli tarihsel sorgular için tasarlanmış veritabanı kullan.
+6. Haftalık yazımları tek transaction'da topla.
+7. Simülasyon çekirdeğini arayüzden bağımsız tut.
+8. Arka plan AI sanatçılar için basitleştirilmiş simülasyon kullan.
+9. Arayüz verisini tembel yükle; kariyerin tamamını belleğe alma.
+10. Dev kariyerleri ilk günden benchmark et.
+
+**Mevcut dünya** (küçük, aktif hesaplanan: aktif yayınlar, ilgili sanatçılar, yaklaşan olaylar, listeler)
+ile **tarihsel dünya** (devasa, SQLite'ta, çoğunlukla değişmez, sadece istenince sorgulanır) ayrımı,
+50 yıllık bir kariyerin 5 yıllık bir kariyer kadar hızlı çalışmasını sağlar.

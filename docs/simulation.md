@@ -55,7 +55,7 @@ doygunluğa giden projeksiyonla hesaplanır. Mimari 1980'den başlar.
 
 Her yıl için:
 - Pazar büyüklükleri: on-demand streaming, dijital indirme (albüm/single), fiziksel (plak/kaset/CD/vinil), radyo kitlesi, video izlenmesi
-- `eraCasualPurchaseRate`, `eraSuperfanFactor` (bkz. game-design §7)
+- `eraCasualPurchaseRate`, `eraSuperfanFactor` (bkz. game-design §10)
 - Aktif formatlar ve fiyatlar
 - Aktif sosyal kanallar
 - **Liste kuralları versiyonu**
@@ -171,7 +171,7 @@ Hesaplanan liste **asla yeniden hesaplanmaz**; satırlar değişmezdir (bkz. dat
   (Tier B profili açılıyorsa Tier B'nin artımlı toplamları vardır).
 
 ## 9. Hype, beklenti, buzz, flop
-Kurallar game-design.md §3–§5'tedir. Simülasyon tarafında hepsi sanatçı başına O(1) güncellemedir.
+Kurallar game-design.md §5–§7'dedir. Simülasyon tarafında hepsi sanatçı başına O(1) güncellemedir.
 Flop raporu için era boyunca katkı faktörleri (rakip çakışması, promosyon, tür trendi,
 şarkı kalitesi, sezon) sanatçı-era başına küçük bir tabloda biriktirilir.
 
@@ -186,10 +186,34 @@ Flop raporu için era boyunca katkı faktörleri (rakip çakışması, promosyon
   türetilmiş önbellek tutulabilir.
 - Kayıtta `simulationVersion` ve `contentVersion` saklanır.
 
-## 11. Zorluk
+## 11. Oyuncu aksiyonları: şarkı yazma ve stat gelişimi
+
+Şarkı yazma haftalık tick'in parçası değildir; oyuncu aksiyonu olarak anında çözülür ve kaydedilir
+(kurallar game-design §4).
+
+- Kalite zarı deterministiktir: `rng(seed, week, artistID, "song", buHaftaYazılanSıra)`.
+  Uygulamayı kapatıp açmak aynı sonucu verir.
+- Kalite ve çekicilik özellikleri (ticari, radyo, streaming, viral, kalıcılık) yazım anında belirlenir
+  ve değişmez; yayından sonraki performansı bunlar + pazar belirler.
+- Stat gelişimi: ilgili aksiyon başına küçük artış, `artış = taban × (1 − stat/100)` (100'e yaklaştıkça yavaşlar).
+- Yaratıcı enerji haftalık tick'te sanatçı başına O(1) toparlanır; burnout bitişi `burnoutUntilWeek` ile tutulur.
+- AI sanatçılar şarkı yazma ekranını kullanmaz; yayınları kendi kalite dağılımlarından üretilir.
+
+## 12. Decay ve legacy
+
+```
+momentumNextWeek = momentum × decayFactor(şarkı.kalıcılık, zorluk)
+                 + promosyon + viralBoost + (ileride) turneBoost
+```
+- Her şarkının decay davranışı farklıdır (kalıcılık özelliği).
+- Yayın yaşlandıkça performansı giderek **legacy**'ye bağlanır. Legacy: kariyer başarısı, liste ömrü,
+  hayran tabanı, kültürel etki, (ileride) ödüller. Eski şarkılar tam hit simülasyonu gerektirmeden
+  gerçekçi şekilde stream toplamaya devam eder (katalog ve dormant formülleri).
+
+## 13. Zorluk
 `DifficultyConfig` çarpanları; ayrı motor yoktur.
 
-## 12. Kalibrasyon referans tablosu (Faz 0)
+## 14. Kalibrasyon referans tablosu (Faz 0)
 
 Rakamlar inandırıcı olmazsa istatistik odaklı oyun çalışmaz. Simülasyon dönemlere göre
 gerçek dünya referanslarına ayarlanır. Aşağıdaki değerler **yaklaşıktır ve Faz 0'da
