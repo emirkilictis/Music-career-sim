@@ -3,6 +3,17 @@
 Bu doküman oynanış kurallarını tanımlar. Formüllerdeki sabitler **örnektir**; gerçek
 değerler `GameContent` konfigürasyonunda tutulur ve Faz 0 kalibrasyonunda ayarlanır.
 
+## 0. Tasarım ilkesi: derinlik arka planda, yüzey sade
+
+Simülasyon derin olacak ama **oyuncunun beynini yakmayacak**. Her yeni sistem bu kurallara uyar:
+
+- **Akıllı varsayılanlar:** her kararın makul bir varsayılanı vardır; oyuncu hiçbir ayara dokunmadan da oynayabilir.
+- **Az ama anlamlı karar:** bir ekranda birkaç önemli seçim; ince ayarlar "Gelişmiş" altında, isteğe bağlı.
+- **Sayılar sonuç olarak gösterilir, girdi olarak istenmez:** oyuncu formül değil, sonuç görür
+  ("Bu hafta 19,4M stream, #3 → #1").
+- **Mikro yönetim yok:** tekrarlayan işler (her hafta post, her şehir için ayrı ayar) zorunlu değildir.
+- Yeni bir özellik eklenmeden önce sorulur: "Bu, oyuncuya eğlenceli bir karar mı veriyor, yoksa sadece iş mi?"
+
 ## 1. Temel döngü
 
 ```

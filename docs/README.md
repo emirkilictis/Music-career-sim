@@ -42,6 +42,8 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K14 | **Dil:** İngilizce (ana dil) + Türkçe. |
 | K15 | **Telif:** Gerçek sanatçı görseli/kaydı/markası gönderilmez. Varsayılan sanatçılar kurgusal; platform isimleri kurgusal (Spotify/Apple Music/Billboard adları ve logoları kullanılmaz, arayüz tarzı benzer olabilir). |
 | K16 | **Cihazlar:** geliştirme M2 MacBook Air (8 GB), test iPhone 16 Pro. Performans hedefleri eski cihazlar düşünülerek 3–4 kat sıkı tutulur. |
+| K17 | **Oyuncuyu boğma:** derinlik arka planda, yüzey sade (bkz. game-design §0). Akıllı varsayılanlar, az ama anlamlı karar, mikro yönetim yok. |
+| K18 | **Turne şimdilik yok** (Faz 3). Geldiğinde sade olacak: birkaç ayak + mekan büyüklüğü + bilet fiyatı; setlist ve detaylar isteğe bağlı. Turne beklentiyi bozmaz. Hazırlık olarak sanatçının bölgesel hayran dağılımı baştan basit bir değer olarak tutulur. |
 
 ## Yol Haritası
 
@@ -68,7 +70,7 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 
 ### Faz 3 — Endüstri derinliği
 - 90'lar ve 80'ler dönemleri (Basın & TV kanalı, kaset/plak, MTV).
-- Turneler, ödüller, ek ülkeler, daha derin AI kariyerleri.
+- Turneler (sade versiyon, bkz. K18), ödüller, ek ülkeler, daha derin AI kariyerleri.
 
 ### Faz 4 — Cila
 - Animasyonlar, ses, onboarding/tutorial, erişilebilirlik, başarımlar, gelişmiş zorluk ayarları.

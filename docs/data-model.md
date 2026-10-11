@@ -61,6 +61,14 @@ CREATE TABLE artistState (               -- sıcak durum, her hafta güncellenir
   moneyCents INTEGER
 );
 
+-- Bölgesel hayran dağılımı (turne ve ileride çok ülke için hazırlık; MVP'de basit tutulur)
+CREATE TABLE artistRegion (
+  artistID INTEGER NOT NULL REFERENCES artist(id),
+  regionID INTEGER NOT NULL,             -- Kuzey Amerika, Avrupa, Latin Amerika, Asya, Okyanusya…
+  fanShare REAL NOT NULL,                -- sanatçının hayranlarının bu bölgedeki payı
+  PRIMARY KEY (artistID, regionID)
+) WITHOUT ROWID;
+
 -- Şarkılar ve krediler (feat)
 CREATE TABLE song (
   id INTEGER PRIMARY KEY,
