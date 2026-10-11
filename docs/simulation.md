@@ -199,7 +199,7 @@ doğrulanacaktır**:
 |---|---|
 | 2000, süperstar pop albüm ilk hafta (saf satış) | ~2,4M |
 | 2006, büyük pop albüm ilk hafta | ~0,7M |
-| 2013, uzun aradan sonra dev comeback albüm ilk hafta | ~1,0M |
+| 2013, uzun aradan sonra dev comeback albüm ilk hafta (The 20/20 Experience) | 968k (doğrulandı) |
 | 2014, süperstar albüm ilk hafta | ~1,3M |
 | 2015, rekor albüm ilk hafta | ~3,4M |
 | 2024, süperstar albüm ilk hafta (birim) | ~2,6M (büyük kısmı saf satış) |
