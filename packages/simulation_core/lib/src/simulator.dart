@@ -9,6 +9,7 @@ import 'config/regions.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
+import 'time.dart';
 import 'world.dart';
 
 /// Summary of one simulated week (what the UI/CLI needs; not the whole world).
@@ -106,7 +107,9 @@ class Simulator {
       final fanFloor = c.fanCurveFloor * math.exp(-ageRel / 104.0);
       final fanCurve = fanFloor +
           (1 - fanFloor) * math.pow(0.5, ageRel / c.fanCurveHalfLifeWeeks);
-      final tail = c.catalogTail * (0.5 + s.longevity);
+      // Catalog level fades very slowly over decades (10-year time constant).
+      final tail =
+          c.catalogTail * (0.5 + s.longevity) * math.exp(-ageRel / 520.0);
       final life = (1 - math.exp(-(promoAge + 1) / s.riseWeeks)) *
               math.exp(-promoAge / s.lifeWeeks) +
           tail;
@@ -133,13 +136,21 @@ class Simulator {
       }
 
       // Chart feedback favours the very top (playlists, radio adds, press);
-      // the best position on any main song chart counts.
+      // the best position on any main song chart counts. It wears off the
+      // longer a song has been on the charts (listener fatigue).
       var chartShape = 0.0;
+      var weeksCharted = 0;
       for (final ch in Charts.mainSongCharts) {
         final pos = s.lastPosOn(ch);
-        if (pos > 0) chartShape = math.max(chartShape, 1 - (pos - 1) / 100);
+        if (pos > 0) {
+          chartShape = math.max(chartShape, 1 - (pos - 1) / 100);
+          weeksCharted = math.max(weeksCharted, s.weeksOnChart(ch));
+        }
       }
-      final chartBoost = c.chartFeedback * chartShape * chartShape;
+      final chartBoost = c.chartFeedback *
+          chartShape *
+          chartShape /
+          (1 + weeksCharted / c.chartFatigueWeeks);
       final exposure = (c.baseExposure +
               c.fameExposure * p.fame +
               chartBoost +
@@ -150,7 +161,12 @@ class Simulator {
           (1 + 0.5 * p.hype);
       final qMult = 0.35 + 0.65 * math.pow(s.quality / 100, 1.4);
 
-      final fanPart = fans * s.fanAppeal * fanCurve * (1 + p.hype);
+      // Fans replay singles; deep cuts get less of their time.
+      final fanPart = fans *
+          s.fanAppeal *
+          fanCurve *
+          (1 + p.hype) *
+          (s.isSingle ? 1.0 : c.albumTrackFanShare);
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
       final pubPart = c.publicPool * s.commercial * life * exposure;
       final noise = r.logNormal(0.10);
@@ -216,6 +232,8 @@ class Simulator {
       ppa[k] = era.physicalSinglesWeekly /
           (sumSingles[k] * (1 + rc.outsideAttention) + 1);
       w.spaIndex[k] += spa[k];
+      w.lastSpa[k] = spa[k];
+      w.lastDpa[k] = dpa[k];
       w.dpaIndex[k] += 0.1 * dpa[k];
       w.emaAttention[k] = 0.9 * w.emaAttention[k] + 0.1 * sumA[k];
       w.emaDownloadDemand[k] = 0.9 * w.emaDownloadDemand[k] + 0.1 * sumD[k];
@@ -274,8 +292,15 @@ class Simulator {
       final uk = CountryShares.ukOfEurope(p.homeCountry);
       songPts[Charts.usSongs][i] =
           us * pts(rulesUs, ph[na], dw[na], st[na], rd[na]);
+      // UK "accelerated decline" (2017+): long-running songs' streams count
+      // at a reduced rate.
+      final ukStreams = rulesUk.streamFactor > 0 &&
+              GameTime.yearOf(w.week) >= 2017 &&
+              s.weeksOnChart(Charts.ukSongs) >= 10
+          ? st[eu] * 0.5
+          : st[eu];
       songPts[Charts.ukSongs][i] =
-          uk * pts(rulesUk, ph[eu], dw[eu], st[eu], rd[eu]);
+          uk * pts(rulesUk, ph[eu], dw[eu], ukStreams, rd[eu]);
       songPts[Charts.globalSongs][i] =
           pts(rulesGlobal, tP, tD, tS, 0, radioCounts: false);
       songPts[Charts.platformGlobal][i] = tS;

@@ -86,7 +86,7 @@ const Map<Region, RegionConfig> regionConfigs = {
           superfan: 1.0,
           collector: 1.0),
     ],
-    outsideAttention: 0.35,
+    outsideAttention: 0.55,
     outsideDownloads: 1.2,
     globalReach: 0.42,
   ),

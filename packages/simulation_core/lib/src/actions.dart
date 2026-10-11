@@ -150,6 +150,7 @@ abstract final class Actions {
     );
     w.songs.add(song);
     w.dirtySongs.add(song.id);
+    if (a.id == w.playerArtistId) w.playerSongIds.add(song.id);
 
     if (!aiMode) {
       a.creativeEnergy = math.max(0, a.creativeEnergy - energyCostPerSong);

@@ -17,10 +17,12 @@ class SimConfig {
     this.baseExposure = 0.0015,
     this.fameExposure = 0.020,
     this.chartFeedback = 0.04,
+    this.chartFatigueWeeks = 12,
+    this.albumTrackFanShare = 0.6,
     this.catalogTail = 0.05,
     this.viralWeeklyChance = 0.0025,
     this.superfanBuyRate = 0.09,
-    this.collectorRate = 0.12,
+    this.collectorRate = 0.15,
     this.variantDecay = 0.6,
     this.casualBuyRate = 0.012,
     this.albumSecondWeekRatio = 0.22,
@@ -75,6 +77,12 @@ class SimConfig {
   final double baseExposure;
   final double fameExposure;
   final double chartFeedback;
+
+  /// Chart feedback halves after this many weeks on the charts.
+  final double chartFatigueWeeks;
+
+  /// Share of fan attention that non-single album tracks get.
+  final double albumTrackFanShare;
 
   /// Long-term catalog level as a fraction of a song's peak-period audience.
   final double catalogTail;

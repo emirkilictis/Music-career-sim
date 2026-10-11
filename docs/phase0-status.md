@@ -113,40 +113,52 @@ Bulunan ve düzeltilen: her hafta tüm aktif satırları `INSERT OR REPLACE` ile
 → sıcak blok + değişenler + elle checkpoint ile ~24 ms. Emekli sanatçıların her hafta yazılmasını
 önlemek için katalog hesapları tembel hale getirildi.
 
-## Kalibrasyon (seed 42, 2005–2024)
+## Kalibrasyon (`dart run bin/calibrate.dart`, seed 42)
 
-| Ölçüt | Gerçek (yaklaşık) | Simülasyon | Durum |
-|---|---|---|---|
-| #1 şarkı haftalık stream, 2023–24 | 40–60M | 54–58M | ✓ |
-| #100 şarkı haftalık stream, 2024 | ~2–4M | 1,9M | ~ |
-| #1 şarkı haftalık indirme, 2008–12 | ~200–400K | 295–390K | ✓ |
-| #1 albüm medyan haftalık, 2005 | ~250K | 295K | ✓ |
-| #1 albüm medyan haftalık, 2020'ler | ~150–250K | 140–180K | ✓ |
-| Yılın en büyük çıkışı, 2005–08 | ~1,0–1,2M | 1,03–1,34M | ✓ |
-| Yılın en büyük çıkışı (AI dünyası), 2009–14 | ~0,8–1,3M | 0,35–0,95M | ~ biraz düşük |
-| Yılın en büyük çıkışı (AI dünyası), 2015–25 | 0,6–4M | 0,5–1,5M | ~ AI mega çıkış nadiren yapıyor |
-| **Oyuncu, 2025, her hamle doğru** | rekor ~4,0M birim / 3,5M saf | **4,24M / 3,71M** | ✓ |
-| Oyuncu, 2025, hamle yok (süperstar) | — | 0,62M | ✓ mantıklı |
-| #200 albüm haftalık birim, 2005–14 | ~3–7K | 0,8–1,2K | ✗ düşük |
-| #200 albüm haftalık birim, 2020'ler | ~4–6K | 6,7–11,5K | ~ biraz yüksek |
-| Yılda farklı #1 şarkı sayısı | ~10–15 | ~15 | ✓ |
+Yıllık medyanlar (haftalık), en uzun #1 serisi ve yılın en büyük ABD albüm çıkışı (AI dünyası):
+
+| Yıl | ABD #1 stream | İng. #1 stream | Global #1 stream | ABD #1 albüm | ABD #100 albüm | En uzun #1 (ABD/İng./Global) | En büyük ABD çıkış |
+|---|---|---|---|---|---|---|---|
+| 2005 | 715K | 75K | 1,0M | 346K | 6K | 9/9/8 | 1,7M |
+| 2010 | 2,6M | 692K | 4,5M | 115K | 3K | 6/9/6 | 488K |
+| 2015 | 15,5M | 3,9M | 23,7M | 116K | 4K | 12/8/12 | 351K |
+| 2020 | 39,2M | 9,7M | 70,6M | 121K | 9K | 15/8/11 | 489K |
+| 2024 | 59,1M | 11,3M | 125,1M | 141K | 12K | 11/10/8 | 684K |
+| 2025 | 59,0M | 10,1M | 119,8M | 160K | 12K | 15/9/12 | 1,1M |
+
+Gerçek referanslar (yaklaşık): 2020'lerde ABD #1 40–60M, İngiltere #1 8–12M, global #1 100–150M;
+uzun #1 serileri 2020'lerde 15–19 hafta. AI rakipler bilerek "mega era" kurmadığı için yılın en büyük
+çıkışı gerçeğin biraz altında (karar: AI çok güçlü olmasın).
+
+Oyuncu senaryoları (2025, süperstar başlangıç, ABD ilk hafta):
+
+| Senaryo | ABD | Global |
+|---|---|---|
+| Hamlesiz (bağlılık 0,4, hype yok, tek edition) | 483K birim / 236K saf | 826K |
+| İyi hamleler | 1,6M / 1,3M | 2,7M |
+| Her şey doğru | **4,0M / 3,6M** (gerçek rekor ~4,0M / 3,5M) | 6,8M |
+
+Bu turda yapılan ayarlar: albüm şarkılarına (single olmayan) hayran ilgisinin %60'ı; liste geri
+beslemesi listede kalınan süreyle zayıflıyor; İngiltere "hızlandırılmış düşüş" (2017+, 10+ hafta →
+stream yarım); Kuzey Amerika'da simüle edilmeyen repertuvar payı artırıldı; katalog seviyesi 10 yıllık
+zaman sabitiyle çok yavaş azalıyor; süperstar başlangıç hayranları düşürüldü, koleksiyoncu etkisi artırıldı;
+isim listeleri genişletildi.
+
+**Oyuncunun şarkıları** AI ile aynı kurala göre kataloğa geçer (adalet: aksi halde oyuncunun eski
+şarkıları bugünkü ünüyle tam hesaplanıp haksız avantaj sağlıyordu). Ama her şarkının "bu hafta"
+rakamı katalog formülünden O(1) hesaplanır ve oyuncunun tüm yayınlanmış şarkıları için haftalık geçmiş
+satırı yazılır — oyuncu her şarkısının haftalık grafiğini görür.
+
+Performans (50 yıl, her hafta kayıtla): aktif şarkı 1.045 → 1.087 (düz), aktif albüm 206 → 354
+(doyuma yaklaşıyor), simülasyon 2,5 → 3,5 ms/hafta, kayıt 24 → 41 ms/hafta, DB 171 MB.
 
 ## Bilinen eksikler / sıradaki adımlar
 
-1. ~~Mega çıkışlar~~ → **çözüldü:** hayran bağlılığı (konveks), varyantlar (koleksiyon kültürü,
-   azalan getiri, haftalara yayma) ve beklenti birlikte doğru hamlelerle 4M'lik çıkışlara izin veriyor
-   (game-design §10.1). AI rakipler bu stratejiyi bilinçli kurmadığı için onların zirveleri gerçeğin biraz
-   altında; istenirse Tier A için "büyük era" planlaması eklenebilir.
-2. **Albüm listesi kuyruğu** satış döneminde ince (katalog albüm satışları).
-3. Oyuncu şarkıları da dormant'a düşüyor; dokümana göre en az CATALOG kalmalı.
-4. Flop desteğinin etkileri (redemption, feat teklifleri vb.), sosyal medya postları,
-   kampanyalar henüz yok (sadece durum değişkenleri var).
-5. Global listeler yok (sadece US).
-6. ~~Persistence~~ → **yapıldı** (yukarıda). Kalan: kayıt süresi 50 yılda ~%50 artıyor (geçmiş
-   tablolarının büyümesi + checkpoint); kayıt açıkken simülasyon da biraz yavaşlıyor (1,4 → 2,5 ms);
-   veritabanı boyutu (50 yılda 107 MB) ileride geçmiş sıkıştırmasıyla küçültülebilir; checkpoint'ler
-   uygulamada boşta/arka planda yapılmalı.
-7. İsim çeşitliliği az (aynı şarkı isimleri sık tekrar ediyor).
-8. Bot oyuncu 20 yılda fame 0,43'e ulaşıyor, #1 yok — oyuncu dengesi zorluk ayarlarıyla birlikte ele alınacak.
-9. Hamlesiz süperstar 2025 ilk haftası (~620K) biraz yüksek; ileride düşürülecek.
-10. AI rakipler bilerek "mega era" kurmuyor (karar: AI çok güçlü olmasın).
+1. Flop desteğinin etkileri (rapor, redemption, feat teklifleri), sosyal medya postları, kampanyalar:
+   Faz 2'de (şu an sadece durum değişkenleri var).
+2. Oyuncu dengesi ve zorluk seviyeleri (bot oyuncu fikir vermek için): Faz 2.
+3. Katalog (dormant) şarkılar kalıcı seviyede kalıyor; on yıllar içinde çok yavaş azalma ileride
+   dönüşümlü uzlaştırma ile eklenebilir.
+4. Veritabanı boyutu (50 yılda ~170 MB) ve kayıt süresinin yavaş artışı: eski geçmişin aylık
+   özetlere sıkıştırılması ileride.
+5. Checkpoint'ler uygulamada boşta/arka planda yapılmalı (Faz 1).

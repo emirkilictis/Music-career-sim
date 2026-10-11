@@ -130,6 +130,7 @@ class SaveStore {
       final id = r['id'] as int;
       final s = Codec.songFrom(hot.songs[id] ?? r, featured[id] ?? []);
       w.songs.add(s);
+      if (s.primaryArtistId == w.playerArtistId) w.playerSongIds.add(s.id);
       if (s.status == SongStatus.active) w.activeSongIds.add(s.id);
       if (s.status == SongStatus.dormant) {
         w.artists[s.primaryArtistId].dormantSongIds.add(s.id);
@@ -381,6 +382,8 @@ class SaveStore {
         ('emaDownloadDemand', w.emaDownloadDemand),
         ('emaRadioDemand', w.emaRadioDemand),
         ('chartCutoff', w.chartCutoff),
+        ('lastSpa', w.lastSpa),
+        ('lastDpa', w.lastDpa),
       ];
 
   void _writeCharts(int week, List<List<ChartEntry>> charts) {
@@ -411,28 +414,35 @@ class SaveStore {
     // player's releases; AI releases keep their full chart history
     // (docs/data-model.md §4.2).
     final player = w.playerArtistId;
-    final songIds = <int>{
-      for (final id in w.activeSongIds)
-        if (w.songs[id].primaryArtistId == player) id,
-    };
+    // Every released player song gets a weekly row (catalog songs' numbers
+    // come from the catalog formula), so per-song graphs are complete.
+    final songIds = <int>[
+      for (final id in w.playerSongIds)
+        if (w.songs[id].releasedWeek >= 0 && w.songs[id].releasedWeek <= r.week)
+          id,
+    ];
     final sw = db.prepare('INSERT OR REPLACE INTO songWeek '
         '(songId, week, streams, downloads, radio, physical, points, '
         'streamsNA, streamsEU, streamsOT) '
         'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     for (final id in songIds) {
       final s = w.songs[id];
-      final wr = s.weekRegion;
+      final wr = [
+        for (var k = 0; k < regionCount; k++) w.songWeekStreamsRegion(s, k),
+      ];
+      final total = wr[0] + wr[1] + wr[2];
+      final active = s.status == SongStatus.active;
       sw.execute([
         id,
         r.week,
-        s.weekStreams,
-        s.weekDownloads,
-        s.weekRadio,
-        s.weekPhysical,
-        s.weekPoints,
-        wr?[0] ?? 0.0,
-        wr?[1] ?? 0.0,
-        wr?[2] ?? 0.0,
+        total,
+        active ? s.weekDownloads : 0.0,
+        active ? s.weekRadio : 0.0,
+        active ? s.weekPhysical : 0.0,
+        active ? s.weekPoints : 0.0,
+        wr[0],
+        wr[1],
+        wr[2],
       ]);
     }
     sw.dispose();

@@ -32,6 +32,15 @@ class World {
   final Float64List spaIndex = Float64List(regionCount);
   final Float64List dpaIndex = Float64List(regionCount);
 
+  /// Last simulated week's streams/downloads per attention, per region; lets
+  /// the UI show "this week" numbers for catalog (dormant) songs in O(1).
+  final Float64List lastSpa = Float64List(regionCount);
+  final Float64List lastDpa = Float64List(regionCount);
+
+  /// The player's songs (written or released), so player screens and saves
+  /// never scan the whole world.
+  final List<int> playerSongIds = [];
+
   /// Per region: Σ sumDormantRate × catalogFactor × regionShare over retired
   /// artists (their factors are frozen).
   final Float64List retiredDormantAttention = Float64List(regionCount);
@@ -218,10 +227,20 @@ class World {
     };
   }
 
-  /// This week's streams of an active song in a chart market.
+  /// Last week's streams of a song in region [r]: exact for active songs,
+  /// and for catalog (dormant) songs derived from the catalog formula.
+  double songWeekStreamsRegion(Song s, int r) {
+    if (s.status == SongStatus.active) return s.weekRegion?[r] ?? 0;
+    if (s.status != SongStatus.dormant) return 0;
+    final a = primaryOf(s);
+    return s.dormantRate * a.catalogFactor * a.regionShare[r] * lastSpa[r];
+  }
+
+  /// This week's streams of a song in a chart market.
   double songWeekStreamsIn(Song s, ChartMarket market) {
-    final wr = s.weekRegion;
-    if (wr == null) return 0;
+    final wr = [
+      for (var r = 0; r < regionCount; r++) songWeekStreamsRegion(s, r),
+    ];
     final home = primaryOf(s).homeCountry;
     return switch (market) {
       ChartMarket.us ||

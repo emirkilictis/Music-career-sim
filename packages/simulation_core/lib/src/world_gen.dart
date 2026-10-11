@@ -138,7 +138,7 @@ abstract final class WorldGen {
       StartTier.unknown => (0.0, 2e3, 2e4),
       StartTier.localBuzz => (0.05, 2e4, 2e5),
       StartTier.risingStar => (0.30, 4e5, 4e6),
-      StartTier.superstar => (0.80, 4e6, 3e7),
+      StartTier.superstar => (0.80, 3e6, 2.4e7),
     };
     var cash = switch (money) {
       StartMoney.low => 500000,
