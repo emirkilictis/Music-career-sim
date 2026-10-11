@@ -82,6 +82,9 @@ abstract final class WorldGen {
       labelReach: isA ? r.range(1.1, 1.4) : r.range(0.6, 1.1),
       artistShare: 0.5,
     );
+    a.devotion = newcomer
+        ? r.range(0.05, 0.2)
+        : (isA ? r.range(0.15, 0.6) : r.range(0.05, 0.35));
     a.nextEraWeek =
         w.week + (newcomer ? r.nextInt(30) : r.nextInt(isA ? 150 : 90));
     w.artists.add(a);
@@ -149,6 +152,12 @@ abstract final class WorldGen {
       artistShare: isLabel ? 0.5 : 1.0,
       moneyCents: cash,
     );
+    a.devotion = switch (tier) {
+      StartTier.unknown => 0.1,
+      StartTier.localBuzz => 0.15,
+      StartTier.risingStar => 0.3,
+      StartTier.superstar => 0.6,
+    };
     w.artists.add(a);
     w.playerArtistId = a.id;
     return a;

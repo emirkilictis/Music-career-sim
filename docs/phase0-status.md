@@ -29,7 +29,7 @@ dart run bin/sim_cli.dart --start 2005 --years 20 --seed 42
 dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet   # performans
 ```
 
-## Testler (`dart test`, 11/11 geçiyor)
+## Testler (`dart test`, 14/14 geçiyor)
 
 - Aynı seed → bit düzeyinde aynı dünya; farklı seed → farklı dünya
 - Sanatçının kariyer stream toplamı = şarkılarının toplamı (aktif + tembel birikimli dormant)
@@ -37,6 +37,8 @@ dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet   # performan
 - Aktif küme tarih büyürken sınırlı kalıyor
 - Şarkı yazma: kalite sınırları, haftada en fazla 3 şarkı, burnout, ünlü prodüktör reddi
 - Başarılı eradan sonra beklenti birikiyor ve **hiç düşmüyor**; flop'tan sonra birikmiyor
+- Mega çıkış: doğru hamlelerle 2025'te 3M+ saf satış; aynı süperstar hamlesiz çok daha düşük;
+  varyantları haftalara yaymak ikinci haftayı güçlendiriyor
 
 ## Performans (bu sunucu, AOT derleme)
 
@@ -65,16 +67,20 @@ listeye giremeyen eski hitlerin aktif kalması (dormant eşiği yükseltildi).
 | #1 albüm medyan haftalık, 2005 | ~250K | 295K | ✓ |
 | #1 albüm medyan haftalık, 2020'ler | ~150–250K | 140–180K | ✓ |
 | Yılın en büyük çıkışı, 2005–08 | ~1,0–1,2M | 1,03–1,34M | ✓ |
-| Yılın en büyük çıkışı, 2009–14 | ~0,8–1,2M | 0,30–0,46M | ✗ düşük |
-| Yılın en büyük çıkışı, 2015–24 | bazı yıllar 1–3M | 0,35–0,59M | ✗ mega çıkış yok |
+| Yılın en büyük çıkışı (AI dünyası), 2009–14 | ~0,8–1,3M | 0,35–0,95M | ~ biraz düşük |
+| Yılın en büyük çıkışı (AI dünyası), 2015–25 | 0,6–4M | 0,5–1,5M | ~ AI mega çıkış nadiren yapıyor |
+| **Oyuncu, 2025, her hamle doğru** | rekor ~4,0M birim / 3,5M saf | **4,24M / 3,71M** | ✓ |
+| Oyuncu, 2025, hamle yok (süperstar) | — | 0,62M | ✓ mantıklı |
 | #200 albüm haftalık birim, 2005–14 | ~3–7K | 0,8–1,2K | ✗ düşük |
 | #200 albüm haftalık birim, 2020'ler | ~4–6K | 6,7–11,5K | ~ biraz yüksek |
 | Yılda farklı #1 şarkı sayısı | ~10–15 | ~15 | ✓ |
 
 ## Bilinen eksikler / sıradaki adımlar
 
-1. **Mega çıkışlar:** 2009 sonrası süperstar albümleri 1M+ yapamıyor. Varyantlar, süperfan
-   bağlılığı ve beklenti etkisi güçlendirilmeli.
+1. ~~Mega çıkışlar~~ → **çözüldü:** hayran bağlılığı (konveks), varyantlar (koleksiyon kültürü,
+   azalan getiri, haftalara yayma) ve beklenti birlikte doğru hamlelerle 4M'lik çıkışlara izin veriyor
+   (game-design §10.1). AI rakipler bu stratejiyi bilinçli kurmadığı için onların zirveleri gerçeğin biraz
+   altında; istenirse Tier A için "büyük era" planlaması eklenebilir.
 2. **Albüm listesi kuyruğu** satış döneminde ince (katalog albüm satışları).
 3. Oyuncu şarkıları da dormant'a düşüyor; dokümana göre en az CATALOG kalmalı.
 4. Flop desteğinin etkileri (redemption, feat teklifleri vb.), sosyal medya postları,

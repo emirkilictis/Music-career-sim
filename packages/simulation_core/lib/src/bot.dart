@@ -73,7 +73,13 @@ class BotPlayer {
       ];
       final title = Names.album(
           RandomStream.keyed(w.seed, w.week, a.id, RngPurpose.botPlayer));
-      Actions.releaseAlbum(w, a, title, tracks);
+      // Use variants once famous enough to have collectors.
+      final variants =
+          a.fame > 0.3 && a.moneyCents > Actions.variantCostCents * 8
+              ? const [0, 0, 0, 1, 2]
+              : const [0];
+      Actions.releaseAlbum(w, a, title, tracks,
+          variantWeeks: variants, payForVariants: true);
       _lastAlbumWeek = w.week;
       return;
     }

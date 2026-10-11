@@ -19,6 +19,8 @@ class SimConfig {
     this.catalogTail = 0.05,
     this.viralWeeklyChance = 0.0025,
     this.superfanBuyRate = 0.09,
+    this.collectorRate = 0.12,
+    this.variantDecay = 0.6,
     this.casualBuyRate = 0.012,
     this.albumSecondWeekRatio = 0.22,
     this.albumWeeklyDecay = 0.86,
@@ -74,6 +76,11 @@ class SimConfig {
   final double viralWeeklyChance;
 
   final double superfanBuyRate;
+
+  /// Extra copies per core fan for the 2nd variant (scaled by devotion and
+  /// era collector culture); each further variant sells [variantDecay]× less.
+  final double collectorRate;
+  final double variantDecay;
   final double casualBuyRate;
   final double albumSecondWeekRatio;
   final double albumWeeklyDecay;

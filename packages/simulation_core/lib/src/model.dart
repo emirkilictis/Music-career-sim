@@ -64,6 +64,10 @@ class Artist {
   double casual;
   double buzz = 0;
 
+  /// How devoted the fanbase is (0..1). Grows with successful eras, drops
+  /// after flops; drives superfan purchases and collector demand.
+  double devotion = 0.2;
+
   /// Converted anticipation that boosts current releases; decays weekly.
   double hype = 0;
 
@@ -103,6 +107,7 @@ class Artist {
   final List<int> pendingAlbumSongIds = [];
   String pendingAlbumTitle = '';
   AlbumType pendingAlbumType = AlbumType.album;
+  List<int> pendingVariantWeeks = const [0];
 
   // Totals (incremental).
   double lifetimeStreams = 0;
@@ -120,6 +125,14 @@ class Artist {
   double weekStreams = 0;
 
   bool get isRetired => retiredWeek >= 0;
+
+  /// Superfan purchase multiplier from devotion. Convex: only the most
+  /// devoted fanbases produce mega debuts.
+  double get devotionBuyFactor =>
+      0.7 + 0.3 * devotion + 2.0 * devotion * devotion * devotion;
+
+  /// Collector multiplier from devotion (also convex).
+  double get devotionCollectorFactor => 0.15 + 0.85 * devotion * devotion;
 
   /// Catalog popularity factor applied to dormant songs.
   double get catalogFactor => 0.3 + 0.7 * popularity;
@@ -226,6 +239,11 @@ class Album {
 
   AlbumStatus status = AlbumStatus.active;
   double hypeAtRelease = 0;
+
+  /// Release offsets (weeks after release) of each edition/variant, sorted.
+  /// Index 0 is the standard edition. Staggering variants keeps an album on
+  /// top for several weeks (docs/game-design.md §8.5).
+  List<int> variantWeeks = const [0];
 
   // Weekly.
   double weekPure = 0;

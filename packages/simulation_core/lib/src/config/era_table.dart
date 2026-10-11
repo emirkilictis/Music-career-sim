@@ -15,6 +15,7 @@ class EraValues {
     required this.radioWeekly,
     required this.casualPurchaseRate,
     required this.superfanFactor,
+    required this.collectorFactor,
   });
 
   final double year;
@@ -37,6 +38,10 @@ class EraValues {
   /// How willing core fans are to buy albums (weak era effect).
   final double superfanFactor;
 
+  /// Collector culture: how much extra variants (vinyl, signed, exclusive)
+  /// sell to devoted fans. Low in the CD era, high in the vinyl revival.
+  final double collectorFactor;
+
   EraValues lerp(EraValues b, double t) {
     double l(double x, double y) => x + (y - x) * t;
     return EraValues(
@@ -47,6 +52,7 @@ class EraValues {
       radioWeekly: l(radioWeekly, b.radioWeekly),
       casualPurchaseRate: l(casualPurchaseRate, b.casualPurchaseRate),
       superfanFactor: l(superfanFactor, b.superfanFactor),
+      collectorFactor: l(collectorFactor, b.collectorFactor),
     );
   }
 }
@@ -101,6 +107,7 @@ class EraTable {
       radioWeekly: last.radioWeekly,
       casualPurchaseRate: last.casualPurchaseRate,
       superfanFactor: last.superfanFactor,
+      collectorFactor: last.collectorFactor,
     );
   }
 
@@ -131,7 +138,8 @@ class EraTable {
             physicalSinglesWeekly: 1.0e6,
             radioWeekly: 6.0e9,
             casualPurchaseRate: 1.00,
-            superfanFactor: 1.00),
+            superfanFactor: 1.00,
+            collectorFactor: 0.15),
         EraValues(
             year: 2003,
             streamsWeekly: 0,
@@ -139,7 +147,8 @@ class EraTable {
             physicalSinglesWeekly: 0.3e6,
             radioWeekly: 6.0e9,
             casualPurchaseRate: 0.88,
-            superfanFactor: 0.95),
+            superfanFactor: 0.95,
+            collectorFactor: 0.15),
         EraValues(
             year: 2005,
             streamsWeekly: 0.05e9,
@@ -147,7 +156,8 @@ class EraTable {
             physicalSinglesWeekly: 0.1e6,
             radioWeekly: 6.0e9,
             casualPurchaseRate: 0.75,
-            superfanFactor: 0.90),
+            superfanFactor: 0.90,
+            collectorFactor: 0.15),
         EraValues(
             year: 2008,
             streamsWeekly: 0.2e9,
@@ -155,7 +165,8 @@ class EraTable {
             physicalSinglesWeekly: 0.02e6,
             radioWeekly: 6.0e9,
             casualPurchaseRate: 0.55,
-            superfanFactor: 0.82),
+            superfanFactor: 0.82,
+            collectorFactor: 0.18),
         EraValues(
             year: 2012,
             streamsWeekly: 1.0e9,
@@ -163,7 +174,8 @@ class EraTable {
             physicalSinglesWeekly: 0.01e6,
             radioWeekly: 6.0e9,
             casualPurchaseRate: 0.38,
-            superfanFactor: 0.75),
+            superfanFactor: 0.75,
+            collectorFactor: 0.25),
         EraValues(
             year: 2014,
             streamsWeekly: 3.0e9,
@@ -171,7 +183,8 @@ class EraTable {
             physicalSinglesWeekly: 0.01e6,
             radioWeekly: 5.8e9,
             casualPurchaseRate: 0.30,
-            superfanFactor: 0.70),
+            superfanFactor: 0.70,
+            collectorFactor: 0.40),
         EraValues(
             year: 2016,
             streamsWeekly: 7.0e9,
@@ -179,7 +192,8 @@ class EraTable {
             physicalSinglesWeekly: 0.01e6,
             radioWeekly: 5.6e9,
             casualPurchaseRate: 0.22,
-            superfanFactor: 0.62),
+            superfanFactor: 0.62,
+            collectorFactor: 0.55),
         EraValues(
             year: 2018,
             streamsWeekly: 11e9,
@@ -187,7 +201,8 @@ class EraTable {
             physicalSinglesWeekly: 0.01e6,
             radioWeekly: 5.4e9,
             casualPurchaseRate: 0.15,
-            superfanFactor: 0.60),
+            superfanFactor: 0.60,
+            collectorFactor: 0.75),
         EraValues(
             year: 2020,
             streamsWeekly: 16e9,
@@ -195,7 +210,8 @@ class EraTable {
             physicalSinglesWeekly: 0.01e6,
             radioWeekly: 5.0e9,
             casualPurchaseRate: 0.11,
-            superfanFactor: 0.64),
+            superfanFactor: 0.64,
+            collectorFactor: 0.90),
         EraValues(
             year: 2022,
             streamsWeekly: 21e9,
@@ -203,7 +219,8 @@ class EraTable {
             physicalSinglesWeekly: 0.01e6,
             radioWeekly: 5.0e9,
             casualPurchaseRate: 0.10,
-            superfanFactor: 0.68),
+            superfanFactor: 0.68,
+            collectorFactor: 1.00),
         EraValues(
             year: 2024,
             streamsWeekly: 25e9,
@@ -211,7 +228,8 @@ class EraTable {
             physicalSinglesWeekly: 0.01e6,
             radioWeekly: 5.0e9,
             casualPurchaseRate: 0.10,
-            superfanFactor: 0.72),
+            superfanFactor: 0.72,
+            collectorFactor: 1.10),
         EraValues(
             year: 2026,
             streamsWeekly: 27e9,
@@ -219,6 +237,7 @@ class EraTable {
             physicalSinglesWeekly: 0.01e6,
             radioWeekly: 5.0e9,
             casualPurchaseRate: 0.10,
-            superfanFactor: 0.72),
+            superfanFactor: 0.72,
+            collectorFactor: 1.15),
       ]);
 }

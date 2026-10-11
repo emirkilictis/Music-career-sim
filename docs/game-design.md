@@ -110,6 +110,7 @@ Tek bir "popülerlik = 93" değişkeni yerine ayrı kavramlar:
 | Anticipation | Yeni proje beklentisi (bkz. §5) | Kurala bağlı |
 | Legacy | Uzun vadeli katalog gücü | Çok yavaş |
 | Followers | Sosyal medya takipçisi | Orta |
+| **Hayran bağlılığı (devotion)** | Hayran kitlesinin ne kadar sadık olduğu; süperfan alımı ve koleksiyoncu talebini belirler (bkz. §10.1) | Era sonlarında değişir, zamanla hafifçe azalır |
 | Yaratıcı enerji | Şarkı yazma kapasitesi (bkz. §4.4) | Haftalık toparlanır |
 
 Oyuncuya gösterilen ana sayılar: monthly listeners (dönem uygunsa), hayran, takipçi, para,
@@ -337,6 +338,30 @@ casualBuyers   = casualAudience × eraCasualPurchaseRate(yıl)            // dö
 - Ama hayran tabanı büyük bir sanatçı 2024'te de milyonlarca saf satış yapabilir
   (sadık hayranlar + vinil + varyantlar).
 - Formatlar dönemden gelir: plak, kaset, CD, dijital indirme, vinil dönüşü.
+
+### 10.1 Mega çıkışlar: doğru hamleler
+
+Streaming döneminde de milyonlarca ilk hafta satışı mümkündür, ama sadece doğru hamlelerle.
+Üç kaldıraç birlikte çalışır:
+
+1. **Hayran bağlılığı (devotion, 0–1).** Başarılı eralar bağlılığı artırır
+   (dev başarı > başarı > normal), hayal kırıklığı ve flop azaltır; zamanla hafifçe aşınır.
+   Etkisi **konvekstir**: orta bağlılık normal satış verir, sadece en sadık kitleler mega çıkış yapar.
+   Bağlılık arttıkça beklenti çıtası da yükselir — sadık kitleyi tatmin etmek zorlaşır.
+2. **Beklenti / hype.** Başarılı eradan sonra ara verip beklentiyi biriktirmek (§5.3).
+3. **Varyantlar.** Her ek varyant sadık hayranlara ekstra kopya satar; her yeni varyant bir
+   öncekinin ~%60'ı kadar etkilidir. Etki koleksiyon kültürüne bağlıdır: CD döneminde düşük,
+   vinil dönüşüyle (2015+) yüksek. Varyantları haftalara yaymak sonraki haftaları güçlendirir.
+
+Kalibrasyon (2025, süperstar, testlerle doğrulandı):
+
+| Senaryo | İlk hafta |
+|---|---|
+| Hiçbir hamle yok (bağlılık 0,4, hype yok, tek edition) | ~0,6M birim |
+| İyi hamleler (bağlılık 0,7, biraz hype, 4 edition) | ~1,7M birim |
+| Her şey doğru (bağlılık 1,0, büyük hype, 8 edition, yayılmış) | ~4,2M birim / 3,7M saf |
+
+Gerçek referans: 2025'te rekor ilk hafta ~4,0M birim / ~3,5M saf satış.
 
 ## 11. Dönemler (oyuncu açısından)
 

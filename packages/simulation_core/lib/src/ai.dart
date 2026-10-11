@@ -26,7 +26,7 @@ abstract final class AiPlanner {
           Actions.releaseSingle(w, a, w.songs[p.songId]);
         case PlannedKind.album:
           Actions.releaseAlbum(w, a, a.pendingAlbumTitle, a.pendingAlbumSongIds,
-              type: a.pendingAlbumType);
+              type: a.pendingAlbumType, variantWeeks: a.pendingVariantWeeks);
           a.pendingAlbumSongIds.clear();
       }
     }
@@ -88,6 +88,7 @@ abstract final class AiPlanner {
     a.pendingAlbumTitle =
         Names.album(RandomStream.keyed(w.seed, w.week, a.id, RngPurpose.names));
     a.pendingAlbumType = isEp ? AlbumType.ep : AlbumType.album;
+    a.pendingVariantWeeks = _variantPlan(w, a, r, albumWeek, isA);
 
     final int gap;
     if (isA) {
@@ -96,6 +97,25 @@ abstract final class AiPlanner {
       gap = 50 + r.nextInt(80);
     }
     a.nextEraWeek = albumWeek + gap;
+  }
+
+  /// Stars in the collector era release many variants; half of them stagger
+  /// variants over the following weeks to stay at #1.
+  static List<int> _variantPlan(
+      World w, Artist a, RandomStream r, int albumWeek, bool isA) {
+    final collector = w.config.era.forWeek(albumWeek).collectorFactor;
+    final int extra;
+    if (isA) {
+      extra = (a.fame * 8 * collector * r.range(0.5, 1.2)).round().clamp(0, 9);
+    } else {
+      extra = r.chance(0.5 * collector) ? 1 : 0;
+    }
+    final stagger = isA && r.chance(0.5);
+    final weeks = [0];
+    for (var i = 1; i <= extra; i++) {
+      weeks.add(stagger && i > extra ~/ 2 ? i - extra ~/ 2 : 0);
+    }
+    return weeks;
   }
 
   static double _singleScore(Song s) =>

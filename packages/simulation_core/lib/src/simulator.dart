@@ -65,6 +65,8 @@ class Simulator {
       a.weekStreams = 0;
       if (a.isRetired) continue;
       a.hype *= 0.92;
+      // Fanbases slowly drift unless renewed by successful eras.
+      a.devotion = math.max(0.0, a.devotion - 0.0002);
       a.buzz *= 0.75;
       a.flopSupport *= 0.97;
       if (!a.eraOpen && a.anticipationCap > 0) {
@@ -222,12 +224,30 @@ class Simulator {
       final superCurve = age == 0
           ? 1.0
           : c.albumSecondWeekRatio * math.pow(c.albumWeeklyDecay, age - 1);
+      // Devoted fanbases buy more (and buy variants).
+      final superRate = c.superfanBuyRate * p.devotionBuyFactor;
       final superPart = p.coreFans *
-          c.superfanBuyRate *
+          superRate *
           era.superfanFactor *
           superCurve *
           (1 + al.hypeAtRelease) *
           (0.5 + al.quality / 100);
+      // Collector copies: each variant released this week (beyond the
+      // standard edition) sells extra copies to devoted fans, with
+      // diminishing returns per additional variant.
+      var variantSum = 0.0;
+      final vw = al.variantWeeks;
+      for (var k = 1; k < vw.length; k++) {
+        if (vw[k] == age) variantSum += math.pow(c.variantDecay, k - 1);
+      }
+      final collectorPart = variantSum == 0
+          ? 0.0
+          : p.coreFans *
+              c.collectorRate *
+              p.devotionCollectorFactor *
+              era.collectorFactor *
+              variantSum *
+              (1 + al.hypeAtRelease);
       var songReach = 0.0, songStreams = 0.0, songDownloads = 0.0;
       for (final sid in al.songIds) {
         final s = w.songs[sid];
@@ -250,7 +270,7 @@ class Simulator {
       final noise =
           RandomStream.keyed(w.seed, w.week, al.id, RngPurpose.albumNoise)
               .logNormal(0.08);
-      al.weekPure = (superPart + casPart) * noise;
+      al.weekPure = (superPart + collectorPart + casPart) * noise;
       al.weekTea = songDownloads / c.trackEquivalentAlbum;
       al.weekSea = songStreams / c.streamEquivalentAlbum;
       al.weekUnits = rules.albumUsesUnits

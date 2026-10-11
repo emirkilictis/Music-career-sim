@@ -185,8 +185,13 @@ abstract final class Actions {
 
   /// Releases an album/EP. Songs not yet released become album tracks;
   /// previously released singles are attached to the album.
+  /// Manufacturing/setup cost per extra variant for the player.
+  static const variantCostCents = 4000000;
+
   static Album releaseAlbum(World w, Artist a, String title, List<int> songIds,
-      {AlbumType type = AlbumType.album}) {
+      {AlbumType type = AlbumType.album,
+      List<int> variantWeeks = const [0],
+      bool payForVariants = false}) {
     _convertAnticipation(a);
     final quality = songIds.isEmpty
         ? 0.0
@@ -202,6 +207,10 @@ abstract final class Actions {
       quality: quality,
     );
     album.hypeAtRelease = a.hype;
+    album.variantWeeks = (List.of(variantWeeks)..sort());
+    if (payForVariants && variantWeeks.length > 1) {
+      a.moneyCents -= variantCostCents * (variantWeeks.length - 1);
+    }
     w.albums.add(album);
     for (final id in songIds) {
       final s = w.songs[id];
@@ -235,7 +244,13 @@ abstract final class Eras {
     if (a.eraOpen) close(w, a);
     final era = w.config.era.forWeek(w.week);
     final c = w.config;
-    final baseline = a.coreFans * c.superfanBuyRate * era.superfanFactor * 2.2 +
+    // Expectations rise with the fanbase's devotion, so a devoted fanbase
+    // has to deliver more to count as a success.
+    final baseline = a.coreFans *
+            c.superfanBuyRate *
+            math.sqrt(a.devotionBuyFactor) *
+            era.superfanFactor *
+            2.2 +
         a.casual * c.casualBuyRate * era.casualPurchaseRate * 2.0 +
         2000;
     a.eraOpen = true;
@@ -270,13 +285,22 @@ abstract final class Eras {
         a.anticipationCap = 0;
         a.anticipation = 0;
         a.flopSupport = 1.0;
+        a.devotion -= 0.12;
       case EraResult.disappointing:
         a.anticipationCap = c.anticipationCapBase * 0.08 * (0.5 + a.fame);
+        a.devotion -= 0.05;
       case EraResult.normal || EraResult.success || EraResult.smash:
         final g = 0.2 +
             0.8 * ((score - 0.85) / 1.15).clamp(0.0, 1.0) +
             (score > 2.0 ? 0.5 * math.min(score - 2.0, 1.0) : 0.0);
         a.anticipationCap = c.anticipationCapBase * g * (0.5 + a.fame);
+        a.devotion += (1 - a.devotion) *
+            switch (result) {
+              EraResult.smash => 0.25,
+              EraResult.success => 0.12,
+              _ => 0.03,
+            };
     }
+    a.devotion = a.devotion.clamp(0.0, 1.0);
   }
 }

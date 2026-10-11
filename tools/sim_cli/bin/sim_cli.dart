@@ -154,7 +154,7 @@ class _YearReport {
     for (final id in topDebuts.take(5)) {
       final al = w.albums[id];
       out.writeln(
-          '  ${_album(id)}  ·  ${fmt(al.firstWeekUnits)} units / ${fmt(al.firstWeekPure)} pure  ·  debut #${al.debutPos}');
+          '  ${_album(id)}  ·  ${fmt(al.firstWeekUnits)} units / ${fmt(al.firstWeekPure)} pure  ·  debut #${al.debutPos} · ${al.variantWeeks.length} ed. · devotion ${w.artists[al.artistId].devotion.toStringAsFixed(2)}');
     }
     final topSongs = songPoints.keys.toList()
       ..sort((a, b) => songPoints[b]!.compareTo(songPoints[a]!));

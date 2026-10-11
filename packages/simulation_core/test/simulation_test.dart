@@ -120,6 +120,8 @@ void main() {
     });
   });
 
+  group('mega debuts', megaDebutTests);
+
   group('eras and anticipation', () {
     test('after a successful era anticipation builds up and never decays', () {
       final w = WorldGen.create(seed: 11, startYear: 2010);
@@ -157,5 +159,65 @@ void main() {
       expect(a.anticipation, 0);
       expect(a.flopSupport, lessThan(0.1));
     });
+  });
+}
+
+/// Mega debut scenarios (docs/game-design.md §5, §8.5, §10): with the right
+/// moves a devoted superstar can sell millions in the streaming era; without
+/// them the same artist cannot.
+({Album album, double week2Pure}) _debut({
+  required int year,
+  required double devotion,
+  required double hype,
+  required List<int> variants,
+}) {
+  final w = WorldGen.create(seed: 77, startYear: year);
+  final sim = Simulator(w);
+  while (w.week < GameTime.firstWeekOf(year)) {
+    sim.step();
+  }
+  final a = WorldGen.addPlayer(w,
+      name: 'Star',
+      genre: 0,
+      tier: StartTier.superstar,
+      money: StartMoney.millionaire);
+  a.devotion = devotion;
+  a.hype = hype;
+  final songs = [
+    for (var i = 0; i < 12; i++)
+      Actions.writeSong(w, a, producerSkill: 90, aiMode: true).id,
+  ];
+  final album =
+      Actions.releaseAlbum(w, a, 'Mega', songs, variantWeeks: variants);
+  sim.step();
+  sim.step();
+  return (album: album, week2Pure: album.weekPure);
+}
+
+void megaDebutTests() {
+  test('right moves in 2025: devoted fans + anticipation + variants → 3M+', () {
+    final r = _debut(
+        year: 2025,
+        devotion: 1.0,
+        hype: 0.8,
+        variants: const [0, 0, 0, 0, 0, 0, 1, 2]);
+    printOnFailure('first week pure: ${r.album.firstWeekPure}');
+    expect(r.album.firstWeekPure, greaterThan(3e6));
+    expect(r.album.debutPos, 1);
+  });
+
+  test('same superstar without devotion, hype or variants stays far lower', () {
+    final r = _debut(year: 2025, devotion: 0.4, hype: 0, variants: const [0]);
+    expect(r.album.firstWeekPure, lessThan(1.2e6));
+  });
+
+  test('staggered variants boost the second week', () {
+    final launchAll = _debut(
+        year: 2025, devotion: 0.9, hype: 0.5, variants: const [0, 0, 0, 0, 0]);
+    final staggered = _debut(
+        year: 2025, devotion: 0.9, hype: 0.5, variants: const [0, 0, 0, 1, 1]);
+    expect(staggered.week2Pure, greaterThan(launchAll.week2Pure * 1.5));
+    expect(
+        staggered.album.firstWeekPure, lessThan(launchAll.album.firstWeekPure));
   });
 }
