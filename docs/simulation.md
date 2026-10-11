@@ -179,9 +179,9 @@ Flop raporu için era boyunca katkı faktörleri (rakip çakışması, promosyon
 
 - **Counter-tabanlı RNG:** `rng(seed, week, entityID, purpose)` — örn. SplitMix64 hash.
   Saklanacak tek RNG durumu seed'dir; paralelleştirme sonucu değiştirmez.
-- **`Dictionary`/`Set` iterasyon sırasına asla güvenme** (Swift'te her process'te rastgele).
-  RNG tüketen veya sıralama yapan döngüler ID'ye göre sıralı dizilerle çalışır.
-- Sayımlar `Int64`, paralar `Int64` cent. Paralel float toplamaları deterministik sırada yapılır.
+- **Hash tabanlı koleksiyonların (`HashMap`/`HashSet`) iterasyon sırasına asla güvenme.**
+  RNG tüketen veya sıralama yapan döngüler ID'ye göre sıralı listelerle çalışır.
+- Sayımlar 64-bit `int`, paralar `int` cent (web hedefi yok; native'de `int` 64-bit). Paralel float toplamaları deterministik sırada yapılır.
 - **Sürekli = kaydet-yükle:** simülasyon için gereken her durum DB'dedir; bellekte sadece
   türetilmiş önbellek tutulabilir.
 - Kayıtta `simulationVersion` ve `contentVersion` saklanır.

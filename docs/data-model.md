@@ -1,7 +1,7 @@
 # Veri Modeli
 
-Her kayıt slotu tek bir SQLite dosyasıdır (GRDB). Tüm ID'ler `INTEGER`'dır (UUID değil;
-milyonlarca satırlık index'lerde boyut farkı büyüktür). Sayımlar ve paralar `INTEGER` (Int64,
+Her kayıt slotu tek bir SQLite dosyasıdır (drift). Tüm ID'ler `INTEGER`'dır (UUID değil;
+milyonlarca satırlık index'lerde boyut farkı büyüktür). Sayımlar ve paralar `INTEGER` (64-bit; Dart `int`,
 para cent cinsinden). Zaman birimi **mutlak hafta indeksi** (`week INTEGER`); takvim yılı ve
 hafta numarası gösterimde türetilir (ISO yıllarının 52/53 hafta sorunu yaşanmaz).
 
@@ -296,6 +296,6 @@ CREATE TABLE notification (id INTEGER PRIMARY KEY, week INTEGER, kind INTEGER, p
 - Test: tüm sıcak sorgularda `EXPLAIN QUERY PLAN` çalıştırılır; büyük tablolarda `SCAN` görülürse test başarısız olur.
 
 ## 7. Migrasyonlar
-- GRDB `DatabaseMigrator`; her migrasyon numaralı ve geri alınamaz.
+- drift şema versiyonları ve migrasyon adımları; her migrasyon numaralı ve geri alınamaz.
 - `meta.simulationVersion` formül değişikliklerini, `meta.contentVersion` konfigürasyon değişikliklerini izler.
 - Eski kayıtlar açılırken migrasyon uygulanır; geçmiş satırlar asla yeniden hesaplanmaz.

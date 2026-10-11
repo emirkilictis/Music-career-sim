@@ -1,13 +1,13 @@
 # Music Career Simulator — Tasarım Dokümanları
 
-iOS için tek oyunculu, istatistik odaklı müzik kariyeri simülasyonu.
+iOS ve Android için tek oyunculu, istatistik odaklı müzik kariyeri simülasyonu.
 Oyuncu solo bir sanatçıyı haftalık adımlarla yönetir: single, EP, albüm, varyant,
 rollout, sosyal medya, listeler, sertifikalar, rekorlar ve on yıllara yayılan bir katalog.
 
 > "Bir albüm çıkardım. Şimdi bu hafta ona tam olarak ne olduğunu görmek istiyorum."
 
 Bu klasör, ilk ChatGPT planının incelenip revize edilmiş halidir. İlk plandaki
-genel yön (SwiftUI + saf Swift simülasyon çekirdeği + SQLite/GRDB, aktif/tarihsel
+genel yön (UI'dan bağımsız simülasyon çekirdeği + SQLite, aktif/tarihsel
 dünya ayrımı, deterministik seed, baştan stres testi) korunmuş; tespit edilen
 sorunlar düzeltilmiş ve oyun tasarımı kararları eklenmiştir.
 
@@ -26,7 +26,7 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 
 | # | Karar |
 |---|---|
-| K1 | **Teknoloji:** SwiftUI + saf Swift `SimulationCore` (Swift Package, UI'dan bağımsız, Linux'ta da derlenir) + SQLite/**GRDB**. SwiftData kullanılmayacak. |
+| K1 | **Teknoloji:** **Flutter (Dart)** — iOS ve Android tek kod tabanı. Saf Dart `simulation_core` paketi (UI'dan ve DB'den bağımsız, Linux'ta da çalışır) + SQLite (drift). Önce iOS'ta test, Android aynı koddan. (İlk plandaki SwiftUI, Android isteği nedeniyle değiştirildi.) |
 | K2 | **Kayıt:** Her slot ayrı bir kariyerdir. Her hafta otomatik kayıt. **Kayıt noktası yok, flop geri alınamaz.** |
 | K3 | **Beklenti (anticipation):** Başarılı eradan sonra ara verilirse birikir, ~2–3 yılda tavana ulaşır, **sonra sabit kalır, hiç düşmez** (JT: FutureSex/LoveSounds → 7 yıl → The 20/20 Experience). Tavanı son eranın başarısı belirler. |
 | K4 | **Flop:** Flop eradan sonra beklemek işe yaramaz, beklenti birikmez. Oyun "Comeback Desteği" ile oyuncuya yardım eder; destek beklendikçe azalır, oyuncuyu hızlı comeback'e iter. Sadık hayranlar alt sınır oluşturur (ölüm sarmalı yok). |
@@ -48,14 +48,14 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 ## Yol Haritası
 
 ### Faz 0 — Simülasyon prototipi (UI yok)
-- `SimulationCore` Swift Package: Artist, Song (feat dahil), Album/Edition/Variant, haftalık pipeline, pazar normalizasyonu, dönem tablosu, listeler, AI rakipler, hype/beklenti/flop.
+- `simulation_core` saf Dart paketi: Artist, Song (feat dahil), Album/Edition/Variant, haftalık pipeline, pazar normalizasyonu, dönem tablosu, listeler, AI rakipler, hype/beklenti/flop.
 - Headless CLI: seed ile N yıl simüle et, CSV/JSON döküm al.
 - **Kalibrasyon:** gerçek dünya referans tablosuna göre denge (bkz. simulation.md §12).
 - Determinizm testleri, aktif küme büyüklüğü takibi, 50 yıllık stres testi.
 - Bu faz Mac olmadan da (Linux'ta) geliştirilebilir.
 
 ### Faz 1 — Oynanabilir MVP
-- SwiftUI arayüz, GRDB persistence, kayıt slotları + haftalık autosave.
+- Flutter arayüz (önce iOS'ta test, Android derlemesi de), SQLite persistence, kayıt slotları + haftalık autosave.
 - Sanatçı oluşturma, şarkı/single/albüm yayınlama, rollout planlama (temel).
 - Kapak ve profil görseli yükleme.
 - Listeler (US Songs, US Albums, Global Songs, Global Albums), istatistikler, kariyer özeti.

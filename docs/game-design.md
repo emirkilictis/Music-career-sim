@@ -245,7 +245,7 @@ Görünümler: **tüm kariyer**, **yıl bazında**, **era bazında**, şarkı/al
 | Sosyal medya profil fotoğrafı | Yuvarlak |
 | Sosyal medya postu | Kare veya 4:5 |
 
-- Galeriden seçilir (`PhotosPicker`), kırpma ekranında ayarlanır.
+- Galeriden seçilir, kırpma ekranında ayarlanır.
 - **AI rakiplere görsel yüklenmez.** AI sanatçılar ve görselsiz yayınlar otomatik varsayılan
   görsel alır (isim + renk paletinden üretilen gradient).
 - Görseller sadece cihazda kalır; oyun telifli içerik dağıtmaz.

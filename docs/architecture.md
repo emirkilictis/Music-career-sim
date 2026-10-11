@@ -1,89 +1,102 @@
 # Mimari ve Performans
 
-## 1. Modüller
+Platform: **Flutter (Dart)** — iOS ve Android tek kod tabanından. Önce iOS'ta (iPhone 16 Pro)
+test edilir; Android aynı koddan derlenir.
+
+## 1. Modüller (monorepo)
 
 ```
-MusicCareerApp (Xcode projesi)
-├── App            SwiftUI ekranları, view model'ler (@MainActor)
-├── Persistence    GRDB: şema, migrasyonlar, sorgular, kayıt slotları, görsel deposu
-├── GameContent    JSON konfigürasyon + yükleyici (türler, dönem tablosu, listeler, zorluk, sertifika eşikleri)
-└── SimulationCore Swift Package — saf Swift, Foundation dışında bağımlılık yok,
-                   SwiftUI ve GRDB bilmez, macOS/Linux'ta da derlenir ve test edilir
-    └── SimCLI     headless komut satırı: seed ile N yıl simüle et, CSV/JSON döküm, benchmark
+music-career-sim/
+├── app/                      Flutter uygulaması: ekranlar, state (Riverpod), yerelleştirme
+├── packages/
+│   ├── simulation_core/      SAF Dart — Flutter'a ve veritabanına bağımlı değil.
+│   │                         Linux/macOS'ta `dart test` ile çalışır.
+│   ├── game_content/         JSON konfigürasyon + yükleyici (türler, dönem tablosu, listeler,
+│   │                         zorluk, sertifika eşikleri)
+│   └── persistence/          SQLite (drift): şema, migrasyonlar, sorgular, kayıt slotları, görsel deposu
+└── tools/
+    └── sim_cli/              headless komut satırı: seed ile N yıl simüle et, CSV/JSON döküm, benchmark
 ```
 
-- `SimulationCore` soğuk veriye (örn. "X sanatçısının kataloğu") bir `WorldStore` protokolü
-  üzerinden ulaşır. Uygulamada GRDB implementasyonu, testlerde bellek içi implementasyon kullanılır.
-- Konfigürasyon değişmez değer tipleridir; sıcak yolda string anahtarlı arama yok
-  (tür/pazar/format → integer ID veya enum, dizi indeksiyle erişim).
+- `simulation_core` soğuk veriye (örn. "X sanatçısının kataloğu") bir `WorldStore` arayüzü üzerinden
+  ulaşır. Uygulamada SQLite implementasyonu, testlerde bellek içi implementasyon kullanılır.
+- Konfigürasyon değişmez değer nesneleridir; sıcak yolda string anahtarlı arama yok
+  (tür/pazar/format → integer ID veya enum, liste indeksiyle erişim).
 
-## 2. Concurrency (Swift 6 strict concurrency ilk günden açık)
+## 2. Concurrency — uzun ömürlü simülasyon isolate'i
 
 ```
-@MainActor GameViewModel ──(Sendable komut)──▶ actor SimulationEngine
-                                                 • sıcak dünya durumu BELLEKTE (açılışta bir kez yüklenir)
-                                                 • simulateWeek() senkron, saf fonksiyon (içinde await yok)
-                                                 • sonuç → DatabasePool.write (tek transaction)
-                                                 • commit başarılıysa bellekteki durumu ilerlet
-◀──(Sendable WeekSummary)────────────────────────
+UI isolate (Flutter)                         Simülasyon isolate'i (uygulama açıkken hep yaşar)
+  GameController ──(komut mesajı)──────────▶   • sıcak dünya durumu BELLEKTE (açılışta bir kez yüklenir)
+   (Riverpod)                                  • simulateWeek() senkron, saf fonksiyon
+                                               • sonuç → SQLite yazma bağlantısı (tek transaction)
+                                               • commit başarılıysa bellekteki durumu ilerlet
+  ◀──(WeekSummary mesajı: küçük, sadece özet)──
+  Ekranlar kendi okuma bağlantısıyla sorgular (WAL sayesinde yazma sırasında okuma serbest)
 ```
 
-- **Actor reentrancy:** actor metodunda `await` olursa iki "Next Week" araya girebilir.
-  Simülasyon actor içinde `await`'siz çalışır; UI'da açık durum makinesi (`idle` / `simulating`) tutulur.
-- `DatabasePool` + WAL: yazma sürerken UI geçen haftayı okumaya devam eder.
-- İleri sarma / yıl atlama: her hafta ayrı commit, haftalar arasında `Task.isCancelled` kontrolü,
-  UI sadece ilerleme göstergesini günceller (her hafta ekranlar yeniden çizilmez).
+- Isolate'ler bellek paylaşmaz; UI'a büyük nesne grafiği gönderilmez, sadece özet ve ID'ler.
+- **Çift tıklama koruması:** UI'da açık durum makinesi (`idle` / `simulating`); simülasyon isolate'i
+  komutları sırayla işler.
+- İleri sarma / yıl atlama: her hafta ayrı commit; haftalar arasında iptal kontrolü;
+  UI sadece ilerleme göstergesini günceller.
 
 ## 3. Persistence
 
+- SQLite (drift + sqlite3 native kütüphanesi). Şema ve migrasyonlar drift ile; sıcak yazma yolu
+  simülasyon isolate'indeki tek yazma bağlantısında.
 - PRAGMA: `journal_mode=WAL`, `synchronous=NORMAL` (uygulama çökmesinde veri kaybı yok;
   elektrik kesintisinde en fazla son hafta, önceki hafta geçerli kalır).
 - Haftalık yazım **tek transaction**; `meta.currentWeek` güncellemesi aynı transaction'da.
-- Hazırlanmış statement'lar tekrar kullanılır (GRDB önbelleği); sadece değişen satırlar yazılır.
+- Hazırlanmış statement'lar tekrar kullanılır; sadece değişen satırlar yazılır.
 - Hafta içinde oyuncunun verdiği kararlar (yayın planlama, post) anında kaydedilir.
 
 ### 3.1 Kayıt slotları
 ```
-Application Support/Saves/
+<uygulama destek klasörü>/Saves/
   <slotID>/career.sqlite (+ -wal, -shm)
-  <slotID>/Assets/<hash>.heic, <hash>_thumb.heic
+  <slotID>/Assets/<hash>.jpg, <hash>_thumb.jpg
   <slotID>/summary.json      ← slot listesi ekranı için (sanatçı adı, yıl, hafta, avatar);
                                her hafta güncellenir, slot listesi büyük DB'leri açmaz
 ```
 - Her slot ayrı kariyer; kayıt noktası yok.
-- Canlı DB iCloud Documents ile senkronize edilmez (WAL bozulma riski).
-  Cihazın kendi iCloud yedeği Application Support'u kapsar; ileride dışa aktarma `VACUUM INTO` ile.
+- Canlı DB bulut senkronizasyon klasörüne konmaz (WAL bozulma riski). Cihaz yedekleri uygulama destek
+  klasörünü kapsar; ileride dışa aktarma `VACUUM INTO` ile.
 
 ## 4. Görsel pipeline'ı
 
-1. `PhotosPicker` → kırpma ekranı (kare / yuvarlak / 16:9 / 4:5).
-2. **ImageIO** ile küçültme (`CGImageSourceCreateThumbnailAtIndex`): orijinal belleğe tam açılmaz.
+1. Galeriden seçim (`image_picker`) → kırpma ekranı (`image_cropper`; kare / yuvarlak / 16:9 / 4:5).
+2. Küçültme arka planda (isolate), orijinal görsel UI belleğine tam açılmaz.
 3. İki boyut kaydedilir: büyük (~1024 px, detay) ve küçük thumbnail (~200 px, liste satırları).
 4. Dosya adı = içerik hash'i (aynı görsel bir kez saklanır); DB'de `asset` satırı + `refCount`.
 5. `refCount` sıfıra düşen dosyalar silinir.
 6. Görsel yoksa: isim + paletten deterministik gradient kapak (AI sanatçılar hep bununla).
-7. Liste satırları her zaman thumbnail kullanır; görseller bellek içi küçük bir LRU önbellekte tutulur.
+7. Liste satırları her zaman thumbnail ve `cacheWidth` ile çizilir; görsel önbelleği sınırlıdır.
 
-## 5. SwiftUI performansı
+## 5. Arayüz performansı
 
-- Dev bir `@Observable GameState` yok; her ekranın kendi küçük view model'i ve sorgusu var.
-- Haftalık yenileme tek "hafta değişti" sinyaliyle; geniş tablolarda GRDB `ValueObservation` yok.
-- `Identifiable` için her zaman DB ID'si (`id: UUID()` üreten init'ler listeyi her seferinde sıfırdan çizdirir).
-- Sayı biçimlendirme `.formatted()` / önbelleğe alınmış formatter ile; `body` içinde formatter oluşturulmaz.
-- Uzun süreli `Task`'larda `[weak self]` veya iptal; view model'ler task'lar tarafından tutulmaz.
+- Dev, tek parça bir oyun durumu nesnesi yok; her ekranın kendi küçük provider'ı ve sorgusu var.
+- Haftalık yenileme tek "hafta değişti" sinyaliyle; ekranlar sadece ihtiyaç duyduğu veriyi yeniden sorgular.
+- Uzun listeler `ListView.builder` (tembel); satırlarda kararlı `Key` olarak DB ID'si; mümkün olan
+  her yerde `const` widget.
+- Sayı biçimlendiriciler (`NumberFormat`) önbelleğe alınır, `build` içinde oluşturulmaz.
+- Stream/abonelik ve controller'lar `dispose` edilir (bellek sızıntısı).
 - Sayfalama keyset ile (`WHERE week < ? ORDER BY week DESC LIMIT 50`), `OFFSET` değil.
-- Grafikler ay/yıl toplama tablolarından okunur; liste pozisyonunda bucket'ın en iyi değeri gösterilir.
+- Grafikler (`fl_chart`) ay/yıl toplama tablolarından okunur; liste pozisyonunda bucket'ın en iyi
+  değeri gösterilir.
+- Arayüz kendi tasarım dilinde olur (istatistik kartları, listeler); iOS'ta Cupertino davranışları
+  (geri kaydırma, kaydırma fiziği) korunur.
 
 ## 6. Yerelleştirme
 
-- String Catalog (`.xcstrings`), kaynak dil İngilizce, ek dil Türkçe.
+- Flutter `gen-l10n` + ARB dosyaları; şablon dil İngilizce (`app_en.arb`), ek dil Türkçe (`app_tr.arb`).
 - Konfigürasyondaki görünen isimler (türler, platformlar, formatlar) yerelleştirme anahtarıyla.
-- Sayı/tarih: `FormatStyle` (compact notation dile göre); hafta gösterimi yerelleştirilmiş format.
+- Sayı/tarih: `intl` (`NumberFormat.compact(locale:)`); hafta gösterimi yerelleştirilmiş format.
 
 ## 7. Performans hedefleri (iPhone 16 Pro)
 
-Hedefler eski cihazlar düşünülerek 3–4 kat sıkı tutulur. Ölçüm **Release (-O) build'de ve gerçek cihazda**
-yapılır (Debug Swift sayısal kodda 10–100 kat yavaştır).
+Hedefler eski ve ucuz Android cihazlar düşünülerek 3–4 kat sıkı tutulur. Ölçüm **profile/release
+modunda ve gerçek cihazda** yapılır (Flutter debug modu JIT ile çalışır ve çok yavaştır).
 
 | Senaryo | Hedef (iPhone 16 Pro) |
 |---|---|
@@ -110,18 +123,20 @@ Bütçenin çoğu DB yazımı ve UI yenilemesine gider; 1.500 şarkının matema
    - bellek kullanımı, kayıt süresi, açılış süresi
 4. **Regresyon eşiği:** N koşunun medyanı, göreli fark; belirgin yavaşlama inceleme olmadan birleştirilmez.
 5. **Sorgu planı testi:** sıcak sorgularda `EXPLAIN QUERY PLAN` → büyük tablolarda `SCAN` yasak.
-6. **Kalibrasyon raporu:** SimCLI ile dönem referanslarına karşı dağılımlar (simulation.md §12).
+6. **Kalibrasyon raporu:** sim_cli ile dönem referanslarına karşı dağılımlar (simulation.md §12).
 
 ## 9. Debug ekranı ve log
 
-- Faz süreleri `ContinuousClock` ile; fazlar `OSSignposter` ile işaretlenir (Instruments'ta görünür).
+- Faz süreleri `Stopwatch` ile; fazlar `dart:developer` `Timeline` ile işaretlenir (DevTools'ta görünür).
 - Gösterilenler: toplam hafta süresi ve faz kırılımı, aktif şarkı sayısı, liste adayı sayısı,
   yazılan satır sayısı, dormant uzlaştırma sayısı, bellek.
 - "Toplamları yeniden hesapla ve doğrula" aracı.
-- Log: `os.Logger` kategorileriyle (debug seviyesi release'te kalıcı yazılmaz).
+- Log sadece debug/profile modunda; release'te kapalı.
 
 ## 10. Geliştirme ortamı
 
-- Geliştirme: M2 MacBook Air 8 GB + Xcode. Simülatör az kullanılır; test iPhone 16 Pro'da.
-- `SimulationCore` ve `SimCLI` Mac olmadan da (Linux'ta) geliştirilip test edilebilir; Faz 0 buna uygundur.
-- İleride TestFlight ile eski iPhone'lu test kullanıcıları.
+- Geliştirme: M2 MacBook Air 8 GB + Flutter SDK + Xcode (iOS derlemesi için şart) + Android SDK.
+- Test: iPhone 16 Pro. Android için ileride ucuz bir Android telefon önerilir (emülatör 8 GB RAM'de ağır).
+- `simulation_core` ve `sim_cli` saf Dart olduğu için Mac olmadan da (Linux'ta) geliştirilip test
+  edilebilir; Faz 0 buna uygundur.
+- Mağazalar: App Store (yıllık geliştirici ücreti), Google Play (tek seferlik kayıt ücreti).
