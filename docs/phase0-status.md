@@ -123,6 +123,6 @@ Bulunan ve düzeltilen: her hafta tüm aktif satırları `INSERT OR REPLACE` ile
    veritabanı boyutu (50 yılda 107 MB) ileride geçmiş sıkıştırmasıyla küçültülebilir; checkpoint'ler
    uygulamada boşta/arka planda yapılmalı.
 7. İsim çeşitliliği az (aynı şarkı isimleri sık tekrar ediyor).
+8. Bot oyuncu 20 yılda fame 0,43'e ulaşıyor, #1 yok — oyuncu dengesi zorluk ayarlarıyla birlikte ele alınacak.
 9. Hamlesiz süperstar 2025 ilk haftası (~620K) biraz yüksek; ileride düşürülecek.
 10. AI rakipler bilerek "mega era" kurmuyor (karar: AI çok güçlü olmasın).
-8. Bot oyuncu 20 yılda fame 0,43'e ulaşıyor, #1 yok — oyuncu dengesi zorluk ayarlarıyla birlikte ele alınacak.
