@@ -247,7 +247,7 @@ class _YearReport {
     out.writeln(
         'SCALE: #1 song median weekly streams ${fmt(_median(no1Streams))}, '
         'downloads ${fmt(_median(no1Downloads))} · #100 streams ${fmt(_median(no100Streams))} · '
-        '#1 album ${fmt(_median(no1AlbumUnits))} · #200 album units ${fmt(_median(no200Units))}');
+        '#1 album ${fmt(_median(no1AlbumUnits))} · #100 album units ${fmt(_median(no200Units))}');
     stdout.write(out.toString());
   }
 }

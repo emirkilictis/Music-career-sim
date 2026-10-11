@@ -124,7 +124,7 @@ void main() {
     final top = store.db.select(
         'SELECT COUNT(*) AS n FROM chartEntry WHERE chartId = ? AND week = ?',
         [Charts.usAlbums, w.week - 1]);
-    expect(top.first['n'], 200);
+    expect(top.first['n'], 100);
     final playerWeeks = store.db.select('SELECT COUNT(*) AS n FROM playerWeek');
     expect(playerWeeks.first['n'], 70);
     final albumWeeks = store.db.select(

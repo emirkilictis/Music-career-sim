@@ -84,7 +84,7 @@ abstract final class Charts {
         key: 'chart.us.albums',
         kind: ChartKind.albums,
         market: ChartMarket.us,
-        size: 200),
+        size: 100),
     ChartDef(
         id: ukAlbums,
         key: 'chart.uk.albums',
@@ -96,7 +96,7 @@ abstract final class Charts {
         key: 'chart.global.albums',
         kind: ChartKind.albums,
         market: ChartMarket.global,
-        size: 200),
+        size: 100),
     ChartDef(
         id: platformGlobal,
         key: 'chart.platform.global',

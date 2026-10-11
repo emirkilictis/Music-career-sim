@@ -406,9 +406,9 @@ Bu hafta: 48,2M stream · Kuzey Amerika 21,4M · Avrupa 13,1M · Diğer 13,7M
 
 | Liste | Ölçtüğü |
 |---|---|
-| ABD Şarkılar (100), ABD Albümler (200) | Kuzey Amerika × ABD payı; satış + stream + radyo; recurrent kuralı |
+| ABD Şarkılar (100), ABD Albümler (100) | Kuzey Amerika × ABD payı; satış + stream + radyo; recurrent kuralı |
 | İngiltere Şarkılar (100), İngiltere Albümler (100) | Avrupa × İngiltere payı; recurrent kuralı |
-| Global Şarkılar (200), Global Albümler (200) | Tüm bölgeler; stream + satış (radyo yok) |
+| Global Şarkılar (200), Global Albümler (100) | Tüm bölgeler; stream + satış (radyo yok) |
 | Platform Global / Kuzey Amerika / Avrupa Top 50 | Sadece stream (2009/2011'den itibaren) |
 
 Ülke listeleri bölgenin bir payıdır (ABD ≈ Kuzey Amerika'nın %89'u, İngiltere ≈ Avrupa'nın %16'sı);

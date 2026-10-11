@@ -101,6 +101,9 @@ Son 5 yılın kayıt dağılımı (ms/hafta): değişenler 2,8 · sıcak blok 10
 commit 3,4 · checkpoint 13,6 (bu sunucuda fsync yavaş). Veritabanı 50 yılda 162 MB (9 listenin tam
 geçmişi; ayrıntılı haftalık istatistikler yalnızca oyuncunun şarkı/albümleri için).
 
+Albüm listeleri 100 sıraya indirildikten sonra (ABD ve Global): aktif albüm 207→313, simülasyon
+1,7→2,4 ms/hafta (50 yıl).
+
 Bölgesiz sürümde (karşılaştırma için) simülasyon ~1,0 ms, kayıt ~24 ms, DB 107 MB idi.
 **Bilinen:** aktif şarkı/albüm sayısı 50 yılda %12 / %45 artıyor (global listelerin düşük
 eşiklerine yakın katalog); süre de buna bağlı olarak artıyor. 100 yılda bile hedefin çok altında
