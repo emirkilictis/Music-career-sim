@@ -85,7 +85,7 @@ class _WeekTransitionState extends State<WeekTransition>
               width: 250,
               padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.calendar_month_rounded,
+                Icon(Icons.calendar_month_rounded,
                     color: AppColors.lilac, size: 30),
                 const SizedBox(height: 10),
                 SizedBox(
@@ -114,7 +114,7 @@ class _WeekTransitionState extends State<WeekTransition>
                   )),
                 ),
                 Text('${GameTime.yearOf(week)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.textMuted,
                         fontWeight: FontWeight.w700)),
                 const SizedBox(height: 14),

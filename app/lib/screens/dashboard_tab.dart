@@ -54,12 +54,11 @@ class _WeekCard extends StatelessWidget {
     if (career.lastWeekPlayed < 0) {
       return _Card(
         child: Row(children: [
-          const Icon(Icons.play_circle_outline_rounded,
-              color: AppColors.textMuted),
+          Icon(Icons.play_circle_outline_rounded, color: AppColors.textMuted),
           const SizedBox(width: 12),
           Expanded(
               child: Text(l.newsEmptyStart,
-                  style: const TextStyle(color: AppColors.textMuted))),
+                  style: TextStyle(color: AppColors.textMuted))),
         ]),
       );
     }
@@ -93,7 +92,7 @@ class _WeekCard extends StatelessWidget {
       highlight: top != null && top.event.isMajor,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(l.weekNewsTitle(GameTime.weekOfYear(career.lastWeekPlayed)),
-            style: const TextStyle(
+            style: TextStyle(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w700,
                 fontSize: 13)),
@@ -116,13 +115,13 @@ class _WeekCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 8, left: 52),
             child: Text(fmt.event(line),
-                style: const TextStyle(color: AppColors.textMuted)),
+                style: TextStyle(color: AppColors.textMuted)),
           ),
         if (lines.length > 3)
           Padding(
             padding: const EdgeInsets.only(top: 6, left: 52),
             child: Text(l.moreNews(lines.length - 3),
-                style: const TextStyle(color: AppColors.textFaint)),
+                style: TextStyle(color: AppColors.textFaint)),
           ),
         const SizedBox(height: 14),
         Wrap(spacing: 8, runSpacing: 8, children: changes),
@@ -219,7 +218,7 @@ class _NextStepCard extends StatelessWidget {
     return _Card(
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(l.nextStep,
-            style: const TextStyle(
+            style: TextStyle(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w700,
                 fontSize: 13)),
@@ -234,7 +233,7 @@ class _NextStepCard extends StatelessWidget {
                   style: const TextStyle(
                       fontSize: 17, fontWeight: FontWeight.w700)),
               const SizedBox(height: 3),
-              Text(body, style: const TextStyle(color: AppColors.textMuted)),
+              Text(body, style: TextStyle(color: AppColors.textMuted)),
             ]),
           ),
         ]),
@@ -286,7 +285,7 @@ class _StatusRow extends StatelessWidget {
           child: _StatusTile(
               label: l.fame,
               value: fmt.percent(p.fame),
-              change: delta(p.fame * 100, (b?.fame ?? 0) * 100,
+              change: delta(p.fame * 100, b == null ? null : b.fame * 100,
                   (v) => v.toStringAsFixed(1)),
               up: b == null || p.fame >= b.fame)),
       const SizedBox(width: 10),
@@ -351,7 +350,7 @@ class _StatusTile extends StatelessWidget {
             Text(label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                     color: AppColors.textMuted,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600)),
@@ -425,8 +424,8 @@ class _EnergySheet extends StatelessWidget {
                 value: p.creativeEnergy / 100,
                 text: '${p.creativeEnergy.round()}',
                 colors: p.creativeEnergy < 30
-                    ? const [AppColors.coral, AppColors.peach]
-                    : const [AppColors.mint, AppColors.sky]),
+                    ? [AppColors.coral, AppColors.peach]
+                    : [AppColors.mint, AppColors.sky]),
             const SizedBox(height: 6),
             Text(
               p.burnoutWeeksLeft > 0
@@ -434,17 +433,17 @@ class _EnergySheet extends StatelessWidget {
                   : p.restingThisWeek
                       ? l.restingThisWeek
                       : l.songsLeftThisWeek(p.songsLeftThisWeek),
-              style: const TextStyle(
+              style: TextStyle(
                   fontWeight: FontWeight.w600, color: AppColors.textMuted),
             ),
             Text(
                 l.energyNextWeek(
                     '${p.energyNextWeek >= 0 ? '+' : '−'}${p.energyNextWeek.abs().round()}'),
-                style: const TextStyle(color: AppColors.textFaint)),
+                style: TextStyle(color: AppColors.textFaint)),
             if (p.creativeEnergy < 30 && p.burnoutWeeksLeft == 0) ...[
               const SizedBox(height: 8),
               Text(l.lowEnergyWarning,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.coral, fontWeight: FontWeight.w600)),
             ],
             if (canRest) ...[
@@ -452,8 +451,7 @@ class _EnergySheet extends StatelessWidget {
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(46)),
-                icon: const Icon(Icons.beach_access_rounded,
-                    color: AppColors.mint),
+                icon: Icon(Icons.beach_access_rounded, color: AppColors.mint),
                 label: Text(l.restThisWeek),
                 onPressed: career.busy
                     ? null
@@ -468,8 +466,7 @@ class _EnergySheet extends StatelessWidget {
               const SizedBox(height: 4),
               Text(l.restHint(Actions.energyRestBonus.round()),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: AppColors.textFaint, fontSize: 12.5)),
+                  style: TextStyle(color: AppColors.textFaint, fontSize: 12.5)),
             ],
           ],
         ),
@@ -518,18 +515,16 @@ class _MoreSection extends StatelessWidget {
               Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: subtitle.isEmpty
               ? null
-              : Text(subtitle,
-                  style: const TextStyle(color: AppColors.textFaint)),
+              : Text(subtitle, style: TextStyle(color: AppColors.textFaint)),
           trailing: trailing ??
-              const Icon(Icons.chevron_right_rounded,
-                  color: AppColors.textFaint),
+              Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
           onTap: onTap,
         );
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Padding(
         padding: const EdgeInsets.only(left: 4, bottom: 4),
         child: Text(l.sideIncome,
-            style: const TextStyle(
+            style: TextStyle(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w700,
                 fontSize: 13)),
@@ -553,7 +548,7 @@ class _MoreSection extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.only(left: 4, bottom: 4),
         child: Text(l.platforms,
-            style: const TextStyle(
+            style: TextStyle(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w700,
                 fontSize: 13)),
@@ -571,9 +566,8 @@ class _MoreSection extends StatelessWidget {
         title: const Text(platformName,
             style: TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Text(l.streamifyTileHint,
-            style: const TextStyle(color: AppColors.textFaint)),
-        trailing:
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
+            style: TextStyle(color: AppColors.textFaint)),
+        trailing: Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
         onTap: () => pushInCareer(context, const StreamifyScreen()),
       ),
     ]);
@@ -647,7 +641,7 @@ Future<void> pickJob(BuildContext context) async {
                   : '${l.jobTerms(fmt.money(j.wageCents), j.energyCost.round())}\n${fmt.jobPerk(j)}'),
               isThreeLine: j != Job.none,
               trailing: j == current
-                  ? const Icon(Icons.check_rounded, color: AppColors.mint)
+                  ? Icon(Icons.check_rounded, color: AppColors.mint)
                   : null,
               onTap: () => Navigator.pop(c, j),
             ),
@@ -697,7 +691,7 @@ class _AdDialogState extends State<_AdDialog> {
     return AlertDialog(
       title: Text(l.adTitle),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        const IconBubble(Icons.ondemand_video_rounded,
+        IconBubble(Icons.ondemand_video_rounded,
             color: AppColors.peach, size: 72),
         const SizedBox(height: 18),
         PillBar(value: 1 - _left / _seconds, height: 10),

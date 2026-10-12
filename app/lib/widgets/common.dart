@@ -14,7 +14,7 @@ void showError(BuildContext context, Object error) {
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(
       content: Row(children: [
-        const Icon(Icons.info_outline, color: AppColors.coral, size: 20),
+        Icon(Icons.info_outline, color: AppColors.coral, size: 20),
         const SizedBox(width: 10),
         Expanded(child: Text(context.fmt.error(error))),
       ]),
@@ -66,7 +66,7 @@ class Section extends StatelessWidget {
                 ],
                 Expanded(
                   child: Text(title,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: AppColors.textMuted)),
@@ -111,7 +111,7 @@ class StatTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis),
         const SizedBox(height: 2),
         Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textMuted),
@@ -148,11 +148,13 @@ class MeterRow extends StatelessWidget {
       required this.label,
       required this.value,
       required this.text,
-      this.colors = const [AppColors.lilac, AppColors.pink]});
+      this.colors});
   final String label;
   final double value;
   final String text;
-  final List<Color> colors;
+
+  /// Gradient of the fill; the signature lilac → pink when null.
+  final List<Color>? colors;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +164,7 @@ class MeterRow extends StatelessWidget {
         SizedBox(
             width: 92,
             child: Text(label,
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.w600, color: AppColors.textMuted))),
         Expanded(child: PillBar(value: value, colors: colors)),
         const SizedBox(width: 12),
@@ -178,12 +180,11 @@ class MeterRow extends StatelessWidget {
 
 class PillBar extends StatelessWidget {
   const PillBar(
-      {super.key,
-      required this.value,
-      this.colors = const [AppColors.lilac, AppColors.pink],
-      this.height = 10});
+      {super.key, required this.value, this.colors, this.height = 10});
   final double value;
-  final List<Color> colors;
+
+  /// Gradient of the fill; the signature lilac → pink when null.
+  final List<Color>? colors;
   final double height;
 
   @override
@@ -202,7 +203,8 @@ class PillBar extends StatelessWidget {
             : Container(
                 width: (c.maxWidth * v).clamp(height, c.maxWidth),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: colors),
+                  gradient: LinearGradient(
+                      colors: colors ?? [AppColors.lilac, AppColors.pink]),
                   borderRadius: BorderRadius.circular(height),
                 ),
               ),
@@ -227,17 +229,19 @@ class EmptyNote extends StatelessWidget {
           ],
           Text(text,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textMuted)),
+              style: TextStyle(color: AppColors.textMuted)),
         ]),
       );
 }
 
 /// Small rounded label.
 class Tag extends StatelessWidget {
-  const Tag(this.text, {super.key, this.color = AppColors.lilac, this.icon});
+  const Tag(this.text, {super.key, Color? color, this.icon}) : _color = color;
   final String text;
-  final Color color;
+  final Color? _color;
   final IconData? icon;
+
+  Color get color => _color ?? AppColors.lilac;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -301,7 +305,7 @@ class GradientButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (busy)
-                    const SizedBox(
+                    SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
@@ -313,7 +317,7 @@ class GradientButton extends StatelessWidget {
                     child: Text(label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AppColors.onAccent,
                             fontWeight: FontWeight.w900,
                             fontSize: 16)),

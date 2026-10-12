@@ -45,8 +45,7 @@ class MediaTile extends StatelessWidget {
                 Text(subtitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        color: AppColors.textMuted, fontSize: 13)),
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
               ],
             ),
           ),
@@ -54,11 +53,11 @@ class MediaTile extends StatelessWidget {
           if (value != null) ...[
             const SizedBox(width: 10),
             Text(value!,
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.w800, color: AppColors.textMuted)),
           ],
           if (onTap != null)
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
+            Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
         ]),
       ),
     );

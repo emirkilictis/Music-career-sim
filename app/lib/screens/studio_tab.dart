@@ -261,7 +261,7 @@ class _StudioTabState extends State<StudioTab> {
                   : p.restingThisWeek
                       ? l.restingThisWeek
                       : l.songsLeftThisWeek(p.songsLeftThisWeek),
-              style: const TextStyle(color: AppColors.textMuted)),
+              style: TextStyle(color: AppColors.textMuted)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -286,7 +286,7 @@ class _StudioTabState extends State<StudioTab> {
               ),
               const SizedBox(height: 14),
               Text(l.studioBudget,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: AppColors.textMuted,
                       fontWeight: FontWeight.w600,
                       fontSize: 13)),
@@ -318,7 +318,7 @@ class _StudioTabState extends State<StudioTab> {
               if (canWrite && p.creativeEnergy < 30) ...[
                 const SizedBox(height: 12),
                 Text(l.lowEnergyWarning,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: AppColors.coral, fontWeight: FontWeight.w600)),
               ],
               const SizedBox(height: 16),
@@ -377,7 +377,7 @@ class _ChoiceRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(label,
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: AppColors.textMuted,
                             fontWeight: FontWeight.w600,
                             fontSize: 13)),
@@ -389,11 +389,11 @@ class _ChoiceRow extends StatelessWidget {
                             fontSize: 16, fontWeight: FontWeight.w700)),
                     if (detail != null)
                       Text(detail!,
-                          style: const TextStyle(
+                          style: TextStyle(
                               color: AppColors.textFaint, fontSize: 13)),
                   ]),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
+            Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
           ]),
         ),
       );

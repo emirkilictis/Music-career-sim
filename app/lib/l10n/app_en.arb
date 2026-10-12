@@ -155,6 +155,9 @@
       }
     }
   },
+  "themeTitle": "Theme",
+  "themeNavy": "Vivid navy",
+  "themeLight": "Light",
   "weekTransition": "Week transition",
   "weekTransitionHint": "A short animation when a week ends.",
   "skippingYear": "Skipping a year…",

@@ -218,5 +218,16 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Day job'));
     await shot(tester, '21_job_picker');
+    await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
+
+    // Light theme from Settings: the open screen repaints in place.
+    app.settings.setLightTheme(true);
+    await tester.pumpAndSettle();
+    await shot(tester, '22_home_light');
+    await tab(tester, 'Studio');
+    await shot(tester, '23_studio_light');
+    app.settings.setLightTheme(false);
+    await tester.pumpAndSettle();
   });
 }

@@ -1,128 +1,126 @@
 import 'package:flutter/material.dart';
 
-/// Theme variant, chosen at build time while we compare looks
-/// (`--dart-define=APP_THEME=plum|navy|light`).
-const _theme = String.fromEnvironment('APP_THEME', defaultValue: 'plum');
-const _navy = _theme == 'navy';
-const _light = _theme == 'light';
+/// One set of app colors. The game has two (docs K41): a vivid navy
+/// default and a light theme chosen in Settings.
+class Palette {
+  const Palette({
+    required this.isLight,
+    required this.bg,
+    required this.surface,
+    required this.surfaceHigh,
+    required this.line,
+    required this.surfaceLow,
+    required this.surfaceHighest,
+    required this.accentSoft,
+    required this.onAccent,
+    required this.text,
+    required this.textMuted,
+    required this.textFaint,
+    required this.lilac,
+    required this.pink,
+    required this.peach,
+    required this.mint,
+    required this.sky,
+    required this.butter,
+    required this.coral,
+  });
 
-/// App colors. Three looks are being compared (feedback: "too dark, too
-/// sleepy"): plum (dark, pastel), navy (lighter blue base, vivid accents)
-/// and light.
+  final bool isLight;
+  final Color bg, surface, surfaceHigh, line, surfaceLow, surfaceHighest;
+  final Color accentSoft, onAccent;
+  final Color text, textMuted, textFaint;
+  final Color lilac, pink, peach, mint, sky, butter, coral;
+
+  /// Lighter blue base with saturated accents (the default).
+  static const navy = Palette(
+    isLight: false,
+    bg: Color(0xFF1B2540),
+    surface: Color(0xFF263253),
+    surfaceHigh: Color(0xFF32406A),
+    line: Color(0xFF3D4C78),
+    surfaceLow: Color(0xFF16203A),
+    surfaceHighest: Color(0xFF3C4B7A),
+    accentSoft: Color(0xFF4B4A9C),
+    onAccent: Color(0xFF1B1530),
+    text: Color(0xFFFFFFFF),
+    textMuted: Color(0xFFBAC4DE),
+    textFaint: Color(0xFF8592B3),
+    lilac: Color(0xFFA48BFF),
+    pink: Color(0xFFFF6BA8),
+    peach: Color(0xFFFFA25C),
+    mint: Color(0xFF3BE3A4),
+    sky: Color(0xFF55BDFF),
+    butter: Color(0xFFFFD54F),
+    coral: Color(0xFFFF6470),
+  );
+
+  /// Light lilac-white base with strong accents.
+  static const light = Palette(
+    isLight: true,
+    bg: Color(0xFFF4F1FB),
+    surface: Color(0xFFFFFFFF),
+    surfaceHigh: Color(0xFFEDE8F7),
+    line: Color(0xFFDCD5EA),
+    surfaceLow: Color(0xFFFFFFFF),
+    surfaceHighest: Color(0xFFE3DCF0),
+    accentSoft: Color(0xFFE2D9FF),
+    onAccent: Color(0xFFFFFFFF),
+    text: Color(0xFF1A1530),
+    textMuted: Color(0xFF5E5675),
+    textFaint: Color(0xFF948CAA),
+    lilac: Color(0xFF6D4AFF),
+    pink: Color(0xFFE5407E),
+    peach: Color(0xFFF2711C),
+    mint: Color(0xFF0FA968),
+    sky: Color(0xFF1C8FE6),
+    butter: Color(0xFFD99A00),
+    coral: Color(0xFFE5484D),
+  );
+}
+
+/// The current app colors ([Palette.navy] unless Settings picked light).
+/// Read at build time, so a theme change rebuilds the whole app.
 abstract final class AppColors {
-  static const isLight = _light;
+  /// Set by [AppSettings] at start and when the theme changes.
+  static Palette palette = Palette.navy;
+  static Palette get _p => palette;
 
-  static const bg = _light
-      ? Color(0xFFF4F1FB)
-      : _navy
-          ? Color(0xFF1B2540)
-          : Color(0xFF13111A);
-  static const surface = _light
-      ? Color(0xFFFFFFFF)
-      : _navy
-          ? Color(0xFF263253)
-          : Color(0xFF1C1926);
-  static const surfaceHigh = _light
-      ? Color(0xFFEDE8F7)
-      : _navy
-          ? Color(0xFF32406A)
-          : Color(0xFF26222F);
-  static const line = _light
-      ? Color(0xFFDCD5EA)
-      : _navy
-          ? Color(0xFF3D4C78)
-          : Color(0xFF332E3D);
-
-  /// Darker than [bg] (nav bar) and the strongest raised surface.
-  static const surfaceLow = _light
-      ? Color(0xFFFFFFFF)
-      : _navy
-          ? Color(0xFF16203A)
-          : Color(0xFF17151F);
-  static const surfaceHighest = _light
-      ? Color(0xFFE3DCF0)
-      : _navy
-          ? Color(0xFF3C4B7A)
-          : Color(0xFF2E2938);
-
-  /// Selected chip / segment / nav indicator.
-  static const accentSoft = _light
-      ? Color(0xFFE2D9FF)
-      : _navy
-          ? Color(0xFF4B4A9C)
-          : Color(0xFF3A3058);
-
-  /// Text on accent-colored buttons.
-  static const onAccent = _light ? Color(0xFFFFFFFF) : Color(0xFF1B1530);
-
-  static const text = _light
-      ? Color(0xFF1A1530)
-      : _navy
-          ? Color(0xFFFFFFFF)
-          : Color(0xFFF4F1F8);
-  static const textMuted = _light
-      ? Color(0xFF5E5675)
-      : _navy
-          ? Color(0xFFBAC4DE)
-          : Color(0xFFA9A2B6);
-  static const textFaint = _light
-      ? Color(0xFF948CAA)
-      : _navy
-          ? Color(0xFF8592B3)
-          : Color(0xFF6F6880);
-
-  static const lilac = _light
-      ? Color(0xFF6D4AFF)
-      : _navy
-          ? Color(0xFFA48BFF)
-          : Color(0xFFB9A6FF);
-  static const pink = _light
-      ? Color(0xFFE5407E)
-      : _navy
-          ? Color(0xFFFF6BA8)
-          : Color(0xFFFFA8C5);
-  static const peach = _light
-      ? Color(0xFFF2711C)
-      : _navy
-          ? Color(0xFFFFA25C)
-          : Color(0xFFFFC59E);
-  static const mint = _light
-      ? Color(0xFF0FA968)
-      : _navy
-          ? Color(0xFF3BE3A4)
-          : Color(0xFF9BE7C4);
-  static const sky = _light
-      ? Color(0xFF1C8FE6)
-      : _navy
-          ? Color(0xFF55BDFF)
-          : Color(0xFF9CCBFF);
-  static const butter = _light
-      ? Color(0xFFD99A00)
-      : _navy
-          ? Color(0xFFFFD54F)
-          : Color(0xFFFFE29A);
-  static const coral = _light
-      ? Color(0xFFE5484D)
-      : _navy
-          ? Color(0xFFFF6470)
-          : Color(0xFFFF8F8F);
+  static bool get isLight => _p.isLight;
+  static Color get bg => _p.bg;
+  static Color get surface => _p.surface;
+  static Color get surfaceHigh => _p.surfaceHigh;
+  static Color get line => _p.line;
+  static Color get surfaceLow => _p.surfaceLow;
+  static Color get surfaceHighest => _p.surfaceHighest;
+  static Color get accentSoft => _p.accentSoft;
+  static Color get onAccent => _p.onAccent;
+  static Color get text => _p.text;
+  static Color get textMuted => _p.textMuted;
+  static Color get textFaint => _p.textFaint;
+  static Color get lilac => _p.lilac;
+  static Color get pink => _p.pink;
+  static Color get peach => _p.peach;
+  static Color get mint => _p.mint;
+  static Color get sky => _p.sky;
+  static Color get butter => _p.butter;
+  static Color get coral => _p.coral;
 
   static const gold = Color(0xFFF2C14E);
 
   /// Signature gradient (buttons, hero cards).
-  static const sunset = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [lilac, pink, peach],
-  );
+  static LinearGradient get sunset => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [lilac, pink, peach],
+      );
 
   /// Soft version for large backgrounds.
   static LinearGradient haze(Color a, Color b) => LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          a.withValues(alpha: _light ? 0.22 : 0.32),
-          b.withValues(alpha: _light ? 0.08 : 0.10)
+          a.withValues(alpha: isLight ? 0.22 : 0.32),
+          b.withValues(alpha: isLight ? 0.08 : 0.10)
         ],
       );
 }

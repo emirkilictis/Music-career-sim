@@ -160,7 +160,7 @@ class _GameShellState extends State<GameShell> {
             PillBar(value: n / weeks, height: 12),
             const SizedBox(height: 12),
             Text(l.weeksPlayed(n),
-                style: const TextStyle(color: AppColors.textMuted)),
+                style: TextStyle(color: AppColors.textMuted)),
           ]),
         ),
       ),
@@ -252,7 +252,7 @@ class _GameShellState extends State<GameShell> {
                               style: const TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.w900)),
                           Text(fmt.week(career.week),
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: AppColors.textMuted,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13)),

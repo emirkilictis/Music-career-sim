@@ -24,6 +24,16 @@ class SettingsScreen extends StatelessWidget {
           ]),
         ),
         const Divider(),
+        ListTile(title: Text(l.themeTitle)),
+        RadioGroup<bool>(
+          groupValue: settings.lightTheme,
+          onChanged: (v) => settings.setLightTheme(v ?? false),
+          child: Column(children: [
+            RadioListTile<bool>(value: false, title: Text(l.themeNavy)),
+            RadioListTile<bool>(value: true, title: Text(l.themeLight)),
+          ]),
+        ),
+        const Divider(),
         SwitchListTile(
           title: Text(l.weekTransition),
           subtitle: Text(l.weekTransitionHint),

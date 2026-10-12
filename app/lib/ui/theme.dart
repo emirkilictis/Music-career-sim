@@ -4,7 +4,7 @@ import 'palette.dart';
 
 /// The app theme built on [AppColors].
 ThemeData appTheme() {
-  const scheme = ColorScheme(
+  final scheme = ColorScheme(
     brightness: AppColors.isLight ? Brightness.light : Brightness.dark,
     primary: AppColors.lilac,
     onPrimary: AppColors.onAccent,
@@ -55,7 +55,7 @@ ThemeData appTheme() {
       margin: EdgeInsets.zero,
       shape: shape20,
     ),
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: AppColors.bg,
       surfaceTintColor: Colors.transparent,
       centerTitle: false,
@@ -65,7 +65,7 @@ ThemeData appTheme() {
           fontWeight: FontWeight.w800,
           color: AppColors.text),
     ),
-    dividerTheme: const DividerThemeData(color: AppColors.line, space: 1),
+    dividerTheme: DividerThemeData(color: AppColors.line, space: 1),
     listTileTheme: const ListTileThemeData(
         contentPadding: EdgeInsets.symmetric(horizontal: 16)),
     filledButtonTheme: FilledButtonThemeData(
@@ -78,7 +78,7 @@ ThemeData appTheme() {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         shape: const StadiumBorder(),
-        side: const BorderSide(color: AppColors.line, width: 1.4),
+        side: BorderSide(color: AppColors.line, width: 1.4),
         foregroundColor: AppColors.text,
         textStyle: const TextStyle(
             fontFamily: AppFonts.ui, fontWeight: FontWeight.w700, fontSize: 15),
@@ -95,7 +95,7 @@ ThemeData appTheme() {
       selectedColor: AppColors.accentSoft,
       side: BorderSide.none,
       shape: const StadiumBorder(),
-      labelStyle: const TextStyle(
+      labelStyle: TextStyle(
           fontFamily: AppFonts.ui,
           fontWeight: FontWeight.w600,
           color: AppColors.text),
@@ -121,8 +121,8 @@ ThemeData appTheme() {
           borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: AppColors.lilac, width: 1.5)),
-      labelStyle: const TextStyle(color: AppColors.textMuted),
+          borderSide: BorderSide(color: AppColors.lilac, width: 1.5)),
+      labelStyle: TextStyle(color: AppColors.textMuted),
     ),
     sliderTheme: base.sliderTheme.copyWith(
       activeTrackColor: AppColors.lilac,
@@ -161,7 +161,7 @@ ThemeData appTheme() {
                 : AppColors.textMuted,
           )),
     ),
-    bottomSheetTheme: const BottomSheetThemeData(
+    bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: AppColors.surface,
       showDragHandle: true,
       shape: RoundedRectangleBorder(
@@ -174,13 +174,13 @@ ThemeData appTheme() {
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
       backgroundColor: AppColors.surfaceHigh,
-      contentTextStyle: const TextStyle(
+      contentTextStyle: TextStyle(
           fontFamily: AppFonts.ui,
           color: AppColors.text,
           fontWeight: FontWeight.w600),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),
-    progressIndicatorTheme: const ProgressIndicatorThemeData(
+    progressIndicatorTheme: ProgressIndicatorThemeData(
       color: AppColors.lilac,
       linearTrackColor: AppColors.surfaceHigh,
     ),

@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 
+import '../ui/palette.dart';
+
 /// App settings kept outside the careers: language and (until in-app
 /// purchases exist) a Premium test switch.
 class AppSettings extends ChangeNotifier {
@@ -20,6 +22,9 @@ class AppSettings extends ChangeNotifier {
   /// Short animation between weeks (feedback B1); can be turned off.
   bool weekTransition = true;
 
+  /// App colors: vivid navy (default) or light (docs K41).
+  bool lightTheme = false;
+
   Locale? get locale => languageCode == null ? null : Locale(languageCode!);
 
   static Future<AppSettings> load(File? file) async {
@@ -30,10 +35,12 @@ class AppSettings extends ChangeNotifier {
         s.languageCode = m['language'] as String?;
         s.premium = m['premium'] as bool? ?? false;
         s.weekTransition = m['weekTransition'] as bool? ?? true;
+        s.lightTheme = m['theme'] == 'light';
       } on FormatException {
         // A broken settings file falls back to defaults.
       }
     }
+    AppColors.palette = s.lightTheme ? Palette.light : Palette.navy;
     return s;
   }
 
@@ -44,6 +51,12 @@ class AppSettings extends ChangeNotifier {
 
   void setPremium(bool on) {
     premium = on;
+    _save();
+  }
+
+  void setLightTheme(bool on) {
+    lightTheme = on;
+    AppColors.palette = on ? Palette.light : Palette.navy;
     _save();
   }
 
@@ -61,6 +74,7 @@ class AppSettings extends ChangeNotifier {
       'language': languageCode,
       'premium': premium,
       'weekTransition': weekTransition,
+      'theme': lightTheme ? 'light' : 'navy',
     }));
   }
 }
