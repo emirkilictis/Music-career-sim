@@ -76,14 +76,26 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 
 | # | Gözlem | Durum |
 |---|---|---|
-| T14 | **Uzun moladan sonraki dönüş albümü zayıf.** 7 yıllık beklenti (K3) 20/20'yi gerçekteki 968K'ya yaklaştırmıyor (257–419K). 2 of 2 ve Man of the Woods da gerçeğin yarısı kadar. | Ayar önerisi: tavandaki beklentinin ilk hafta etkisini artırmak. |
+| T14 ✅ | **Uzun moladan sonraki dönüş albümü zayıf.** 7 yıllık beklenti (K3) 20/20'yi gerçekteki 968K'ya yaklaştırmıyor (257–419K). 2 of 2 ve Man of the Woods da gerçeğin yarısı kadar. | **Yapıldı (K44):** lead single beklentiyi tüketmiyor, albüm kullanıyor; ünlülük düşmüyor. 20/20 artık ilk hafta 1,12M (#1, 13 hafta). |
 | T15 | **Geç kariyer single'ları:** Selfish (2024) 6–16 hafta #1 (gerçekte #19), Filthy #1–3 (gerçekte #9). Emir'in kararı (K42): şarkı kaliteliyse (Selfish'in notu 92–94) bu **doğru davranış**, oyuncu iyi müzik yaptığı sürece zirvede kalabilmeli. | Değişiklik yok. İleride sadece: düşük kalite / kendini tekrar / boşa harcanan beklenti düşüşe yol açsın, yaş ve dönem tek başına değil. |
 | T16 | **Birikimli albüm satışları ~2 kat.** Justified 19–23M birim (gerçek ~7M dünya), FS/LS 20–23M (gerçek ~10M). İlk hafta doğru, ama katalog satışları yıllarca fazla sürüyor. | Ayar önerisi: albüm katalog düşüş hızını artırmak. |
 | T17 | **İngiltere listesinde çok zayıf.** ABD'de #1 olan şarkılar İngiltere'de #12–#96 (gerçekte JT İngiltere'de de hep ilk 5). ABD'li sanatçının Avrupa payı düşük. | Ayar önerisi: ABD'li pop yıldızlarının Avrupa payını yükseltmek (memleket bonusunu yumuşatmak). |
 | T18 | **Büyük şirket kariyeri için bütçe yok.** "Küçük plak şirketi" sadece $25K avans veriyor; 2002'de stream geliri olmadığı için yükselen yıldız bile ilk albümü bitiremiyor. Senaryo Milyoner başlangıcıyla oynandı. | Faz 2'deki büyük şirket teklifleri (R5) çözecek; yükselen yıldız + şirket yolunda avans büyüklüğe göre artabilir. |
 
-| T19 | **Sahne ve karizma hiç gelişmiyor.** 22 yılda söz yazarlığı 47 → 68, vokal 43 → 50 oldu (şarkı yazdıkça); sahne performansı ve karizma 29'da kaldı, çünkü onları geliştiren bir şey yok. | Turne/konser, pratik (rakip incelemesi ✅ listesi) ve sosyal medya gelince bu ikisi de gelişmeli. |
+| T19 ✅ | **Sahne ve karizma hiç gelişmiyor.** 22 yılda söz yazarlığı 47 → 68, vokal 43 → 50 oldu (şarkı yazdıkça); sahne performansı ve karizma 29'da kaldı, çünkü onları geliştiren bir şey yok. | **Yapıldı (K43):** her hafta 1 yetenek puanı, her yetenek 100'e kadar. Turne/sosyal medya gelince ek yollar da olacak. |
 | T20 | **Streaming çağında yıllık stream'ler yüksek.** 2018'de 4,3 milyar, 2024'te 7,8 milyar (gerçek JT'nin tüm platformlardaki yıllığı muhtemelen 2–3 milyar). T16 ile aynı kökten (katalog çok uzun ve güçlü yaşıyor) olabilir. | T16 ile birlikte bakılacak. |
+
+| T21 ✅ | **Dijital çağda single satışları çok düşük** (Emir). SexyBack gerçekte dünyada 11,3M dijital sattı, oyunda 5,6M'di. | **Yapıldı (K44):** dijital satışlar hitlerde yoğunlaşıyor. SexyBack artık 11,5M. |
+| T22 | **Yetenek puanlarıyla notlar 90–100'e çıkıyor.** JT 2006'dan sonra hep 91–100 not alıyor; bu yüzden 2013 single'ları 15,7M (gerçek ~5M), toplam albüm birimi 124M, para $392M. K42'ye göre kaliteli müzik çok satmalı, ama 100'e ulaşma hızı (5 yılda her şey ~100) fazla olabilir. | Gözlem: puanların yetenek arttıkça pahalılaşması (ör. 80'den sonra 2 puan) ya da haftalık 1 yerine ayda 2–3 düşünülebilir. Karar Emir'in. |
+
+**Yeni ayarla (tohum 2002):**
+
+| | Gerçek | Önce | Şimdi |
+|---|---|---|---|
+| SexyBack dünya single satışı | 11,3M | 5,6M | 11,5M |
+| 20/20 ilk hafta (ABD) | 968K | 257–419K | 1,12M (#1, 13 hafta) |
+| FutureSex/LoveSounds ilk hafta | 684K | 594–706K | 992K |
+| Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
 

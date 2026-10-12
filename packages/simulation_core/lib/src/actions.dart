@@ -42,6 +42,18 @@ abstract final class Actions {
   /// energy cost taken at the end of each week.
   static void setJob(World w, Artist a, Job job) => a.job = job;
 
+  /// Skill points the player earns each week, and the skill ceiling.
+  static const skillPointsPerWeek = 1;
+  static const maxSkill = 100.0;
+
+  /// Spends one skill point: +1 on [kind], up to [maxSkill].
+  static void spendSkillPoint(Artist a, SkillKind kind) {
+    if (a.skillPoints <= 0) throw ActionException('No skill points');
+    if (a.skills[kind] >= maxSkill) throw ActionException('Skill is maxed');
+    a.skills[kind] = math.min(maxSkill, a.skills[kind] + 1);
+    a.skillPoints--;
+  }
+
   /// Energy gained at the end of a week (before the job's cost).
   static const energyRegenWriting = 14.0, energyRegenIdle = 24.0;
   static const energyRestBonus = 20.0;
@@ -308,7 +320,7 @@ abstract final class Actions {
   static void releaseSingle(World w, Artist a, Song s,
       {Campaign campaign = Campaign.standard}) {
     _payCampaign(a, campaign);
-    _convertAnticipation(a);
+    _convertAnticipation(a, album: false);
     s.isSingle = true;
     s.singleWeek = w.week;
     if (s.status == SongStatus.vault) {
@@ -332,7 +344,7 @@ abstract final class Actions {
       bool payForVariants = false,
       Campaign campaign = Campaign.standard}) {
     _payCampaign(a, campaign);
-    _convertAnticipation(a);
+    _convertAnticipation(a, album: type == AlbumType.album);
     final quality = songIds.isEmpty
         ? 0.0
         : songIds.map((id) => w.songs[id].quality).reduce((x, y) => x + y) /
@@ -373,10 +385,14 @@ abstract final class Actions {
     return album;
   }
 
-  /// First release after a closed era turns stored anticipation into hype.
-  static void _convertAnticipation(Artist a) {
-    if (!a.eraOpen && a.anticipation > 0) {
-      a.hype += a.anticipation;
+  /// Stored anticipation (after a closed era) becomes hype when the artist
+  /// returns. Comeback singles ride it without using it up; the album
+  /// that opens the new era takes all of it (a long-awaited album is the
+  /// event, e.g. a comeback single two months before the album).
+  static void _convertAnticipation(Artist a, {required bool album}) {
+    if (a.eraOpen || a.anticipation <= 0) return;
+    a.hype = math.max(a.hype, a.anticipation);
+    if (album) {
       a.anticipation = 0;
       a.anticipationCap = 0;
     }

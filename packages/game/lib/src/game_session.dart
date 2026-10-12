@@ -388,6 +388,18 @@ class GameSession {
     _saveNow();
   }
 
+  /// Spends one skill point on [kind] (docs K43).
+  void spendSkillPoint(SkillKind kind) {
+    if (_p.skillPoints <= 0) {
+      throw GameException('noSkillPoints', 'No skill points left');
+    }
+    if (_p.skills[kind] >= Actions.maxSkill) {
+      throw GameException('skillMaxed', 'This skill is maxed');
+    }
+    Actions.spendSkillPoint(_p, kind);
+    _saveNow();
+  }
+
   /// Takes this week off: no writing, more energy at the end of the week.
   void rest() {
     if (_p.lastWriteWeek == world.week && _p.songsWrittenThisWeek > 0) {

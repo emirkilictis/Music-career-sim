@@ -199,6 +199,13 @@ class _NextStepCard extends StatelessWidget {
           l.chooseJob,
           () => pickJob(context),
         ),
+      _ when p.skillPoints >= 5 => (
+          Icons.trending_up_rounded,
+          l.stepSkillsTitle,
+          l.stepSkillsBody(p.skillPoints),
+          l.goCareer,
+          () => onOpenTab?.call(4),
+        ),
       _ when p.songsLeftThisWeek > 0 && p.creativeEnergy >= 40 => (
           Icons.edit_note_rounded,
           l.stepWriteTitle,

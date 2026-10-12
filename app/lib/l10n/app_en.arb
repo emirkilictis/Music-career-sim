@@ -589,6 +589,8 @@
   "errorGeneric": "Something went wrong.",
   "errorNotEnoughMoney": "Not enough money.",
   "errorWeeklyLimit": "You can write at most 3 songs a week.",
+  "errorNoSkillPoints": "No skill points left. You get one every week.",
+  "errorSkillMaxed": "This skill is already 100.",
   "errorBurnout": "You are burned out. Rest for a few weeks.",
   "errorCollaboratorRefused": "They won't work with you yet — you need more fans.",
   "errorInvalidGenres": "Pick 1 to 3 different genres.",
@@ -897,6 +899,36 @@
   },
   "stepFirstReleaseBody": "Your first song is ready. Put it out there!",
   "stepJobTitle": "Find a day job",
+  "stepSkillsTitle": "Spend your skill points",
+  "stepSkillsBody": "{count} points waiting. Better skills make better songs.",
+  "@stepSkillsBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goCareer": "Open Career",
+  "skillsTitle": "Skills",
+  "skillPointsLeft": "{count} skill points to spend",
+  "@skillPointsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skillPointsHint": "You get 1 skill point every week. Each skill goes up to 100.",
+  "skillRaise": "Raise {skill}",
+  "@skillRaise": {
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      }
+    }
+  },
+  "singleUnits": "Single units",
+  "singleUnitsHint": "Sales + streams ÷ 150",
   "stepJobBody": "Money is tight. A day job pays every week.",
   "stepWriteTitle": "Write a song",
   "stepWriteBody": "You can write {count} more songs this week.",

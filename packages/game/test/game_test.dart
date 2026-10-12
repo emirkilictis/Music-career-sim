@@ -147,6 +147,38 @@ void main() {
       g.close();
     });
 
+    test('a skill point every week, spent up to 100, kept on reopening', () {
+      var g = GameSession.start(slots, _setup());
+      final id = g.slotId;
+      final vocals = g.player.skills[SkillKind.vocals]!;
+      expect(g.player.skillPoints, 0);
+      expect(() => g.spendSkillPoint(SkillKind.vocals), _code('noSkillPoints'));
+      final fame = <double>[];
+      for (var i = 0; i < 4; i++) {
+        g.advanceWeek();
+        fame.add(g.player.fame);
+      }
+      expect(g.player.skillPoints, 4);
+      // Near the cap (as after years of practice): the last point fills it.
+      g.world.artists[g.player.id].skills.songwriting = 99.5;
+      g.spendSkillPoint(SkillKind.songwriting);
+      expect(g.player.skills[SkillKind.songwriting], 100);
+      expect(
+          () => g.spendSkillPoint(SkillKind.songwriting), _code('skillMaxed'));
+      g.spendSkillPoint(SkillKind.vocals);
+      expect(g.player.skillPoints, 2);
+      g.close();
+
+      g = GameSession.resume(slots, id);
+      expect(g.player.skillPoints, 2);
+      expect(g.player.skills[SkillKind.vocals], vocals + 1);
+      // Fame never goes down (docs K44).
+      for (var i = 1; i < fame.length; i++) {
+        expect(fame[i], greaterThanOrEqualTo(fame[i - 1]));
+      }
+      g.close();
+    });
+
     test('an early-2000s single sells CDs, not streams', () {
       final g = GameSession.start(
           slots,

@@ -54,6 +54,7 @@ int worldHash(World w) {
     addInt(a.moneyCents);
     addInt(a.job.index);
     addInt(a.restWeek);
+    addInt(a.skillPoints);
     addDouble(a.creativeEnergy);
     addInt(a.kind.index);
     addInt(a.members.length);

@@ -71,6 +71,8 @@ void main() {
 
     await tester.tap(find.text('Career'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('By region'), 300,
+        scrollable: find.byType(Scrollable).first);
     expect(find.text('By region'), findsOneWidget);
 
     // Platforms live on Home, not in the tab bar.
@@ -100,6 +102,23 @@ void main() {
         findsOneWidget);
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
+
+    // A skill point every week, spent on the Career tab.
+    await tester.tap(find.text('Career'));
+    await tester.pumpAndSettle();
+    final left = RegExp(r'^(\d+) skill points to spend$');
+    await tester.scrollUntilVisible(find.textContaining(left), -300,
+        scrollable: find.byType(Scrollable).first);
+    int points() => int.parse(left
+        .firstMatch((tester.widget<Text>(find.textContaining(left))).data!)!
+        .group(1)!);
+    final before = points();
+    expect(before, greaterThanOrEqualTo(2));
+    await tester.ensureVisible(find.byTooltip('Raise Vocals'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Raise Vocals'));
+    await tester.pumpAndSettle();
+    expect(points(), before - 1);
   });
 
   testWidgets('free players see Premium starts locked', (tester) async {

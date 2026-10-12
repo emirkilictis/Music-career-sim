@@ -138,6 +138,9 @@ mixin Charted {
   int weeksOnChart(int chart) => charts?[chart]?.weeksOn ?? 0;
 }
 
+/// One of the five artist skills (for spending skill points).
+enum SkillKind { songwriting, vocals, production, performance, charisma }
+
 class Skills {
   Skills({
     required this.songwriting,
@@ -152,6 +155,29 @@ class Skills {
   double production;
   double performance;
   double charisma;
+
+  double operator [](SkillKind k) => switch (k) {
+        SkillKind.songwriting => songwriting,
+        SkillKind.vocals => vocals,
+        SkillKind.production => production,
+        SkillKind.performance => performance,
+        SkillKind.charisma => charisma,
+      };
+
+  void operator []=(SkillKind k, double v) {
+    switch (k) {
+      case SkillKind.songwriting:
+        songwriting = v;
+      case SkillKind.vocals:
+        vocals = v;
+      case SkillKind.production:
+        production = v;
+      case SkillKind.performance:
+        performance = v;
+      case SkillKind.charisma:
+        charisma = v;
+    }
+  }
 }
 
 class Artist {
@@ -225,6 +251,9 @@ class Artist {
 
   /// Weekly rest chosen by the player: no writing that week, more energy.
   int restWeek = -1;
+
+  /// Unspent skill points (the player earns one a week; docs K43).
+  int skillPoints = 0;
 
   // Side income (player only; docs/game-design.md §20.1, K36).
   Job job = Job.none;

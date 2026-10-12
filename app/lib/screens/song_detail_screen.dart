@@ -82,6 +82,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
       if (hasStreams) ...[
         StatTile(label: l.thisWeekStreams, value: fmt.compact(s.weekStreams)),
         StatTile(label: l.streams, value: fmt.compact(s.lifetimeStreams.total)),
+        StatTile(label: l.singleUnits, value: fmt.compact(s.singleUnits)),
         for (final r in Region.values)
           StatTile(
               label: fmt.region(r), value: fmt.compact(s.lifetimeStreams[r])),

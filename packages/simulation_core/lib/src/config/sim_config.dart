@@ -39,6 +39,8 @@ class SimConfig {
     this.albumWeeklyDecay = 0.86,
     this.trackEquivalentAlbum = 10,
     this.streamEquivalentAlbum = 1500,
+    this.downloadHitExponent = 1.45,
+    this.downloadHitExponentLate = 1.15,
     this.songChartStreamDivisor = 125,
     this.songChartRadioDivisor = 900,
     this.songChartSize = 100,
@@ -141,6 +143,23 @@ class SimConfig {
   /// First-week album purchases by non-fans, per casual listener × fame³
   /// (event albums of superstars).
   final double eventBuyRate;
+
+  /// How strongly digital track sales concentrate on hits (1 = in
+  /// proportion to attention; above 1 = the biggest hits take more), in the
+  /// iTunes boom (to 2008).
+  final double downloadHitExponent;
+
+  /// The same once the digital catalog is deep and streaming spreads
+  /// listening (2014 on); [downloadHitExponentFor] fades between the two.
+  final double downloadHitExponentLate;
+
+  double downloadHitExponentFor(int year) {
+    if (year <= 2008) return downloadHitExponent;
+    if (year >= 2014) return downloadHitExponentLate;
+    final t = (year - 2008) / 6;
+    return downloadHitExponent +
+        t * (downloadHitExponentLate - downloadHitExponent);
+  }
 
   /// Extra album sales per doubling of the tracklist beyond 10 tracks.
   final double longAlbumBonus;

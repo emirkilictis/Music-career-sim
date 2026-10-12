@@ -229,6 +229,8 @@ class Fmt {
     return switch (e.code) {
       'notEnoughMoney' => l.errorNotEnoughMoney,
       'weeklyLimit' => l.errorWeeklyLimit,
+      'noSkillPoints' => l.errorNoSkillPoints,
+      'skillMaxed' => l.errorSkillMaxed,
       'burnout' => l.errorBurnout,
       'collaboratorRefused' => l.errorCollaboratorRefused,
       'alreadyWrote' => l.errorAlreadyWrote,

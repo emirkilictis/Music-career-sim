@@ -105,6 +105,9 @@ abstract final class Cmd {
 
   static SessionCmd<void> rest() => (s) => s.rest();
 
+  static SessionCmd<void> spendSkillPoint(SkillKind kind) =>
+      (s) => s.spendSkillPoint(kind);
+
   static SessionCmd<void> rewardAd() => (s) => s.rewardAd();
 
   static SessionCmd<bool> dailyBonus(bool premium) =>

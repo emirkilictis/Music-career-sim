@@ -101,6 +101,7 @@ void playUntil(int w, {List<String> write = const [], List<int>? genres}) {
       }
     }
     if (g.player.hasJob) g.setJob(Job.none);
+    _spendPoints();
     final r = g.advanceWeek();
     for (final e in r.events) {
       final line = switch (e) {
@@ -120,6 +121,23 @@ void playUntil(int w, {List<String> write = const [], List<int>? genres}) {
     }
   }
   if (queue.isNotEmpty) stderr.writeln('Not written in time: $queue');
+}
+
+/// A singer-songwriter's priorities for the weekly skill point.
+void _spendPoints() {
+  const order = [
+    SkillKind.songwriting,
+    SkillKind.vocals,
+    SkillKind.performance,
+    SkillKind.charisma,
+    SkillKind.production,
+  ];
+  while (g.player.skillPoints > 0) {
+    final k = order.firstWhere((k) => g.player.skills[k]! < 100,
+        orElse: () => order.last);
+    if (g.player.skills[k]! >= 100) break;
+    g.spendSkillPoint(k);
+  }
 }
 
 String _skills() {

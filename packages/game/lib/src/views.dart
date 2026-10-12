@@ -87,6 +87,8 @@ class ArtistView {
             : 0,
         adsLeftThisWeek = Actions.adsLeftThisWeek(w, a),
         job = a.job,
+        skillPoints = a.skillPoints,
+        skills = {for (final k in SkillKind.values) k: a.skills[k]},
         lastReleaseWeek = a.lastReleaseWeek,
         everCharted = a.tier == ArtistTier.player &&
             (w.playerSongIds.any((id) => _charted(w.songs[id])) ||
@@ -141,6 +143,10 @@ class ArtistView {
   final int adsLeftThisWeek;
   final Job job;
   bool get hasJob => job != Job.none;
+
+  /// Unspent skill points and the current skills (0–100).
+  final int skillPoints;
+  final Map<SkillKind, double> skills;
 
   /// Week of the last single or album (-1 = never released anything).
   final int lastReleaseWeek;
@@ -219,6 +225,12 @@ class SongView {
 
   /// Single sales: downloads + CD singles.
   double get singleSales => lifetimeDownloads + lifetimePhysical;
+
+  /// Single units as certifications count them: sales + streams / 150.
+  double get singleUnits =>
+      singleSales + lifetimeStreams.total / streamsPerSingleUnit;
+
+  static const streamsPerSingleUnit = 150;
 
   bool get inVault => status == SongStatus.vault;
 }

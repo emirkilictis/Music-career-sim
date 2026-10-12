@@ -3,7 +3,10 @@ import 'codec.dart';
 /// Versioned schema. Each entry migrates the database from version i to i+1
 /// (docs/data-model.md). Never edit a shipped migration; append a new one.
 /// (v1 has not shipped yet, so it is still being shaped.)
-final List<String> migrations = [_v1(), _v2];
+final List<String> migrations = [_v1(), _v2, _v3];
+
+/// v3: unspent skill points (docs K43).
+const _v3 = 'ALTER TABLE artist ADD COLUMN skillPoints INTEGER;';
 
 /// v2: a song's weekly streams/downloads per region (so "this week" numbers
 /// survive closing and reopening a career), its CD single sales, and the

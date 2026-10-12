@@ -111,6 +111,7 @@ class Simulator {
     final radio = Float64List(n * _r);
     final sumA = Float64List(_r), sumD = Float64List(_r);
     final sumR = Float64List(_r), sumSingles = Float64List(_r);
+    final songAttention = Float64List(n);
     final activeIndex = <int, int>{};
     for (var i = 0; i < n; i++) {
       final s = w.songs[ids[i]];
@@ -209,6 +210,7 @@ class Simulator {
           noise *
           trackShare;
       s.lastAttention = a;
+      songAttention[i] = a;
       s.lastReach = (casPart + pubPart + viralPart) * qMult * trackShare;
 
       final fresh = math.exp(-promoAge / 6.0);
@@ -233,6 +235,33 @@ class Simulator {
         sumD[k] += dl[j];
         sumR[k] += radio[j];
         if (s.isSingle) sumSingles[k] += att[j];
+      }
+    }
+
+    // Digital purchases pile onto the biggest hits (docs K44): each song's
+    // download demand is scaled by (attention / mean)^(γ−1), so a smash
+    // takes a much bigger share of the same market (the tail sells less).
+    // Strongest in the iTunes boom, softer once the catalog is deep.
+    final hitExp = c.downloadHitExponentFor(year);
+    if (hitExp != 1 && n > 0) {
+      var total = 0.0;
+      for (var i = 0; i < n; i++) {
+        total += songAttention[i];
+      }
+      final mean = total / n;
+      for (var k = 0; k < _r; k++) {
+        sumD[k] = 0;
+      }
+      for (var i = 0; i < n; i++) {
+        final f = math
+            .pow((songAttention[i] / (mean + 1e-9)).clamp(0.02, 1000.0),
+                hitExp - 1)
+            .toDouble();
+        for (var k = 0; k < _r; k++) {
+          final j = i * _r + k;
+          dl[j] *= f;
+          sumD[k] += dl[j];
+        }
       }
     }
 
@@ -538,14 +567,19 @@ class Simulator {
       final target = 1 - math.exp(-a.weekPoints / (1.5 * topPoints));
       a.popularity +=
           (target > a.popularity ? 0.15 : 0.03) * (target - a.popularity);
-      a.fame +=
-          (a.popularity > a.fame ? 0.02 : 0.002) * (a.popularity - a.fame);
+      // Fame (being known) only grows: a star stays a household name
+      // through a long break; popularity (current buzz) is what fades.
+      if (a.popularity > a.fame) a.fame += 0.02 * (a.popularity - a.fame);
       // Growth saturates: you cannot convert people who are already fans.
       final casualRoom = math.max(0.0, 1 - a.casual / c.publicPool);
       final fanRoom = math.max(0.0, 1 - a.coreFans / (0.04 * c.publicPool));
-      a.casual += c.casualConversion * a.weekReach * casualRoom -
+      // Charisma: likeable artists turn listeners into fans more easily
+      // (×0.8 at 0, ×1.0 at 50, ×1.2 at 100).
+      final charm = 0.8 + 0.4 * a.skills.charisma / 100;
+      a.casual += c.casualConversion * charm * a.weekReach * casualRoom -
           c.casualDecay * a.casual;
-      final conv = a.tier == ArtistTier.player ? w.difficulty.fanConversion : 1;
+      final conv = charm *
+          (a.tier == ArtistTier.player ? w.difficulty.fanConversion : 1);
       a.coreFans += c.fanConversion * conv * a.weekReach * fanRoom -
           c.coreFanDecay * a.kind.fanDecay * a.coreFans;
       if (a.coreFans < 100) a.coreFans = 100;
@@ -557,6 +591,7 @@ class Simulator {
       a.updateRegionShare();
     }
     _playerIncome();
+    _playerCatalogAlbumUnits();
 
     final result = WeekResult(
       week: w.week,
@@ -837,6 +872,31 @@ class Simulator {
     return revived;
   }
 
+  /// The player's albums that left the active set still earn album units
+  /// from their tracks' streams (SEA) in the units era, so career totals
+  /// match "every stream counts" (AI catalogs skip this for speed; they
+  /// only matter for charts, which use the active set).
+  void _playerCatalogAlbumUnits() {
+    final w = world;
+    final p = w.player;
+    if (p == null) return;
+    if (!Charts.songRules(ChartMarket.global, w.week).albumUsesUnits) return;
+    final c = w.config;
+    for (final al in w.albums) {
+      if (al.artistId != p.id || al.status != AlbumStatus.dormant) continue;
+      for (var k = 0; k < _r; k++) {
+        var streams = 0.0;
+        for (final sid in al.songIds) {
+          streams += w.songWeekStreamsRegion(w.songs[sid], k);
+        }
+        final units = streams / c.streamEquivalentAlbum;
+        al.reg[AlbumReg.lifeUnits + k] += units;
+        p.reg[ArtistReg.lifeUnits + k] += units;
+      }
+      w.dirtyAlbums.add(al.id);
+    }
+  }
+
   void _playerIncome() {
     final p = world.player;
     if (p == null) return;
@@ -863,6 +923,7 @@ class Simulator {
     p.moneyCents += (cents * p.artistShare).round();
     // The label takes no cut of the day job.
     p.moneyCents += p.job.wageCents;
+    p.skillPoints += Actions.skillPointsPerWeek;
     // Side benefits of some jobs (docs K36).
     final s = p.skills;
     switch (p.job) {

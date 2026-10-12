@@ -3,6 +3,7 @@ import 'package:game/game.dart';
 
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../ui/palette.dart';
 import '../widgets/common.dart';
 import '../widgets/image_pickers.dart';
 import 'song_detail_screen.dart';
@@ -61,6 +62,8 @@ class _CareerScreenState extends State<CareerScreen> {
     final list = ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        const SkillsSection(),
+        const SizedBox(height: 12),
         Section(
           title: l.artistPhotos,
           child: ArtistPhotosSection(artistId: p.id, name: p.name),
@@ -78,6 +81,11 @@ class _CareerScreenState extends State<CareerScreen> {
               StatTile(
                   label: l.singleSales,
                   value: fmt.compact(p.lifetimeSingleSales)),
+              if (hasStreams)
+                StatTile(
+                    label: l.singleUnits,
+                    value: fmt.compact(
+                        p.lifetimeSingleSales + p.lifetimeStreams.total / 150)),
               StatTile(
                   label: l.albumUnits,
                   value: fmt.compact(p.lifetimeUnits.total)),
@@ -183,5 +191,69 @@ class _CareerScreenState extends State<CareerScreen> {
     );
     if (widget.embedded) return list;
     return Scaffold(appBar: AppBar(title: Text(l.careerSummary)), body: list);
+  }
+}
+
+/// The five skills with a + button each while skill points are left
+/// (docs K43: one point a week, each skill up to 100).
+class SkillsSection extends StatelessWidget {
+  const SkillsSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final career = context.career;
+    final p = career.player;
+    final names = {
+      SkillKind.songwriting: l.statSongwriting,
+      SkillKind.vocals: l.statVocals,
+      SkillKind.production: l.statProduction,
+      SkillKind.performance: l.statPerformance,
+      SkillKind.charisma: l.statCharisma,
+    };
+    Future<void> raise(SkillKind k) async {
+      try {
+        await career.act(Cmd.spendSkillPoint(k));
+      } catch (e) {
+        if (context.mounted) showError(context, e);
+      }
+    }
+
+    return Section(
+      title: l.skillsTitle,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(
+          p.skillPoints > 0
+              ? l.skillPointsLeft(p.skillPoints)
+              : l.skillPointsHint,
+          style: TextStyle(
+              color: p.skillPoints > 0 ? AppColors.lilac : AppColors.textMuted,
+              fontWeight:
+                  p.skillPoints > 0 ? FontWeight.w800 : FontWeight.w500),
+        ),
+        const SizedBox(height: 6),
+        for (final k in SkillKind.values)
+          Row(children: [
+            Expanded(
+              child: MeterRow(
+                  label: names[k]!,
+                  value: p.skills[k]! / Actions.maxSkill,
+                  text: p.skills[k]!.floor().toString()),
+            ),
+            SizedBox(
+              width: 44,
+              child: p.skillPoints > 0 && p.skills[k]! < Actions.maxSkill
+                  ? IconButton(
+                      tooltip: l.skillRaise(names[k]!),
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => raise(k),
+                      icon: Icon(Icons.add_circle_rounded,
+                          color: AppColors.lilac),
+                    )
+                  : null,
+            ),
+          ]),
+      ]),
+    );
   }
 }

@@ -48,8 +48,8 @@ abstract final class Codec {
     'pendingAlbumType', 'pendingVariants',
     ...artistRegColumns,
     'no1Singles', 'no1SinglesFeatured', 'no1Albums', 'weeksAtNo1',
-    // Added in schema v2 (appended: older hot snapshots read it as null).
-    'restWeek',
+    // Added in schema v2/v3 (appended: older hot snapshots read null).
+    'restWeek', 'skillPoints',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -76,6 +76,7 @@ abstract final class Codec {
         _ints(a.no1Singles), _ints(a.no1SinglesFeatured), _ints(a.no1Albums),
         _ints(a.weeksAtNo1),
         a.restWeek,
+        a.skillPoints,
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -129,6 +130,7 @@ abstract final class Codec {
       ..lastAdWeek = r['lastAdWeek'] as int
       ..adsWatchedThisWeek = r['adsWatchedThisWeek'] as int
       ..restWeek = r['restWeek'] as int? ?? -1
+      ..skillPoints = r['skillPoints'] as int? ?? 0
       ..sumDormantRate = _d(r['sumDormantRate'])
       ..nextEraWeek = r['nextEraWeek'] as int
       ..pendingAlbumTitle = r['pendingAlbumTitle'] as String
