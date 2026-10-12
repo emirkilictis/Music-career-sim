@@ -55,7 +55,7 @@ sebebi de bu.
 | X2 | **Gerçek sanatçı isimleri ve fotoğrafları oyunun içinde.** Telif ve kişilik hakkı riski; App Store reddedebilir. | Göndermiyoruz (K15). R8 ile oyuncunun kendisi yapar. |
 | X3 | **"Statlar işe yaramıyor, her şey rastgele" şikayeti.** Pahalı stüdyoda stream düşüyor; yüksek kaliteye düşük puan veriliyor. | Bizim A4 sorunumuzla aynı. Her yatırımın etkisi görünür olmalı (stat artışı, bütçe bonusu, kampanya özeti C4). Rastgelelik sadece küçük bir pay. |
 | X4 | **Sinir bozucu kesintiler:** %20 vergi, yüksek menajer payı. | Kesinti varsa açıkça ve oyuna anlam katan biçimde: plak şirketi payı (seçilen yol), menajer pazarlıkla. Keyfi vergi koymayalım. |
-| X5 | **Reklamsız diye satıp sonradan rastgele reklam eklemek.** En öfkeli yorumlar bunlar. | Reklam sadece oyuncunun seçtiği ödüllü reklam (K11). Zorunlu reklam yok. Premium'da hiç reklam yok. Bu sözü değiştirmeyelim. |
+| X5 | **Reklamsız diye satıp sonradan rastgele reklam eklemek.** En öfkeli yorumlar bunlar. | Reklam sadece oyuncunun seçtiği ödüllü reklam (K27). Zorunlu reklam yok. Premium'da hiç reklam yok. Bu sözü değiştirmeyelim. |
 | X6 | **Kayıtların kaybolması.** | Kayıtlar cihazda SQLite'ta ve her hafta otomatik kaydediliyor. Ek olarak kayıt dışa/içe aktarma ve iCloud/Google yedeği (Faz 4). |
 | X7 | **Çok şarkı olunca yavaşlama.** | Mimarimiz bunun için tasarlandı (tembel katalog, arka planda simülasyon). 50 yıllık stres testinde de ölçülüyor. |
 | X8 | **Takipçi / dinleyici gibi tutarsız sayılar** (40M aylık dinleyici, 600K takipçi). | Sosyal medya geldiğinde takipçiler hayran ve dinleyicilerden türetilsin. |
