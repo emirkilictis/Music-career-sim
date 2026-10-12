@@ -18,8 +18,9 @@ void main() {
   final out = Directory('build/screenshots');
   final key = GlobalKey();
 
-  Future<void> shot(WidgetTester tester, String name) async {
-    await tester.pumpAndSettle();
+  Future<void> shot(WidgetTester tester, String name,
+      {bool settle = true}) async {
+    if (settle) await tester.pumpAndSettle();
     final boundary =
         key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     await tester.runAsync(() async {
@@ -94,6 +95,12 @@ void main() {
     await tester.tap(find.text('Velvet Avenue'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Next week'));
+    // Mid-way through the week transition card.
+    for (var i = 0; i < 8; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 50)));
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await shot(tester, '03a_week_transition', settle: false);
     await tester.pumpAndSettle();
     await shot(tester, '03_week_news');
     await tester.tapAt(const Offset(200, 80));
@@ -113,6 +120,10 @@ void main() {
 
     await tab(tester, 'Career');
     await shot(tester, '15_career');
+    await tester.tap(find.text('Skip'));
+    await shot(tester, '15b_skip_menu');
+    await tester.tapAt(const Offset(200, 80));
+    await tester.pumpAndSettle();
     await tab(tester, 'Home');
     await tester.scrollUntilVisible(find.text('Streamify'), 300,
         scrollable: find.byType(Scrollable).first);

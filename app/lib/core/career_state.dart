@@ -73,15 +73,20 @@ class CareerState extends ChangeNotifier {
     }
   }
 
-  /// Year skip (stops at a major event); [onProgress] gets weeks played.
-  Future<(YearReport, List<EventLine>)> skipYear(
-      void Function(int weeks) onProgress) async {
+  /// Skips up to [weeks] weeks (see [SkipStop]); [onProgress] gets weeks
+  /// played. A year skip keeps only the big news; a short skip keeps all of
+  /// the player's news.
+  Future<(YearReport, List<EventLine>)> skip(
+      int weeks, SkipStop stop, void Function(int weeks) onProgress) async {
     _setBusy(true);
     final port = ReceivePort()..listen((m) => onProgress(m as int));
     try {
-      final result = await controller.run(Cmd.skipYear(port.sendPort));
+      final result =
+          await controller.run(Cmd.skipWeeks(weeks, stop, port.sendPort));
       final y = result.$1;
-      lastEvents = sortLines(result.$2.where((l) => l.event.isMajor).toList());
+      final news = playerNews(result.$2);
+      lastEvents = sortLines(
+          y.isYear ? news.where((l) => l.event.isMajor).toList() : news);
       lastWeekPlayed = y.fromWeek + y.weeks - 1;
       lastMoneyDelta = y.moneyDeltaCents;
       await refresh();

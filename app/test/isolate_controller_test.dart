@@ -36,7 +36,8 @@ void main() {
 
     final weeks = <int>[];
     final yearPort = ReceivePort()..listen((n) => weeks.add(n as int));
-    final (year, _) = await c.run(Cmd.skipYear(yearPort.sendPort));
+    final (year, _) = await c.run(Cmd.skipWeeks(
+        GameTime.weeksPerYear, SkipStop.major, yearPort.sendPort));
     expect(year.weeks, greaterThan(0));
 
     final chart = await c.run(Cmd.chart(Charts.usSongs));

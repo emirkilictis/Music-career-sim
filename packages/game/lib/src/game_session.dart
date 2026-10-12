@@ -23,14 +23,35 @@ class WeekReport {
   bool get hasMajor => events.any((e) => e.isMajor);
 }
 
-/// Result of a year skip: the year-summary screen (docs/game-design.md §1.1).
+/// When a multi-week skip stops early.
+enum SkipStop {
+  /// Play every requested week.
+  never,
+
+  /// After a week with a major event (top-10 debut, #1, viral, ...).
+  major,
+
+  /// After any week with news about the player.
+  anyNews;
+
+  bool stopsOn(GameEvent e) => switch (this) {
+        never => false,
+        major => e.isMajor,
+        anyNews => !e.isIndustry,
+      };
+}
+
+/// Result of a skip (a few weeks or a year): the summary screen
+/// (docs/game-design.md §1.1).
 class YearReport {
   YearReport({
     required this.fromWeek,
     required this.weeks,
+    this.requestedWeeks = GameTime.weeksPerYear,
     required this.stoppedEarly,
     required this.events,
     required this.streamsGained,
+    this.singleSalesGained = 0,
     required this.pureGained,
     required this.unitsGained,
     required this.moneyDeltaCents,
@@ -42,10 +63,18 @@ class YearReport {
   final int fromWeek;
   final int weeks;
 
-  /// True when a major event stopped the skip before 52 weeks.
+  /// Weeks asked for (52 for a year skip).
+  final int requestedWeeks;
+
+  /// True when an event stopped the skip before [requestedWeeks].
   final bool stoppedEarly;
+
+  bool get isYear => requestedWeeks == GameTime.weeksPerYear;
   final List<GameEvent> events;
   final double streamsGained;
+
+  /// Downloads + CD singles.
+  final double singleSalesGained;
   final double pureGained;
   final double unitsGained;
   final int moneyDeltaCents;
@@ -399,6 +428,20 @@ class GameSession {
     bool stopOnMajor = true,
     void Function(WeekReport week)? onWeek,
     bool Function()? cancel,
+  }) =>
+      advanceWeeks(GameTime.weeksPerYear,
+          stop: stopOnMajor ? SkipStop.major : SkipStop.never,
+          onWeek: onWeek,
+          cancel: cancel);
+
+  /// Plays up to [count] weeks, stopping after a week whose news matches
+  /// [stop]. [onWeek] reports progress after each week; returning true from
+  /// [cancel] stops after the current week.
+  YearReport advanceWeeks(
+    int count, {
+    SkipStop stop = SkipStop.major,
+    void Function(WeekReport week)? onWeek,
+    bool Function()? cancel,
   }) {
     final p = _p;
     final from = world.week;
@@ -406,25 +449,28 @@ class GameSession {
     final pure0 = _sum(p, ArtistReg.lifePure);
     final units0 = _sum(p, ArtistReg.lifeUnits);
     final money0 = p.moneyCents, fans0 = p.coreFans, fame0 = p.fame;
+    final singles0 = _singleSales();
     final events = <GameEvent>[];
     var weeks = 0;
     var stopped = false;
-    while (weeks < GameTime.weeksPerYear) {
+    while (weeks < count) {
       final r = advanceWeek();
       weeks++;
       events.addAll(r.events);
       onWeek?.call(r);
-      if ((stopOnMajor && r.hasMajor) || (cancel?.call() ?? false)) {
-        stopped = weeks < GameTime.weeksPerYear;
+      if (r.events.any(stop.stopsOn) || (cancel?.call() ?? false)) {
+        stopped = weeks < count;
         break;
       }
     }
     return YearReport(
       fromWeek: from,
       weeks: weeks,
+      requestedWeeks: count,
       stoppedEarly: stopped,
       events: events,
       streamsGained: world.artistLifetimeStreams(p) - streams0,
+      singleSalesGained: _singleSales() - singles0,
       pureGained: _sum(p, ArtistReg.lifePure) - pure0,
       unitsGained: _sum(p, ArtistReg.lifeUnits) - units0,
       moneyDeltaCents: p.moneyCents - money0,
@@ -521,6 +567,13 @@ class GameSession {
   // ---------------------------------------------------------------- helpers
 
   void _saveNow() => _store.saveState(world);
+
+  double _singleSales() => world.playerSongIds.fold(
+      0.0,
+      (t, id) =>
+          t +
+          world.songLifetimeDownloads(world.songs[id]) +
+          world.songs[id].lifetimePhysical);
 
   void _requireMoney(int cents) {
     if (cents > _p.moneyCents) {

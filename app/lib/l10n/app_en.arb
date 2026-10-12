@@ -123,6 +123,40 @@
   "homeOther": "Rest of world",
   "nextWeek": "Next week",
   "skipYear": "Skip year",
+  "skip": "Skip",
+  "skipAhead": "Skip ahead",
+  "skipWeeksOption": "{count} weeks",
+  "@skipWeeksOption": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skipWeeksHint": "Stops early if something big happens.",
+  "skipUntilNews": "Until something happens",
+  "skipUntilNewsHint": "Stops at your next news: a chart entry, a playlist, a new peak…",
+  "skipYearOption": "A whole year",
+  "skipYearHint": "Stops at a #1, a top-10 debut or a viral hit.",
+  "skippingWeeks": "Skipping {count} weeks…",
+  "@skippingWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skippingUntilNews": "Playing until something happens…",
+  "weekShort": "Week {week}",
+  "@weekShort": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "weekTransition": "Week transition",
+  "weekTransitionHint": "A short animation when a week ends.",
   "skippingYear": "Skipping a year…",
   "weeksPlayed": "{count} weeks played",
   "@weeksPlayed": {

@@ -270,5 +270,24 @@ void main() {
       expect(career.first.streams, greaterThan(0));
       g.close();
     });
+
+    test('a few weeks can be skipped, stopping at the first news', () {
+      final g = GameSession.start(slots, _setup());
+      final four = g.advanceWeeks(4, stop: SkipStop.never);
+      expect(four.weeks, 4);
+      expect(four.requestedWeeks, 4);
+      expect(four.isYear, isFalse);
+      expect(four.stoppedEarly, isFalse);
+
+      // A released single makes news (a chart debut, a playlist or a peak)
+      // sooner or later; the skip stops right after that week.
+      final song = g.writeSong(budget: BudgetTier.low).id;
+      g.releaseSingle(song);
+      final until = g.advanceWeeks(52, stop: SkipStop.anyNews);
+      final news = until.events.where((e) => !e.isIndustry);
+      if (until.stoppedEarly) expect(news, isNotEmpty);
+      expect(until.weeks, lessThanOrEqualTo(52));
+      g.close();
+    });
   });
 }

@@ -59,12 +59,14 @@ abstract final class Cmd {
         return (r.week, describeEvents(s, r.events), r.moneyDeltaCents);
       };
 
-  /// Year skip; the number of weeks played is sent to [progress].
-  static SessionCmd<(YearReport, List<EventLine>)> skipYear(
-          SendPort progress) =>
+  /// Skips up to [weeks] weeks (52 = a year), stopping per [stop]; the
+  /// number of weeks played is sent to [progress].
+  static SessionCmd<(YearReport, List<EventLine>)> skipWeeks(
+          int weeks, SkipStop stop, SendPort progress) =>
       (s) {
         var n = 0;
-        final y = s.advanceYear(onWeek: (_) => progress.send(++n));
+        final y = s.advanceWeeks(weeks,
+            stop: stop, onWeek: (_) => progress.send(++n));
         return (y, describeEvents(s, y.events));
       };
 

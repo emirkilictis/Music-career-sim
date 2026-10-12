@@ -17,6 +17,9 @@ class AppSettings extends ChangeNotifier {
   /// by the store's entitlement when in-app purchases are added.
   bool premium = false;
 
+  /// Short animation between weeks (feedback B1); can be turned off.
+  bool weekTransition = true;
+
   Locale? get locale => languageCode == null ? null : Locale(languageCode!);
 
   static Future<AppSettings> load(File? file) async {
@@ -26,6 +29,7 @@ class AppSettings extends ChangeNotifier {
         final m = jsonDecode(await file.readAsString()) as Map<String, Object?>;
         s.languageCode = m['language'] as String?;
         s.premium = m['premium'] as bool? ?? false;
+        s.weekTransition = m['weekTransition'] as bool? ?? true;
       } on FormatException {
         // A broken settings file falls back to defaults.
       }
@@ -43,12 +47,20 @@ class AppSettings extends ChangeNotifier {
     _save();
   }
 
+  void setWeekTransition(bool on) {
+    weekTransition = on;
+    _save();
+  }
+
   void _save() {
     notifyListeners();
     final f = _file;
     if (f == null) return;
     f.parent.createSync(recursive: true);
-    f.writeAsStringSync(
-        jsonEncode({'language': languageCode, 'premium': premium}));
+    f.writeAsStringSync(jsonEncode({
+      'language': languageCode,
+      'premium': premium,
+      'weekTransition': weekTransition,
+    }));
   }
 }

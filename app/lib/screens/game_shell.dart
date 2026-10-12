@@ -9,6 +9,7 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
+import '../widgets/week_transition.dart';
 import 'career_tab.dart';
 import 'charts_tab.dart';
 import 'dashboard_tab.dart';
@@ -23,7 +24,7 @@ Future<T?> pushInCareer<T>(BuildContext context, Widget page) {
 }
 
 /// The in-career frame: header (week, money), five tabs and the
-/// "Next week" / "Skip year" controls.
+/// "Next week" / "Skip" controls.
 class GameShell extends StatefulWidget {
   const GameShell({super.key, required this.state});
   final CareerState state;
@@ -61,8 +62,24 @@ class _GameShellState extends State<GameShell> {
 
   Future<void> _nextWeek() async {
     final state = widget.state;
+    // Feedback B1: a short "Week 12 → 13" card while the week is played.
+    ValueNotifier<WeekOutcome?>? outcome;
+    Future<void>? shown;
+    if (context.settingsRead.weekTransition) {
+      final o = outcome = ValueNotifier(null);
+      final from = state.week;
+      shown = showGeneralDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 160),
+        pageBuilder: (_, __, ___) => WeekTransition(fromWeek: from, outcome: o),
+      );
+    }
     try {
       final lines = await state.nextWeek();
+      outcome?.value = WeekOutcome(state.week, state.lastMoneyDelta);
+      await shown;
       if (!mounted) return;
       final major = lines.where((l) => l.event.isMajor).toList();
       if (major.isNotEmpty) {
@@ -75,24 +92,72 @@ class _GameShellState extends State<GameShell> {
             icon: Icons.notifications_none_rounded);
       }
     } catch (e) {
+      outcome?.value = const WeekOutcome.failed();
+      await shown;
       if (mounted) showError(context, e);
+    } finally {
+      outcome?.dispose();
     }
   }
 
-  Future<void> _skipYear() async {
+  /// Feedback B2: skip a few weeks, until the next news, or a year.
+  Future<void> _skipMenu() async {
+    final l = context.l10n;
+    Widget option(
+            IconData icon, String title, String hint, (int, SkipStop) value) =>
+        ListTile(
+          leading: IconBubble(icon, color: AppColors.lilac),
+          title:
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+          subtitle: Text(hint),
+          onTap: () => Navigator.pop(context, value),
+        );
+    final choice = await showModalBottomSheet<(int, SkipStop)>(
+      context: context,
+      builder: (c) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Text(l.skipAhead,
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.w900)),
+            ),
+            for (final n in const [2, 4, 8])
+              option(Icons.fast_forward_rounded, l.skipWeeksOption(n),
+                  l.skipWeeksHint, (n, SkipStop.major)),
+            option(Icons.notifications_active_outlined, l.skipUntilNews,
+                l.skipUntilNewsHint, (GameTime.weeksPerYear, SkipStop.anyNews)),
+            option(Icons.event_repeat_rounded, l.skipYearOption, l.skipYearHint,
+                (GameTime.weeksPerYear, SkipStop.major)),
+          ],
+        ),
+      ),
+    );
+    if (choice != null && mounted) await _skip(choice.$1, choice.$2);
+  }
+
+  Future<void> _skip(int weeks, SkipStop stop) async {
     final state = widget.state;
     final l = context.l10n;
     final progress = ValueNotifier<int>(0);
+    final title = stop == SkipStop.anyNews
+        ? l.skippingUntilNews
+        : weeks == GameTime.weeksPerYear
+            ? l.skippingYear
+            : l.skippingWeeks(weeks);
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (c) => AlertDialog(
-        title: Text(l.skippingYear),
+        title: Text(title),
         content: ValueListenableBuilder<int>(
           valueListenable: progress,
           builder: (_, n, __) =>
               Column(mainAxisSize: MainAxisSize.min, children: [
-            PillBar(value: n / GameTime.weeksPerYear, height: 12),
+            PillBar(value: n / weeks, height: 12),
             const SizedBox(height: 12),
             Text(l.weeksPlayed(n),
                 style: const TextStyle(color: AppColors.textMuted)),
@@ -101,12 +166,14 @@ class _GameShellState extends State<GameShell> {
       ),
     );
     try {
-      final (report, lines) = await state.skipYear((n) => progress.value = n);
+      final (report, lines) =
+          await state.skip(weeks, stop, (n) => progress.value = n);
       if (!mounted) return;
       Navigator.of(context).pop();
       await showDialog<void>(
         context: context,
-        builder: (c) => _YearSummaryDialog(report: report, lines: lines),
+        builder: (c) => _YearSummaryDialog(
+            report: report, lines: playerNews(lines), week: state.week),
       );
     } catch (e) {
       if (mounted) {
@@ -225,9 +292,9 @@ class _GameShellState extends State<GameShell> {
                   SizedBox(
                     height: 54,
                     child: OutlinedButton.icon(
-                      onPressed: career.busy ? null : _skipYear,
+                      onPressed: career.busy ? null : _skipMenu,
                       icon: const Icon(Icons.fast_forward_rounded, size: 20),
-                      label: Text(l.skipYear),
+                      label: Text(l.skip),
                     ),
                   ),
                 ]),
@@ -290,20 +357,29 @@ class MoneyPill extends StatelessWidget {
       );
 }
 
+/// Summary after a skip: a year, a few weeks, or until the next news.
 class _YearSummaryDialog extends StatelessWidget {
-  const _YearSummaryDialog({required this.report, required this.lines});
+  const _YearSummaryDialog(
+      {required this.report, required this.lines, required this.week});
   final YearReport report;
   final List<EventLine> lines;
+
+  /// Current week, for the era's main number (docs K38).
+  final int week;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final fmt = context.fmt;
-    final highlights = lines.where((x) => x.event.isMajor).toList();
+    final highlights =
+        report.isYear ? lines.where((x) => x.event.isMajor).toList() : lines;
+    final streaming = SalesEra.of(GameTime.yearOf(week)) == SalesEra.streaming;
     return AlertDialog(
       title: Text(report.stoppedEarly
           ? l.yearStoppedTitle(report.weeks)
-          : l.yearSummaryTitle(GameTime.yearOf(report.fromWeek))),
+          : report.isYear
+              ? l.yearSummaryTitle(GameTime.yearOf(report.fromWeek))
+              : l.weeksPlayed(report.weeks)),
       content: SizedBox(
         width: 420,
         child: SingleChildScrollView(
@@ -312,8 +388,13 @@ class _YearSummaryDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               StatGrid(tiles: [
-                StatTile(
-                    label: l.streams, value: fmt.compact(report.streamsGained)),
+                streaming
+                    ? StatTile(
+                        label: l.streams,
+                        value: fmt.compact(report.streamsGained))
+                    : StatTile(
+                        label: l.singleSales,
+                        value: fmt.compact(report.singleSalesGained)),
                 StatTile(
                     label: l.albumUnits,
                     value: fmt.compact(report.unitsGained)),

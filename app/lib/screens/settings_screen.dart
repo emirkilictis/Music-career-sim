@@ -25,6 +25,12 @@ class SettingsScreen extends StatelessWidget {
         ),
         const Divider(),
         SwitchListTile(
+          title: Text(l.weekTransition),
+          subtitle: Text(l.weekTransitionHint),
+          value: settings.weekTransition,
+          onChanged: settings.setWeekTransition,
+        ),
+        SwitchListTile(
           title: Text(l.premiumTest),
           subtitle: Text(l.premiumTestHint),
           value: settings.premium,

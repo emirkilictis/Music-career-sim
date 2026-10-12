@@ -83,6 +83,21 @@ void main() {
     await tester.tap(find.text('Top 50 – Global'));
     await tester.pumpAndSettle();
     expect(find.textContaining('50 songs'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // Skip menu: four weeks, then a summary.
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+    expect(find.text('Until something happens'), findsOneWidget);
+    await tester.tap(find.text('4 weeks'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining(RegExp(r'^(4 weeks played|Stopped after)')),
+        findsOneWidget);
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('free players see Premium starts locked', (tester) async {
