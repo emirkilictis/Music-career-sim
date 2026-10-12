@@ -401,9 +401,9 @@ abstract final class Eras {
         a.devotion += (1 - a.devotion) *
             a.kind.devotionGain *
             switch (result) {
-              EraResult.smash => 0.25,
-              EraResult.success => 0.12,
-              _ => 0.03,
+              EraResult.smash => 0.2,
+              EraResult.success => 0.09,
+              _ => 0.02,
             };
     }
     a.devotion = a.devotion.clamp(0.0, 1.0);

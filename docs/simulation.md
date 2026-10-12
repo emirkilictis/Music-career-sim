@@ -138,7 +138,7 @@ lifetime = lifetimeAtSettle + dormantRate × (artist.catalogIndex − indexAtSet
 
 ## 7. Listeler
 
-İlk listeler: US Songs (100), US Albums (200), Global Songs (200), Global Albums (200).
+Listeler: US/UK/Global Songs (100), US/UK/Global Albums (100), platform Top 50 (Global, Kuzey Amerika, Avrupa).
 İsimler kurgusaldır.
 
 ### 7.1 Aday = aktif küme

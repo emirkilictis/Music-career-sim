@@ -327,9 +327,10 @@ void albumShapeTests() {
   test('more tracks raise the debut with diminishing returns', () {
     final ten = _albumRun(tracks: 10, skill: 90, weeks: 1).first;
     final forty = _albumRun(tracks: 40, skill: 90, weeks: 1).first;
-    // A modest lift (streaming equivalents of the extra tracks; a superstar's
-    // first week is mostly pure sales), never anything like 4×.
-    expect(forty, greaterThan(1.05 * ten));
+    // About +25% for 4× the tracks (longer tracklist + streaming
+    // equivalents of the extra tracks), never anything like 4×.
+    print('40 vs 10 tracks: ${(forty / ten).toStringAsFixed(3)}');
+    expect(forty / ten, inInclusiveRange(1.18, 1.35));
     expect(forty, lessThan(1.8 * ten));
   });
 }

@@ -78,7 +78,7 @@ abstract final class Charts {
         key: 'chart.global.songs',
         kind: ChartKind.songs,
         market: ChartMarket.global,
-        size: 200),
+        size: 100),
     ChartDef(
         id: usAlbums,
         key: 'chart.us.albums',

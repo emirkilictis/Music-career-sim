@@ -29,6 +29,7 @@ class SimConfig {
     this.playlistMidBoost = 0.3,
     this.playlistBigBoost = 0.8,
     this.playlistFade = 0.85,
+    this.longAlbumBonus = 0.08,
     this.superfanBuyRate = 0.09,
     this.collectorRate = 0.15,
     this.variantDecay = 0.6,
@@ -135,6 +136,9 @@ class SimConfig {
   final double playlistMidBoost;
   final double playlistBigBoost;
   final double playlistFade;
+
+  /// Extra album sales per doubling of the tracklist beyond 10 tracks.
+  final double longAlbumBonus;
 
   final double superfanBuyRate;
 

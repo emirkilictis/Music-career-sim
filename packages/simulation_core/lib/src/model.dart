@@ -297,7 +297,7 @@ class Artist {
   /// Superfan purchase multiplier from devotion. Convex: only the most
   /// devoted fanbases produce mega debuts.
   double get devotionBuyFactor =>
-      0.7 + 0.3 * devotion + 2.0 * devotion * devotion * devotion;
+      0.5 + 0.2 * devotion + 2.3 * devotion * devotion * devotion;
 
   /// Collector multiplier from devotion (also convex).
   double get devotionCollectorFactor => 0.15 + 0.85 * devotion * devotion;

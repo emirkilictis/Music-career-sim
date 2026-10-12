@@ -81,7 +81,7 @@ class Simulator {
       a.weekStreams = 0;
       a.hype *= 0.92;
       // Fanbases slowly drift unless renewed by successful eras.
-      a.devotion = math.max(0.0, a.devotion - 0.0002 * a.kind.devotionDrift);
+      a.devotion = math.max(0.0, a.devotion - 0.0004 * a.kind.devotionDrift);
       a.buzz *= 0.75;
       a.flopSupport *= 0.97;
       if (!a.eraOpen && a.anticipationCap > 0) {
@@ -402,6 +402,11 @@ class Simulator {
       final noise =
           RandomStream.keyed(w.seed, w.week, al.id, RngPurpose.albumNoise)
               .logNormal(0.08);
+      // Long tracklists sell a little more (more for the money, bundles);
+      // each doubling beyond 10 tracks adds [SimConfig.longAlbumBonus].
+      final n = al.songIds.length;
+      final tracklist =
+          n > 10 ? 1 + c.longAlbumBonus * math.log(n / 10) / math.ln2 : 1.0;
 
       // Song consumption of this album's tracks, per region.
       final reach = Float64List(_r),
@@ -444,7 +449,7 @@ class Simulator {
                 (age == 0 ? 1.5 : 1.0) +
             (age == 0 ? casual * 0.003 * era.casualPurchaseRate : 0.0) +
             casual * c.albumCatalogRate * era.casualPurchaseRate * (0.5 + q01);
-        final pure = (superPart + collectorPart + casPart) * noise;
+        final pure = (superPart + collectorPart + casPart) * noise * tracklist;
         final streams =
             sea[k] + al.sumDormantRate * p.catalogFactor * share * spa[k];
         final t = tea[k] / c.trackEquivalentAlbum;

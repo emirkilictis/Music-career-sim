@@ -16,7 +16,7 @@ Simülasyon motorunun ilk çalışan sürümü. Arayüz ve veritabanı yok; ama�
 | `model.dart` | Sanatçı (statlar, beklenti, era, enerji), şarkı (feat dahil), albüm, ekip, liste girişi |
 | `actions.dart` | Şarkı yazma (statlar + ekip + şans + ilham anı + enerji/burnout), single/albüm yayınlama, era skoru ve beklenti |
 | `lifecycle.dart` | ACTIVE ↔ DORMANT geçişleri, tembel birikim (lazy accrual) |
-| `simulator.dart` | Haftalık pipeline: pazar normalizasyonu, stream/indirme/radyo/fiziksel, albüm satışı + TEA + SEA, US Songs (100) ve US Albums (200), recurrent kuralı, hayran/popülerlik |
+| `simulator.dart` | Haftalık pipeline: pazar normalizasyonu, stream/indirme/radyo/fiziksel, albüm satışı + TEA + SEA, US Songs (100) ve US Albums (100), recurrent kuralı, hayran/popülerlik |
 | `ai.dart` | AI rakiplerin era planları (lead single → albüm → single'lar), feat, nüfus kontrolü, tier sıralaması |
 | `bot.dart` | Kalibrasyon için basit bot oyuncu (aynı `Actions` API'si) |
 | `world_hash.dart` | Determinizm testleri için durum hash'i |
@@ -216,6 +216,17 @@ Sonuç (seed 42 ve 7, 2015–2025, `dart run bin/chart_churn.dart <seed> 2015 20
 | Yılda farklı #1 şarkı | 11–19 | 10–19 |
 | ABD / UK / Global #1 şarkı, haftalık (2020'ler) | 36–54M / 10–13M / 68–90M | 40–55M / ~10M / 70–125M |
 | 2025 süperstar ABD ilk hafta (hamlesiz / iyi / max) | 279K / 1.4M / 3.9M | — / — / ~4.0M |
+
+## İnce ayar: uzun albümler, Global Songs, #1 albüm satışları (yapıldı)
+
+- 40 şarkılı albüm 10 şarkılıya göre ilk haftada ~%25 fazla (`longAlbumBonus` 0.08: 10'un üstünde her
+  iki katına çıkışta saf satış +%8, üstüne ekstra şarkıların stream karşılığı). Test: oran 1.18–1.35.
+- Global 200 → **Global Songs**, 100 sıra.
+- #1 albüm haftaları düşürüldü: AI fandomlarının sadakati yavaş birikiyor (başarılı era kazancı
+  0.25/0.12/0.03 → 0.20/0.09/0.02) ve biraz daha hızlı azalıyor (haftalık 0.0002 → 0.0004); sadakat
+  çarpanı daha dik (orta sadakat daha az, tam sadakat aynı). Tipik #1 haftası 175–250K → ~140–175K;
+  yılda farklı #1 albüm çoğunlukla 24–32. 2025 süperstar: hamlesiz 189K, iyi hamle 1.1M, max 3.2–3.9M
+  (albüm başına ±%8 rastgelelik; ortalama ~3.5M saf).
 
 ## Bilinen eksikler / sıradaki adımlar
 
