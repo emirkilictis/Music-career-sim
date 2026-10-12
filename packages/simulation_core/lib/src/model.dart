@@ -387,6 +387,9 @@ class Song with Charted {
 
   double lifetimeRadio = 0;
 
+  /// Physical (CD) singles sold, all regions.
+  double lifetimePhysical = 0;
+
   /// This week's streams and downloads per region ([streams ×3,
   /// downloads ×3]); only kept while the song is active.
   Float64List? weekRegion;

@@ -65,6 +65,7 @@ int worldHash(World w) {
   for (final s in w.songs) {
     addAll(s.reg);
     addDouble(s.dormantRate);
+    addDouble(s.lifetimePhysical);
     for (final g in s.genres) {
       addInt(g);
     }

@@ -147,6 +147,31 @@ void main() {
       g.close();
     });
 
+    test('an early-2000s single sells CDs, not streams', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2002,
+              premium: true,
+              tier: StartTier.risingStar,
+              money: StartMoney.comfortable));
+      final song = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(song);
+      for (var i = 0; i < 6; i++) {
+        g.advanceWeek();
+      }
+      final s = g.song(song);
+      expect(s.lifetimeStreams.total, 0);
+      expect(s.lifetimePhysical, greaterThan(0));
+      expect(s.singleSales, s.lifetimePhysical + s.lifetimeDownloads);
+      expect(g.player.lifetimeSingleSales, closeTo(s.singleSales, 1e-6));
+      expect(g.songHistory(song).map((h) => h.sales).reduce((a, b) => a + b),
+          closeTo(s.lifetimePhysical + s.lifetimeDownloads, 1));
+      expect(g.careerByYear().single.singleSales, greaterThan(0));
+      expect(SalesEra.of(2002), SalesEra.physical);
+      g.close();
+    });
+
     test('the premium daily bonus is paid once a day', () {
       final g = GameSession.start(slots, _setup());
       final day = DateTime(2026, 5, 4, 10);

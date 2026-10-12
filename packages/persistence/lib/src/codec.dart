@@ -156,7 +156,7 @@ abstract final class Codec {
     'charts',
     // Added in schema v2; new columns go last so older hot snapshots still
     // read (missing trailing columns come back as null).
-    'weekRegion',
+    'weekRegion', 'lifetimePhysical',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -173,6 +173,7 @@ abstract final class Codec {
         ...s.reg,
         _encodeCharts(s),
         s.weekRegion?.join(','),
+        s.lifetimePhysical,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -216,6 +217,7 @@ abstract final class Codec {
       ..dormantRate = _d(r['dormantRate']);
     _readReg(r, songRegColumns, s.reg);
     _decodeCharts(r['charts'] as String, s);
+    s.lifetimePhysical = (r['lifetimePhysical'] as num?)?.toDouble() ?? 0;
     if (r['weekRegion'] case final String wr when wr.isNotEmpty) {
       s.weekRegion =
           Float64List.fromList(wr.split(',').map(double.parse).toList());

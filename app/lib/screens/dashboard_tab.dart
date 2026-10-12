@@ -86,9 +86,13 @@ class DashboardTab extends StatelessWidget {
                 StatTile(label: l.coreFans, value: fmt.compact(p.coreFans)),
                 StatTile(
                     label: l.listeners, value: fmt.compact(p.casualListeners)),
-                StatTile(
-                    label: l.streams,
-                    value: fmt.compact(p.lifetimeStreams.total)),
+                SalesEra.of(GameTime.yearOf(career.week)) == SalesEra.streaming
+                    ? StatTile(
+                        label: l.streams,
+                        value: fmt.compact(p.lifetimeStreams.total))
+                    : StatTile(
+                        label: l.singleSales,
+                        value: fmt.compact(p.lifetimeSingleSales)),
                 StatTile(
                     label: l.albumUnits,
                     value: fmt.compact(p.lifetimeUnits.total)),

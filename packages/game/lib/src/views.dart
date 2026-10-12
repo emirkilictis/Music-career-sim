@@ -61,6 +61,18 @@ class ArtistView {
             _regional((r) => a.reg[ArtistReg.lifePure + r].toDouble()),
         lifetimeUnits =
             _regional((r) => a.reg[ArtistReg.lifeUnits + r].toDouble()),
+        lifetimeSingleSales = a.tier == ArtistTier.player
+            ? w.playerSongIds.fold(
+                0.0,
+                (t, id) =>
+                    t +
+                    w.songLifetimeDownloads(w.songs[id]) +
+                    w.songs[id].lifetimePhysical)
+            : a.lifetimeDownloads,
+        lifetimeRadio = a.tier == ArtistTier.player
+            ? w.playerSongIds
+                .fold(0.0, (t, id) => t + w.songs[id].lifetimeRadio)
+            : 0,
         numberOneSingles = List.unmodifiable(a.no1Singles),
         numberOneAlbums = List.unmodifiable(a.no1Albums),
         eraOpen = a.eraOpen,
@@ -97,6 +109,12 @@ class ArtistView {
   final RegionalNumbers lifetimeStreams;
   final RegionalNumbers lifetimePure;
   final RegionalNumbers lifetimeUnits;
+
+  /// Downloads + CD singles (CD singles counted for the player only).
+  final double lifetimeSingleSales;
+
+  /// Radio audience of the player's songs (0 for rivals).
+  final double lifetimeRadio;
 
   /// #1 counts per chart id.
   final List<int> numberOneSingles;
@@ -138,6 +156,7 @@ class SongView {
             s.releasedWeek < 0 ? 0 : w.songWeekStreamsIn(s, ChartMarket.global),
         lifetimeStreams = _regional((r) => w.songLifetimeStreams(s, r)),
         lifetimeDownloads = w.songLifetimeDownloads(s),
+        lifetimePhysical = s.lifetimePhysical,
         lifetimeRadio = s.lifetimeRadio;
 
   factory SongView.of(World w, Song s) => SongView._(w, s);
@@ -164,7 +183,15 @@ class SongView {
   final double weekStreams;
   final RegionalNumbers lifetimeStreams;
   final double lifetimeDownloads;
+
+  /// CD singles sold.
+  final double lifetimePhysical;
+
+  /// Radio audience (listener impressions).
   final double lifetimeRadio;
+
+  /// Single sales: downloads + CD singles.
+  double get singleSales => lifetimeDownloads + lifetimePhysical;
 
   bool get inVault => status == SongStatus.vault;
 }
@@ -367,4 +394,23 @@ class ArtistPageView {
   final List<SongView> singles;
 
   double get monthlyListeners => Streamify.monthlyListeners(weeklyStreams);
+}
+
+/// Which number best tells a song's success in a given year (docs K38):
+/// CD singles and radio in the early 2000s, then downloads, then streams.
+enum SalesEra {
+  /// 2000–2004: single sales (mostly CD) first, radio second.
+  physical,
+
+  /// 2005–2011: single sales (mostly downloads) first, streams second.
+  downloads,
+
+  /// 2012 on: streams first, single sales second.
+  streaming;
+
+  static SalesEra of(int year) => year < 2005
+      ? physical
+      : year < 2012
+          ? downloads
+          : streaming;
 }

@@ -178,7 +178,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
                       title: s.title,
                       subtitle:
                           '${GameTime.yearOf(s.singleWeek)} · ${fmt.campaign(s.campaign)}',
-                      value: fmt.compact(s.lifetimeStreams.total),
+                      value: fmt.songMain(s, career.week),
                       onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(

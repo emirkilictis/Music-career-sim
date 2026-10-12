@@ -58,11 +58,14 @@ class YearReport {
 
 /// One weekly point of a release's history graph.
 class HistoryPoint {
-  HistoryPoint(this.week, this.value, this.positions);
+  HistoryPoint(this.week, this.value, this.positions, {this.sales = 0});
   final int week;
 
   /// Streams (songs) or units (albums) that week.
   final double value;
+
+  /// Songs: single sales (downloads + CD singles) that week.
+  final double sales;
 
   /// Chart position by chart id that week (only charts it was on).
   final Map<int, int> positions;
@@ -73,6 +76,7 @@ class CareerYear {
   CareerYear({
     required this.year,
     required this.streams,
+    required this.singleSales,
     required this.pure,
     required this.units,
     required this.fame,
@@ -81,6 +85,9 @@ class CareerYear {
   });
   final int year;
   final double streams;
+
+  /// Downloads + CD singles of the player's songs.
+  final double singleSales;
   final double pure;
   final double units;
   final double fame;
@@ -431,7 +438,8 @@ class GameSession {
 
   /// Weekly streams and chart positions of one of the player's songs.
   List<HistoryPoint> songHistory(int songId) => _history(
-        'SELECT week, streams AS v FROM songWeek WHERE songId = ? '
+        'SELECT week, streams AS v, downloads + physical AS s FROM songWeek '
+        'WHERE songId = ? '
         'ORDER BY week',
         songId,
         Charts.all
@@ -463,7 +471,8 @@ class GameSession {
     return [
       for (final r in _store.db.select(sql, [id]))
         HistoryPoint(r['week'] as int, (r['v'] as num).toDouble(),
-            pos[r['week'] as int] ?? const {}),
+            pos[r['week'] as int] ?? const {},
+            sales: (r['s'] as num?)?.toDouble() ?? 0),
     ];
   }
 
@@ -478,6 +487,12 @@ class GameSession {
         (r['units'] as num?)?.toDouble() ?? 0,
       );
     }
+    final singles = <int, double>{
+      for (final r in _store.db.select(
+          'SELECT ${GameTime.baseYear} + week / ${GameTime.weeksPerYear} AS y, '
+          'SUM(downloads + physical) AS n FROM songWeek GROUP BY y'))
+        r['y'] as int: (r['n'] as num?)?.toDouble() ?? 0,
+    };
     final out = <CareerYear>[];
     var lastStreams = 0.0;
     for (final r in _store.db.select(
@@ -491,6 +506,7 @@ class GameSession {
       out.add(CareerYear(
         year: y,
         streams: life - lastStreams,
+        singleSales: singles[y] ?? 0,
         pure: sales[y]?.$1 ?? 0,
         units: sales[y]?.$2 ?? 0,
         fame: (r['fame'] as num).toDouble(),

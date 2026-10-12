@@ -129,7 +129,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   leading: Text('${i + 1}'),
                   title: Text(_tracks[i].title),
                   subtitle: Text(_tracks[i].isSingle ? l.typeSingle : ''),
-                  trailing: Text(fmt.compact(_tracks[i].lifetimeStreams.total)),
+                  trailing: Text(fmt.songMain(_tracks[i], widget.state.week)),
                   onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(

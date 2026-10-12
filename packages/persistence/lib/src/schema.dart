@@ -5,9 +5,12 @@ import 'codec.dart';
 /// (v1 has not shipped yet, so it is still being shaped.)
 final List<String> migrations = [_v1(), _v2];
 
-/// v2: a song's weekly streams/downloads per region, so "this week" numbers
-/// survive closing and reopening a career.
-const _v2 = 'ALTER TABLE song ADD COLUMN weekRegion TEXT;';
+/// v2: a song's weekly streams/downloads per region (so "this week" numbers
+/// survive closing and reopening a career) and its CD single sales.
+const _v2 = '''
+  ALTER TABLE song ADD COLUMN weekRegion TEXT;
+  ALTER TABLE song ADD COLUMN lifetimePhysical REAL;
+''';
 
 String _cols(List<String> names, String type) =>
     names.map((n) => '$n $type').join(', ');

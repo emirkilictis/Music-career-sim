@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:game/game.dart' hide Actions;
 import 'package:music_career_sim/core/commands.dart';
+import 'package:music_career_sim/widgets/media_tile.dart';
 
 import 'support.dart';
 
@@ -149,5 +150,47 @@ void main() {
     await shot(tester, '16_home_tr');
     await tab(tester, 'Listeler');
     await shot(tester, '17_charts_tr');
+  });
+
+  testWidgets('screenshots: early 2000s career', skip: !enabled,
+      (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+
+    // 2002: CD singles and radio, no streaming yet.
+    final c = app.controller;
+    final port = ReceivePort();
+    await c.exec(Cmd.start(
+        CareerSetup(
+          name: 'June Harper',
+          genre: 0,
+          startYear: 2002,
+          tier: StartTier.risingStar,
+          money: StartMoney.comfortable,
+          premium: true,
+          seed: 2002,
+        ),
+        port.sendPort));
+    port.close();
+    final song =
+        (await c.run(Cmd.writeSong(budget: BudgetTier.high, genres: const [0])))
+            .id;
+    await c.run(Cmd.releaseSingle(song, Campaign.standard));
+    for (var i = 0; i < 8; i++) {
+      await c.run(Cmd.nextWeek());
+    }
+    await c.exec(Cmd.closeCareer());
+
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('June Harper'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Career');
+    await shot(tester, '18_career_2002');
+    await tab(tester, 'Releases');
+    await tester.tap(find.byType(MediaTile).first);
+    await shot(tester, '19_song_2002');
   });
 }

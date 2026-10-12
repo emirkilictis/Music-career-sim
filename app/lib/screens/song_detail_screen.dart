@@ -65,6 +65,41 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           body: const Center(child: CircularProgressIndicator()));
     }
     final streams = [for (final h in _history) h.value];
+    final sales = [for (final h in _history) h.sales];
+    final hasStreams = s.lifetimeStreams.total >= 1;
+    final salesFirst =
+        SalesEra.of(GameTime.yearOf(widget.state.week)) != SalesEra.streaming;
+    final saleTiles = [
+      StatTile(label: l.singleSales, value: fmt.compact(s.singleSales)),
+      StatTile(label: l.downloads, value: fmt.compact(s.lifetimeDownloads)),
+      if (s.lifetimePhysical >= 1)
+        StatTile(label: l.cdSingles, value: fmt.compact(s.lifetimePhysical)),
+      StatTile(label: l.radioAudience, value: fmt.compact(s.lifetimeRadio)),
+    ];
+    final streamTiles = [
+      if (hasStreams) ...[
+        StatTile(label: l.thisWeekStreams, value: fmt.compact(s.weekStreams)),
+        StatTile(label: l.streams, value: fmt.compact(s.lifetimeStreams.total)),
+        for (final r in Region.values)
+          StatTile(
+              label: fmt.region(r), value: fmt.compact(s.lifetimeStreams[r])),
+      ],
+    ];
+    Widget chart(String title, List<double> v) => Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Section(
+            title: title,
+            child: LineChart(
+                values: v,
+                topLabel: fmt.compact(v.reduce((a, b) => a > b ? a : b))),
+          ),
+        );
+    final streamChart = streams.length > 1 && streams.any((x) => x >= 1)
+        ? chart(l.weeklyStreams, streams)
+        : null;
+    final salesChart = sales.length > 1 && sales.any((x) => x >= 1)
+        ? chart(l.weeklySingleSales, sales)
+        : null;
     final usPos = [
       for (final h in _history) h.positions[Charts.usSongs]?.toDouble()
     ];
@@ -111,37 +146,18 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             const SizedBox(height: 12),
             Section(
               title: l.numbers,
-              child: StatGrid(tiles: [
-                StatTile(
-                    label: l.thisWeekStreams,
-                    value: fmt.compact(s.weekStreams)),
-                StatTile(
-                    label: l.streams,
-                    value: fmt.compact(s.lifetimeStreams.total)),
-                for (final r in Region.values)
-                  StatTile(
-                      label: fmt.region(r),
-                      value: fmt.compact(s.lifetimeStreams[r])),
-                StatTile(
-                    label: l.downloads,
-                    value: fmt.compact(s.lifetimeDownloads)),
-                StatTile(
-                    label: l.radioAudience,
-                    value: fmt.compact(s.lifetimeRadio)),
-              ]),
+              child: StatGrid(
+                  tiles: salesFirst
+                      ? [...saleTiles, ...streamTiles]
+                      : [...streamTiles, ...saleTiles]),
             ),
             const SizedBox(height: 12),
             _ChartRecords(records: s.charts),
-            if (streams.length > 1) ...[
-              const SizedBox(height: 12),
-              Section(
-                title: l.weeklyStreams,
-                child: LineChart(
-                    values: streams,
-                    topLabel:
-                        fmt.compact(streams.reduce((a, b) => a > b ? a : b))),
-              ),
-            ],
+            ...[
+              if (salesFirst) salesChart,
+              streamChart,
+              if (!salesFirst) salesChart,
+            ].whereType<Widget>(),
             if (usPos.whereType<double>().length > 1) ...[
               const SizedBox(height: 12),
               Section(

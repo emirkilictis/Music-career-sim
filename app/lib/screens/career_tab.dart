@@ -39,9 +39,11 @@ class _CareerScreenState extends State<CareerScreen> {
     if (mounted) {
       setState(() {
         _years = years;
+        final fmt = context.fmt;
+        final week = career.week;
         _songs = songs.where((s) => !s.inVault).toList()
           ..sort((a, b) =>
-              b.lifetimeStreams.total.compareTo(a.lifetimeStreams.total));
+              fmt.songMainValue(b, week).compareTo(fmt.songMainValue(a, week)));
       });
     }
   }
@@ -53,6 +55,8 @@ class _CareerScreenState extends State<CareerScreen> {
     final career = context.career;
     final p = career.player;
     final t = Theme.of(context).textTheme;
+    final era = SalesEra.of(GameTime.yearOf(career.week));
+    final hasStreams = p.lifetimeStreams.total >= 1;
     final list = ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -61,14 +65,22 @@ class _CareerScreenState extends State<CareerScreen> {
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             StatGrid(tiles: [
+              if (hasStreams)
+                StatTile(
+                    label: l.streams,
+                    value: fmt.compact(p.lifetimeStreams.total)),
               StatTile(
-                  label: l.streams,
-                  value: fmt.compact(p.lifetimeStreams.total)),
+                  label: l.singleSales,
+                  value: fmt.compact(p.lifetimeSingleSales)),
               StatTile(
                   label: l.albumUnits,
                   value: fmt.compact(p.lifetimeUnits.total)),
               StatTile(
                   label: l.pureSales, value: fmt.compact(p.lifetimePure.total)),
+              if (era == SalesEra.physical || !hasStreams)
+                StatTile(
+                    label: l.radioAudience,
+                    value: fmt.compact(p.lifetimeRadio)),
               StatTile(label: l.coreFans, value: fmt.compact(p.coreFans)),
             ]),
             const SizedBox(height: 16),
@@ -79,7 +91,7 @@ class _CareerScreenState extends State<CareerScreen> {
               children: [
                 TableRow(children: [
                   const SizedBox(),
-                  Text(l.streams, style: t.labelSmall),
+                  if (hasStreams) Text(l.streams, style: t.labelSmall),
                   Text(l.albumUnits, style: t.labelSmall),
                 ]),
                 for (final r in Region.values)
@@ -88,7 +100,7 @@ class _CareerScreenState extends State<CareerScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(fmt.region(r)),
                     ),
-                    Text(fmt.compact(p.lifetimeStreams[r])),
+                    if (hasStreams) Text(fmt.compact(p.lifetimeStreams[r])),
                     Text(fmt.compact(p.lifetimeUnits[r])),
                   ]),
               ],
@@ -118,7 +130,8 @@ class _CareerScreenState extends State<CareerScreen> {
                   children: [
                     TableRow(children: [
                       Text(l.year, style: t.labelSmall),
-                      Text(l.streams, style: t.labelSmall),
+                      if (hasStreams) Text(l.streams, style: t.labelSmall),
+                      Text(l.singleSales, style: t.labelSmall),
                       Text(l.albumUnits, style: t.labelSmall),
                       Text(l.fame, style: t.labelSmall),
                     ]),
@@ -128,7 +141,8 @@ class _CareerScreenState extends State<CareerScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Text('${y.year}'),
                         ),
-                        Text(fmt.compact(y.streams)),
+                        if (hasStreams) Text(fmt.compact(y.streams)),
+                        Text(fmt.compact(y.singleSales)),
                         Text(fmt.compact(y.units)),
                         Text(fmt.percent(y.fame)),
                       ]),
@@ -146,8 +160,11 @@ class _CareerScreenState extends State<CareerScreen> {
                       dense: true,
                       contentPadding: EdgeInsets.zero,
                       title: Text(s.title),
-                      subtitle: Text(fmt.songStatus(s)),
-                      trailing: Text(fmt.compact(s.lifetimeStreams.total)),
+                      subtitle: Text([
+                        fmt.songStatus(s),
+                        fmt.songSecondary(s, career.week),
+                      ].where((x) => x.isNotEmpty).join(' · ')),
+                      trailing: Text(fmt.songMain(s, career.week)),
                       onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(

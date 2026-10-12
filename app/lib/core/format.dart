@@ -163,6 +163,30 @@ class Fmt {
         EraResult.smash => l.eraSmash,
       };
 
+  /// A song's headline number for the year being played (docs K38):
+  /// single sales until 2011, streams after. E.g. "1.2M sold".
+  String songMain(SongView s, int week) =>
+      SalesEra.of(GameTime.yearOf(week)) == SalesEra.streaming
+          ? l.streamsValue(compact(s.lifetimeStreams.total))
+          : l.singleSalesValue(compact(s.singleSales));
+
+  /// Sort key that matches [songMain].
+  double songMainValue(SongView s, int week) =>
+      SalesEra.of(GameTime.yearOf(week)) == SalesEra.streaming
+          ? s.lifetimeStreams.total
+          : s.singleSales;
+
+  /// The second number worth showing: radio in the CD era, streams in the
+  /// download era, sales in the streaming era. Empty when it is zero.
+  String songSecondary(SongView s, int week) {
+    final (v, text) = switch (SalesEra.of(GameTime.yearOf(week))) {
+      SalesEra.physical => (s.lifetimeRadio, l.radioValue),
+      SalesEra.downloads => (s.lifetimeStreams.total, l.streamsValue),
+      SalesEra.streaming => (s.singleSales, l.singleSalesValue),
+    };
+    return v < 1 ? '' : text(compact(v));
+  }
+
   String songStatus(SongView s) => s.inVault
       ? l.statusVault
       : s.isSingle

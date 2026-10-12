@@ -325,6 +325,7 @@ class Simulator {
       s.weekRadio = tR;
       s.weekPhysical = tP;
       s.lifetimeRadio += tR;
+      s.lifetimePhysical += tP;
 
       final na = Region.northAmerica.index, eu = Region.europe.index;
       final us = CountryShares.usOfNorthAmerica(p.homeCountry);

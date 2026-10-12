@@ -729,5 +729,32 @@
         "type": "int"
       }
     }
+  },
+  "singleSales": "Single sales",
+  "weeklySingleSales": "Weekly single sales",
+  "cdSingles": "CD singles",
+  "singleSalesValue": "{value} sold",
+  "@singleSalesValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "streamsValue": "{value} streams",
+  "@streamsValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "radioValue": "{value} radio audience",
+  "@radioValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
   }
 }
