@@ -59,6 +59,33 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 
 İyi olanlar: tutarlı koyu tema ve pastel renkler, dergi tarzı liste ekranı, Streamify sayfası, hafta geçiş kartı ve alt pencereler.
 
+## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
+
+`packages/game/tool/jt_scenario.dart`: 2002'de yükselen yıldız (NSYNC sonrası), büyük şirket
+bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → single'lar; 2007–2013 ve
+2018–2024 arası uzun molalar). 3 farklı dünya (tohum 2002, 7, 42). Hiç flop yok.
+
+| Albüm | Gerçek ilk hafta (ABD) | Oyun ilk hafta | Gerçek zirve | Oyun zirve |
+|---|---|---|---|---|
+| Justified (2002) | 439K | 209–304K | #2 | #3–4 |
+| FutureSex/LoveSounds (2006) | 684K | 594–706K | #1 | #1 (2–9 hafta) |
+| The 20/20 Experience (2013) | 968K | 257–419K | #1 | #1 (4–7 hafta) |
+| 20/20 – 2 of 2 (2013) | 350K | 162–170K | #1 | #2–3 |
+| Man of the Woods (2018) | 293K | 139–156K | #1 | #1 |
+| Everything I Thought It Was (2024) | ~31K | ~205K | #4 | #1–2 |
+
+| # | Gözlem | Durum |
+|---|---|---|
+| T14 | **Uzun moladan sonraki dönüş albümü zayıf.** 7 yıllık beklenti (K3) 20/20'yi gerçekteki 968K'ya yaklaştırmıyor (257–419K). 2 of 2 ve Man of the Woods da gerçeğin yarısı kadar. | Ayar önerisi: tavandaki beklentinin ilk hafta etkisini artırmak. |
+| T15 | **Geç kariyer single'ları fazla güçlü.** Selfish (2024) 6–16 hafta #1 (gerçekte #19), Filthy #1–3 (gerçekte #9), TKO #1–4 (gerçekte #36). Hayranlar ve sadakat yaşla pek azalmıyor; 2010'ların sonunda #1 olmak çok kolay. | Ayar önerisi: dönem değişince (streaming çağı) eski yıldızların "yeni dinleyici" kazanımı azalsın; uzun süredir aynı tür yapan sanatçıda yorgunluk. |
+| T16 | **Birikimli albüm satışları ~2 kat.** Justified 19–23M birim (gerçek ~7M dünya), FS/LS 20–23M (gerçek ~10M). İlk hafta doğru, ama katalog satışları yıllarca fazla sürüyor. | Ayar önerisi: albüm katalog düşüş hızını artırmak. |
+| T17 | **İngiltere listesinde çok zayıf.** ABD'de #1 olan şarkılar İngiltere'de #12–#96 (gerçekte JT İngiltere'de de hep ilk 5). ABD'li sanatçının Avrupa payı düşük. | Ayar önerisi: ABD'li pop yıldızlarının Avrupa payını yükseltmek (memleket bonusunu yumuşatmak). |
+| T18 | **Büyük şirket kariyeri için bütçe yok.** "Küçük plak şirketi" sadece $25K avans veriyor; 2002'de stream geliri olmadığı için yükselen yıldız bile ilk albümü bitiremiyor. Senaryo Milyoner başlangıcıyla oynandı. | Faz 2'deki büyük şirket teklifleri (R5) çözecek; yükselen yıldız + şirket yolunda avans büyüklüğe göre artabilir. |
+
+İyi taraflar: kariyerin şekli doğru (2006 ve 2013 en büyük dönemler, molalar beklenti yaratıyor),
+SexyBack 4–12 hafta #1 (gerçek 7), FutureSex/LoveSounds ilk haftası neredeyse birebir, Can't Stop
+the Feeling! #1 oldu, dönem sonu sonuçları hep "başarı".
+
 ## Test oyunu 2 — Claude (yeni dengeyle, 2025, ücretsiz başlangıç)
 
 Aynı başlangıç, ~70 hafta. Notlar ve kilitler belirgin şekilde daha iyi (yukarıda A1–A4). Yeni bulgular:
