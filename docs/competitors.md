@@ -63,6 +63,88 @@ sebebi de bu.
 | X10 | **Zor başlangıç, hantal arayüz** (Music Star yorumu). | Bizim A1–A4 sorunlarımız ve ilk açılış rehberi. |
 | X11 | **Tekrara düşme.** | Dönem değişimleri (indirmeden streaming'e geçiş), rakip hikâyeleri, kariyer olayları ve hedefler (rekorlar, sertifikalar). |
 
+## Groove Journey menüleri: tek tek seçim önerisi
+
+Her şeyi almak zorunda değiliz. Ölçüt: **gerçekçi bir müzik kariyerine derinlik katıyor mu,
+yoksa oyunu bir "hayat simülatörüne" mi dağıtıyor?** Seçilenler mevcut ekranlarımıza yerleşir;
+yeni sekme açılmaz.
+
+İşaretler: **✅ Al** (yakın zamanda) · **🕒 Sonra** (Faz 2–3) · **❌ Alma**
+
+### Ana ekran
+
+| Onlarda | Karar | Bizde |
+|---|---|---|
+| Hafta ilerletme düğmesi (▶▶) | ✅ | Var. B1 (geçiş ekranı) ve B2 (çoklu hafta atlama) ile güçlenecek. |
+| Takvim | ✅ | Çıkış takvimi: planlanan single/albüm, kampanya haftaları, rakiplerin duyurulan albümleri. Rollout planlama ekranının parçası. |
+| Tatil (palmiye) | ✅ | "Dinlen / tatile çık": birkaç hafta yazamazsın ama enerji hızla dolar. A3 tükenmişlik çözümünün parçası. |
+| Bildirimler | ✅ | Var. B3 ile sadece kendi olaylarımız. |
+| Nasıl oynanır | ✅ | İlk açılış rehberi (yol haritasında). |
+| "Güncellemeler" kutusu | ✅ | Küçük "Yenilikler" sayfası, güncellemeden sonra bir kez. |
+| Çevrimiçi lider tablosu | ❌ | Sunucu gerekir; Efsane mod ve Premium varken adil olmaz. İleride belki Game Center başarımları. |
+| Ana ekranda yüzen düğmeler, GOD MODE reklamı | ❌ | Kalabalık ve reklam gibi duruyor. Premium sadece Ayarlar'da ve kilitli seçeneklerde görünsün. |
+
+### Müzik yapma (Stüdyo)
+
+| Onlarda | Karar | Bizde |
+|---|---|---|
+| Şarkı / EP / albüm oluştur, yayınlanmamış şarkılar | ✅ | Var. |
+| Besteci tut | ✅ | Var (prodüktör + söz yazarı). A1 ile kilitler düzelecek. |
+| Pratik (practice) | ✅ | Para veya enerji harcayıp stat geliştirme. Statlar görünür olacak (C3). Rakipteki "pratik işe yaramıyor" şikayetine karşı: artış ekranda görünsün. |
+| Albüm rollout | ✅ | Yol haritasında. Single → albüm duyurusu → çıkış → deluxe planı. |
+| Ortak albüm | 🕒 | Feat sistemiyle birlikte (Faz 2). |
+| Konser bulma, setlist, bilet satışı | 🕒 | Turneler (Faz 3, sade versiyon, K18). Üç ayrı ekran değil, tek "Konserler" ekranı. |
+| Merch | 🕒 | Basit gelir kalemi; harcama yerleriyle birlikte (R6). |
+| Derleme (compilation) | 🕒 | "En iyiler" albümü, geç kariyerde güzel bir hamle. Küçük iş. |
+| Grup kur (kariyer ortasında) | ❌ | Grup modunu başlangıçta seçiyoruz (K30). Dağılma / solo çıkış Faz 2–3'te. |
+| Plak şirketi kur | 🕒 | Geç oyun hedefi olabilir, ama çok büyük bir sistem. Faz 3 sonrası. |
+| Başka sanatçı oluştur (aynı kariyerde) | ❌ | Bir kariyer = bir sanatçı. Kayıt slotları zaten sınırsız. |
+
+### Müzik dünyası (Listeler / Platformlar)
+
+| Onlarda | Karar | Bizde |
+|---|---|---|
+| Platformlar telefon uygulaması ikonları gibi | ✅ | Platformlar bölümünü uygulama ikonu ızgarası yapalım; her platform çıkış yılında belirsin (D1). Kurgusal isimler. |
+| Yayınladığın müzik, yaklaşan albümler | ✅ | "Yayınlar" var. Rakiplerin yaklaşan albümleri yeni: aynı haftaya denk gelmemek için önemli bir karar. |
+| Radyo, radyo listesi | ✅ | 2000'lerin başında asıl ölçü radyo (C1). Radyo listesi simülasyonda kolayca çıkar. |
+| Liste geçmişi, kilometre taşları | ✅ | Rekorlar (game-design'da var) + sertifikalar (R2). |
+| Tür trendleri | ✅ | Simülasyon zaten tür ağırlıklarını tutuyor; yükselen / düşen türler grafiği. Hangi türde yazacağına karar vermeye yardım eder. |
+| Ödüller | 🕒 | Faz 3. |
+| Festivaller | 🕒 | Turnelerle birlikte. |
+| Film müziği, gişe | ❌ | Konudan uzaklaştırıyor. |
+
+### Medya ve sosyal (onlarda ayrı bir sekme)
+
+| Onlarda | Karar | Bizde |
+|---|---|---|
+| Eleştiri siteleri (iki tane) | ✅ | **Bir tane** kurgusal eleştiri sitesi + ortalama puan (R4). |
+| Gazete (The Morning News) | ✅ | Sektör haberleri buraya: rakiplerin #1'leri, büyük çıkışlar, dönem değişimleri. Böylece B3'teki rakip haberleri bildirimden çıkıp okunabilir bir yere taşınır. |
+| Viki sayfası (Gikipedia) | ✅ | Sanatçının ansiklopedi sayfası: diskografi, listeler, sertifikalar, ödüller. Kariyer özetinin en güzel hali, paylaşım kartına da uygun. |
+| Sosyal medya (Z / PicDoc / TickTock) | 🕒 | Faz 2'de. Üç ayrı uygulama yerine **tek "Sosyal" ekranı**: paylaşım → hype. Kısa video uygulaması 2017'den sonra viral şansı olarak (D1). |
+| Bandcamp (merch) | ❌ | Gerçek marka adı. Merch zaten 🕒. |
+
+### İş ve hayat
+
+| Onlarda | Karar | Bizde |
+|---|---|---|
+| İş bulma (job finder) | ✅ | A2: birden fazla iş, her biri biraz enerji götürür. |
+| Finans | ✅ | Gelir-gider dökümü: stream, satış, iş, kampanya, ekip. "Para nereden geliyor?" sorusunu cevaplar. |
+| Menajer | 🕒 | Plak anlaşmalarıyla birlikte (R5): menajer pay alır, karşılığında promosyon ve teklif getirir. |
+| Plak şirketi (teklifler) | 🕒 | R5 (Faz 2). |
+| Mülkler, yatırımlar | 🕒 | Harcama yerleri (R6). Önce oyuna etkisi olan harcamalar gelir; mülk en sonda ve küçük bir etkiyle. |
+| Güvenlik, uşak, dadı vb. | ❌ | Oyunu hayat simülatörüne çeviriyor. |
+| İlişkiler | ❌ | Şimdilik yok. İleride en fazla "müzik çevresi" (feat arkadaşlıkları, rakiplikler) olarak. |
+
+### Arayüzden çıkan dersler
+
+- **Hepsi aynı görünen düğme ızgaraları** her şeyi eşit önemde gösteriyor. Bizde ekranlar içerikle
+  açılsın (kartlar, listeler, grafikler); menü ızgarası sadece Platformlar'da.
+- **Etiketsiz sekme ikonları** ilk bakışta anlaşılmıyor. Bizde 5 sekme ve etiketleri kalsın.
+- **Özellik ekleyip kaldırmak** ("Music Groups have been discontinued") ve yerini değiştirmek
+  ("Watch IT has been moved to music tab") oyuncuyu yoruyor. Önce az ama sağlam ekle.
+- **Gerçek markaya çok yakın parodi isimler** (Watch IT, TickTock, Midal, Gikipedia) ve doğrudan
+  gerçek bir marka (Bandcamp) riskli (K15). Bizim isimlerimiz kendi başına durabilmeli.
+
 ## Önerilen sıra
 
 1. Önce **feedback.md'deki 1. öncelikli işler** (ilerleme kilidi, enerji ve işler, notların
