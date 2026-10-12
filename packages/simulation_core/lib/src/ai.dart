@@ -50,7 +50,7 @@ abstract final class AiPlanner {
     final producerSkill = isA ? r.range(72, 94) : r.range(42, 76);
 
     // Tier B sometimes runs a singles-only cycle.
-    if (!isA && r.chance(0.35)) {
+    if (!isA && r.chance(0.2)) {
       final s = Actions.writeSong(w, a,
           producerSkill: producerSkill,
           aiMode: true,
@@ -104,12 +104,13 @@ abstract final class AiPlanner {
     a.pendingAlbumType = isEp ? AlbumType.ep : AlbumType.album;
     a.pendingVariantWeeks = _variantPlan(w, a, r, albumWeek, isA);
 
-    final int gap;
-    if (isA) {
-      gap = r.chance(0.10) ? 260 + r.nextInt(105) : 100 + r.nextInt(100);
-    } else {
-      gap = 50 + r.nextInt(80);
-    }
+    // Superstars take 2–4 years (sometimes a long hiatus); working artists
+    // put out a project about once a year; vocal groups come back faster
+    // (docs/game-design.md §2.4). Release volume drives album-chart churn.
+    var gap = isA
+        ? (r.chance(0.10) ? 260 + r.nextInt(105) : 100 + r.nextInt(100))
+        : 30 + r.nextInt(60);
+    if (a.kind == ArtistKind.vocalGroup) gap = (gap * 0.6).round();
     a.nextEraWeek = albumWeek + gap;
   }
 

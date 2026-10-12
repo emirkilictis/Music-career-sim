@@ -199,6 +199,24 @@ olmadığından pazar az sayıda şarkıya bölünüyor, ABD #1 haftada ~350M st
 Kalibrasyon (seed 42): 2025 süperstar hamlesiz ABD 272K birim / 221K saf, iyi hamle 1.2M,
 max hamle + dev kampanya 3.5M / 3.4M saf.
 
+## Albüm listesi dengesi (yapıldı)
+
+Sebep: AI'nin orta seviye sanatçıları ortalama ~1,5 yılda bir albüm çıkarıyordu (yılda ~140 albüm/EP);
+ilk haftası 60K+ olan albüm azdı, uzun soluklu hitler #1'de 15–20 hafta kalıyordu. Değişiklikler:
+B grubu albümsüz döngü %35 → %20, albüm arası 50–130 → 30–90 hafta, vokal gruplar %40 daha sık;
+süperstarlar aynı (2–4 yıl). Daha çok çıkış dinlenmeleri daha çok şarkıya böldüğü için liste geri
+bildirimi (hitlerin playlist/radyo ivmesi) 0.04 → 0.10.
+
+Sonuç (seed 42 ve 7, 2015–2025, `dart run bin/chart_churn.dart <seed> 2015 2025`):
+
+| | Simülasyon | Gerçek (yaklaşık) |
+|---|---|---|
+| Yılda farklı #1 albüm | 22–37 (çoğu ~30) | 30–45 |
+| En uzun #1 serisi | çoğu yıl 5–12 hf | 6–13 hf |
+| Yılda farklı #1 şarkı | 11–19 | 10–19 |
+| ABD / UK / Global #1 şarkı, haftalık (2020'ler) | 36–54M / 10–13M / 68–90M | 40–55M / ~10M / 70–125M |
+| 2025 süperstar ABD ilk hafta (hamlesiz / iyi / max) | 279K / 1.4M / 3.9M | — / — / ~4.0M |
+
 ## Bilinen eksikler / sıradaki adımlar
 
 1. Flop desteğinin etkileri (rapor, redemption, feat teklifleri), sosyal medya postları, kampanyalar:
@@ -209,6 +227,4 @@ max hamle + dev kampanya 3.5M / 3.4M saf.
 4. Veritabanı boyutu (50 yılda ~170 MB) ve kayıt süresinin yavaş artışı: eski geçmişin aylık
    özetlere sıkıştırılması ileride.
 5. Checkpoint'ler uygulamada boşta/arka planda yapılmalı (Faz 1).
-6. **Albüm listesi fazla durağan:** ABD albüm listesinde yılda 6–19 farklı #1 (seed 42, 2010–2025);
-   gerçekte ~30–45 (şarkılarda 8–17 / gerçek 10–19, yerinde). Ölçüm: `dart run bin/chart_churn.dart`.
-   Muhtemel sebep: orta ölçekli AI albüm çıkışı az veya uzun soluklu albümlerin SEA'sı fazla.
+6. ~~Albüm listesi fazla durağan~~ → düzeltildi (aşağıda).

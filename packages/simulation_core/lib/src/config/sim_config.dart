@@ -19,7 +19,7 @@ class SimConfig {
     this.albumTrackExposure = 0.30,
     this.baseExposure = 0.0015,
     this.fameExposure = 0.020,
-    this.chartFeedback = 0.04,
+    this.chartFeedback = 0.10,
     this.chartFatigueWeeks = 12,
     this.albumTrackFanShare = 0.6,
     this.catalogTail = 0.05,
