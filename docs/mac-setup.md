@@ -45,7 +45,11 @@ Birden fazla cihaz varsa listeden iPhone'u seç. İlk kurulumdan sonra telefonda
 **Ayarlar → Genel → VPN ve Cihaz Yönetimi →** Apple ID'ne **güven** demen gerekebilir.
 
 - Kod değişince: Terminal'de `r` (hızlı yenile) veya `R` (yeniden başlat).
-- Yeni sürümü almak için: `git pull` → `flutter pub get` → `flutter run`.
+- **Ana ekrandan açmak için release sürüm kur:** `flutter run --release`. Debug sürüm (düz
+  `flutter run`) iOS'ta yalnızca terminal/Xcode bağlıyken açılır; ana ekrandan açınca
+  "debug mode Flutter apps can only be launched from Flutter tooling" der. Release sürüm kablosuz da
+  açılır (ücretsiz Apple ID'de 7 gün geçerli, sonra aynı komutla yeniden kur).
+- Yeni sürümü almak için: `git pull` → `flutter pub get` → `flutter run --release`.
 - Simülatörde denemek istersen: `open -a Simulator` → `flutter run`.
 
 ## Test sürümüne özel notlar
