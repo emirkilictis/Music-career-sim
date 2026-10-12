@@ -553,23 +553,33 @@ class _MoreSection extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 fontSize: 13)),
       ),
-      ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-        leading: Container(
-          width: 36,
-          height: 36,
-          decoration: const BoxDecoration(
-              color: StreamifyColors.accent, shape: BoxShape.circle),
-          child: const Icon(Icons.graphic_eq_rounded,
-              color: Colors.black, size: 20),
+      // Platforms appear in their real launch years (docs K38).
+      if (GameTime.yearOf(career.week) <
+          Charts.all[Charts.platformGlobal].startYear)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+          child: Text(l.platformsLater,
+              style: TextStyle(color: AppColors.textFaint)),
+        )
+      else
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+          leading: Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+                color: StreamifyColors.accent, shape: BoxShape.circle),
+            child: const Icon(Icons.graphic_eq_rounded,
+                color: Colors.black, size: 20),
+          ),
+          title: const Text(platformName,
+              style: TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(l.streamifyTileHint,
+              style: TextStyle(color: AppColors.textFaint)),
+          trailing:
+              Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
+          onTap: () => pushInCareer(context, const StreamifyScreen()),
         ),
-        title: const Text(platformName,
-            style: TextStyle(fontWeight: FontWeight.w600)),
-        subtitle: Text(l.streamifyTileHint,
-            style: TextStyle(color: AppColors.textFaint)),
-        trailing: Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
-        onTap: () => pushInCareer(context, const StreamifyScreen()),
-      ),
     ]);
   }
 }

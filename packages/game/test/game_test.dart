@@ -292,5 +292,14 @@ void main() {
       expect(until.weeks, lessThanOrEqualTo(52));
       g.close();
     });
+
+    test('the streaming platform launches in its real year with news', () {
+      final g = GameSession.start(slots, _setup(startYear: 2008));
+      final y = g.advanceWeeks(GameTime.weeksPerYear + 1, stop: SkipStop.never);
+      final launches = y.events.whereType<PlatformLaunched>().toList();
+      expect(launches.map((e) => e.chartId), [Charts.platformGlobal]);
+      expect(GameTime.yearOf(g.week), 2009);
+      g.close();
+    });
   });
 }

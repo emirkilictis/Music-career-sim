@@ -382,6 +382,9 @@ k('photoPlatform','{platform} photo','{platform} fotoğrafı', platform='String'
 k('photoPlatformOwn','Its own photo','Kendine özel fotoğraf')
 k('photoUsesGeneral','Uses your profile photo','Profil fotoğrafını kullanıyor')
 
+k('eventPlatformLaunched','{platform} has launched: songs now get streamed there, with its own Top 50.','{platform} yayına girdi: şarkılar artık orada da dinleniyor, kendi Top 50 listesiyle.', platform='String')
+k('eventPlatformArrived','{platform} arrived in {region}.','{platform} {region} pazarına geldi.', platform='String', region='String')
+k('platformsLater','Streaming platforms arrive in the late 2000s.','Streaming platformları 2000\'lerin sonunda gelecek.')
 # Celebrations and sharing (feedback E6, R1)
 k('celebrateNumberOne','Number one!','Bir numara!')
 k('celebrateFirstChart','Your first chart entry!','İlk liste girişin!')

@@ -206,4 +206,5 @@ String _event(GameSession s, GameEvent e) => switch (e) {
         'era closed: ${e.result.name} (${_c(e.units)} vs exp ${_c(e.expected)})',
       BurnoutOver() => 'burnout over',
       RivalNumberOne() => 'rival #1 ${Charts.all[e.chartId].key}',
+      PlatformLaunched() => 'platform launched ${Charts.all[e.chartId].key}',
     };

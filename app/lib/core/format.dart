@@ -267,6 +267,9 @@ class Fmt {
           : l.eventPlaylistMid(t, platformName),
       EraClosed() => l.eventEraClosed(eraResult(e.result)),
       BurnoutOver() => l.eventBurnoutOver,
+      PlatformLaunched() => e.chartId == Charts.platformGlobal
+          ? l.eventPlatformLaunched(platformName)
+          : l.eventPlatformArrived(platformName, l.regionNorthAmerica),
       RivalNumberOne() =>
         l.eventRivalNumberOne(line.artistName, t, chart(e.chartId)),
     };

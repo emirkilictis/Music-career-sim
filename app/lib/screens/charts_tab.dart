@@ -73,7 +73,10 @@ class _ChartsTabState extends State<ChartsTab> {
               builder: (_) => songs
                   ? SongDetailScreen(songId: r.entityId, state: career)
                   : AlbumDetailScreen(albumId: r.entityId, state: career)));
-    } else {
+    } else if (GameTime.yearOf(career.week) >=
+        Charts.all[Charts.platformGlobal].startYear) {
+      // Rival pages live on the streaming platform, which only exists from
+      // its launch year (docs K38).
       pushInCareer(context, ArtistPage(artistId: r.artistId));
     }
   }

@@ -941,6 +941,26 @@
   },
   "photoPlatformOwn": "Its own photo",
   "photoUsesGeneral": "Uses your profile photo",
+  "eventPlatformLaunched": "{platform} has launched: songs now get streamed there, with its own Top 50.",
+  "@eventPlatformLaunched": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "eventPlatformArrived": "{platform} arrived in {region}.",
+  "@eventPlatformArrived": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      },
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "platformsLater": "Streaming platforms arrive in the late 2000s.",
   "celebrateNumberOne": "Number one!",
   "celebrateFirstChart": "Your first chart entry!",
   "share": "Share",

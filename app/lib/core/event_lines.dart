@@ -39,6 +39,7 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         PlaylistAdded() => EventLine(e, title: song(e.songId)),
         EraClosed() => EventLine(e),
         BurnoutOver() => EventLine(e),
+        PlatformLaunched() => EventLine(e),
         RivalNumberOne() => EventLine(e,
             title: entity(e.kind, e.entityId),
             artistName: w.artists[e.artistId].name),
@@ -61,7 +62,8 @@ List<EventLine> sortLines(List<EventLine> lines) {
         NewPeak() => 5,
         PlaylistAdded() => 6,
         BurnoutOver() => 7,
-        RivalNumberOne() => 8,
+        PlatformLaunched() => 8,
+        RivalNumberOne() => 9,
       };
   return [...lines]..sort((a, b) => rank(a).compareTo(rank(b)));
 }

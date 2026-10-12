@@ -713,6 +713,15 @@ class GameSession {
         }
       }
     }
+    for (final c in const [
+      Charts.platformGlobal,
+      Charts.platformNorthAmerica,
+    ]) {
+      final def = Charts.all[c];
+      if (def.activeIn(r.week) && !def.activeIn(r.week - 1)) {
+        events.add(PlatformLaunched(c));
+      }
+    }
     return events;
   }
 }

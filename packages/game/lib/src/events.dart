@@ -114,3 +114,12 @@ class RivalNumberOne extends GameEvent {
   @override
   bool get isIndustry => true;
 }
+
+/// A streaming platform opened in a region this week (docs K38): its Top 50
+/// chart [chartId] starts.
+class PlatformLaunched extends GameEvent {
+  const PlatformLaunched(this.chartId);
+  final int chartId;
+  @override
+  bool get isMajor => false;
+}
