@@ -5,4 +5,5 @@ environment:
 workspace:
   - packages/simulation_core
   - packages/persistence
+  - packages/game
   - tools/sim_cli

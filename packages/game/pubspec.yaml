@@ -1,0 +1,12 @@
+name: game
+description: Game layer for Music Career Simulator — careers, weekly play, notifications and screen data on top of the simulation and saves.
+publish_to: none
+version: 0.1.0
+resolution: workspace
+environment:
+  sdk: ^3.6.0
+dependencies:
+  simulation_core: any
+  persistence: any
+dev_dependencies:
+  test: ^1.25.0

@@ -215,6 +215,23 @@ class SaveStore {
     _clearDirty(w);
   }
 
+  /// Saves player actions taken between weeks (a written song, a release,
+  /// money) right away, without writing history; the week stays the same.
+  void saveState(World w) {
+    _transaction(() {
+      _writeArtists(w, [for (final id in w.dirtyArtists) w.artists[id]]);
+      final dirtySongs = [for (final id in w.dirtySongs) w.songs[id]];
+      _writeSongs(w, dirtySongs);
+      _writeCredits(dirtySongs);
+      final dirtyAlbums = [for (final id in w.dirtyAlbums) w.albums[id]];
+      _writeAlbums(w, dirtyAlbums);
+      _writeTracks(dirtyAlbums);
+      _writeHot(w);
+      _writeMeta(w);
+    });
+    _clearDirty(w);
+  }
+
   /// Relational rows of active entities are refreshed this often, and by
   /// [flushActive] (call it when the app goes to the background or closes).
   static const flushEveryWeeks = 13;
@@ -540,9 +557,15 @@ class SaveSlots {
     File('${root.path}/$slotId/summary.json').writeAsStringSync(jsonEncode({
       'slotId': slotId,
       'artistName': p?.name,
+      'kind': p?.kind.name,
+      'genre': p?.genre,
+      'difficulty': w.difficulty.name,
       'year': GameTime.yearOf(w.week),
       'weekOfYear': GameTime.weekOfYear(w.week),
       'fame': p?.fame,
+      'coreFans': p?.coreFans,
+      'moneyCents': p?.moneyCents,
+      'savedAt': DateTime.now().toUtc().toIso8601String(),
     }));
   }
 

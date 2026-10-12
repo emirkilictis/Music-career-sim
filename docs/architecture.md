@@ -11,9 +11,10 @@ music-career-sim/
 ├── packages/
 │   ├── simulation_core/      SAF Dart — Flutter'a ve veritabanına bağımlı değil.
 │   │                         Linux/macOS'ta `dart test` ile çalışır.
-│   ├── game_content/         JSON konfigürasyon + yükleyici (türler, dönem tablosu, listeler,
-│   │                         zorluk, sertifika eşikleri)
-│   └── persistence/          SQLite (`sqlite3` paketi, elle SQL): şema, migrasyonlar, kayıt slotları, geçmiş
+│   ├── persistence/          SQLite (`sqlite3` paketi, elle SQL): şema, migrasyonlar, kayıt slotları, geçmiş
+│   └── game/                 Oyun katmanı (saf Dart): kariyer başlatma/devam, haftalık oynanış +
+│                             autosave, bildirimler, ekran verileri (view), geçmiş sorguları.
+│                             **Arayüz sadece bu paketle konuşur.**
 └── tools/
     └── sim_cli/              headless komut satırı: seed ile N yıl simüle et, CSV/JSON döküm, benchmark
 ```
@@ -23,11 +24,30 @@ music-career-sim/
 - Konfigürasyon değişmez değer nesneleridir; sıcak yolda string anahtarlı arama yok
   (tür/pazar/format → integer ID veya enum, liste indeksiyle erişim).
 
+### 1.1 Oyun katmanı (`packages/game`)
+
+- `CareerSetup` — yeni kariyer ekranının seçimleri; `validate()` kuralları uygular (isim, tür, grup üyeleri
+  2–7, başlangıç yılı 2000–2026, Premium'a özel başlangıçlar, stat puanı kuralları).
+- `GameSession.start / resume / close` — dünyayı kurar (başlangıç yılından önceki 3 yılı simüle eder,
+  ilerleme geri bildirimiyle), slotu açar, kaydı kapatır.
+- **Aksiyonlar:** `writeSong`, `releaseSingle`, `releaseAlbum` (EP 3–7, albüm 8–40 şarkı, en fazla 8 varyant),
+  `setJob`, `rewardAd`, `claimDailyBonus`. Kurala aykırı her şey `GameException(code)` fırlatır; `code`
+  arayüzde çevrilir (`notEnoughMoney`, `weeklyLimit`, `burnout`, `collaboratorRefused`, `adLimit`…).
+  Aksiyonlar **anında kaydedilir** (`SaveStore.saveState`), hafta oynanmadan uygulama kapansa da kaybolmaz.
+- **Haftalar:** `advanceWeek()` → `WeekReport` (olaylar + para farkı), her hafta autosave.
+  `advanceYear()` → `YearReport` (yıl özeti); büyük bir olayda durur (#1, albüm ilk haftası, viral,
+  era sonucu, Top 10 giriş).
+- **Bildirimler (`GameEvent`):** ChartDebut, NumberOne, NewPeak, AlbumFirstWeek, ViralTrend, PlaylistAdded,
+  EraClosed, BurnoutOver, RivalNumberOne. Sadece ID ve sayı taşır; metni arayüz kurar (EN/TR).
+- **Ekran verileri:** `ArtistView`, `SongView` (gerçek kalite gizli, tahmini not görünür), `AlbumView`,
+  `ChartView`, `CollaboratorView`; bölge kırılımlı sayılar (`RegionalNumbers`).
+- **Geçmiş:** `songHistory`, `albumHistory` (haftalık sayı + liste sıraları), `careerByYear` (yıllık özet).
+
 ## 2. Concurrency — uzun ömürlü simülasyon isolate'i
 
 ```
 UI isolate (Flutter)                         Simülasyon isolate'i (uygulama açıkken hep yaşar)
-  GameController ──(komut mesajı)──────────▶   • sıcak dünya durumu BELLEKTE (açılışta bir kez yüklenir)
+  GameController ──(komut mesajı)──────────▶   • GameSession burada yaşar; sıcak dünya BELLEKTE
    (Riverpod)                                  • simulateWeek() senkron, saf fonksiyon
                                                • sonuç → SQLite yazma bağlantısı (tek transaction)
                                                • commit başarılıysa bellekteki durumu ilerlet

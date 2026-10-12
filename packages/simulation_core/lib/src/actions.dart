@@ -116,7 +116,7 @@ abstract final class Actions {
       a.lastWriteWeek = w.week;
       a.songsWrittenThisWeek = 0;
     }
-    final index = a.songsWrittenThisWeek++;
+    final index = a.songsWrittenThisWeek;
 
     if (!aiMode) {
       for (final c in [producer, cowriter]) {
@@ -130,6 +130,8 @@ abstract final class Actions {
       if (cost > a.moneyCents) throw SongwritingException('Not enough money');
       a.moneyCents -= cost;
     }
+    // Counted only once the song is really written (a refusal costs nothing).
+    a.songsWrittenThisWeek++;
 
     final r = RandomStream.keyed(
         w.seed, w.week, a.id * 64 + index, RngPurpose.songQuality);

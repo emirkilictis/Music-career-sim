@@ -71,7 +71,7 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 - Determinizm testleri, aktif küme büyüklüğü takibi, 50 yıllık stres testi.
 - Bu faz Mac olmadan da (Linux'ta) geliştirilebilir.
 
-### Faz 1 — Oynanabilir MVP
+### Faz 1 — Oynanabilir MVP — *başladı: oyun katmanı (`packages/game`) hazır*
 - Flutter arayüz (önce iOS'ta test, Android derlemesi de), SQLite persistence, kayıt slotları + haftalık autosave.
 - Sanatçı oluşturma (statlar, kariyer yolu: bağımsız / küçük şirket, başlangıç seviyesi).
 - Şarkı yazma (ekip, kalite, şans, yaratıcı enerji, kasa), single/albüm yayınlama, rollout planlama (temel), kampanya seviyesi.
