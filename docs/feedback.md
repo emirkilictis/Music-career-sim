@@ -1,8 +1,8 @@
 # Geri Bildirim ve Yapılacaklar
 
 Oyuncu geri bildirimleri (Emir, iPhone) ve test oyunlarında görülenler (Claude) tek listede.
-Buradakiler **henüz uygulanmadı**. Hangisinin yapılacağına birlikte karar verilir; yapılınca karar
-kaydına (README) ve ilgili dokümana taşınır.
+Öncelik sırası onaylandı (README K35–K38); 1. öncelikten başlanarak uygulanıyor. Biten maddelerin
+öncelik sütununa ✅ eklenir.
 
 Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = önce, **2** = sonra,
 **3** = ileride.

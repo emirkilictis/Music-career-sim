@@ -62,6 +62,10 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K33 | **Kayıt slotu herkes için sınırsız** (ücretsiz sürüm dahil). |
 | K34 | **Görsel dil:** sade ama sıcak koyu tema (pastel vurgu, göz yormayan kontrast). Listeler ekranı müzik dergisi listesi gibi (kâğıt beyazı, büyük sıra numaraları, GH/ZİRVE/HAFTA); Streamify ekranları büyük streaming uygulamalarının düzenine benzer (sanatçı sayfası, aylık dinleyici, popüler şarkılar, Top 50 playlistleri). Gerçek marka adı, logo ve renk kimliği birebir kopyalanmaz. |
 | K29 | **Premium bilerek güçlü (satması için):** daha yüksek başlangıç statları (55 puan, tavan 70; ücretsiz 30 puan, tavan 60) + ünlü/zengin başlangıçlar + günlük bonus. Formüller ve zorluk herkes için aynı; ücretsiz sürüm eksiksiz kalır. |
+| K35 | **Özellik seçimi rakip incelemesine göre:** [competitors.md](competitors.md)'deki ✅ / 🕒 / ❌ listesi onaylandı. Oyun gerçekçi bir müzik kariyerinde derinleşir; hayat simülasyonu (güvenlik, personel, ilişkiler), film/gişe, aynı kariyerde ikinci sanatçı ve çevrimiçi lider tablosu yok. Yeni özellikler mevcut sekmelere yerleşir, gerçek markaya yakın parodi isim kullanılmaz. |
+| K36 | **İş seçenekleri** (K27'yi günceller): birden fazla gündelik iş; her biri biraz yaratıcı enerji götürür, kazanç arttıkça enerji kaybı artar. Enerji dengesi ve "dinlen / tatil" seçeneğiyle birlikte ayarlanır. |
+| K37 | **Bildirimler sadece oyuncunun kendi olayları için** (liste girişi, zirve, #1, albüm ilk hafta, viral, playlist, dönem sonu). Sektör haberleri (rakiplerin #1'leri vb.) ileride gazete ekranında. |
+| K38 | **Platformlar gerçek çıkış yıllarında gelir** (kurgusal isimlerle): indirme mağazası 2003, video 2005, ses paylaşım 2008, Streamify 2008 Avrupa / 2011 ABD, ikinci streaming servisi 2015, kısa video 2017–2018. Ekranlar o yılın asıl ölçüsünü öne çıkarır (2000–2004 radyo + CD single, sonra indirme, sonra stream). |
 | K23 | ChatGPT planındaki ekranlar, rekorlar, kampanyalar, finans, bildirimler, ödüller, Kolay mod ve 10 performans kuralı dokümanlara taşındı. |
 
 ## Yol Haritası
