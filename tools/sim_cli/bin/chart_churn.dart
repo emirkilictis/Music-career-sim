@@ -14,6 +14,7 @@ void main(List<String> args) {
   final albumNo1 = <int, Map<int, int>>{}, songNo1 = <int, Set<int>>{};
   final debutNo1 = <int, int>{}, releases = <int, int>{};
   final no1Units = <int, List<double>>{}, tenthUnits = <int, List<double>>{};
+  final no1Pure = <int, List<double>>{}, no1TierA = <int, int>{};
   final debutTop10 = <int, int>{};
   while (w.week < GameTime.firstWeekOf(to + 1)) {
     final r = sim.step();
@@ -31,6 +32,12 @@ void main(List<String> args) {
     double units(ChartEntry e) =>
         w.albumWeekUnitsUs(w.albums[e.entityId]);
     (no1Units[y] ??= []).add(units(a.first));
+    final top = w.albums[a.first.entityId];
+    final topArtist = w.artists[top.artistId];
+    (no1Pure[y] ??= []).add(
+        CountryShares.usOfNorthAmerica(topArtist.homeCountry) *
+            top.weekRegion[Region.northAmerica.index]);
+    if (topArtist.tier == ArtistTier.a) no1TierA[y] = (no1TierA[y] ?? 0) + 1;
     if (a.length >= 10) (tenthUnits[y] ??= []).add(units(a[9]));
     (songNo1[y] ??= {}).add(s.first.entityId);
   }
@@ -42,11 +49,11 @@ void main(List<String> args) {
 
   String k(double v) => '${(v / 1000).round()}K';
   print('year | album #1s | debut #1 | longest run | releases | '
-      'top10 debuts | #1 units med | #10 units med | song #1s');
+      'top10 debuts | #1 units med (pure) | #1 wks by tier A | #10 units med | song #1s');
   for (final y in albumNo1.keys) {
     final runs = albumNo1[y]!.values.toList()..sort();
     print('$y | ${albumNo1[y]!.length} | ${debutNo1[y] ?? 0} | ${runs.last} | '
-        '${releases[y]} | ${debutTop10[y] ?? 0} | ${k(med(no1Units[y]))} | '
+        '${releases[y]} | ${debutTop10[y] ?? 0} | ${k(med(no1Units[y]))} (${k(med(no1Pure[y]))}) | ${no1TierA[y] ?? 0} | '
         '${k(med(tenthUnits[y]))} | ${songNo1[y]!.length}');
   }
 }

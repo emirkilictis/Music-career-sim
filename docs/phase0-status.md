@@ -228,6 +228,19 @@ Sonuç (seed 42 ve 7, 2015–2025, `dart run bin/chart_churn.dart <seed> 2015 20
   yılda farklı #1 albüm çoğunlukla 24–32. 2025 süperstar: hamlesiz 189K, iyi hamle 1.1M, max 3.2–3.9M
   (albüm başına ±%8 rastgelelik; ortalama ~3.5M saf).
 
+## Süperstar "olay albümü" ve daha fazla AI çıkışı (yapıldı)
+
+- **Olay albümü:** çok ünlü sanatçının albümünü hayranı olmayanlar da ilk hafta alır
+  (`eventBuyRate` × sıradan dinleyici × ünlülük³; 2. hafta ¼). Orta seviyeyi neredeyse etkilemez.
+- Sadık hayran satın alma oranı 0.09 → 0.07, koleksiyoncu oranı 0.15 → 0.19 (varyant hamlesi değerli
+  kalsın diye). B grubu albümsüz döngü %20 → %15, albüm arası 26–76 hafta; A grubu 90–185 hafta.
+  Daha çok çıkış için liste ivmesi 0.10 → 0.12.
+- 2025 süperstar ABD ilk hafta (3 seed ortalaması, `bin/superstar_probe.dart`): hamlesiz (sadakat 0.4)
+  ~295K, hamlesiz ama sadık (0.9) ~560K (test: hamlesiz sadık süperstar #1'den giriş yapar), iyi hamle
+  ~1.4M, max ~3.9M.
+- Listeler (seed 42/7, 2020–2025): yılda farklı #1 albüm 28–36, en uzun seri 6–10 hf, tipik #1 haftası
+  ~165–205K (yarısı AI süperstarlarından); ABD/UK/Global #1 şarkı 31–47M / 8–14M / 49–84M.
+
 ## Bilinen eksikler / sıradaki adımlar
 
 1. Flop desteğinin etkileri (rapor, redemption, feat teklifleri), sosyal medya postları, kampanyalar:

@@ -280,6 +280,14 @@ void megaDebutTests() {
         lessThan(1.2e6));
   });
 
+  test('a devoted superstar goes #1 even without any moves', () {
+    // An event album: a Taylor-level career sells big on name alone.
+    final r = _debut(year: 2025, devotion: 0.9, hype: 0, variants: const [0]);
+    expect(r.world.albumFirstWeekIn(r.album, ChartMarket.us),
+        greaterThan(450e3));
+    expect(r.album.statsOrNull(Charts.usAlbums)?.debutPos, 1);
+  });
+
   test('staggered variants boost the second week', () {
     final launchAll = _debut(
         year: 2025, devotion: 0.9, hype: 0.5, variants: const [0, 0, 0, 0, 0]);

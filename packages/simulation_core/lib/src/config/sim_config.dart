@@ -19,7 +19,7 @@ class SimConfig {
     this.albumTrackExposure = 0.30,
     this.baseExposure = 0.0015,
     this.fameExposure = 0.020,
-    this.chartFeedback = 0.10,
+    this.chartFeedback = 0.12,
     this.chartFatigueWeeks = 12,
     this.albumTrackFanShare = 0.6,
     this.catalogTail = 0.05,
@@ -30,8 +30,9 @@ class SimConfig {
     this.playlistBigBoost = 0.8,
     this.playlistFade = 0.85,
     this.longAlbumBonus = 0.08,
-    this.superfanBuyRate = 0.09,
-    this.collectorRate = 0.15,
+    this.eventBuyRate = 0.11,
+    this.superfanBuyRate = 0.07,
+    this.collectorRate = 0.19,
     this.variantDecay = 0.6,
     this.casualBuyRate = 0.012,
     this.albumSecondWeekRatio = 0.22,
@@ -136,6 +137,10 @@ class SimConfig {
   final double playlistMidBoost;
   final double playlistBigBoost;
   final double playlistFade;
+
+  /// First-week album purchases by non-fans, per casual listener × fame³
+  /// (event albums of superstars).
+  final double eventBuyRate;
 
   /// Extra album sales per doubling of the tracklist beyond 10 tracks.
   final double longAlbumBonus;

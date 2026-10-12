@@ -449,7 +449,22 @@ class Simulator {
                 (age == 0 ? 1.5 : 1.0) +
             (age == 0 ? casual * 0.003 * era.casualPurchaseRate : 0.0) +
             casual * c.albumCatalogRate * era.casualPurchaseRate * (0.5 + q01);
-        final pure = (superPart + collectorPart + casPart) * noise * tracklist;
+        // A superstar's album is an event: even non-fans buy it in the
+        // first weeks. Grows steeply with fame (fame³), so it lifts the
+        // biggest stars without touching working artists.
+        final eventPart = age > 1
+            ? 0.0
+            : casual *
+                c.eventBuyRate *
+                p.fame *
+                p.fame *
+                p.fame *
+                era.casualPurchaseRate *
+                (1 + al.hypeAtRelease) *
+                (age == 0 ? 1.0 : 0.25);
+        final pure = (superPart + collectorPart + casPart + eventPart) *
+            noise *
+            tracklist;
         final streams =
             sea[k] + al.sumDormantRate * p.catalogFactor * share * spa[k];
         final t = tea[k] / c.trackEquivalentAlbum;
