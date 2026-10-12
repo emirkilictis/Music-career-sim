@@ -67,6 +67,14 @@ class Simulator {
     final c = w.config;
     final eras = w.regionalEra.forWeek(w.week);
 
+    // The week streams and downloads start to count as album units: every
+    // album collects its tracks' earlier streams and downloads at once, so
+    // a 2002 album that lived on in the streaming era gets all of them.
+    if (Charts.songRules(ChartMarket.global, w.week).albumUsesUnits &&
+        !Charts.songRules(ChartMarket.global, w.week - 1).albumUsesUnits) {
+      _retroactiveAlbumUnits();
+    }
+
     // 1–2. Scheduled AI activity.
     AiPlanner.step(w);
 
@@ -876,6 +884,29 @@ class Simulator {
   /// from their tracks' streams (SEA) in the units era, so career totals
   /// match "every stream counts" (AI catalogs skip this for speed; they
   /// only matter for charts, which use the active set).
+  void _retroactiveAlbumUnits() {
+    final w = world;
+    final c = w.config;
+    for (final al in w.albums) {
+      if (al.releaseWeek >= w.week) continue;
+      final a = w.artists[al.artistId];
+      for (var k = 0; k < _r; k++) {
+        var streams = 0.0, downloads = 0.0;
+        for (final sid in al.songIds) {
+          final s = w.songs[sid];
+          streams += w.songLifetimeStreams(s, k);
+          downloads += w.songLifetimeDownloads(s, k);
+        }
+        final units = streams / c.streamEquivalentAlbum +
+            downloads / c.trackEquivalentAlbum;
+        al.reg[AlbumReg.lifeUnits + k] += units;
+        a.reg[ArtistReg.lifeUnits + k] += units;
+      }
+      w.dirtyAlbums.add(al.id);
+      w.dirtyArtists.add(a.id);
+    }
+  }
+
   void _playerCatalogAlbumUnits() {
     final w = world;
     final p = w.player;

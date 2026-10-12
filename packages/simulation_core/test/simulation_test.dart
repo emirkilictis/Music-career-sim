@@ -185,6 +185,33 @@ void main() {
   group('album shape', albumShapeTests);
   group('viral', viralTests);
 
+  test('in 2015 every album collects its earlier streams and downloads', () {
+    final w = WorldGen.create(seed: 15, startYear: 2014);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2015)) {
+      sim.step();
+    }
+    // The biggest album released before the streaming-unit era.
+    final old = w.albums.where((al) => al.releaseWeek < w.week).toList()
+      ..sort((x, y) => w
+          .songLifetimeDownloads(w.songs[y.songIds.first])
+          .compareTo(w.songLifetimeDownloads(w.songs[x.songIds.first])));
+    final al = old.first;
+    double units() => [
+          for (var k = 0; k < regionCount; k++) al.reg[AlbumReg.lifeUnits + k]
+        ].fold(0.0, (a, b) => a + b);
+    var owed = 0.0;
+    for (final id in al.songIds) {
+      final s = w.songs[id];
+      owed += w.songLifetimeStreams(s) / w.config.streamEquivalentAlbum +
+          w.songLifetimeDownloads(s) / w.config.trackEquivalentAlbum;
+    }
+    expect(owed, greaterThan(1000));
+    final before = units();
+    sim.step();
+    expect(units() - before, greaterThanOrEqualTo(owed * 0.999));
+  });
+
   group('eras and anticipation', () {
     test('after a successful era anticipation builds up and never decays', () {
       final w = WorldGen.create(seed: 11, startYear: 2010);
