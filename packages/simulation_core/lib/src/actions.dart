@@ -131,7 +131,11 @@ abstract final class Actions {
     final writing =
         co == null ? own : 0.6 * math.max(own, co) + 0.4 * math.min(own, co);
     final prod = producer?.skill ?? producerSkill ?? a.skills.production * 0.8;
-    final skill = 0.45 * writing + 0.30 * prod + 0.25 * a.skills.vocals;
+    final wq = a.kind.qualityWeights;
+    final skill = wq.writing * writing +
+        wq.production * prod +
+        wq.vocals * a.skills.vocals +
+        wq.perf * a.skills.performance;
 
     final genreFit =
         (producer != null && producer.genre == a.genre) ? 3.0 : 0.0;
@@ -346,6 +350,7 @@ abstract final class Eras {
             (score > 2.0 ? 0.5 * math.min(score - 2.0, 1.0) : 0.0);
         a.anticipationCap = c.anticipationCapBase * g * (0.5 + a.fame);
         a.devotion += (1 - a.devotion) *
+            a.kind.devotionGain *
             switch (result) {
               EraResult.smash => 0.25,
               EraResult.success => 0.12,

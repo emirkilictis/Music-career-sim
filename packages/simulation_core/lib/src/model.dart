@@ -10,6 +10,71 @@ import 'config/regions.dart';
 
 enum ArtistTier { player, a, b }
 
+/// Solo artist, band, or vocal group (boy band / girl group);
+/// docs/game-design.md §2.4. Kinds differ in strengths, never in penalties.
+enum ArtistKind {
+  solo(
+    qualityWeights: (writing: 0.45, production: 0.30, vocals: 0.25, perf: 0.0),
+    statWeights: [0.40, 1 / 3, 0.40 / 3, 0.20 / 3, 0.20 / 3],
+    devotionGain: 1.0,
+    devotionDrift: 1.0,
+    fanDecay: 1.0,
+  ),
+
+  /// Plays its own instruments: production and stage performance matter more,
+  /// and the fanbase is loyal over long careers.
+  band(
+    qualityWeights: (writing: 0.40, production: 0.30, vocals: 0.15, perf: 0.15),
+    statWeights: [0.35, 0.15, 0.25, 0.20, 0.05],
+    devotionGain: 1.0,
+    devotionDrift: 1.0,
+    fanDecay: 0.8,
+  ),
+
+  /// Boy band / girl group: vocals, choreography and charisma; builds a
+  /// devoted, collecting fandom quickly.
+  vocalGroup(
+    qualityWeights: (writing: 0.35, production: 0.25, vocals: 0.30, perf: 0.10),
+    statWeights: [0.25, 0.35, 0.10, 0.20, 0.10],
+    devotionGain: 1.4,
+    devotionDrift: 0.5,
+    fanDecay: 1.0,
+  );
+
+  const ArtistKind({
+    required this.qualityWeights,
+    required this.statWeights,
+    required this.devotionGain,
+    required this.devotionDrift,
+    required this.fanDecay,
+  });
+
+  /// How skills combine into song quality (sums to 1).
+  final ({
+    double writing,
+    double production,
+    double vocals,
+    double perf
+  }) qualityWeights;
+
+  /// "Auto distribute" split of starting points: songwriting, vocals,
+  /// production, performance, charisma.
+  final List<double> statWeights;
+
+  /// Multiplier on devotion gained from successful eras.
+  final double devotionGain;
+
+  /// Multiplier on the slow weekly devotion drift.
+  final double devotionDrift;
+
+  /// Multiplier on core-fan decay.
+  final double fanDecay;
+
+  bool get isGroup => this != solo;
+  static const minMembers = 2;
+  static const maxMembers = 7;
+}
+
 enum SongStatus { vault, active, dormant }
 
 enum AlbumType { single, ep, album }
@@ -74,10 +139,13 @@ class Artist {
     required this.coreFans,
     required this.casual,
     this.homeCountry = HomeCountry.us,
+    this.kind = ArtistKind.solo,
+    List<String>? members,
     this.labelReach = 1.0,
     this.artistShare = 1.0,
     this.moneyCents = 0,
-  }) : popularity = fame {
+  })  : members = members ?? [],
+        popularity = fame {
     updateRegionShare();
   }
 
@@ -86,6 +154,11 @@ class Artist {
   ArtistTier tier;
   final int genre;
   final HomeCountry homeCountry;
+  final ArtistKind kind;
+
+  /// Member names for bands and vocal groups (empty for solo artists).
+  /// Mutable for later lineup changes.
+  final List<String> members;
   final int debutWeek;
   int retiredWeek = -1;
   final Skills skills;

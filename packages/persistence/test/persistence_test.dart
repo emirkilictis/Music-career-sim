@@ -72,6 +72,23 @@ void main() {
     expect(again.list(), isEmpty);
   });
 
+  test('a vocal group player survives save/load', () {
+    final w = WorldGen.create(seed: 9, startYear: 2012);
+    WorldGen.addPlayer(w,
+        name: 'Girls',
+        genre: 0,
+        kind: ArtistKind.vocalGroup,
+        members: const ['Ava', 'Mia', 'Zoe', 'Lia']);
+    final store = SaveStore.create('${tmp.path}/g.sqlite', w);
+    final loaded = store.load();
+    store.close();
+    expect(loaded.player!.kind, ArtistKind.vocalGroup);
+    expect(loaded.player!.members, ['Ava', 'Mia', 'Zoe', 'Lia']);
+    final ai = w.artists.firstWhere((a) => a.kind == ArtistKind.band);
+    expect(loaded.artists[ai.id].members, ai.members);
+    expect(worldHash(loaded), worldHash(w));
+  });
+
   test('difficulty and side income survive save/load', () {
     final w = _newWorld(5, difficulty: Difficulty.hard);
     final p = w.player!;

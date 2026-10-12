@@ -144,6 +144,7 @@ void main() {
     });
   });
 
+  group('groups', groupTests);
   group('side income', sideIncomeTests);
   group('difficulty', difficultyTests);
   group('mega debuts', megaDebutTests);
@@ -436,5 +437,91 @@ void difficultyTests() {
     expect(normal.fans, greaterThan(hard.fans));
     // The AI only feels the player through the shared market.
     expect((easy.aiFans - hard.aiFans).abs() / normal.aiFans, lessThan(1e-3));
+  });
+}
+
+/// Bands and vocal groups (docs/game-design.md §2.4).
+void groupTests() {
+  World fresh() => WorldGen.create(seed: 31, startYear: 2010);
+  const four = ['Ava', 'Mia', 'Zoe', 'Lia'];
+
+  test('a group needs 2–7 members, a solo artist none', () {
+    expect(
+        () => WorldGen.addPlayer(fresh(),
+            name: 'G', genre: 0, kind: ArtistKind.vocalGroup, members: ['A']),
+        throwsArgumentError);
+    expect(
+        () => WorldGen.addPlayer(fresh(),
+            name: 'G',
+            genre: 0,
+            kind: ArtistKind.band,
+            members: List.filled(8, 'X')),
+        throwsArgumentError);
+    expect(
+        () => WorldGen.addPlayer(fresh(), name: 'S', genre: 0, members: four),
+        throwsArgumentError);
+    final g = WorldGen.addPlayer(fresh(),
+        name: 'Girls', genre: 0, kind: ArtistKind.vocalGroup, members: four);
+    expect(g.members, four);
+    expect(g.kind.isGroup, isTrue);
+  });
+
+  test('auto stats suit the kind and stay within the rules', () {
+    for (final kind in ArtistKind.values) {
+      for (final premium in [false, true]) {
+        final s = StartingStats.auto(premium: premium, kind: kind);
+        expect(StartingStats.isValid(s, premium: premium), isTrue);
+        final spent = s.songwriting +
+            s.vocals +
+            s.production +
+            s.performance +
+            s.charisma -
+            5 * StartingStats.base;
+        expect(spent, StartingStats.points(premium: premium));
+      }
+      final q = kind.qualityWeights;
+      expect(q.writing + q.production + q.vocals + q.perf, closeTo(1, 1e-12));
+    }
+    final band = StartingStats.auto(premium: false, kind: ArtistKind.band);
+    final group =
+        StartingStats.auto(premium: false, kind: ArtistKind.vocalGroup);
+    expect(band.production, greaterThan(group.production));
+    expect(group.vocals, greaterThan(band.vocals));
+  });
+
+  test('the AI world has bands and vocal groups with members', () {
+    final w = fresh();
+    final bands = w.artists.where((a) => a.kind == ArtistKind.band).toList();
+    final groups =
+        w.artists.where((a) => a.kind == ArtistKind.vocalGroup).toList();
+    expect(bands.length, greaterThan(15));
+    expect(groups.length, greaterThan(10));
+    for (final a in [...bands, ...groups]) {
+      expect(a.members.length, inInclusiveRange(3, 7));
+    }
+    expect(
+        w.artists
+            .where((a) => a.kind == ArtistKind.solo)
+            .every((a) => a.members.isEmpty),
+        isTrue);
+  });
+
+  test('vocal groups build a devoted fandom faster', () {
+    double gain(ArtistKind kind) {
+      final a = WorldGen.addPlayer(fresh(),
+          name: 'X',
+          genre: 0,
+          kind: kind,
+          members: kind.isGroup ? four : const []);
+      final before = a.devotion;
+      a.eraOpen = true;
+      a.eraUnits = 3e6;
+      a.eraExpected = 1e6;
+      Eras.close(WorldGen.create(seed: 31, startYear: 2010), a);
+      return a.devotion - before;
+    }
+
+    expect(
+        gain(ArtistKind.vocalGroup), greaterThan(1.3 * gain(ArtistKind.solo)));
   });
 }

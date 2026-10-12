@@ -77,7 +77,7 @@ class Simulator {
       a.weekStreams = 0;
       a.hype *= 0.92;
       // Fanbases slowly drift unless renewed by successful eras.
-      a.devotion = math.max(0.0, a.devotion - 0.0002);
+      a.devotion = math.max(0.0, a.devotion - 0.0002 * a.kind.devotionDrift);
       a.buzz *= 0.75;
       a.flopSupport *= 0.97;
       if (!a.eraOpen && a.anticipationCap > 0) {
@@ -501,7 +501,7 @@ class Simulator {
           c.casualDecay * a.casual;
       final conv = a.tier == ArtistTier.player ? w.difficulty.fanConversion : 1;
       a.coreFans += c.fanConversion * conv * a.weekReach * fanRoom -
-          c.coreFanDecay * a.coreFans;
+          c.coreFanDecay * a.kind.fanDecay * a.coreFans;
       if (a.coreFans < 100) a.coreFans = 100;
       if (a.casual < 1000) a.casual = 1000;
       if (a.eraOpen && w.week - a.eraStartWeek >= c.eraLengthWeeks) {

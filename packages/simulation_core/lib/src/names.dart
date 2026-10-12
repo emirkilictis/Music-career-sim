@@ -403,12 +403,15 @@ abstract final class Names {
     'Solstice',
   ];
 
-  static String artist(RandomStream r) {
-    final roll = r.nextDouble();
-    if (roll < 0.55) return '${r.pick(_first)} ${r.pick(_last)}';
-    if (roll < 0.80) return r.pick(_mononym);
-    return 'The ${r.pick(_bandA)} ${r.pick(_bandB)}';
-  }
+  /// A solo artist's name: a person's name or a mononym.
+  static String solo(RandomStream r) => r.nextDouble() < 0.7
+      ? '${r.pick(_first)} ${r.pick(_last)}'
+      : r.pick(_mononym);
+
+  /// A band or vocal group name.
+  static String group(RandomStream r) => r.nextDouble() < 0.6
+      ? 'The ${r.pick(_bandA)} ${r.pick(_bandB)}'
+      : '${r.pick(_bandA)} ${r.pick(_bandB)}';
 
   static String person(RandomStream r) => '${r.pick(_first)} ${r.pick(_last)}';
 

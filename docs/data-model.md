@@ -50,6 +50,8 @@ CREATE TABLE artist (
   genreID INTEGER NOT NULL,
   debutWeek INTEGER NOT NULL,
   retiredWeek INTEGER,
+  kind INTEGER NOT NULL DEFAULT 0,       -- 0 = solo, 1 = band, 2 = vokal grup
+  members TEXT,                          -- üye isimleri (JSON); ileride member tablosu + fotoğraf
   avatarAssetID INTEGER REFERENCES asset(id),   -- sadece oyuncu
   bannerAssetID INTEGER REFERENCES asset(id),   -- sadece oyuncu
   socialAvatarAssetID INTEGER REFERENCES asset(id)

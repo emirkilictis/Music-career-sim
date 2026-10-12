@@ -46,6 +46,7 @@ Hafta 14, 2007
 
 ### 2.1 Sanatçı oluşturma (tek ekran + isteğe bağlı detay)
 - İsim, profil fotoğrafı (opsiyonel), tür, başlangıç yılı, zorluk.
+- **Sanatçı türü:** Solo / Band / Vokal grup (boyband, girlband) — bkz. §2.4.
 - **Stat dağıtımı:** her stat 25'ten başlar, oyuncu 30 puan dağıtır (başlangıçta hiçbir stat 60'ı geçemez).
   **Premium:** 55 puan, tavan 70 (otomatik dağıtım: söz yazarlığı 47, vokal 43, prodüksiyon 32, performans 29,
   karizma 29 — ücretsizde 37 / 35 / 29 / 27 / 27).
@@ -82,6 +83,26 @@ Hafta 14, 2007
 
 - Ünlü başlangıçta diskografi boştur; profil "kariyer burada başlıyor" der (uydurma geçmiş yok).
 - Gelir modeli için bkz. §20.
+
+### 2.4 Grup modu: Band ve Vokal grup
+
+Oyuncu solo sanatçı, **band** veya **vokal grup** (boyband / girlband) olarak başlayabilir.
+Sade tutulur: grup **tek sanatçı gibi** oynanır, oyuncu üye üye stat yönetmez.
+
+- **Üyeler:** 2–7 kişi; her üyenin adı (ve ileride fotoğrafı). Solo sanatçının üye listesi yoktur.
+- **Statlar:** grubun tek stat seti vardır (§2.1 puan kuralları aynı). Otomatik dağıtım türe göre:
+
+| Tür | Şarkı kalitesinde öne çıkan | Otomatik dağıtım ağırlığı | Güçlü yanı |
+|---|---|---|---|
+| Solo | söz yazarlığı, prodüksiyon, vokal | söz > vokal > prodüksiyon | — (kalibre edilmiş temel) |
+| Band | söz yazarlığı, prodüksiyon, **performans** (kendi enstrümanları) | söz > prodüksiyon > performans | Sadık kitle: çekirdek hayran kaybı %20 daha yavaş, uzun kariyer |
+| Vokal grup | **vokal**, söz yazarlığı, prodüksiyon, performans (koreografi) | vokal > söz > performans | **Fandom:** başarılı eralardan %40 daha fazla sadakat (devotion), sadakat yarı hızda azalır → büyük ilk hafta, güçlü varyant/koleksiyon satışı |
+
+- Türler arasında **ceza yok**, sadece farklı güçlü yanlar.
+- AI rakiplerin ~%12'si band, ~%8'i vokal grup (3–7 üyeli, kurgusal isimler).
+- **Faz 2–3:** ara verme / dağılma / **reunion** (beklenti sistemiyle: yıllar sonra dev reunion albümü),
+  üyelerin **solo çıkışı** (feat modelini kullanır), kadro değişikliği (üye ayrılır / katılır),
+  "en sevilen üye" popülerliği.
 
 ## 3. Sanatçı
 

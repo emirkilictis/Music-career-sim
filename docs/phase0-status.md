@@ -40,7 +40,7 @@ dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet   # performan
 dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet --save /tmp/c.sqlite   # + kayıt
 ```
 
-## Testler (simülasyon 25/25, kayıt 7/7 geçiyor)
+## Testler (simülasyon 29/29, kayıt 8/8 geçiyor)
 
 - Aynı seed → bit düzeyinde aynı dünya; farklı seed → farklı dünya
 - Sanatçının kariyer stream toplamı = şarkılarının toplamı (aktif + tembel birikimli dormant)
@@ -172,6 +172,14 @@ sadece oyuncunun erişimini, hayran dönüşümünü ve şarkı kalitesini ölç
 (gerçek gün, hesap başına, `account.json`) + `Actions.grantDailyBonus` ($5K). Bot oyuncu $5K'dan iş +
 reklamla başlıyor (2015–2021 bot koşusu: 5 albüm, ~$4.6M). Başlangıç statları: `StartingStats`
 (ücretsiz 30 puan / tavan 60, Premium 55 puan / tavan 70; `auto` ve `isValid`).
+
+## Grup modu (yapıldı)
+
+`ArtistKind` (solo / band / vocalGroup) ve üye listesi; oyuncu ve AI için. Tür; şarkı kalitesindeki stat
+ağırlıklarını, otomatik stat dağıtımını, sadakat kazanımını/azalmasını ve hayran kaybını belirler.
+Solo değerleri eski formülle birebir aynı. AI'nin ~%20'si grup. Kalibrasyon sonrası referanslar yerinde
+(2025 süperstar: hamlesiz ABD 472K, max hamle 4.0M / 3.6M saf). Testler: üye sayısı kuralları, türe göre
+otomatik statlar, AI grupları, vokal grubun daha hızlı sadakat kazanması, kayıttan aynen dönme.
 
 ## Bilinen eksikler / sıradaki adımlar
 

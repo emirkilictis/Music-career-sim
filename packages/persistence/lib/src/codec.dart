@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:simulation_core/simulation_core.dart';
@@ -39,6 +40,7 @@ abstract final class Codec {
     'lastReleaseWeek',
     'creativeEnergy', 'burnoutUntilWeek', 'lastWriteWeek',
     'songsWrittenThisWeek',
+    'kind', 'members',
     'hasJob', 'lastAdWeek', 'adsWatchedThisWeek',
     'labelReach', 'artistShare', 'moneyCents',
     'sumDormantRate',
@@ -61,6 +63,7 @@ abstract final class Codec {
         a.lastReleaseWeek,
         a.creativeEnergy, a.burnoutUntilWeek, a.lastWriteWeek,
         a.songsWrittenThisWeek,
+        a.kind.index, jsonEncode(a.members),
         a.hasJob ? 1 : 0, a.lastAdWeek, a.adsWatchedThisWeek,
         a.labelReach, a.artistShare, a.moneyCents,
         a.sumDormantRate,
@@ -79,6 +82,8 @@ abstract final class Codec {
       tier: ArtistTier.values[r['tier'] as int],
       genre: r['genre'] as int,
       homeCountry: HomeCountry.values[r['homeCountry'] as int],
+      kind: ArtistKind.values[r['kind'] as int],
+      members: (jsonDecode(r['members'] as String) as List).cast<String>(),
       debutWeek: r['debutWeek'] as int,
       skills: Skills(
         songwriting: _d(r['songwriting']),

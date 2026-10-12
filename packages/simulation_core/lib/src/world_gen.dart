@@ -40,17 +40,30 @@ abstract final class StartingStats {
     return spent <= points(premium: premium) + 1e-9;
   }
 
-  /// The "auto distribute" button: a balanced singer-songwriter build.
-  static Skills auto({required bool premium}) {
+  /// The "auto distribute" button: a build that suits the artist [kind]
+  /// (whole points, largest remainder).
+  static Skills auto(
+      {required bool premium, ArtistKind kind = ArtistKind.solo}) {
     final p = points(premium: premium);
-    final sw = (p * 0.40).round(), vo = (p * 0.33).round();
-    final pr = (p * 0.13).round(), pe = (p - sw - vo - pr) ~/ 2;
+    final exact = [for (final wt in kind.statWeights) wt * p];
+    final pts = [for (final x in exact) x.floor()];
+    final order = List.generate(5, (i) => i)
+      ..sort((i, j) {
+        final d = (exact[j] - pts[j]).compareTo(exact[i] - pts[i]);
+        return d != 0 ? d : i.compareTo(j);
+      });
+    var left = p - pts.fold(0, (a, x) => a + x);
+    for (final i in order) {
+      if (left <= 0) break;
+      pts[i]++;
+      left--;
+    }
     return Skills(
-      songwriting: base + sw,
-      vocals: base + vo,
-      production: base + pr,
-      performance: base + pe,
-      charisma: base + (p - sw - vo - pr - pe),
+      songwriting: base + pts[0],
+      vocals: base + pts[1],
+      production: base + pts[2],
+      performance: base + pts[3],
+      charisma: base + pts[4],
     );
   }
 }
@@ -116,9 +129,23 @@ abstract final class WorldGen {
       casual = 1.5e6 * r.logNormal(0.9) * (0.3 + 3 * fame);
     }
     final scale = w.config.globalAudienceScale;
+    // Kind and members use their own streams so the other draws stay put.
+    final k = RandomStream.keyed(w.seed, 2, id, RngPurpose.worldGen);
+    final kindRoll = k.nextDouble();
+    final kind = kindRoll < 0.12
+        ? ArtistKind.band
+        : (kindRoll < 0.20 ? ArtistKind.vocalGroup : ArtistKind.solo);
+    final m = RandomStream.keyed(w.seed, 3, id, RngPurpose.names);
+    final memberCount = switch (kind) {
+      ArtistKind.solo => 0,
+      ArtistKind.band => 3 + m.nextInt(3),
+      ArtistKind.vocalGroup => 4 + m.nextInt(4),
+    };
     final a = Artist(
       id: id,
-      name: Names.artist(n),
+      name: kind.isGroup ? Names.group(n) : Names.solo(n),
+      kind: kind,
+      members: [for (var i = 0; i < memberCount; i++) Names.person(m)],
       tier: tier,
       homeCountry:
           _homeCountry(RandomStream.keyed(w.seed, 1, id, RngPurpose.worldGen)),
@@ -178,8 +205,17 @@ abstract final class WorldGen {
     StartMoney money = StartMoney.basic,
     CareerPath path = CareerPath.independent,
     HomeCountry home = HomeCountry.us,
+    ArtistKind kind = ArtistKind.solo,
+    List<String> members = const [],
     Skills? skills,
   }) {
+    if (kind.isGroup
+        ? members.length < ArtistKind.minMembers ||
+            members.length > ArtistKind.maxMembers
+        : members.isNotEmpty) {
+      throw ArgumentError.value(members.length, 'members',
+          kind.isGroup ? 'a group needs 2–7 members' : 'solo has no members');
+    }
     final (fame, fans, casual) = switch (tier) {
       StartTier.unknown => (0.0, 2e3, 2e4),
       StartTier.localBuzz => (0.05, 2e4, 2e5),
@@ -198,9 +234,11 @@ abstract final class WorldGen {
       name: name,
       tier: ArtistTier.player,
       homeCountry: home,
+      kind: kind,
+      members: [...members],
       genre: genre,
       debutWeek: w.week,
-      skills: skills ?? StartingStats.auto(premium: false),
+      skills: skills ?? StartingStats.auto(premium: false, kind: kind),
       fame: fame,
       coreFans: fans * w.config.globalAudienceScale,
       casual: casual * w.config.globalAudienceScale,

@@ -27,6 +27,7 @@ String _v1() => '''
     lastReleaseWeek INTEGER,
     creativeEnergy REAL, burnoutUntilWeek INTEGER, lastWriteWeek INTEGER,
     songsWrittenThisWeek INTEGER,
+    kind INTEGER, members TEXT,
     hasJob INTEGER, lastAdWeek INTEGER, adsWatchedThisWeek INTEGER,
     labelReach REAL, artistShare REAL, moneyCents INTEGER,
     sumDormantRate REAL,
