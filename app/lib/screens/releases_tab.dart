@@ -4,9 +4,11 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../core/images.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/image_pickers.dart';
 import '../widgets/media_tile.dart';
 import 'album_detail_screen.dart';
 import 'song_detail_screen.dart';
@@ -73,7 +75,10 @@ class _ReleasesTabState extends State<ReleasesTab> {
             ),
             for (final s in eligible)
               ListTile(
-                leading: CoverArt(seed: songCoverSeed(s.id, s.albumId)),
+                leading: CoverArt(
+                    seed: songCoverSeed(s.id, s.albumId),
+                    songId: s.id,
+                    albumId: s.albumId),
                 trailing: GradeTag(fmt.grade(s.estimatedGrade)),
                 title: Text(s.title),
                 subtitle:
@@ -85,7 +90,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
       ),
     );
     if (song == null || !mounted) return;
-    final campaign = await pickCampaign(context, career);
+    final campaign = await pickCampaign(context, career,
+        header: CoverPickRow(songId: song.id, albumId: song.albumId));
     if (campaign == null || !mounted) return;
     try {
       await career.act(Cmd.releaseSingle(song.id, campaign));
@@ -142,6 +148,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
                   for (final a in _albums)
                     MediaTile(
                       coverSeed: albumCoverSeed(a.id),
+                      albumId: a.id,
                       badge: PeakTag(a.charts
                               .where((c) => c.chartId == Charts.usAlbums)
                               .firstOrNull
@@ -170,6 +177,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
                   for (final s in singles)
                     MediaTile(
                       coverSeed: songCoverSeed(s.id, s.albumId),
+                      songId: s.id,
+                      albumId: s.albumId,
                       badge: PeakTag(s.charts
                               .where((c) => c.chartId == Charts.usSongs)
                               .firstOrNull
@@ -194,7 +203,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
 
 /// Campaign choice with prices (docs/game-design.md §9).
 Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
-    {int extraCents = 0}) {
+    {int extraCents = 0, Widget? header}) {
   final l = context.l10n;
   final fmt = context.fmt;
   final money = career.player.moneyCents;
@@ -205,6 +214,7 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
     builder: (c) => SafeArea(
       child: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
+        if (header != null) ...[header, const Divider(height: 20)],
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
           child: Text(l.pickCampaign, style: Theme.of(c).textTheme.titleLarge),
@@ -256,6 +266,9 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
   final Set<int> _picked = {};
   AlbumType _type = AlbumType.album;
   int _editions = 1;
+
+  /// Cover picked before the album exists; saved once it is released.
+  String? _cover;
   bool _stagger = true;
 
   @override
@@ -290,6 +303,10 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
         campaign: campaign,
       ));
       if (!mounted) return;
+      final cover = _cover;
+      if (cover != null) {
+        context.imagesRead.save(ImageStore.albumKey(album.id), cover);
+      }
       Navigator.pop(context);
       showInfo(context, l.albumReleased(album.title));
     } catch (e) {
@@ -320,6 +337,9 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
             decoration: InputDecoration(
                 labelText: l.albumTitle, border: const OutlineInputBorder()),
           ),
+          PendingCoverRow(
+              path: _cover, onChanged: (p) => setState(() => _cover = p)),
+          const SizedBox(height: 8),
           SegmentedButton<AlbumType>(
             showSelectedIcon: false,
             segments: [

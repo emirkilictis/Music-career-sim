@@ -3,6 +3,7 @@ import 'package:game/game.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/commands.dart';
+import '../../core/images.dart';
 import '../../core/scope.dart';
 import '../../ui/palette.dart';
 import '../../widgets/art.dart';
@@ -62,7 +63,7 @@ class _ArtistPageState extends State<ArtistPage> {
     final plays = NumberFormat.decimalPattern(l.localeName);
     final popular = page.popular.take(_showAll ? 10 : 5).toList();
     final career = context.careerRead;
-    final releases = <(String, int, String, VoidCallback?)>[
+    final releases = <(String, int, String, VoidCallback?, int?, int)>[
       for (final al in page.albums)
         (
           al.title,
@@ -75,6 +76,8 @@ class _ArtistPageState extends State<ArtistPage> {
                       builder: (_) =>
                           AlbumDetailScreen(albumId: al.id, state: career)))
               : null,
+          null,
+          al.id,
         ),
       for (final s in page.singles)
         (
@@ -88,6 +91,8 @@ class _ArtistPageState extends State<ArtistPage> {
                       builder: (_) =>
                           SongDetailScreen(songId: s.id, state: career)))
               : null,
+          s.id,
+          s.albumId,
         ),
     ];
     final (c1, c2) = _headerColors(a.id);
@@ -121,7 +126,12 @@ class _ArtistPageState extends State<ArtistPage> {
               alignment: const Alignment(0.7, -0.2),
               child: Opacity(
                 opacity: 0.9,
-                child: ArtistAvatar(name: a.name, seed: a.id, size: 170),
+                child: ArtistAvatar(
+                    name: a.name,
+                    seed: a.id,
+                    size: 170,
+                    artistId: a.id,
+                    photo: ArtistPhoto.streamify),
               ),
             ),
             const DecoratedBox(
@@ -226,7 +236,11 @@ class _ArtistPageState extends State<ArtistPage> {
                           fontWeight: FontWeight.w600)),
                 ),
                 CoverArt(
-                    seed: songCoverSeed(s.id, s.albumId), size: 46, radius: 2),
+                    seed: songCoverSeed(s.id, s.albumId),
+                    size: 46,
+                    radius: 2,
+                    songId: s.id,
+                    albumId: s.albumId),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -286,7 +300,7 @@ class _ArtistPageState extends State<ArtistPage> {
               itemCount: releases.length,
               separatorBuilder: (_, __) => const SizedBox(width: 14),
               itemBuilder: (context, i) {
-                final (title, seed, sub, onTap) = releases[i];
+                final (title, seed, sub, onTap, songId, albumId) = releases[i];
                 return InkWell(
                   onTap: onTap,
                   child: SizedBox(
@@ -294,7 +308,12 @@ class _ArtistPageState extends State<ArtistPage> {
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CoverArt(seed: seed, size: 146, radius: 4),
+                          CoverArt(
+                              seed: seed,
+                              size: 146,
+                              radius: 4,
+                              songId: songId,
+                              albumId: albumId),
                           const SizedBox(height: 8),
                           Text(title,
                               maxLines: 1,

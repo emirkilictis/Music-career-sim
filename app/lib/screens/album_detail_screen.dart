@@ -4,6 +4,8 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/image_pickers.dart';
+import '../core/images.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/line_chart.dart';
@@ -65,6 +67,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         children: [
           ReleaseHeader(
             coverSeed: albumCoverSeed(a.id),
+            albumId: a.id,
+            onCoverTap: () => editImage(context, ImageStore.albumKey(a.id)),
             title: a.title,
             subtitle: '${a.artistName} · ${fmt.albumType(a.type)}',
           ),

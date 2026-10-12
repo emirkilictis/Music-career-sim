@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:music_career_sim/widgets/art.dart';
@@ -113,5 +115,70 @@ void main() {
     await tester.tap(find.text('Superstar'));
     await tester.pump();
     expect(find.text('This start needs Premium.'), findsOneWidget);
+  });
+
+  testWidgets('own covers and artist photos replace the generated art',
+      (tester) async {
+    phoneView(tester);
+    final app = TestApp.create();
+    addTearDown(app.dispose);
+    final photo = await tester.runAsync(() => makeTestImage(
+        '${app.dir.path}/photo.png',
+        const Color(0xFFFF5C9D),
+        const Color(0xFF3B5BDB)));
+    await tester.pumpWidget(app.widget);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('New career'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Luna Vale');
+    await tester.tap(find.text('Start career'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Studio'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.textContaining('Write & record'));
+    await tester.tap(find.textContaining('Write & record'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.byType(Image), findsNothing);
+
+    // Releasing a single: the campaign sheet offers a cover first.
+    await tester.tap(find.text('Releases'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Release a single'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ListTile).last);
+    await tester.pumpAndSettle();
+    expect(find.text('Generated cover'), findsOneWidget);
+    app.picker.next = photo;
+    await tester.tap(find.text('Add cover'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Choose from photos'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your own image'), findsOneWidget);
+    expect(find.byType(Image), findsWidgets);
+    await tester.tap(find.text('No promotion'));
+    await tester.pumpAndSettle();
+    // The single's tile in Releases shows the uploaded cover.
+    expect(find.byType(Image), findsWidgets);
+
+    // Artist photo: general one from the Career tab.
+    await tester.tap(find.text('Career'));
+    await tester.pumpAndSettle();
+    expect(find.text('Uses your profile photo'), findsOneWidget);
+    app.picker.next = photo;
+    await tester.tap(find.text('Profile photo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Choose from photos'));
+    await tester.pumpAndSettle();
+    expect(find.text('Uses your profile photo'), findsOneWidget);
+    // One cover and one artist photo, stored with the career.
+    expect(
+        Directory('${app.dir.path}/careers')
+            .listSync(recursive: true)
+            .whereType<File>()
+            .where((f) => f.path.contains('/images/'))
+            .length,
+        2);
   });
 }

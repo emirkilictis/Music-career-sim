@@ -215,6 +215,8 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         const SizedBox(width: 6),
                         CoverArt(
                             seed: songCoverSeed(r.entityId, r.albumId),
+                            songId: r.entityId,
+                            albumId: r.albumId,
                             size: 48,
                             radius: 2),
                         const SizedBox(width: 12),

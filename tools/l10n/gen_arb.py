@@ -367,6 +367,21 @@ k('restNow','Rest this week','Bu hafta dinlen')
 k('moreNews','+{count} more','+{count} haber daha', count='int')
 k('thisWeekShort','This week','Bu hafta')
 
+# Images (feedback C5)
+k('cover','Cover','Kapak')
+k('coverOwn','Your own image','Kendi görselin')
+k('coverGenerated','Generated cover','Otomatik kapak')
+k('addCover','Add cover','Kapak ekle')
+k('changeCover','Change','Değiştir')
+k('chooseFromPhotos','Choose from photos','Fotoğraflardan seç')
+k('useGeneratedImage','Use the generated one','Otomatik görsele dön')
+k('artistPhotos','Artist photos','Sanatçı fotoğrafları')
+k('photoGeneral','Profile photo','Profil fotoğrafı')
+k('photoGeneralHint','Used everywhere unless a platform has its own.','Platforma özel seçmezsen her yerde bu kullanılır.')
+k('photoPlatform','{platform} photo','{platform} fotoğrafı', platform='String')
+k('photoPlatformOwn','Its own photo','Kendine özel fotoğraf')
+k('photoUsesGeneral','Uses your profile photo','Profil fotoğrafını kullanıyor')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

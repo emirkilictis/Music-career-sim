@@ -360,5 +360,18 @@
   "goReleases": "Yayınlara git",
   "restNow": "Bu hafta dinlen",
   "moreNews": "+{count} haber daha",
-  "thisWeekShort": "Bu hafta"
+  "thisWeekShort": "Bu hafta",
+  "cover": "Kapak",
+  "coverOwn": "Kendi görselin",
+  "coverGenerated": "Otomatik kapak",
+  "addCover": "Kapak ekle",
+  "changeCover": "Değiştir",
+  "chooseFromPhotos": "Fotoğraflardan seç",
+  "useGeneratedImage": "Otomatik görsele dön",
+  "artistPhotos": "Sanatçı fotoğrafları",
+  "photoGeneral": "Profil fotoğrafı",
+  "photoGeneralHint": "Platforma özel seçmezsen her yerde bu kullanılır.",
+  "photoPlatform": "{platform} fotoğrafı",
+  "photoPlatformOwn": "Kendine özel fotoğraf",
+  "photoUsesGeneral": "Profil fotoğrafını kullanıyor"
 }

@@ -8,6 +8,8 @@ class MediaTile extends StatelessWidget {
   const MediaTile({
     super.key,
     required this.coverSeed,
+    this.songId,
+    this.albumId,
     required this.title,
     required this.subtitle,
     this.value,
@@ -16,6 +18,10 @@ class MediaTile extends StatelessWidget {
   });
 
   final int coverSeed;
+
+  /// Lets an uploaded cover replace the generated one.
+  final int? songId;
+  final int? albumId;
   final String title;
   final String subtitle;
   final String? value;
@@ -30,7 +36,7 @@ class MediaTile extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 7),
         child: Row(children: [
-          CoverArt(seed: coverSeed, size: 52),
+          CoverArt(seed: coverSeed, size: 52, songId: songId, albumId: albumId),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

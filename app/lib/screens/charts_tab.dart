@@ -280,7 +280,12 @@ class _ChartLine extends StatelessWidget {
               ]),
             ),
             const SizedBox(width: 6),
-            CoverArt(seed: cover, size: top ? 76 : 52, radius: 4),
+            CoverArt(
+                seed: cover,
+                size: top ? 76 : 52,
+                radius: 4,
+                songId: albums ? null : r.entityId,
+                albumId: albums ? r.entityId : r.albumId),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

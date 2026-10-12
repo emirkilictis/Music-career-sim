@@ -16,6 +16,9 @@ class CareerState extends ChangeNotifier {
 
   ArtistView? _player;
   int week = 0;
+
+  /// Save slot of this career (for its images folder).
+  String? slotId;
   Difficulty difficulty = Difficulty.normal;
 
   /// The player before the last played week or skip, for "what changed".
@@ -36,6 +39,7 @@ class CareerState extends ChangeNotifier {
   int get weekOfYear => GameTime.weekOfYear(week);
 
   Future<void> refresh() async {
+    slotId ??= await controller.run(Cmd.slotId());
     final (p, w, d) = await controller.run(Cmd.snapshot());
     _player = p;
     week = w;

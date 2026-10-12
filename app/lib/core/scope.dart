@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../l10n/gen/app_localizations.dart';
 import 'career_state.dart';
 import 'game_controller.dart';
+import 'images.dart';
 import 'settings.dart';
 
 /// Makes a [Listenable] available below it and rebuilds dependents when it
@@ -45,4 +46,6 @@ extension ScopeContext on BuildContext {
   AppSettings get settings => Scope.of<AppSettings>(this);
   AppSettings get settingsRead => Scope.read<AppSettings>(this);
   GameController get controller => ControllerScope.of(this);
+  ImageStore get images => Scope.of<ImageStore>(this);
+  ImageStore get imagesRead => Scope.read<ImageStore>(this);
 }

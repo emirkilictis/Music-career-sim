@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/commands.dart';
 import '../../core/format.dart';
+import '../../core/images.dart';
 import '../../core/scope.dart';
 import '../../ui/palette.dart';
 import '../../widgets/art.dart';
@@ -112,7 +113,12 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(14),
                     child: Row(children: [
-                      ArtistAvatar(name: p.name, seed: p.id, size: 72),
+                      ArtistAvatar(
+                          name: p.name,
+                          seed: p.id,
+                          size: 72,
+                          artistId: p.id,
+                          photo: ArtistPhoto.streamify),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Column(
@@ -193,6 +199,8 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
                                     fontWeight: FontWeight.w600))),
                         CoverArt(
                             seed: songCoverSeed(s.id, s.albumId),
+                            songId: s.id,
+                            albumId: s.albumId,
                             size: 48,
                             radius: 2),
                         const SizedBox(width: 12),

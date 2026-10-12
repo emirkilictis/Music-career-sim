@@ -920,5 +920,25 @@
       }
     }
   },
-  "thisWeekShort": "This week"
+  "thisWeekShort": "This week",
+  "cover": "Cover",
+  "coverOwn": "Your own image",
+  "coverGenerated": "Generated cover",
+  "addCover": "Add cover",
+  "changeCover": "Change",
+  "chooseFromPhotos": "Choose from photos",
+  "useGeneratedImage": "Use the generated one",
+  "artistPhotos": "Artist photos",
+  "photoGeneral": "Profile photo",
+  "photoGeneralHint": "Used everywhere unless a platform has its own.",
+  "photoPlatform": "{platform} photo",
+  "@photoPlatform": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "photoPlatformOwn": "Its own photo",
+  "photoUsesGeneral": "Uses your profile photo"
 }

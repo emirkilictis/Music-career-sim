@@ -144,9 +144,11 @@ class _SlotsScreenState extends State<SlotsScreen> {
 Future<void> openCareer(BuildContext context, CareerState state) async {
   await state.refresh();
   if (!context.mounted) return;
+  final images = context.imagesRead..open(state.slotId!);
   await Navigator.push(
     context,
     MaterialPageRoute(builder: (_) => GameShell(state: state)),
   );
+  images.close();
   await state.controller.exec(Cmd.closeCareer());
 }

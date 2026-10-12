@@ -240,7 +240,8 @@ class _GameShellState extends State<GameShell> {
                       icon: const Icon(Icons.arrow_back_rounded),
                       onPressed: () => Navigator.of(context).maybePop(),
                     ),
-                    ArtistAvatar(name: p.name, seed: p.id, size: 40),
+                    ArtistAvatar(
+                        name: p.name, seed: p.id, size: 40, artistId: p.id),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

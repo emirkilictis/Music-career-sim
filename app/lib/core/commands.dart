@@ -44,6 +44,8 @@ abstract final class Cmd {
         return s.slotId;
       };
 
+  static SessionCmd<String> slotId() => (s) => s.slotId;
+
   static HostCmd<void> closeCareer() => (h) {
         h.session?.close();
         h.session = null;

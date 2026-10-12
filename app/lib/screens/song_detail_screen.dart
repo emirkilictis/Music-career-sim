@@ -4,6 +4,8 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/image_pickers.dart';
+import '../core/images.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/line_chart.dart';
@@ -110,6 +112,9 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         children: [
           ReleaseHeader(
             coverSeed: songCoverSeed(s.id, s.albumId),
+            songId: s.id,
+            albumId: s.albumId,
+            onCoverTap: () => editImage(context, ImageStore.songKey(s.id)),
             title: s.title,
             subtitle: '${s.artistName} · ${fmt.songStatus(s)}',
             trailing: GradeTag(fmt.grade(s.estimatedGrade)),
@@ -221,8 +226,16 @@ class ReleaseHeader extends StatelessWidget {
       required this.coverSeed,
       required this.title,
       required this.subtitle,
-      this.trailing});
+      this.trailing,
+      this.songId,
+      this.albumId,
+      this.onCoverTap});
   final int coverSeed;
+  final int? songId;
+  final int? albumId;
+
+  /// Opens the cover picker (the player's own releases).
+  final VoidCallback? onCoverTap;
   final String title;
   final String subtitle;
   final Widget? trailing;
@@ -238,7 +251,29 @@ class ReleaseHeader extends StatelessWidget {
                   blurRadius: 30, offset: Offset(0, 12), color: Colors.black54),
             ],
           ),
-          child: CoverArt(seed: coverSeed, size: 190, radius: 18),
+          child: GestureDetector(
+            onTap: onCoverTap,
+            child: Stack(children: [
+              CoverArt(
+                  seed: coverSeed,
+                  size: 190,
+                  radius: 18,
+                  songId: songId,
+                  albumId: albumId),
+              if (onCoverTap != null)
+                Positioned(
+                  right: 10,
+                  bottom: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: const BoxDecoration(
+                        color: Colors.black54, shape: BoxShape.circle),
+                    child: const Icon(Icons.photo_camera_outlined,
+                        color: Colors.white, size: 18),
+                  ),
+                ),
+            ]),
+          ),
         ),
         const SizedBox(height: 16),
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [

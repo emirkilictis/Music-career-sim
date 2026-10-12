@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:music_career_sim/app.dart';
 import 'package:music_career_sim/core/game_controller.dart';
+import 'package:music_career_sim/core/images.dart';
 import 'package:music_career_sim/core/settings.dart';
 
 /// Real fonts so screenshots are readable (tests use a box font otherwise).
@@ -49,20 +51,49 @@ void phoneView(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+/// Stands in for the phone's photo picker: returns [next] (or cancels).
+class FakePickSource implements ImagePickSource {
+  String? next;
+  @override
+  Future<String?> pick() async => next;
+}
+
+/// Writes a simple two-color PNG (a stand-in photo). Call inside
+/// `tester.runAsync`.
+Future<String> makeTestImage(String path, Color a, Color b) async {
+  final rec = ui.PictureRecorder();
+  final canvas = Canvas(rec);
+  const s = 256.0;
+  canvas.drawRect(
+      const Rect.fromLTWH(0, 0, s, s),
+      Paint()
+        ..shader = ui.Gradient.linear(Offset.zero, const Offset(s, s), [a, b]));
+  canvas.drawCircle(const Offset(s * 0.62, s * 0.4), s * 0.22,
+      Paint()..color = const Color(0xCCFFFFFF));
+  final img = await rec.endRecording().toImage(s.toInt(), s.toInt());
+  final png = await img.toByteData(format: ui.ImageByteFormat.png);
+  File(path).writeAsBytesSync(png!.buffer.asUint8List());
+  return path;
+}
+
 class TestApp {
-  TestApp._(this.dir, this.controller, this.settings);
+  TestApp._(this.dir, this.controller, this.settings, this.images, this.picker);
   final Directory dir;
   final LocalGameController controller;
   final AppSettings settings;
+  final ImageStore images;
+  final FakePickSource picker;
 
   static TestApp create({bool premium = false}) {
     final dir = Directory.systemTemp.createTempSync('mcs_app_');
     final settings = AppSettings(null)..premium = premium;
-    return TestApp._(dir, LocalGameController('${dir.path}/careers'), settings);
+    final picker = FakePickSource();
+    return TestApp._(dir, LocalGameController('${dir.path}/careers'), settings,
+        ImageStore('${dir.path}/careers', source: picker), picker);
   }
 
-  Widget get widget =>
-      MusicCareerApp(controller: controller, settings: settings);
+  Widget get widget => MusicCareerApp(
+      controller: controller, settings: settings, images: images);
 
   Future<void> dispose() async {
     await controller.dispose();

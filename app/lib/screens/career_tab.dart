@@ -4,6 +4,7 @@ import 'package:game/game.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
 import '../widgets/common.dart';
+import '../widgets/image_pickers.dart';
 import 'song_detail_screen.dart';
 
 /// Career summary: totals by region, #1s, year by year, all songs.
@@ -60,6 +61,11 @@ class _CareerScreenState extends State<CareerScreen> {
     final list = ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        Section(
+          title: l.artistPhotos,
+          child: ArtistPhotosSection(artistId: p.id, name: p.name),
+        ),
+        const SizedBox(height: 12),
         Section(
           title: l.careerTotals,
           child:

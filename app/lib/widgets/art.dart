@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../core/images.dart';
+import '../core/scope.dart';
 import '../ui/palette.dart';
 
 /// Curated color pairs for generated covers: soft and varied.
@@ -29,21 +32,65 @@ int _hash(int seed) {
 
 /// Generated cover art for a release until the player uploads one
 /// (docs/game-design.md §18). The same seed always gives the same cover.
+///
+/// Pass [songId] / [albumId] so an uploaded cover (song first, then its
+/// album) replaces the generated art.
 class CoverArt extends StatelessWidget {
-  const CoverArt({super.key, required this.seed, this.size = 48, this.radius});
+  const CoverArt(
+      {super.key,
+      required this.seed,
+      this.size = 48,
+      this.radius,
+      this.songId,
+      this.albumId});
   final int seed;
   final double size;
   final double? radius;
+  final int? songId;
+  final int? albumId;
 
   @override
   Widget build(BuildContext context) {
+    final store = _images(context);
+    final path = store == null
+        ? null
+        : songId != null
+            ? store.songCover(songId!, albumId ?? -1)
+            : albumId != null
+                ? store.albumCover(albumId!)
+                : null;
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius ?? size * 0.12),
       child: SizedBox.square(
         dimension: size,
-        child: CustomPaint(painter: _CoverPainter(_hash(seed))),
+        child: path != null
+            ? _Photo(path: path, size: size)
+            : CustomPaint(painter: _CoverPainter(_hash(seed))),
       ),
     );
+  }
+}
+
+/// The open career's images, if the app provides them here.
+ImageStore? _images(BuildContext context) =>
+    context.dependOnInheritedWidgetOfExactType<Scope<ImageStore>>()?.notifier;
+
+/// A stored image, decoded at display size.
+class _Photo extends StatelessWidget {
+  const _Photo({required this.path, required this.size});
+  final String path;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
+    return Image.file(File(path),
+        fit: BoxFit.cover,
+        width: size,
+        height: size,
+        cacheWidth: px,
+        gaplessPlayback: true,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink());
   }
 }
 
@@ -110,13 +157,21 @@ class _CoverPainter extends CustomPainter {
   bool shouldRepaint(_CoverPainter old) => old.h != h;
 }
 
-/// Round gradient avatar with initials (until a photo is uploaded).
+/// Round gradient avatar with initials, or the artist's uploaded photo when
+/// [artistId] has one (for [photo]'s place, else the general photo).
 class ArtistAvatar extends StatelessWidget {
   const ArtistAvatar(
-      {super.key, required this.name, required this.seed, this.size = 44});
+      {super.key,
+      required this.name,
+      required this.seed,
+      this.size = 44,
+      this.artistId,
+      this.photo = ArtistPhoto.general});
   final String name;
   final int seed;
   final double size;
+  final int? artistId;
+  final ArtistPhoto photo;
 
   String get _initials {
     final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
@@ -126,6 +181,12 @@ class ArtistAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final path = artistId == null
+        ? null
+        : _images(context)?.artistPhoto(artistId!, photo);
+    if (path != null) {
+      return ClipOval(child: _Photo(path: path, size: size));
+    }
     final (a, b) = _pairs[_hash(seed + 7) % _pairs.length];
     return Container(
       width: size,
