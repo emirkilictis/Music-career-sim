@@ -4,10 +4,11 @@ import 'palette.dart';
 
 /// The app theme built on [AppColors].
 ThemeData appTheme() {
-  final scheme = const ColorScheme.dark(
+  const scheme = ColorScheme(
+    brightness: AppColors.isLight ? Brightness.light : Brightness.dark,
     primary: AppColors.lilac,
-    onPrimary: Color(0xFF1B1530),
-    primaryContainer: Color(0xFF3A3058),
+    onPrimary: AppColors.onAccent,
+    primaryContainer: AppColors.accentSoft,
     onPrimaryContainer: AppColors.text,
     secondary: AppColors.pink,
     onSecondary: Color(0xFF34121F),
@@ -16,14 +17,15 @@ ThemeData appTheme() {
     tertiary: AppColors.mint,
     onTertiary: Color(0xFF0E2E20),
     error: AppColors.coral,
+    onError: AppColors.onAccent,
     surface: AppColors.bg,
     onSurface: AppColors.text,
     onSurfaceVariant: AppColors.textMuted,
     surfaceContainerLowest: AppColors.bg,
-    surfaceContainerLow: Color(0xFF17151F),
+    surfaceContainerLow: AppColors.surfaceLow,
     surfaceContainer: AppColors.surface,
     surfaceContainerHigh: AppColors.surfaceHigh,
-    surfaceContainerHighest: Color(0xFF2E2938),
+    surfaceContainerHighest: AppColors.surfaceHighest,
     outline: AppColors.textFaint,
     outlineVariant: AppColors.line,
   );
@@ -90,7 +92,7 @@ ThemeData appTheme() {
     ),
     chipTheme: base.chipTheme.copyWith(
       backgroundColor: AppColors.surfaceHigh,
-      selectedColor: const Color(0xFF3A3058),
+      selectedColor: AppColors.accentSoft,
       side: BorderSide.none,
       shape: const StadiumBorder(),
       labelStyle: const TextStyle(
@@ -102,7 +104,7 @@ ThemeData appTheme() {
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: SegmentedButton.styleFrom(
         backgroundColor: AppColors.surfaceHigh,
-        selectedBackgroundColor: const Color(0xFF3A3058),
+        selectedBackgroundColor: AppColors.accentSoft,
         selectedForegroundColor: AppColors.text,
         foregroundColor: AppColors.textMuted,
         side: BorderSide.none,
@@ -140,8 +142,8 @@ ThemeData appTheme() {
       trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: const Color(0xFF17151F),
-      indicatorColor: const Color(0xFF3A3058),
+      backgroundColor: AppColors.surfaceLow,
+      indicatorColor: AppColors.accentSoft,
       height: 66,
       labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
             fontFamily: AppFonts.ui,

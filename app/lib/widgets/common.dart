@@ -305,16 +305,16 @@ class GradientButton extends StatelessWidget {
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                            strokeWidth: 2.4, color: Color(0xFF2A1B3D)))
+                            strokeWidth: 2.4, color: AppColors.onAccent))
                   else if (icon != null)
-                    Icon(icon, color: const Color(0xFF2A1B3D)),
+                    Icon(icon, color: AppColors.onAccent),
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            color: Color(0xFF2A1B3D),
+                            color: AppColors.onAccent,
                             fontWeight: FontWeight.w900,
                             fontSize: 16)),
                   ),
@@ -363,7 +363,7 @@ class PosBadge extends StatelessWidget {
         color: top
             ? AppColors.gold
             : highlight
-                ? const Color(0xFF3A3058)
+                ? AppColors.accentSoft
                 : AppColors.surfaceHigh,
         borderRadius: BorderRadius.circular(12),
       ),
