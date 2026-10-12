@@ -20,6 +20,7 @@ sorunlar düzeltilmiş ve oyun tasarımı kararları eklenmiştir.
 | [data-model.md](data-model.md) | Varlıklar (feat, statlar, ekip, plak şirketi dahil), SQLite şeması, index'ler, geçmiş saklama stratejisi |
 | [architecture.md](architecture.md) | Modüller, concurrency, persistence, UI performansı, görsel pipeline'ı, test ve benchmark |
 | [phase0-status.md](phase0-status.md) | **Faz 0 durumu:** ne yapıldı, testler, performans, kalibrasyon sonuçları, bilinen eksikler |
+| [feedback.md](feedback.md) | Oyuncu geri bildirimleri ve test oyunu notları (henüz uygulanmayanlar) |
 
 ## Karar Kaydı
 
