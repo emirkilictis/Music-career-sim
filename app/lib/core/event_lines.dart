@@ -38,6 +38,10 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
   ];
 }
 
+/// The player's own news (docs K37): industry headlines are left out.
+List<EventLine> playerNews(List<EventLine> lines) =>
+    lines.where((l) => !l.event.isIndustry).toList();
+
 /// Most important first: player #1s and big moments before small news.
 List<EventLine> sortLines(List<EventLine> lines) {
   int rank(EventLine l) => switch (l.event) {

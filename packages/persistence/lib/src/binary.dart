@@ -85,10 +85,12 @@ class RowReader {
   int count() => _i64();
 
   /// Reads one row as a column-name map (same shape as a database row).
+  /// A row written before trailing columns were added has fewer values;
+  /// the missing columns read as null.
   Map<String, Object?> row(List<String> columns) {
     final n = _i64();
-    assert(n == columns.length);
-    final m = <String, Object?>{};
+    assert(n <= columns.length);
+    final m = <String, Object?>{for (final c in columns.skip(n)) c: null};
     for (var i = 0; i < n; i++) {
       final tag = _bytes[_pos++];
       m[columns[i]] = switch (tag) {

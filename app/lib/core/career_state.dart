@@ -63,7 +63,7 @@ class CareerState extends ChangeNotifier {
     _setBusy(true);
     try {
       final (week, lines, delta) = await controller.run(Cmd.nextWeek());
-      lastEvents = sortLines(lines);
+      lastEvents = sortLines(playerNews(lines));
       lastWeekPlayed = week;
       lastMoneyDelta = delta;
       await refresh();

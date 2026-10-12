@@ -7,6 +7,10 @@ sealed class GameEvent {
 
   /// Major events stop a year skip so the player sees them (§1.1).
   bool get isMajor;
+
+  /// Industry news about rivals, not about the player (docs K37: these are
+  /// never shown as notifications).
+  bool get isIndustry => false;
 }
 
 /// What an event or view refers to.
@@ -107,4 +111,6 @@ class RivalNumberOne extends GameEvent {
   final int artistId;
   @override
   bool get isMajor => false;
+  @override
+  bool get isIndustry => true;
 }

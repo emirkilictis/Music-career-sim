@@ -131,12 +131,19 @@ void main() {
       // An action between weeks is saved at once, without playing a week.
       g.writeSong(budget: BudgetTier.low);
       final hash = worldHash(g.world);
+      final weekStreams = g.song(song).weekStreams;
+      final no1 = g.chart(Charts.usSongs).rows.first;
+      final rivalWeekly = g.artistPage(no1.artistId).weeklyStreams;
+      expect(weekStreams, greaterThan(0));
       g.close();
 
       g = GameSession.resume(slots, id);
       expect(worldHash(g.world), hash);
       expect(g.player.hasJob, isTrue);
       expect(g.songs.length, 2);
+      // "This week" numbers survive reopening (they used to read 0).
+      expect(g.song(song).weekStreams, weekStreams);
+      expect(g.artistPage(no1.artistId).weeklyStreams, rivalWeekly);
       g.close();
     });
 
