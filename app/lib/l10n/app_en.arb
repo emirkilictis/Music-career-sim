@@ -940,5 +940,26 @@
     }
   },
   "photoPlatformOwn": "Its own photo",
-  "photoUsesGeneral": "Uses your profile photo"
+  "photoUsesGeneral": "Uses your profile photo",
+  "celebrateNumberOne": "Number one!",
+  "celebrateFirstChart": "Your first chart entry!",
+  "share": "Share",
+  "continueLabel": "Continue",
+  "shareMomentText": "“{title}” is #{position} on {chart}! — {app}",
+  "@shareMomentText": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "position": {
+        "type": "int"
+      },
+      "chart": {
+        "type": "String"
+      },
+      "app": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui' as ui;
@@ -6,7 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:game/game.dart' hide Actions;
+import 'package:music_career_sim/core/career_state.dart';
 import 'package:music_career_sim/core/commands.dart';
+import 'package:music_career_sim/core/event_lines.dart';
+import 'package:music_career_sim/core/scope.dart';
+import 'package:music_career_sim/screens/charts_tab.dart';
+import 'package:music_career_sim/widgets/celebration.dart';
 import 'package:music_career_sim/widgets/media_tile.dart';
 
 import 'support.dart';
@@ -165,6 +171,34 @@ void main() {
     await shot(tester, '16_home_tr');
     await tab(tester, 'Listeler');
     await shot(tester, '17_charts_tr');
+    app.settings.setLanguage('en');
+    await tester.pumpAndSettle();
+
+    // Celebration screens (shown after a week with a first #1 or the
+    // career's first chart entry).
+    final ctx = tester.element(find.byType(ChartsTab));
+    final state = Scope.read<CareerState>(ctx);
+    final hit = songs.first;
+    unawaited(showCelebration(
+        ctx,
+        EventLine(const NumberOne(Charts.usSongs, EntityKind.song, 0, 1),
+            title: 'Kiss (Silent Hours)', songId: hit),
+        state));
+    for (var i = 0; i < 12; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await shot(tester, '24_celebration_no1', settle: false);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    unawaited(showCelebration(
+        ctx,
+        EventLine(const ChartDebut(Charts.globalSongs, EntityKind.song, 0, 64),
+            title: 'Kiss (Silent Hours)', songId: hit),
+        state));
+    await shot(tester, '25_celebration_first_chart');
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('screenshots: early 2000s career', skip: !enabled,

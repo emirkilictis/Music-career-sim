@@ -201,12 +201,15 @@ void main() {
         }
         songs.add(g.writeSong(budget: BudgetTier.high).id);
       }
+      expect(g.player.everCharted, isFalse);
       g.releaseSingle(songs.first, campaign: Campaign.global);
       final weekEvents = <GameEvent>[];
       for (var i = 0; i < 3; i++) {
         weekEvents.addAll(g.advanceWeek().events);
       }
       expect(weekEvents.whereType<ChartDebut>(), isNotEmpty);
+      // The app celebrates the first ever chart entry once.
+      expect(g.player.everCharted, isTrue);
 
       g.releaseAlbum('Supernova', songs,
           variantWeeks: const [0, 0, 1], campaign: Campaign.intensive);

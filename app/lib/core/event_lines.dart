@@ -3,8 +3,13 @@ import 'package:game/game.dart';
 /// A game event with the names it refers to, resolved on the game side so
 /// the UI can build the sentence without another round trip.
 class EventLine {
-  EventLine(this.event, {this.title = '', this.artistName = ''});
+  EventLine(this.event,
+      {this.title = '', this.artistName = '', this.songId, this.albumId = -1});
   final GameEvent event;
+
+  /// The release the line is about, for its cover (song first, then album).
+  final int? songId;
+  final int albumId;
 
   /// Song or album title (empty when the event has none).
   final String title;
@@ -20,11 +25,14 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
   String album(int id) => w.albums[id].title;
   String entity(EntityKind k, int id) =>
       k == EntityKind.song ? song(id) : album(id);
+  EventLine release(GameEvent e, EntityKind k, int id) => k == EntityKind.song
+      ? EventLine(e, title: song(id), songId: id, albumId: w.songs[id].albumId)
+      : EventLine(e, title: album(id), albumId: id);
   return [
     for (final e in events)
       switch (e) {
-        ChartDebut() => EventLine(e, title: entity(e.kind, e.entityId)),
-        NumberOne() => EventLine(e, title: entity(e.kind, e.entityId)),
+        ChartDebut() => release(e, e.kind, e.entityId),
+        NumberOne() => release(e, e.kind, e.entityId),
         NewPeak() => EventLine(e, title: song(e.songId)),
         AlbumFirstWeek() => EventLine(e, title: album(e.albumId)),
         ViralTrend() => EventLine(e, title: song(e.songId)),

@@ -7,6 +7,7 @@ import '../core/event_lines.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
+import '../widgets/celebration.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
 import '../widgets/week_transition.dart';
@@ -81,7 +82,14 @@ class _GameShellState extends State<GameShell> {
       outcome?.value = WeekOutcome(state.week, state.lastMoneyDelta);
       await shown;
       if (!mounted) return;
-      final major = lines.where((l) => l.event.isMajor).toList();
+      // The biggest moment gets its own screen (feedback E6).
+      final big =
+          lines.where((l) => isCelebration(l, state.before)).firstOrNull;
+      if (big != null) {
+        await showCelebration(context, big, state);
+        if (!mounted) return;
+      }
+      final major = lines.where((l) => l.event.isMajor && l != big).toList();
       if (major.isNotEmpty) {
         await _showNews(
             context.l10n

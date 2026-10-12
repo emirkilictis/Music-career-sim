@@ -382,6 +382,13 @@ k('photoPlatform','{platform} photo','{platform} fotoğrafı', platform='String'
 k('photoPlatformOwn','Its own photo','Kendine özel fotoğraf')
 k('photoUsesGeneral','Uses your profile photo','Profil fotoğrafını kullanıyor')
 
+# Celebrations and sharing (feedback E6, R1)
+k('celebrateNumberOne','Number one!','Bir numara!')
+k('celebrateFirstChart','Your first chart entry!','İlk liste girişin!')
+k('share','Share','Paylaş')
+k('continueLabel','Continue','Devam')
+k('shareMomentText','“{title}” is #{position} on {chart}! — {app}','“{title}” {chart} listesinde #{position}! — {app}', title='String', position='int', chart='String', app='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

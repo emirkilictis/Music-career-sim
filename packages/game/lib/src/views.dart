@@ -88,6 +88,9 @@ class ArtistView {
         adsLeftThisWeek = Actions.adsLeftThisWeek(w, a),
         job = a.job,
         lastReleaseWeek = a.lastReleaseWeek,
+        everCharted = a.tier == ArtistTier.player &&
+            (w.playerSongIds.any((id) => _charted(w.songs[id])) ||
+                w.albums.any((al) => al.artistId == a.id && _charted(al))),
         vaultCount = a.tier == ArtistTier.player
             ? w.playerSongIds
                 .where((id) => w.songs[id].status == SongStatus.vault)
@@ -144,6 +147,9 @@ class ArtistView {
 
   /// The player's unreleased songs.
   final int vaultCount;
+
+  /// Any of the player's releases has been on a chart.
+  final bool everCharted;
 
   /// The player took this week off.
   final bool restingThisWeek;
@@ -438,4 +444,11 @@ enum SalesEra {
       : year < 2012
           ? downloads
           : streaming;
+}
+
+bool _charted(Charted e) {
+  for (var c = 0; c < Charts.count; c++) {
+    if ((e.statsOrNull(c)?.weeksOn ?? 0) > 0) return true;
+  }
+  return false;
 }

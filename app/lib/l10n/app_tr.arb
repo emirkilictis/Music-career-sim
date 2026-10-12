@@ -373,5 +373,10 @@
   "photoGeneralHint": "Platforma özel seçmezsen her yerde bu kullanılır.",
   "photoPlatform": "{platform} fotoğrafı",
   "photoPlatformOwn": "Kendine özel fotoğraf",
-  "photoUsesGeneral": "Profil fotoğrafını kullanıyor"
+  "photoUsesGeneral": "Profil fotoğrafını kullanıyor",
+  "celebrateNumberOne": "Bir numara!",
+  "celebrateFirstChart": "İlk liste girişin!",
+  "share": "Paylaş",
+  "continueLabel": "Devam",
+  "shareMomentText": "“{title}” {chart} listesinde #{position}! — {app}"
 }
