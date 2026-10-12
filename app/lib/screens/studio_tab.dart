@@ -3,6 +3,7 @@ import 'package:game/game.dart';
 
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/media_tile.dart';
@@ -71,6 +72,25 @@ class _StudioTabState extends State<StudioTab> {
     final l = context.l10n;
     final fmt = context.fmt;
     final title = _title.text.trim();
+    // Warn before the song that ends in burnout (playtest finding A3).
+    if (career.player.creativeEnergy <= Actions.energyCostPerSong) {
+      final go = await showDialog<bool>(
+        context: context,
+        builder: (c) => AlertDialog(
+          title: Text(l.burnoutConfirmTitle),
+          content: Text(l.burnoutConfirmBody(Actions.burnoutWeeks)),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(c, false),
+                child: Text(l.cancel)),
+            FilledButton(
+                onPressed: () => Navigator.pop(c, true),
+                child: Text(l.writeAnyway)),
+          ],
+        ),
+      );
+      if (go != true || !mounted) return;
+    }
     try {
       final song = await career.act(Cmd.writeSong(
         producerId: _producer,
@@ -132,7 +152,9 @@ class _StudioTabState extends State<StudioTab> {
                 value: c.id,
                 enabled: c.available,
                 child: Text(
-                  '${c.name} · ${c.skill.round()} · ${fmt.genre(c.genre)} · ${fmt.money(c.feeCents)}',
+                  c.available
+                      ? '${c.name} · ${c.skill.round()} · ${fmt.genre(c.genre)} · ${fmt.money(c.feeCents)}'
+                      : '${c.name} · ${c.skill.round()} · ${l.needsFans(fmt.compact(c.requiredFans))}',
                   overflow: TextOverflow.ellipsis,
                   style: c.available
                       ? null
@@ -151,7 +173,9 @@ class _StudioTabState extends State<StudioTab> {
           icon: Icons.edit_note_rounded,
           trailing: Text(p.burnoutWeeksLeft > 0
               ? l.burnoutWeeks(p.burnoutWeeksLeft)
-              : l.songsLeftThisWeek(p.songsLeftThisWeek)),
+              : p.restingThisWeek
+                  ? l.restingThisWeek
+                  : l.songsLeftThisWeek(p.songsLeftThisWeek)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -203,6 +227,12 @@ class _StudioTabState extends State<StudioTab> {
                 selected: {_budget},
                 onSelectionChanged: (s) => setState(() => _budget = s.first),
               ),
+              if (canWrite && p.creativeEnergy < 30) ...[
+                const SizedBox(height: 12),
+                Text(l.lowEnergyWarning,
+                    style: const TextStyle(
+                        color: AppColors.coral, fontWeight: FontWeight.w600)),
+              ],
               const SizedBox(height: 16),
               GradientButton(
                 onPressed: canWrite && !career.busy ? _write : null,

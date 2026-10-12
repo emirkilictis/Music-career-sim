@@ -48,6 +48,8 @@ abstract final class Codec {
     'pendingAlbumType', 'pendingVariants',
     ...artistRegColumns,
     'no1Singles', 'no1SinglesFeatured', 'no1Albums', 'weeksAtNo1',
+    // Added in schema v2 (appended: older hot snapshots read it as null).
+    'restWeek',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -64,7 +66,7 @@ abstract final class Codec {
         a.creativeEnergy, a.burnoutUntilWeek, a.lastWriteWeek,
         a.songsWrittenThisWeek,
         a.kind.index, jsonEncode(a.members),
-        a.hasJob ? 1 : 0, a.lastAdWeek, a.adsWatchedThisWeek,
+        a.job.index, a.lastAdWeek, a.adsWatchedThisWeek,
         a.labelReach, a.artistShare, a.moneyCents,
         a.sumDormantRate,
         a.nextEraWeek, _encodePlan(a.plan), _ints(a.pendingAlbumSongIds),
@@ -73,6 +75,7 @@ abstract final class Codec {
         ...a.reg,
         _ints(a.no1Singles), _ints(a.no1SinglesFeatured), _ints(a.no1Albums),
         _ints(a.weeksAtNo1),
+        a.restWeek,
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -121,9 +124,11 @@ abstract final class Codec {
       ..burnoutUntilWeek = r['burnoutUntilWeek'] as int
       ..lastWriteWeek = r['lastWriteWeek'] as int
       ..songsWrittenThisWeek = r['songsWrittenThisWeek'] as int
-      ..hasJob = r['hasJob'] == 1
+      // Stored as the job index (saves before K36 hold 0/1: 1 = cafe).
+      ..job = Job.values[r['hasJob'] as int]
       ..lastAdWeek = r['lastAdWeek'] as int
       ..adsWatchedThisWeek = r['adsWatchedThisWeek'] as int
+      ..restWeek = r['restWeek'] as int? ?? -1
       ..sumDormantRate = _d(r['sumDormantRate'])
       ..nextEraWeek = r['nextEraWeek'] as int
       ..pendingAlbumTitle = r['pendingAlbumTitle'] as String

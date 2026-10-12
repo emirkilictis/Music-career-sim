@@ -121,12 +121,12 @@ void main() {
     test('weeks autosave; resuming continues exactly where it was', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;
-      g.setJob(true);
+      g.setJob(Job.cafe);
       final song = g.writeSong(budget: BudgetTier.low).id;
       g.releaseSingle(song);
       for (var i = 0; i < 5; i++) {
         final r = g.advanceWeek();
-        expect(r.moneyDeltaCents, greaterThanOrEqualTo(Actions.jobWageCents));
+        expect(r.moneyDeltaCents, greaterThanOrEqualTo(Job.cafe.wageCents));
       }
       // An action between weeks is saved at once, without playing a week.
       g.writeSong(budget: BudgetTier.low);

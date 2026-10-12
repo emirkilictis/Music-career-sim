@@ -203,5 +203,16 @@ void main() {
     await tab(tester, 'Releases');
     await tester.tap(find.byType(MediaTile).first);
     await shot(tester, '19_song_2002');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // Energy, rest and day jobs on Home.
+    await tab(tester, 'Home');
+    await tester.scrollUntilVisible(find.text('Rest this week'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -250));
+    await shot(tester, '20_energy_and_job');
+    await tester.tap(find.textContaining('Day job'));
+    await shot(tester, '21_job_picker');
   });
 }

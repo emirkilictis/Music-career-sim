@@ -223,8 +223,12 @@ class Artist {
   int lastWriteWeek = -1;
   int songsWrittenThisWeek = 0;
 
-  // Side income (player only; docs/game-design.md §20.1). The job only pays.
-  bool hasJob = false;
+  /// Weekly rest chosen by the player: no writing that week, more energy.
+  int restWeek = -1;
+
+  // Side income (player only; docs/game-design.md §20.1, K36).
+  Job job = Job.none;
+  bool get hasJob => job != Job.none;
   int lastAdWeek = -1;
   int adsWatchedThisWeek = 0;
 
@@ -471,6 +475,24 @@ class Album with Charted {
       reg[AlbumReg.lifeUnits + 2];
 
   bool get chartsOnAlbumChart => type != AlbumType.single;
+}
+
+/// Day jobs (docs K36): steady pay that costs some creative energy every
+/// week. Some teach a little on the side. Index order is stored in saves
+/// (index 1 is the original $350 day job): only append.
+enum Job {
+  none(0, 0),
+  cafe(35000, 3),
+  musicTeacher(45000, 5),
+  studioAssistant(50000, 6),
+  barGigs(60000, 8),
+  nightShift(80000, 12);
+
+  const Job(this.wageCents, this.energyCost);
+  final int wageCents;
+
+  /// Creative energy lost each week.
+  final double energyCost;
 }
 
 class Collaborator {

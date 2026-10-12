@@ -52,7 +52,9 @@ int worldHash(World w) {
     addAll(a.reg);
     addAll(a.regionShare);
     addInt(a.moneyCents);
-    addInt(a.hasJob ? 1 : 0);
+    addInt(a.job.index);
+    addInt(a.restWeek);
+    addDouble(a.creativeEnergy);
     addInt(a.kind.index);
     addInt(a.members.length);
     addInt(a.lastAdWeek);

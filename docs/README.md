@@ -66,6 +66,8 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K36 | **İş seçenekleri** (K27'yi günceller): birden fazla gündelik iş; her biri biraz yaratıcı enerji götürür, kazanç arttıkça enerji kaybı artar. Enerji dengesi ve "dinlen / tatil" seçeneğiyle birlikte ayarlanır. |
 | K37 | **Bildirimler sadece oyuncunun kendi olayları için** (liste girişi, zirve, #1, albüm ilk hafta, viral, playlist, dönem sonu). Sektör haberleri (rakiplerin #1'leri vb.) ileride gazete ekranında. |
 | K38 | **Platformlar gerçek çıkış yıllarında gelir** (kurgusal isimlerle): indirme mağazası 2003, video 2005, ses paylaşım 2008, Streamify 2008 Avrupa / 2011 ABD, ikinci streaming servisi 2015, kısa video 2017–2018. Ekranlar o yılın asıl ölçüsünü öne çıkarır (2000–2004 radyo + CD single, sonra indirme, sonra stream). |
+| K39 | **Ekip kilidi hayran sayısına bağlı** (A1): becerisi 45'e kadar olan herkes çalışır; üstü her 7 beceri puanında iki katı sadık hayran ister (beceri 52 → 10K, 73 → 80K, 94 → ~650K). Yeterince ünlü olan da çalışabilir. Kilitli kişide "X hayran gerekli" yazar. |
+| K40 | **Enerji** (K20'yi günceller): şarkı −20; hafta sonunda şarkı yazılan haftada +14, yazılmayan haftada +24; "Bu hafta dinlen" +20 ek (o hafta şarkı yazılmaz); iş kendi enerji maliyetini düşer. Enerji 30'un altında şarkılar zayıflar (uyarı gösterilir); tükenmişlik yaratacak şarkıdan önce onay sorulur. Oyuncunun stüdyo bütçe bonusu 0 / +5 / +10, şans payı biraz dar (AI kalibrasyonu değişmedi). |
 | K23 | ChatGPT planındaki ekranlar, rekorlar, kampanyalar, finans, bildirimler, ödüller, Kolay mod ve 10 performans kuralı dokümanlara taşındı. |
 
 ## Yol Haritası

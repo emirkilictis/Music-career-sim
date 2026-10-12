@@ -251,14 +251,68 @@
   },
   "sideIncome": "Side income",
   "dayJob": "Day job",
-  "dayJobHint": "{amount} a week. It only pays — no effect on your music.",
-  "@dayJobHint": {
+  "chooseJob": "Choose a day job",
+  "jobNone": "No job",
+  "jobCafe": "Café shifts",
+  "jobMusicTeacher": "Music teacher",
+  "jobStudioAssistant": "Studio assistant",
+  "jobBarGigs": "Bar & wedding gigs",
+  "jobNightShift": "Night shift",
+  "jobPerkNone": "All your energy goes to music.",
+  "jobPerkCafe": "Light work.",
+  "jobPerkMusicTeacher": "Your vocals and stage skills grow a little.",
+  "jobPerkStudioAssistant": "Your production skill grows a little.",
+  "jobPerkBarGigs": "A few new fans every week.",
+  "jobPerkNightShift": "The best pay, and the most tiring.",
+  "jobTerms": "{wage} a week · −{energy} energy",
+  "@jobTerms": {
     "placeholders": {
-      "amount": {
+      "wage": {
+        "type": "String"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "restThisWeek": "Rest this week",
+  "restHint": "No writing this week; +{energy} energy at its end.",
+  "@restHint": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "restingThisWeek": "Resting this week",
+  "energyNextWeek": "Next week: {change} energy",
+  "@energyNextWeek": {
+    "placeholders": {
+      "change": {
         "type": "String"
       }
     }
   },
+  "lowEnergyWarning": "Low energy: songs come out weaker.",
+  "burnoutConfirmTitle": "Burn out?",
+  "burnoutConfirmBody": "This song uses up your energy: you won't be able to write for {weeks} weeks.",
+  "@burnoutConfirmBody": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "writeAnyway": "Write anyway",
+  "needsFans": "needs {count} fans",
+  "@needsFans": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "errorAlreadyWrote": "You already wrote this week.",
   "watchAd": "Watch an ad (+{amount}) · {left}/{max} left",
   "@watchAd": {
     "placeholders": {
@@ -523,7 +577,7 @@
   "errorNotEnoughMoney": "Not enough money.",
   "errorWeeklyLimit": "You can write at most 3 songs a week.",
   "errorBurnout": "You are burned out. Rest for a few weeks.",
-  "errorCollaboratorRefused": "They won't work with you yet — you need more fame.",
+  "errorCollaboratorRefused": "They won't work with you yet — you need more fans.",
   "errorInvalidGenres": "Pick 1 to 3 different genres.",
   "errorInvalidTitle": "The title must be 1–60 characters.",
   "errorAlreadySingle": "This song is already a single.",

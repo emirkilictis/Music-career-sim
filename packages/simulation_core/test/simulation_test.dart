@@ -438,7 +438,7 @@ void sideIncomeTests() {
     expect(p.moneyCents - before, Actions.dailyBonusCents);
   });
 
-  test('the job only pays: energy and songwriting are unaffected', () {
+  test('jobs pay and cost energy; resting restores it', () {
     final twin = WorldGen.create(seed: 21, startYear: 2010);
     final twinSim = Simulator(twin);
     while (twin.week < GameTime.firstWeekOf(2010)) {
@@ -446,21 +446,83 @@ void sideIncomeTests() {
     }
     final q = WorldGen.addPlayer(twin, name: 'Free', genre: 0);
     p.moneyCents = q.moneyCents = 1000000;
-    Actions.setJob(w, p, true);
-    for (var week = 0; week < 4; week++) {
-      for (final (world, artist) in [(w, p), (twin, q)]) {
-        for (var i = 0; i < 3 && Actions.canWrite(world, artist); i++) {
-          Actions.writeSong(world, artist, budget: BudgetTier.low);
-        }
-      }
-      expect(p.creativeEnergy, q.creativeEnergy);
-      expect(p.songsWrittenThisWeek, q.songsWrittenThisWeek);
+    p.creativeEnergy = q.creativeEnergy = 40;
+    Actions.setJob(w, p, Job.cafe);
+    sim.step();
+    twinSim.step();
+    // An idle week restores energy; the job takes a little of it.
+    expect(q.creativeEnergy, 40 + Actions.energyRegenIdle);
+    expect(p.creativeEnergy, q.creativeEnergy - Job.cafe.energyCost);
+    expect(p.moneyCents - q.moneyCents, Job.cafe.wageCents);
+
+    // A writing week restores less.
+    Actions.setJob(w, p, Job.none);
+    p.creativeEnergy = 60;
+    Actions.writeSong(w, p, budget: BudgetTier.low);
+    sim.step();
+    expect(p.creativeEnergy,
+        60 - Actions.energyCostPerSong + Actions.energyRegenWriting);
+
+    // Resting: no writing that week, extra energy at its end.
+    p.creativeEnergy = 10;
+    Actions.rest(w, p);
+    expect(Actions.canWrite(w, p), isFalse);
+    expect(() => Actions.writeSong(w, p, budget: BudgetTier.low),
+        throwsA(isA<SongwritingException>()));
+    sim.step();
+    expect(p.creativeEnergy,
+        10 + Actions.energyRegenIdle + Actions.energyRestBonus);
+    expect(Actions.canWrite(w, p), isTrue);
+    Actions.writeSong(w, p, budget: BudgetTier.low);
+    expect(() => Actions.rest(w, p), throwsA(isA<ActionException>()));
+
+    // A studio job teaches production on the side.
+    final prod = p.skills.production;
+    Actions.setJob(w, p, Job.studioAssistant);
+    for (var i = 0; i < 4; i++) {
       sim.step();
-      twinSim.step();
     }
-    expect(p.burnoutUntilWeek, q.burnoutUntilWeek);
-    expect(p.moneyCents - q.moneyCents, 4 * Actions.jobWageCents);
-    expect(p.coreFans, q.coreFans);
+    expect(p.skills.production, greaterThan(prod));
+  });
+
+  test('catalog (dormant) songs keep paying the player', () {
+    p.moneyCents = 10000000;
+    final s = Actions.writeSong(w, p, budget: BudgetTier.high);
+    Actions.releaseSingle(w, p, s, campaign: Campaign.none);
+    for (var i = 0; i < 150 && s.status != SongStatus.dormant; i++) {
+      sim.step();
+    }
+    expect(s.status, SongStatus.dormant);
+    final m0 = p.moneyCents;
+    sim.step();
+    var streams = 0.0;
+    for (var r = 0; r < regionCount; r++) {
+      streams += w.songWeekStreamsRegion(s, r);
+    }
+    expect(streams, greaterThan(0));
+    expect(p.moneyCents - m0, (streams * 0.35 * p.artistShare).round());
+  });
+
+  test('collaborators want fans: none at skill 45, more for better ones', () {
+    Collaborator c(double skill) => Collaborator(
+        id: 0,
+        name: 'x',
+        role: CollaboratorRole.producer,
+        skill: skill,
+        genre: 0,
+        feeCents: 0,
+        minFame: 1);
+    expect(Actions.requiredFans(c(40)), 0);
+    expect(Actions.requiredFans(c(45)), 0);
+    expect(Actions.requiredFans(c(52)), 10000);
+    expect(Actions.requiredFans(c(73)), 80000);
+    expect(Actions.requiredFans(c(94)), inInclusiveRange(600000, 700000));
+    p.coreFans = 25000;
+    p.fame = 0;
+    expect(Actions.collaboratorAvailable(c(60), p), isTrue);
+    expect(Actions.collaboratorAvailable(c(70), p), isFalse);
+    p.fame = 1;
+    expect(Actions.collaboratorAvailable(c(99), p), isTrue);
   });
 
   test('ads are always available, at most three per week', () {

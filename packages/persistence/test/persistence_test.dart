@@ -21,8 +21,9 @@ World _newWorld(int seed, {Difficulty difficulty = Difficulty.normal}) {
 /// Deterministic scripted player moves, applied identically in both runs.
 void _playerMoves(World w, int i) {
   final p = w.player!;
-  if (i == 2) Actions.setJob(w, p, true);
-  if (i == 90) Actions.setJob(w, p, false);
+  if (i == 2) Actions.setJob(w, p, Job.barGigs);
+  if (i == 40) Actions.rest(w, p);
+  if (i == 90) Actions.setJob(w, p, Job.none);
   if (i % 3 == 0) Actions.claimAdReward(w, p);
   if (i % 5 == 0 && Actions.canWrite(w, p)) {
     Actions.writeSong(w, p, budget: BudgetTier.medium);
@@ -93,7 +94,7 @@ void main() {
   test('difficulty and side income survive save/load', () {
     final w = _newWorld(5, difficulty: Difficulty.hard);
     final p = w.player!;
-    Actions.setJob(w, p, true);
+    Actions.setJob(w, p, Job.musicTeacher);
     Actions.claimAdReward(w, p);
     Actions.claimAdReward(w, p);
     final store = SaveStore.create('${tmp.path}/e.sqlite', w);

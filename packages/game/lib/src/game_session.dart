@@ -265,7 +265,9 @@ class GameSession {
   List<CollaboratorView> collaborators(CollaboratorRole role) => [
         for (final c in world.collaborators)
           if (c.role == role)
-            CollaboratorView(c, available: c.minFame <= _p.fame),
+            CollaboratorView(c,
+                available: Actions.collaboratorAvailable(c, _p),
+                requiredFans: Actions.requiredFans(c)),
       ]..sort((a, b) => b.skill.compareTo(a.skill));
 
   // ---------------------------------------------------------------- actions
@@ -288,8 +290,8 @@ class GameSession {
     final producer = _collaborator(producerId, CollaboratorRole.producer);
     final cowriter = _collaborator(cowriterId, CollaboratorRole.songwriter);
     for (final c in [producer, cowriter]) {
-      if (c != null && c.minFame > p.fame) {
-        throw GameException('collaboratorRefused', '${c.name} needs more fame');
+      if (c != null && !Actions.collaboratorAvailable(c, p)) {
+        throw GameException('collaboratorRefused', '${c.name} needs more fans');
       }
     }
     final g = genres ?? [p.genre];
@@ -380,9 +382,18 @@ class GameSession {
     return AlbumView.of(world, al);
   }
 
-  /// Takes or quits the day job (it only pays; §20.1).
-  void setJob(bool on) {
-    Actions.setJob(world, _p, on);
+  /// Takes a day job, or quits with [Job.none] (docs K36).
+  void setJob(Job job) {
+    Actions.setJob(world, _p, job);
+    _saveNow();
+  }
+
+  /// Takes this week off: no writing, more energy at the end of the week.
+  void rest() {
+    if (_p.lastWriteWeek == world.week && _p.songsWrittenThisWeek > 0) {
+      throw GameException('alreadyWrote', 'Already wrote this week');
+    }
+    Actions.rest(world, _p);
     _saveNow();
   }
 

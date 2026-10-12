@@ -86,7 +86,9 @@ class ArtistView {
                 (a.lastWriteWeek == w.week ? a.songsWrittenThisWeek : 0)
             : 0,
         adsLeftThisWeek = Actions.adsLeftThisWeek(w, a),
-        hasJob = a.hasJob,
+        job = a.job,
+        restingThisWeek = a.restWeek == w.week,
+        energyNextWeek = Actions.weeklyEnergy(w, a),
         isRetired = a.isRetired;
 
   factory ArtistView.of(World w, Artist a) => ArtistView._(w, a);
@@ -128,7 +130,14 @@ class ArtistView {
   final int burnoutWeeksLeft;
   final int songsLeftThisWeek;
   final int adsLeftThisWeek;
-  final bool hasJob;
+  final Job job;
+  bool get hasJob => job != Job.none;
+
+  /// The player took this week off.
+  final bool restingThisWeek;
+
+  /// Energy change at the end of this week if nothing else changes.
+  final double energyNextWeek;
   final bool isRetired;
 }
 
@@ -326,7 +335,8 @@ class ChartView {
 
 /// One collaborator the player can hire (fame permitting).
 class CollaboratorView {
-  CollaboratorView(Collaborator c, {required this.available})
+  CollaboratorView(Collaborator c,
+      {required this.available, this.requiredFans = 0})
       : id = c.id,
         name = c.name,
         role = c.role,
@@ -340,8 +350,11 @@ class CollaboratorView {
   final int genre;
   final int feeCents;
 
-  /// False when the collaborator still refuses the player (not famous enough).
+  /// False when the collaborator still refuses the player (too few fans).
   final bool available;
+
+  /// Core fans this collaborator wants (0 = works with anyone).
+  final int requiredFans;
 }
 
 /// This week's units of an album in a chart market (US/UK are shares of

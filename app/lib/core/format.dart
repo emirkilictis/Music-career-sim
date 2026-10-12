@@ -142,6 +142,24 @@ class Fmt {
         BudgetTier.high => l.budgetHigh,
       };
 
+  String job(Job j) => switch (j) {
+        Job.none => l.jobNone,
+        Job.cafe => l.jobCafe,
+        Job.musicTeacher => l.jobMusicTeacher,
+        Job.studioAssistant => l.jobStudioAssistant,
+        Job.barGigs => l.jobBarGigs,
+        Job.nightShift => l.jobNightShift,
+      };
+
+  String jobPerk(Job j) => switch (j) {
+        Job.none => l.jobPerkNone,
+        Job.cafe => l.jobPerkCafe,
+        Job.musicTeacher => l.jobPerkMusicTeacher,
+        Job.studioAssistant => l.jobPerkStudioAssistant,
+        Job.barGigs => l.jobPerkBarGigs,
+        Job.nightShift => l.jobPerkNightShift,
+      };
+
   String campaign(Campaign c) => switch (c) {
         Campaign.none => l.campaignNone,
         Campaign.standard => l.campaignStandard,
@@ -213,6 +231,7 @@ class Fmt {
       'weeklyLimit' => l.errorWeeklyLimit,
       'burnout' => l.errorBurnout,
       'collaboratorRefused' => l.errorCollaboratorRefused,
+      'alreadyWrote' => l.errorAlreadyWrote,
       'invalidGenres' => l.errorInvalidGenres,
       'invalidTitle' => l.errorInvalidTitle,
       'alreadySingle' => l.errorAlreadySingle,

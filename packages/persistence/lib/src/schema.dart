@@ -6,10 +6,12 @@ import 'codec.dart';
 final List<String> migrations = [_v1(), _v2];
 
 /// v2: a song's weekly streams/downloads per region (so "this week" numbers
-/// survive closing and reopening a career) and its CD single sales.
+/// survive closing and reopening a career), its CD single sales, and the
+/// artist's rest week.
 const _v2 = '''
   ALTER TABLE song ADD COLUMN weekRegion TEXT;
   ALTER TABLE song ADD COLUMN lifetimePhysical REAL;
+  ALTER TABLE artist ADD COLUMN restWeek INTEGER;
 ''';
 
 String _cols(List<String> names, String type) =>

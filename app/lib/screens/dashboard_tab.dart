@@ -138,13 +138,52 @@ class DashboardTab extends StatelessWidget {
             Text(
               p.burnoutWeeksLeft > 0
                   ? l.burnoutWeeks(p.burnoutWeeksLeft)
-                  : l.songsLeftThisWeek(p.songsLeftThisWeek),
+                  : p.restingThisWeek
+                      ? l.restingThisWeek
+                      : l.songsLeftThisWeek(p.songsLeftThisWeek),
               style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: p.burnoutWeeksLeft > 0
                       ? AppColors.coral
                       : AppColors.textMuted),
             ),
+            const SizedBox(height: 2),
+            Text(
+                l.energyNextWeek(
+                    '${p.energyNextWeek >= 0 ? '+' : '−'}${p.energyNextWeek.abs().round()}'),
+                style:
+                    const TextStyle(color: AppColors.textFaint, fontSize: 13)),
+            if (p.creativeEnergy < 30 && p.burnoutWeeksLeft == 0) ...[
+              const SizedBox(height: 6),
+              Text(l.lowEnergyWarning,
+                  style: const TextStyle(
+                      color: AppColors.coral, fontWeight: FontWeight.w600)),
+            ],
+            if (!p.restingThisWeek &&
+                p.songsLeftThisWeek == Actions.maxSongsPerWeek) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 46,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.beach_access_rounded,
+                      color: AppColors.mint),
+                  label: Text(l.restThisWeek),
+                  onPressed: career.busy
+                      ? null
+                      : () async {
+                          try {
+                            await career.act(Cmd.rest());
+                          } catch (e) {
+                            if (context.mounted) showError(context, e);
+                          }
+                        },
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(l.restHint(Actions.energyRestBonus.round()),
+                  style: const TextStyle(
+                      color: AppColors.textFaint, fontSize: 12.5)),
+            ],
           ]),
         ),
         const SizedBox(height: 14),
@@ -230,6 +269,57 @@ class _NewsSection extends StatelessWidget {
 class _SideIncomeSection extends StatelessWidget {
   const _SideIncomeSection();
 
+  /// Day jobs (docs K36): pay against a little energy each week.
+  Future<void> _pickJob(BuildContext context) async {
+    final career = context.careerRead;
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final current = career.player.job;
+    final job = await showModalBottomSheet<Job>(
+      context: context,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Text(l.chooseJob,
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.w900)),
+            ),
+            for (final j in Job.values)
+              ListTile(
+                selected: j == current,
+                leading: IconBubble(
+                    j == Job.none
+                        ? Icons.music_note_rounded
+                        : Icons.work_outline_rounded,
+                    color: j == Job.none ? AppColors.mint : AppColors.butter),
+                title: Text(fmt.job(j),
+                    style: const TextStyle(fontWeight: FontWeight.w800)),
+                subtitle: Text(j == Job.none
+                    ? fmt.jobPerk(j)
+                    : '${l.jobTerms(fmt.money(j.wageCents), j.energyCost.round())}\n${fmt.jobPerk(j)}'),
+                isThreeLine: j != Job.none,
+                trailing: j == current
+                    ? const Icon(Icons.check_rounded, color: AppColors.mint)
+                    : null,
+                onTap: () => Navigator.pop(c, j),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (job == null || job == current || !context.mounted) return;
+    try {
+      await career.act(Cmd.setJob(job));
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
   Future<void> _watchAd(BuildContext context) async {
     final career = context.careerRead;
     final watched = await showDialog<bool>(
@@ -260,32 +350,35 @@ class _SideIncomeSection extends StatelessWidget {
       title: l.sideIncome,
       icon: Icons.savings_rounded,
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(children: [
-          const IconBubble(Icons.work_outline_rounded, color: AppColors.butter),
-          const SizedBox(width: 12),
-          Expanded(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(l.dayJob,
-                  style: const TextStyle(fontWeight: FontWeight.w800)),
-              Text(l.dayJobHint(fmt.money(Actions.jobWageCents)),
-                  style: const TextStyle(
-                      color: AppColors.textMuted, fontSize: 13)),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: career.busy ? null : () => _pickJob(context),
+            child: Row(children: [
+              const IconBubble(Icons.work_outline_rounded,
+                  color: AppColors.butter),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${l.dayJob}: ${fmt.job(p.job)}',
+                          style: const TextStyle(fontWeight: FontWeight.w800)),
+                      Text(
+                          p.hasJob
+                              ? l.jobTerms(fmt.money(p.job.wageCents),
+                                  p.job.energyCost.round())
+                              : l.jobPerkNone,
+                          style: const TextStyle(
+                              color: AppColors.textMuted, fontSize: 13)),
+                    ]),
+              ),
+              const Icon(Icons.chevron_right_rounded,
+                  color: AppColors.textFaint),
             ]),
           ),
-          Switch(
-            value: p.hasJob,
-            onChanged: career.busy
-                ? null
-                : (on) async {
-                    try {
-                      await career.act(Cmd.setJob(on));
-                    } catch (e) {
-                      if (context.mounted) showError(context, e);
-                    }
-                  },
-          ),
-        ]),
+        ),
         const SizedBox(height: 14),
         SizedBox(
           height: 48,

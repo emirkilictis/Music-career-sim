@@ -30,10 +30,7 @@ abstract final class Actions {
   static const inspirationChance = 0.04;
   static const inspirationBonus = 20.0;
 
-  // Side income (docs/game-design.md §20.1).
-  /// Weekly wage of the day job. The job only pays: it costs no energy,
-  /// songwriting slots or anything else.
-  static const jobWageCents = 35000;
+  // Side income (docs/game-design.md §20.1, K36).
   static const adRewardCents = 25000;
   static const maxAdsPerWeek = 3;
 
@@ -41,8 +38,44 @@ abstract final class Actions {
   /// is decided by the app, outside the deterministic simulation.
   static const dailyBonusCents = 500000;
 
-  /// Takes or quits the day job; the wage is paid at the end of each week.
-  static void setJob(World w, Artist a, bool on) => a.hasJob = on;
+  /// Takes a day job (or [Job.none] to quit); the wage is paid and its
+  /// energy cost taken at the end of each week.
+  static void setJob(World w, Artist a, Job job) => a.job = job;
+
+  /// Energy gained at the end of a week (before the job's cost).
+  static const energyRegenWriting = 14.0, energyRegenIdle = 24.0;
+  static const energyRestBonus = 20.0;
+
+  /// Takes this week off: no more writing this week, extra energy at its
+  /// end. Not possible after writing this week.
+  static void rest(World w, Artist a) {
+    if (a.lastWriteWeek == w.week && a.songsWrittenThisWeek > 0) {
+      throw ActionException('Already wrote this week');
+    }
+    a.restWeek = w.week;
+  }
+
+  /// End-of-week energy change for [a] (docs K20, K36).
+  static double weeklyEnergy(World w, Artist a) {
+    final wrote = a.lastWriteWeek == w.week && a.songsWrittenThisWeek > 0;
+    return (wrote ? energyRegenWriting : energyRegenIdle) +
+        (a.restWeek == w.week ? energyRestBonus : 0) -
+        a.job.energyCost;
+  }
+
+  /// Core fans a collaborator wants before working with you: none up to
+  /// skill 45, then doubling every 7 skill points (5K at 45, ~80K at 73,
+  /// ~650K at 94). Rounded to two significant digits.
+  static int requiredFans(Collaborator c) {
+    if (c.skill <= 45) return 0;
+    final v = 5000 * math.pow(2, (c.skill - 45) / 7);
+    final mag = math.pow(10, (math.log(v) / math.ln10).floor() - 1);
+    return ((v / mag).round() * mag).round();
+  }
+
+  /// Whether [c] works with [a]: enough fans, or enough fame.
+  static bool collaboratorAvailable(Collaborator c, Artist a) =>
+      a.coreFans >= requiredFans(c) || a.fame >= c.minFame;
 
   static int adsLeftThisWeek(World w, Artist a) =>
       maxAdsPerWeek - (a.lastAdWeek == w.week ? a.adsWatchedThisWeek : 0);
@@ -71,14 +104,24 @@ abstract final class Actions {
         BudgetTier.high => 1500000,
       };
 
+  /// Quality bonus of studio time for AI artists (label budgets).
   static double budgetBonus(BudgetTier b) => switch (b) {
         BudgetTier.low => 0,
         BudgetTier.medium => 3,
         BudgetTier.high => 6,
       };
 
+  /// Quality bonus of the studio time the player pays for: money is a real
+  /// lever (playtest finding A4).
+  static double playerBudgetBonus(BudgetTier b) => switch (b) {
+        BudgetTier.low => 0,
+        BudgetTier.medium => 5,
+        BudgetTier.high => 10,
+      };
+
   static bool canWrite(World w, Artist a) {
     if (w.week < a.burnoutUntilWeek) return false;
+    if (a.restWeek == w.week) return false;
     final writtenThisWeek =
         a.lastWriteWeek == w.week ? a.songsWrittenThisWeek : 0;
     return writtenThisWeek < maxSongsPerWeek;
@@ -120,8 +163,8 @@ abstract final class Actions {
 
     if (!aiMode) {
       for (final c in [producer, cowriter]) {
-        if (c != null && c.minFame > a.fame) {
-          throw SongwritingException('${c.name} needs more fame');
+        if (c != null && !collaboratorAvailable(c, a)) {
+          throw SongwritingException('${c.name} needs more fans');
         }
       }
       final cost = budgetCostCents(budget) +
@@ -150,7 +193,9 @@ abstract final class Actions {
 
     final genreFit =
         (producer != null && songGenres.contains(producer.genre)) ? 3.0 : 0.0;
-    final luck = r.nextNormal() * 8.0;
+    // The player's luck is a little narrower so the team and budget show
+    // (playtest finding A4); AI songs keep the calibrated spread.
+    final luck = r.nextNormal() * (aiMode ? 8.0 : 6.0);
     final inspired = r.chance(inspirationChance);
     final energyBefore = a.creativeEnergy;
     final energyPenalty =
@@ -158,7 +203,7 @@ abstract final class Actions {
 
     final raw = skill +
         (a.tier == ArtistTier.player ? w.difficulty.qualityBonus : 0) +
-        budgetBonus(budget) +
+        (aiMode ? budgetBonus(budget) : playerBudgetBonus(budget)) +
         genreFit +
         luck +
         (inspired ? inspirationBonus : 0) -
@@ -185,7 +230,7 @@ abstract final class Actions {
     final longevity = mix(0.6, t.nextDouble());
 
     // The team's estimate: better producers estimate better.
-    final estimateNoise = 14.0 - prod / 10.0;
+    final estimateNoise = math.max(3.0, 9.0 - prod / 20.0);
     final grade =
         (quality + r.nextNormal() * estimateNoise).round().clamp(1, 100);
 

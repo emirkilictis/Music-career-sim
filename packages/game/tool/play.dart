@@ -5,7 +5,7 @@
 //   dart run tool/play.dart <saveDir> write <low|medium|high> [producerId] [cowriterId] [genres,..]
 //   dart run tool/play.dart <saveDir> single <songId> [none|standard|intensive|global]
 //   dart run tool/play.dart <saveDir> album "<title>" <ep|album> <campaign> <songId>...
-//   dart run tool/play.dart <saveDir> week [n] | job <on|off> | ad
+//   dart run tool/play.dart <saveDir> week [n] | job <none|cafe|...> | ad | rest
 //   dart run tool/play.dart <saveDir> chart <chartId> [rows]
 //   dart run tool/play.dart <saveDir> -     (one command per line from stdin)
 import 'dart:io';
@@ -120,7 +120,10 @@ void _run(GameSession s, String cmd, List<String> rest) {
         print('Released album #${al.id}.');
         _status(s);
       case 'job':
-        s.setJob(rest[0] == 'on');
+        s.setJob(Job.values.byName(rest[0]));
+        _status(s);
+      case 'rest':
+        s.rest();
         _status(s);
       case 'ad':
         s.rewardAd();
@@ -166,7 +169,7 @@ void _status(GameSession s) {
       '  dev ${(p.devotion * 100).round()}%'
       '  fans ${_c(p.coreFans)} listeners ${_c(p.casualListeners)}'
       '  energy ${p.creativeEnergy.round()} songsLeft ${p.songsLeftThisWeek}'
-      '  ads ${p.adsLeftThisWeek} job ${p.hasJob}'
+      '  ads ${p.adsLeftThisWeek} job ${p.job.name}'
       '  hype ${(p.hype * 100).round()}% antic ${(p.anticipation * 100).round()}%');
 }
 

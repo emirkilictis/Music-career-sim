@@ -88,9 +88,8 @@ class Simulator {
         a.anticipation +=
             (a.anticipationCap - a.anticipation) * c.anticipationBuildRate;
       }
-      if (a.lastWriteWeek != w.week) {
-        a.creativeEnergy = math.min(100, a.creativeEnergy + 12);
-      }
+      a.creativeEnergy =
+          (a.creativeEnergy + Actions.weeklyEnergy(w, a)).clamp(0.0, 100.0);
     }
 
     // Campaign effects for this year: promotion works mostly through radio
@@ -848,12 +847,35 @@ class Simulator {
       cents +=
           s.weekStreams * 0.35 + s.weekDownloads * 70 + s.weekPhysical * 100;
     }
+    // Catalog songs keep streaming (and paying) after they leave the active
+    // set.
+    for (final id in world.playerSongIds) {
+      final s = world.songs[id];
+      if (s.status != SongStatus.dormant) continue;
+      for (var r = 0; r < regionCount; r++) {
+        cents += world.songWeekStreamsRegion(s, r) * 0.35;
+      }
+    }
     for (final id in world.activeAlbumIds) {
       final al = world.albums[id];
       if (al.artistId == p.id) cents += al.weekPure * 600;
     }
     p.moneyCents += (cents * p.artistShare).round();
     // The label takes no cut of the day job.
-    if (p.hasJob) p.moneyCents += Actions.jobWageCents;
+    p.moneyCents += p.job.wageCents;
+    // Side benefits of some jobs (docs K36).
+    final s = p.skills;
+    switch (p.job) {
+      case Job.musicTeacher:
+        s.vocals += 0.08 * (1 - s.vocals / 100);
+        s.performance += 0.05 * (1 - s.performance / 100);
+      case Job.studioAssistant:
+        s.production += 0.12 * (1 - s.production / 100);
+      case Job.barGigs:
+        p.coreFans += 40;
+        p.casual += 300;
+      case Job.none || Job.cafe || Job.nightShift:
+        break;
+    }
   }
 }

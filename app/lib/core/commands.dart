@@ -99,7 +99,9 @@ abstract final class Cmd {
       (s) => s.releaseAlbum(title, songIds,
           type: type, variantWeeks: variantWeeks, campaign: campaign);
 
-  static SessionCmd<void> setJob(bool on) => (s) => s.setJob(on);
+  static SessionCmd<void> setJob(Job job) => (s) => s.setJob(job);
+
+  static SessionCmd<void> rest() => (s) => s.rest();
 
   static SessionCmd<void> rewardAd() => (s) => s.rewardAd();
 

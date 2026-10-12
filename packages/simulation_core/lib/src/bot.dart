@@ -30,7 +30,7 @@ class BotPlayer {
   /// Free start: keep a day job until the music pays, watch the weekly ads.
   void _sideIncome(Artist a) {
     final w = world;
-    Actions.setJob(w, a, a.moneyCents < 5000000);
+    Actions.setJob(w, a, a.moneyCents < 5000000 ? Job.cafe : Job.none);
     while (Actions.adsLeftThisWeek(w, a) > 0) {
       Actions.claimAdReward(w, a);
     }
@@ -63,7 +63,9 @@ class BotPlayer {
     Collaborator? producer;
     for (final c in w.collaborators) {
       if (c.role != CollaboratorRole.producer) continue;
-      if (c.minFame > a.fame || c.feeCents > spend) continue;
+      if (!Actions.collaboratorAvailable(c, a) || c.feeCents > spend) {
+        continue;
+      }
       if (producer == null || c.skill > producer.skill) producer = c;
     }
     final cost = Actions.budgetCostCents(budget) + (producer?.feeCents ?? 0);

@@ -27,7 +27,7 @@ void main() {
         budget: BudgetTier.low, genres: const [1, 2], title: 'Over There'));
     expect(song.title, 'Over There');
     await c.run(Cmd.releaseSingle(song.id, Campaign.none));
-    await c.run(Cmd.setJob(true));
+    await c.run(Cmd.setJob(Job.cafe));
     await c.run(Cmd.rewardAd());
 
     final (w, _, delta) = await c.run(Cmd.nextWeek());
