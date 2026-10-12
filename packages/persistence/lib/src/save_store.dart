@@ -91,6 +91,7 @@ class SaveStore {
       config: config ?? SimConfig(),
       seed: meta['seed'] as int,
       week: meta['week'] as int,
+      difficulty: Difficulty.values[meta['difficulty'] as int],
     );
     w.playerArtistId = meta['playerArtistId'] as int;
     for (final (key, arr) in _metaArrays(w)) {
@@ -298,6 +299,7 @@ class SaveStore {
       'seed': w.seed,
       'week': w.week,
       'playerArtistId': w.playerArtistId,
+      'difficulty': w.difficulty.index,
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

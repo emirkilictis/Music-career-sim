@@ -123,6 +123,11 @@ class Artist {
   int lastWriteWeek = -1;
   int songsWrittenThisWeek = 0;
 
+  // Side income (player only; docs/game-design.md §20.1). The job only pays.
+  bool hasJob = false;
+  int lastAdWeek = -1;
+  int adsWatchedThisWeek = 0;
+
   // Business.
   double labelReach;
   double artistShare;

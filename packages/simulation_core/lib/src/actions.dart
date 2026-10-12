@@ -6,6 +6,13 @@ import 'rng.dart';
 import 'names.dart';
 import 'world.dart';
 
+class ActionException implements Exception {
+  ActionException(this.message);
+  final String message;
+  @override
+  String toString() => 'ActionException: $message';
+}
+
 class SongwritingException implements Exception {
   SongwritingException(this.message);
   final String message;
@@ -21,6 +28,33 @@ abstract final class Actions {
   static const burnoutWeeks = 3;
   static const inspirationChance = 0.04;
   static const inspirationBonus = 20.0;
+
+  // Side income (docs/game-design.md §20.1).
+  /// Weekly wage of the day job. The job only pays: it costs no energy,
+  /// songwriting slots or anything else.
+  static const jobWageCents = 35000;
+  static const adRewardCents = 10000;
+  static const maxAdsPerWeek = 3;
+
+  /// Takes or quits the day job; the wage is paid at the end of each week.
+  static void setJob(World w, Artist a, bool on) => a.hasJob = on;
+
+  static int adsLeftThisWeek(World w, Artist a) =>
+      maxAdsPerWeek - (a.lastAdWeek == w.week ? a.adsWatchedThisWeek : 0);
+
+  /// Pays the reward for a watched (opt-in) rewarded ad; the app calls this
+  /// after the ad finished. Always available, at most [maxAdsPerWeek] a week.
+  static void claimAdReward(World w, Artist a) {
+    if (adsLeftThisWeek(w, a) <= 0) {
+      throw ActionException('Ad limit reached for this week');
+    }
+    if (a.lastAdWeek != w.week) {
+      a.lastAdWeek = w.week;
+      a.adsWatchedThisWeek = 0;
+    }
+    a.adsWatchedThisWeek++;
+    a.moneyCents += adRewardCents;
+  }
 
   static int budgetCostCents(BudgetTier b) => switch (b) {
         BudgetTier.low => 30000,
@@ -100,6 +134,7 @@ abstract final class Actions {
         (!aiMode && energyBefore < 30) ? (30 - energyBefore) * 0.5 : 0.0;
 
     final raw = skill +
+        (a.tier == ArtistTier.player ? w.difficulty.qualityBonus : 0) +
         budgetBonus(budget) +
         genreFit +
         luck +

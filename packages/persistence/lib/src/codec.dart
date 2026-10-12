@@ -39,6 +39,7 @@ abstract final class Codec {
     'lastReleaseWeek',
     'creativeEnergy', 'burnoutUntilWeek', 'lastWriteWeek',
     'songsWrittenThisWeek',
+    'hasJob', 'lastAdWeek', 'adsWatchedThisWeek',
     'labelReach', 'artistShare', 'moneyCents',
     'sumDormantRate',
     'nextEraWeek', 'plan', 'pendingSongs', 'pendingAlbumTitle',
@@ -60,6 +61,7 @@ abstract final class Codec {
         a.lastReleaseWeek,
         a.creativeEnergy, a.burnoutUntilWeek, a.lastWriteWeek,
         a.songsWrittenThisWeek,
+        a.hasJob ? 1 : 0, a.lastAdWeek, a.adsWatchedThisWeek,
         a.labelReach, a.artistShare, a.moneyCents,
         a.sumDormantRate,
         a.nextEraWeek, _encodePlan(a.plan), _ints(a.pendingAlbumSongIds),
@@ -114,6 +116,9 @@ abstract final class Codec {
       ..burnoutUntilWeek = r['burnoutUntilWeek'] as int
       ..lastWriteWeek = r['lastWriteWeek'] as int
       ..songsWrittenThisWeek = r['songsWrittenThisWeek'] as int
+      ..hasJob = r['hasJob'] == 1
+      ..lastAdWeek = r['lastAdWeek'] as int
+      ..adsWatchedThisWeek = r['adsWatchedThisWeek'] as int
       ..sumDormantRate = _d(r['sumDormantRate'])
       ..nextEraWeek = r['nextEraWeek'] as int
       ..pendingAlbumTitle = r['pendingAlbumTitle'] as String

@@ -6,8 +6,9 @@ import 'package:test/test.dart';
 
 late Directory tmp;
 
-World _newWorld(int seed) {
-  final w = WorldGen.create(seed: seed, startYear: 2012);
+World _newWorld(int seed, {Difficulty difficulty = Difficulty.normal}) {
+  final w =
+      WorldGen.create(seed: seed, startYear: 2012, difficulty: difficulty);
   final sim = Simulator(w);
   while (w.week < GameTime.firstWeekOf(2012)) {
     sim.step();
@@ -20,6 +21,9 @@ World _newWorld(int seed) {
 /// Deterministic scripted player moves, applied identically in both runs.
 void _playerMoves(World w, int i) {
   final p = w.player!;
+  if (i == 2) Actions.setJob(w, p, true);
+  if (i == 90) Actions.setJob(w, p, false);
+  if (i % 3 == 0) Actions.claimAdReward(w, p);
   if (i % 5 == 0 && Actions.canWrite(w, p)) {
     Actions.writeSong(w, p, budget: BudgetTier.medium);
   }
@@ -55,6 +59,21 @@ void main() {
     expect(loaded.songs.length, w.songs.length);
     expect(loaded.activeSongIds, w.activeSongIds);
     expect(loaded.activeArtistIds, w.activeArtistIds);
+  });
+
+  test('difficulty and side income survive save/load', () {
+    final w = _newWorld(5, difficulty: Difficulty.hard);
+    final p = w.player!;
+    Actions.setJob(w, p, true);
+    Actions.claimAdReward(w, p);
+    Actions.claimAdReward(w, p);
+    final store = SaveStore.create('${tmp.path}/e.sqlite', w);
+    final loaded = store.load();
+    store.close();
+    expect(loaded.difficulty, Difficulty.hard);
+    expect(loaded.player!.hasJob, isTrue);
+    expect(Actions.adsLeftThisWeek(loaded, loaded.player!), 1);
+    expect(worldHash(loaded), worldHash(w));
   });
 
   test('continuous play == save/load every few weeks (determinism)', () {

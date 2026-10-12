@@ -5,6 +5,7 @@ export 'src/actions.dart';
 export 'src/ai.dart' show AiPlanner;
 export 'src/bot.dart';
 export 'src/config/charts.dart';
+export 'src/config/difficulty.dart';
 export 'src/config/era_table.dart';
 export 'src/config/regions.dart';
 export 'src/config/sim_config.dart';

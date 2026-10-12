@@ -122,6 +122,8 @@ void main() {
     });
   });
 
+  group('side income', sideIncomeTests);
+  group('difficulty', difficultyTests);
   group('mega debuts', megaDebutTests);
   group('album shape', albumShapeTests);
   group('viral', viralTests);
@@ -305,5 +307,105 @@ void viralTests() {
     final c = SimConfig();
     expect(c.viralEraFactor(2008), lessThan(0.2));
     expect(c.viralEraFactor(2022), greaterThan(1.0));
+  });
+}
+
+/// Free start, day job and rewarded ads (docs/game-design.md §20.1).
+void sideIncomeTests() {
+  late World w;
+  late Artist p;
+  late Simulator sim;
+  setUp(() {
+    w = WorldGen.create(seed: 21, startYear: 2010);
+    sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2010)) {
+      sim.step();
+    }
+    p = WorldGen.addPlayer(w, name: 'Free', genre: 0);
+  });
+
+  test('the free start has no money and cannot pay for a song', () {
+    expect(p.moneyCents, 0);
+    expect(() => Actions.writeSong(w, p, budget: BudgetTier.low),
+        throwsA(isA<SongwritingException>()));
+  });
+
+  test('the job only pays: energy and songwriting are unaffected', () {
+    final twin = WorldGen.create(seed: 21, startYear: 2010);
+    final twinSim = Simulator(twin);
+    while (twin.week < GameTime.firstWeekOf(2010)) {
+      twinSim.step();
+    }
+    final q = WorldGen.addPlayer(twin, name: 'Free', genre: 0);
+    p.moneyCents = q.moneyCents = 1000000;
+    Actions.setJob(w, p, true);
+    for (var week = 0; week < 4; week++) {
+      for (final (world, artist) in [(w, p), (twin, q)]) {
+        for (var i = 0; i < 3 && Actions.canWrite(world, artist); i++) {
+          Actions.writeSong(world, artist, budget: BudgetTier.low);
+        }
+      }
+      expect(p.creativeEnergy, q.creativeEnergy);
+      expect(p.songsWrittenThisWeek, q.songsWrittenThisWeek);
+      sim.step();
+      twinSim.step();
+    }
+    expect(p.burnoutUntilWeek, q.burnoutUntilWeek);
+    expect(p.moneyCents - q.moneyCents, 4 * Actions.jobWageCents);
+    expect(p.coreFans, q.coreFans);
+  });
+
+  test('ads are always available, at most three per week', () {
+    for (var week = 0; week < 3; week++) {
+      expect(Actions.adsLeftThisWeek(w, p), Actions.maxAdsPerWeek);
+      for (var i = 0; i < Actions.maxAdsPerWeek; i++) {
+        Actions.claimAdReward(w, p);
+      }
+      expect(
+          () => Actions.claimAdReward(w, p), throwsA(isA<ActionException>()));
+      sim.step();
+    }
+    expect(p.moneyCents, 9 * Actions.adRewardCents);
+  });
+}
+
+void difficultyTests() {
+  test('normal ("realistic") is the calibrated balance', () {
+    expect(Difficulty.normal.exposure, 1.0);
+    expect(Difficulty.normal.fanConversion, 1.0);
+    expect(Difficulty.normal.qualityBonus, 0);
+    expect(WorldGen.create(seed: 1, startYear: 2010).difficulty,
+        Difficulty.normal);
+  });
+
+  test('difficulty scales the player only, never the AI', () {
+    final runs = {
+      for (final d in Difficulty.values)
+        d: () {
+          final w = WorldGen.create(seed: 8, startYear: 2012, difficulty: d);
+          final sim = Simulator(w);
+          while (w.week < GameTime.firstWeekOf(2012)) {
+            sim.step();
+          }
+          final p = WorldGen.addPlayer(w,
+              name: 'D', genre: 0, money: StartMoney.millionaire);
+          final song = Actions.writeSong(w, p, budget: BudgetTier.high);
+          Actions.releaseSingle(w, p, song);
+          for (var i = 0; i < 12; i++) {
+            sim.step();
+          }
+          var aiFans = 0.0;
+          for (final a in w.artists) {
+            if (a.tier != ArtistTier.player) aiFans += a.coreFans;
+          }
+          return (fans: p.coreFans, aiFans: aiFans);
+        }(),
+    };
+    final easy = runs[Difficulty.easy]!, normal = runs[Difficulty.normal]!;
+    final hard = runs[Difficulty.hard]!;
+    expect(easy.fans, greaterThan(normal.fans));
+    expect(normal.fans, greaterThan(hard.fans));
+    // The AI only feels the player through the shared market.
+    expect((easy.aiFans - hard.aiFans).abs() / normal.aiFans, lessThan(1e-3));
   });
 }

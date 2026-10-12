@@ -168,7 +168,8 @@ class Simulator {
               0.02 * p.buzz) *
           promo *
           p.labelReach *
-          (1 + 0.5 * p.hype);
+          (1 + 0.5 * p.hype) *
+          (p.tier == ArtistTier.player ? w.difficulty.exposure : 1.0);
       final qMult = 0.35 + 0.65 * math.pow(s.quality / 100, 1.4);
 
       // Fans replay singles; deep cuts get less of their time.
@@ -498,8 +499,9 @@ class Simulator {
       final fanRoom = math.max(0.0, 1 - a.coreFans / (0.04 * c.publicPool));
       a.casual += c.casualConversion * a.weekReach * casualRoom -
           c.casualDecay * a.casual;
-      a.coreFans +=
-          c.fanConversion * a.weekReach * fanRoom - c.coreFanDecay * a.coreFans;
+      final conv = a.tier == ArtistTier.player ? w.difficulty.fanConversion : 1;
+      a.coreFans += c.fanConversion * conv * a.weekReach * fanRoom -
+          c.coreFanDecay * a.coreFans;
       if (a.coreFans < 100) a.coreFans = 100;
       if (a.casual < 1000) a.casual = 1000;
       if (a.eraOpen && w.week - a.eraStartWeek >= c.eraLengthWeeks) {
@@ -803,5 +805,7 @@ class Simulator {
       if (al.artistId == p.id) cents += al.weekPure * 600;
     }
     p.moneyCents += (cents * p.artistShare).round();
+    // The label takes no cut of the day job.
+    if (p.hasJob) p.moneyCents += Actions.jobWageCents;
   }
 }

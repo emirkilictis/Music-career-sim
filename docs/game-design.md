@@ -54,7 +54,7 @@ Hafta 14, 2007
 
 | Yol | Para | Gelir payı | Erişim (radyo, playlist, pazarlama) | Kısıt |
 |---|---|---|---|---|
-| **Bağımsız** | Düşük | Kayıtlı müzik gelirinin %100'ü | Düşük | Yok, tam özgürlük |
+| **Bağımsız** | Başlangıç parası (ücretsizde 0) | Kayıtlı müzik gelirinin %100'ü | Düşük | Yok, tam özgürlük |
 | **Küçük plak şirketi** | Avans (peşin nakit) | %50 (avans bu paydan geri ödenir) | Orta-yüksek | Sözleşme: 2 albüm |
 
 - Sözleşme bitince yenile veya bağımsızlaş.
@@ -72,9 +72,11 @@ Hafta 14, 2007
 
 | Başlangıç parası | Erişim |
 |---|---|
-| Düşük | Ücretsiz |
-| Rahat | Ücretsiz |
-| Milyoner | **Premium** |
+| Sıfır ($0) — para iş ve ödüllü reklamla kazanılır (§20.1) | Ücretsiz |
+| Rahat ($50K) | **Premium** |
+| Milyoner ($1M) | **Premium** |
+
+- Küçük plak şirketi yolunda avans ($25K) her başlangıç parasının üstüne eklenir.
 
 - Ünlü başlangıçta diskografi boştur; profil "kariyer burada başlıyor" der (uydurma geçmiş yok).
 - Gelir modeli için bkz. §20.
@@ -437,6 +439,7 @@ Yeni ülke listesi eklemek bir konfigürasyon satırıdır. Liste ve platform is
 | Radyo/yayın hakları (basit) | Pazarlama/kampanya |
 | Merch | Üretim (fiziksel varyantlar) |
 | (İleride) turne | (İleride) turne |
+| Gündelik iş maaşı, ödüllü reklam (§20.1) | |
 
 - Plak şirketindeyse kayıtlı müzik gelirinin payı ve avans geri ödemesi otomatik uygulanır.
 - Karmaşık telif/royalty hesapları yok.
@@ -536,7 +539,17 @@ Bu hafta: 19,4M stream · Toplam: 2,31B stream · Saf satış: 5,2M
 
 ## 19. Zorluk
 
-Ayrı motor yok; `DifficultyConfig` çarpanları:
+Üç seviye: **Kolay ("Domination")**, **Normal ("Gerçekçi")**, **Zor**.
+
+- **Normal = "Gerçekçi"**: gerçek dünya rakamlarına göre kalibre edilmiş mevcut denge
+  (bkz. phase0-status.md kalibrasyon tablosu). Tüm çarpanlar 1.
+- Zorluk **sadece oyuncunun** sayılarını ölçekler; AI ve piyasa her seviyede aynıdır
+  (AI oyuncuyu sadece ortak pazar üzerinden hisseder).
+- Kariyer başlarken seçilir, kayda yazılır, sonradan değişmez.
+- Şu an motorda olan çarpanlar (`Difficulty`): erişim (exposure), hayran dönüşümü, şarkı kalitesi bonusu.
+  Kolay: 1.3 / 1.3 / +3 · Zor: 0.8 / 0.8 / −3 (geçici değerler, Faz 2'de kalibre edilecek).
+
+Faz 2'de eklenecek çarpanlar:
 pazarlama etkisi, hayran dönüşümü, hit şansı, decay, varyant talep havuzu, radyo/playlist kabulü,
 **flop desteği gücü**, beklenti tavanı, (ileride) turne talebi.
 
@@ -557,7 +570,19 @@ daha güçlü varyantlar, daha kolay radyo/playlist kabulü, daha güçlü flop 
 - Simülasyonun kendisi (zorluk, formüller) Premium'dan etkilenmez; para ile oyun içi güç satılmaz,
   sadece başlangıç seçenekleri ve kolaylıklar.
 - Satın alımları geri yükleme (restore) zorunludur.
-- Reklam yok (karar verilmedi).
+- Reklam: sadece **isteğe bağlı ödüllü reklam** (§20.1). Zorunlu/araya giren reklam planlanmadı.
+
+### 20.1 Ücretsiz başlangıç: iş ve ödüllü reklam
+
+Ücretsiz sürümde kariyer **$0** ile başlar. İlk şarkıların parası iki yoldan gelir:
+
+- **Gündelik iş:** açılıp kapatılabilir, haftalık sabit maaş öder ($350/hafta).
+  **İş sadece para kazandırır**; enerjiyi, şarkı yazma hakkını veya başka hiçbir şeyi etkilemez
+  (oyuncuyu sıkmamak için). Maaştan plak şirketi pay almaz.
+- **Ödüllü reklam:** her zaman izlenebilir (sadece başlangıçta değil), **haftada en fazla 3 kez**,
+  her biri $100. Tamamen isteğe bağlıdır; ödül reklam bitince verilir.
+- İş + 3 reklam ≈ $650/hafta: haftada ~2 düşük bütçeli şarkı ($300). Daha pahalı kayıtlar için
+  biriktirmek veya müzikten kazanmak gerekir.
 
 ## 21. Dil
 

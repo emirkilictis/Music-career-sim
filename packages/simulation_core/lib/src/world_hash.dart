@@ -35,6 +35,7 @@ int worldHash(World w) {
   }
 
   addInt(w.week);
+  addInt(w.difficulty.index);
   addAll(w.spaIndex);
   addAll(w.dpaIndex);
   addAll(w.retiredDormantAttention);
@@ -51,6 +52,9 @@ int worldHash(World w) {
     addAll(a.reg);
     addAll(a.regionShare);
     addInt(a.moneyCents);
+    addInt(a.hasJob ? 1 : 0);
+    addInt(a.lastAdWeek);
+    addInt(a.adsWatchedThisWeek);
     for (final v in a.no1Singles) {
       addInt(v);
     }

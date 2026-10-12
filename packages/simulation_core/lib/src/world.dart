@@ -1,18 +1,26 @@
 import 'dart:typed_data';
 
 import 'config/charts.dart';
+import 'config/difficulty.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'model.dart';
 
 /// The hot, in-memory simulation state ("current world").
 class World {
-  World({required this.config, required this.seed, required this.week})
-      : regionalEra = RegionalEra(config.era);
+  World({
+    required this.config,
+    required this.seed,
+    required this.week,
+    this.difficulty = Difficulty.normal,
+  }) : regionalEra = RegionalEra(config.era);
 
   final SimConfig config;
   final RegionalEra regionalEra;
   final int seed;
+
+  /// Chosen when the career starts; scales only the player's numbers.
+  final Difficulty difficulty;
 
   /// Current week (the next week to be simulated).
   int week;

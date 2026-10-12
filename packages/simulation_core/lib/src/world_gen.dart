@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'config/difficulty.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'model.dart';
@@ -10,7 +11,9 @@ import 'world.dart';
 
 enum StartTier { unknown, localBuzz, risingStar, superstar }
 
-enum StartMoney { low, comfortable, millionaire }
+/// Starting cash. [none] is the free start (earn via the job or rewarded ads);
+/// [comfortable] and [millionaire] are Premium starts (§20).
+enum StartMoney { none, comfortable, millionaire }
 
 enum CareerPath { independent, smallLabel }
 
@@ -18,13 +21,18 @@ enum CareerPath { independent, smallLabel }
 abstract final class WorldGen {
   /// Creates a world whose clock starts [SimConfig.burnInYears] before
   /// [startYear]; run it up to [startYear] before handing it to the player.
-  static World create(
-      {required int seed, required int startYear, SimConfig? config}) {
+  static World create({
+    required int seed,
+    required int startYear,
+    SimConfig? config,
+    Difficulty difficulty = Difficulty.normal,
+  }) {
     final cfg = config ?? SimConfig();
     final w = World(
       config: cfg,
       seed: seed,
       week: GameTime.firstWeekOf(startYear - cfg.burnInYears),
+      difficulty: difficulty,
     );
     for (var i = 0; i < cfg.tierACount; i++) {
       _addAiArtist(w, ArtistTier.a);
@@ -129,7 +137,7 @@ abstract final class WorldGen {
     required String name,
     required int genre,
     StartTier tier = StartTier.unknown,
-    StartMoney money = StartMoney.low,
+    StartMoney money = StartMoney.none,
     CareerPath path = CareerPath.independent,
     HomeCountry home = HomeCountry.us,
     Skills? skills,
@@ -141,7 +149,7 @@ abstract final class WorldGen {
       StartTier.superstar => (0.80, 3e6, 2.4e7),
     };
     var cash = switch (money) {
-      StartMoney.low => 500000,
+      StartMoney.none => 0,
       StartMoney.comfortable => 5000000,
       StartMoney.millionaire => 100000000,
     };

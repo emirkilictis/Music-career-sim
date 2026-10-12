@@ -22,8 +22,18 @@ class BotPlayer {
     final w = world;
     final a = w.player;
     if (a == null) return;
+    _sideIncome(a);
     _maybeWrite(a);
     _maybeRelease(a);
+  }
+
+  /// Free start: keep a day job until the music pays, watch the weekly ads.
+  void _sideIncome(Artist a) {
+    final w = world;
+    Actions.setJob(w, a, a.moneyCents < 5000000);
+    while (Actions.adsLeftThisWeek(w, a) > 0) {
+      Actions.claimAdReward(w, a);
+    }
   }
 
   List<Song> _vault(Artist a) =>

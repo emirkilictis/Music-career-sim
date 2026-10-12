@@ -65,7 +65,8 @@ CREATE TABLE artistState (               -- sıcak durum, her hafta güncellenir
   currentEraID INTEGER, lastEraID INTEGER,
   catalogIndex REAL, sumDormantRate REAL,
   creativeEnergy REAL, burnoutUntilWeek INTEGER,
-  moneyCents INTEGER
+  moneyCents INTEGER,
+  hasJob INTEGER, lastAdWeek INTEGER, adsWatchedThisWeek INTEGER  -- sadece oyuncu (§20.1)
 );
 
 CREATE TABLE artistSkill (               -- statlar (0–100); AI için basitleştirilmiş değerler
@@ -351,5 +352,6 @@ CREATE TABLE notification (id INTEGER PRIMARY KEY, week INTEGER, kind INTEGER, p
 
 ## 7. Migrasyonlar
 - `PRAGMA user_version` + numaralı SQL migrasyonları; her migrasyon numaralı ve geri alınamaz.
+- `meta.difficulty` kariyerin zorluğunu (Kolay/Normal/Zor) tutar; sonradan değişmez.
 - `meta.simulationVersion` formül değişikliklerini, `meta.contentVersion` konfigürasyon değişikliklerini izler.
 - Eski kayıtlar açılırken migrasyon uygulanır; geçmiş satırlar asla yeniden hesaplanmaz.
