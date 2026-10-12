@@ -43,6 +43,22 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 |---|---|---|---|---|
 | D1 | **Müzik platformları gerçek hayattaki çıkış yıllarına göre gelsin.** Şu an Streamify kutusu ana ekranda her yıl görünüyor; listeleri 2009 (global/Avrupa) ve 2011'den (Kuzey Amerika) itibaren var. | E | 2 | Kurgusal isimlerle, gerçekteki çıkış yıllarına göre: **dijital indirme mağazası** 2003 (ABD; Avrupa 2004), **video platformu** 2005 (klip izlenmeleri, 2006'dan büyüme), **ses paylaşım platformu** 2008 (bağımsız sanatçılar, keşfedilme), **Streamify** 2008 Avrupa / 2011 ABD, **ikinci büyük streaming servisi** 2015, **kısa video uygulaması** 2017–2018 (viral şarkılar). Çıkmadan önce Platformlar bölümünde görünmesin (ya da "20XX'te geliyor" diye kilitli dursun). Çıkış yılı gelince haber: "Yeni bir platform çıktı". Platformlar haftalık simülasyonda zaten var olan stream / indirme / video paylarına bağlanacak; dönem tablosu (era table) aynı yılları kullanıyor. |
 
+## E. Arayüz (Claude'un ekran incelemesi)
+
+| # | Konu | Kaynak | Öncelik | Ne yapılacak |
+|---|---|---|---|---|
+| E1 | **Ana ekran "her şey eşit" sorunu.** Kahraman kartı ekranın yarısını statik sayılarla kaplıyor; asıl önemli olanlar (haftanın haberleri, enerji, yapılacaklar) aşağıda kalıyor. Groove Journey'de eleştirdiğimiz hatanın hafif hali. | T | 1 | Kahraman kartı küçülsün (avatar + isim + 3 küçük çubuk). En üstte haftanın haberi ve **"sıradaki adım" önerisi** ("Kasanda 3 şarkı var, birini single yap", "Enerjin düşük, dinlen"). Sayılar haftalık değişimle (+2.1K hayran). |
+| E2 | **Stüdyo ekranında 21 tür çipi ekranı kaplıyor**; asıl kararlar (prodüktör, söz yazarı, bütçe) ve "Yaz" düğmesi aşağıda kalıyor. | T | 1 | Ana tür hazır seçili gelsin, "+ tür ekle" küçük bir pencere açsın. Ekip seçimi kart olsun (beceri çubuğu, ücret, kilitliyse "X hayran gerekli"). Maliyet ve tahmini kalite aralığı "Yaz" düğmesinin yanında sabit dursun. |
+| E3 | **İsim ve avatar iki kez görünüyor** (üst çubuk + kahraman kartı). | T | 2 | E1 ile birlikte: üst çubukta sadece hafta ve para. |
+| E4 | **Alt kısım kalabalık:** "Sonraki hafta / Atla" şeridi + sekme çubuğu ekranın ~%20'si. | T | 2 | Şerit biraz incelsin; Listeler ekranında içerik daha çok yer alsın. |
+| E5 | **Otomatik kapaklar birbirine çok benziyor** (aynı degrade + daire); oyuncunun yayınları ayırt edilemiyor. | T | 2 | Daha çeşitli otomatik kapak desenleri (şekil, doku, tipografi) + kapak yükleme (C5). |
+| E6 | **Kutlama anları yok.** #1, ilk liste girişi, sertifika gibi büyük anlar sadece bir alt pencere. | T | 2 | Tam ekran kısa kutlama (konfeti, büyük "#1"), paylaşım kartı (R1) ile birlikte. |
+| E7 | **Sayılar bağlamsız.** "Ünlülük %30" ne demek, artıyor mu azalıyor mu belli değil. | T | 2 | Değişim okları ve kısa açıklama ("i"): ne işe yarar, nasıl artar. |
+| E8 | **Yazı ağırlığı her yerde çok kalın** (w800–w900); başlık ile içerik ayrışmıyor. | T | 3 | Tipografi ölçeğini sadeleştirmek: başlıklar kalın, içerik normal. |
+| E9 | **Kariyer listesi boş ve çöp kutusu fazla göz önünde.** | T | 3 | Kartta son hit / son albüm kapağı; silme uzun basma veya menüde. |
+
+İyi olanlar: tutarlı koyu tema ve pastel renkler, dergi tarzı liste ekranı, Streamify sayfası, hafta geçiş kartı ve alt pencereler.
+
 ## Test oyunu 2 — Claude (yeni dengeyle, 2025, ücretsiz başlangıç)
 
 Aynı başlangıç, ~70 hafta. Notlar ve kilitler belirgin şekilde daha iyi (yukarıda A1–A4). Yeni bulgular:
