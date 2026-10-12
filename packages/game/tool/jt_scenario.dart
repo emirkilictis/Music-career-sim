@@ -9,6 +9,9 @@ final log = <String>[];
 final relSongs = <String, int>{}; // title -> song id
 final relAlbums = <String, int>{};
 final eraSongs = <int>[]; // songs written for the current album
+final team = <int, String>{}; // song id -> "producer / co-writer · budget"
+final skillsAt = <String, String>{}; // moment -> skills
+final eras = <String>[];
 
 int wk(int year, int week) => GameTime.firstWeekOf(year) + week - 1;
 
@@ -42,14 +45,24 @@ void writeOne(String title, List<int> genres) {
           : BudgetTier.low;
   if (Actions.budgetCostCents(budget) > money) return;
   final spare = (money - Actions.budgetCostCents(budget)) ~/ 3;
+  final prodId = best(CollaboratorRole.producer, genres, spare);
+  final writerId = best(CollaboratorRole.songwriter, genres, spare);
+  String name(CollaboratorRole r, int? id) => id == null
+      ? '—'
+      : g
+          .collaborators(r)
+          .firstWhere((x) => x.id == id)
+          .let((x) => '${x.name} (${x.skill.round()})');
   final s = g.writeSong(
     budget: budget,
-    producerId: best(CollaboratorRole.producer, genres, spare),
-    cowriterId: best(CollaboratorRole.songwriter, genres, spare),
+    producerId: prodId,
+    cowriterId: writerId,
     genres: genres,
     title: title,
   );
   eraSongs.add(s.id);
+  team[s.id] = '${name(CollaboratorRole.producer, prodId)} / '
+      '${name(CollaboratorRole.songwriter, writerId)} · ${budget.name}';
 }
 
 void single(String title, {Campaign campaign = Campaign.intensive}) {
@@ -67,6 +80,7 @@ void album(String title, List<String> leadTitles, int tracks,
   ids.addAll(rest.take(tracks - ids.length));
   final al = g.releaseAlbum(title, ids, campaign: campaign);
   relAlbums[title] = al.id;
+  skillsAt[title] = _skills();
   eraSongs.clear();
   log.add('${_date()}  ALBUM    "$title" (${ids.length} tracks)');
 }
@@ -95,13 +109,29 @@ void playUntil(int w, {List<String> write = const [], List<int>? genres}) {
         AlbumFirstWeek() =>
           'album first week: US ${c(e.usUnits)} (#${e.usPosition}), global ${c(e.globalUnits)}',
         ViralTrend() => 'viral ${g.song(e.songId).title}',
-        EraClosed() => 'era closed: ${e.result.name}',
+        EraClosed() => () {
+            eras.add('${_date()}: ${e.result.name} '
+                '(${c(e.units)} units vs expected ${c(e.expected)})');
+            return 'era closed: ${e.result.name}';
+          }(),
         _ => null,
       };
       if (line != null) log.add('${_date()}    · $line');
     }
   }
   if (queue.isNotEmpty) stderr.writeln('Not written in time: $queue');
+}
+
+String _skills() {
+  final k = g.world.artists[g.player.id].skills;
+  String f(double v) => v.toStringAsFixed(0);
+  return 'songwriting ${f(k.songwriting)} · vocals ${f(k.vocals)} · '
+      'production ${f(k.production)} · performance ${f(k.performance)} · '
+      'charisma ${f(k.charisma)}';
+}
+
+extension<T> on T {
+  R let<R>(R Function(T) f) => f(this);
 }
 
 String _title(EntityKind k, int id) =>
@@ -124,6 +154,7 @@ void main(List<String> args) {
       seed: args.isEmpty ? 2002 : int.parse(args.first),
     ),
   );
+  skillsAt['Start 2002'] = _skills();
   final p0 = g.player;
   log.add(
       'Start 2002: fans ${c(p0.coreFans)}, fame ${(p0.fame * 100).round()}%,'
@@ -356,6 +387,108 @@ void main(List<String> args) {
       ' streams ${c(p.lifetimeStreams.total)}, album units ${c(p.lifetimeUnits.total)},'
       ' single sales ${c(p.lifetimeSingleSales)}');
   print('#1 singles: ${p.numberOneSingles}  #1 albums: ${p.numberOneAlbums}');
+  if (args.length > 1) File(args[1]).writeAsStringSync(_markdown());
   g.close();
   dir.deleteSync(recursive: true);
+}
+
+String _markdown() {
+  final b = StringBuffer();
+  final p = g.player;
+  String rec(List<ChartRecord> rs, int chart) {
+    final r = rs.where((x) => x.chartId == chart).firstOrNull;
+    if (r == null) return '—';
+    return '#${r.peak}${r.weeksAtNo1 > 0 ? ' (${r.weeksAtNo1}× #1)' : ''}, '
+        '${r.weeksOn} hf';
+  }
+
+  String reg(RegionalNumbers n) =>
+      Region.values.map((r) => c(n[r])).join(' / ');
+
+  b.writeln(
+      '# JT kariyeri — ayrıntılı döküm (Gerçekçi mod, tohum ${g.world.seed})\n');
+  b.writeln('## Özet\n');
+  b.writeln('| | |\n|---|---|');
+  b.writeln('| Bitiş | ${_date()} |');
+  b.writeln('| Sadık hayran | ${c(p.coreFans)} |');
+  b.writeln('| Dinleyici (casual) | ${c(p.casualListeners)} |');
+  b.writeln(
+      '| Ünlülük / popülerlik / sadakat | %${(p.fame * 100).round()} / %${(p.popularity * 100).round()} / %${(p.devotion * 100).round()} |');
+  b.writeln('| Para | \$${c(p.moneyCents / 100)} |');
+  b.writeln(
+      '| Toplam stream (K.Amerika / Avrupa / Diğer) | ${c(p.lifetimeStreams.total)} (${reg(p.lifetimeStreams)}) |');
+  b.writeln(
+      '| Albüm birimi (K.Amerika / Avrupa / Diğer) | ${c(p.lifetimeUnits.total)} (${reg(p.lifetimeUnits)}) |');
+  b.writeln('| Saf albüm satışı | ${c(p.lifetimePure.total)} |');
+  b.writeln('| Single satışı (indirme + CD) | ${c(p.lifetimeSingleSales)} |');
+  b.writeln('| Radyo dinleyicisi (toplam) | ${c(p.lifetimeRadio)} |');
+  final charts = Charts.all;
+  b.writeln('| #1 single sayısı | ${[
+    for (final ch in Charts.mainSongCharts)
+      '${charts[ch].key.replaceAll('chart.', '')}: ${p.numberOneSingles[ch]}'
+  ].join(', ')} |');
+  b.writeln('| #1 albüm sayısı | ${[
+    for (final ch in Charts.mainAlbumCharts)
+      '${charts[ch].key.replaceAll('chart.', '')}: ${p.numberOneAlbums[ch]}'
+  ].join(', ')} |');
+  b.writeln();
+  b.writeln('## Statlar (beceriler)\n');
+  b.writeln('| An | Beceriler |\n|---|---|');
+  skillsAt['Bitiş 2024'] = _skills();
+  for (final e in skillsAt.entries) {
+    b.writeln('| ${e.key} | ${e.value} |');
+  }
+  b.writeln();
+  b.writeln('## Dönemler (era)\n');
+  for (final e in eras) {
+    b.writeln('- $e');
+  }
+  b.writeln();
+  b.writeln('## Yıl yıl\n');
+  b.writeln(
+      '| Yıl | Stream | Single satışı | Albüm birimi | Saf satış | Ünlülük | Sadık hayran | Para |');
+  b.writeln('|---|---|---|---|---|---|---|---|');
+  for (final y in g.careerByYear()) {
+    b.writeln(
+        '| ${y.year} | ${c(y.streams)} | ${c(y.singleSales)} | ${c(y.units)} | ${c(y.pure)} | %${(y.fame * 100).round()} | ${c(y.coreFans)} | \$${c(y.moneyCents / 100)} |');
+  }
+  b.writeln();
+  b.writeln('## Albümler\n');
+  for (final e in relAlbums.entries) {
+    final a = g.album(e.value);
+    b.writeln(
+        '### ${e.key} (${GameTime.yearOf(a.releaseWeek)}, ${a.campaign.name} kampanya)\n');
+    b.writeln(
+        '- İlk hafta: ABD ${c(a.firstWeekUsUnits)} birim (${c(a.firstWeekUsPure)} saf), İngiltere ${c(a.firstWeekUkUnits)}, dünya ${c(a.firstWeekUnits)}');
+    b.writeln(
+        '- Listeler: ABD ${rec(a.charts, Charts.usAlbums)} · İngiltere ${rec(a.charts, Charts.ukAlbums)} · Global ${rec(a.charts, Charts.globalAlbums)}');
+    b.writeln(
+        '- Toplam: ${c(a.lifetimeUnits.total)} birim (${reg(a.lifetimeUnits)}), ${c(a.lifetimePure.total)} saf');
+    b.writeln(
+        '\n| # | Şarkı | Not | Stream | Satış | Ekip (prodüktör / söz yazarı · bütçe) |');
+    b.writeln('|---|---|---|---|---|---|');
+    var i = 1;
+    for (final id in a.trackIds) {
+      final s = g.song(id);
+      b.writeln(
+          '| ${i++} | ${s.title}${s.isSingle ? ' ★' : ''} | ${s.estimatedGrade} | ${c(s.lifetimeStreams.total)} | ${c(s.singleSales)} | ${team[id] ?? ''} |');
+    }
+    b.writeln();
+  }
+  b.writeln('## Single\'lar\n');
+  b.writeln(
+      '| Single | Not | ABD | İngiltere | Global | Streamify Global | Stream (KA / AV / D) | İndirme | CD | Radyo |');
+  b.writeln('|---|---|---|---|---|---|---|---|---|---|');
+  for (final t in relSongs.keys) {
+    final s = g.song(relSongs[t]!);
+    if (!s.isSingle) continue;
+    b.writeln(
+        '| $t | ${s.estimatedGrade} | ${rec(s.charts, Charts.usSongs)} | ${rec(s.charts, Charts.ukSongs)} | ${rec(s.charts, Charts.globalSongs)} | ${rec(s.charts, Charts.platformGlobal)} | ${c(s.lifetimeStreams.total)} (${reg(s.lifetimeStreams)}) | ${c(s.lifetimeDownloads)} | ${c(s.lifetimePhysical)} | ${c(s.lifetimeRadio)} |');
+  }
+  b.writeln();
+  b.writeln('## Önemli anlar\n');
+  for (final l in log) {
+    b.writeln('- ${l.trim()}');
+  }
+  return b.toString();
 }

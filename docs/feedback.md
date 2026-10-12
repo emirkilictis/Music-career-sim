@@ -82,6 +82,11 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | T17 | **İngiltere listesinde çok zayıf.** ABD'de #1 olan şarkılar İngiltere'de #12–#96 (gerçekte JT İngiltere'de de hep ilk 5). ABD'li sanatçının Avrupa payı düşük. | Ayar önerisi: ABD'li pop yıldızlarının Avrupa payını yükseltmek (memleket bonusunu yumuşatmak). |
 | T18 | **Büyük şirket kariyeri için bütçe yok.** "Küçük plak şirketi" sadece $25K avans veriyor; 2002'de stream geliri olmadığı için yükselen yıldız bile ilk albümü bitiremiyor. Senaryo Milyoner başlangıcıyla oynandı. | Faz 2'deki büyük şirket teklifleri (R5) çözecek; yükselen yıldız + şirket yolunda avans büyüklüğe göre artabilir. |
 
+| T19 | **Sahne ve karizma hiç gelişmiyor.** 22 yılda söz yazarlığı 47 → 68, vokal 43 → 50 oldu (şarkı yazdıkça); sahne performansı ve karizma 29'da kaldı, çünkü onları geliştiren bir şey yok. | Turne/konser, pratik (rakip incelemesi ✅ listesi) ve sosyal medya gelince bu ikisi de gelişmeli. |
+| T20 | **Streaming çağında yıllık stream'ler yüksek.** 2018'de 4,3 milyar, 2024'te 7,8 milyar (gerçek JT'nin tüm platformlardaki yıllığı muhtemelen 2–3 milyar). T16 ile aynı kökten (katalog çok uzun ve güçlü yaşıyor) olabilir. | T16 ile birlikte bakılacak. |
+
+Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
+
 İyi taraflar: kariyerin şekli doğru (2006 ve 2013 en büyük dönemler, molalar beklenti yaratıyor),
 SexyBack 4–12 hafta #1 (gerçek 7), FutureSex/LoveSounds ilk haftası neredeyse birebir, Can't Stop
 the Feeling! #1 oldu, dönem sonu sonuçları hep "başarı".
