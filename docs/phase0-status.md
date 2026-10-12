@@ -200,3 +200,6 @@ zarlanır, `WeekResult.playlistAdds` bildirir. `tools/sim_cli/bin/campaign_probe
 4. Veritabanı boyutu (50 yılda ~170 MB) ve kayıt süresinin yavaş artışı: eski geçmişin aylık
    özetlere sıkıştırılması ileride.
 5. Checkpoint'ler uygulamada boşta/arka planda yapılmalı (Faz 1).
+6. **Albüm listesi fazla durağan:** ABD albüm listesinde yılda 6–19 farklı #1 (seed 42, 2010–2025);
+   gerçekte ~30–45 (şarkılarda 8–17 / gerçek 10–19, yerinde). Ölçüm: `dart run bin/chart_churn.dart`.
+   Muhtemel sebep: orta ölçekli AI albüm çıkışı az veya uzun soluklu albümlerin SEA'sı fazla.

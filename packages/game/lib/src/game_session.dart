@@ -356,8 +356,13 @@ class GameSession {
   }
 
   /// Year skip: plays up to 52 weeks, stopping after a week with a major
-  /// event when [stopOnMajor] is set.
-  YearReport advanceYear({bool stopOnMajor = true}) {
+  /// event when [stopOnMajor] is set. [onWeek] reports progress after each
+  /// week; returning true from [cancel] stops after the current week.
+  YearReport advanceYear({
+    bool stopOnMajor = true,
+    void Function(WeekReport week)? onWeek,
+    bool Function()? cancel,
+  }) {
     final p = _p;
     final from = world.week;
     final streams0 = world.artistLifetimeStreams(p);
@@ -371,7 +376,8 @@ class GameSession {
       final r = advanceWeek();
       weeks++;
       events.addAll(r.events);
-      if (stopOnMajor && r.hasMajor) {
+      onWeek?.call(r);
+      if ((stopOnMajor && r.hasMajor) || (cancel?.call() ?? false)) {
         stopped = weeks < GameTime.weeksPerYear;
         break;
       }

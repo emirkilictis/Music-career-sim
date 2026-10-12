@@ -71,7 +71,16 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 - Determinizm testleri, aktif küme büyüklüğü takibi, 50 yıllık stres testi.
 - Bu faz Mac olmadan da (Linux'ta) geliştirilebilir.
 
-### Faz 1 — Oynanabilir MVP — *başladı: oyun katmanı (`packages/game`) hazır*
+### Faz 1 — Oynanabilir MVP — *devam ediyor*
+
+Yapıldı: oyun katmanı (`packages/game`), Flutter uygulamasının ilk sürümü (`app/`): kariyer listesi,
+yeni kariyer (grup modu, türler, zorluk, Premium kilitleri, stat dağıtımı), ana ekran (haberler, iş,
+reklam, günlük bonus), stüdyo, yayınlar (single + albüm/EP kurucu, kampanya, versiyonlar), listeler,
+kariyer özeti, şarkı/albüm detayı (grafikler), ayarlar (dil, Premium test modu), EN/TR. Ekran
+görüntüleri: [screenshots/](screenshots/). iPhone'da çalıştırma: [mac-setup.md](mac-setup.md).
+
+Sırada: görsel yükleme (kapak/profil), gerçek satın alma ve reklam SDK'ları, rollout planlama ekranı,
+kayıt/yıl atlama sırasında iptal, ilk açılış rehberi, ikonlar ve cilalar.
 - Flutter arayüz (önce iOS'ta test, Android derlemesi de), SQLite persistence, kayıt slotları + haftalık autosave.
 - Sanatçı oluşturma (statlar, kariyer yolu: bağımsız / küçük şirket, başlangıç seviyesi).
 - Şarkı yazma (ekip, kalite, şans, yaratıcı enerji, kasa), single/albüm yayınlama, rollout planlama (temel), kampanya seviyesi.

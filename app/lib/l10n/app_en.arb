@@ -1,0 +1,661 @@
+{
+  "@@locale": "en",
+  "appTitle": "Music Career Simulator",
+  "settings": "Settings",
+  "newCareer": "New career",
+  "noCareersTitle": "No careers yet",
+  "noCareersBody": "Start a new career and make your first song.",
+  "deleteCareerTitle": "Delete career?",
+  "deleteCareerBody": "“{name}” and its whole history will be deleted. This cannot be undone.",
+  "@deleteCareerBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "ok": "OK",
+  "weekLabel": "Week {week}, {year}",
+  "@weekLabel": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "fameValue": "Fame {value}",
+  "@fameValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "fansValue": "{value} fans",
+  "@fansValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "buildingWorld": "Building the music world…",
+  "buildingWorldBody": "Simulating the years before your debut so the charts are full.",
+  "sectionArtist": "Artist",
+  "sectionWorld": "World",
+  "sectionStart": "Start",
+  "sectionStats": "Stats",
+  "artistName": "Artist name",
+  "groupName": "Group name",
+  "members": "{count} members",
+  "@members": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "memberN": "Member {n}",
+  "@memberN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "genre": "Genre",
+  "homeCountry": "Home",
+  "startYear": "Start year",
+  "difficulty": "Difficulty",
+  "difficultyEasy": "Easy",
+  "difficultyNormal": "Realistic",
+  "difficultyHard": "Hard",
+  "difficultyEasyHint": "“Domination”: your releases travel further than in real life.",
+  "difficultyNormalHint": "Balanced on real-world numbers.",
+  "difficultyHardHint": "Tougher than reality.",
+  "careerPath": "Career path",
+  "pathIndependent": "Independent",
+  "pathSmallLabel": "Small label",
+  "pathIndependentHint": "You keep 100% of recording income, but reach fewer people.",
+  "pathSmallLabelHint": "An advance and more reach; the label keeps 50% of recording income.",
+  "startLevel": "Start level",
+  "tierUnknown": "Unknown",
+  "tierLocalBuzz": "Local buzz",
+  "tierRisingStar": "Rising star",
+  "tierSuperstar": "Superstar",
+  "startMoney": "Starting money",
+  "moneyBasic": "$5K",
+  "moneyComfortable": "Comfortable ($50K)",
+  "moneyMillionaire": "Millionaire ($1M)",
+  "autoDistribute": "Auto",
+  "pointsLeft": "{left} points left · max {cap} per stat",
+  "@pointsLeft": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "statSongwriting": "Songwriting",
+  "statVocals": "Vocals",
+  "statProduction": "Production",
+  "statPerformance": "Performance",
+  "statCharisma": "Charisma",
+  "premiumOnly": "This start needs Premium.",
+  "premiumPitchTitle": "Premium",
+  "premiumPitchBody": "Start as a rising star or superstar, with more money, stronger stats and a daily bonus.",
+  "startCareer": "Start career",
+  "kindSolo": "Solo",
+  "kindBand": "Band",
+  "kindVocalGroup": "Vocal group",
+  "homeUs": "USA",
+  "homeCanada": "Canada",
+  "homeUk": "UK",
+  "homeEurope": "Europe",
+  "homeOther": "Rest of world",
+  "nextWeek": "Next week",
+  "skipYear": "Skip year",
+  "skippingYear": "Skipping a year…",
+  "weeksPlayed": "{count} weeks played",
+  "@weeksPlayed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tabHome": "Home",
+  "tabStudio": "Studio",
+  "tabReleases": "Releases",
+  "tabCharts": "Charts",
+  "tabCareer": "Career",
+  "weekNewsTitle": "Week {week}",
+  "@weekNewsTitle": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "yearSummaryTitle": "Your {year}",
+  "@yearSummaryTitle": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "yearStoppedTitle": "Stopped after {weeks} weeks",
+  "@yearStoppedTitle": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "highlights": "Highlights",
+  "dailyBonus": "Daily Premium bonus: {amount}",
+  "@dailyBonus": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "fame": "Fame",
+  "popularity": "Popularity",
+  "devotion": "Devotion",
+  "coreFans": "Core fans",
+  "listeners": "Listeners",
+  "streams": "Streams",
+  "albumUnits": "Album units",
+  "anticipationValue": "Anticipation {value}",
+  "@anticipationValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "hypeValue": "Hype {value}",
+  "@hypeValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "comebackSupport": "Comeback support",
+  "thisWeek": "This week",
+  "newsEmptyStart": "Play a week to see what happens.",
+  "newsQuiet": "A quiet week.",
+  "creativeEnergy": "Creative energy",
+  "energy": "Energy",
+  "burnoutWeeks": "Burnout: {weeks} more weeks without writing",
+  "@burnoutWeeks": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "songsLeftThisWeek": "{count} songs left this week",
+  "@songsLeftThisWeek": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sideIncome": "Side income",
+  "dayJob": "Day job",
+  "dayJobHint": "{amount} a week. It only pays — no effect on your music.",
+  "@dayJobHint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "watchAd": "Watch an ad (+{amount}) · {left}/{max} left",
+  "@watchAd": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "left": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "adTitle": "Ad",
+  "collectReward": "Collect",
+  "adReward": "+{amount} from the ad",
+  "@adReward": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "money": "Money",
+  "writeSong": "Write a song",
+  "songTitleOptional": "Title (optional)",
+  "genresUpTo": "Genres (up to {max}, the first is the main one)",
+  "@genresUpTo": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "producer": "Producer",
+  "cowriter": "Co-writer",
+  "nobody": "Nobody (do it yourself)",
+  "studioBudget": "Studio budget",
+  "budgetLow": "Low",
+  "budgetMedium": "Medium",
+  "budgetHigh": "High",
+  "writeAndRecord": "Write & record · {cost}",
+  "@writeAndRecord": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "songRecorded": "Song recorded",
+  "teamEstimate": "Your team's estimate",
+  "vaultCount": "Vault ({count})",
+  "@vaultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "vaultEmpty": "No unreleased songs. Write one above.",
+  "releaseSingle": "Release a single",
+  "newAlbum": "New album / EP",
+  "albumsAndEps": "Albums & EPs",
+  "noAlbumsYet": "No albums yet.",
+  "singles": "Singles",
+  "noSinglesYet": "No singles yet.",
+  "noSongsToRelease": "No songs to release. Write some in the studio first.",
+  "pickSingle": "Pick the single",
+  "singleReleased": "“{title}” is out!",
+  "@singleReleased": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "albumReleased": "“{title}” is out!",
+  "@albumReleased": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "firstWeekShort": "first week {units}",
+  "@firstWeekShort": {
+    "placeholders": {
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "pickCampaign": "Promotion campaign",
+  "campaignHint": "Campaigns bring new listeners and radio play. In the streaming era they work through playlists.",
+  "campaignNone": "No promotion",
+  "campaignStandard": "Standard",
+  "campaignIntensive": "Intensive",
+  "campaignGlobal": "Global push",
+  "campaignNoneHint": "Free, but far fewer new listeners.",
+  "campaignStandardHint": "What labels usually do.",
+  "campaignIntensiveHint": "More reach and radio, better playlist chances.",
+  "campaignGlobalHint": "The biggest push money can buy.",
+  "albumTitle": "Title",
+  "typeSingle": "Single",
+  "typeEp": "EP",
+  "typeAlbum": "Album",
+  "tracksPicked": "Tracks: {count} (needs {min}–{max})",
+  "@tracksPicked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editions": "Editions",
+  "editionsCount": "{count} editions",
+  "@editionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editionsHint": "Extra editions (vinyl colors, deluxe…) make devoted fans buy again. {cost} each.",
+  "@editionsHint": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "staggerEditions": "Release extras in later weeks",
+  "staggerEditionsHint": "Keeps the album selling for longer.",
+  "release": "Release",
+  "releaseWithCost": "Release · editions {cost}",
+  "@releaseWithCost": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "statusVault": "In the vault",
+  "statusAlbumTrack": "Album track",
+  "chartUsSongs": "US Top 100 Songs",
+  "chartUkSongs": "UK Top 100 Singles",
+  "chartGlobalSongs": "Global 200",
+  "chartUsAlbums": "US Top 100 Albums",
+  "chartUkAlbums": "UK Top 100 Albums",
+  "chartGlobalAlbums": "Global Top 100 Albums",
+  "chartPlatform": "{platform} Top 50 {region}",
+  "@chartPlatform": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      },
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "chartShortUs": "US Songs",
+  "chartShortUk": "UK Singles",
+  "chartShortGlobal": "Global 200",
+  "chartShortUsAlbums": "US Albums",
+  "chartShortUkAlbums": "UK Albums",
+  "chartShortGlobalAlbums": "Global Albums",
+  "regionGlobal": "Global",
+  "regionNorthAmerica": "North America",
+  "regionEurope": "Europe",
+  "regionOther": "Rest of world",
+  "chartEmpty": "This chart has no entries yet.",
+  "chartNew": "NEW",
+  "chartReentry": "RE",
+  "chartPeakWeeks": "peak {peak} · {weeks} wks",
+  "@chartPeakWeeks": {
+    "placeholders": {
+      "peak": {
+        "type": "int"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "releasedOn": "Released {week}",
+  "@releasedOn": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "onPlaylist": "On a big playlist",
+  "releaseAsSingle": "Release as single",
+  "numbers": "Numbers",
+  "thisWeekStreams": "This week",
+  "downloads": "Downloads",
+  "radioAudience": "Radio audience",
+  "weeklyStreams": "Weekly streams",
+  "weeklyUnits": "Weekly units",
+  "positionOn": "Position on {chart}",
+  "@positionOn": {
+    "placeholders": {
+      "chart": {
+        "type": "String"
+      }
+    }
+  },
+  "chartHistory": "Chart history",
+  "neverCharted": "Has not charted yet.",
+  "chartRecordLine": "debut #{debut} · {weeks} weeks · {no1} weeks at #1 · now {now}",
+  "@chartRecordLine": {
+    "placeholders": {
+      "debut": {
+        "type": "int"
+      },
+      "weeks": {
+        "type": "int"
+      },
+      "no1": {
+        "type": "int"
+      },
+      "now": {
+        "type": "int"
+      }
+    }
+  },
+  "firstWeek": "First week",
+  "usUnits": "US units",
+  "usPureSales": "US pure sales",
+  "ukUnits": "UK units",
+  "globalUnits": "Worldwide units",
+  "totalSales": "Total",
+  "pureSales": "Pure sales",
+  "tracklist": "Tracklist",
+  "careerTotals": "Career",
+  "byRegion": "By region",
+  "numberOnes": "#1s",
+  "yearByYear": "Year by year",
+  "yearByYearEmpty": "Play some weeks to fill your history.",
+  "year": "Year",
+  "topSongs": "Top songs",
+  "noReleasesYet": "No releases yet.",
+  "language": "Language",
+  "languageSystem": "Device language",
+  "premiumTest": "Premium (test mode)",
+  "premiumTestHint": "Turns Premium on for testing until in-app purchases are added.",
+  "eraFlop": "Flop",
+  "eraDisappointing": "Disappointing",
+  "eraNormal": "As expected",
+  "eraSuccess": "Success",
+  "eraSmash": "Smash",
+  "errorGeneric": "Something went wrong.",
+  "errorNotEnoughMoney": "Not enough money.",
+  "errorWeeklyLimit": "You can write at most 3 songs a week.",
+  "errorBurnout": "You are burned out. Rest for a few weeks.",
+  "errorCollaboratorRefused": "They won't work with you yet — you need more fame.",
+  "errorInvalidGenres": "Pick 1 to 3 different genres.",
+  "errorInvalidTitle": "The title must be 1–60 characters.",
+  "errorAlreadySingle": "This song is already a single.",
+  "errorTrackCount": "Wrong number of tracks for this release.",
+  "errorTrackTaken": "A song is already on another release.",
+  "errorAdLimit": "You watched all 3 ads this week.",
+  "errorPremiumRequired": "This start needs Premium.",
+  "errorInvalidName": "Enter a name (up to 40 characters).",
+  "errorInvalidMembers": "A group needs 2–7 members with names.",
+  "errorInvalidSkills": "Stat points do not add up.",
+  "eventNumberOne": "“{title}” is #1 on the {chart}!",
+  "@eventNumberOne": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "chart": {
+        "type": "String"
+      }
+    }
+  },
+  "eventNumberOneAgain": "“{title}” is back at #1 on the {chart} ({weeks} weeks in total).",
+  "@eventNumberOneAgain": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "chart": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "eventDebut": "“{title}” debuted at #{pos} on the {chart}.",
+  "@eventDebut": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "chart": {
+        "type": "String"
+      },
+      "pos": {
+        "type": "int"
+      }
+    }
+  },
+  "eventNewPeak": "“{title}” climbed to a new peak: #{pos} on the {chart}.",
+  "@eventNewPeak": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "chart": {
+        "type": "String"
+      },
+      "pos": {
+        "type": "int"
+      }
+    }
+  },
+  "eventAlbumFirstWeek": "“{title}” sold {units} units in the US in its first week (#{pos}); {global} worldwide.",
+  "@eventAlbumFirstWeek": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      },
+      "pos": {
+        "type": "int"
+      },
+      "global": {
+        "type": "String"
+      }
+    }
+  },
+  "eventAlbumFirstWeekNoChart": "“{title}” sold {units} units in the US in its first week; {global} worldwide.",
+  "@eventAlbumFirstWeekNoChart": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      },
+      "global": {
+        "type": "String"
+      }
+    }
+  },
+  "eventViral": "“{title}” is going viral on short-video apps!",
+  "@eventViral": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventPlaylistBig": "“{title}” was added to a big {platform} playlist.",
+  "@eventPlaylistBig": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "eventPlaylistMid": "“{title}” was added to a {platform} playlist.",
+  "@eventPlaylistMid": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "eventEraClosed": "Your album era is over: {result}.",
+  "@eventEraClosed": {
+    "placeholders": {
+      "result": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBurnoutOver": "Your burnout is over — you can write again.",
+  "eventRivalNumberOne": "{artist}'s “{title}” is the new #1 on the {chart}.",
+  "@eventRivalNumberOne": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "chart": {
+        "type": "String"
+      }
+    }
+  },
+  "genrePop": "Pop",
+  "genreHipHop": "Hip-Hop",
+  "genreRnb": "R&B",
+  "genreRock": "Rock",
+  "genreCountry": "Country",
+  "genreDance": "Dance/Electronic",
+  "genreLatin": "Latin",
+  "genreIndie": "Indie/Alternative",
+  "genreMetal": "Metal",
+  "genrePunk": "Punk",
+  "genreSoul": "Soul",
+  "genreFunk": "Funk",
+  "genreDisco": "Disco",
+  "genreJazz": "Jazz",
+  "genreBlues": "Blues",
+  "genreFolk": "Folk",
+  "genreReggae": "Reggae",
+  "genreAfrobeats": "Afrobeats",
+  "genreKpop": "K-Pop",
+  "genreGospel": "Gospel",
+  "genreClassical": "Classical"
+}

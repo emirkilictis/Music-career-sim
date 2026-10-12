@@ -7,7 +7,7 @@ test edilir; Android aynı koddan derlenir.
 
 ```
 music-career-sim/
-├── app/                      Flutter uygulaması: ekranlar, state (Riverpod), yerelleştirme
+├── app/                      Flutter uygulaması: ekranlar, state (ChangeNotifier), yerelleştirme (ARB, EN/TR)
 ├── packages/
 │   ├── simulation_core/      SAF Dart — Flutter'a ve veritabanına bağımlı değil.
 │   │                         Linux/macOS'ta `dart test` ile çalışır.
@@ -48,7 +48,7 @@ music-career-sim/
 ```
 UI isolate (Flutter)                         Simülasyon isolate'i (uygulama açıkken hep yaşar)
   GameController ──(komut mesajı)──────────▶   • GameSession burada yaşar; sıcak dünya BELLEKTE
-   (Riverpod)                                  • simulateWeek() senkron, saf fonksiyon
+   (CareerState)                               • simulateWeek() senkron, saf fonksiyon
                                                • sonuç → SQLite yazma bağlantısı (tek transaction)
                                                • commit başarılıysa bellekteki durumu ilerlet
   ◀──(WeekSummary mesajı: küçük, sadece özet)──
@@ -56,6 +56,14 @@ UI isolate (Flutter)                         Simülasyon isolate'i (uygulama aç
 ```
 
 - Isolate'ler bellek paylaşmaz; UI'a büyük nesne grafiği gönderilmez, sadece özet ve ID'ler.
+- **Uygulandığı hali (Faz 1):** `IsolateGameController` oyunu uzun ömürlü bir isolate'te çalıştırır.
+  Komutlar `GameSession` üzerinde çalışan closure'lardır ve **sadece `app/lib/core/commands.dart`
+  içinde** üretilir: bir closure, oluşturulduğu kapsamdaki her yakalanmış değişkeni isolate'e taşır;
+  widget içinde yazılırsa widget ağacını sürükleyip gönderilemez. Sonuçlar `game` paketinin view
+  nesneleridir. İlerleme (dünya kurma, yıl atlama) `SendPort` ile gelir. Testlerde aynı API'yi
+  `LocalGameController` (aynı isolate) sağlar; `isolate_controller_test` gerçek isolate'i dener.
+- State: `CareerState` (ChangeNotifier) oyuncu özetini ve son haftanın haberlerini tutar; her
+  komuttan sonra yenilenir, ekranlar `revision` değişince kendi verilerini yeniden ister.
 - **Çift tıklama koruması:** UI'da açık durum makinesi (`idle` / `simulating`); simülasyon isolate'i
   komutları sırayla işler.
 - İleri sarma / yıl atlama: her hafta ayrı commit; haftalar arasında iptal kontrolü;
@@ -168,6 +176,11 @@ Bütçenin çoğu DB yazımı ve UI yenilemesine gider; 1.500 şarkının matema
 - Test: iPhone 16 Pro. Android için ileride ucuz bir Android telefon önerilir (emülatör 8 GB RAM'de ağır).
 - `simulation_core` ve `sim_cli` saf Dart olduğu için Mac olmadan da (Linux'ta) geliştirilip test
   edilebilir; Faz 0 buna uygundur.
+- Monorepo bir pub **workspace**'tir ve içinde Flutter uygulaması olduğu için bağımlılıklar kökten
+  `flutter pub get` ile alınır (paket testleri: ilgili klasörde `dart test`, Flutter'ın Dart'ıyla).
+- Bulut/Linux ortamında uygulama Linux masaüstü olarak derlenip çalıştırılabilir; ekran görüntüleri
+  `SCREENSHOTS=1 flutter test test/screenshots_test.dart` ile iPhone boyutunda üretilir.
+- iPhone'da çalıştırma adımları: [mac-setup.md](mac-setup.md).
 - Mağazalar: App Store (yıllık geliştirici ücreti), Google Play (tek seferlik kayıt ücreti).
 
 ## 11. Uygulama içi satın alma (Premium)

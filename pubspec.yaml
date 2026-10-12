@@ -7,3 +7,4 @@ workspace:
   - packages/persistence
   - packages/game
   - tools/sim_cli
+  - app

@@ -2,3 +2,4 @@
 build/
 *.exe
 /out/
+app/lib/l10n/gen/
