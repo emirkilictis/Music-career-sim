@@ -110,7 +110,14 @@ void main() {
     await tester.tap(find.text('US ALBUMS'));
     await shot(tester, '08_charts_albums');
 
-    await tab(tester, 'Streamify');
+    await tab(tester, 'Career');
+    await shot(tester, '15_career');
+    await tab(tester, 'Home');
+    await tester.scrollUntilVisible(find.text('Streamify'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await shot(tester, '04b_home_platforms');
+    await tester.tap(find.text('Streamify'));
     await shot(tester, '09_streamify');
     await tester.tap(find.text('Velvet Avenue').last);
     await shot(tester, '10_artist_page');
@@ -127,19 +134,12 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    await tab(tester, 'Releases');
-    await tester.tap(find.text('Neon Bloom'));
-    await shot(tester, '14_album_detail');
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    await tab(tester, 'Home');
-    await tester.scrollUntilVisible(find.text('Career summary'), 300,
-        scrollable: find.byType(Scrollable).first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Career summary'));
-    await tester.pumpAndSettle();
-    await shot(tester, '15_career');
+    await tab(tester, 'Releases');
+    await tester.tap(find.text('Neon Bloom'));
+    await shot(tester, '14_album_detail');
     await tester.pageBack();
     await tester.pumpAndSettle();
 

@@ -288,5 +288,8 @@
   "top50Title": "Top 50 – {region}",
   "top50Description": "Şu an en çok dinlenen şarkıların haftalık güncellemesi – {region}.",
   "details": "Detaylar",
+  "platforms": "Platformlar",
+  "streamifyTileHint": "Sanatçı profilin ve Top 50 listeleri",
+  "morePlatformsSoon": "Daha fazla platform (video, diğer müzik servisleri) yolda.",
   "songsCount": "{count} şarkı"
 }

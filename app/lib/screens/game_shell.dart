@@ -9,10 +9,10 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
+import 'career_tab.dart';
 import 'charts_tab.dart';
 import 'dashboard_tab.dart';
 import 'releases_tab.dart';
-import 'streamify/streamify_tab.dart';
 import 'studio_tab.dart';
 
 /// Pushes [page] with the open career available to it.
@@ -159,18 +159,13 @@ class _GameShellState extends State<GameShell> {
         final fmt = context.fmt;
         final career = context.career;
         final p = career.player;
-        final streamify = _tab == 4;
         final paper = _tab == 3;
         return Scaffold(
-          backgroundColor: streamify
-              ? StreamifyColors.bg
-              : paper
-                  ? PaperColors.ink
-                  : null,
+          backgroundColor: paper ? PaperColors.ink : null,
           body: SafeArea(
             bottom: false,
             child: Column(children: [
-              if (!streamify && !paper)
+              if (!paper)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(4, 6, 16, 6),
                   child: Row(children: [
@@ -206,7 +201,7 @@ class _GameShellState extends State<GameShell> {
                   StudioTab(),
                   ReleasesTab(),
                   ChartsTab(),
-                  StreamifyTab(),
+                  CareerScreen(embedded: true),
                 ]),
               ),
             ]),
@@ -257,10 +252,9 @@ class _GameShellState extends State<GameShell> {
                       icon: const Icon(Icons.format_list_numbered_rounded),
                       label: l.tabCharts),
                   NavigationDestination(
-                      icon: const Icon(Icons.graphic_eq_rounded),
-                      selectedIcon: const Icon(Icons.graphic_eq_rounded,
-                          color: StreamifyColors.accent),
-                      label: l.tabStreamify),
+                      icon: const Icon(Icons.person_outline_rounded),
+                      selectedIcon: const Icon(Icons.person_rounded),
+                      label: l.tabCareer),
                 ],
               ),
             ],

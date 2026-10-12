@@ -719,6 +719,9 @@
     }
   },
   "details": "Details",
+  "platforms": "Platforms",
+  "streamifyTileHint": "Your artist profile and Top 50 charts",
+  "morePlatformsSoon": "More platforms (video, other music services) are coming.",
   "songsCount": "{count} songs",
   "@songsCount": {
     "placeholders": {

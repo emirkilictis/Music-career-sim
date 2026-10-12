@@ -9,8 +9,9 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
-import 'career_tab.dart';
+import '../core/format.dart';
 import 'game_shell.dart';
+import 'streamify/streamify_tab.dart';
 
 /// Home: who you are right now, this week's news and side income.
 class DashboardTab extends StatelessWidget {
@@ -145,22 +146,37 @@ class DashboardTab extends StatelessWidget {
         const SizedBox(height: 14),
         const _SideIncomeSection(),
         const SizedBox(height: 14),
-        Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(22),
-          child: ListTile(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
-            leading:
-                const IconBubble(Icons.insights_rounded, color: AppColors.sky),
-            title: Text(l.careerSummary,
-                style: const TextStyle(fontWeight: FontWeight.w800)),
-            subtitle: Text(l.careerSummaryHint),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => pushInCareer(context, const CareerScreen()),
-          ),
+        Section(
+          title: l.platforms,
+          icon: Icons.podcasts_rounded,
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Material(
+              color: StreamifyColors.surfaceHigh,
+              borderRadius: BorderRadius.circular(16),
+              child: ListTile(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                leading: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: const BoxDecoration(
+                      color: StreamifyColors.accent, shape: BoxShape.circle),
+                  child:
+                      const Icon(Icons.graphic_eq_rounded, color: Colors.black),
+                ),
+                title: const Text(platformName,
+                    style: TextStyle(fontWeight: FontWeight.w800)),
+                subtitle: Text(l.streamifyTileHint),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => pushInCareer(context, const StreamifyScreen()),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(l.morePlatformsSoon,
+                style: const TextStyle(
+                    color: AppColors.textFaint, fontSize: 12.5)),
+          ]),
         ),
       ],
     );

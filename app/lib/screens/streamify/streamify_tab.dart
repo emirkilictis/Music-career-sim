@@ -20,14 +20,15 @@ const _top50 = [
 ];
 
 /// The in-game streaming app: your artist profile and its Top 50 charts.
-class StreamifyTab extends StatefulWidget {
-  const StreamifyTab({super.key});
+/// One of several platforms (opened from Home → Platforms).
+class StreamifyScreen extends StatefulWidget {
+  const StreamifyScreen({super.key});
 
   @override
-  State<StreamifyTab> createState() => _StreamifyTabState();
+  State<StreamifyScreen> createState() => _StreamifyScreenState();
 }
 
-class _StreamifyTabState extends State<StreamifyTab> {
+class _StreamifyScreenState extends State<StreamifyScreen> {
   ArtistPageView? _me;
   List<int> _active = const [];
   int _loadedRevision = -1;
@@ -64,151 +65,160 @@ class _StreamifyTabState extends State<StreamifyTab> {
     final plays = NumberFormat.decimalPattern(l.localeName);
     TextStyle h = const TextStyle(fontSize: 22, fontWeight: FontWeight.w900);
 
-    return ColoredBox(
-      color: StreamifyColors.bg,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-        children: [
-          Row(children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: const BoxDecoration(
-                  color: StreamifyColors.accent, shape: BoxShape.circle),
-              child: const Icon(Icons.graphic_eq_rounded,
-                  color: Colors.black, size: 22),
-            ),
-            const SizedBox(width: 10),
-            const Text(platformName,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(context.fmt.week(career.week),
-                  textAlign: TextAlign.right,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      color: StreamifyColors.muted,
-                      fontWeight: FontWeight.w600)),
-            ),
-          ]),
-          const SizedBox(height: 22),
-          Text(l.yourProfile, style: h),
-          const SizedBox(height: 12),
-          Material(
-            color: StreamifyColors.surfaceHigh,
-            borderRadius: BorderRadius.circular(10),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () => pushInCareer(context, ArtistPage(artistId: p.id)),
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Row(children: [
-                  ArtistAvatar(name: p.name, seed: p.id, size: 72),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(p.name,
-                              style: const TextStyle(
-                                  fontSize: 19, fontWeight: FontWeight.w900)),
-                          const SizedBox(height: 4),
-                          Text(
-                              l.monthlyListeners(plays
-                                  .format((me?.monthlyListeners ?? 0).round())),
-                              style: const TextStyle(
-                                  color: StreamifyColors.muted)),
-                        ]),
-                  ),
-                  const Icon(Icons.chevron_right_rounded,
-                      color: StreamifyColors.muted),
-                ]),
-              ),
-            ),
-          ),
-          if (charts.isNotEmpty) ...[
-            const SizedBox(height: 26),
-            Text(l.streamifyCharts, style: h),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 196,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: charts.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 14),
-                itemBuilder: (context, i) => InkWell(
+    return Scaffold(
+        backgroundColor: StreamifyColors.bg,
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+            children: [
+              Row(children: [
+                Transform.translate(
+                    offset: const Offset(-12, 0),
+                    child: const BackButton(color: Colors.white)),
+                const SizedBox(width: 0),
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: const BoxDecoration(
+                      color: StreamifyColors.accent, shape: BoxShape.circle),
+                  child: const Icon(Icons.graphic_eq_rounded,
+                      color: Colors.black, size: 22),
+                ),
+                const SizedBox(width: 10),
+                const Text(platformName,
+                    style:
+                        TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(context.fmt.week(career.week),
+                      textAlign: TextAlign.right,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: StreamifyColors.muted,
+                          fontWeight: FontWeight.w600)),
+                ),
+              ]),
+              const SizedBox(height: 22),
+              Text(l.yourProfile, style: h),
+              const SizedBox(height: 12),
+              Material(
+                color: StreamifyColors.surfaceHigh,
+                borderRadius: BorderRadius.circular(10),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
                   onTap: () =>
-                      pushInCareer(context, PlaylistPage(chartId: charts[i])),
-                  child: SizedBox(
-                    width: 150,
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Top50Cover(chartId: charts[i]),
-                          const SizedBox(height: 8),
-                          Text(l.top50Title(top50Region(context, charts[i])),
-                              maxLines: 2,
-                              style: const TextStyle(
-                                  color: StreamifyColors.muted,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13)),
-                        ]),
+                      pushInCareer(context, ArtistPage(artistId: p.id)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(children: [
+                      ArtistAvatar(name: p.name, seed: p.id, size: 72),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(p.name,
+                                  style: const TextStyle(
+                                      fontSize: 19,
+                                      fontWeight: FontWeight.w900)),
+                              const SizedBox(height: 4),
+                              Text(
+                                  l.monthlyListeners(plays.format(
+                                      (me?.monthlyListeners ?? 0).round())),
+                                  style: const TextStyle(
+                                      color: StreamifyColors.muted)),
+                            ]),
+                      ),
+                      const Icon(Icons.chevron_right_rounded,
+                          color: StreamifyColors.muted),
+                    ]),
                   ),
                 ),
               ),
-            ),
-          ],
-          const SizedBox(height: 22),
-          Text(l.yourTopTracks, style: h),
-          const SizedBox(height: 8),
-          if (me == null || me.popular.isEmpty)
-            EmptyNote(l.noReleasesYet)
-          else
-            for (final (i, s) in me.popular.take(5).indexed)
-              InkWell(
-                onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) =>
-                            SongDetailScreen(songId: s.id, state: career))),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 7),
-                  child: Row(children: [
-                    SizedBox(
-                        width: 24,
-                        child: Text('${i + 1}',
-                            style: const TextStyle(
-                                color: StreamifyColors.muted,
-                                fontWeight: FontWeight.w600))),
-                    CoverArt(
-                        seed: songCoverSeed(s.id, s.albumId),
-                        size: 48,
-                        radius: 2),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(s.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15.5)),
-                            Text(
-                                streamifyPlays(
-                                    context, s.lifetimeStreams.total),
+              if (charts.isNotEmpty) ...[
+                const SizedBox(height: 26),
+                Text(l.streamifyCharts, style: h),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 196,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: charts.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 14),
+                    itemBuilder: (context, i) => InkWell(
+                      onTap: () => pushInCareer(
+                          context, PlaylistPage(chartId: charts[i])),
+                      child: SizedBox(
+                        width: 150,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Top50Cover(chartId: charts[i]),
+                              const SizedBox(height: 8),
+                              Text(
+                                  l.top50Title(top50Region(context, charts[i])),
+                                  maxLines: 2,
+                                  style: const TextStyle(
+                                      color: StreamifyColors.muted,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13)),
+                            ]),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 22),
+              Text(l.yourTopTracks, style: h),
+              const SizedBox(height: 8),
+              if (me == null || me.popular.isEmpty)
+                EmptyNote(l.noReleasesYet)
+              else
+                for (final (i, s) in me.popular.take(5).indexed)
+                  InkWell(
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) =>
+                                SongDetailScreen(songId: s.id, state: career))),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 7),
+                      child: Row(children: [
+                        SizedBox(
+                            width: 24,
+                            child: Text('${i + 1}',
                                 style: const TextStyle(
                                     color: StreamifyColors.muted,
-                                    fontSize: 13)),
-                          ]),
+                                    fontWeight: FontWeight.w600))),
+                        CoverArt(
+                            seed: songCoverSeed(s.id, s.albumId),
+                            size: 48,
+                            radius: 2),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(s.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15.5)),
+                                Text(
+                                    streamifyPlays(
+                                        context, s.lifetimeStreams.total),
+                                    style: const TextStyle(
+                                        color: StreamifyColors.muted,
+                                        fontSize: 13)),
+                              ]),
+                        ),
+                      ]),
                     ),
-                  ]),
-                ),
-              ),
-        ],
-      ),
-    );
+                  ),
+            ],
+          ),
+        ));
   }
 }

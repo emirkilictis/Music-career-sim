@@ -67,23 +67,22 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
+    await tester.tap(find.text('Career'));
+    await tester.pumpAndSettle();
+    expect(find.text('By region'), findsOneWidget);
+
+    // Platforms live on Home, not in the tab bar.
+    await tester.tap(find.text('Home'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Streamify'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Streamify'));
     await tester.pumpAndSettle();
     expect(find.text('Your artist profile'), findsOneWidget);
     await tester.tap(find.text('Top 50 – Global'));
     await tester.pumpAndSettle();
     expect(find.textContaining('50 songs'), findsOneWidget);
-    await tester.pageBack();
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Home'));
-    await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Career summary'), 300,
-        scrollable: find.byType(Scrollable).first);
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Career summary'));
-    await tester.pumpAndSettle();
-    expect(find.text('By region'), findsOneWidget);
   });
 
   testWidgets('free players see Premium starts locked', (tester) async {

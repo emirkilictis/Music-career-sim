@@ -82,7 +82,7 @@ görüntüleri: [screenshots/](screenshots/). iPhone'da çalıştırma: [mac-set
 
 Görsel tasarım (K34): yumuşak koyu tema + pastel vurgular, Figtree / Barlow Condensed yazı tipleri,
 otomatik kapak görselleri; listeler dergi (Billboard benzeri) görünümünde, Streamify sekmesi büyük bir
-streaming uygulaması (Spotify benzeri) görünümünde. Marka adı/logosu kullanılmaz.
+streaming uygulaması (Spotify benzeri) görünümünde; alt barda değil, ana ekrandaki **Platformlar** bölümünden açılır (ileride video ve diğer müzik servisleri de oraya eklenecek). Marka adı/logosu kullanılmaz.
 
 Sırada: görsel yükleme (kapak/profil), gerçek satın alma ve reklam SDK'ları, rollout planlama ekranı,
 kayıt/yıl atlama sırasında iptal, ilk açılış rehberi, ikonlar ve cilalar.
