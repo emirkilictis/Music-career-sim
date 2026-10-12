@@ -657,5 +657,74 @@
   "genreAfrobeats": "Afrobeats",
   "genreKpop": "K-Pop",
   "genreGospel": "Gospel",
-  "genreClassical": "Classical"
+  "genreClassical": "Classical",
+  "tabStreamify": "Streamify",
+  "careerSummary": "Career summary",
+  "careerSummaryHint": "Totals, regions, #1s and year by year",
+  "chartsMasthead": "THE CHARTS",
+  "weekOf": "Week of {date}",
+  "@weekOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "colLastWeek": "LW",
+  "colPeak": "PEAK",
+  "colWeeks": "WKS",
+  "chartGainer": "GAINER",
+  "you": "YOU",
+  "verifiedArtist": "Verified artist",
+  "monthlyListeners": "{count} monthly listeners",
+  "@monthlyListeners": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "follow": "Follow",
+  "popular": "Popular",
+  "seeMore": "See more",
+  "showLess": "Show less",
+  "discography": "Discography",
+  "about": "About",
+  "followersValue": "{count} followers",
+  "@followersValue": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "whereListen": "Where people listen",
+  "yourProfile": "Your artist profile",
+  "streamifyCharts": "Charts",
+  "yourTopTracks": "Your top tracks",
+  "top50Title": "Top 50 – {region}",
+  "@top50Title": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "top50Description": "Your weekly update of the most played tracks right now – {region}.",
+  "@top50Description": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "details": "Details",
+  "songsCount": "{count} songs",
+  "@songsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

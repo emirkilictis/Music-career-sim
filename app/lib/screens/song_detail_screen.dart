@@ -4,6 +4,7 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/line_chart.dart';
 import 'releases_tab.dart';
@@ -72,13 +73,19 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          ReleaseHeader(
+            coverSeed: songCoverSeed(s.id, s.albumId),
+            title: s.title,
+            subtitle: '${s.artistName} · ${fmt.songStatus(s)}',
+            trailing: GradeTag(fmt.grade(s.estimatedGrade)),
+          ),
+          const SizedBox(height: 14),
           Section(
-            title: '${s.artistName} · ${fmt.songStatus(s)}',
-            trailing: CircleAvatar(child: Text(fmt.grade(s.estimatedGrade))),
+            title: fmt.genres(s.genres),
+            icon: Icons.sell_outlined,
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(fmt.genres(s.genres)),
                   const SizedBox(height: 4),
                   Text(
                     [
@@ -92,10 +99,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   ),
                   if (s.inVault || (!s.isSingle && s.albumId >= 0)) ...[
                     const SizedBox(height: 12),
-                    FilledButton.icon(
+                    GradientButton(
                       onPressed: () => _release(s),
-                      icon: const Icon(Icons.music_note),
-                      label: Text(l.releaseAsSingle),
+                      icon: Icons.music_note_rounded,
+                      label: l.releaseAsSingle,
                     ),
                   ],
                 ]),
@@ -189,4 +196,49 @@ class ChartRecords extends StatelessWidget {
             ]),
     );
   }
+}
+
+/// Big cover with title and artist, centered (detail pages).
+class ReleaseHeader extends StatelessWidget {
+  const ReleaseHeader(
+      {super.key,
+      required this.coverSeed,
+      required this.title,
+      required this.subtitle,
+      this.trailing});
+  final int coverSeed;
+  final String title;
+  final String subtitle;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+        const SizedBox(height: 4),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: const [
+              BoxShadow(
+                  blurRadius: 30, offset: Offset(0, 12), color: Colors.black54),
+            ],
+          ),
+          child: CoverArt(seed: coverSeed, size: 190, radius: 18),
+        ),
+        const SizedBox(height: 16),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Flexible(
+            child: Text(title,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+          ),
+          if (trailing != null) ...[const SizedBox(width: 10), trailing!],
+        ]),
+        const SizedBox(height: 4),
+        Text(subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600)),
+      ]);
 }

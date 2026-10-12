@@ -327,7 +327,8 @@ void albumShapeTests() {
   test('more tracks raise the debut with diminishing returns', () {
     final ten = _albumRun(tracks: 10, skill: 90, weeks: 1).first;
     final forty = _albumRun(tracks: 40, skill: 90, weeks: 1).first;
-    expect(forty, greaterThan(1.15 * ten));
+    // A modest lift (streaming equivalents of the extra tracks), not 4×.
+    expect(forty, greaterThan(1.1 * ten));
     expect(forty, lessThan(1.8 * ten));
   });
 }

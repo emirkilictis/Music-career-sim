@@ -4,6 +4,7 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/line_chart.dart';
 import 'song_detail_screen.dart';
@@ -62,8 +63,15 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          ReleaseHeader(
+            coverSeed: albumCoverSeed(a.id),
+            title: a.title,
+            subtitle: '${a.artistName} · ${fmt.albumType(a.type)}',
+          ),
+          const SizedBox(height: 14),
           Section(
-            title: '${a.artistName} · ${fmt.albumType(a.type)}',
+            title: l.details,
+            icon: Icons.info_outline_rounded,
             child: Text(
               '${l.releasedOn(fmt.week(a.releaseWeek))} · ${fmt.campaign(a.campaign)}'
               '${a.variantWeeks.length > 1 ? ' · ${l.editionsCount(a.variantWeeks.length)}' : ''}',

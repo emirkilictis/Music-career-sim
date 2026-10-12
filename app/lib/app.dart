@@ -5,6 +5,7 @@ import 'core/game_controller.dart';
 import 'core/scope.dart';
 import 'core/settings.dart';
 import 'l10n/gen/app_localizations.dart';
+import 'ui/theme.dart';
 import 'screens/slots_screen.dart';
 
 class MusicCareerApp extends StatelessWidget {
@@ -13,31 +14,6 @@ class MusicCareerApp extends StatelessWidget {
 
   final GameController controller;
   final AppSettings settings;
-
-  static ThemeData theme() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF8E5CFF),
-      brightness: Brightness.dark,
-    ).copyWith(surface: const Color(0xFF121016));
-    return ThemeData(
-      colorScheme: scheme,
-      useMaterial3: true,
-      scaffoldBackgroundColor: scheme.surface,
-      cardTheme: CardThemeData(
-        color: scheme.surfaceContainer,
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: scheme.surface,
-        surfaceTintColor: Colors.transparent,
-        centerTitle: false,
-      ),
-      listTileTheme: const ListTileThemeData(
-          contentPadding: EdgeInsets.symmetric(horizontal: 16)),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +26,7 @@ class MusicCareerApp extends StatelessWidget {
           builder: (context, _) => MaterialApp(
             onGenerateTitle: (c) => AppLocalizations.of(c).appTitle,
             debugShowCheckedModeBanner: false,
-            theme: theme(),
+            theme: appTheme(),
             locale: settings.locale,
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: const [

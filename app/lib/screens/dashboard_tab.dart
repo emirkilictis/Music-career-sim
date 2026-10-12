@@ -5,8 +5,12 @@ import 'package:game/game.dart';
 
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../ui/palette.dart';
+import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
+import 'career_tab.dart';
+import 'game_shell.dart';
 
 /// Home: who you are right now, this week's news and side income.
 class DashboardTab extends StatelessWidget {
@@ -18,37 +22,65 @@ class DashboardTab extends StatelessWidget {
     final fmt = context.fmt;
     final career = context.career;
     final p = career.player;
-    final s = Theme.of(context).colorScheme;
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        Section(
-          title: [
-            fmt.kind(p.kind),
-            fmt.genre(p.genre),
-            fmt.difficulty(career.difficulty),
-          ].join(' · '),
+        // Hero card.
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(26),
+            gradient: AppColors.haze(AppColors.lilac, AppColors.pink),
+          ),
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (p.members.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Text(p.members.join(', '),
-                      style: TextStyle(color: s.outline)),
+              Row(children: [
+                ArtistAvatar(name: p.name, seed: p.id, size: 64),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(p.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                              fontSize: 24,
+                              height: 1.1,
+                              fontWeight: FontWeight.w900)),
+                      const SizedBox(height: 8),
+                      Wrap(spacing: 6, runSpacing: 6, children: [
+                        Tag(fmt.kind(p.kind), color: AppColors.lilac),
+                        Tag(fmt.genre(p.genre), color: AppColors.pink),
+                        Tag(fmt.difficulty(career.difficulty),
+                            color: AppColors.peach),
+                      ]),
+                    ],
+                  ),
                 ),
+              ]),
+              if (p.members.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(p.members.join(' · '),
+                    style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w600)),
+              ],
+              const SizedBox(height: 16),
               MeterRow(label: l.fame, value: p.fame, text: fmt.percent(p.fame)),
               MeterRow(
                   label: l.popularity,
                   value: p.popularity,
-                  text: fmt.percent(p.popularity)),
+                  text: fmt.percent(p.popularity),
+                  colors: const [AppColors.sky, AppColors.lilac]),
               MeterRow(
                   label: l.devotion,
                   value: p.devotion,
                   text: fmt.percent(p.devotion),
-                  color: s.tertiary),
-              const SizedBox(height: 12),
+                  colors: const [AppColors.pink, AppColors.peach]),
+              const SizedBox(height: 16),
               StatGrid(tiles: [
                 StatTile(label: l.coreFans, value: fmt.compact(p.coreFans)),
                 StatTile(
@@ -62,82 +94,113 @@ class DashboardTab extends StatelessWidget {
               ]),
               if (p.anticipation > 0.01 ||
                   p.hype > 0.01 ||
-                  p.comebackSupport > 0.05)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Wrap(spacing: 8, runSpacing: 6, children: [
-                    if (p.anticipation > 0.01)
-                      Chip(
-                          avatar: const Icon(Icons.hourglass_top, size: 16),
-                          label: Text(l.anticipationValue(
-                              fmt.percent(p.anticipation.clamp(0, 1))))),
-                    if (p.hype > 0.01)
-                      Chip(
-                          avatar: const Icon(Icons.bolt, size: 16),
-                          label: Text(
-                              l.hypeValue(fmt.percent(p.hype.clamp(0, 1))))),
-                    if (p.comebackSupport > 0.05)
-                      Chip(
-                          avatar: const Icon(Icons.healing, size: 16),
-                          label: Text(l.comebackSupport)),
-                  ]),
-                ),
+                  p.comebackSupport > 0.05) ...[
+                const SizedBox(height: 14),
+                Wrap(spacing: 6, runSpacing: 6, children: [
+                  if (p.anticipation > 0.01)
+                    Tag(
+                        l.anticipationValue(
+                            fmt.percent(p.anticipation.clamp(0, 1))),
+                        icon: Icons.hourglass_top_rounded,
+                        color: AppColors.butter),
+                  if (p.hype > 0.01)
+                    Tag(l.hypeValue(fmt.percent(p.hype.clamp(0, 1))),
+                        icon: Icons.bolt_rounded, color: AppColors.peach),
+                  if (p.comebackSupport > 0.05)
+                    Tag(l.comebackSupport,
+                        icon: Icons.healing_rounded, color: AppColors.mint),
+                ]),
+              ],
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        _NewsSection(),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
+        const _NewsSection(),
+        const SizedBox(height: 14),
         Section(
           title: l.creativeEnergy,
+          icon: Icons.auto_awesome_rounded,
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             MeterRow(
                 label: l.energy,
                 value: p.creativeEnergy / 100,
                 text: '${p.creativeEnergy.round()}',
-                color: p.creativeEnergy < 30 ? s.error : null),
-            const SizedBox(height: 6),
+                colors: p.creativeEnergy < 30
+                    ? const [AppColors.coral, AppColors.peach]
+                    : const [AppColors.mint, AppColors.sky]),
+            const SizedBox(height: 8),
             Text(
               p.burnoutWeeksLeft > 0
                   ? l.burnoutWeeks(p.burnoutWeeksLeft)
                   : l.songsLeftThisWeek(p.songsLeftThisWeek),
-              style: TextStyle(color: p.burnoutWeeksLeft > 0 ? s.error : null),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: p.burnoutWeeksLeft > 0
+                      ? AppColors.coral
+                      : AppColors.textMuted),
             ),
           ]),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         const _SideIncomeSection(),
+        const SizedBox(height: 14),
+        Material(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(22),
+          child: ListTile(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+            leading:
+                const IconBubble(Icons.insights_rounded, color: AppColors.sky),
+            title: Text(l.careerSummary,
+                style: const TextStyle(fontWeight: FontWeight.w800)),
+            subtitle: Text(l.careerSummaryHint),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => pushInCareer(context, const CareerScreen()),
+          ),
+        ),
       ],
     );
   }
 }
 
 class _NewsSection extends StatelessWidget {
+  const _NewsSection();
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final fmt = context.fmt;
     final career = context.career;
     if (career.lastWeekPlayed < 0) {
-      return Section(title: l.thisWeek, child: EmptyNote(l.newsEmptyStart));
+      return Section(
+          title: l.thisWeek,
+          icon: Icons.notifications_none_rounded,
+          child: EmptyNote(l.newsEmptyStart, icon: Icons.play_circle_outline));
     }
+    final delta = career.lastMoneyDelta;
     return Section(
       title: l.weekNewsTitle(GameTime.weekOfYear(career.lastWeekPlayed)),
-      trailing: Text(fmt.signedMoney(career.lastMoneyDelta),
-          style: TextStyle(
-              color: career.lastMoneyDelta >= 0
-                  ? Colors.greenAccent
-                  : Theme.of(context).colorScheme.error)),
+      icon: Icons.notifications_none_rounded,
+      trailing: Tag(fmt.signedMoney(delta),
+          color: delta >= 0 ? AppColors.mint : AppColors.coral),
       child: career.lastEvents.isEmpty
-          ? EmptyNote(l.newsQuiet)
+          ? EmptyNote(l.newsQuiet, icon: Icons.nightlight_round)
           : Column(children: [
               for (final line in career.lastEvents.take(8))
-                ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: EventIcon(line.event, size: 22),
-                  title: Text(fmt.event(line)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(children: [
+                    EventIcon(line.event, size: 38),
+                    const SizedBox(width: 12),
+                    Expanded(
+                        child: Text(fmt.event(line),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w600))),
+                  ]),
                 ),
             ]),
     );
@@ -159,7 +222,8 @@ class _SideIncomeSection extends StatelessWidget {
       await career.act(Cmd.rewardAd());
       if (context.mounted) {
         showInfo(context,
-            context.l10n.adReward(context.fmt.money(Actions.adRewardCents)));
+            context.l10n.adReward(context.fmt.money(Actions.adRewardCents)),
+            icon: Icons.paid_rounded);
       }
     } catch (e) {
       if (context.mounted) showError(context, e);
@@ -174,30 +238,46 @@ class _SideIncomeSection extends StatelessWidget {
     final p = career.player;
     return Section(
       title: l.sideIncome,
+      icon: Icons.savings_rounded,
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(l.dayJob),
-          subtitle: Text(l.dayJobHint(fmt.money(Actions.jobWageCents))),
-          value: p.hasJob,
-          onChanged: career.busy
-              ? null
-              : (on) async {
-                  try {
-                    await career.act(Cmd.setJob(on));
-                  } catch (e) {
-                    if (context.mounted) showError(context, e);
-                  }
-                },
-        ),
-        const SizedBox(height: 4),
-        OutlinedButton.icon(
-          icon: const Icon(Icons.ondemand_video),
-          label: Text(l.watchAd(fmt.money(Actions.adRewardCents),
-              p.adsLeftThisWeek, Actions.maxAdsPerWeek)),
-          onPressed: p.adsLeftThisWeek > 0 && !career.busy
-              ? () => _watchAd(context)
-              : null,
+        Row(children: [
+          const IconBubble(Icons.work_outline_rounded, color: AppColors.butter),
+          const SizedBox(width: 12),
+          Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(l.dayJob,
+                  style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(l.dayJobHint(fmt.money(Actions.jobWageCents)),
+                  style: const TextStyle(
+                      color: AppColors.textMuted, fontSize: 13)),
+            ]),
+          ),
+          Switch(
+            value: p.hasJob,
+            onChanged: career.busy
+                ? null
+                : (on) async {
+                    try {
+                      await career.act(Cmd.setJob(on));
+                    } catch (e) {
+                      if (context.mounted) showError(context, e);
+                    }
+                  },
+          ),
+        ]),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 48,
+          child: OutlinedButton.icon(
+            icon: const Icon(Icons.play_circle_outline_rounded,
+                color: AppColors.peach),
+            label: Text(l.watchAd(fmt.money(Actions.adRewardCents),
+                p.adsLeftThisWeek, Actions.maxAdsPerWeek)),
+            onPressed: p.adsLeftThisWeek > 0 && !career.busy
+                ? () => _watchAd(context)
+                : null,
+          ),
         ),
       ]),
     );
@@ -238,9 +318,10 @@ class _AdDialogState extends State<_AdDialog> {
     return AlertDialog(
       title: Text(l.adTitle),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.ondemand_video, size: 56),
-        const SizedBox(height: 12),
-        LinearProgressIndicator(value: 1 - _left / _seconds),
+        const IconBubble(Icons.ondemand_video_rounded,
+            color: AppColors.peach, size: 72),
+        const SizedBox(height: 18),
+        PillBar(value: 1 - _left / _seconds, height: 10),
       ]),
       actions: [
         TextButton(

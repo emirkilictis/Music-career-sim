@@ -196,6 +196,36 @@ class GameSession {
           if (al.artistId == _p.id) AlbumView.of(world, al),
       ];
 
+  /// Streamify artist page for any artist (player or rival).
+  ArtistPageView artistPage(int artistId) {
+    final w = world;
+    final a = w.artists[artistId];
+    final songs = [
+      for (final s in w.songs)
+        if (s.primaryArtistId == artistId && s.releasedWeek >= 0) s,
+    ];
+    final weekly = {
+      for (final s in songs) s.id: w.songWeekStreamsIn(s, ChartMarket.global),
+    };
+    final popular = [...songs]..sort((x, y) {
+        final d = weekly[y.id]!.compareTo(weekly[x.id]!);
+        return d != 0 ? d : y.lifetimeStreams.compareTo(x.lifetimeStreams);
+      });
+    return ArtistPageView(
+      artist: ArtistView.of(w, a),
+      weeklyStreams: weekly.values.fold(0.0, (x, y) => x + y),
+      popular: [for (final s in popular.take(10)) SongView.of(w, s)],
+      albums: [
+        for (final al in w.albums.reversed)
+          if (al.artistId == artistId) AlbumView.of(w, al),
+      ],
+      singles: [
+        for (final s in songs.reversed)
+          if (s.isSingle && s.albumId < 0) SongView.of(w, s),
+      ],
+    );
+  }
+
   List<CollaboratorView> collaborators(CollaboratorRole role) => [
         for (final c in world.collaborators)
           if (c.role == role)

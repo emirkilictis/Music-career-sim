@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:music_career_sim/widgets/art.dart';
 
 import 'support.dart';
 
@@ -22,7 +23,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // In the game: name in the header, a full first week ahead.
-    expect(find.text('Luna Vale'), findsOneWidget);
+    expect(find.text('Luna Vale'), findsWidgets);
     expect(find.text('Week 1, 2024'), findsOneWidget);
     expect(find.text('Play a week to see what happens.'), findsOneWidget);
 
@@ -55,9 +56,32 @@ void main() {
 
     await tester.tap(find.text('Charts'));
     await tester.pumpAndSettle();
-    expect(find.text('US Top 100 Songs'), findsOneWidget);
+    expect(find.text('US TOP 100 SONGS'), findsOneWidget);
+    expect(find.text('LW'), findsOneWidget);
 
-    await tester.tap(find.text('Career'));
+    // A rival's Streamify page from the chart.
+    await tester.tap(find.byType(CoverArt).at(1));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('monthly listeners'), findsOneWidget);
+    expect(find.text('Popular'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Streamify'));
+    await tester.pumpAndSettle();
+    expect(find.text('Your artist profile'), findsOneWidget);
+    await tester.tap(find.text('Top 50 – Global'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('50 songs'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Home'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Career summary'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Career summary'));
     await tester.pumpAndSettle();
     expect(find.text('By region'), findsOneWidget);
   });

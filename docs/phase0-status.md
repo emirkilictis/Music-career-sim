@@ -190,6 +190,15 @@ zarlanır, `WeekResult.playlistAdds` bildirir. `tools/sim_cli/bin/campaign_probe
 (8 seed medyanı). Kalibrasyon referansları yerinde: 2025 süperstar max hamle + dev kampanya ABD 3.8M /
 3.5M saf, hamlesiz 462K; ABD #1 2021 49M. Bot artık parasının %5'ini aşmayan en büyük kampanyayı seçiyor.
 
+## Katalog derinliği düzeltmesi (yapıldı)
+
+Dünya artık başlangıç yılı ne olursa olsun en geç 2002'den simüle edilir (`SimConfig.catalogStartYear`).
+Önceden sadece 3 yıl önceden başlıyordu; streaming döneminde başlayan kariyerlerde eski şarkı kataloğu
+olmadığından pazar az sayıda şarkıya bölünüyor, ABD #1 haftada ~350M stream alıyordu (gerçek ~40–55M).
+Şimdi 2022'de ABD #1 ≈ 55M, global #1 ≈ 120M. Yeni kariyer kurulumu ~3–4 sn (ilerleme çubuklu).
+Kalibrasyon (seed 42): 2025 süperstar hamlesiz ABD 272K birim / 221K saf, iyi hamle 1.2M,
+max hamle + dev kampanya 3.5M / 3.4M saf.
+
 ## Bilinen eksikler / sıradaki adımlar
 
 1. Flop desteğinin etkileri (rapor, redemption, feat teklifleri), sosyal medya postları, kampanyalar:

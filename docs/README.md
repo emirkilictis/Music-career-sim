@@ -58,6 +58,7 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K31 | **Kampanya seviyesi** (Promosyonsuz / Standart / Yoğun / Dev global) her yayında seçilir; Standart = kalibre edilmiş temel. Etkisi döneme göre **radyodan playlistlere kayar**; playlist döneminde editör playlist eklemeleri (bildirimli). Müzik videosu, radyo/TV aksiyonları Faz 2. |
 | K32 | **Türler:** 21 ana tür; bir şarkının 1–3 türü olabilir (ilki ana tür). Sanatçının bir ana türü vardır. |
 | K33 | **Kayıt slotu herkes için sınırsız** (ücretsiz sürüm dahil). |
+| K34 | **Görsel dil:** sade ama sıcak koyu tema (pastel vurgu, göz yormayan kontrast). Listeler ekranı müzik dergisi listesi gibi (kâğıt beyazı, büyük sıra numaraları, GH/ZİRVE/HAFTA); Streamify ekranları büyük streaming uygulamalarının düzenine benzer (sanatçı sayfası, aylık dinleyici, popüler şarkılar, Top 50 playlistleri). Gerçek marka adı, logo ve renk kimliği birebir kopyalanmaz. |
 | K29 | **Premium bilerek güçlü (satması için):** daha yüksek başlangıç statları (55 puan, tavan 70; ücretsiz 30 puan, tavan 60) + ünlü/zengin başlangıçlar + günlük bonus. Formüller ve zorluk herkes için aynı; ücretsiz sürüm eksiksiz kalır. |
 | K23 | ChatGPT planındaki ekranlar, rekorlar, kampanyalar, finans, bildirimler, ödüller, Kolay mod ve 10 performans kuralı dokümanlara taşındı. |
 
@@ -78,6 +79,10 @@ yeni kariyer (grup modu, türler, zorluk, Premium kilitleri, stat dağıtımı),
 reklam, günlük bonus), stüdyo, yayınlar (single + albüm/EP kurucu, kampanya, versiyonlar), listeler,
 kariyer özeti, şarkı/albüm detayı (grafikler), ayarlar (dil, Premium test modu), EN/TR. Ekran
 görüntüleri: [screenshots/](screenshots/). iPhone'da çalıştırma: [mac-setup.md](mac-setup.md).
+
+Görsel tasarım (K34): yumuşak koyu tema + pastel vurgular, Figtree / Barlow Condensed yazı tipleri,
+otomatik kapak görselleri; listeler dergi (Billboard benzeri) görünümünde, Streamify sekmesi büyük bir
+streaming uygulaması (Spotify benzeri) görünümünde. Marka adı/logosu kullanılmaz.
 
 Sırada: görsel yükleme (kapak/profil), gerçek satın alma ve reklam SDK'ları, rollout planlama ekranı,
 kayıt/yıl atlama sırasında iptal, ilk açılış rehberi, ikonlar ve cilalar.

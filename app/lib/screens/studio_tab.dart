@@ -3,7 +3,9 @@ import 'package:game/game.dart';
 
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/media_tile.dart';
 import 'song_detail_screen.dart';
 
 /// Studio: write a song (one screen, smart defaults) and see the vault.
@@ -146,6 +148,7 @@ class _StudioTabState extends State<StudioTab> {
       children: [
         Section(
           title: l.writeSong,
+          icon: Icons.edit_note_rounded,
           trailing: Text(p.burnoutWeeksLeft > 0
               ? l.burnoutWeeks(p.burnoutWeeksLeft)
               : l.songsLeftThisWeek(p.songsLeftThisWeek)),
@@ -188,6 +191,7 @@ class _StudioTabState extends State<StudioTab> {
                   style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: 6),
               SegmentedButton<BudgetTier>(
+                showSelectedIcon: false,
                 segments: [
                   for (final b in BudgetTier.values)
                     ButtonSegment(
@@ -200,12 +204,10 @@ class _StudioTabState extends State<StudioTab> {
                 onSelectionChanged: (s) => setState(() => _budget = s.first),
               ),
               const SizedBox(height: 16),
-              FilledButton.icon(
-                style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48)),
+              GradientButton(
                 onPressed: canWrite && !career.busy ? _write : null,
-                icon: const Icon(Icons.mic),
-                label: Text(l.writeAndRecord(fmt.money(_cost()))),
+                icon: Icons.mic_rounded,
+                label: l.writeAndRecord(fmt.money(_cost())),
               ),
             ],
           ),
@@ -213,17 +215,16 @@ class _StudioTabState extends State<StudioTab> {
         const SizedBox(height: 12),
         Section(
           title: l.vaultCount(_vault.length),
+          icon: Icons.lock_outline_rounded,
           child: _vault.isEmpty
               ? EmptyNote(l.vaultEmpty)
               : Column(children: [
                   for (final s in _vault)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: CircleAvatar(
-                          child: Text(fmt.grade(s.estimatedGrade))),
-                      title: Text(s.title),
-                      subtitle: Text(fmt.genres(s.genres)),
-                      trailing: const Icon(Icons.chevron_right),
+                    MediaTile(
+                      coverSeed: songCoverSeed(s.id, s.albumId),
+                      title: s.title,
+                      subtitle: fmt.genres(s.genres),
+                      badge: GradeTag(fmt.grade(s.estimatedGrade)),
                       onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(

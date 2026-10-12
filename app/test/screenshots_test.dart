@@ -65,8 +65,8 @@ void main() {
         await c.run(Cmd.nextWeek());
         continue;
       }
-      songs.add((await c.run(Cmd.writeSong(
-              budget: BudgetTier.high, genres: const [0, 18])))
+      songs.add((await c.run(
+              Cmd.writeSong(budget: BudgetTier.high, genres: const [0, 18])))
           .id);
     }
     await c.run(Cmd.releaseSingle(songs.first, Campaign.intensive));
@@ -92,14 +92,13 @@ void main() {
 
     await tester.tap(find.text('Velvet Avenue'));
     await tester.pumpAndSettle();
-    if (find.text('OK').evaluate().isNotEmpty) {
-      await tester.tap(find.text('OK'));
-    }
     await tester.tap(find.text('Next week'));
     await tester.pumpAndSettle();
     await shot(tester, '03_week_news');
     await tester.tapAt(const Offset(200, 80));
     await tester.pumpAndSettle();
+    ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first))
+        .removeCurrentSnackBar();
     await shot(tester, '04_home');
 
     await tab(tester, 'Studio');
@@ -107,31 +106,48 @@ void main() {
     await tab(tester, 'Releases');
     await shot(tester, '06_releases');
     await tab(tester, 'Charts');
-    await shot(tester, '07_charts');
-    await tester.ensureVisible(find.text('US Albums'));
+    await shot(tester, '07_charts_songs');
+    await tester.tap(find.text('US ALBUMS'));
+    await shot(tester, '08_charts_albums');
+
+    await tab(tester, 'Streamify');
+    await shot(tester, '09_streamify');
+    await tester.tap(find.text('Velvet Avenue').last);
+    await shot(tester, '10_artist_page');
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
+    await shot(tester, '11_artist_page_more');
+    await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('US Albums'));
+    await tester.tap(find.text('Top 50 – Global'));
+    await shot(tester, '12_top50');
+    await tester.tap(find.byType(InkWell).at(2));
+    await shot(tester, '13_rival_page');
+    await tester.pageBack();
     await tester.pumpAndSettle();
-    await shot(tester, '08_album_chart');
-    await tab(tester, 'Career');
-    await shot(tester, '09_career');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
 
     await tab(tester, 'Releases');
     await tester.tap(find.text('Neon Bloom'));
-    await shot(tester, '10_album_detail');
+    await shot(tester, '14_album_detail');
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.drag(find.byType(ListView).last, const Offset(0, -500));
+
+    await tab(tester, 'Home');
+    await tester.scrollUntilVisible(find.text('Career summary'), 300,
+        scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
-    final single = find.byType(ListTile).last;
-    await tester.tap(single);
-    await shot(tester, '11_song_detail');
+    await tester.tap(find.text('Career summary'));
+    await tester.pumpAndSettle();
+    await shot(tester, '15_career');
     await tester.pageBack();
     await tester.pumpAndSettle();
 
     app.settings.setLanguage('tr');
     await tester.pumpAndSettle();
-    await tab(tester, 'Ana sayfa');
-    await shot(tester, '12_home_tr');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 2000));
+    await shot(tester, '16_home_tr');
+    await tab(tester, 'Listeler');
+    await shot(tester, '17_charts_tr');
   });
 }

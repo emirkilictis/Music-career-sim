@@ -57,6 +57,7 @@ class SimConfig {
     this.tierBCount = 300,
     this.newArtistsPerYear = 30,
     this.burnInYears = 3,
+    this.catalogStartYear = 2002,
   }) : era = era ?? EraTable.usDefault();
 
   final EraTable era;
@@ -177,4 +178,17 @@ class SimConfig {
 
   /// Years simulated silently before the start year so charts are populated.
   final int burnInYears;
+
+  /// The world is never younger than this: later starts still simulate from
+  /// here, so the catalog of older songs (which takes its share of streams)
+  /// is as deep as in the calibration runs. Starting just a few years before
+  /// a streaming-era year left the market to too few songs (US #1 ≈ 350M
+  /// streams a week instead of ≈ 50M).
+  final int catalogStartYear;
+
+  /// First simulated year for a career starting in [startYear].
+  int worldStartYear(int startYear) =>
+      startYear - burnInYears < catalogStartYear
+          ? startYear - burnInYears
+          : catalogStartYear;
 }

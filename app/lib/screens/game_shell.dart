@@ -5,13 +5,22 @@ import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/event_lines.dart';
 import '../core/scope.dart';
+import '../ui/palette.dart';
+import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
-import 'career_tab.dart';
 import 'charts_tab.dart';
 import 'dashboard_tab.dart';
 import 'releases_tab.dart';
+import 'streamify/streamify_tab.dart';
 import 'studio_tab.dart';
+
+/// Pushes [page] with the open career available to it.
+Future<T?> pushInCareer<T>(BuildContext context, Widget page) {
+  final state = Scope.read<CareerState>(context);
+  return Navigator.of(context).push<T>(MaterialPageRoute(
+      builder: (_) => Scope<CareerState>(value: state, child: page)));
+}
 
 /// The in-career frame: header (week, money), five tabs and the
 /// "Next week" / "Skip year" controls.
@@ -39,7 +48,8 @@ class _GameShellState extends State<GameShell> {
     final granted = await widget.state.act(Cmd.dailyBonus(premium));
     if (granted && mounted) {
       showInfo(context,
-          context.l10n.dailyBonus(context.fmt.money(Actions.dailyBonusCents)));
+          context.l10n.dailyBonus(context.fmt.money(Actions.dailyBonusCents)),
+          icon: Icons.card_giftcard_rounded);
     }
   }
 
@@ -61,7 +71,8 @@ class _GameShellState extends State<GameShell> {
                 .weekNewsTitle(GameTime.weekOfYear(state.lastWeekPlayed)),
             major);
       } else if (lines.isNotEmpty) {
-        showInfo(context, context.fmt.event(lines.first));
+        showInfo(context, context.fmt.event(lines.first),
+            icon: Icons.notifications_none_rounded);
       }
     } catch (e) {
       if (mounted) showError(context, e);
@@ -81,9 +92,10 @@ class _GameShellState extends State<GameShell> {
           valueListenable: progress,
           builder: (_, n, __) =>
               Column(mainAxisSize: MainAxisSize.min, children: [
-            LinearProgressIndicator(value: n / GameTime.weeksPerYear),
+            PillBar(value: n / GameTime.weeksPerYear, height: 12),
             const SizedBox(height: 12),
-            Text(l.weeksPlayed(n)),
+            Text(l.weeksPlayed(n),
+                style: const TextStyle(color: AppColors.textMuted)),
           ]),
         ),
       ),
@@ -110,19 +122,26 @@ class _GameShellState extends State<GameShell> {
     final fmt = context.fmt;
     return showModalBottomSheet<void>(
       context: context,
-      showDragHandle: true,
       builder: (c) => SafeArea(
         child: ListView(
           shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           children: [
-            Text(title, style: Theme.of(c).textTheme.titleLarge),
-            const SizedBox(height: 8),
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 12),
             for (final line in lines)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: EventIcon(line.event),
-                title: Text(fmt.event(line)),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(children: [
+                  EventIcon(line.event, size: 44),
+                  const SizedBox(width: 14),
+                  Expanded(
+                      child: Text(fmt.event(line),
+                          style: const TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600))),
+                ]),
               ),
           ],
         ),
@@ -140,66 +159,83 @@ class _GameShellState extends State<GameShell> {
         final fmt = context.fmt;
         final career = context.career;
         final p = career.player;
-        final tabs = [
-          const DashboardTab(),
-          const StudioTab(),
-          const ReleasesTab(),
-          const ChartsTab(),
-          const CareerTab(),
-        ];
+        final streamify = _tab == 4;
+        final paper = _tab == 3;
         return Scaffold(
-          appBar: AppBar(
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                Text(fmt.week(career.week),
-                    style: Theme.of(context).textTheme.bodySmall),
-              ],
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: Chip(
-                  avatar: const Icon(Icons.attach_money, size: 18),
-                  label: Text(fmt.money(p.moneyCents).replaceFirst('\$', '')),
+          backgroundColor: streamify
+              ? StreamifyColors.bg
+              : paper
+                  ? PaperColors.ink
+                  : null,
+          body: SafeArea(
+            bottom: false,
+            child: Column(children: [
+              if (!streamify && !paper)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(4, 6, 16, 6),
+                  child: Row(children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      onPressed: () => Navigator.of(context).maybePop(),
+                    ),
+                    ArtistAvatar(name: p.name, seed: p.id, size: 40),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(p.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w900)),
+                          Text(fmt.week(career.week),
+                              style: const TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13)),
+                        ],
+                      ),
+                    ),
+                    MoneyPill(text: fmt.money(p.moneyCents)),
+                  ]),
                 ),
+              Expanded(
+                child: IndexedStack(index: _tab, children: const [
+                  DashboardTab(),
+                  StudioTab(),
+                  ReleasesTab(),
+                  ChartsTab(),
+                  StreamifyTab(),
+                ]),
               ),
-            ],
+            ]),
           ),
-          body: IndexedStack(index: _tab, children: tabs),
           bottomNavigationBar: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Material(
-                color: Theme.of(context).colorScheme.surfaceContainerLow,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                  child: Row(children: [
-                    Expanded(
-                      child: FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48)),
-                        onPressed: career.busy ? null : _nextWeek,
-                        icon: career.busy
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 2))
-                            : const Icon(Icons.skip_next_rounded),
-                        label: Text(l.nextWeek),
-                      ),
+              Container(
+                color: AppColors.bg,
+                padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                child: Row(children: [
+                  Expanded(
+                    child: GradientButton(
+                      label: l.nextWeek,
+                      icon: Icons.skip_next_rounded,
+                      busy: career.busy,
+                      onPressed: career.busy ? null : _nextWeek,
                     ),
-                    const SizedBox(width: 8),
-                    OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(0, 48)),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    height: 54,
+                    child: OutlinedButton.icon(
                       onPressed: career.busy ? null : _skipYear,
-                      child: Text(l.skipYear),
+                      icon: const Icon(Icons.fast_forward_rounded, size: 20),
+                      label: Text(l.skipYear),
                     ),
-                  ]),
-                ),
+                  ),
+                ]),
               ),
               NavigationBar(
                 selectedIndex: _tab,
@@ -207,24 +243,24 @@ class _GameShellState extends State<GameShell> {
                 destinations: [
                   NavigationDestination(
                       icon: const Icon(Icons.home_outlined),
-                      selectedIcon: const Icon(Icons.home),
+                      selectedIcon: const Icon(Icons.home_rounded),
                       label: l.tabHome),
                   NavigationDestination(
-                      icon: const Icon(Icons.mic_none),
-                      selectedIcon: const Icon(Icons.mic),
+                      icon: const Icon(Icons.mic_none_rounded),
+                      selectedIcon: const Icon(Icons.mic_rounded),
                       label: l.tabStudio),
                   NavigationDestination(
                       icon: const Icon(Icons.album_outlined),
-                      selectedIcon: const Icon(Icons.album),
+                      selectedIcon: const Icon(Icons.album_rounded),
                       label: l.tabReleases),
                   NavigationDestination(
-                      icon: const Icon(Icons.leaderboard_outlined),
-                      selectedIcon: const Icon(Icons.leaderboard),
+                      icon: const Icon(Icons.format_list_numbered_rounded),
                       label: l.tabCharts),
                   NavigationDestination(
-                      icon: const Icon(Icons.person_outline),
-                      selectedIcon: const Icon(Icons.person),
-                      label: l.tabCareer),
+                      icon: const Icon(Icons.graphic_eq_rounded),
+                      selectedIcon: const Icon(Icons.graphic_eq_rounded,
+                          color: StreamifyColors.accent),
+                      label: l.tabStreamify),
                 ],
               ),
             ],
@@ -233,6 +269,31 @@ class _GameShellState extends State<GameShell> {
       }),
     );
   }
+}
+
+/// Money with a thin gradient ring.
+class MoneyPill extends StatelessWidget {
+  const MoneyPill({super.key, required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(1.6),
+        decoration: BoxDecoration(
+          gradient: AppColors.sunset,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Text(text,
+              style:
+                  const TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
+        ),
+      );
 }
 
 class _YearSummaryDialog extends StatelessWidget {
@@ -264,24 +325,27 @@ class _YearSummaryDialog extends StatelessWidget {
                     value: fmt.compact(report.unitsGained)),
                 StatTile(
                     label: l.money,
-                    value: fmt.signedMoney(report.moneyDeltaCents)),
+                    value: fmt.signedMoney(report.moneyDeltaCents),
+                    color: report.moneyDeltaCents >= 0
+                        ? AppColors.mint
+                        : AppColors.coral),
                 StatTile(
                     label: l.coreFans,
                     value:
                         '${report.coreFansDelta >= 0 ? '+' : ''}${fmt.compact(report.coreFansDelta)}'),
               ]),
               if (highlights.isNotEmpty) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 Text(l.highlights,
-                    style: Theme.of(context).textTheme.titleSmall),
+                    style: const TextStyle(fontWeight: FontWeight.w800)),
                 for (final line in highlights.take(12))
                   Padding(
-                    padding: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.only(top: 10),
                     child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          EventIcon(line.event, size: 18),
-                          const SizedBox(width: 8),
+                          EventIcon(line.event, size: 32),
+                          const SizedBox(width: 10),
                           Expanded(child: Text(fmt.event(line))),
                         ]),
                   ),

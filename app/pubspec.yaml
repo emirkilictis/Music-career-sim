@@ -25,3 +25,25 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  fonts:
+    - family: Figtree
+      fonts:
+        - asset: assets/fonts/Figtree_400Regular.ttf
+        - asset: assets/fonts/Figtree_500Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Figtree_600SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Figtree_700Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Figtree_800ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Figtree_900Black.ttf
+          weight: 900
+    - family: BarlowCondensed
+      fonts:
+        - asset: assets/fonts/BarlowCondensed_600SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/BarlowCondensed_700Bold.ttf
+          weight: 700
+        - asset: assets/fonts/BarlowCondensed_800ExtraBold.ttf
+          weight: 800

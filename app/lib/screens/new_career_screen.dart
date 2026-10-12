@@ -197,6 +197,7 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
                   ),
                   const SizedBox(height: 8),
                   SegmentedButton<ArtistKind>(
+                    showSelectedIcon: false,
                     segments: [
                       for (final k in ArtistKind.values)
                         ButtonSegment(value: k, label: Text(fmt.kind(k))),
@@ -295,6 +296,7 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
                   Text(l.difficulty, style: t.labelLarge),
                   const SizedBox(height: 6),
                   SegmentedButton<Difficulty>(
+                    showSelectedIcon: false,
                     segments: [
                       for (final d in Difficulty.values)
                         ButtonSegment(value: d, label: Text(fmt.difficulty(d))),
@@ -322,6 +324,7 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
                   Text(l.careerPath, style: t.labelLarge),
                   const SizedBox(height: 6),
                   SegmentedButton<CareerPath>(
+                    showSelectedIcon: false,
                     segments: [
                       for (final p in CareerPath.values)
                         ButtonSegment(value: p, label: Text(fmt.path(p))),
@@ -418,11 +421,9 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: FilledButton.icon(
-            style:
-                FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: Text(l.startCareer),
+          child: GradientButton(
+            icon: Icons.play_arrow_rounded,
+            label: l.startCareer,
             onPressed: () => _create(premium),
           ),
         ),

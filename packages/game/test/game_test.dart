@@ -199,6 +199,17 @@ void main() {
       expect(
           history.any((h) => h.positions.containsKey(Charts.usSongs)), isTrue);
       expect(g.albumHistory(fw.albumId).single.value, view.weekUnits);
+
+      // Streamify artist page: popular tracks, discography, listeners.
+      final page = g.artistPage(g.player.id);
+      expect(page.popular, isNotEmpty);
+      expect(page.popular.length, lessThanOrEqualTo(10));
+      expect(page.albums.single.title, 'Supernova');
+      expect(page.monthlyListeners, greaterThan(0));
+      final us = g.chart(Charts.usSongs);
+      expect(us.rows.first.weekValue, greaterThan(us.rows.last.weekValue));
+      final rival = g.artistPage(us.rows.first.artistId);
+      expect(rival.popular, isNotEmpty);
       g.close();
     });
 

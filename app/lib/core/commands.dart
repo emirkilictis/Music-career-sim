@@ -112,6 +112,8 @@ abstract final class Cmd {
   static SessionCmd<SongView> song(int id) => (s) => s.song(id);
   static SessionCmd<AlbumView> album(int id) => (s) => s.album(id);
   static SessionCmd<ChartView> chart(int id) => (s) => s.chart(id);
+  static SessionCmd<ArtistPageView> artistPage(int artistId) =>
+      (s) => s.artistPage(artistId);
   static SessionCmd<List<int>> activeCharts() =>
       (s) => [for (final c in s.activeCharts) c.id];
   static SessionCmd<List<CollaboratorView>> collaborators(

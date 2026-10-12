@@ -218,6 +218,8 @@ class AlbumView {
 /// One line of a published chart.
 class ChartRow {
   ChartRow({
+    required this.albumId,
+    required this.weekValue,
     required this.position,
     required this.lastPos,
     required this.peak,
@@ -230,6 +232,13 @@ class ChartRow {
   });
   final int position;
 
+  /// Album the entry belongs to (for its cover); -1 for a loose single.
+  final int albumId;
+
+  /// This week's streams (song charts) or units (album charts) in the
+  /// chart's market.
+  final double weekValue;
+
   /// 0 = new or re-entry this week.
   final int lastPos;
   final int peak;
@@ -240,6 +249,7 @@ class ChartRow {
   final String artistName;
   final bool isPlayer;
   bool get isNew => lastPos == 0 && weeksOn == 1;
+  bool get isReentry => lastPos == 0 && weeksOn > 1;
 }
 
 class ChartView {
@@ -252,19 +262,24 @@ class ChartView {
         def.kind == ChartKind.songs ? EntityKind.song : EntityKind.album;
     final rows = [
       for (final e in w.charts[chartId])
-        _row(w, kind, e.position, e.lastPos, e.peak, e.weeksOn, e.entityId),
+        _row(w, def.market, kind, e.position, e.lastPos, e.peak, e.weeksOn,
+            e.entityId),
     ];
     return ChartView._(def, w.week - 1, rows);
   }
 
-  static ChartRow _row(World w, EntityKind kind, int position, int lastPos,
-      int peak, int weeksOn, int id) {
+  static ChartRow _row(World w, ChartMarket market, EntityKind kind,
+      int position, int lastPos, int peak, int weeksOn, int id) {
     final title =
         kind == EntityKind.song ? w.songs[id].title : w.albums[id].title;
     final artistId = kind == EntityKind.song
         ? w.songs[id].primaryArtistId
         : w.albums[id].artistId;
     return ChartRow(
+      albumId: kind == EntityKind.song ? w.songs[id].albumId : id,
+      weekValue: kind == EntityKind.song
+          ? w.songWeekStreamsIn(w.songs[id], market)
+          : albumWeekUnitsIn(w, w.albums[id], market),
       position: position,
       lastPos: lastPos,
       peak: peak,
@@ -300,4 +315,56 @@ class CollaboratorView {
 
   /// False when the collaborator still refuses the player (not famous enough).
   final bool available;
+}
+
+/// This week's units of an album in a chart market (US/UK are shares of
+/// their region, like [World.albumFirstWeekIn]).
+double albumWeekUnitsIn(World w, Album al, ChartMarket market) {
+  if (al.status != AlbumStatus.active) return 0;
+  final home = w.artists[al.artistId].homeCountry;
+  double units(Region r) => al.weekRegion[regionCount + r.index];
+  return switch (market) {
+    ChartMarket.us =>
+      CountryShares.usOfNorthAmerica(home) * units(Region.northAmerica),
+    ChartMarket.uk => CountryShares.ukOfEurope(home) * units(Region.europe),
+    _ => al.weekUnits,
+  };
+}
+
+/// The fictional streaming platform's view of an artist (Streamify artist
+/// page): its share of all streams, monthly listeners, popular tracks.
+abstract final class Streamify {
+  /// Share of all on-demand streams that happen on the platform.
+  static const share = 0.45;
+
+  /// Monthly listeners from weekly streams (about 12 plays per listener a
+  /// month on the platform).
+  static double monthlyListeners(double weeklyStreams) =>
+      weeklyStreams * share * 4.3 / 12;
+}
+
+class ArtistPageView {
+  ArtistPageView({
+    required this.artist,
+    required this.weeklyStreams,
+    required this.popular,
+    required this.albums,
+    required this.singles,
+  });
+
+  final ArtistView artist;
+
+  /// All platforms; use [Streamify] for the platform's numbers.
+  final double weeklyStreams;
+
+  /// Most played songs right now (up to 10).
+  final List<SongView> popular;
+
+  /// Albums and EPs, newest first.
+  final List<AlbumView> albums;
+
+  /// Singles not on an album, newest first.
+  final List<SongView> singles;
+
+  double get monthlyListeners => Streamify.monthlyListeners(weeklyStreams);
 }

@@ -4,7 +4,10 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../ui/palette.dart';
+import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/media_tile.dart';
 import 'album_detail_screen.dart';
 import 'song_detail_screen.dart';
 
@@ -70,7 +73,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
             ),
             for (final s in eligible)
               ListTile(
-                leading: CircleAvatar(child: Text(fmt.grade(s.estimatedGrade))),
+                leading: CoverArt(seed: songCoverSeed(s.id, s.albumId)),
+                trailing: GradeTag(fmt.grade(s.estimatedGrade)),
                 title: Text(s.title),
                 subtitle:
                     Text('${fmt.songStatus(s)} · ${fmt.genres(s.genres)}'),
@@ -102,18 +106,20 @@ class _ReleasesTabState extends State<ReleasesTab> {
       children: [
         Row(children: [
           Expanded(
-            child: FilledButton.tonalIcon(
-              style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
-              onPressed: career.busy ? null : _releaseSingle,
-              icon: const Icon(Icons.music_note),
-              label: Text(l.releaseSingle),
+            child: _ActionCard(
+              icon: Icons.music_note_rounded,
+              color: AppColors.pink,
+              label: l.releaseSingle,
+              onTap: career.busy ? null : _releaseSingle,
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: FilledButton.tonalIcon(
-              style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
-              onPressed: career.busy
+            child: _ActionCard(
+              icon: Icons.album_rounded,
+              color: AppColors.lilac,
+              label: l.newAlbum,
+              onTap: career.busy
                   ? null
                   : () => Navigator.push(
                       context,
@@ -123,32 +129,29 @@ class _ReleasesTabState extends State<ReleasesTab> {
                               songs: _songs
                                   .where((s) => s.albumId < 0)
                                   .toList()))),
-              icon: const Icon(Icons.album),
-              label: Text(l.newAlbum),
             ),
           ),
         ]),
         const SizedBox(height: 16),
         Section(
           title: l.albumsAndEps,
+          icon: Icons.album_outlined,
           child: _albums.isEmpty
               ? EmptyNote(l.noAlbumsYet)
               : Column(children: [
                   for (final a in _albums)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: PosBadge(
-                          a.charts
-                                  .where((c) => c.chartId == Charts.usAlbums)
-                                  .firstOrNull
-                                  ?.peak ??
-                              0,
-                          highlight: true),
-                      title: Text(a.title),
-                      subtitle: Text(
+                    MediaTile(
+                      coverSeed: albumCoverSeed(a.id),
+                      badge: PeakTag(a.charts
+                              .where((c) => c.chartId == Charts.usAlbums)
+                              .firstOrNull
+                              ?.peak ??
+                          0),
+                      title: a.title,
+                      subtitle:
                           '${fmt.albumType(a.type)} · ${GameTime.yearOf(a.releaseWeek)} · '
-                          '${l.firstWeekShort(fmt.compact(a.firstWeekUsUnits))}'),
-                      trailing: Text(fmt.compact(a.lifetimeUnits.total)),
+                          '${l.firstWeekShort(fmt.compact(a.firstWeekUsUnits))}',
+                      value: fmt.compact(a.lifetimeUnits.total),
                       onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -160,23 +163,22 @@ class _ReleasesTabState extends State<ReleasesTab> {
         const SizedBox(height: 12),
         Section(
           title: l.singles,
+          icon: Icons.music_note_outlined,
           child: singles.isEmpty
               ? EmptyNote(l.noSinglesYet)
               : Column(children: [
                   for (final s in singles)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: PosBadge(
-                          s.charts
-                                  .where((c) => c.chartId == Charts.usSongs)
-                                  .firstOrNull
-                                  ?.peak ??
-                              0,
-                          highlight: true),
-                      title: Text(s.title),
-                      subtitle: Text(
-                          '${GameTime.yearOf(s.singleWeek)} · ${fmt.campaign(s.campaign)}'),
-                      trailing: Text(fmt.compact(s.lifetimeStreams.total)),
+                    MediaTile(
+                      coverSeed: songCoverSeed(s.id, s.albumId),
+                      badge: PeakTag(s.charts
+                              .where((c) => c.chartId == Charts.usSongs)
+                              .firstOrNull
+                              ?.peak ??
+                          0),
+                      title: s.title,
+                      subtitle:
+                          '${GameTime.yearOf(s.singleWeek)} · ${fmt.campaign(s.campaign)}',
+                      value: fmt.compact(s.lifetimeStreams.total),
                       onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -319,6 +321,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
                 labelText: l.albumTitle, border: const OutlineInputBorder()),
           ),
           SegmentedButton<AlbumType>(
+            showSelectedIcon: false,
             segments: [
               ButtonSegment(
                   value: AlbumType.ep,
@@ -384,17 +387,55 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: FilledButton.icon(
-            style:
-                FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+          child: GradientButton(
             onPressed: ok && !widget.state.busy ? _release : null,
-            icon: const Icon(Icons.rocket_launch),
-            label: Text(_variantCost > 0
+            icon: Icons.rocket_launch_rounded,
+            label: _variantCost > 0
                 ? l.releaseWithCost(fmt.money(_variantCost))
-                : l.release),
+                : l.release,
           ),
         ),
       ),
     );
   }
+}
+
+class _ActionCard extends StatelessWidget {
+  const _ActionCard(
+      {required this.icon,
+      required this.color,
+      required this.label,
+      required this.onTap});
+  final IconData icon;
+  final Color color;
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+        borderRadius: BorderRadius.circular(22),
+        color: Colors.transparent,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            gradient: AppColors.haze(color, AppColors.surface),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(22),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IconBubble(icon, color: color),
+                    const SizedBox(height: 14),
+                    Text(label,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800, fontSize: 15.5)),
+                  ]),
+            ),
+          ),
+        ),
+      );
 }

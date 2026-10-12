@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/art.dart';
 import '../widgets/common.dart';
 import 'game_shell.dart';
 import 'new_career_screen.dart';
@@ -117,9 +118,10 @@ class _SlotsScreenState extends State<SlotsScreen> {
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 6),
-                        leading: CircleAvatar(
-                            child: Text(name.isEmpty ? '?' : name[0])),
-                        title: Text(name),
+                        leading: ArtistAvatar(name: name, seed: id.hashCode),
+                        title: Text(name,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w800)),
                         subtitle: Text(
                             '${l.weekLabel(s['weekOfYear'] as int? ?? 1, s['year'] as int? ?? 0)}'
                             ' · ${l.fameValue(fmt.percent(fame))}'

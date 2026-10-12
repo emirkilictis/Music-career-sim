@@ -70,8 +70,9 @@ abstract final class StartingStats {
 
 /// Builds a new world: AI artists, collaborators, and (optionally) a player.
 abstract final class WorldGen {
-  /// Creates a world whose clock starts [SimConfig.burnInYears] before
-  /// [startYear]; run it up to [startYear] before handing it to the player.
+  /// Creates a world whose clock starts at [SimConfig.worldStartYear] (at
+  /// least [SimConfig.burnInYears] before [startYear]); run it up to
+  /// [startYear] before handing it to the player.
   static World create({
     required int seed,
     required int startYear,
@@ -82,7 +83,7 @@ abstract final class WorldGen {
     final w = World(
       config: cfg,
       seed: seed,
-      week: GameTime.firstWeekOf(startYear - cfg.burnInYears),
+      week: GameTime.firstWeekOf(cfg.worldStartYear(startYear)),
       difficulty: difficulty,
     );
     for (var i = 0; i < cfg.tierACount; i++) {
