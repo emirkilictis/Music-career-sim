@@ -149,6 +149,7 @@ abstract final class Codec {
     'status', 'releasedWeek', 'albumId', 'isSingle', 'singleWeek',
     'lastAttention', 'lastReach', 'weekStreams', 'weekDownloads',
     'weekPhysical', 'weekRadio', 'weekPoints', 'viralBoost', 'viralRamp',
+    'campaign', 'playlistAdd', 'playlistWeek', 'playlistBoost',
     'weeksBelowCutoff', 'lifetimeRadio', 'dormantRate',
     ...songRegColumns,
     'charts',
@@ -162,6 +163,7 @@ abstract final class Codec {
         s.singleWeek,
         s.lastAttention, s.lastReach, s.weekStreams, s.weekDownloads,
         s.weekPhysical, s.weekRadio, s.weekPoints, s.viralBoost, s.viralRamp,
+        s.campaign.index, s.playlistAdd.index, s.playlistWeek, s.playlistBoost,
         s.weeksBelowCutoff, s.lifetimeRadio, s.dormantRate,
         ...s.reg,
         _encodeCharts(s),
@@ -198,6 +200,10 @@ abstract final class Codec {
       ..weekPoints = _d(r['weekPoints'])
       ..viralBoost = _d(r['viralBoost'])
       ..viralRamp = r['viralRamp'] as int
+      ..campaign = Campaign.values[r['campaign'] as int]
+      ..playlistAdd = PlaylistAdd.values[r['playlistAdd'] as int]
+      ..playlistWeek = r['playlistWeek'] as int
+      ..playlistBoost = _d(r['playlistBoost'])
       ..weeksBelowCutoff = r['weeksBelowCutoff'] as int
       ..lifetimeRadio = _d(r['lifetimeRadio'])
       ..dormantRate = _d(r['dormantRate']);
@@ -209,7 +215,7 @@ abstract final class Codec {
   // ----------------------------------------------------------------- album
   static final albumColumns = [
     'id', 'title', 'artistId', 'type', 'releaseWeek', 'quality', //
-    'status', 'hypeAtRelease', 'variants',
+    'status', 'hypeAtRelease', 'campaign', 'variants',
     'weekPure', 'weekTea', 'weekSea', 'weekUnits', 'weeksBelowCutoff',
     'firstWeekUnits', 'firstWeekPure', 'sumDormantRate',
     ...albumRegColumns,
@@ -219,7 +225,8 @@ abstract final class Codec {
   static List<Object?> albumRow(Album al) => [
         al.id, al.title, al.artistId, al.type.index, al.releaseWeek, //
         al.quality,
-        al.status.index, al.hypeAtRelease, _ints(al.variantWeeks),
+        al.status.index, al.hypeAtRelease, al.campaign.index,
+        _ints(al.variantWeeks),
         al.weekPure, al.weekTea, al.weekSea, al.weekUnits, al.weeksBelowCutoff,
         al.firstWeekUnits, al.firstWeekPure, al.sumDormantRate,
         ...al.reg,
@@ -239,6 +246,7 @@ abstract final class Codec {
     al
       ..status = AlbumStatus.values[r['status'] as int]
       ..hypeAtRelease = _d(r['hypeAtRelease'])
+      ..campaign = Campaign.values[r['campaign'] as int]
       ..variantWeeks = _parseInts(r['variants'] as String)
       ..weekPure = _d(r['weekPure'])
       ..weekTea = _d(r['weekTea'])

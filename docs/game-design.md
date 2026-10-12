@@ -350,14 +350,38 @@ Duyuru → Teaser postlar → Lead single → Pre-save → Albüm çıkışı
 
 Tek seçim + isteğe bağlı aksiyonlar:
 
-| Seviye | Maliyet | Etki |
-|---|---|---|
-| Promosyonsuz | 0 | — |
-| Standart | Düşük | Orta |
-| Yoğun | Yüksek | Yüksek |
-| Dev global kampanya | Çok yüksek | Çok yüksek |
+Her single ve albüm yayınında bir **kampanya seviyesi** seçilir (varsayılan: Standart). Maliyet yayında
+peşin ödenir; para yetmezse yayın yapılamaz.
 
-İsteğe bağlı aksiyonlar (dönemde mevcutsa): müzik videosu, TV performansı, ödül töreni performansı,
+| Seviye | Maliyet | Etki (Standart'a göre) |
+|---|---|---|
+| Promosyonsuz | $0 | Belirgin şekilde daha az yeni dinleyici ve radyo |
+| Standart | $2.000 | Temel (AI plak şirketlerinin yaptığı; kalibre edilmiş denge) |
+| Yoğun | $20.000 | Daha fazla erişim ve radyo, daha yüksek playlist şansı |
+| Dev global kampanya | $250.000 | Çok daha fazla erişim ve radyo, en yüksek playlist şansı |
+
+- Kampanya **yeni dinleyicilere** ulaşmayı ve radyoyu etkiler; sadık hayranlar zaten dinler.
+  Bu yüzden kampanya, az tanınan sanatçı için çok, süperstar için az fark yaratır
+  (süperstarın ilk hafta satışını hayranlar belirler).
+- Albüm kampanyası albümle yeni çıkan şarkılara uygulanır; önceden çıkmış single'lar kendi kampanyasını korur.
+
+### 9.1 Radyodan playlistlere kayma
+
+Kampanyanın gücü döneme göre farklı kanallardan işler (oyuncu ayrı bir mekanik yönetmez):
+
+- **Radyo dönemi (2010 öncesi):** kampanya ağırlıkla **radyoyu** büyütür.
+- **Geçiş (2010–2017):** etki giderek playlistlere kayar.
+- **Playlist dönemi (2018+):** kampanya ağırlıkla **stream erişimini** büyütür; radyo etkisi azalır.
+
+Ölçülen örnek (yeni sanatçı, 12 hafta, Promosyonsuz → Dev global): 2005'te radyo ×4,8 / stream ×2;
+2022'de stream ×2,6 / radyo ×1,9.
+
+**Editör playlistleri:** playlist döneminde yayın sırasında şarkı büyük bir platform playlistine
+eklenebilir (orta veya büyük). Şans: kampanya seviyesi × dönem × şarkı kalitesi (single'larda yüksek,
+albüm şarkılarında düşük). Eklenince birkaç hafta içinde sönen ekstra erişim verir ve bildirim gelir:
+"🎧 'Velvet Diamonds' büyük bir playlist'e eklendi". AI şarkıları da aynı kuralla playlistlere girer.
+
+İsteğe bağlı aksiyonlar (Faz 2; dönemde mevcutsa): müzik videosu, TV performansı, ödül töreni performansı,
 radyo kampanyası, playlist kampanyası, sosyal medya kampanyası, indirim, remix.
 Plak şirketindeyse erişim çarpanı kampanyaları güçlendirir.
 
@@ -510,6 +534,7 @@ Hafta sonunda sadece ilginç olaylar gösterilir:
 📉 Single #3'ten #8'e düştü.
 💿 Albümün Platinum oldu.
 😮‍💨 Burnout: 3 hafta şarkı yazamazsın.
+🎧 'Velvet Diamonds' büyük bir playlist'e eklendi.
 ```
 
 ## 16. Ana ekranlar

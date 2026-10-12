@@ -32,7 +32,8 @@ void _playerMoves(World w, int i) {
       for (final s in w.songs)
         if (s.primaryArtistId == p.id && s.status == SongStatus.vault) s.id,
     ];
-    Actions.releaseSingle(w, p, w.songs[vault.first]);
+    Actions.releaseSingle(w, p, w.songs[vault.first],
+        campaign: Campaign.intensive);
   }
   if (i == 60) {
     final vault = [
@@ -42,7 +43,7 @@ void _playerMoves(World w, int i) {
     final single =
         w.songs.firstWhere((s) => s.primaryArtistId == p.id && s.isSingle);
     Actions.releaseAlbum(w, p, 'Debut', [single.id, ...vault],
-        variantWeeks: const [0, 0, 1]);
+        variantWeeks: const [0, 0, 1], campaign: Campaign.global);
   }
 }
 

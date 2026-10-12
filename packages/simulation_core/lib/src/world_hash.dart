@@ -65,11 +65,15 @@ int worldHash(World w) {
   for (final s in w.songs) {
     addAll(s.reg);
     addDouble(s.dormantRate);
+    addInt(s.campaign.index);
+    addInt(s.playlistAdd.index);
+    addDouble(s.playlistBoost);
     addCharts(s);
   }
   addInt(w.albums.length);
   for (final al in w.albums) {
     addAll(al.reg);
+    addInt(al.campaign.index);
     addCharts(al);
   }
   for (final chart in w.charts) {

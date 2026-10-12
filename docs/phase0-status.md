@@ -40,7 +40,7 @@ dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet   # performan
 dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet --save /tmp/c.sqlite   # + kayıt
 ```
 
-## Testler (simülasyon 29/29, kayıt 8/8 geçiyor)
+## Testler (simülasyon 35/35, kayıt 8/8 geçiyor)
 
 - Aynı seed → bit düzeyinde aynı dünya; farklı seed → farklı dünya
 - Sanatçının kariyer stream toplamı = şarkılarının toplamı (aktif + tembel birikimli dormant)
@@ -180,6 +180,15 @@ ağırlıklarını, otomatik stat dağıtımını, sadakat kazanımını/azalmas
 Solo değerleri eski formülle birebir aynı. AI'nin ~%20'si grup. Kalibrasyon sonrası referanslar yerinde
 (2025 süperstar: hamlesiz ABD 472K, max hamle 4.0M / 3.6M saf). Testler: üye sayısı kuralları, türe göre
 otomatik statlar, AI grupları, vokal grubun daha hızlı sadakat kazanması, kayıttan aynen dönme.
+
+## Kampanyalar ve playlist kayması (yapıldı)
+
+`Campaign` (none / standard / intensive / global; $0 / $2K / $20K / $250K) `releaseSingle` ve
+`releaseAlbum`'da seçilir, oyuncu peşin öder. Standart = 1 (AI ve kalibrasyon değişmedi). Güç
+`playlistShare(yıl)` ile radyodan stream erişimine kayar. Editör playlist eklemeleri (orta/büyük) yayında
+zarlanır, `WeekResult.playlistAdds` bildirir. `tools/sim_cli/bin/campaign_probe.dart` etkileri ölçer
+(8 seed medyanı). Kalibrasyon referansları yerinde: 2025 süperstar max hamle + dev kampanya ABD 3.8M /
+3.5M saf, hamlesiz 462K; ABD #1 2021 49M. Bot artık parasının %5'ini aşmayan en büyük kampanyayı seçiyor.
 
 ## Bilinen eksikler / sıradaki adımlar
 

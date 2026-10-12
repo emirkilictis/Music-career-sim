@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import '../model.dart';
 import 'era_table.dart';
 
 /// Balance knobs. Everything tunable lives here (or in [EraTable]) instead of
@@ -23,6 +26,9 @@ class SimConfig {
     this.viralWeeklyChance = 0.0025,
     this.viralRevivalChance = 0.4,
     this.megaViralChance = 0.12,
+    this.playlistMidBoost = 0.3,
+    this.playlistBigBoost = 0.8,
+    this.playlistFade = 0.85,
     this.superfanBuyRate = 0.09,
     this.collectorRate = 0.15,
     this.variantDecay = 0.6,
@@ -106,6 +112,28 @@ class SimConfig {
           : year < 2020
               ? 1.0
               : 1.2;
+
+  /// Share of promotion that works through streaming playlists rather than
+  /// radio: radio era before 2010, playlist era from 2018.
+  double playlistShare(int year) => year < 2010
+      ? 0.05
+      : year >= 2018
+          ? 0.9
+          : 0.05 + 0.85 * (year - 2010) / 8;
+
+  /// Campaign multiplier on a song's exposure (new listeners) in [year].
+  double campaignExposure(Campaign k, int year) =>
+      math.max(0.1, 1 + k.strength * (0.5 + 0.5 * playlistShare(year)));
+
+  /// Campaign multiplier on a song's radio play in [year]: strongest in the
+  /// radio era, weaker once playlists take over.
+  double campaignRadio(Campaign k, int year) =>
+      math.max(0.1, 1 + k.strength * (0.5 + (1 - playlistShare(year))));
+
+  /// Extra exposure from a mid / big editorial playlist add; fades weekly.
+  final double playlistMidBoost;
+  final double playlistBigBoost;
+  final double playlistFade;
 
   final double superfanBuyRate;
 

@@ -85,6 +85,33 @@ enum CollaboratorRole { producer, songwriter }
 
 enum BudgetTier { low, medium, high }
 
+/// Promotion campaign for a release (docs/game-design.md §9). [standard] is
+/// the calibrated baseline (what AI labels do); the strength shifts from
+/// radio to streaming playlists over the years ([SimConfig.playlistShare]).
+enum Campaign {
+  none(costCents: 0, strength: -0.4, playlistOdds: 0.05),
+  standard(costCents: 200000, strength: 0, playlistOdds: 0.25),
+  intensive(costCents: 2000000, strength: 0.35, playlistOdds: 0.45),
+  global(costCents: 25000000, strength: 0.7, playlistOdds: 0.65);
+
+  const Campaign({
+    required this.costCents,
+    required this.strength,
+    required this.playlistOdds,
+  });
+
+  final int costCents;
+
+  /// Effect relative to [standard] (0); negative = less than a label's usual.
+  final double strength;
+
+  /// Base chance (before era, quality, single/album track) of a playlist add.
+  final double playlistOdds;
+}
+
+/// Editorial playlist pickup of a release.
+enum PlaylistAdd { none, mid, big }
+
 enum EraResult { flop, disappointing, normal, success, smash }
 
 /// Per-chart stats of a song or album. Allocated only once an entity
@@ -342,6 +369,14 @@ class Song with Charted {
 
   /// Weeks a viral trend keeps growing before it starts to fade.
   int viralRamp = 0;
+
+  /// Promotion campaign it was released (or pushed as a single) with.
+  Campaign campaign = Campaign.standard;
+
+  /// Editorial playlist pickup: extra exposure that fades week by week.
+  PlaylistAdd playlistAdd = PlaylistAdd.none;
+  int playlistWeek = -1;
+  double playlistBoost = 0;
   int weeksBelowCutoff = 0;
 
   double lifetimeRadio = 0;
@@ -391,6 +426,7 @@ class Album with Charted {
 
   AlbumStatus status = AlbumStatus.active;
   double hypeAtRelease = 0;
+  Campaign campaign = Campaign.standard;
 
   /// Release offsets (weeks after release) of each edition/variant, sorted.
   /// Index 0 is the standard edition. Staggering variants keeps an album on

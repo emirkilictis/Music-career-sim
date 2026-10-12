@@ -49,6 +49,7 @@ String _v1() => '''
     isSingle INTEGER, singleWeek INTEGER,
     lastAttention REAL, lastReach REAL, weekStreams REAL, weekDownloads REAL,
     weekPhysical REAL, weekRadio REAL, weekPoints REAL, viralBoost REAL, viralRamp INTEGER,
+    campaign INTEGER, playlistAdd INTEGER, playlistWeek INTEGER, playlistBoost REAL,
     weeksBelowCutoff INTEGER, lifetimeRadio REAL, dormantRate REAL,
     ${_cols(Codec.songRegColumns, 'REAL')},
     charts TEXT
@@ -70,7 +71,7 @@ String _v1() => '''
     type INTEGER NOT NULL,
     releaseWeek INTEGER NOT NULL,
     quality REAL,
-    status INTEGER NOT NULL, hypeAtRelease REAL, variants TEXT,
+    status INTEGER NOT NULL, hypeAtRelease REAL, campaign INTEGER, variants TEXT,
     weekPure REAL, weekTea REAL, weekSea REAL, weekUnits REAL, weeksBelowCutoff INTEGER,
     firstWeekUnits REAL, firstWeekPure REAL, sumDormantRate REAL,
     ${_cols(Codec.albumRegColumns, 'REAL')},

@@ -4,6 +4,7 @@ import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
 import 'names.dart';
+import 'time.dart';
 import 'world.dart';
 
 class ActionException implements Exception {
@@ -218,8 +219,39 @@ abstract final class Actions {
     s.production += production * (1 - s.production / 100);
   }
 
+  /// Pays the player's campaign up front (AI labels run theirs implicitly).
+  static void _payCampaign(Artist a, Campaign campaign) {
+    if (a.tier != ArtistTier.player) return;
+    if (campaign.costCents > a.moneyCents) {
+      throw ActionException('Not enough money for the campaign');
+    }
+    a.moneyCents -= campaign.costCents;
+  }
+
+  /// Applies the campaign to a song and rolls for an editorial playlist add
+  /// (only meaningful in the playlist era).
+  static void _promote(World w, Song s, Campaign campaign) {
+    s.campaign = campaign;
+    w.dirtySongs.add(s.id);
+    final pl = w.config.playlistShare(GameTime.yearOf(w.week));
+    final r = RandomStream.keyed(w.seed, w.week, s.id, RngPurpose.playlist);
+    final q01 = s.quality / 100;
+    final chance = campaign.playlistOdds *
+        pl *
+        (0.3 + 0.7 * q01) *
+        (s.isSingle ? 1.0 : 0.35);
+    if (!r.chance(chance)) return;
+    final big = r.chance(0.2 + 0.4 * q01);
+    s.playlistAdd = big ? PlaylistAdd.big : PlaylistAdd.mid;
+    s.playlistWeek = w.week;
+    s.playlistBoost =
+        big ? w.config.playlistBigBoost : w.config.playlistMidBoost;
+  }
+
   /// Releases a vault song as a single, or promotes an album track to single.
-  static void releaseSingle(World w, Artist a, Song s) {
+  static void releaseSingle(World w, Artist a, Song s,
+      {Campaign campaign = Campaign.standard}) {
+    _payCampaign(a, campaign);
     _convertAnticipation(a);
     s.isSingle = true;
     s.singleWeek = w.week;
@@ -229,6 +261,7 @@ abstract final class Actions {
     } else if (s.status == SongStatus.dormant) {
       Lifecycle.reactivateSong(w, s);
     }
+    _promote(w, s, campaign);
     a.lastReleaseWeek = w.week;
   }
 
@@ -240,7 +273,9 @@ abstract final class Actions {
   static Album releaseAlbum(World w, Artist a, String title, List<int> songIds,
       {AlbumType type = AlbumType.album,
       List<int> variantWeeks = const [0],
-      bool payForVariants = false}) {
+      bool payForVariants = false,
+      Campaign campaign = Campaign.standard}) {
+    _payCampaign(a, campaign);
     _convertAnticipation(a);
     final quality = songIds.isEmpty
         ? 0.0
@@ -256,6 +291,7 @@ abstract final class Actions {
       quality: quality,
     );
     album.hypeAtRelease = a.hype;
+    album.campaign = campaign;
     album.variantWeeks = (List.of(variantWeeks)..sort());
     w.dirtyAlbums.add(album.id);
     if (payForVariants && variantWeeks.length > 1) {
@@ -269,6 +305,8 @@ abstract final class Actions {
       if (s.status == SongStatus.vault) {
         s.releasedWeek = w.week;
         Lifecycle.activateSong(w, s);
+        // Earlier singles keep their own campaign; new tracks get the album's.
+        _promote(w, s, campaign);
       } else if (s.status == SongStatus.dormant) {
         Lifecycle.reactivateSong(w, s);
       }

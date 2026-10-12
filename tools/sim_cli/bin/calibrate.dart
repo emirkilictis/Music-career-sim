@@ -99,10 +99,10 @@ void main(List<String> args) {
       'active songs ${w.activeSongIds.length} · active albums ${w.activeAlbumIds.length}');
 
   // Debut scenarios for a superstar player in 2025.
-  for (final (label, devotion, hype, variants) in [
-    ('no moves', 0.4, 0.0, [0]),
-    ('good moves', 0.7, 0.4, [0, 0, 0, 1]),
-    ('max moves', 1.0, 0.8, [0, 0, 0, 0, 0, 0, 1, 2]),
+  for (final (label, devotion, hype, variants, campaign) in [
+    ('no moves', 0.4, 0.0, [0], Campaign.standard),
+    ('good moves', 0.7, 0.4, [0, 0, 0, 1], Campaign.intensive),
+    ('max moves', 1.0, 0.8, [0, 0, 0, 0, 0, 0, 1, 2], Campaign.global),
   ]) {
     final x = WorldGen.create(seed: 77, startYear: 2025);
     final s = Simulator(x);
@@ -120,7 +120,8 @@ void main(List<String> args) {
       for (var i = 0; i < 12; i++)
         Actions.writeSong(x, p, producerSkill: 90, aiMode: true).id,
     ];
-    final al = Actions.releaseAlbum(x, p, 'X', songs, variantWeeks: variants);
+    final al = Actions.releaseAlbum(x, p, 'X', songs,
+        variantWeeks: variants, campaign: campaign);
     s.step();
     print(
         '2025 superstar, $label: US ${f(x.albumFirstWeekIn(al, ChartMarket.us))} units / '

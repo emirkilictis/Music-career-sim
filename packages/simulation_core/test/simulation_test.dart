@@ -144,6 +144,7 @@ void main() {
     });
   });
 
+  group('campaigns', campaignTests);
   group('groups', groupTests);
   group('side income', sideIncomeTests);
   group('difficulty', difficultyTests);
@@ -523,5 +524,113 @@ void groupTests() {
 
     expect(
         gain(ArtistKind.vocalGroup), greaterThan(1.3 * gain(ArtistKind.solo)));
+  });
+}
+
+/// Campaign levels and the radio → playlist shift (docs/game-design.md §9).
+void campaignTests() {
+  ({World w, Simulator sim, Artist p}) setup(int year) {
+    final w = WorldGen.create(seed: 51, startYear: year);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(year)) {
+      sim.step();
+    }
+    final p = WorldGen.addPlayer(w,
+        name: 'P',
+        genre: 0,
+        tier: StartTier.localBuzz,
+        money: StartMoney.millionaire);
+    return (w: w, sim: sim, p: p);
+  }
+
+  test('standard is the calibrated baseline in every year', () {
+    final c = SimConfig();
+    for (var y = 1990; y <= 2030; y++) {
+      expect(c.campaignExposure(Campaign.standard, y), 1.0);
+      expect(c.campaignRadio(Campaign.standard, y), 1.0);
+    }
+  });
+
+  test('promotion shifts from radio to playlists over the years', () {
+    final c = SimConfig();
+    double radioGain(int y) =>
+        c.campaignRadio(Campaign.global, y) / c.campaignRadio(Campaign.none, y);
+    double reachGain(int y) =>
+        c.campaignExposure(Campaign.global, y) /
+        c.campaignExposure(Campaign.none, y);
+    expect(radioGain(2005), greaterThan(radioGain(2022)));
+    expect(reachGain(2022), greaterThan(reachGain(2005)));
+    expect(c.playlistShare(2005), lessThan(0.1));
+    expect(c.playlistShare(2022), greaterThan(0.8));
+  });
+
+  test('the player pays for the campaign; no money, no release', () {
+    final x = setup(2022);
+    final s = Actions.writeSong(x.w, x.p, budget: BudgetTier.low);
+    final before = x.p.moneyCents;
+    Actions.releaseSingle(x.w, x.p, s, campaign: Campaign.intensive);
+    expect(before - x.p.moneyCents, Campaign.intensive.costCents);
+    expect(s.campaign, Campaign.intensive);
+
+    final t = Actions.writeSong(x.w, x.p, budget: BudgetTier.low);
+    x.p.moneyCents = Campaign.global.costCents - 1;
+    expect(() => Actions.releaseSingle(x.w, x.p, t, campaign: Campaign.global),
+        throwsA(isA<ActionException>()));
+    expect(t.status, SongStatus.vault);
+    expect(x.p.moneyCents, Campaign.global.costCents - 1);
+  });
+
+  test('a bigger campaign brings more listeners', () {
+    double streams(Campaign k) {
+      final x = setup(2022);
+      final s = Actions.writeSong(x.w, x.p, producerSkill: 75, aiMode: true);
+      Actions.releaseSingle(x.w, x.p, s, campaign: k);
+      var total = 0.0;
+      for (var i = 0; i < 8; i++) {
+        x.sim.step();
+        total += s.weekStreams;
+      }
+      return total;
+    }
+
+    expect(streams(Campaign.global), greaterThan(1.3 * streams(Campaign.none)));
+  });
+
+  test('editorial playlist adds happen in the playlist era, not before', () {
+    int adds(int year) {
+      final x = setup(year);
+      x.p.moneyCents = 1 << 40;
+      var n = 0;
+      for (var i = 0; i < 60; i++) {
+        final s = Actions.writeSong(x.w, x.p, producerSkill: 80, aiMode: true);
+        Actions.releaseSingle(x.w, x.p, s, campaign: Campaign.global);
+        if (s.playlistAdd != PlaylistAdd.none) {
+          expect(s.playlistWeek, x.w.week);
+          expect(s.playlistBoost, greaterThan(0));
+          n++;
+        }
+      }
+      return n;
+    }
+
+    final modern = adds(2022), old = adds(2005);
+    expect(modern, greaterThan(15));
+    expect(old, lessThan(modern ~/ 4));
+  });
+
+  test('the week result reports playlist adds', () {
+    final x = setup(2022);
+    x.p.moneyCents = 1 << 40;
+    final added = <int>[];
+    for (var i = 0; i < 30 && added.isEmpty; i++) {
+      final s = Actions.writeSong(x.w, x.p, producerSkill: 85, aiMode: true);
+      Actions.releaseSingle(x.w, x.p, s, campaign: Campaign.global);
+      final r = x.sim.step();
+      if (s.playlistAdd != PlaylistAdd.none) {
+        expect(r.playlistAdds, contains(s.id));
+        added.add(s.id);
+      }
+    }
+    expect(added, isNotEmpty);
   });
 }

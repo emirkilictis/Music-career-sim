@@ -36,6 +36,15 @@ class BotPlayer {
     }
   }
 
+  /// The biggest campaign that costs at most 5% of the bank (none if broke).
+  Campaign _campaign(Artist a) {
+    var best = Campaign.none;
+    for (final k in Campaign.values) {
+      if (k.costCents <= a.moneyCents * 0.05) best = k;
+    }
+    return best;
+  }
+
   List<Song> _vault(Artist a) =>
       _songs.where((s) => s.status == SongStatus.vault).toList()
         ..sort((x, y) {
@@ -89,7 +98,7 @@ class BotPlayer {
               ? const [0, 0, 0, 1, 2]
               : const [0];
       Actions.releaseAlbum(w, a, title, tracks,
-          variantWeeks: variants, payForVariants: true);
+          variantWeeks: variants, payForVariants: true, campaign: _campaign(a));
       _lastAlbumWeek = w.week;
       return;
     }
@@ -109,7 +118,7 @@ class BotPlayer {
       }
       pick ??= vault.isNotEmpty ? vault.first : null;
       if (pick == null) return;
-      Actions.releaseSingle(w, a, pick);
+      Actions.releaseSingle(w, a, pick, campaign: _campaign(a));
       _lastSingleWeek = w.week;
     }
   }

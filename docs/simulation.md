@@ -213,6 +213,9 @@ Flop raporu için era boyunca katkı faktörleri (rakip çakışması, promosyon
 momentumNextWeek = momentum × decayFactor(şarkı.kalıcılık, zorluk)
                  + promosyon + viralBoost + (ileride) turneBoost
 ```
+- Promosyon = kampanya çarpanları (`SimConfig.campaignExposure/campaignRadio`): Standart = 1;
+  güç `playlistShare(yıl)`'a göre erişim (stream) ile radyo arasında bölünür. Editör playlist eklemesi
+  yayında bir kez zarlanır (`playlistBoost`, haftalık ×0,85 söner).
 - Her şarkının decay davranışı farklıdır (kalıcılık özelliği).
 - Yayın yaşlandıkça performansı giderek **legacy**'ye bağlanır. Legacy: kariyer başarısı, liste ömrü,
   hayran tabanı, kültürel etki, (ileride) ödüller. Eski şarkılar tam hit simülasyonu gerektirmeden

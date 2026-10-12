@@ -20,6 +20,7 @@ class WeekResult {
     required this.albumDebuts,
     required this.newNumberOnes,
     required this.viralSongs,
+    required this.playlistAdds,
     required this.activeSongs,
     required this.activeAlbums,
     required this.dormantSongs,
@@ -39,6 +40,9 @@ class WeekResult {
 
   /// Songs that started a viral trend this week (new or catalog).
   final List<int> viralSongs;
+
+  /// Songs added to an editorial playlist this week (see [Song.playlistAdd]).
+  final List<int> playlistAdds;
   final int activeSongs;
   final int activeAlbums;
   final int dormantSongs;
@@ -88,6 +92,17 @@ class Simulator {
         a.creativeEnergy = math.min(100, a.creativeEnergy + 12);
       }
     }
+
+    // Campaign effects for this year: promotion works mostly through radio
+    // before streaming playlists, mostly through playlists after.
+    final year = GameTime.yearOf(w.week);
+    final campaignExposure = [
+      for (final k in Campaign.values) c.campaignExposure(k, year),
+    ];
+    final campaignRadio = [
+      for (final k in Campaign.values) c.campaignRadio(k, year),
+    ];
+    final playlistAdds = <int>[];
 
     // 5. Raw demand for active songs, split by region.
     final ids = w.activeSongIds;
@@ -169,7 +184,11 @@ class Simulator {
           promo *
           p.labelReach *
           (1 + 0.5 * p.hype) *
-          (p.tier == ArtistTier.player ? w.difficulty.exposure : 1.0);
+          (p.tier == ArtistTier.player ? w.difficulty.exposure : 1.0) *
+          campaignExposure[s.campaign.index] *
+          (1 + s.playlistBoost);
+      if (s.playlistWeek == w.week) playlistAdds.add(s.id);
+      s.playlistBoost *= c.playlistFade;
       final qMult = 0.35 + 0.65 * math.pow(s.quality / 100, 1.4);
 
       // Fans replay singles; deep cuts get less of their time.
@@ -200,6 +219,7 @@ class Simulator {
           (s.isSingle ? 1.0 : 0.03) *
           (0.2 + p.fame) *
           p.labelReach *
+          campaignRadio[s.campaign.index] *
           (1 + 8 * chartBoost);
 
       for (var k = 0; k < _r; k++) {
@@ -518,6 +538,7 @@ class Simulator {
       albumDebuts: debuts,
       newNumberOnes: newNo1,
       viralSongs: virals,
+      playlistAdds: playlistAdds,
       activeSongs: w.activeSongIds.length,
       activeAlbums: w.activeAlbumIds.length,
       dormantSongs: w.dormantSongCount,
