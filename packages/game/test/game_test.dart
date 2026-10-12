@@ -179,6 +179,114 @@ void main() {
       g.close();
     });
 
+    test('releases scheduled ahead, announced when the player chooses', () {
+      var g = GameSession.start(
+          slots, _setup(premium: true, money: StartMoney.millionaire));
+      final id = g.slotId;
+      final w0 = g.week;
+      final songs = [
+        for (var i = 0; i < 3; i++) g.writeSong(budget: BudgetTier.low).id,
+      ];
+      final money0 = g.player.moneyCents;
+
+      // A single in 6 weeks, announced 2 weeks before it comes out.
+      final single = g.scheduleSingle(songs[0],
+          campaign: Campaign.standard,
+          releaseWeek: w0 + 6,
+          announceWeek: w0 + 4);
+      expect(g.player.moneyCents, money0 - Campaign.standard.costCents);
+      expect(single.announced, isFalse);
+      expect(g.song(songs[0]).scheduledSingleWeek, w0 + 6);
+      expect(() => g.releaseSingle(songs[0]), _code('alreadyScheduled'));
+      expect(
+          () => g.scheduleSingle(songs[1],
+              releaseWeek: w0 + 30, announceWeek: w0),
+          _code('invalidDate'));
+      expect(
+          () => g.scheduleSingle(songs[1],
+              releaseWeek: w0 + 3, announceWeek: w0 + 4),
+          _code('invalidDate'));
+
+      // An EP in 10 weeks, never announced (surprise); its songs are taken.
+      final ep = g.scheduleAlbum('Later', songs,
+          type: AlbumType.ep,
+          campaign: Campaign.none,
+          releaseWeek: w0 + 10,
+          announceWeek: w0 + 10);
+      expect(ep.isSurprise, isTrue);
+      expect(() => g.releaseAlbum('Now', songs, type: AlbumType.ep),
+          _code('trackOnOtherRelease'));
+      expect(g.scheduled.map((s) => s.id), [single.id, ep.id]);
+
+      for (var i = 0; i < 3; i++) {
+        g.advanceWeek();
+      }
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.scheduled.length, 2);
+
+      final events = <(int, GameEvent)>[];
+      final buzz = <double>[];
+      while (g.week < w0 + 10) {
+        final r = g.advanceWeek();
+        events.addAll([for (final e in r.events) (r.week, e)]);
+        if (g.scheduled.isNotEmpty && !g.scheduled.first.isAlbum) {
+          buzz.add(g.scheduled.first.buzz);
+        }
+      }
+      final announced = events.where((e) => e.$2 is ReleaseAnnounced).toList();
+      expect(announced.length, 1);
+      expect(announced.single.$1, w0 + 4);
+      // Buzz built only after the announcement (weeks w0+4 and w0+5).
+      expect(buzz.where((b) => b > 0).length, 2);
+      final out = events.where((e) => e.$2 is ReleaseOut).toList();
+      expect(out.first.$1, w0 + 6);
+      expect(g.song(songs[0]).isSingle, isTrue);
+      expect(g.song(songs[0]).singleWeek, w0 + 6);
+      expect(g.scheduled.length, 1);
+
+      // Cancelling gives the money back and frees the songs.
+      final before = g.player.moneyCents;
+      g.cancelScheduled(ep.id);
+      expect(g.scheduled, isEmpty);
+      expect(g.player.moneyCents, before + ep.paidCents);
+      g.releaseAlbum('Now', songs, type: AlbumType.ep, campaign: Campaign.none);
+      g.close();
+    });
+
+    test('an announced album opens bigger than a surprise drop', () {
+      double firstWeek(bool announce) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                premium: true,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire));
+        g.world.player!.moneyCents = 1 << 40;
+        final songs = <int>[];
+        while (songs.length < 8) {
+          if (g.player.songsLeftThisWeek == 0 || g.player.creativeEnergy < 30) {
+            g.advanceWeek();
+            continue;
+          }
+          songs.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        final release = g.week + 6;
+        g.scheduleAlbum('Big', songs,
+            releaseWeek: release, announceWeek: announce ? g.week : release);
+        AlbumFirstWeek? fw;
+        while (fw == null) {
+          fw = g.advanceWeek().events.whereType<AlbumFirstWeek>().firstOrNull;
+        }
+        g.close();
+        return fw.globalUnits;
+      }
+
+      final surprise = firstWeek(false);
+      final announced = firstWeek(true);
+      expect(announced, greaterThan(surprise * 1.1));
+    });
+
     test('an early-2000s single sells CDs, not streams', () {
       final g = GameSession.start(
           slots,

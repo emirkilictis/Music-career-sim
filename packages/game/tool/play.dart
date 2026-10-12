@@ -207,4 +207,6 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       BurnoutOver() => 'burnout over',
       RivalNumberOne() => 'rival #1 ${Charts.all[e.chartId].key}',
       PlatformLaunched() => 'platform launched ${Charts.all[e.chartId].key}',
+      ReleaseOut() => 'scheduled ${e.kind.name} ${e.entityId} out',
+      ReleaseAnnounced() => 'announced "${e.title}" for week ${e.releaseWeek}',
     };

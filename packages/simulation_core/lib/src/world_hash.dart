@@ -55,6 +55,11 @@ int worldHash(World w) {
     addInt(a.job.index);
     addInt(a.restWeek);
     addInt(a.skillPoints);
+    for (final sr in a.scheduled) {
+      addInt(sr.releaseWeek);
+      addInt(sr.announceWeek);
+      addDouble(sr.buzz);
+    }
     addDouble(a.creativeEnergy);
     addInt(a.kind.index);
     addInt(a.members.length);

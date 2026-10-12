@@ -411,6 +411,86 @@
       }
     }
   },
+  "releaseScheduled": "“{title}” is set for {date}.",
+  "@releaseScheduled": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "whenTitle": "When should it come out?",
+  "releaseNow": "This week",
+  "inWeeks": "In {count} weeks",
+  "@inWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inOneWeek": "Next week",
+  "releaseDate": "Out: {date}",
+  "@releaseDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "announceTitle": "Announcement",
+  "announceNow": "Now",
+  "announceBefore": "{count} weeks before",
+  "@announceBefore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "announceOneWeek": "1 week before",
+  "announceSurprise": "Surprise drop",
+  "announceDate": "Announcement: {date}",
+  "@announceDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "announceHint": "From the announcement to the release, fans get excited and the first week grows. About 4–6 weeks is enough; a surprise drop builds nothing.",
+  "announceLocked": "Already announced. You can still move the date, but pushing it back costs some of the excitement.",
+  "continueAction": "Continue",
+  "save": "Save",
+  "upcoming": "Coming up",
+  "statusAnnounced": "Announced",
+  "statusSurprise": "Surprise",
+  "buzzLabel": "Excitement",
+  "changeDate": "Change date",
+  "cancelRelease": "Call off",
+  "cancelReleaseTitle": "Call off this release?",
+  "cancelReleaseBody": "Its songs are free again and {money} comes back. Any excitement is lost.",
+  "@cancelReleaseBody": {
+    "placeholders": {
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseCancelled": "Release called off.",
+  "dateSaved": "New date saved.",
+  "scheduledSingleTag": "Single on {date}",
+  "@scheduledSingleTag": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "scheduledAlbumTag": "On an upcoming release",
   "firstWeekShort": "first week {units}",
   "@firstWeekShort": {
     "placeholders": {
@@ -599,6 +679,8 @@
   "errorTrackCount": "Wrong number of tracks for this release.",
   "errorTrackTaken": "A song is already on another release.",
   "errorAdLimit": "You watched all 3 ads this week.",
+  "errorInvalidDate": "Pick a week up to 26 weeks ahead, announced no later than the release.",
+  "errorAlreadyScheduled": "This song is already set to come out as a single.",
   "errorPremiumRequired": "This start needs Premium.",
   "errorInvalidName": "Enter a name (up to 40 characters).",
   "errorInvalidMembers": "A group needs 2–7 members with names.",
@@ -726,6 +808,25 @@
     }
   },
   "eventBurnoutOver": "Your burnout is over — you can write again.",
+  "eventReleaseOut": "“{title}” is out today!",
+  "@eventReleaseOut": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventReleaseAnnounced": "You announced “{title}”: out {date}.",
+  "@eventReleaseAnnounced": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "eventRivalNumberOne": "{artist}'s “{title}” is the new #1 on the {chart}.",
   "@eventRivalNumberOne": {
     "placeholders": {

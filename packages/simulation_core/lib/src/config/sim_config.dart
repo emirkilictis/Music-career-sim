@@ -41,6 +41,10 @@ class SimConfig {
     this.streamEquivalentAlbum = 1500,
     this.downloadHitExponent = 1.45,
     this.downloadHitExponentLate = 1.15,
+    this.announceBuzzAlbum = 0.3,
+    this.announceBuzzEp = 0.15,
+    this.announceBuzzSingle = 0.1,
+    this.announceBuildRate = 0.35,
     this.songChartStreamDivisor = 125,
     this.songChartRadioDivisor = 900,
     this.songChartSize = 100,
@@ -152,6 +156,21 @@ class SimConfig {
   /// The same once the digital catalog is deep and streaming spreads
   /// listening (2014 on); [downloadHitExponentFor] fades between the two.
   final double downloadHitExponentLate;
+
+  /// Most buzz an announced release can build, × (0.5 + fame) (docs K45).
+  final double announceBuzzAlbum, announceBuzzEp, announceBuzzSingle;
+
+  /// Share of the remaining gap to that ceiling built each announced week
+  /// (~80% after 4 weeks, so announcing much earlier adds little).
+  final double announceBuildRate;
+
+  double announceBuzzCap(AlbumType type, double fame) =>
+      switch (type) {
+        AlbumType.album => announceBuzzAlbum,
+        AlbumType.ep => announceBuzzEp,
+        AlbumType.single => announceBuzzSingle,
+      } *
+      (0.5 + fame);
 
   double downloadHitExponentFor(int year) {
     if (year <= 2008) return downloadHitExponent;

@@ -318,9 +318,12 @@ abstract final class Actions {
 
   /// Releases a vault song as a single, or promotes an album track to single.
   static void releaseSingle(World w, Artist a, Song s,
-      {Campaign campaign = Campaign.standard}) {
-    _payCampaign(a, campaign);
+      {Campaign campaign = Campaign.standard,
+      bool prepaid = false,
+      double buzz = 0}) {
+    if (!prepaid) _payCampaign(a, campaign);
     _convertAnticipation(a, album: false);
+    a.hype += buzz;
     s.isSingle = true;
     s.singleWeek = w.week;
     if (s.status == SongStatus.vault) {
@@ -342,9 +345,12 @@ abstract final class Actions {
       {AlbumType type = AlbumType.album,
       List<int> variantWeeks = const [0],
       bool payForVariants = false,
-      Campaign campaign = Campaign.standard}) {
-    _payCampaign(a, campaign);
+      Campaign campaign = Campaign.standard,
+      bool prepaid = false,
+      double buzz = 0}) {
+    if (!prepaid) _payCampaign(a, campaign);
     _convertAnticipation(a, album: type == AlbumType.album);
+    a.hype += buzz;
     final quality = songIds.isEmpty
         ? 0.0
         : songIds.map((id) => w.songs[id].quality).reduce((x, y) => x + y) /
@@ -383,6 +389,52 @@ abstract final class Actions {
     a.lastReleaseWeek = w.week;
     if (type == AlbumType.album) Eras.open(w, a, album);
     return album;
+  }
+
+  /// Releases set for a later week (docs K45), longest allowed lead time.
+  static const maxScheduleWeeks = 26;
+
+  /// Scheduled releases due this week come out (before the week is played,
+  /// like a release made by hand). Returns what came out.
+  static List<ScheduledOut> releaseScheduled(World w, Artist a) {
+    final out = <ScheduledOut>[];
+    final due = a.scheduled.where((sr) => sr.releaseWeek <= w.week).toList();
+    for (final sr in due) {
+      a.scheduled.remove(sr);
+      if (sr.isAlbum) {
+        final free = [
+          for (final id in sr.songIds)
+            if (w.songs[id].albumId < 0) id
+        ];
+        if (free.isEmpty) continue;
+        final al = releaseAlbum(w, a, sr.title, free,
+            type: sr.type,
+            variantWeeks: sr.variantWeeks,
+            campaign: sr.campaign,
+            prepaid: true,
+            buzz: sr.buzz);
+        out.add((scheduleId: sr.id, isAlbum: true, id: al.id));
+      } else {
+        final s = w.songs[sr.songIds.single];
+        if (s.isSingle) continue;
+        releaseSingle(w, a, s,
+            campaign: sr.campaign, prepaid: true, buzz: sr.buzz);
+        out.add((scheduleId: sr.id, isAlbum: false, id: s.id));
+      }
+    }
+    return out;
+  }
+
+  /// Announced releases build buzz until they come out; fans already feel
+  /// it (half of it lifts the artist's hype in the meantime).
+  static void buildAnnouncedBuzz(World w, Artist a) {
+    final c = w.config;
+    for (final sr in a.scheduled) {
+      if (!sr.announcedBy(w.week) || w.week >= sr.releaseWeek) continue;
+      final cap = c.announceBuzzCap(sr.type, a.fame);
+      if (sr.buzz < cap) sr.buzz += (cap - sr.buzz) * c.announceBuildRate;
+      a.hype = math.max(a.hype, 0.5 * sr.buzz);
+    }
   }
 
   /// Stored anticipation (after a closed era) becomes hype when the artist

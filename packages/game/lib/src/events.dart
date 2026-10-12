@@ -123,3 +123,33 @@ class PlatformLaunched extends GameEvent {
   @override
   bool get isMajor => false;
 }
+
+/// A scheduled player release came out this week (docs K45). Albums also
+/// report [AlbumFirstWeek] when they chart.
+class ReleaseOut extends GameEvent {
+  const ReleaseOut(this.kind, this.entityId, this.scheduleId);
+  final EntityKind kind;
+  final int entityId;
+
+  /// The [ScheduledView.id] it was planned under.
+  final int scheduleId;
+  @override
+  bool get isMajor => true;
+}
+
+/// A scheduled player release was announced this week.
+class ReleaseAnnounced extends GameEvent {
+  const ReleaseAnnounced(
+      {required this.isAlbum,
+      required this.songId,
+      required this.title,
+      required this.releaseWeek});
+  final bool isAlbum;
+
+  /// The single's song (-1 for an album).
+  final int songId;
+  final String title;
+  final int releaseWeek;
+  @override
+  bool get isMajor => false;
+}

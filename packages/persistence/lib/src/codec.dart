@@ -49,7 +49,7 @@ abstract final class Codec {
     ...artistRegColumns,
     'no1Singles', 'no1SinglesFeatured', 'no1Albums', 'weeksAtNo1',
     // Added in schema v2/v3 (appended: older hot snapshots read null).
-    'restWeek', 'skillPoints',
+    'restWeek', 'skillPoints', 'schedule',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -77,6 +77,7 @@ abstract final class Codec {
         _ints(a.weeksAtNo1),
         a.restWeek,
         a.skillPoints,
+        _encodeSchedule(a.scheduled),
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -137,6 +138,7 @@ abstract final class Codec {
       ..pendingAlbumType = AlbumType.values[r['pendingAlbumType'] as int]
       ..pendingVariantWeeks = _parseInts(r['pendingVariants'] as String);
     a.plan.addAll(_decodePlan(r['plan'] as String));
+    a.scheduled.addAll(_decodeSchedule(r['schedule'] as String?));
     a.pendingAlbumSongIds.addAll(_parseInts(r['pendingSongs'] as String));
     _readReg(r, artistRegColumns, a.reg);
     _readInts(r['no1Singles'] as String, a.no1Singles);
@@ -344,4 +346,40 @@ abstract final class Codec {
           return PlannedRelease(
               week: f[0], kind: PlannedKind.values[f[1]], songId: f[2]);
         }).toList();
+
+  static String _encodeSchedule(List<ScheduledRelease> list) => jsonEncode([
+        for (final sr in list)
+          {
+            'id': sr.id,
+            'type': sr.type.index,
+            'songs': sr.songIds,
+            'title': sr.title,
+            'variants': sr.variantWeeks,
+            'campaign': sr.campaign.index,
+            'release': sr.releaseWeek,
+            'announce': sr.announceWeek,
+            'created': sr.createdWeek,
+            'paid': sr.paidCents,
+            'buzz': sr.buzz,
+          }
+      ]);
+
+  static List<ScheduledRelease> _decodeSchedule(String? json) => [
+        if (json != null)
+          for (final m
+              in (jsonDecode(json) as List).cast<Map<String, Object?>>())
+            ScheduledRelease(
+              id: m['id'] as int,
+              type: AlbumType.values[m['type'] as int],
+              songIds: (m['songs'] as List).cast<int>(),
+              title: m['title'] as String,
+              variantWeeks: (m['variants'] as List).cast<int>(),
+              campaign: Campaign.values[m['campaign'] as int],
+              releaseWeek: m['release'] as int,
+              announceWeek: m['announce'] as int,
+              createdWeek: m['created'] as int,
+              paidCents: m['paid'] as int,
+              buzz: (m['buzz'] as num).toDouble(),
+            ),
+      ];
 }

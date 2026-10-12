@@ -95,7 +95,9 @@ class ArtistView {
                 w.albums.any((al) => al.artistId == a.id && _charted(al))),
         vaultCount = a.tier == ArtistTier.player
             ? w.playerSongIds
-                .where((id) => w.songs[id].status == SongStatus.vault)
+                .where((id) =>
+                    w.songs[id].status == SongStatus.vault &&
+                    !a.scheduled.any((sr) => sr.songIds.contains(id)))
                 .length
             : 0,
         restingThisWeek = a.restWeek == w.week,
@@ -190,9 +192,25 @@ class SongView {
         lifetimeStreams = _regional((r) => w.songLifetimeStreams(s, r)),
         lifetimeDownloads = w.songLifetimeDownloads(s),
         lifetimePhysical = s.lifetimePhysical,
-        lifetimeRadio = s.lifetimeRadio;
+        lifetimeRadio = s.lifetimeRadio,
+        scheduledSingleWeek = _scheduledWeek(w, s, album: false),
+        scheduledAlbumWeek = _scheduledWeek(w, s, album: true);
 
   factory SongView.of(World w, Song s) => SongView._(w, s);
+
+  static int _scheduledWeek(World w, Song s, {required bool album}) {
+    for (final sr in w.artists[s.primaryArtistId].scheduled) {
+      if (sr.isAlbum == album && sr.songIds.contains(s.id)) {
+        return sr.releaseWeek;
+      }
+    }
+    return -1;
+  }
+
+  /// Week a scheduled single / album with this song comes out, or -1
+  /// (docs K45).
+  final int scheduledSingleWeek;
+  final int scheduledAlbumWeek;
 
   final int id;
   final String title;
@@ -441,6 +459,43 @@ class ArtistPageView {
 
 /// Which number best tells a song's success in a given year (docs K38):
 /// CD singles and radio in the early 2000s, then downloads, then streams.
+/// A player release set for a later week (docs K45).
+class ScheduledView {
+  ScheduledView.of(World w, ScheduledRelease sr)
+      : id = sr.id,
+        type = sr.type,
+        title = sr.isAlbum ? sr.title : w.songs[sr.songIds.single].title,
+        songIds = List.unmodifiable(sr.songIds),
+        releaseWeek = sr.releaseWeek,
+        announceWeek = sr.announceWeek,
+        announced = sr.announcedBy(w.week),
+        isSurprise = sr.isSurprise,
+        campaign = sr.campaign,
+        paidCents = sr.paidCents,
+        buzz = sr.buzz,
+        buzzCap = w.config.announceBuzzCap(sr.type, w.player!.fame);
+
+  final int id;
+  final AlbumType type;
+
+  /// The album title, or the single's song title.
+  final String title;
+  final List<int> songIds;
+  final int releaseWeek;
+
+  /// Equal to [releaseWeek] for a surprise release.
+  final int announceWeek;
+  final bool announced;
+  final bool isSurprise;
+  final Campaign campaign;
+  final int paidCents;
+
+  /// Excitement built since the announcement, and its ceiling.
+  final double buzz;
+  final double buzzCap;
+  bool get isAlbum => type != AlbumType.single;
+}
+
 enum SalesEra {
   /// 2000–2004: single sales (mostly CD) first, radio second.
   physical,

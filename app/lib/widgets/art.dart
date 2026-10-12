@@ -42,23 +42,29 @@ class CoverArt extends StatelessWidget {
       this.size = 48,
       this.radius,
       this.songId,
-      this.albumId});
+      this.albumId,
+      this.imageKey});
   final int seed;
   final double size;
   final double? radius;
   final int? songId;
   final int? albumId;
 
+  /// Any other stored image (e.g. a scheduled album's cover).
+  final String? imageKey;
+
   @override
   Widget build(BuildContext context) {
     final store = _images(context);
     final path = store == null
         ? null
-        : songId != null
-            ? store.songCover(songId!, albumId ?? -1)
-            : albumId != null
-                ? store.albumCover(albumId!)
-                : null;
+        : imageKey != null
+            ? store.path(imageKey!)
+            : songId != null
+                ? store.songCover(songId!, albumId ?? -1)
+                : albumId != null
+                    ? store.albumCover(albumId!)
+                    : null;
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius ?? size * 0.12),
       child: SizedBox.square(

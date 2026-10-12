@@ -88,6 +88,10 @@ void main() {
         variantWeeks: const [0, 0, 1, 2],
         campaign: Campaign.global));
     await c.run(Cmd.nextWeek());
+    // The next single is set for later and announced in advance (K45).
+    final (_, now, _) = await c.run(Cmd.snapshot());
+    await c.run(
+        Cmd.scheduleSingle(songs[12], Campaign.standard, now + 8, now + 4));
     await c.exec(Cmd.closeCareer());
 
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
@@ -123,6 +127,12 @@ void main() {
     await tester.pumpAndSettle();
     await tab(tester, 'Releases');
     await shot(tester, '06_releases');
+    await tester.tap(find.textContaining('Announcement: '));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Change date'));
+    await shot(tester, '06b_release_timing');
+    await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
     await tab(tester, 'Charts');
     await shot(tester, '07_charts_songs');
     await tester.tap(find.text('US ALBUMS'));

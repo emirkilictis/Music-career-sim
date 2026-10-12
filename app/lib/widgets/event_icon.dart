@@ -22,6 +22,8 @@ class EventIcon extends StatelessWidget {
       EraClosed() => (Icons.insights_rounded, AppColors.pink),
       BurnoutOver() => (Icons.edit_note_rounded, AppColors.butter),
       PlatformLaunched() => (Icons.graphic_eq_rounded, AppColors.mint),
+      ReleaseOut() => (Icons.rocket_launch_rounded, AppColors.pink),
+      ReleaseAnnounced() => (Icons.campaign_rounded, AppColors.sky),
       RivalNumberOne() => (Icons.newspaper_rounded, AppColors.textMuted),
     };
     return IconBubble(icon, color: color, size: size);

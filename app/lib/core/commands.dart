@@ -101,6 +101,37 @@ abstract final class Cmd {
       (s) => s.releaseAlbum(title, songIds,
           type: type, variantWeeks: variantWeeks, campaign: campaign);
 
+  static SessionCmd<ScheduledView> scheduleSingle(
+          int songId, Campaign campaign, int releaseWeek, int announceWeek) =>
+      (s) => s.scheduleSingle(songId,
+          campaign: campaign,
+          releaseWeek: releaseWeek,
+          announceWeek: announceWeek);
+
+  static SessionCmd<ScheduledView> scheduleAlbum({
+    required String title,
+    required List<int> songIds,
+    required AlbumType type,
+    required List<int> variantWeeks,
+    required Campaign campaign,
+    required int releaseWeek,
+    required int announceWeek,
+  }) =>
+      (s) => s.scheduleAlbum(title, songIds,
+          type: type,
+          variantWeeks: variantWeeks,
+          campaign: campaign,
+          releaseWeek: releaseWeek,
+          announceWeek: announceWeek);
+
+  static SessionCmd<void> reschedule(
+          int id, int releaseWeek, int? announceWeek) =>
+      (s) => s.reschedule(id,
+          releaseWeek: releaseWeek, announceWeek: announceWeek);
+
+  static SessionCmd<void> cancelScheduled(int id) =>
+      (s) => s.cancelScheduled(id);
+
   static SessionCmd<void> setJob(Job job) => (s) => s.setJob(job);
 
   static SessionCmd<void> rest() => (s) => s.rest();
@@ -118,6 +149,8 @@ abstract final class Cmd {
   static SessionCmd<List<SongView>> songs() => (s) => s.songs;
   static SessionCmd<List<SongView>> vault() => (s) => s.vault;
   static SessionCmd<List<AlbumView>> albums() => (s) => s.albums;
+
+  static SessionCmd<List<ScheduledView>> scheduled() => (s) => s.scheduled;
   static SessionCmd<SongView> song(int id) => (s) => s.song(id);
   static SessionCmd<AlbumView> album(int id) => (s) => s.album(id);
   static SessionCmd<ChartView> chart(int id) => (s) => s.chart(id);

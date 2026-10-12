@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../core/images.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import 'game_shell.dart';
@@ -145,6 +146,8 @@ Future<void> openCareer(BuildContext context, CareerState state) async {
   await state.refresh();
   if (!context.mounted) return;
   final images = context.imagesRead..open(state.slotId!);
+  state.onScheduledAlbumOut = (scheduleId, albumId) => images.adopt(
+      ImageStore.scheduledKey(scheduleId), ImageStore.albumKey(albumId));
   await Navigator.push(
     context,
     MaterialPageRoute(builder: (_) => GameShell(state: state)),

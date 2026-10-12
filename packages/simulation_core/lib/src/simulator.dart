@@ -18,6 +18,7 @@ class WeekResult {
     required this.week,
     required this.charts,
     required this.albumDebuts,
+    this.scheduledOut = const [],
     required this.newNumberOnes,
     required this.viralSongs,
     required this.playlistAdds,
@@ -34,6 +35,10 @@ class WeekResult {
 
   /// Albums released this week (ids).
   final List<int> albumDebuts;
+
+  /// The player's scheduled releases that came out at the start of this
+  /// week (docs K45).
+  final List<ScheduledOut> scheduledOut;
 
   /// Entities reaching #1 for the first time, by chart id.
   final List<List<int>> newNumberOnes;
@@ -75,6 +80,12 @@ class Simulator {
       _retroactiveAlbumUnits();
     }
 
+    // The player's scheduled releases due this week come out.
+    final player = w.player;
+    final scheduledOut = player == null
+        ? const <ScheduledOut>[]
+        : Actions.releaseScheduled(w, player);
+
     // 1–2. Scheduled AI activity.
     AiPlanner.step(w);
 
@@ -88,6 +99,7 @@ class Simulator {
       a.weekReach = 0;
       a.weekStreams = 0;
       a.hype *= 0.92;
+      if (a.scheduled.isNotEmpty) Actions.buildAnnouncedBuzz(w, a);
       // Fanbases slowly drift unless renewed by successful eras.
       a.devotion = math.max(0.0, a.devotion - 0.0004 * a.kind.devotionDrift);
       a.buzz *= 0.75;
@@ -605,6 +617,7 @@ class Simulator {
       week: w.week,
       charts: published,
       albumDebuts: debuts,
+      scheduledOut: scheduledOut,
       newNumberOnes: newNo1,
       viralSongs: virals,
       playlistAdds: playlistAdds,

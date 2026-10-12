@@ -29,6 +29,15 @@ class CareerState extends ChangeNotifier {
   int lastWeekPlayed = -1;
   int lastMoneyDelta = 0;
 
+  /// Called when a scheduled album comes out (moves its advance cover).
+  void Function(int scheduleId, int albumId)? onScheduledAlbumOut;
+
+  void _adoptCovers(List<EventLine> lines) {
+    for (final (scheduleId, albumId) in scheduledAlbumsOut(lines)) {
+      onScheduledAlbumOut?.call(scheduleId, albumId);
+    }
+  }
+
   /// Bumped on every change so screens know to reload their own data.
   int revision = 0;
   bool busy = false;
@@ -71,6 +80,7 @@ class CareerState extends ChangeNotifier {
     before = _player;
     try {
       final (week, lines, delta) = await controller.run(Cmd.nextWeek());
+      _adoptCovers(lines);
       lastEvents = sortLines(playerNews(lines));
       lastWeekPlayed = week;
       lastMoneyDelta = delta;
@@ -93,6 +103,7 @@ class CareerState extends ChangeNotifier {
       final result =
           await controller.run(Cmd.skipWeeks(weeks, stop, port.sendPort));
       final y = result.$1;
+      _adoptCovers(result.$2);
       final news = playerNews(result.$2);
       lastEvents = sortLines(
           y.isYear ? news.where((l) => l.event.isMajor).toList() : news);

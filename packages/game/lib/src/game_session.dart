@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:persistence/persistence.dart';
 import 'package:simulation_core/simulation_core.dart';
 
@@ -323,11 +325,136 @@ class GameSession {
 
   /// Releases a vault song as a single, or pushes an album track as a single.
   void releaseSingle(int songId, {Campaign campaign = Campaign.standard}) {
-    final s = _ownSong(songId);
-    if (s.isSingle) throw GameException('alreadySingle', 'Already a single');
+    final s = _checkSingle(songId);
     _requireMoney(campaign.costCents);
     Actions.releaseSingle(world, _p, s, campaign: campaign);
     _saveNow();
+  }
+
+  Song _checkSingle(int songId) {
+    final s = _ownSong(songId);
+    if (s.isSingle) throw GameException('alreadySingle', 'Already a single');
+    if (_p.scheduled.any((sr) => !sr.isAlbum && sr.songIds.contains(s.id))) {
+      throw GameException('alreadyScheduled', 'Already scheduled as a single');
+    }
+    return s;
+  }
+
+  // ---------------------------------------------------- scheduled releases
+
+  /// The player's releases set for later weeks, soonest first (docs K45).
+  List<ScheduledView> get scheduled => [
+        for (final sr in [
+          ..._p.scheduled
+        ]..sort((a, b) => a.releaseWeek.compareTo(b.releaseWeek)))
+          ScheduledView.of(world, sr),
+      ];
+
+  /// Sets a single to come out at [releaseWeek] (1–26 weeks ahead),
+  /// announced at [announceWeek] (this week up to the release week; the
+  /// release week itself = a surprise drop). The campaign is paid now.
+  ScheduledView scheduleSingle(int songId,
+      {Campaign campaign = Campaign.standard,
+      required int releaseWeek,
+      required int announceWeek}) {
+    final s = _checkSingle(songId);
+    _checkDates(releaseWeek, announceWeek);
+    _requireMoney(campaign.costCents);
+    return _schedule(ScheduledRelease(
+      id: _nextScheduleId(),
+      type: AlbumType.single,
+      songIds: [s.id],
+      releaseWeek: releaseWeek,
+      announceWeek: announceWeek,
+      createdWeek: world.week,
+      campaign: campaign,
+      paidCents: campaign.costCents,
+    ));
+  }
+
+  /// Sets an album or EP to come out later (see [scheduleSingle]). Its
+  /// songs can still come out as singles before it.
+  ScheduledView scheduleAlbum(
+    String title,
+    List<int> songIds, {
+    AlbumType type = AlbumType.album,
+    List<int> variantWeeks = const [0],
+    Campaign campaign = Campaign.standard,
+    required int releaseWeek,
+    required int announceWeek,
+  }) {
+    final t = _checkAlbum(title, songIds, type, variantWeeks);
+    _checkDates(releaseWeek, announceWeek);
+    final cost = campaign.costCents +
+        Actions.variantCostCents * (variantWeeks.length - 1);
+    _requireMoney(cost);
+    return _schedule(ScheduledRelease(
+      id: _nextScheduleId(),
+      type: type,
+      songIds: List.of(songIds),
+      title: t,
+      variantWeeks: List.of(variantWeeks),
+      releaseWeek: releaseWeek,
+      announceWeek: announceWeek,
+      createdWeek: world.week,
+      campaign: campaign,
+      paidCents: cost,
+    ));
+  }
+
+  /// Moves a scheduled release. Once announced, the announcement stays;
+  /// pushing an announced release back costs part of its buzz.
+  void reschedule(int id, {required int releaseWeek, int? announceWeek}) {
+    final sr = _scheduledById(id);
+    final announced = sr.announcedBy(world.week);
+    final announce = announced ? sr.announceWeek : announceWeek ?? releaseWeek;
+    if (releaseWeek <= world.week ||
+        releaseWeek > world.week + Actions.maxScheduleWeeks ||
+        announce > releaseWeek ||
+        (!announced && announce < world.week)) {
+      throw GameException('invalidDate', 'Pick a later week');
+    }
+    if (announced && releaseWeek > sr.releaseWeek) sr.buzz *= delayBuzzKept;
+    sr.releaseWeek = releaseWeek;
+    sr.announceWeek = announce;
+    _saveNow();
+  }
+
+  /// Share of the buzz kept when an announced release is pushed back.
+  static const delayBuzzKept = 0.7;
+
+  /// Calls off a scheduled release: its songs are free again and what was
+  /// paid for it comes back (any announcement buzz is lost).
+  void cancelScheduled(int id) {
+    final sr = _scheduledById(id);
+    _p.scheduled.remove(sr);
+    _p.moneyCents += sr.paidCents;
+    _saveNow();
+  }
+
+  ScheduledRelease _scheduledById(int id) =>
+      _p.scheduled.where((sr) => sr.id == id).firstOrNull ??
+      (throw GameException('notScheduled', 'No such scheduled release'));
+
+  /// Unique in the career (a pending album cover is stored under it).
+  int _nextScheduleId() => _p.scheduled
+      .where((sr) => sr.createdWeek == world.week)
+      .fold(world.week * 64, (m, sr) => math.max(m, sr.id + 1));
+
+  void _checkDates(int releaseWeek, int announceWeek) {
+    if (releaseWeek <= world.week ||
+        releaseWeek > world.week + Actions.maxScheduleWeeks ||
+        announceWeek < world.week ||
+        announceWeek > releaseWeek) {
+      throw GameException('invalidDate', 'Pick a later week');
+    }
+  }
+
+  ScheduledView _schedule(ScheduledRelease sr) {
+    _p.moneyCents -= sr.paidCents;
+    _p.scheduled.add(sr);
+    _saveNow();
+    return ScheduledView.of(world, sr);
   }
 
   static const minEpTracks = 3, maxEpTracks = 7;
@@ -344,6 +471,20 @@ class GameSession {
     List<int> variantWeeks = const [0],
     Campaign campaign = Campaign.standard,
   }) {
+    final t = _checkAlbum(title, songIds, type, variantWeeks);
+    _requireMoney(campaign.costCents +
+        Actions.variantCostCents * (variantWeeks.length - 1));
+    final al = Actions.releaseAlbum(world, _p, t, songIds,
+        type: type,
+        variantWeeks: variantWeeks,
+        payForVariants: true,
+        campaign: campaign);
+    _saveNow();
+    return AlbumView.of(world, al);
+  }
+
+  String _checkAlbum(
+      String title, List<int> songIds, AlbumType type, List<int> variantWeeks) {
     final t = title.trim();
     if (t.isEmpty || t.length > 60) {
       throw GameException('invalidTitle', 'Title must be 1–60 chars');
@@ -361,7 +502,8 @@ class GameSession {
       throw GameException('duplicateTracks', 'A song is listed twice');
     }
     for (final id in songIds) {
-      if (_ownSong(id).albumId >= 0) {
+      if (_ownSong(id).albumId >= 0 ||
+          _p.scheduled.any((sr) => sr.isAlbum && sr.songIds.contains(id))) {
         throw GameException('trackOnOtherRelease', 'Song $id is taken');
       }
     }
@@ -371,15 +513,7 @@ class GameSession {
         !variantWeeks.contains(0)) {
       throw GameException('invalidVariants', 'Variants must include week 0');
     }
-    _requireMoney(campaign.costCents +
-        Actions.variantCostCents * (variantWeeks.length - 1));
-    final al = Actions.releaseAlbum(world, _p, t, songIds,
-        type: type,
-        variantWeeks: variantWeeks,
-        payForVariants: true,
-        campaign: campaign);
-    _saveNow();
-    return AlbumView.of(world, al);
+    return t;
   }
 
   /// Takes a day job, or quits with [Job.none] (docs K36).
@@ -700,6 +834,21 @@ class GameSession {
       if (al.artistId == p.id) check(al, EntityKind.album, id, _albumCharts);
     }
 
+    for (final o in r.scheduledOut) {
+      events.add(ReleaseOut(
+          o.isAlbum ? EntityKind.album : EntityKind.song, o.id, o.scheduleId));
+    }
+    for (final sr in p.scheduled) {
+      if (sr.announceWeek == r.week &&
+          !sr.isSurprise &&
+          sr.announceWeek > sr.createdWeek) {
+        events.add(ReleaseAnnounced(
+            isAlbum: sr.isAlbum,
+            songId: sr.isAlbum ? -1 : sr.songIds.single,
+            title: sr.isAlbum ? sr.title : w.songs[sr.songIds.single].title,
+            releaseWeek: sr.releaseWeek));
+      }
+    }
     for (final id in r.viralSongs) {
       if (w.songs[id].primaryArtistId == p.id) events.add(ViralTrend(id));
     }

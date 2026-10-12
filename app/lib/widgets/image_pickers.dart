@@ -64,6 +64,27 @@ class CoverPickRow extends StatelessWidget {
   }
 }
 
+/// Cover of a scheduled album, stored under [imageKey] until it comes out.
+class PendingKeyCoverRow extends StatelessWidget {
+  const PendingKeyCoverRow({super.key, required this.imageKey});
+  final String imageKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final own = context.images.path(imageKey) != null;
+    return ListTile(
+      leading: CoverArt(seed: imageKey.hashCode, imageKey: imageKey, size: 52),
+      title: Text(l.cover, style: const TextStyle(fontWeight: FontWeight.w700)),
+      subtitle: Text(own ? l.coverOwn : l.coverGenerated),
+      trailing: TextButton(
+        onPressed: () => editImage(context, imageKey),
+        child: Text(own ? l.changeCover : l.addCover),
+      ),
+    );
+  }
+}
+
 /// Cover chosen before the album exists (album builder); saved on release.
 class PendingCoverRow extends StatelessWidget {
   const PendingCoverRow(

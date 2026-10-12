@@ -255,6 +255,9 @@ class Artist {
   /// Unspent skill points (the player earns one a week; docs K43).
   int skillPoints = 0;
 
+  /// The player's releases set for a later week (docs K45).
+  final List<ScheduledRelease> scheduled = [];
+
   // Side income (player only; docs/game-design.md §20.1, K36).
   Job job = Job.none;
   bool get hasJob => job != Job.none;
@@ -647,3 +650,47 @@ abstract final class AlbumReg {
   static const firstWeekPure = 12;
   static const length = 15;
 }
+
+/// A player single or album set for a later week, announced at
+/// [announceWeek] (docs K45). From the announcement until the release,
+/// [buzz] builds and is added to the artist's hype when it comes out.
+class ScheduledRelease {
+  ScheduledRelease({
+    required this.id,
+    required this.type,
+    required this.songIds,
+    required this.releaseWeek,
+    required this.announceWeek,
+    required this.createdWeek,
+    this.title = '',
+    this.variantWeeks = const [0],
+    this.campaign = Campaign.standard,
+    this.paidCents = 0,
+    this.buzz = 0,
+  });
+
+  final int id;
+
+  /// [AlbumType.single] for a single (one song in [songIds]).
+  final AlbumType type;
+  final List<int> songIds;
+  final String title;
+  final List<int> variantWeeks;
+  final Campaign campaign;
+  int releaseWeek;
+
+  /// Equal to [releaseWeek]: a surprise release with no announcement.
+  int announceWeek;
+  final int createdWeek;
+
+  /// Campaign and edition costs paid when it was scheduled.
+  final int paidCents;
+  double buzz;
+
+  bool get isAlbum => type != AlbumType.single;
+  bool get isSurprise => announceWeek >= releaseWeek;
+  bool announcedBy(int week) => !isSurprise && week >= announceWeek;
+}
+
+/// A scheduled release that came out: the single's song id or the album id.
+typedef ScheduledOut = ({int scheduleId, bool isAlbum, int id});

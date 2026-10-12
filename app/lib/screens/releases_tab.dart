@@ -10,6 +10,7 @@ import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/image_pickers.dart';
 import '../widgets/media_tile.dart';
+import '../widgets/release_timing.dart';
 import 'album_detail_screen.dart';
 import 'song_detail_screen.dart';
 
@@ -24,6 +25,7 @@ class ReleasesTab extends StatefulWidget {
 class _ReleasesTabState extends State<ReleasesTab> {
   List<SongView> _songs = const [];
   List<AlbumView> _albums = const [];
+  List<ScheduledView> _scheduled = const [];
   int _loadedRevision = -1;
 
   @override
@@ -40,10 +42,12 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final career = context.careerRead;
     final songs = await career.read(Cmd.songs());
     final albums = await career.read(Cmd.albums());
+    final scheduled = await career.read(Cmd.scheduled());
     if (mounted) {
       setState(() {
         _songs = songs;
         _albums = albums;
+        _scheduled = scheduled;
       });
     }
   }
@@ -52,7 +56,9 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final l = context.l10n;
     final fmt = context.fmt;
     final career = context.careerRead;
-    final eligible = _songs.where((s) => !s.isSingle).toList()
+    final eligible = _songs
+        .where((s) => !s.isSingle && s.scheduledSingleWeek < 0)
+        .toList()
       ..sort((a, b) => b.estimatedGrade.compareTo(a.estimatedGrade));
     if (eligible.isEmpty) {
       showInfo(context, l.noSongsToRelease);
@@ -90,12 +96,90 @@ class _ReleasesTabState extends State<ReleasesTab> {
       ),
     );
     if (song == null || !mounted) return;
+    final when = await pickReleaseTiming(context, week: career.week);
+    if (when == null || !mounted) return;
     final campaign = await pickCampaign(context, career,
         header: CoverPickRow(songId: song.id, albumId: song.albumId));
     if (campaign == null || !mounted) return;
     try {
-      await career.act(Cmd.releaseSingle(song.id, campaign));
-      if (mounted) showInfo(context, l.singleReleased(song.title));
+      if (when.releaseWeek == career.week) {
+        await career.act(Cmd.releaseSingle(song.id, campaign));
+        if (mounted) showInfo(context, l.singleReleased(song.title));
+      } else {
+        await career.act(Cmd.scheduleSingle(
+            song.id, campaign, when.releaseWeek, when.announceWeek));
+        if (mounted) {
+          showInfo(context,
+              l.releaseScheduled(song.title, fmt.week(when.releaseWeek)));
+        }
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  /// Change the date of a scheduled release, or call it off.
+  Future<void> _editScheduled(ScheduledView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final action = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(
+            title: Text(s.title,
+                style: const TextStyle(fontWeight: FontWeight.w800)),
+            subtitle: Text('${fmt.albumType(s.type)} · '
+                '${l.releaseDate(fmt.week(s.releaseWeek))}'),
+          ),
+          if (s.isAlbum)
+            PendingKeyCoverRow(imageKey: ImageStore.scheduledKey(s.id)),
+          ListTile(
+            leading: const Icon(Icons.edit_calendar_rounded),
+            title: Text(l.changeDate),
+            onTap: () => Navigator.pop(c, true),
+          ),
+          ListTile(
+            leading: Icon(Icons.event_busy_rounded, color: AppColors.coral),
+            title: Text(l.cancelRelease),
+            onTap: () => Navigator.pop(c, false),
+          ),
+        ]),
+      ),
+    );
+    if (action == null || !mounted) return;
+    try {
+      if (action) {
+        final when =
+            await pickReleaseTiming(context, week: career.week, editing: s);
+        if (when == null || !mounted) return;
+        await career
+            .act(Cmd.reschedule(s.id, when.releaseWeek, when.announceWeek));
+        if (mounted) showInfo(context, l.dateSaved);
+      } else {
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (c) => AlertDialog(
+            title: Text(l.cancelReleaseTitle),
+            content: Text(l.cancelReleaseBody(fmt.money(s.paidCents))),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(c, false),
+                  child: Text(l.cancel)),
+              FilledButton(
+                  onPressed: () => Navigator.pop(c, true),
+                  child: Text(l.cancelRelease)),
+            ],
+          ),
+        );
+        if (ok != true || !mounted) return;
+        final images = context.imagesRead;
+        await career.act(Cmd.cancelScheduled(s.id));
+        images.remove(ImageStore.scheduledKey(s.id));
+        if (mounted) showInfo(context, l.releaseCancelled);
+      }
     } catch (e) {
       if (mounted) showError(context, e);
     }
@@ -133,12 +217,36 @@ class _ReleasesTabState extends State<ReleasesTab> {
                           builder: (_) => AlbumBuilderScreen(
                               state: career,
                               songs: _songs
-                                  .where((s) => s.albumId < 0)
+                                  .where((s) =>
+                                      s.albumId < 0 && s.scheduledAlbumWeek < 0)
                                   .toList()))),
             ),
           ),
         ]),
         const SizedBox(height: 16),
+        if (_scheduled.isNotEmpty) ...[
+          Section(
+            title: l.upcoming,
+            icon: Icons.event_rounded,
+            child: Column(children: [
+              for (final s in _scheduled)
+                MediaTile(
+                  coverSeed: s.isAlbum
+                      ? albumCoverSeed(s.id)
+                      : songCoverSeed(s.songIds.single, -1),
+                  songId: s.isAlbum ? null : s.songIds.single,
+                  imageKey: s.isAlbum ? ImageStore.scheduledKey(s.id) : null,
+                  title: s.title,
+                  subtitleLines: 2,
+                  subtitle: '${fmt.albumType(s.type)} · '
+                      '${l.releaseDate(fmt.week(s.releaseWeek))}\n'
+                      '${s.isSurprise ? l.announceSurprise : s.announced ? '${l.statusAnnounced} · ${l.buzzLabel} ${(100 * s.buzz / s.buzzCap).round()}%' : l.announceDate(fmt.week(s.announceWeek))}',
+                  onTap: career.busy ? null : () => _editScheduled(s),
+                ),
+            ]),
+          ),
+          const SizedBox(height: 12),
+        ],
         Section(
           title: l.albumsAndEps,
           icon: Icons.album_outlined,
@@ -291,24 +399,42 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
       for (final s in widget.songs)
         if (_picked.contains(s.id)) s.id
     ];
+    final when = await pickReleaseTiming(context, week: career.week);
+    if (when == null || !mounted) return;
     final campaign =
         await pickCampaign(context, career, extraCents: _variantCost);
     if (campaign == null || !mounted) return;
     try {
-      final album = await career.act(Cmd.releaseAlbum(
-        title: _title.text,
-        songIds: ordered,
-        type: _type,
-        variantWeeks: _variantWeeks,
-        campaign: campaign,
-      ));
-      if (!mounted) return;
       final cover = _cover;
-      if (cover != null) {
-        context.imagesRead.save(ImageStore.albumKey(album.id), cover);
+      final images = context.imagesRead;
+      if (when.releaseWeek == career.week) {
+        final album = await career.act(Cmd.releaseAlbum(
+          title: _title.text,
+          songIds: ordered,
+          type: _type,
+          variantWeeks: _variantWeeks,
+          campaign: campaign,
+        ));
+        if (cover != null) images.save(ImageStore.albumKey(album.id), cover);
+        if (!mounted) return;
+        Navigator.pop(context);
+        showInfo(context, l.albumReleased(album.title));
+      } else {
+        final s = await career.act(Cmd.scheduleAlbum(
+          title: _title.text,
+          songIds: ordered,
+          type: _type,
+          variantWeeks: _variantWeeks,
+          campaign: campaign,
+          releaseWeek: when.releaseWeek,
+          announceWeek: when.announceWeek,
+        ));
+        if (cover != null) images.save(ImageStore.scheduledKey(s.id), cover);
+        if (!mounted) return;
+        Navigator.pop(context);
+        showInfo(context,
+            l.releaseScheduled(s.title, context.fmt.week(s.releaseWeek)));
       }
-      Navigator.pop(context);
-      showInfo(context, l.albumReleased(album.title));
     } catch (e) {
       if (mounted) showError(context, e);
     }

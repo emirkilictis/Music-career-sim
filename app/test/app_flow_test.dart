@@ -51,6 +51,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byType(ListTile).last);
     await tester.pumpAndSettle();
+    // When: this week (the default).
+    expect(find.text('When should it come out?'), findsOneWidget);
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
     expect(find.text('Promotion campaign'), findsOneWidget);
     await tester.tap(find.text('No promotion'));
     await tester.pumpAndSettle();
@@ -168,6 +172,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byType(ListTile).last);
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
     expect(find.text('Generated cover'), findsOneWidget);
     app.picker.next = photo;
     await tester.tap(find.text('Add cover'));
@@ -199,5 +205,70 @@ void main() {
             .where((f) => f.path.contains('/images/'))
             .length,
         2);
+  });
+
+  testWidgets('a single set for later, announced two weeks before',
+      (tester) async {
+    phoneView(tester);
+    final app = TestApp.create();
+    addTearDown(app.dispose);
+    await tester.pumpWidget(app.widget);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('New career'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Luna Vale');
+    await tester.tap(find.text('Start career'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Studio'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.textContaining('Write & record'));
+    await tester.tap(find.textContaining('Write & record'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Releases'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Release a single'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ListTile).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('In 4 weeks'));
+    await tester.pumpAndSettle();
+    expect(find.text('Out: Week 5, 2024'), findsOneWidget);
+    await tester.tap(find.text('2 weeks before'));
+    await tester.pumpAndSettle();
+    expect(find.text('Announcement: Week 3, 2024'), findsOneWidget);
+    // Longer than the wait: not possible.
+    expect(
+        tester
+            .widget<ChoiceChip>(
+                find.widgetWithText(ChoiceChip, '6 weeks before'))
+            .onSelected,
+        isNull);
+    await tester.ensureVisible(find.text('Continue'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('No promotion'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('is set for Week 5, 2024'), findsOneWidget);
+    expect(find.text('Coming up'), findsOneWidget);
+    final tile = find.textContaining('Announcement: Week 3, 2024');
+    expect(tile, findsOneWidget);
+
+    // Move it two weeks later, keeping the announcement plan.
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Change date'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('In 6 weeks'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Save'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Announcement: Week 5, 2024'), findsOneWidget);
+    expect(find.textContaining('Out: Week 7, 2024'), findsOneWidget);
   });
 }

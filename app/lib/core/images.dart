@@ -72,6 +72,9 @@ class ImageStore extends ChangeNotifier {
 
   static String songKey(int songId) => 'song_$songId';
   static String albumKey(int albumId) => 'album_$albumId';
+
+  /// An album cover chosen before a scheduled album exists (docs K45).
+  static String scheduledKey(int scheduleId) => 'scheduled_$scheduleId';
   static String artistKey(int artistId, ArtistPhoto kind) =>
       kind == ArtistPhoto.general
           ? 'artist_$artistId'
@@ -114,6 +117,15 @@ class ImageStore extends ChangeNotifier {
         '${dir.path}/${key}_${DateTime.now().microsecondsSinceEpoch}$ext';
     File(sourcePath).copySync(target);
     _files[key] = target;
+    notifyListeners();
+  }
+
+  /// Moves the image of [from] to [to] (a scheduled album came out).
+  void adopt(String from, String to) {
+    final path = _files.remove(from);
+    if (path == null) return;
+    _deleteFile(to);
+    _files[to] = path;
     notifyListeners();
   }
 

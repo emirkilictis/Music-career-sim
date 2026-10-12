@@ -40,6 +40,9 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         EraClosed() => EventLine(e),
         BurnoutOver() => EventLine(e),
         PlatformLaunched() => EventLine(e),
+        ReleaseOut() => release(e, e.kind, e.entityId),
+        ReleaseAnnounced() =>
+          EventLine(e, title: e.title, songId: e.songId < 0 ? null : e.songId),
         RivalNumberOne() => EventLine(e,
             title: entity(e.kind, e.entityId),
             artistName: w.artists[e.artistId].name),
@@ -47,9 +50,35 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
   ];
 }
 
-/// The player's own news (docs K37): industry headlines are left out.
-List<EventLine> playerNews(List<EventLine> lines) =>
-    lines.where((l) => !l.event.isIndustry).toList();
+/// The player's own news (docs K37): industry headlines are left out, and
+/// a scheduled album that charted is told by its first-week line only.
+List<EventLine> playerNews(List<EventLine> lines) {
+  final firstWeek = {
+    for (final l in lines)
+      if (l.event case AlbumFirstWeek(:final albumId)) albumId,
+  };
+  return lines
+      .where((l) => !l.event.isIndustry)
+      .where((l) => switch (l.event) {
+            ReleaseOut(kind: EntityKind.album, :final entityId) =>
+              !firstWeek.contains(entityId),
+            _ => true,
+          })
+      .toList();
+}
+
+/// Scheduled albums that came out in [lines]: (schedule id, album id), so
+/// a cover picked in advance can move to the album (docs K45).
+List<(int, int)> scheduledAlbumsOut(List<EventLine> lines) => [
+      for (final l in lines)
+        if (l.event
+            case ReleaseOut(
+              kind: EntityKind.album,
+              :final entityId,
+              :final scheduleId
+            ))
+          (scheduleId, entityId),
+    ];
 
 /// Most important first: player #1s and big moments before small news.
 List<EventLine> sortLines(List<EventLine> lines) {
@@ -61,6 +90,8 @@ List<EventLine> sortLines(List<EventLine> lines) {
         ChartDebut() => 4,
         NewPeak() => 5,
         PlaylistAdded() => 6,
+        ReleaseOut() => 2,
+        ReleaseAnnounced() => 6,
         BurnoutOver() => 7,
         PlatformLaunched() => 8,
         RivalNumberOne() => 9,

@@ -3,7 +3,10 @@ import 'codec.dart';
 /// Versioned schema. Each entry migrates the database from version i to i+1
 /// (docs/data-model.md). Never edit a shipped migration; append a new one.
 /// (v1 has not shipped yet, so it is still being shaped.)
-final List<String> migrations = [_v1(), _v2, _v3];
+final List<String> migrations = [_v1(), _v2, _v3, _v4];
+
+/// v4: the player's scheduled releases as JSON (docs K45).
+const _v4 = 'ALTER TABLE artist ADD COLUMN schedule TEXT;';
 
 /// v3: unspent skill points (docs K43).
 const _v3 = 'ALTER TABLE artist ADD COLUMN skillPoints INTEGER;';

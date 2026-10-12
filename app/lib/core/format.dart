@@ -230,6 +230,8 @@ class Fmt {
       'notEnoughMoney' => l.errorNotEnoughMoney,
       'weeklyLimit' => l.errorWeeklyLimit,
       'noSkillPoints' => l.errorNoSkillPoints,
+      'invalidDate' => l.errorInvalidDate,
+      'alreadyScheduled' => l.errorAlreadyScheduled,
       'skillMaxed' => l.errorSkillMaxed,
       'burnout' => l.errorBurnout,
       'collaboratorRefused' => l.errorCollaboratorRefused,
@@ -269,6 +271,8 @@ class Fmt {
           : l.eventPlaylistMid(t, platformName),
       EraClosed() => l.eventEraClosed(eraResult(e.result)),
       BurnoutOver() => l.eventBurnoutOver,
+      ReleaseOut() => l.eventReleaseOut(t),
+      ReleaseAnnounced() => l.eventReleaseAnnounced(t, week(e.releaseWeek)),
       PlatformLaunched() => e.chartId == Charts.platformGlobal
           ? l.eventPlatformLaunched(platformName)
           : l.eventPlatformArrived(platformName, l.regionNorthAmerica),
