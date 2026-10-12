@@ -115,6 +115,28 @@ void main() {
       expect(Actions.canWrite(w, p), isFalse);
     });
 
+    test('starting stats: premium gets a bigger pool and a higher cap', () {
+      final free = StartingStats.auto(premium: false);
+      final premium = StartingStats.auto(premium: true);
+      // The free auto build is the calibrated default player.
+      expect(
+          [free.songwriting, free.vocals, free.production], [37.0, 35.0, 29.0]);
+      expect(StartingStats.isValid(free, premium: false), isTrue);
+      expect(StartingStats.isValid(premium, premium: true), isTrue);
+      expect(StartingStats.isValid(premium, premium: false), isFalse);
+      expect(premium.songwriting, greaterThan(free.songwriting));
+      Skills one(double sw) => Skills(
+          songwriting: sw,
+          vocals: 25,
+          production: 25,
+          performance: 25,
+          charisma: 25);
+      expect(StartingStats.isValid(one(55), premium: false), isTrue);
+      expect(StartingStats.isValid(one(61), premium: false), isFalse);
+      expect(StartingStats.isValid(one(70), premium: true), isTrue);
+      expect(StartingStats.isValid(one(71), premium: true), isFalse);
+    });
+
     test('famous producers refuse unknown artists', () {
       final star = w.collaborators.firstWhere((c) => c.minFame > 0.3);
       expect(() => Actions.writeSong(w, p, producer: star),

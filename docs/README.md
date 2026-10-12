@@ -54,6 +54,7 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K26 | **Zorluk:** Kolay ("Domination") / **Normal = "Gerçekçi"** (gerçek dünyaya kalibre edilmiş mevcut denge) / Zor. Zorluk sadece oyuncuyu ölçekler, AI'yi değil. |
 | K27 | **Ücretsiz başlangıç $5.000 ile;** fazlası gündelik işle ($350/hafta, sadece maaş öder, hiçbir şeyi etkilemez) ve ödüllü reklamla (her zaman, haftada en fazla 3 × $250) kazanılır. Rahat/Milyoner başlangıcı Premium. |
 | K28 | **Premium günlük giriş bonusu:** her gerçek gün ilk girişte $5.000, hesap başına günde bir kez. |
+| K29 | **Premium bilerek güçlü (satması için):** daha yüksek başlangıç statları (55 puan, tavan 70; ücretsiz 30 puan, tavan 60) + ünlü/zengin başlangıçlar + günlük bonus. Formüller ve zorluk herkes için aynı; ücretsiz sürüm eksiksiz kalır. |
 | K23 | ChatGPT planındaki ekranlar, rekorlar, kampanyalar, finans, bildirimler, ödüller, Kolay mod ve 10 performans kuralı dokümanlara taşındı. |
 
 ## Yol Haritası

@@ -17,6 +17,44 @@ enum StartMoney { basic, comfortable, millionaire }
 
 enum CareerPath { independent, smallLabel }
 
+/// Starting stat allocation (docs/game-design.md §2.1): every stat starts at
+/// [base] and the player spends a pool of points on top, up to a cap.
+/// Premium gets a bigger pool and a higher cap.
+abstract final class StartingStats {
+  static const base = 25.0;
+
+  static int points({required bool premium}) => premium ? 55 : 30;
+  static double cap({required bool premium}) => premium ? 70 : 60;
+
+  static bool isValid(Skills s, {required bool premium}) {
+    final v = [
+      s.songwriting,
+      s.vocals,
+      s.production,
+      s.performance,
+      s.charisma,
+    ];
+    final limit = cap(premium: premium);
+    if (v.any((x) => x < base || x > limit)) return false;
+    final spent = v.fold(0.0, (a, x) => a + x - base);
+    return spent <= points(premium: premium) + 1e-9;
+  }
+
+  /// The "auto distribute" button: a balanced singer-songwriter build.
+  static Skills auto({required bool premium}) {
+    final p = points(premium: premium);
+    final sw = (p * 0.40).round(), vo = (p * 0.33).round();
+    final pr = (p * 0.13).round(), pe = (p - sw - vo - pr) ~/ 2;
+    return Skills(
+      songwriting: base + sw,
+      vocals: base + vo,
+      production: base + pr,
+      performance: base + pe,
+      charisma: base + (p - sw - vo - pr - pe),
+    );
+  }
+}
+
 /// Builds a new world: AI artists, collaborators, and (optionally) a player.
 abstract final class WorldGen {
   /// Creates a world whose clock starts [SimConfig.burnInYears] before
@@ -162,13 +200,7 @@ abstract final class WorldGen {
       homeCountry: home,
       genre: genre,
       debutWeek: w.week,
-      skills: skills ??
-          Skills(
-              songwriting: 37,
-              vocals: 35,
-              production: 29,
-              performance: 27,
-              charisma: 27),
+      skills: skills ?? StartingStats.auto(premium: false),
       fame: fame,
       coreFans: fans * w.config.globalAudienceScale,
       casual: casual * w.config.globalAudienceScale,

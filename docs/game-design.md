@@ -47,6 +47,8 @@ Hafta 14, 2007
 ### 2.1 Sanatçı oluşturma (tek ekran + isteğe bağlı detay)
 - İsim, profil fotoğrafı (opsiyonel), tür, başlangıç yılı, zorluk.
 - **Stat dağıtımı:** her stat 25'ten başlar, oyuncu 30 puan dağıtır (başlangıçta hiçbir stat 60'ı geçemez).
+  **Premium:** 55 puan, tavan 70 (otomatik dağıtım: söz yazarlığı 47, vokal 43, prodüksiyon 32, performans 29,
+  karizma 29 — ücretsizde 37 / 35 / 29 / 27 / 27).
   "Otomatik dağıt" butonu var.
 - **Kariyer yolu** ve **başlangıç seviyesi** (aşağıda).
 
@@ -562,13 +564,15 @@ daha güçlü varyantlar, daha kolay radyo/playlist kabulü, daha güçlü flop 
 - Oyun **ücretsiz indirilir ve tek başına eksiksiz oynanır.**
 - **Premium üyelik** üç şekilde satılır: **aylık**, **yıllık** ve **ömür boyu** (tek seferlik).
   Rakip oyunlarda aylık üyelik kabul görmüş bir model; ömür boyu seçeneği aboneliği sevmeyen oyuncular için.
-- Premium şunları açar: Yükselen yıldız ve Süperstar başlangıcı, Rahat ve Milyoner başlangıcı,
+- **Premium satması için bilerek güçlüdür ("biraz OP")**: Yükselen yıldız ve Süperstar başlangıcı,
+  Rahat ve Milyoner başlangıcı, **daha yüksek başlangıç statları** (55 puan / tavan 70, §2.1),
   sınırsız kayıt slotu, **günlük giriş bonusu** (§20.2). Üyeliğin değerini sürdürmek için yeni içerikler (dönemler, özellikler)
   ilk olarak veya sadece Premium'a gelebilir.
 - **Üyelik bitince hiçbir kariyer kilitlenmez.** Premium ile başlatılmış kariyerler ve mevcut slotlar
   oynanmaya devam eder; sadece **yeni** Premium başlangıç ve ücretsiz limitin üstünde **yeni** slot açılamaz.
-- Simülasyonun kendisi (zorluk, formüller) Premium'dan etkilenmez; para ile oyun içi güç satılmaz,
-  sadece başlangıç seçenekleri ve kolaylıklar. Tek istisna küçük günlük giriş bonusudur (oyun içi para).
+- Premium **güçlü bir başlangıç** satar (stat, para, ünlülük, günlük bonus); formüller ve zorluk ise herkes
+  için aynıdır. Ücretsiz oyuncu aynı zirvelere daha uzun yoldan çıkabilir: ücretsiz sürüm tek başına
+  eksiksiz ve eğlenceli kalmalı.
 - Satın alımları geri yükleme (restore) zorunludur.
 - Reklam: sadece **isteğe bağlı ödüllü reklam** (§20.1). Zorunlu/araya giren reklam planlanmadı.
 
