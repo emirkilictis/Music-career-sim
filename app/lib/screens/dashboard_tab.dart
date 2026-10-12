@@ -3,19 +3,47 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
+import '../core/career_state.dart';
 import '../core/commands.dart';
+import '../core/format.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
-import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
-import '../core/format.dart';
-import 'game_shell.dart';
 import 'streamify/streamify_tab.dart';
+import 'game_shell.dart';
 
-/// Home: who you are right now, this week's news and side income.
+/// Home, built for focus (feedback E1): what happened this week, the one
+/// thing worth doing next, three small status numbers; everything else is
+/// quiet and further down. Details live in Career and in tap-to-open sheets.
 class DashboardTab extends StatelessWidget {
-  const DashboardTab({super.key});
+  const DashboardTab({super.key, this.onOpenTab, this.onNextWeek});
+
+  /// Switches the game's tab bar (1 = Studio, 2 = Releases).
+  final void Function(int tab)? onOpenTab;
+  final VoidCallback? onNextWeek;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+      children: [
+        const _WeekCard(),
+        const SizedBox(height: 12),
+        _NextStepCard(onOpenTab: onOpenTab, onNextWeek: onNextWeek),
+        const SizedBox(height: 12),
+        const _StatusRow(),
+        const SizedBox(height: 22),
+        const _MoreSection(),
+      ],
+    );
+  }
+}
+
+/// This week's news: the biggest story large, the rest small, and what
+/// changed (money, fans, streams or sales).
+class _WeekCard extends StatelessWidget {
+  const _WeekCard();
 
   @override
   Widget build(BuildContext context) {
@@ -23,110 +51,375 @@ class DashboardTab extends StatelessWidget {
     final fmt = context.fmt;
     final career = context.career;
     final p = career.player;
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      children: [
-        // Hero card.
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(26),
-            gradient: AppColors.haze(AppColors.lilac, AppColors.pink),
-          ),
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(children: [
-                ArtistAvatar(name: p.name, seed: p.id, size: 64),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(p.name,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              fontSize: 24,
-                              height: 1.1,
-                              fontWeight: FontWeight.w900)),
-                      const SizedBox(height: 8),
-                      Wrap(spacing: 6, runSpacing: 6, children: [
-                        Tag(fmt.kind(p.kind), color: AppColors.lilac),
-                        Tag(fmt.genre(p.genre), color: AppColors.pink),
-                        Tag(fmt.difficulty(career.difficulty),
-                            color: AppColors.peach),
-                      ]),
-                    ],
-                  ),
-                ),
-              ]),
-              if (p.members.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text(p.members.join(' · '),
+    if (career.lastWeekPlayed < 0) {
+      return _Card(
+        child: Row(children: [
+          const Icon(Icons.play_circle_outline_rounded,
+              color: AppColors.textMuted),
+          const SizedBox(width: 12),
+          Expanded(
+              child: Text(l.newsEmptyStart,
+                  style: const TextStyle(color: AppColors.textMuted))),
+        ]),
+      );
+    }
+    final lines = career.lastEvents;
+    final top = lines.isEmpty ? null : lines.first;
+    final b = career.before;
+    final streaming =
+        SalesEra.of(GameTime.yearOf(career.week)) == SalesEra.streaming;
+    final changes = <Widget>[
+      _Delta(fmt.signedMoney(career.lastMoneyDelta),
+          up: career.lastMoneyDelta >= 0),
+      if (b != null && (p.coreFans - b.coreFans).abs() >= 1)
+        _Delta(
+            l.fansValue(
+                '${p.coreFans >= b.coreFans ? '+' : '−'}${fmt.compact((p.coreFans - b.coreFans).abs())}'),
+            up: p.coreFans >= b.coreFans),
+      if (b != null && streaming)
+        if (p.lifetimeStreams.total - b.lifetimeStreams.total >= 1)
+          _Delta(
+              l.streamsValue(
+                  '+${fmt.compact(p.lifetimeStreams.total - b.lifetimeStreams.total)}'),
+              up: true),
+      if (b != null && !streaming)
+        if (p.lifetimeSingleSales - b.lifetimeSingleSales >= 1)
+          _Delta(
+              l.singleSalesValue(
+                  '+${fmt.compact(p.lifetimeSingleSales - b.lifetimeSingleSales)}'),
+              up: true),
+    ];
+    return _Card(
+      highlight: top != null && top.event.isMajor,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(l.weekNewsTitle(GameTime.weekOfYear(career.lastWeekPlayed)),
+            style: const TextStyle(
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w700,
+                fontSize: 13)),
+        const SizedBox(height: 10),
+        if (top == null)
+          Text(l.newsQuiet,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700))
+        else
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            EventIcon(top.event, size: 40),
+            const SizedBox(width: 12),
+            Expanded(
+                child: Text(fmt.event(top),
                     style: const TextStyle(
-                        color: AppColors.textMuted,
-                        fontWeight: FontWeight.w600)),
-              ],
-              const SizedBox(height: 16),
-              MeterRow(label: l.fame, value: p.fame, text: fmt.percent(p.fame)),
-              MeterRow(
-                  label: l.popularity,
-                  value: p.popularity,
-                  text: fmt.percent(p.popularity),
-                  colors: const [AppColors.sky, AppColors.lilac]),
-              MeterRow(
-                  label: l.devotion,
-                  value: p.devotion,
-                  text: fmt.percent(p.devotion),
-                  colors: const [AppColors.pink, AppColors.peach]),
-              const SizedBox(height: 16),
-              StatGrid(tiles: [
-                StatTile(label: l.coreFans, value: fmt.compact(p.coreFans)),
-                StatTile(
-                    label: l.listeners, value: fmt.compact(p.casualListeners)),
-                SalesEra.of(GameTime.yearOf(career.week)) == SalesEra.streaming
-                    ? StatTile(
-                        label: l.streams,
-                        value: fmt.compact(p.lifetimeStreams.total))
-                    : StatTile(
-                        label: l.singleSales,
-                        value: fmt.compact(p.lifetimeSingleSales)),
-                StatTile(
-                    label: l.albumUnits,
-                    value: fmt.compact(p.lifetimeUnits.total)),
-              ]),
-              if (p.anticipation > 0.01 ||
-                  p.hype > 0.01 ||
-                  p.comebackSupport > 0.05) ...[
-                const SizedBox(height: 14),
-                Wrap(spacing: 6, runSpacing: 6, children: [
-                  if (p.anticipation > 0.01)
-                    Tag(
-                        l.anticipationValue(
-                            fmt.percent(p.anticipation.clamp(0, 1))),
-                        icon: Icons.hourglass_top_rounded,
-                        color: AppColors.butter),
-                  if (p.hype > 0.01)
-                    Tag(l.hypeValue(fmt.percent(p.hype.clamp(0, 1))),
-                        icon: Icons.bolt_rounded, color: AppColors.peach),
-                  if (p.comebackSupport > 0.05)
-                    Tag(l.comebackSupport,
-                        icon: Icons.healing_rounded, color: AppColors.mint),
-                ]),
-              ],
-            ],
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        height: 1.3))),
+          ]),
+        for (final line in lines.skip(1).take(2))
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 52),
+            child: Text(fmt.event(line),
+                style: const TextStyle(color: AppColors.textMuted)),
           ),
+        if (lines.length > 3)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 52),
+            child: Text(l.moreNews(lines.length - 3),
+                style: const TextStyle(color: AppColors.textFaint)),
+          ),
+        const SizedBox(height: 14),
+        Wrap(spacing: 8, runSpacing: 8, children: changes),
+      ]),
+    );
+  }
+}
+
+/// The one suggested move for right now.
+class _NextStepCard extends StatelessWidget {
+  const _NextStepCard({this.onOpenTab, this.onNextWeek});
+  final void Function(int tab)? onOpenTab;
+  final VoidCallback? onNextWeek;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final career = context.career;
+    final p = career.player;
+    final sinceRelease =
+        p.lastReleaseWeek < 0 ? 1 << 20 : career.week - p.lastReleaseWeek;
+    Future<void> rest() async {
+      try {
+        await career.act(Cmd.rest());
+      } catch (e) {
+        if (context.mounted) showError(context, e);
+      }
+    }
+
+    final (
+      IconData icon,
+      String title,
+      String body,
+      String? button,
+      VoidCallback? action
+    ) step = switch (p) {
+      _ when p.burnoutWeeksLeft > 0 => (
+          Icons.healing_rounded,
+          l.stepBurnoutTitle,
+          l.stepBurnoutBody(p.burnoutWeeksLeft),
+          p.vaultCount > 0 ? l.goReleases : null,
+          () => onOpenTab?.call(2),
         ),
-        const SizedBox(height: 14),
-        const _NewsSection(),
-        const SizedBox(height: 14),
-        Section(
-          title: l.creativeEnergy,
-          icon: Icons.auto_awesome_rounded,
+      _
+          when p.creativeEnergy < 30 &&
+              !p.restingThisWeek &&
+              p.songsLeftThisWeek == Actions.maxSongsPerWeek =>
+        (
+          Icons.beach_access_rounded,
+          l.stepRestTitle,
+          l.stepRestBody(Actions.energyRestBonus.round()),
+          l.restNow,
+          rest,
+        ),
+      _ when p.vaultCount >= GameSession.minAlbumTracks => (
+          Icons.album_rounded,
+          l.stepAlbumTitle,
+          l.stepAlbumBody(p.vaultCount),
+          l.goReleases,
+          () => onOpenTab?.call(2),
+        ),
+      _ when p.vaultCount > 0 && sinceRelease >= 6 => (
+          Icons.music_note_rounded,
+          l.stepReleaseTitle,
+          p.lastReleaseWeek < 0
+              ? l.stepFirstReleaseBody
+              : l.stepReleaseBody(p.vaultCount),
+          l.goReleases,
+          () => onOpenTab?.call(2),
+        ),
+      _ when p.moneyCents < 100000 && !p.hasJob => (
+          Icons.work_outline_rounded,
+          l.stepJobTitle,
+          l.stepJobBody,
+          l.chooseJob,
+          () => pickJob(context),
+        ),
+      _ when p.songsLeftThisWeek > 0 && p.creativeEnergy >= 40 => (
+          Icons.edit_note_rounded,
+          l.stepWriteTitle,
+          l.stepWriteBody(p.songsLeftThisWeek),
+          l.goStudio,
+          () => onOpenTab?.call(1),
+        ),
+      _ => (
+          Icons.skip_next_rounded,
+          l.stepWaitTitle,
+          l.stepWaitBody,
+          null,
+          null,
+        ),
+    };
+    final (icon, title, body, button, action) = step;
+    return _Card(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(l.nextStep,
+            style: const TextStyle(
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w700,
+                fontSize: 13)),
+        const SizedBox(height: 10),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          IconBubble(icon, color: AppColors.lilac),
+          const SizedBox(width: 12),
+          Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 3),
+              Text(body, style: const TextStyle(color: AppColors.textMuted)),
+            ]),
+          ),
+        ]),
+        if (button != null) ...[
+          const SizedBox(height: 14),
+          FilledButton(
+            onPressed: career.busy ? null : action,
+            style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(46),
+                backgroundColor: AppColors.lilac.withValues(alpha: 0.2),
+                foregroundColor: AppColors.lilac),
+            child: Text(button,
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ]),
+    );
+  }
+}
+
+/// Fans, fame and energy as three small tiles; tap energy for details.
+class _StatusRow extends StatelessWidget {
+  const _StatusRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.career;
+    final p = career.player;
+    final b = career.before;
+
+    /// The change as text, or null when it would round to nothing.
+    String? delta(double now, double? was, String Function(double) f) {
+      if (was == null) return null;
+      final text = f((now - was).abs());
+      return RegExp(r'[1-9]').hasMatch(text) ? text : null;
+    }
+
+    return Row(children: [
+      Expanded(
+          child: _StatusTile(
+              label: l.coreFans,
+              value: fmt.compact(p.coreFans),
+              change: delta(p.coreFans, b?.coreFans, fmt.compact),
+              up: b == null || p.coreFans >= b.coreFans)),
+      const SizedBox(width: 10),
+      Expanded(
+          child: _StatusTile(
+              label: l.fame,
+              value: fmt.percent(p.fame),
+              change: delta(p.fame * 100, (b?.fame ?? 0) * 100,
+                  (v) => v.toStringAsFixed(1)),
+              up: b == null || p.fame >= b.fame)),
+      const SizedBox(width: 10),
+      Expanded(
+          child: _StatusTile(
+        label: l.energy,
+        value: '${p.creativeEnergy.round()}',
+        warn: p.creativeEnergy < 30 || p.burnoutWeeksLeft > 0,
+        arrow: false,
+        change: p.burnoutWeeksLeft > 0
+            ? l.burnoutWeeks(p.burnoutWeeksLeft)
+            : p.restingThisWeek
+                ? l.restingThisWeek
+                : null,
+        onTap: () => _energySheet(context),
+      )),
+    ]);
+  }
+
+  void _energySheet(BuildContext context) {
+    final career = context.careerRead;
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (c) =>
+          Scope<CareerState>(value: career, child: const _EnergySheet()),
+    );
+  }
+}
+
+class _StatusTile extends StatelessWidget {
+  const _StatusTile({
+    required this.label,
+    required this.value,
+    this.change,
+    this.up = true,
+    this.arrow = true,
+    this.warn = false,
+    this.onTap,
+  });
+  final String label;
+  final String value;
+  final String? change;
+  final bool up;
+
+  /// Shows [change] with an up/down arrow (a delta, not a note).
+  final bool arrow;
+  final bool warn;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
           child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            Text(value,
+                maxLines: 1,
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: warn ? AppColors.coral : AppColors.text)),
+            const SizedBox(height: 2),
+            SizedBox(
+              height: 17,
+              child: change == null
+                  ? null
+                  : Row(children: [
+                      if (arrow)
+                        Icon(
+                            up
+                                ? Icons.arrow_upward_rounded
+                                : Icons.arrow_downward_rounded,
+                            size: 13,
+                            color: up ? AppColors.mint : AppColors.coral),
+                      Flexible(
+                        child: Text(change!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: warn || !up
+                                    ? AppColors.coral
+                                    : arrow
+                                        ? AppColors.mint
+                                        : AppColors.textMuted)),
+                      ),
+                    ]),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// Energy details and the rest option (opened from the energy tile).
+class _EnergySheet extends StatelessWidget {
+  const _EnergySheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final career = context.career;
+    final p = career.player;
+    final canRest = !p.restingThisWeek &&
+        p.songsLeftThisWeek == Actions.maxSongsPerWeek &&
+        p.burnoutWeeksLeft == 0;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l.creativeEnergy,
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 14),
             MeterRow(
                 label: l.energy,
                 value: p.creativeEnergy / 100,
@@ -134,191 +427,60 @@ class DashboardTab extends StatelessWidget {
                 colors: p.creativeEnergy < 30
                     ? const [AppColors.coral, AppColors.peach]
                     : const [AppColors.mint, AppColors.sky]),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               p.burnoutWeeksLeft > 0
                   ? l.burnoutWeeks(p.burnoutWeeksLeft)
                   : p.restingThisWeek
                       ? l.restingThisWeek
                       : l.songsLeftThisWeek(p.songsLeftThisWeek),
-              style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: p.burnoutWeeksLeft > 0
-                      ? AppColors.coral
-                      : AppColors.textMuted),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w600, color: AppColors.textMuted),
             ),
-            const SizedBox(height: 2),
             Text(
                 l.energyNextWeek(
                     '${p.energyNextWeek >= 0 ? '+' : '−'}${p.energyNextWeek.abs().round()}'),
-                style:
-                    const TextStyle(color: AppColors.textFaint, fontSize: 13)),
+                style: const TextStyle(color: AppColors.textFaint)),
             if (p.creativeEnergy < 30 && p.burnoutWeeksLeft == 0) ...[
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               Text(l.lowEnergyWarning,
                   style: const TextStyle(
                       color: AppColors.coral, fontWeight: FontWeight.w600)),
             ],
-            if (!p.restingThisWeek &&
-                p.songsLeftThisWeek == Actions.maxSongsPerWeek) ...[
-              const SizedBox(height: 12),
-              SizedBox(
-                height: 46,
-                child: OutlinedButton.icon(
-                  icon: const Icon(Icons.beach_access_rounded,
-                      color: AppColors.mint),
-                  label: Text(l.restThisWeek),
-                  onPressed: career.busy
-                      ? null
-                      : () async {
-                          try {
-                            await career.act(Cmd.rest());
-                          } catch (e) {
-                            if (context.mounted) showError(context, e);
-                          }
-                        },
-                ),
+            if (canRest) ...[
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(46)),
+                icon: const Icon(Icons.beach_access_rounded,
+                    color: AppColors.mint),
+                label: Text(l.restThisWeek),
+                onPressed: career.busy
+                    ? null
+                    : () async {
+                        try {
+                          await career.act(Cmd.rest());
+                        } catch (e) {
+                          if (context.mounted) showError(context, e);
+                        }
+                      },
               ),
               const SizedBox(height: 4),
               Text(l.restHint(Actions.energyRestBonus.round()),
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
                       color: AppColors.textFaint, fontSize: 12.5)),
             ],
-          ]),
-        ),
-        const SizedBox(height: 14),
-        const _SideIncomeSection(),
-        const SizedBox(height: 14),
-        Section(
-          title: l.platforms,
-          icon: Icons.podcasts_rounded,
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Material(
-              color: StreamifyColors.surfaceHigh,
-              borderRadius: BorderRadius.circular(16),
-              child: ListTile(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                leading: Container(
-                  width: 42,
-                  height: 42,
-                  decoration: const BoxDecoration(
-                      color: StreamifyColors.accent, shape: BoxShape.circle),
-                  child:
-                      const Icon(Icons.graphic_eq_rounded, color: Colors.black),
-                ),
-                title: const Text(platformName,
-                    style: TextStyle(fontWeight: FontWeight.w800)),
-                subtitle: Text(l.streamifyTileHint),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => pushInCareer(context, const StreamifyScreen()),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(l.morePlatformsSoon,
-                style: const TextStyle(
-                    color: AppColors.textFaint, fontSize: 12.5)),
-          ]),
-        ),
-      ],
-    );
-  }
-}
-
-class _NewsSection extends StatelessWidget {
-  const _NewsSection();
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final fmt = context.fmt;
-    final career = context.career;
-    if (career.lastWeekPlayed < 0) {
-      return Section(
-          title: l.thisWeek,
-          icon: Icons.notifications_none_rounded,
-          child: EmptyNote(l.newsEmptyStart, icon: Icons.play_circle_outline));
-    }
-    final delta = career.lastMoneyDelta;
-    return Section(
-      title: l.weekNewsTitle(GameTime.weekOfYear(career.lastWeekPlayed)),
-      icon: Icons.notifications_none_rounded,
-      trailing: Tag(fmt.signedMoney(delta),
-          color: delta >= 0 ? AppColors.mint : AppColors.coral),
-      child: career.lastEvents.isEmpty
-          ? EmptyNote(l.newsQuiet, icon: Icons.nightlight_round)
-          : Column(children: [
-              for (final line in career.lastEvents.take(8))
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Row(children: [
-                    EventIcon(line.event, size: 38),
-                    const SizedBox(width: 12),
-                    Expanded(
-                        child: Text(fmt.event(line),
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w600))),
-                  ]),
-                ),
-            ]),
-    );
-  }
-}
-
-class _SideIncomeSection extends StatelessWidget {
-  const _SideIncomeSection();
-
-  /// Day jobs (docs K36): pay against a little energy each week.
-  Future<void> _pickJob(BuildContext context) async {
-    final career = context.careerRead;
-    final l = context.l10n;
-    final fmt = context.fmt;
-    final current = career.player.job;
-    final job = await showModalBottomSheet<Job>(
-      context: context,
-      isScrollControlled: true,
-      builder: (c) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-              child: Text(l.chooseJob,
-                  style: const TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.w900)),
-            ),
-            for (final j in Job.values)
-              ListTile(
-                selected: j == current,
-                leading: IconBubble(
-                    j == Job.none
-                        ? Icons.music_note_rounded
-                        : Icons.work_outline_rounded,
-                    color: j == Job.none ? AppColors.mint : AppColors.butter),
-                title: Text(fmt.job(j),
-                    style: const TextStyle(fontWeight: FontWeight.w800)),
-                subtitle: Text(j == Job.none
-                    ? fmt.jobPerk(j)
-                    : '${l.jobTerms(fmt.money(j.wageCents), j.energyCost.round())}\n${fmt.jobPerk(j)}'),
-                isThreeLine: j != Job.none,
-                trailing: j == current
-                    ? const Icon(Icons.check_rounded, color: AppColors.mint)
-                    : null,
-                onTap: () => Navigator.pop(c, j),
-              ),
           ],
         ),
       ),
     );
-    if (job == null || job == current || !context.mounted) return;
-    try {
-      await career.act(Cmd.setJob(job));
-    } catch (e) {
-      if (context.mounted) showError(context, e);
-    }
   }
+}
+
+/// Quiet extras: day job, rewarded ad, platforms.
+class _MoreSection extends StatelessWidget {
+  const _MoreSection();
 
   Future<void> _watchAd(BuildContext context) async {
     final career = context.careerRead;
@@ -346,54 +508,158 @@ class _SideIncomeSection extends StatelessWidget {
     final fmt = context.fmt;
     final career = context.career;
     final p = career.player;
-    return Section(
-      title: l.sideIncome,
-      icon: Icons.savings_rounded,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: career.busy ? null : () => _pickJob(context),
-            child: Row(children: [
-              const IconBubble(Icons.work_outline_rounded,
-                  color: AppColors.butter),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${l.dayJob}: ${fmt.job(p.job)}',
-                          style: const TextStyle(fontWeight: FontWeight.w800)),
-                      Text(
-                          p.hasJob
-                              ? l.jobTerms(fmt.money(p.job.wageCents),
-                                  p.job.energyCost.round())
-                              : l.jobPerkNone,
-                          style: const TextStyle(
-                              color: AppColors.textMuted, fontSize: 13)),
-                    ]),
-              ),
+    Widget row(
+            IconData icon, String title, String subtitle, VoidCallback? onTap,
+            {Widget? trailing}) =>
+        ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+          leading: Icon(icon, color: AppColors.textMuted),
+          title:
+              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: subtitle.isEmpty
+              ? null
+              : Text(subtitle,
+                  style: const TextStyle(color: AppColors.textFaint)),
+          trailing: trailing ??
               const Icon(Icons.chevron_right_rounded,
                   color: AppColors.textFaint),
-            ]),
-          ),
+          onTap: onTap,
+        );
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Padding(
+        padding: const EdgeInsets.only(left: 4, bottom: 4),
+        child: Text(l.sideIncome,
+            style: const TextStyle(
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w700,
+                fontSize: 13)),
+      ),
+      row(
+        Icons.work_outline_rounded,
+        '${l.dayJob}: ${fmt.job(p.job)}',
+        p.hasJob
+            ? l.jobTerms(fmt.money(p.job.wageCents), p.job.energyCost.round())
+            : l.jobPerkNone,
+        career.busy ? null : () => pickJob(context),
+      ),
+      row(
+        Icons.play_circle_outline_rounded,
+        l.watchAd(fmt.money(Actions.adRewardCents), p.adsLeftThisWeek,
+            Actions.maxAdsPerWeek),
+        '',
+        p.adsLeftThisWeek > 0 && !career.busy ? () => _watchAd(context) : null,
+      ),
+      const SizedBox(height: 14),
+      Padding(
+        padding: const EdgeInsets.only(left: 4, bottom: 4),
+        child: Text(l.platforms,
+            style: const TextStyle(
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w700,
+                fontSize: 13)),
+      ),
+      ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+        leading: Container(
+          width: 36,
+          height: 36,
+          decoration: const BoxDecoration(
+              color: StreamifyColors.accent, shape: BoxShape.circle),
+          child: const Icon(Icons.graphic_eq_rounded,
+              color: Colors.black, size: 20),
         ),
-        const SizedBox(height: 14),
-        SizedBox(
-          height: 48,
-          child: OutlinedButton.icon(
-            icon: const Icon(Icons.play_circle_outline_rounded,
-                color: AppColors.peach),
-            label: Text(l.watchAd(fmt.money(Actions.adRewardCents),
-                p.adsLeftThisWeek, Actions.maxAdsPerWeek)),
-            onPressed: p.adsLeftThisWeek > 0 && !career.busy
-                ? () => _watchAd(context)
-                : null,
-          ),
+        title: const Text(platformName,
+            style: TextStyle(fontWeight: FontWeight.w600)),
+        subtitle: Text(l.streamifyTileHint,
+            style: const TextStyle(color: AppColors.textFaint)),
+        trailing:
+            const Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
+        onTap: () => pushInCareer(context, const StreamifyScreen()),
+      ),
+    ]);
+  }
+}
+
+/// A plain card; [highlight] gives the soft accent background used for big
+/// news.
+class _Card extends StatelessWidget {
+  const _Card({required this.child, this.highlight = false});
+  final Widget child;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          gradient: highlight
+              ? AppColors.haze(AppColors.lilac, AppColors.pink)
+              : null,
+          borderRadius: BorderRadius.circular(22),
         ),
-      ]),
-    );
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+        child: child,
+      );
+}
+
+/// "+$12K", "+2.1K fans": green when up, red when down.
+class _Delta extends StatelessWidget {
+  const _Delta(this.text, {required this.up});
+  final String text;
+  final bool up;
+
+  @override
+  Widget build(BuildContext context) =>
+      Tag(text, color: up ? AppColors.mint : AppColors.coral);
+}
+
+/// Day jobs (docs K36): pay against a little energy each week.
+Future<void> pickJob(BuildContext context) async {
+  final career = context.careerRead;
+  final l = context.l10n;
+  final fmt = context.fmt;
+  final current = career.player.job;
+  final job = await showModalBottomSheet<Job>(
+    context: context,
+    isScrollControlled: true,
+    builder: (c) => SafeArea(
+      child: ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: Text(l.chooseJob,
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+          ),
+          for (final j in Job.values)
+            ListTile(
+              selected: j == current,
+              leading: IconBubble(
+                  j == Job.none
+                      ? Icons.music_note_rounded
+                      : Icons.work_outline_rounded,
+                  color: j == Job.none ? AppColors.mint : AppColors.butter),
+              title: Text(fmt.job(j),
+                  style: const TextStyle(fontWeight: FontWeight.w800)),
+              subtitle: Text(j == Job.none
+                  ? fmt.jobPerk(j)
+                  : '${l.jobTerms(fmt.money(j.wageCents), j.energyCost.round())}\n${fmt.jobPerk(j)}'),
+              isThreeLine: j != Job.none,
+              trailing: j == current
+                  ? const Icon(Icons.check_rounded, color: AppColors.mint)
+                  : null,
+              onTap: () => Navigator.pop(c, j),
+            ),
+        ],
+      ),
+    ),
+  );
+  if (job == null || job == current || !context.mounted) return;
+  try {
+    await career.act(Cmd.setJob(job));
+  } catch (e) {
+    if (context.mounted) showError(context, e);
   }
 }
 

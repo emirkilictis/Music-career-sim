@@ -61,15 +61,15 @@ class Section extends StatelessWidget {
             children: [
               Row(children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 18, color: AppColors.lilac),
+                  Icon(icon, size: 18, color: AppColors.textMuted),
                   const SizedBox(width: 8),
                 ],
                 Expanded(
                   child: Text(title,
                       style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.text)),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textMuted)),
                 ),
                 if (trailing != null)
                   Flexible(
@@ -103,8 +103,8 @@ class StatTile extends StatelessWidget {
       children: [
         Text(value,
             style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w900,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
                 letterSpacing: -0.4,
                 color: color ?? AppColors.text),
             maxLines: 1,

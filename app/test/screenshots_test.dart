@@ -111,6 +111,10 @@ void main() {
 
     await tab(tester, 'Studio');
     await shot(tester, '05_studio');
+    await tester.tap(find.text('Producer'));
+    await shot(tester, '05b_producer_picker');
+    await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
     await tab(tester, 'Releases');
     await shot(tester, '06_releases');
     await tab(tester, 'Charts');
@@ -208,10 +212,10 @@ void main() {
 
     // Energy, rest and day jobs on Home.
     await tab(tester, 'Home');
-    await tester.scrollUntilVisible(find.text('Rest this week'), 300,
-        scrollable: find.byType(Scrollable).first);
-    await tester.drag(find.byType(Scrollable).first, const Offset(0, -250));
-    await shot(tester, '20_energy_and_job');
+    await tester.tap(find.text('Energy'));
+    await shot(tester, '20_energy_sheet');
+    await tester.tapAt(const Offset(200, 80));
+    await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Day job'));
     await shot(tester, '21_job_picker');
   });

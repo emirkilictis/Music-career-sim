@@ -87,6 +87,12 @@ class ArtistView {
             : 0,
         adsLeftThisWeek = Actions.adsLeftThisWeek(w, a),
         job = a.job,
+        lastReleaseWeek = a.lastReleaseWeek,
+        vaultCount = a.tier == ArtistTier.player
+            ? w.playerSongIds
+                .where((id) => w.songs[id].status == SongStatus.vault)
+                .length
+            : 0,
         restingThisWeek = a.restWeek == w.week,
         energyNextWeek = Actions.weeklyEnergy(w, a),
         isRetired = a.isRetired;
@@ -132,6 +138,12 @@ class ArtistView {
   final int adsLeftThisWeek;
   final Job job;
   bool get hasJob => job != Job.none;
+
+  /// Week of the last single or album (-1 = never released anything).
+  final int lastReleaseWeek;
+
+  /// The player's unreleased songs.
+  final int vaultCount;
 
   /// The player took this week off.
   final bool restingThisWeek;

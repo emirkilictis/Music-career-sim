@@ -351,6 +351,16 @@
   "producer": "Producer",
   "cowriter": "Co-writer",
   "nobody": "Nobody (do it yourself)",
+  "done": "Done",
+  "skillValue": "Skill {value}",
+  "@skillValue": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "songTitleHint": "Title (optional — we'll name it otherwise)",
   "studioBudget": "Studio budget",
   "budgetLow": "Low",
   "budgetMedium": "Medium",
@@ -844,5 +854,68 @@
         "type": "String"
       }
     }
-  }
+  },
+  "nextStep": "Next step",
+  "stepBurnoutTitle": "Recovering",
+  "stepBurnoutBody": "You burned out: you can write again in {weeks} weeks. Release what you have meanwhile.",
+  "@stepBurnoutBody": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "stepRestTitle": "Take a breather",
+  "stepRestBody": "Your energy is low and songs come out weaker. Resting this week gives +{energy} energy.",
+  "@stepRestBody": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "stepAlbumTitle": "Make an album",
+  "stepAlbumBody": "{count} songs in the vault: enough for an album or an EP.",
+  "@stepAlbumBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepReleaseTitle": "Release a single",
+  "stepReleaseBody": "{count} songs are waiting in the vault, and your fans haven't heard from you in a while.",
+  "@stepReleaseBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepFirstReleaseBody": "Your first song is ready. Put it out there!",
+  "stepJobTitle": "Find a day job",
+  "stepJobBody": "Money is tight. A day job pays every week.",
+  "stepWriteTitle": "Write a song",
+  "stepWriteBody": "You can write {count} more songs this week.",
+  "@stepWriteBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stepWaitTitle": "Let the week play",
+  "stepWaitBody": "Your music is out there. See what the week brings.",
+  "goStudio": "Go to Studio",
+  "goReleases": "Go to Releases",
+  "restNow": "Rest this week",
+  "moreNews": "+{count} more",
+  "@moreNews": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "thisWeekShort": "This week"
 }

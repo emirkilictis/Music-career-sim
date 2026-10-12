@@ -59,6 +59,108 @@ class _StudioTabState extends State<StudioTab> {
     });
   }
 
+  /// Genres in a sheet (feedback E2): 21 chips stay out of the way.
+  Future<void> _pickGenres(List<int> current) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    var picked = [...current];
+    final result = await showModalBottomSheet<List<int>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (c) => StatefulBuilder(
+        builder: (c, set) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(l.genresUpTo(maxSongGenres),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 12),
+                Wrap(spacing: 6, runSpacing: 2, children: [
+                  for (var g = 0; g < genreNames.length; g++)
+                    FilterChip(
+                      label: Text(picked.contains(g)
+                          ? '${picked.indexOf(g) + 1}. ${fmt.genre(g)}'
+                          : fmt.genre(g)),
+                      selected: picked.contains(g),
+                      onSelected: (on) => set(() {
+                        if (on && picked.length < maxSongGenres) picked.add(g);
+                        if (!on && picked.length > 1) picked.remove(g);
+                        picked = [...picked];
+                      }),
+                    ),
+                ]),
+                const SizedBox(height: 14),
+                FilledButton(
+                    onPressed: () => Navigator.pop(c, picked),
+                    child: Text(l.done)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (result != null && mounted) setState(() => _genres = result);
+  }
+
+  /// Producer / co-writer list in a sheet, best first; locked ones say how
+  /// many fans they want.
+  Future<void> _pickCollaborator(String title, List<CollaboratorView> list,
+      int? current, void Function(int?) set) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final picked = await showModalBottomSheet<(int?,)>(
+      context: context,
+      isScrollControlled: true,
+      builder: (c) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.75,
+        maxChildSize: 0.92,
+        builder: (c, scroll) => ListView(
+          controller: scroll,
+          padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Text(title,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w800)),
+            ),
+            ListTile(
+              selected: current == null,
+              title: Text(l.nobody),
+              onTap: () => Navigator.pop(c, (null,)),
+            ),
+            for (final x in list)
+              ListTile(
+                enabled: x.available,
+                selected: current == x.id,
+                title: Text(x.name,
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                subtitle: Text(x.available
+                    ? '${fmt.genre(x.genre)} · ${fmt.money(x.feeCents)}'
+                    : l.needsFans(fmt.compact(x.requiredFans))),
+                trailing: SizedBox(
+                  width: 92,
+                  child: Row(children: [
+                    Expanded(child: PillBar(value: x.skill / 100, height: 6)),
+                    const SizedBox(width: 8),
+                    Text('${x.skill.round()}',
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                  ]),
+                ),
+                onTap: () => Navigator.pop(c, (x.id,)),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (picked != null && mounted) setState(() => set(picked.$1));
+  }
+
   int _cost() {
     int fee(List<CollaboratorView> list, int? id) =>
         id == null ? 0 : list.firstWhere((c) => c.id == id).feeCents;
@@ -138,32 +240,14 @@ class _StudioTabState extends State<StudioTab> {
     final genres = _genres ?? [p.genre];
     final canWrite = p.songsLeftThisWeek > 0 && p.burnoutWeeksLeft == 0;
 
-    DropdownButtonFormField<int?> collaboratorField(String label,
-            List<CollaboratorView> list, int? value, void Function(int?) set) =>
-        DropdownButtonFormField<int?>(
-          initialValue: value,
-          isExpanded: true,
-          decoration: InputDecoration(
-              labelText: label, border: const OutlineInputBorder()),
-          items: [
-            DropdownMenuItem(value: null, child: Text(l.nobody)),
-            for (final c in list)
-              DropdownMenuItem(
-                value: c.id,
-                enabled: c.available,
-                child: Text(
-                  c.available
-                      ? '${c.name} · ${c.skill.round()} · ${fmt.genre(c.genre)} · ${fmt.money(c.feeCents)}'
-                      : '${c.name} · ${c.skill.round()} · ${l.needsFans(fmt.compact(c.requiredFans))}',
-                  overflow: TextOverflow.ellipsis,
-                  style: c.available
-                      ? null
-                      : TextStyle(color: Theme.of(context).disabledColor),
-                ),
-              ),
-          ],
-          onChanged: (v) => setState(() => set(v)),
-        );
+    CollaboratorView? find(List<CollaboratorView> list, int? id) =>
+        id == null ? null : list.where((c) => c.id == id).firstOrNull;
+    String teamValue(CollaboratorView? c) =>
+        c == null ? l.nobody : '${c.name} · ${l.skillValue(c.skill.round())}';
+    String? teamDetail(CollaboratorView? c) =>
+        c == null ? null : '${fmt.genre(c.genre)} · ${fmt.money(c.feeCents)}';
+    final producer = find(_producers, _producer);
+    final cowriter = find(_writers, _cowriter);
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -171,49 +255,42 @@ class _StudioTabState extends State<StudioTab> {
         Section(
           title: l.writeSong,
           icon: Icons.edit_note_rounded,
-          trailing: Text(p.burnoutWeeksLeft > 0
-              ? l.burnoutWeeks(p.burnoutWeeksLeft)
-              : p.restingThisWeek
-                  ? l.restingThisWeek
-                  : l.songsLeftThisWeek(p.songsLeftThisWeek)),
+          trailing: Text(
+              p.burnoutWeeksLeft > 0
+                  ? l.burnoutWeeks(p.burnoutWeeksLeft)
+                  : p.restingThisWeek
+                      ? l.restingThisWeek
+                      : l.songsLeftThisWeek(p.songsLeftThisWeek),
+              style: const TextStyle(color: AppColors.textMuted)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                controller: _title,
-                maxLength: 60,
-                decoration: InputDecoration(
-                    labelText: l.songTitleOptional,
-                    border: const OutlineInputBorder()),
+              _ChoiceRow(
+                label: l.genre,
+                value: fmt.genres(genres),
+                onTap: () => _pickGenres(genres),
               ),
-              Text(l.genresUpTo(maxSongGenres),
-                  style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 6),
-              Wrap(spacing: 6, runSpacing: 2, children: [
-                for (var g = 0; g < genreNames.length; g++)
-                  FilterChip(
-                    label: Text(genres.contains(g)
-                        ? '${genres.indexOf(g) + 1}. ${fmt.genre(g)}'
-                        : fmt.genre(g)),
-                    selected: genres.contains(g),
-                    onSelected: (on) => setState(() {
-                      final next = [...genres];
-                      if (on && next.length < maxSongGenres) next.add(g);
-                      if (!on && next.length > 1) next.remove(g);
-                      _genres = next;
-                    }),
-                  ),
-              ]),
+              _ChoiceRow(
+                label: l.producer,
+                value: teamValue(producer),
+                detail: teamDetail(producer),
+                onTap: () => _pickCollaborator(
+                    l.producer, _producers, _producer, (v) => _producer = v),
+              ),
+              _ChoiceRow(
+                label: l.cowriter,
+                value: teamValue(cowriter),
+                detail: teamDetail(cowriter),
+                onTap: () => _pickCollaborator(
+                    l.cowriter, _writers, _cowriter, (v) => _cowriter = v),
+              ),
               const SizedBox(height: 14),
-              collaboratorField(
-                  l.producer, _producers, _producer, (v) => _producer = v),
-              const SizedBox(height: 12),
-              collaboratorField(
-                  l.cowriter, _writers, _cowriter, (v) => _cowriter = v),
-              const SizedBox(height: 12),
               Text(l.studioBudget,
-                  style: Theme.of(context).textTheme.labelLarge),
-              const SizedBox(height: 6),
+                  style: const TextStyle(
+                      color: AppColors.textMuted,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13)),
+              const SizedBox(height: 8),
               SegmentedButton<BudgetTier>(
                 showSelectedIcon: false,
                 segments: [
@@ -226,6 +303,17 @@ class _StudioTabState extends State<StudioTab> {
                 ],
                 selected: {_budget},
                 onSelectionChanged: (s) => setState(() => _budget = s.first),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: _title,
+                maxLength: 60,
+                decoration: InputDecoration(
+                  isDense: true,
+                  counterText: '',
+                  hintText: l.songTitleHint,
+                  border: const OutlineInputBorder(),
+                ),
               ),
               if (canWrite && p.creativeEnergy < 30) ...[
                 const SizedBox(height: 12),
@@ -266,4 +354,47 @@ class _StudioTabState extends State<StudioTab> {
       ],
     );
   }
+}
+
+/// "Label / value ›" row that opens a picker.
+class _ChoiceRow extends StatelessWidget {
+  const _ChoiceRow(
+      {required this.label, required this.value, this.detail, this.onTap});
+  final String label;
+  final String value;
+  final String? detail;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(children: [
+            Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label,
+                        style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13)),
+                    const SizedBox(height: 2),
+                    Text(value,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w700)),
+                    if (detail != null)
+                      Text(detail!,
+                          style: const TextStyle(
+                              color: AppColors.textFaint, fontSize: 13)),
+                  ]),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
+          ]),
+        ),
+      );
 }

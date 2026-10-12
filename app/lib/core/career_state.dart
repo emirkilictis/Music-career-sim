@@ -18,6 +18,9 @@ class CareerState extends ChangeNotifier {
   int week = 0;
   Difficulty difficulty = Difficulty.normal;
 
+  /// The player before the last played week or skip, for "what changed".
+  ArtistView? before;
+
   /// News of the last played week (most important first).
   List<EventLine> lastEvents = const [];
   int lastWeekPlayed = -1;
@@ -61,6 +64,7 @@ class CareerState extends ChangeNotifier {
   Future<List<EventLine>> nextWeek() async {
     if (busy) return const [];
     _setBusy(true);
+    before = _player;
     try {
       final (week, lines, delta) = await controller.run(Cmd.nextWeek());
       lastEvents = sortLines(playerNews(lines));
@@ -79,6 +83,7 @@ class CareerState extends ChangeNotifier {
   Future<(YearReport, List<EventLine>)> skip(
       int weeks, SkipStop stop, void Function(int weeks) onProgress) async {
     _setBusy(true);
+    before = _player;
     final port = ReceivePort()..listen((m) => onProgress(m as int));
     try {
       final result =

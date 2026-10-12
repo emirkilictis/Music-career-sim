@@ -263,12 +263,15 @@ class _GameShellState extends State<GameShell> {
                   ]),
                 ),
               Expanded(
-                child: IndexedStack(index: _tab, children: const [
-                  DashboardTab(),
-                  StudioTab(),
-                  ReleasesTab(),
-                  ChartsTab(),
-                  CareerScreen(embedded: true),
+                child: IndexedStack(index: _tab, children: [
+                  DashboardTab(
+                    onOpenTab: (i) => setState(() => _tab = i),
+                    onNextWeek: _nextWeek,
+                  ),
+                  const StudioTab(),
+                  const ReleasesTab(),
+                  const ChartsTab(),
+                  const CareerScreen(embedded: true),
                 ]),
               ),
             ]),
