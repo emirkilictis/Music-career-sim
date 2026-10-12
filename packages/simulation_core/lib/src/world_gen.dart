@@ -149,7 +149,7 @@ abstract final class WorldGen {
       tier: tier,
       homeCountry:
           _homeCountry(RandomStream.keyed(w.seed, 1, id, RngPurpose.worldGen)),
-      genre: r.nextInt(genreNames.length),
+      genre: _weightedGenre(r.nextDouble()),
       debutWeek:
           newcomer ? w.week : w.week - r.nextInt(GameTime.weeksPerYear * 12),
       skills: skills,
@@ -178,6 +178,17 @@ abstract final class WorldGen {
     return HomeCountry.other;
   }
 
+  /// Picks an AI artist's genre from [genreAiWeights] with one uniform draw.
+  static int _weightedGenre(double u) {
+    final total = genreAiWeights.fold(0.0, (a, x) => a + x);
+    var x = u * total;
+    for (var i = 0; i < genreAiWeights.length; i++) {
+      x -= genreAiWeights[i];
+      if (x < 0) return i;
+    }
+    return genreAiWeights.length - 1;
+  }
+
   static void _addCollaborators(World w) {
     for (var i = 0; i < 80; i++) {
       final r = RandomStream.keyed(w.seed, 0, 100000 + i, RngPurpose.worldGen);
@@ -189,7 +200,7 @@ abstract final class WorldGen {
         role:
             i.isEven ? CollaboratorRole.producer : CollaboratorRole.songwriter,
         skill: skill,
-        genre: r.nextInt(genreNames.length),
+        genre: _weightedGenre(r.nextDouble()),
         feeCents: (20000 * math.pow(skill / 20, 2.6)).round(),
         minFame: math.max(0, (skill - 45) / 60),
       ));

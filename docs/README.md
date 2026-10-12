@@ -56,6 +56,8 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K28 | **Premium günlük giriş bonusu:** her gerçek gün ilk girişte $5.000, hesap başına günde bir kez. |
 | K30 | **Grup modu:** Solo / Band / Vokal grup (boyband, girlband). Grup tek sanatçı gibi oynanır (tek stat seti), 2–7 üye (isim, ileride fotoğraf). Türler ceza değil farklı güç verir (band: sadık uzun kariyer; vokal grup: hızlı ve sadık fandom). AI'de de gruplar var. Dağılma/reunion/solo çıkış/kadro değişikliği Faz 2–3. |
 | K31 | **Kampanya seviyesi** (Promosyonsuz / Standart / Yoğun / Dev global) her yayında seçilir; Standart = kalibre edilmiş temel. Etkisi döneme göre **radyodan playlistlere kayar**; playlist döneminde editör playlist eklemeleri (bildirimli). Müzik videosu, radyo/TV aksiyonları Faz 2. |
+| K32 | **Türler:** 21 ana tür; bir şarkının 1–3 türü olabilir (ilki ana tür). Sanatçının bir ana türü vardır. |
+| K33 | **Kayıt slotu herkes için sınırsız** (ücretsiz sürüm dahil). |
 | K29 | **Premium bilerek güçlü (satması için):** daha yüksek başlangıç statları (55 puan, tavan 70; ücretsiz 30 puan, tavan 60) + ünlü/zengin başlangıçlar + günlük bonus. Formüller ve zorluk herkes için aynı; ücretsiz sürüm eksiksiz kalır. |
 | K23 | ChatGPT planındaki ekranlar, rekorlar, kampanyalar, finans, bildirimler, ödüller, Kolay mod ve 10 performans kuralı dokümanlara taşındı. |
 
@@ -97,6 +99,5 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 
 - Kolay/Zor çarpanlarının kesin değerleri ve flop desteği her birinde ne kadar güçlü?
 - Faz 1'de hangi türler (genre) olacak?
-- Kurgusal liste ve platform isimleri (örn. "Streamify", "US Top 100").
+- Kurgusal liste ve platform isimleri (örn. "Streamify", "US Top 100") — henüz düşünülmedi; öneri listesi hazırlanacak.
 - Premium fiyatları (aylık / yıllık / ömür boyu).
-- Ücretsiz sürümde kaç kayıt slotu olacak?

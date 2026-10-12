@@ -98,7 +98,15 @@ abstract final class Actions {
     List<int> featured = const [],
     bool aiMode = false,
     String? title,
+    List<int>? genres,
   }) {
+    final songGenres = genres ?? [a.genre];
+    if (songGenres.isEmpty ||
+        songGenres.length > maxSongGenres ||
+        songGenres.toSet().length != songGenres.length ||
+        songGenres.any((g) => g < 0 || g >= genreNames.length)) {
+      throw SongwritingException('A song has 1–$maxSongGenres distinct genres');
+    }
     if (!aiMode && !canWrite(w, a)) {
       throw SongwritingException(w.week < a.burnoutUntilWeek
           ? 'Burnout: cannot write until week ${a.burnoutUntilWeek}'
@@ -139,7 +147,7 @@ abstract final class Actions {
         wq.perf * a.skills.performance;
 
     final genreFit =
-        (producer != null && producer.genre == a.genre) ? 3.0 : 0.0;
+        (producer != null && songGenres.contains(producer.genre)) ? 3.0 : 0.0;
     final luck = r.nextNormal() * 8.0;
     final inspired = r.chance(inspirationChance);
     final energyBefore = a.creativeEnergy;
@@ -184,7 +192,8 @@ abstract final class Actions {
       title: title ??
           Names.song(RandomStream.keyed(
               w.seed, w.week, a.id * 64 + index, RngPurpose.names)),
-      genre: a.genre,
+      genre: songGenres.first,
+      extraGenres: songGenres.sublist(1),
       primaryArtistId: a.id,
       featuredArtistIds: List.of(featured),
       writtenWeek: w.week,

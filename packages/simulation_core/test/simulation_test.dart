@@ -137,6 +137,39 @@ void main() {
       expect(StartingStats.isValid(one(71), premium: true), isFalse);
     });
 
+    test('a song has 1–3 distinct genres; the primary comes first', () {
+      final s = Actions.writeSong(w, p, budget: BudgetTier.low, genres: [6, 0]);
+      expect(s.genre, 6);
+      expect(s.genres, [6, 0]);
+      for (final bad in [
+        <int>[],
+        [0, 0],
+        [0, 1, 2, 3],
+        [genreNames.length],
+      ]) {
+        expect(() => Actions.writeSong(w, p, aiMode: true, genres: bad),
+            throwsA(isA<SongwritingException>()));
+      }
+      expect(Actions.writeSong(w, p, budget: BudgetTier.low).genres, [p.genre]);
+    });
+
+    test('genre tables cover every genre; AI genres follow the weights', () {
+      expect(genreRegionAffinity.length, genreNames.length);
+      expect(genreAiWeights.length, genreNames.length);
+      final counts = List.filled(genreNames.length, 0);
+      for (final a in w.artists) {
+        if (a.tier != ArtistTier.player) counts[a.genre]++;
+      }
+      // Pop is far more common than classical among AI artists.
+      expect(counts[0], greaterThan(5 * counts[20] + 10));
+      // Some AI songs are crossovers.
+      final sim = Simulator(w);
+      for (var i = 0; i < 20; i++) {
+        sim.step();
+      }
+      expect(w.songs.any((s) => s.extraGenres.isNotEmpty), isTrue);
+    });
+
     test('famous producers refuse unknown artists', () {
       final star = w.collaborators.firstWhere((c) => c.minFame > 0.3);
       expect(() => Actions.writeSong(w, p, producer: star),

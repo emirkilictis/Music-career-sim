@@ -331,11 +331,17 @@ class Song with Charted {
     required this.longevity,
     required this.estimatedGrade,
     List<int>? featuredArtistIds,
-  }) : featuredArtistIds = featuredArtistIds ?? [];
+    List<int>? extraGenres,
+  })  : featuredArtistIds = featuredArtistIds ?? [],
+        extraGenres = extraGenres ?? [];
 
   final int id;
   final String title;
+
+  /// Primary genre; [extraGenres] are further genres (crossover songs).
   final int genre;
+  final List<int> extraGenres;
+  List<int> get genres => [genre, ...extraGenres];
   final int primaryArtistId;
   final List<int> featuredArtistIds;
   final int writtenWeek;
@@ -510,10 +516,51 @@ const List<String> genreNames = [
   'R&B',
   'Rock',
   'Country',
-  'Dance',
+  'Dance/Electronic',
   'Latin',
-  'Indie',
+  'Indie/Alternative',
+  'Metal',
+  'Punk',
+  'Soul',
+  'Funk',
+  'Disco',
+  'Jazz',
+  'Blues',
+  'Folk',
+  'Reggae',
+  'Afrobeats',
+  'K-Pop',
+  'Gospel',
+  'Classical',
 ];
+
+/// Relative share of AI artists per genre (index-aligned with [genreNames]).
+const List<double> genreAiWeights = [
+  22, // Pop
+  18, // Hip-Hop
+  9, // R&B
+  10, // Rock
+  8, // Country
+  7, // Dance/Electronic
+  7, // Latin
+  6, // Indie/Alternative
+  2, // Metal
+  1, // Punk
+  1, // Soul
+  1, // Funk
+  0.5, // Disco
+  1, // Jazz
+  0.5, // Blues
+  2, // Folk
+  1, // Reggae
+  2, // Afrobeats
+  2, // K-Pop
+  1, // Gospel
+  0.5, // Classical
+];
+
+/// A song has a primary genre and up to this many genres in total.
+const maxSongGenres = 3;
 
 /// Offsets into [Artist.reg] (each block has one value per [Region]).
 abstract final class ArtistReg {

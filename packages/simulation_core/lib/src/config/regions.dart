@@ -188,9 +188,22 @@ const List<List<double>> genreRegionAffinity = [
   [1.2, 0.9, 0.8], // R&B
   [1.0, 1.2, 0.8], // Rock
   [1.8, 0.4, 0.3], // Country
-  [0.8, 1.4, 1.0], // Dance
+  [0.8, 1.4, 1.0], // Dance/Electronic
   [0.9, 0.7, 2.2], // Latin
-  [1.0, 1.2, 0.6], // Indie
+  [1.0, 1.2, 0.6], // Indie/Alternative
+  [0.9, 1.4, 0.8], // Metal
+  [1.0, 1.2, 0.6], // Punk
+  [1.2, 1.0, 0.7], // Soul
+  [1.2, 0.9, 0.9], // Funk
+  [1.0, 1.2, 0.9], // Disco
+  [1.1, 1.1, 0.8], // Jazz
+  [1.3, 1.0, 0.6], // Blues
+  [1.1, 1.2, 0.6], // Folk
+  [0.9, 1.1, 1.4], // Reggae
+  [0.7, 1.2, 1.8], // Afrobeats
+  [0.6, 0.7, 2.4], // K-Pop
+  [1.6, 0.6, 0.8], // Gospel
+  [0.9, 1.4, 0.9], // Classical
 ];
 
 /// Country charts are a share of their region's consumption, with a home

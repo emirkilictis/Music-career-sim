@@ -15,6 +15,7 @@ abstract final class RngPurpose {
   static const botPlayer = 9;
   static const newArtists = 10;
   static const playlist = 11;
+  static const songGenres = 12;
 }
 
 /// SplitMix64 finalizer. Dart native ints are 64-bit and wrap on overflow.

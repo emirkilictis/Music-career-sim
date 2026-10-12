@@ -49,6 +49,7 @@ String _v1() => '''
     isSingle INTEGER, singleWeek INTEGER,
     lastAttention REAL, lastReach REAL, weekStreams REAL, weekDownloads REAL,
     weekPhysical REAL, weekRadio REAL, weekPoints REAL, viralBoost REAL, viralRamp INTEGER,
+    extraGenres TEXT,
     campaign INTEGER, playlistAdd INTEGER, playlistWeek INTEGER, playlistBoost REAL,
     weeksBelowCutoff INTEGER, lifetimeRadio REAL, dormantRate REAL,
     ${_cols(Codec.songRegColumns, 'REAL')},

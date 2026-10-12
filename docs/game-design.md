@@ -144,13 +144,20 @@ popülerlik göstergesi. Diğerleri arka planda.
 ## 4. Şarkı yapma
 
 ### 4.1 Akış (tek ekran)
-1. Tür / ruh hali (varsayılan: sanatçının türü)
+1. Tür(ler): 1–3 tür, ilki ana tür (varsayılan: sanatçının türü). Örn. Pop + Latin crossover.
+   Prodüktörün türü şarkının türlerinden biriyse uyum bonusu (+3).
 2. Ortak söz yazarı (opsiyonel)
 3. Prodüktör (opsiyonel; seçilmezse sanatçı kendisi prodükte eder)
 4. Stüdyo bütçesi: Düşük / Orta / Yüksek
 5. "Yaz ve kaydet" → sonuç kartı
 
 Şarkı **kasaya** (vault) girer; daha sonra single, EP veya albüme konur.
+
+**Türler (21):** Pop, Hip-Hop, R&B, Rock, Country, Dance/Electronic, Latin, Indie/Alternative, Metal, Punk,
+Soul, Funk, Disco, Jazz, Blues, Folk, Reggae, Afrobeats, K-Pop, Gospel, Classical. Sanatçının bir ana türü
+vardır (kitlesinin bölgelere dağılımını etkiler: Country → Kuzey Amerika, K-Pop/Latin/Afrobeats → Diğer,
+Metal/Dance → Avrupa ağırlıklı). AI sanatçıların türleri gerçekçi oranlarla dağılır (Pop/Hip-Hop çok,
+Classical az); AI şarkılarının ~%20'si crossover'dır. Faz 2: tür trendleri ve tür listeleri.
 
 ### 4.2 Ekip (NPC'ler)
 - Prodüktörler ve söz yazarları sanatçı değil, ayrı bir NPC listesidir (isimler kurgusal).
@@ -565,7 +572,7 @@ Bu hafta: 19,4M stream · Toplam: 2,31B stream · Saf satış: 5,2M
 - **Kayıt noktası yok, geri alma yok** — flop'un dönüşü yoktur.
 - Simülasyon deterministik olduğundan, sonucu görmeden uygulamayı kapatıp açmak aynı haftayı
   aynı sonuçla tekrar üretir; hile ile sonuç değiştirilemez.
-- Ücretsiz sürümde sınırlı slot (örn. 3), Premium'da sınırsız.
+- Kayıt slotu **herkes için sınırsız** (ücretsiz sürüm dahil).
 - Slot silme ve (ileride) dışa aktarma/yedek.
 
 ## 18. Kullanıcı görselleri
@@ -612,10 +619,10 @@ daha güçlü varyantlar, daha kolay radyo/playlist kabulü, daha güçlü flop 
   Rakip oyunlarda aylık üyelik kabul görmüş bir model; ömür boyu seçeneği aboneliği sevmeyen oyuncular için.
 - **Premium satması için bilerek güçlüdür ("biraz OP")**: Yükselen yıldız ve Süperstar başlangıcı,
   Rahat ve Milyoner başlangıcı, **daha yüksek başlangıç statları** (55 puan / tavan 70, §2.1),
-  sınırsız kayıt slotu, **günlük giriş bonusu** (§20.2). Üyeliğin değerini sürdürmek için yeni içerikler (dönemler, özellikler)
+  **günlük giriş bonusu** (§20.2). (Kayıt slotu herkese sınırsız olduğundan Premium avantajı değildir.) Üyeliğin değerini sürdürmek için yeni içerikler (dönemler, özellikler)
   ilk olarak veya sadece Premium'a gelebilir.
 - **Üyelik bitince hiçbir kariyer kilitlenmez.** Premium ile başlatılmış kariyerler ve mevcut slotlar
-  oynanmaya devam eder; sadece **yeni** Premium başlangıç ve ücretsiz limitin üstünde **yeni** slot açılamaz.
+  oynanmaya devam eder; sadece **yeni** Premium başlangıç seçilemez.
 - Premium **güçlü bir başlangıç** satar (stat, para, ünlülük, günlük bonus); formüller ve zorluk ise herkes
   için aynıdır. Ücretsiz oyuncu aynı zirvelere daha uzun yoldan çıkabilir: ücretsiz sürüm tek başına
   eksiksiz ve eğlenceli kalmalı.

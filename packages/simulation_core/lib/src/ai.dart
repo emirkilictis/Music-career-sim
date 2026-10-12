@@ -33,6 +33,17 @@ abstract final class AiPlanner {
     }
   }
 
+  /// The artist's genre, sometimes with a crossover genre (own stream, so
+  /// planning draws are unaffected).
+  static List<int> _songGenres(World w, Artist a, int track) {
+    final g = RandomStream.keyed(
+        w.seed, w.week, a.id * 64 + track, RngPurpose.songGenres);
+    if (!g.chance(0.2)) return [a.genre];
+    final extra =
+        (a.genre + 1 + g.nextInt(genreNames.length - 1)) % genreNames.length;
+    return [a.genre, extra];
+  }
+
   static void _planEra(World w, Artist a) {
     final r = RandomStream.keyed(w.seed, w.week, a.id, RngPurpose.aiPlanning);
     final isA = a.tier == ArtistTier.a;
@@ -43,7 +54,8 @@ abstract final class AiPlanner {
       final s = Actions.writeSong(w, a,
           producerSkill: producerSkill,
           aiMode: true,
-          featured: _maybeFeature(w, a, r));
+          featured: _maybeFeature(w, a, r),
+          genres: _songGenres(w, a, 0));
       a.plan.add(PlannedRelease(
           week: w.week, kind: PlannedKind.leadSingle, songId: s.id));
       a.nextEraWeek = w.week + 20 + r.nextInt(40);
@@ -58,7 +70,8 @@ abstract final class AiPlanner {
       tracks.add(Actions.writeSong(w, a,
           producerSkill: producerSkill,
           aiMode: true,
-          featured: i < 3 ? _maybeFeature(w, a, r) : const []));
+          featured: i < 3 ? _maybeFeature(w, a, r) : const [],
+          genres: _songGenres(w, a, i)));
     }
     // Best commercial prospects become singles.
     final ranked = List.of(tracks)
