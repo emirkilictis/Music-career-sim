@@ -11,9 +11,9 @@ import 'world.dart';
 
 enum StartTier { unknown, localBuzz, risingStar, superstar }
 
-/// Starting cash. [none] is the free start (earn via the job or rewarded ads);
-/// [comfortable] and [millionaire] are Premium starts (§20).
-enum StartMoney { none, comfortable, millionaire }
+/// Starting cash. [basic] is the free start (more via the job or rewarded
+/// ads); [comfortable] and [millionaire] are Premium starts (§20).
+enum StartMoney { basic, comfortable, millionaire }
 
 enum CareerPath { independent, smallLabel }
 
@@ -137,7 +137,7 @@ abstract final class WorldGen {
     required String name,
     required int genre,
     StartTier tier = StartTier.unknown,
-    StartMoney money = StartMoney.none,
+    StartMoney money = StartMoney.basic,
     CareerPath path = CareerPath.independent,
     HomeCountry home = HomeCountry.us,
     Skills? skills,
@@ -149,7 +149,7 @@ abstract final class WorldGen {
       StartTier.superstar => (0.80, 3e6, 2.4e7),
     };
     var cash = switch (money) {
-      StartMoney.none => 0,
+      StartMoney.basic => 500000,
       StartMoney.comfortable => 5000000,
       StartMoney.millionaire => 100000000,
     };

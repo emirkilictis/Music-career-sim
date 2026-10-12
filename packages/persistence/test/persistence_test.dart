@@ -61,6 +61,17 @@ void main() {
     expect(loaded.activeArtistIds, w.activeArtistIds);
   });
 
+  test('premium daily bonus: once per calendar day per account', () {
+    final slots = SaveSlots(Directory('${tmp.path}/slots'));
+    expect(slots.claimDailyBonus(DateTime(2026, 3, 1, 9)), isTrue);
+    expect(slots.claimDailyBonus(DateTime(2026, 3, 1, 23, 59)), isFalse);
+    // A restart (new SaveSlots) keeps the claim.
+    final again = SaveSlots(Directory('${tmp.path}/slots'));
+    expect(again.claimDailyBonus(DateTime(2026, 3, 1, 12)), isFalse);
+    expect(again.claimDailyBonus(DateTime(2026, 3, 2, 0, 1)), isTrue);
+    expect(again.list(), isEmpty);
+  });
+
   test('difficulty and side income survive save/load', () {
     final w = _newWorld(5, difficulty: Difficulty.hard);
     final p = w.player!;

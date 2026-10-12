@@ -517,6 +517,24 @@ class SaveSlots {
 
   SaveStore open(String slotId) => SaveStore.open(dbPath(slotId));
 
+  /// Premium daily login bonus: true at most once per local calendar day for
+  /// the whole account (not per slot), and records the claim. The caller
+  /// checks Premium and then credits it with `Actions.grantDailyBonus`.
+  bool claimDailyBonus(DateTime now) {
+    final f = File('${root.path}/account.json');
+    final account = f.existsSync()
+        ? jsonDecode(f.readAsStringSync()) as Map<String, Object?>
+        : <String, Object?>{};
+    final today = '${now.year.toString().padLeft(4, '0')}-'
+        '${now.month.toString().padLeft(2, '0')}-'
+        '${now.day.toString().padLeft(2, '0')}';
+    if (account['lastDailyBonus'] == today) return false;
+    account['lastDailyBonus'] = today;
+    root.createSync(recursive: true);
+    f.writeAsStringSync(jsonEncode(account));
+    return true;
+  }
+
   void writeSummary(String slotId, World w) {
     final p = w.player;
     File('${root.path}/$slotId/summary.json').writeAsStringSync(jsonEncode({

@@ -324,10 +324,17 @@ void sideIncomeTests() {
     p = WorldGen.addPlayer(w, name: 'Free', genre: 0);
   });
 
-  test('the free start has no money and cannot pay for a song', () {
-    expect(p.moneyCents, 0);
-    expect(() => Actions.writeSong(w, p, budget: BudgetTier.low),
+  test('the free start can pay for a few cheap songs, not a pricey one', () {
+    expect(p.moneyCents, 500000);
+    expect(() => Actions.writeSong(w, p, budget: BudgetTier.high),
         throwsA(isA<SongwritingException>()));
+    Actions.writeSong(w, p, budget: BudgetTier.low);
+  });
+
+  test('the premium daily bonus adds money', () {
+    final before = p.moneyCents;
+    Actions.grantDailyBonus(w, p);
+    expect(p.moneyCents - before, Actions.dailyBonusCents);
   });
 
   test('the job only pays: energy and songwriting are unaffected', () {
@@ -365,7 +372,7 @@ void sideIncomeTests() {
           () => Actions.claimAdReward(w, p), throwsA(isA<ActionException>()));
       sim.step();
     }
-    expect(p.moneyCents, 9 * Actions.adRewardCents);
+    expect(p.moneyCents, 500000 + 9 * Actions.adRewardCents);
   });
 }
 

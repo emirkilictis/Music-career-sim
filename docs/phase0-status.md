@@ -40,7 +40,7 @@ dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet   # performan
 dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet --save /tmp/c.sqlite   # + kayıt
 ```
 
-## Testler (simülasyon 23/23, kayıt 6/6 geçiyor)
+## Testler (simülasyon 24/24, kayıt 7/7 geçiyor)
 
 - Aynı seed → bit düzeyinde aynı dünya; farklı seed → farklı dünya
 - Sanatçının kariyer stream toplamı = şarkılarının toplamı (aktif + tembel birikimli dormant)
@@ -53,8 +53,9 @@ dart run bin/sim_cli.dart --start 2005 --years 50 --seed 7 --quiet --save /tmp/c
 - **Kayıt:** oluştur + yükle birebir aynı dünya; **kesintisiz oynamak = her 13 haftada kapatıp kayıttan
   açmak** (oyuncu hamleleriyle birlikte, bit düzeyinde aynı hash); kayıt ortasında çökme önceki haftayı
   bozmuyor; liste ve haftalık geçmiş sorgulanabiliyor; slot oluştur/listele/aç/sil
-- Ücretsiz başlangıç $0 ile; **iş sadece para kazandırıyor** (enerji, şarkı hakkı, burnout, hayran
-  aynı kalıyor); ödüllü reklam her hafta açık, haftada en fazla 3
+- Ücretsiz başlangıç $5K ile; **iş sadece para kazandırıyor** (enerji, şarkı hakkı, burnout, hayran
+  aynı kalıyor); ödüllü reklam her hafta açık, haftada en fazla 3; Premium günlük bonus hesap başına
+  günde bir kez (yeniden açınca da)
 - Zorluk: Normal = kalibre edilmiş denge (çarpanlar 1); Kolay > Normal > Zor oyuncu hayranı,
   AI etkilenmiyor; zorluk ve iş/reklam sayaçları kayıttan aynen dönüyor
 - Mega çıkış: doğru hamlelerle 2025'te 3M+ saf satış; aynı süperstar hamlesiz çok daha düşük;
@@ -166,9 +167,10 @@ Eski katalog şarkıları rastgele viral olup listelere tırmanabiliyor (game-de
 
 Mevcut kalibrasyon **Normal ("Gerçekçi")** zorluk olarak kabul edildi. `Difficulty` (Kolay / Normal / Zor)
 sadece oyuncunun erişimini, hayran dönüşümünü ve şarkı kalitesini ölçekler; değer kayıt meta'sında.
-Ücretsiz başlangıç $0 (`StartMoney.none`); `Actions.setJob` (haftalık $350, başka etkisi yok) ve
-`Actions.claimAdReward` (haftada en fazla 3 × $100). Bot oyuncu da artık $0'dan iş + reklamla başlıyor
-(2015–2021 bot koşusu: 5 albüm, ~$4.5M).
+Ücretsiz başlangıç $5K (`StartMoney.basic`); `Actions.setJob` (haftalık $350, başka etkisi yok) ve
+`Actions.claimAdReward` (haftada en fazla 3 × $250). Premium günlük bonus: `SaveSlots.claimDailyBonus`
+(gerçek gün, hesap başına, `account.json`) + `Actions.grantDailyBonus` ($5K). Bot oyuncu $5K'dan iş +
+reklamla başlıyor (2015–2021 bot koşusu: 5 albüm, ~$4.6M).
 
 ## Bilinen eksikler / sıradaki adımlar
 

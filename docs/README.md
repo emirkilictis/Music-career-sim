@@ -48,11 +48,12 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 | K19 | **Şarkı kalitesi = sanatçı statları + ekip (prodüktör, söz yazarı) + şans.** Tecrübesiz biri de "ilham anı" ile şaheser yazabilir. Kesin kalite gizli, tahmini not gösterilir. |
 | K20 | **Yaratıcı enerji ve burnout:** tek çubuk; art arda çok şarkı yazınca burnout (birkaç hafta yazamama). |
 | K21 | **Kariyer yolu:** Bağımsız veya küçük plak şirketi (sade: avans, gelir payı, 2 albümlük sözleşme). Büyük şirket teklifleri Faz 2. |
-| K22 | **Başlangıç seviyesi ve parası seçilebilir;** Süperstar/Yükselen yıldız ile Rahat/Milyoner para başlangıcı Premium (ücretsizde $0, bkz. K27). Oyun ücretsiz ve tek başına eksiksiz. Premium: **aylık / yıllık üyelik + ömür boyu** seçeneği. Üyelik bitince hiçbir kariyer kilitlenmez. |
+| K22 | **Başlangıç seviyesi ve parası seçilebilir;** Süperstar/Yükselen yıldız ile Rahat/Milyoner para başlangıcı Premium (ücretsizde $5K, bkz. K27). Oyun ücretsiz ve tek başına eksiksiz. Premium: **aylık / yıllık üyelik + ömür boyu** seçeneği. Üyelik bitince hiçbir kariyer kilitlenmez. |
 | K24 | **Bölgeler:** Kuzey Amerika, Avrupa, Diğer (Latin Amerika + Asya + Okyanusya + Afrika). Konfigürasyondan genişletilebilir. Stream, indirme, satış ve radyo bölge bazında hesaplanır; sanatçının kitlesi memleketi, türü ve ünlülüğüne göre bölgelere dağılır. |
 | K25 | **Listeler:** ABD, İngiltere ve Global (şarkı + albüm; albüm listeleri 100 sıra), ayrıca streaming platformunun Global / Kuzey Amerika / Avrupa Top 50'si. Ülke listeleri, bölgenin bir payıdır (memleket bonusu ile). İsimler kurgusal. |
 | K26 | **Zorluk:** Kolay ("Domination") / **Normal = "Gerçekçi"** (gerçek dünyaya kalibre edilmiş mevcut denge) / Zor. Zorluk sadece oyuncuyu ölçekler, AI'yi değil. |
-| K27 | **Ücretsiz başlangıç $0 ile:** para gündelik işle (sadece maaş öder, hiçbir şeyi etkilemez) ve ödüllü reklamla (her zaman, haftada en fazla 3) kazanılır. Rahat/Milyoner başlangıcı Premium. |
+| K27 | **Ücretsiz başlangıç $5.000 ile;** fazlası gündelik işle ($350/hafta, sadece maaş öder, hiçbir şeyi etkilemez) ve ödüllü reklamla (her zaman, haftada en fazla 3 × $250) kazanılır. Rahat/Milyoner başlangıcı Premium. |
+| K28 | **Premium günlük giriş bonusu:** her gerçek gün ilk girişte $5.000, hesap başına günde bir kez. |
 | K23 | ChatGPT planındaki ekranlar, rekorlar, kampanyalar, finans, bildirimler, ödüller, Kolay mod ve 10 performans kuralı dokümanlara taşındı. |
 
 ## Yol Haritası
@@ -91,7 +92,6 @@ Bu kararlar alınmıştır; değiştirmek için bilinçli bir revizyon gerekir.
 ## Açık Sorular
 
 - Kolay/Zor çarpanlarının kesin değerleri ve flop desteği her birinde ne kadar güçlü?
-- Premium üyeler reklamsız mı ödül alır (örn. reklam izlemeden haftalık 3 ödül)?
 - Faz 1'de hangi türler (genre) olacak?
 - Kurgusal liste ve platform isimleri (örn. "Streamify", "US Top 100").
 - Premium fiyatları (aylık / yıllık / ömür boyu).

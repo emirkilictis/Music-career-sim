@@ -54,7 +54,7 @@ Hafta 14, 2007
 
 | Yol | Para | Gelir payı | Erişim (radyo, playlist, pazarlama) | Kısıt |
 |---|---|---|---|---|
-| **Bağımsız** | Başlangıç parası (ücretsizde 0) | Kayıtlı müzik gelirinin %100'ü | Düşük | Yok, tam özgürlük |
+| **Bağımsız** | Başlangıç parası (ücretsizde $5K) | Kayıtlı müzik gelirinin %100'ü | Düşük | Yok, tam özgürlük |
 | **Küçük plak şirketi** | Avans (peşin nakit) | %50 (avans bu paydan geri ödenir) | Orta-yüksek | Sözleşme: 2 albüm |
 
 - Sözleşme bitince yenile veya bağımsızlaş.
@@ -72,7 +72,7 @@ Hafta 14, 2007
 
 | Başlangıç parası | Erişim |
 |---|---|
-| Sıfır ($0) — para iş ve ödüllü reklamla kazanılır (§20.1) | Ücretsiz |
+| Başlangıç ($5K) — fazlası iş ve ödüllü reklamla kazanılır (§20.1) | Ücretsiz |
 | Rahat ($50K) | **Premium** |
 | Milyoner ($1M) | **Premium** |
 
@@ -562,27 +562,35 @@ daha güçlü varyantlar, daha kolay radyo/playlist kabulü, daha güçlü flop 
 - Oyun **ücretsiz indirilir ve tek başına eksiksiz oynanır.**
 - **Premium üyelik** üç şekilde satılır: **aylık**, **yıllık** ve **ömür boyu** (tek seferlik).
   Rakip oyunlarda aylık üyelik kabul görmüş bir model; ömür boyu seçeneği aboneliği sevmeyen oyuncular için.
-- Premium şunları açar: Yükselen yıldız ve Süperstar başlangıcı, Milyoner başlangıcı,
-  sınırsız kayıt slotu. Üyeliğin değerini sürdürmek için yeni içerikler (dönemler, özellikler)
+- Premium şunları açar: Yükselen yıldız ve Süperstar başlangıcı, Rahat ve Milyoner başlangıcı,
+  sınırsız kayıt slotu, **günlük giriş bonusu** (§20.2). Üyeliğin değerini sürdürmek için yeni içerikler (dönemler, özellikler)
   ilk olarak veya sadece Premium'a gelebilir.
 - **Üyelik bitince hiçbir kariyer kilitlenmez.** Premium ile başlatılmış kariyerler ve mevcut slotlar
   oynanmaya devam eder; sadece **yeni** Premium başlangıç ve ücretsiz limitin üstünde **yeni** slot açılamaz.
 - Simülasyonun kendisi (zorluk, formüller) Premium'dan etkilenmez; para ile oyun içi güç satılmaz,
-  sadece başlangıç seçenekleri ve kolaylıklar.
+  sadece başlangıç seçenekleri ve kolaylıklar. Tek istisna küçük günlük giriş bonusudur (oyun içi para).
 - Satın alımları geri yükleme (restore) zorunludur.
 - Reklam: sadece **isteğe bağlı ödüllü reklam** (§20.1). Zorunlu/araya giren reklam planlanmadı.
 
 ### 20.1 Ücretsiz başlangıç: iş ve ödüllü reklam
 
-Ücretsiz sürümde kariyer **$0** ile başlar. İlk şarkıların parası iki yoldan gelir:
+Ücretsiz sürümde kariyer **$5.000** ile başlar (birkaç ucuz şarkıya yeter). Fazlası iki yoldan gelir:
 
 - **Gündelik iş:** açılıp kapatılabilir, haftalık sabit maaş öder ($350/hafta).
   **İş sadece para kazandırır**; enerjiyi, şarkı yazma hakkını veya başka hiçbir şeyi etkilemez
   (oyuncuyu sıkmamak için). Maaştan plak şirketi pay almaz.
 - **Ödüllü reklam:** her zaman izlenebilir (sadece başlangıçta değil), **haftada en fazla 3 kez**,
-  her biri $100. Tamamen isteğe bağlıdır; ödül reklam bitince verilir.
-- İş + 3 reklam ≈ $650/hafta: haftada ~2 düşük bütçeli şarkı ($300). Daha pahalı kayıtlar için
-  biriktirmek veya müzikten kazanmak gerekir.
+  her biri $250. Tamamen isteğe bağlıdır; ödül reklam bitince verilir.
+- İş + 3 reklam ≈ $1.100/hafta: haftada ~3 düşük bütçeli şarkı ($300) veya ~3 haftada bir orta bütçeli
+  kayıt ($3.000). Yüksek bütçe ve pahalı prodüktörler için biriktirmek veya müzikten kazanmak gerekir.
+
+### 20.2 Premium günlük giriş bonusu
+
+- Premium üye oyuna **her gün** girdiğinde **$5.000** oyun içi para alır.
+- Gerçek takvim gününe bağlıdır (oyun haftasına değil); **hesap başına günde bir kez**, o an açılan
+  kariyere yatar (slot sayısıyla çoğalmaz).
+- Uygunluk (Premium mi, bugün alındı mı) uygulamada kontrol edilir; simülasyon sadece parayı ekler,
+  böylece motor deterministik kalır.
 
 ## 21. Dil
 

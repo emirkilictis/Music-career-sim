@@ -33,8 +33,12 @@ abstract final class Actions {
   /// Weekly wage of the day job. The job only pays: it costs no energy,
   /// songwriting slots or anything else.
   static const jobWageCents = 35000;
-  static const adRewardCents = 10000;
+  static const adRewardCents = 25000;
   static const maxAdsPerWeek = 3;
+
+  /// Premium daily login bonus. Eligibility (Premium, once per calendar day)
+  /// is decided by the app, outside the deterministic simulation.
+  static const dailyBonusCents = 500000;
 
   /// Takes or quits the day job; the wage is paid at the end of each week.
   static void setJob(World w, Artist a, bool on) => a.hasJob = on;
@@ -55,6 +59,10 @@ abstract final class Actions {
     a.adsWatchedThisWeek++;
     a.moneyCents += adRewardCents;
   }
+
+  /// Credits the Premium daily login bonus to the career being played.
+  static void grantDailyBonus(World w, Artist a) =>
+      a.moneyCents += dailyBonusCents;
 
   static int budgetCostCents(BudgetTier b) => switch (b) {
         BudgetTier.low => 30000,
