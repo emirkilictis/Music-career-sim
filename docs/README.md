@@ -21,6 +21,7 @@ sorunlar düzeltilmiş ve oyun tasarımı kararları eklenmiştir.
 | [architecture.md](architecture.md) | Modüller, concurrency, persistence, UI performansı, görsel pipeline'ı, test ve benchmark |
 | [phase0-status.md](phase0-status.md) | **Faz 0 durumu:** ne yapıldı, testler, performans, kalibrasyon sonuçları, bilinen eksikler |
 | [feedback.md](feedback.md) | Oyuncu geri bildirimleri ve test oyunu notları (henüz uygulanmayanlar) |
+| [competitors.md](competitors.md) | Rakip oyunlar (Groove Journey vb.): neyi alalım, neden kaçınalım |
 
 ## Karar Kaydı
 
