@@ -594,23 +594,27 @@ Bu hafta: 19,4M stream · Toplam: 2,31B stream · Saf satış: 5,2M
 
 ## 19. Zorluk
 
-Üç seviye: **Kolay ("Domination")**, **Normal ("Gerçekçi")**, **Zor**.
+Kariyer başında seçilir, sonradan değişmez. Aynı oyunda istediğin kariyeri gerçekçi, istediğini
+efsane modda oynayabilirsin.
 
-- **Normal = "Gerçekçi"**: gerçek dünya rakamlarına göre kalibre edilmiş mevcut denge
-  (bkz. phase0-status.md kalibrasyon tablosu). Tüm çarpanlar 1.
-- Zorluk **sadece oyuncunun** sayılarını ölçekler; AI ve piyasa her seviyede aynıdır
-  (AI oyuncuyu sadece ortak pazar üzerinden hisseder).
-- Kariyer başlarken seçilir, kayda yazılır, sonradan değişmez.
-- Şu an motorda olan çarpanlar (`Difficulty`): erişim (exposure), hayran dönüşümü, şarkı kalitesi bonusu.
-  Kolay: 1.3 / 1.3 / +3 · Zor: 0.8 / 0.8 / −3 (geçici değerler, Faz 2'de kalibre edilecek).
+| Mod | Ne hissettirir | Oyuncu | AI rakipler |
+|---|---|---|---|
+| **Efsane** | "Tüm zamanların en büyüğü ol" (Michael Jackson fantezisi) | Erişim ×1,4, hayran kazanımı ×1,6, şarkı kalitesi +5, albüm talebi ×1,4, sadakat kazanımı ×1,5 | Erişim ve albüm talebi ×0,85 |
+| **Gerçekçi** | Gerçek dünya rakamları; herkes aynı kurallarla | Kalibre edilmiş denge (hepsi 1) | Aynı |
+| **Zor** | Gerçeklikten zor | Erişim ×0,8, hayran ×0,8, kalite −3, albüm talebi ×0,85, sadakat ×0,8 | Aynı |
 
-Faz 2'de eklenecek çarpanlar:
-pazarlama etkisi, hayran dönüşümü, hit şansı, decay, varyant talep havuzu, radyo/playlist kabulü,
-**flop desteği gücü**, beklenti tavanı, (ileride) turne talebi.
+2025 süperstar, ABD ilk hafta (3 seed ortalaması, `tools/sim_cli/bin/superstar_probe.dart <mod>`):
 
-**Kolay — "Domination" modu** güç fantezisine bilerek izin verir (örnek yönler, değerler kalibre edilecek):
-pazarlama etkisi +%50, hayran dönüşümü +%35, çıkış momentumu +%25, daha yavaş decay,
-daha güçlü varyantlar, daha kolay radyo/playlist kabulü, daha güçlü flop desteği.
+| | Gerçekçi | Efsane |
+|---|---|---|
+| Hamlesiz (sadakat 0,4) | ~295K | ~435K |
+| Hamlesiz, sadık fandom (0,9) | ~560K (#1) | ~840K |
+| İyi hamleler | ~1,4M | ~2,0M |
+| Max hamle | ~3,9M | **~5,7M** |
+
+Testler: efsane modda max hamle 5M+; gerçekçi modda 4,8M altı.
+Faz 2'de eklenebilecek çarpanlar: flop desteği gücü, beklenti tavanı, radyo/playlist kabulü,
+(ileride) turne talebi.
 
 ## 20. Gelir modeli
 

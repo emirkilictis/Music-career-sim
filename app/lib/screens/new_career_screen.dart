@@ -308,7 +308,7 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
                   const SizedBox(height: 4),
                   Text(
                       switch (_difficulty) {
-                        Difficulty.easy => l.difficultyEasyHint,
+                        Difficulty.legend => l.difficultyLegendHint,
                         Difficulty.normal => l.difficultyNormalHint,
                         Difficulty.hard => l.difficultyHardHint,
                       },

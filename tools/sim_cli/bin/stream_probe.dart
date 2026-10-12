@@ -39,7 +39,8 @@ void main(List<String> args) {
   }
   double med(List<double> v) => (v..sort())[v.length ~/ 2];
   String m(double v) => '${(v / 1e6).toStringAsFixed(1)}M';
-  print('fanShare $fanShare fb $feedback fame $fameExp: US#1 ${m(med(us))} UK#1 ${m(med(uk))} GL#1 ${m(med(gl))} '
+  print(
+      'fanShare $fanShare fb $feedback fame $fameExp: US#1 ${m(med(us))} UK#1 ${m(med(uk))} GL#1 ${m(med(gl))} '
       '| album tracks ${(100 * tracks / (singles + tracks)).round()}% of active streams '
       '| active songs ${active ~/ n}');
 }

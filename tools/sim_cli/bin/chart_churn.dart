@@ -29,8 +29,7 @@ void main(List<String> args) {
     for (final e in a.take(10)) {
       if (e.isDebut) debutTop10[y] = (debutTop10[y] ?? 0) + 1;
     }
-    double units(ChartEntry e) =>
-        w.albumWeekUnitsUs(w.albums[e.entityId]);
+    double units(ChartEntry e) => w.albumWeekUnitsUs(w.albums[e.entityId]);
     (no1Units[y] ??= []).add(units(a.first));
     final top = w.albums[a.first.entityId];
     final topArtist = w.artists[top.artistId];

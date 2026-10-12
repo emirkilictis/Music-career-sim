@@ -245,7 +245,7 @@ Sonuç (seed 42 ve 7, 2015–2025, `dart run bin/chart_churn.dart <seed> 2015 20
 
 1. Flop desteğinin etkileri (rapor, redemption, feat teklifleri), sosyal medya postları, kampanyalar:
    Faz 2'de (şu an sadece durum değişkenleri var).
-2. Kolay/Zor çarpanlarının kalibrasyonu ve diğer zorluk çarpanları (flop desteği, beklenti tavanı vb.): Faz 2.
+2. Zorluk: Efsane/Gerçekçi/Zor yapıldı (game-design §19). Kalan çarpanlar (flop desteği, beklenti tavanı vb.): Faz 2.
 3. Katalog (dormant) şarkılar kalıcı seviyede kalıyor; on yıllar içinde çok yavaş azalma ileride
    dönüşümlü uzlaştırma ile eklenebilir.
 4. Veritabanı boyutu (50 yılda ~170 MB) ve kayıt süresinin yavaş artışı: eski geçmişin aylık

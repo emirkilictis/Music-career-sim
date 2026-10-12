@@ -233,8 +233,10 @@ void main() {
   required double devotion,
   required double hype,
   required List<int> variants,
+  Difficulty difficulty = Difficulty.normal,
+  Campaign campaign = Campaign.standard,
 }) {
-  final w = WorldGen.create(seed: 77, startYear: year);
+  final w = WorldGen.create(seed: 77, startYear: year, difficulty: difficulty);
   final sim = Simulator(w);
   while (w.week < GameTime.firstWeekOf(year)) {
     sim.step();
@@ -250,8 +252,8 @@ void main() {
     for (var i = 0; i < 12; i++)
       Actions.writeSong(w, a, producerSkill: 90, aiMode: true).id,
   ];
-  final album =
-      Actions.releaseAlbum(w, a, 'Mega', songs, variantWeeks: variants);
+  final album = Actions.releaseAlbum(w, a, 'Mega', songs,
+      variantWeeks: variants, campaign: campaign);
   sim.step();
   sim.step();
   return (world: w, album: album, week2Pure: album.weekPure);
@@ -280,11 +282,42 @@ void megaDebutTests() {
         lessThan(1.2e6));
   });
 
+  test('legend mode: a 5M+ week is reachable, realistic stays near 4M', () {
+    const maxMoves = [0, 0, 0, 0, 0, 0, 1, 2];
+    final legend = _debut(
+        year: 2025,
+        devotion: 1.0,
+        hype: 0.8,
+        variants: maxMoves,
+        campaign: Campaign.global,
+        difficulty: Difficulty.legend);
+    final real = _debut(
+        year: 2025,
+        devotion: 1.0,
+        hype: 0.8,
+        variants: maxMoves,
+        campaign: Campaign.global);
+    final legendUs =
+        legend.world.albumFirstWeekIn(legend.album, ChartMarket.us);
+    final realUs = real.world.albumFirstWeekIn(real.album, ChartMarket.us);
+    printOnFailure('legend $legendUs, realistic $realUs');
+    expect(legendUs, greaterThan(5e6));
+    expect(realUs, lessThan(4.8e6));
+  });
+
+  test('legend mode holds the AI back a little', () {
+    final c = Difficulty.legend;
+    expect(c.aiExposure, lessThan(1));
+    expect(c.aiAlbumDemand, lessThan(1));
+    expect(Difficulty.normal.aiExposure, 1);
+    expect(Difficulty.normal.albumDemand, 1);
+  });
+
   test('a devoted superstar goes #1 even without any moves', () {
     // An event album: a Taylor-level career sells big on name alone.
     final r = _debut(year: 2025, devotion: 0.9, hype: 0, variants: const [0]);
-    expect(r.world.albumFirstWeekIn(r.album, ChartMarket.us),
-        greaterThan(450e3));
+    expect(
+        r.world.albumFirstWeekIn(r.album, ChartMarket.us), greaterThan(450e3));
     expect(r.album.statsOrNull(Charts.usAlbums)?.debutPos, 1);
   });
 
@@ -453,7 +486,7 @@ void difficultyTests() {
         Difficulty.normal);
   });
 
-  test('difficulty scales the player only, never the AI', () {
+  test('difficulty scales the player; only legend holds the AI back', () {
     final runs = {
       for (final d in Difficulty.values)
         d: () {
@@ -476,12 +509,14 @@ void difficultyTests() {
           return (fans: p.coreFans, aiFans: aiFans);
         }(),
     };
-    final easy = runs[Difficulty.easy]!, normal = runs[Difficulty.normal]!;
+    final easy = runs[Difficulty.legend]!, normal = runs[Difficulty.normal]!;
     final hard = runs[Difficulty.hard]!;
     expect(easy.fans, greaterThan(normal.fans));
     expect(normal.fans, greaterThan(hard.fans));
-    // The AI only feels the player through the shared market.
-    expect((easy.aiFans - hard.aiFans).abs() / normal.aiFans, lessThan(1e-3));
+    // Realistic and hard leave the AI alone (it only feels the player
+    // through the shared market); legend holds it back a little.
+    expect((normal.aiFans - hard.aiFans).abs() / normal.aiFans, lessThan(1e-3));
+    expect(easy.aiFans, lessThan(normal.aiFans));
   });
 }
 

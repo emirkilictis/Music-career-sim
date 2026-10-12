@@ -184,7 +184,9 @@ class Simulator {
           promo *
           p.labelReach *
           (1 + 0.5 * p.hype) *
-          (p.tier == ArtistTier.player ? w.difficulty.exposure : 1.0) *
+          (p.tier == ArtistTier.player
+              ? w.difficulty.exposure
+              : w.difficulty.aiExposure) *
           campaignExposure[s.campaign.index] *
           (1 + s.playlistBoost);
       if (s.playlistWeek == w.week) playlistAdds.add(s.id);
@@ -404,6 +406,9 @@ class Simulator {
               .logNormal(0.08);
       // Long tracklists sell a little more (more for the money, bundles);
       // each doubling beyond 10 tracks adds [SimConfig.longAlbumBonus].
+      final demand = p.tier == ArtistTier.player
+          ? w.difficulty.albumDemand
+          : w.difficulty.aiAlbumDemand;
       final n = al.songIds.length;
       final tracklist =
           n > 10 ? 1 + c.longAlbumBonus * math.log(n / 10) / math.ln2 : 1.0;
@@ -464,7 +469,8 @@ class Simulator {
                 (age == 0 ? 1.0 : 0.25);
         final pure = (superPart + collectorPart + casPart + eventPart) *
             noise *
-            tracklist;
+            tracklist *
+            demand;
         final streams =
             sea[k] + al.sumDormantRate * p.catalogFactor * share * spa[k];
         final t = tea[k] / c.trackEquivalentAlbum;

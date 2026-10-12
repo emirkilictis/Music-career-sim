@@ -2,7 +2,9 @@ import 'package:simulation_core/simulation_core.dart';
 
 /// 2025 superstar first weeks (US) for several setups, averaged over seeds
 /// so album noise does not hide the level.
-void main() {
+void main(List<String> args) {
+  final difficulty =
+      Difficulty.values.byName(args.isEmpty ? 'normal' : args[0]);
   final setups = [
     ('no moves (devotion 0.4)', 0.4, 0.0, const [0], Campaign.standard),
     ('no moves, devoted (0.9)', 0.9, 0.0, const [0], Campaign.standard),
@@ -12,7 +14,8 @@ void main() {
   for (final (label, dev, hype, vars, camp) in setups) {
     final units = <double>[];
     for (final seed in [77, 78, 79]) {
-      final x = WorldGen.create(seed: seed, startYear: 2025);
+      final x =
+          WorldGen.create(seed: seed, startYear: 2025, difficulty: difficulty);
       final s = Simulator(x);
       while (x.week < GameTime.firstWeekOf(2025)) {
         s.step();
@@ -34,7 +37,7 @@ void main() {
       units.add(x.albumFirstWeekIn(al, ChartMarket.us));
     }
     final avg = units.reduce((a, b) => a + b) / units.length;
-    print('$label: US ${(avg / 1e3).round()}K units (seeds: '
+    print('${difficulty.name} $label: US ${(avg / 1e3).round()}K units (seeds: '
         '${units.map((u) => '${(u / 1e3).round()}K').join(', ')})');
   }
 }

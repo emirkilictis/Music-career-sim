@@ -131,7 +131,7 @@ class Fmt {
       };
 
   String difficulty(Difficulty d) => switch (d) {
-        Difficulty.easy => l.difficultyEasy,
+        Difficulty.legend => l.difficultyLegend,
         Difficulty.normal => l.difficultyNormal,
         Difficulty.hard => l.difficultyHard,
       };

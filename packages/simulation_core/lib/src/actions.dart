@@ -400,6 +400,7 @@ abstract final class Eras {
         a.anticipationCap = c.anticipationCapBase * g * (0.5 + a.fame);
         a.devotion += (1 - a.devotion) *
             a.kind.devotionGain *
+            (a.tier == ArtistTier.player ? w.difficulty.devotionGain : 1) *
             switch (result) {
               EraResult.smash => 0.2,
               EraResult.success => 0.09,
