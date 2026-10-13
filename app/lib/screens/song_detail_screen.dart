@@ -6,6 +6,7 @@ import '../core/commands.dart';
 import '../core/scope.dart';
 import '../widgets/image_pickers.dart';
 import '../core/images.dart';
+import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/artist_link.dart';
@@ -46,6 +47,34 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         _history = history;
         _run = run;
       });
+    }
+  }
+
+  Future<void> _scrap(SongView s) async {
+    final l = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l.scrapSongTitle(s.title)),
+        content: Text(l.scrapSongBody),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(c, false), child: Text(l.cancel)),
+          FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppColors.coral),
+              onPressed: () => Navigator.pop(c, true),
+              child: Text(l.scrapSong)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await widget.state.act(Cmd.scrapSong(s.id));
+      if (!mounted) return;
+      Navigator.pop(context);
+      showInfo(context, l.songScrapped(s.title));
+    } catch (e) {
+      if (mounted) showError(context, e);
     }
   }
 
@@ -153,6 +182,17 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       label: l.releaseAsSingle,
                     ),
                   ],
+                  if (s.isPlayer &&
+                      s.inVault &&
+                      s.scheduledSingleWeek < 0 &&
+                      s.scheduledAlbumWeek < 0)
+                    TextButton.icon(
+                      onPressed: () => _scrap(s),
+                      style: TextButton.styleFrom(
+                          foregroundColor: AppColors.coral),
+                      icon: const Icon(Icons.delete_outline_rounded),
+                      label: Text(l.scrapSong),
+                    ),
                 ]),
           ),
           if (!s.inVault) ...[

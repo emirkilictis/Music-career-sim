@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
+import 'album_detail_screen.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/format.dart';
@@ -175,6 +176,17 @@ class _NextStepCard extends StatelessWidget {
           l.stepRestBody(Actions.energyRestBonus.round()),
           l.restNow,
           rest,
+        ),
+      _ when p.eraAlbumSinglesLeft > 0 && sinceRelease >= 8 => (
+          Icons.queue_music_rounded,
+          l.stepAlbumSingleTitle,
+          l.stepAlbumSingleBody(p.eraAlbumSinglesLeft),
+          l.openAlbum,
+          () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) =>
+                      AlbumDetailScreen(albumId: p.eraAlbumId, state: career))),
         ),
       _ when p.vaultCount >= GameSession.minAlbumTracks => (
           Icons.album_rounded,

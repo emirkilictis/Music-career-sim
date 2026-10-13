@@ -66,6 +66,18 @@ class _ReleasesTabState extends State<ReleasesTab> {
       showInfo(context, l.noSongsToRelease);
       return;
     }
+    final groups = <(String, List<SongView>)>[
+      for (final a in _albums)
+        if (eligible.any((s) => s.albumId == a.id))
+          (
+            l.fromAlbum(a.title),
+            [
+              for (final id in a.trackIds) ...eligible.where((s) => s.id == id),
+            ]
+          ),
+      if (eligible.any((s) => s.inVault))
+        (l.fromVault, eligible.where((s) => s.inVault).toList()),
+    ];
     final song = await showModalBottomSheet<SongView>(
       context: context,
       showDragHandle: true,
@@ -81,18 +93,30 @@ class _ReleasesTabState extends State<ReleasesTab> {
               child:
                   Text(l.pickSingle, style: Theme.of(c).textTheme.titleLarge),
             ),
-            for (final s in eligible)
-              ListTile(
-                leading: CoverArt(
-                    seed: songCoverSeed(s.id, s.albumId),
-                    songId: s.id,
-                    albumId: s.albumId),
-                trailing: GradeTag(fmt.grade(s.estimatedGrade)),
-                title: Text(s.title),
-                subtitle:
-                    Text('${fmt.songStatus(s)} · ${fmt.genres(s.genres)}'),
-                onTap: () => Navigator.pop(c, s),
+            // Album tracks first, grouped by album (newest first), then
+            // the vault.
+            for (final (header, group) in groups) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                child: Text(header,
+                    style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w700)),
               ),
+              for (final s in group)
+                ListTile(
+                  leading: CoverArt(
+                      seed: songCoverSeed(s.id, s.albumId),
+                      songId: s.id,
+                      albumId: s.albumId),
+                  trailing: GradeTag(fmt.grade(s.estimatedGrade)),
+                  title: Text(s.title),
+                  subtitle: Text(s.inVault
+                      ? fmt.genres(s.genres)
+                      : '${fmt.songMain(s, career.week)} · ${fmt.genres(s.genres)}'),
+                  onTap: () => Navigator.pop(c, s),
+                ),
+            ],
           ],
         ),
       ),

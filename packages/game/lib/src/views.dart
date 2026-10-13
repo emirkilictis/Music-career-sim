@@ -76,6 +76,14 @@ class ArtistView {
         numberOneSingles = List.unmodifiable(a.no1Singles),
         numberOneAlbums = List.unmodifiable(a.no1Albums),
         eraOpen = a.eraOpen,
+        eraAlbumId = a.eraOpen ? a.eraAlbumId : -1,
+        eraAlbumSinglesLeft = a.eraOpen && a.eraAlbumId >= 0
+            ? w.albums[a.eraAlbumId].songIds
+                .where((id) =>
+                    !w.songs[id].isSingle &&
+                    !a.scheduled.any((sr) => sr.songIds.contains(id)))
+                .length
+            : 0,
         lastEraResult = a.lastEraResult,
         comebackSupport = a.flopSupport,
         creativeEnergy = a.creativeEnergy,
@@ -135,6 +143,11 @@ class ArtistView {
   final List<int> numberOneSingles;
   final List<int> numberOneAlbums;
   final bool eraOpen;
+
+  /// The album of the open era, and how many of its tracks could still be
+  /// singles (not singles yet, not scheduled).
+  final int eraAlbumId;
+  final int eraAlbumSinglesLeft;
   final EraResult? lastEraResult;
 
   /// Comeback support after a flop (0..1), docs/game-design.md §6.

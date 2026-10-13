@@ -57,6 +57,16 @@ abstract final class Actions {
   static const energyRegenWriting = 14.0, energyRegenIdle = 24.0;
   static const energyRestBonus = 20.0;
 
+  /// Throws away an unreleased song (docs K48). Its recording cost is not
+  /// refunded.
+  static void scrapSong(World w, Song s) {
+    if (s.status != SongStatus.vault) {
+      throw ActionException('Only unreleased songs can be scrapped');
+    }
+    s.status = SongStatus.scrapped;
+    w.dirtySongs.add(s.id);
+  }
+
   /// Takes this week off: no more writing this week, extra energy at its
   /// end. Not possible after writing this week.
   static void rest(World w, Artist a) {

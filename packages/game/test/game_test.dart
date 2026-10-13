@@ -431,6 +431,29 @@ void main() {
       g.close();
     });
 
+    test('vault songs can be scrapped; released or scheduled ones not', () {
+      var g = GameSession.start(slots, _setup());
+      final id = g.slotId;
+      final a = g.writeSong(budget: BudgetTier.low).id;
+      final b = g.writeSong(budget: BudgetTier.low).id;
+      final c = g.writeSong(budget: BudgetTier.low).id;
+      g.releaseSingle(b, campaign: Campaign.none);
+      g.scheduleSingle(c,
+          campaign: Campaign.none,
+          releaseWeek: g.week + 3,
+          announceWeek: g.week + 3);
+      expect(() => g.scrapSong(b), _code('notInVault'));
+      expect(() => g.scrapSong(c), _code('songScheduled'));
+      g.scrapSong(a);
+      expect(g.songs.map((s) => s.id), isNot(contains(a)));
+      expect(() => g.releaseSingle(a), _code('unknownSong'));
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.songs.map((s) => s.id), isNot(contains(a)));
+      expect(g.player.vaultCount, 0);
+      g.close();
+    });
+
     test('an early-2000s single sells CDs, not streams', () {
       final g = GameSession.start(
           slots,

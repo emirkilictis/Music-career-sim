@@ -254,6 +254,7 @@ class Fmt {
       'resting' => l.errorResting,
       'noSkillPoints' => l.errorNoSkillPoints,
       'invalidDate' => l.errorInvalidDate,
+      'songScheduled' => l.errorSongScheduled,
       'alreadyScheduled' => l.errorAlreadyScheduled,
       'skillMaxed' => l.errorSkillMaxed,
       'burnout' => l.errorBurnout,
@@ -290,7 +291,7 @@ class Fmt {
               t, compact(e.usUnits), e.usPosition, compact(e.globalUnits))
           : l.eventAlbumFirstWeekNoChart(
               t, compact(e.usUnits), compact(e.globalUnits)),
-      ViralTrend() => l.eventViral(t),
+      ViralTrend() => e.shortVideo ? l.eventViral(t) : l.eventViralVideo(t),
       PlaylistAdded() => e.size == PlaylistAdd.big
           ? l.eventPlaylistBig(t, platformName)
           : l.eventPlaylistMid(t, platformName),

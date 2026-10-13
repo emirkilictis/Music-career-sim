@@ -12,6 +12,7 @@ import '../widgets/common.dart';
 import '../widgets/artist_link.dart';
 import '../widgets/history_tables.dart';
 import '../widgets/line_chart.dart';
+import 'releases_tab.dart';
 import 'song_detail_screen.dart';
 
 /// One album or EP: first week, regional sales, charts, tracks, history.
@@ -228,8 +229,28 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   contentPadding: EdgeInsets.zero,
                   leading: Text('${i + 1}'),
                   title: Text(_tracks[i].title),
-                  subtitle: Text(_tracks[i].isSingle ? l.typeSingle : ''),
-                  trailing: Text(fmt.songMain(_tracks[i], widget.state.week)),
+                  subtitle: Text(_tracks[i].isSingle
+                      ? l.typeSingle
+                      : _tracks[i].scheduledSingleWeek >= 0
+                          ? l.scheduledSingleTag(
+                              fmt.week(_tracks[i].scheduledSingleWeek))
+                          : fmt.songMain(_tracks[i], widget.state.week)),
+                  // Another single from the album in one tap.
+                  trailing: a.isPlayer &&
+                          !_tracks[i].isSingle &&
+                          _tracks[i].scheduledSingleWeek < 0
+                      ? OutlinedButton(
+                          onPressed: widget.state.busy
+                              ? null
+                              : () async {
+                                  if (await releaseSingleFlow(
+                                      context, widget.state, _tracks[i])) {
+                                    _load();
+                                  }
+                                },
+                          child: Text(l.makeSingle),
+                        )
+                      : Text(fmt.songMain(_tracks[i], widget.state.week)),
                   onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(

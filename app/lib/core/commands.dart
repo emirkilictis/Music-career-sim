@@ -142,6 +142,8 @@ abstract final class Cmd {
 
   static SessionCmd<void> rest() => (s) => s.rest();
 
+  static SessionCmd<void> scrapSong(int id) => (s) => s.scrapSong(id);
+
   static SessionCmd<void> spendSkillPoint(SkillKind kind) =>
       (s) => s.spendSkillPoint(kind);
 

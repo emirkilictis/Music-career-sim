@@ -73,10 +73,12 @@ class AlbumFirstWeek extends GameEvent {
   bool get isMajor => true;
 }
 
-/// A player song started a short-video viral trend.
+/// A player song started a viral trend online: on video sites before the
+/// short-video apps (2017), on those after.
 class ViralTrend extends GameEvent {
-  const ViralTrend(this.songId);
+  const ViralTrend(this.songId, {this.shortVideo = true});
   final int songId;
+  final bool shortVideo;
   @override
   bool get isMajor => true;
 }

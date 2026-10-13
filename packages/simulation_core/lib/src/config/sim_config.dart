@@ -112,15 +112,19 @@ class SimConfig {
   /// Share of viral trends that become huge.
   final double megaViralChance;
 
-  /// Strength of short-video virality by year: none before short-video
-  /// platforms, an early phase, then the full short-video era.
-  double viralEraFactor(int year) => year < 2013
-      ? 0.15
-      : year < 2018
-          ? 0.4
-          : year < 2020
-              ? 1.0
-              : 1.2;
+  /// Strength of online virality by year: nothing before video sites
+  /// (2005; a pre-internet hit grows on radio instead), a little on video
+  /// sites, more with early short-video apps, then the full short-video
+  /// era.
+  double viralEraFactor(int year) => year < 2005
+      ? 0.0
+      : year < 2013
+          ? 0.15
+          : year < 2018
+              ? 0.4
+              : year < 2020
+                  ? 1.0
+                  : 1.2;
 
   /// Share of promotion that works through streaming playlists rather than
   /// radio: radio era before 2010, playlist era from 2018.

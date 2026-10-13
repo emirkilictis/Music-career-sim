@@ -75,7 +75,9 @@ enum ArtistKind {
   static const maxMembers = 7;
 }
 
-enum SongStatus { vault, active, dormant }
+/// [scrapped]: an unreleased song the player threw away (never released,
+/// hidden everywhere; kept so ids stay stable).
+enum SongStatus { vault, active, dormant, scrapped }
 
 enum AlbumType { single, ep, album }
 

@@ -482,6 +482,25 @@
   "announceLocked": "Already announced. You can still move the date, but pushing it back costs some of the excitement.",
   "continueAction": "Continue",
   "save": "Save",
+  "scrapSong": "Scrap this song",
+  "scrapSongTitle": "Scrap “{title}”?",
+  "@scrapSongTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "scrapSongBody": "It leaves your vault for good. Recording costs are not refunded.",
+  "songScrapped": "“{title}” was scrapped.",
+  "@songScrapped": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "errorSongScheduled": "This song is on a scheduled release.",
   "upcoming": "Coming up",
   "lastWeekSales": "Last week sales",
   "lastWeekUs": "Last week (US)",
@@ -845,6 +864,14 @@
       }
     }
   },
+  "eventViralVideo": "“{title}” is going viral on video sites!",
+  "@eventViralVideo": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "eventViral": "“{title}” is going viral on short-video apps!",
   "@eventViral": {
     "placeholders": {
@@ -1066,6 +1093,26 @@
     }
   },
   "stepReleaseTitle": "Release a single",
+  "stepAlbumSingleTitle": "Another single from the album",
+  "stepAlbumSingleBody": "A new single keeps the album selling. {count} tracks could still be singles.",
+  "@stepAlbumSingleBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "openAlbum": "Open album",
+  "makeSingle": "Make it a single",
+  "fromAlbum": "From “{title}”",
+  "@fromAlbum": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "fromVault": "From the vault",
   "stepReleaseBody": "{count} songs are waiting in the vault, and your fans haven't heard from you in a while.",
   "@stepReleaseBody": {
     "placeholders": {

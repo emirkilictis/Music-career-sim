@@ -254,7 +254,8 @@ class GameSession {
   /// The player's songs, newest first.
   List<SongView> get songs => [
         for (final id in world.playerSongIds.reversed)
-          SongView.of(world, world.songs[id]),
+          if (world.songs[id].status != SongStatus.scrapped)
+            SongView.of(world, world.songs[id]),
       ];
 
   /// Unreleased songs, best estimate first.
@@ -456,6 +457,10 @@ class GameSession {
     _saveNow();
   }
 
+  /// First year of short-video apps (docs K38); earlier virality happens
+  /// on video sites.
+  static const shortVideoYear = 2017;
+
   /// Share of the buzz kept when an announced release is pushed back.
   static const delayBuzzKept = 0.7;
 
@@ -579,6 +584,19 @@ class GameSession {
       throw GameException('skillMaxed', 'This skill is maxed');
     }
     Actions.spendSkillPoint(_p, kind);
+    _saveNow();
+  }
+
+  /// Throws away an unreleased song from the vault (docs K48).
+  void scrapSong(int songId) {
+    final s = _ownSong(songId);
+    if (s.status != SongStatus.vault) {
+      throw GameException('notInVault', 'Only unreleased songs');
+    }
+    if (_p.scheduled.any((sr) => sr.songIds.contains(s.id))) {
+      throw GameException('songScheduled', 'Song is on a scheduled release');
+    }
+    Actions.scrapSong(world, s);
     _saveNow();
   }
 
@@ -851,6 +869,9 @@ class GameSession {
       throw GameException('unknownSong', 'No song $id');
     }
     final s = world.songs[id];
+    if (s.status == SongStatus.scrapped) {
+      throw GameException('unknownSong', 'Song $id was scrapped');
+    }
     if (s.primaryArtistId != _p.id) {
       throw GameException('notYourSong', 'Song $id is not yours');
     }
@@ -966,7 +987,10 @@ class GameSession {
       }
     }
     for (final id in r.viralSongs) {
-      if (w.songs[id].primaryArtistId == p.id) events.add(ViralTrend(id));
+      if (w.songs[id].primaryArtistId == p.id) {
+        events.add(ViralTrend(id,
+            shortVideo: GameTime.yearOf(r.week) >= shortVideoYear));
+      }
     }
     for (final id in r.playlistAdds) {
       final s = w.songs[id];
