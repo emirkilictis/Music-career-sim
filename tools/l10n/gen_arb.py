@@ -390,6 +390,8 @@ k('ukUnits','UK units','UK birimi')
 k('globalUnits','Worldwide units','Dünya geneli birim')
 k('totalSales','Total','Toplam')
 k('pureSales','Pure sales','Saf satış')
+k('albumStats','Album stats','Albüm istatistikleri')
+k('albumPageTotals','{count} songs · {plays} plays','{count} şarkı · {plays} dinlenme', count='int', plays='String')
 k('preSingleSales','Pre-released singles','Önceden çıkan single’lar')
 k('tracklist','Tracklist','Şarkı listesi')
 # career

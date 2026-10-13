@@ -185,6 +185,10 @@ void main() {
     await shot(tester, '10_artist_page');
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
     await shot(tester, '11_artist_page_more');
+    await tester.tap(find.text('Neon Bloom').last);
+    await shot(tester, '11b_streamify_album');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.tap(find.text('Top 50 – Global'));

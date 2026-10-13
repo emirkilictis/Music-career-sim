@@ -376,6 +376,8 @@
   "globalUnits": "Dünya geneli birim",
   "totalSales": "Toplam",
   "pureSales": "Saf satış",
+  "albumStats": "Albüm istatistikleri",
+  "albumPageTotals": "{count} şarkı · {plays} dinlenme",
   "preSingleSales": "Önceden çıkan single’lar",
   "tracklist": "Şarkı listesi",
   "careerTotals": "Kariyer",

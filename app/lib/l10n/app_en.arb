@@ -923,6 +923,18 @@
   "globalUnits": "Worldwide units",
   "totalSales": "Total",
   "pureSales": "Pure sales",
+  "albumStats": "Album stats",
+  "albumPageTotals": "{count} songs · {plays} plays",
+  "@albumPageTotals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "plays": {
+        "type": "String"
+      }
+    }
+  },
   "preSingleSales": "Pre-released singles",
   "tracklist": "Tracklist",
   "careerTotals": "Career",

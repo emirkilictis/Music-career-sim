@@ -8,8 +8,9 @@ import '../../core/scope.dart';
 import '../../ui/palette.dart';
 import '../../widgets/art.dart';
 import '../../widgets/common.dart';
-import '../album_detail_screen.dart';
 import '../song_detail_screen.dart';
+import 'album_page.dart';
+import '../game_shell.dart';
 
 /// Streamify artist page, laid out like a big streaming app's: large header,
 /// monthly listeners, popular tracks with play counts, discography, about.
@@ -69,13 +70,7 @@ class _ArtistPageState extends State<ArtistPage> {
           al.title,
           albumCoverSeed(al.id),
           '${GameTime.yearOf(al.releaseWeek)} · ${fmt.albumType(al.type)}',
-          a.isPlayer
-              ? () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) =>
-                          AlbumDetailScreen(albumId: al.id, state: career)))
-              : null,
+          () => pushInCareer(context, StreamifyAlbumPage(albumId: al.id)),
           null,
           al.id,
         ),
@@ -95,7 +90,7 @@ class _ArtistPageState extends State<ArtistPage> {
           s.coverAlbumId,
         ),
     ];
-    final (c1, c2) = _headerColors(a.id);
+    final (c1, c2) = streamifyHeaderColors(a.id);
     final regions = a.lifetimeStreams;
 
     return CustomScrollView(slivers: [
@@ -402,7 +397,7 @@ class _ArtistPageState extends State<ArtistPage> {
   }
 }
 
-(Color, Color) _headerColors(int seed) {
+(Color, Color) streamifyHeaderColors(int seed) {
   const sets = [
     (Color(0xFF6D4BC4), Color(0xFF2A1D52)),
     (Color(0xFFB4436C), Color(0xFF3D1528)),

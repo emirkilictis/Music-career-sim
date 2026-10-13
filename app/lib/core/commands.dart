@@ -168,6 +168,12 @@ abstract final class Cmd {
   static SessionCmd<List<ScheduledView>> scheduled() => (s) => s.scheduled;
   static SessionCmd<SongView> song(int id) => (s) => s.song(id);
   static SessionCmd<AlbumView> album(int id) => (s) => s.album(id);
+
+  /// An album with its tracks, for the Streamify album page (docs F23).
+  static SessionCmd<(AlbumView, List<SongView>)> albumPage(int id) => (s) {
+        final al = s.album(id);
+        return (al, [for (final t in al.trackIds) s.song(t)]);
+      };
   static SessionCmd<ChartView> chart(int id) => (s) => s.chart(id);
   static SessionCmd<ArtistPageView> artistPage(int artistId) =>
       (s) => s.artistPage(artistId);
