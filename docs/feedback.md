@@ -78,6 +78,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F13 ✅ | **#1'de kalma süreleri çok uzun** (JT tekrarında FS/LS 17, Man of the Woods 19 hafta; rakip dünyasında yılda 11–20 farklı #1). | **Yapıldı (K51):** albüm satışları zamanla doyuyor. Yılda 23–34 farklı #1, JT albümleri 7–10 hafta #1 (kalite yüksek olduğu için hâlâ uzun ama makul). |
 | F14 ✅ | **Yorgunken (düşük yaratıcılık) bile A+ şarkı çıkıyor.** | **Yapıldı:** ceza puan değil yüzde: 40'ta %10, 20'de %30, 0'da %50 daha zayıf (K46). |
 | F15 ✅ | **Efsane modda 2013–14'te 46M satıp "disappointing" aldım; önceki dönem 2006'da 146M'di.** | **Yapıldı (K53):** beklenti önceki dönemin ham satışını değil, kendi beklentisine oranını taşır; taban bugünün pazarından hesaplanır. |
+| F16 | **Promo fiyatları çok ucuz** (Emir, Efsane mod): en pahalı Küresel kampanya $250K, ama her single'da kullanınca haftada milyonlar kazandırıyor; aşırı güçlü. | Öneri: (1) Kampanya fiyatı sabit değil, sanatçının büyüklüğüne ve döneme göre ölçeklensin (bir süperstarın küresel kampanyası milyonlar tutar; kampanya ne kadar çok kişiye ulaşırsa o kadar pahalı). (2) Aynı dönemde üst üste büyük kampanya yapınca etkisi azalsın (dinleyici yorulur). (3) Kampanyanın getirisi gelirden ayrı gösterilsin ki kâr/zarar görülsün. Plak şirketi masrafın bir kısmını ödüyor (K54), bu yüzden ölçekleme şirket payıyla birlikte ayarlanmalı. Henüz yapılmadı. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 
