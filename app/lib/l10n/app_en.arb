@@ -85,7 +85,105 @@
   "pathIndependent": "Independent",
   "pathSmallLabel": "Small label",
   "pathIndependentHint": "You keep 100% of recording income, but reach fewer people.",
-  "pathSmallLabelHint": "An advance and more reach; the label keeps 50% of recording income.",
+  "pathSmallLabelHint": "A $25K advance and more reach; the label keeps 40% of the income and you owe it 2 albums. Bigger labels sign you once you have fans.",
+  "labelSection": "Record label",
+  "labelsTitle": "Record labels",
+  "labelsButton": "See labels",
+  "labelIndependent": "Independent",
+  "labelSmall": "Basement Records",
+  "labelMid": "Northline Music",
+  "labelMajor": "Vertex Records",
+  "labelGiant": "Monarch Music Group",
+  "labelKindSmall": "Small label",
+  "labelKindMid": "Mid-size label",
+  "labelKindMajor": "Major label",
+  "labelKindGiant": "Giant",
+  "labelKindIndependent": "On your own",
+  "labelReach": "Reach",
+  "labelYourShare": "Your share of income",
+  "labelMaxCampaign": "Biggest campaign",
+  "labelCampaignShare": "You pay of campaigns",
+  "labelAdvance": "Advance",
+  "labelContract": "Contract",
+  "labelContractAlbums": "{count} albums",
+  "@labelContractAlbums": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "labelNoContract": "None",
+  "labelNeedsFans": "{count} core fans",
+  "@labelNeedsFans": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "labelNeedsFame": "{percent}% fame",
+  "@labelNeedsFame": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "labelNeedsEra": "Last era at least “{result}”",
+  "@labelNeedsEra": {
+    "placeholders": {
+      "result": {
+        "type": "String"
+      }
+    }
+  },
+  "labelNoRequirements": "Signs anyone",
+  "labelCurrent": "Your label",
+  "labelSign": "Sign",
+  "labelGoIndependent": "Go independent",
+  "labelSigned": "You signed with {label}!",
+  "@labelSigned": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "labelOwed": "You owe {label} {count} more albums.",
+  "@labelOwed": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "labelFree": "No albums owed: you can sign with another label.",
+  "labelsHint": "Bigger labels reach more people, run bigger campaigns and pay more of them, but take more of your income. They sign artists with fans, and after a flop they drop you.",
+  "labelsLegendHint": "Legend mode: labels ask for less and never drop you.",
+  "campaignLockedHint": "Your label can't run this one",
+  "eventLabelOffer": "{label} wants to sign you! See Career → Record label.",
+  "@eventLabelOffer": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "eventLabelDropped": "After the flop, {label} ended your contract. You are independent again.",
+  "@eventLabelDropped": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCampaignLocked": "Your label can't run that big a campaign.",
+  "errorUnderContract": "You still owe your label albums.",
+  "errorLabelRefused": "This label won't sign you yet.",
   "startLevel": "Start level",
   "tierUnknown": "Unknown",
   "tierLocalBuzz": "Local buzz",

@@ -207,6 +207,22 @@ class Fmt {
         Campaign.global => l.campaignGlobal,
       };
 
+  String labelName(Label x) => switch (x) {
+        Label.independent => l.labelIndependent,
+        Label.small => l.labelSmall,
+        Label.mid => l.labelMid,
+        Label.major => l.labelMajor,
+        Label.giant => l.labelGiant,
+      };
+
+  String labelKind(Label x) => switch (x) {
+        Label.independent => l.labelKindIndependent,
+        Label.small => l.labelKindSmall,
+        Label.mid => l.labelKindMid,
+        Label.major => l.labelKindMajor,
+        Label.giant => l.labelKindGiant,
+      };
+
   String videoBudget(VideoBudget b) => switch (b) {
         VideoBudget.low => l.videoLow,
         VideoBudget.medium => l.videoMedium,
@@ -298,6 +314,9 @@ class Fmt {
       'invalidDate' => l.errorInvalidDate,
       'songScheduled' => l.errorSongScheduled,
       'hasVideo' => l.errorHasVideo,
+      'campaignLocked' => l.errorCampaignLocked,
+      'underContract' => l.errorUnderContract,
+      'labelRefused' => l.errorLabelRefused,
       'alreadyScheduled' => l.errorAlreadyScheduled,
       'skillMaxed' => l.errorSkillMaxed,
       'burnout' => l.errorBurnout,
@@ -341,6 +360,8 @@ class Fmt {
       EraClosed() => l.eventEraClosed(eraResult(e.result)),
       BurnoutOver() => l.eventBurnoutOver,
       ReleaseOut() => l.eventReleaseOut(t),
+      LabelOffer() => l.eventLabelOffer(labelName(e.label)),
+      LabelDropped() => l.eventLabelDropped(labelName(e.label)),
       ReleaseAnnounced() => l.eventReleaseAnnounced(t, week(e.releaseWeek)),
       PlatformLaunched() => e.chartId == Charts.platformGlobal
           ? l.eventPlatformLaunched(platformName)

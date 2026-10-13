@@ -360,8 +360,41 @@ class GameSession {
   /// Releases a vault song as a single, or pushes an album track as a single.
   void releaseSingle(int songId, {Campaign campaign = Campaign.standard}) {
     final s = _checkSingle(songId);
-    _requireMoney(campaign.costCents);
+    _requireMoney(_campaignCost(campaign));
     Actions.releaseSingle(world, _p, s, campaign: campaign);
+    _saveNow();
+  }
+
+  /// What the player pays for [campaign] with their label, after checking
+  /// the label can run it at all (docs K54).
+  int _campaignCost(Campaign campaign) {
+    if (campaign.index > _p.label.maxCampaign.index) {
+      throw GameException('campaignLocked', 'The label cannot run this');
+    }
+    return Actions.campaignCostFor(_p, campaign);
+  }
+
+  // ------------------------------------------------------------- labels
+
+  /// Every label, with its terms and whether it would sign the player.
+  List<LabelView> get labels => [
+        for (final l in Label.values)
+          LabelView.of(world, _p, l, Actions.labelMissing(world, _p, l)),
+      ];
+
+  /// Signs with [label] (or goes independent with [Label.independent]).
+  /// Not possible while albums are still owed to the current label.
+  void signLabel(Label label) {
+    if (label == _p.label) {
+      throw GameException('sameLabel', 'Already with this label');
+    }
+    if (_p.contractAlbumsLeft > 0) {
+      throw GameException('underContract', 'Albums still owed to the label');
+    }
+    if (Actions.labelMissing(world, _p, label).isNotEmpty) {
+      throw GameException('labelRefused', 'The label turned you down');
+    }
+    Actions.signLabel(world, _p, label);
     _saveNow();
   }
 
@@ -393,7 +426,7 @@ class GameSession {
       required int announceWeek}) {
     final s = _checkSingle(songId);
     _checkDates(releaseWeek, announceWeek);
-    _requireMoney(campaign.costCents);
+    _requireMoney(_campaignCost(campaign));
     return _schedule(ScheduledRelease(
       id: _nextScheduleId(),
       type: AlbumType.single,
@@ -402,7 +435,7 @@ class GameSession {
       announceWeek: announceWeek,
       createdWeek: world.week,
       campaign: campaign,
-      paidCents: campaign.costCents,
+      paidCents: _campaignCost(campaign),
     ));
   }
 
@@ -421,7 +454,7 @@ class GameSession {
     final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
     _checkDates(releaseWeek, announceWeek);
     final formats = _formats(variantFormats);
-    final cost = campaign.costCents +
+    final cost = _campaignCost(campaign) +
         Actions.editionsCostCents(variantWeeks.length, formats);
     _requireMoney(cost);
     return _schedule(ScheduledRelease(
@@ -515,7 +548,7 @@ class GameSession {
   }) {
     final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
     final formats = _formats(variantFormats);
-    _requireMoney(campaign.costCents +
+    _requireMoney(_campaignCost(campaign) +
         Actions.editionsCostCents(variantWeeks.length, formats));
     final al = Actions.releaseAlbum(world, _p, t, songIds,
         type: type,
@@ -1011,6 +1044,16 @@ class GameSession {
     }
     if (before.eraOpen && !p.eraOpen && p.lastEraResult != null) {
       events.add(EraClosed(p.lastEraResult!, p.lastEraUnits, p.eraExpected));
+      if (before.label != Label.independent && p.label == Label.independent) {
+        events.add(LabelDropped(before.label));
+      } else if (p.contractAlbumsLeft == 0 &&
+          p.lastEraResult!.index >= EraResult.normal.index) {
+        // A good era: the biggest label that would sign the player calls.
+        final offer = Label.values.reversed.firstWhere(
+            (l) => Actions.labelMissing(w, p, l).isEmpty,
+            orElse: () => p.label);
+        if (offer.index > p.label.index) events.add(LabelOffer(offer));
+      }
     }
     if (before.burnoutUntil > before.week && w.week >= p.burnoutUntilWeek) {
       events.add(const BurnoutOver());
@@ -1045,6 +1088,7 @@ class _Snapshot {
       : week = w.week,
         money = p.moneyCents,
         eraOpen = p.eraOpen,
+        label = p.label,
         burnoutUntil = p.burnoutUntilWeek {
     void take(Charted e, EntityKind kind, int id) {
       for (var c = 0; c < Charts.count; c++) {
@@ -1066,6 +1110,7 @@ class _Snapshot {
   final int week;
   final int money;
   final bool eraOpen;
+  final Label label;
   final int burnoutUntil;
 
   /// (kind, id, chart) → (last position, peak) before the week.

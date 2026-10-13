@@ -240,7 +240,7 @@ abstract final class WorldGen {
       StartMoney.millionaire => 100000000,
     };
     final isLabel = path == CareerPath.smallLabel;
-    if (isLabel) cash += 2500000; // advance
+    if (isLabel) cash += Label.small.advanceCents;
     final a = Artist(
       id: w.artists.length,
       name: name,
@@ -254,10 +254,15 @@ abstract final class WorldGen {
       fame: fame,
       coreFans: fans * w.config.globalAudienceScale,
       casual: casual * w.config.globalAudienceScale,
-      labelReach: isLabel ? 1.15 : 0.7,
-      artistShare: isLabel ? 0.5 : 1.0,
+      labelReach: isLabel ? Label.small.reach : Label.independent.reach,
+      artistShare:
+          isLabel ? Label.small.artistShare : Label.independent.artistShare,
       moneyCents: cash,
     );
+    if (isLabel) {
+      a.label = Label.small;
+      a.contractAlbumsLeft = Label.small.contractAlbums;
+    }
     a.devotion = switch (tier) {
       StartTier.unknown => 0.1,
       StartTier.localBuzz => 0.15,

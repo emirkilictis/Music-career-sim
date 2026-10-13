@@ -50,6 +50,8 @@ abstract final class Codec {
     'no1Singles', 'no1SinglesFeatured', 'no1Albums', 'weeksAtNo1',
     // Added in schema v2/v3 (appended: older hot snapshots read null).
     'restWeek', 'skillPoints', 'schedule',
+    // Added in schema v8.
+    'label', 'contractAlbums',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -78,6 +80,8 @@ abstract final class Codec {
         a.restWeek,
         a.skillPoints,
         _encodeSchedule(a.scheduled),
+        a.label.index,
+        a.contractAlbumsLeft,
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -139,6 +143,14 @@ abstract final class Codec {
       ..pendingVariantWeeks = _parseInts(r['pendingVariants'] as String);
     a.plan.addAll(_decodePlan(r['plan'] as String));
     a.scheduled.addAll(_decodeSchedule(r['schedule'] as String?));
+    // Saves before v8: a player on the small label start shows by its split.
+    final label = r['label'] as int?;
+    a.label = label != null
+        ? Label.values[label]
+        : (a.tier == ArtistTier.player && a.artistShare < 1
+            ? Label.small
+            : Label.independent);
+    a.contractAlbumsLeft = r['contractAlbums'] as int? ?? 0;
     a.pendingAlbumSongIds.addAll(_parseInts(r['pendingSongs'] as String));
     _readReg(r, artistRegColumns, a.reg);
     _readInts(r['no1Singles'] as String, a.no1Singles);

@@ -171,3 +171,19 @@ class StillNumberOne extends GameEvent {
   @override
   bool get isMajor => false;
 }
+
+/// After a good era, a bigger label wants to sign the player (docs K54).
+class LabelOffer extends GameEvent {
+  const LabelOffer(this.label);
+  final Label label;
+  @override
+  bool get isMajor => true;
+}
+
+/// After a flop, the player's label ended the contract.
+class LabelDropped extends GameEvent {
+  const LabelDropped(this.label);
+  final Label label;
+  @override
+  bool get isMajor => true;
+}

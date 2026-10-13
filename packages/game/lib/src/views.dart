@@ -95,6 +95,8 @@ class ArtistView {
         adsLeftThisWeek = Actions.adsLeftThisWeek(w, a),
         job = a.job,
         skillPoints = a.skillPoints,
+        label = a.label,
+        contractAlbumsLeft = a.contractAlbumsLeft,
         skills = {for (final k in SkillKind.values) k: a.skills[k]},
         lastReleaseWeek = a.lastReleaseWeek,
         everCharted = a.tier == ArtistTier.player &&
@@ -164,6 +166,10 @@ class ArtistView {
   final int adsLeftThisWeek;
   final Job job;
   bool get hasJob => job != Job.none;
+
+  /// The player's record label and albums still owed to it (docs K54).
+  final Label label;
+  final int contractAlbumsLeft;
 
   /// Unspent skill points and the current skills (0–100).
   final int skillPoints;
@@ -562,6 +568,30 @@ class ScheduledView {
   final double buzz;
   final double buzzCap;
   bool get isAlbum => type != AlbumType.single;
+}
+
+/// A record label's terms for the player (docs K54).
+class LabelView {
+  LabelView.of(World w, Artist p, this.label, this.missing)
+      : isCurrent = p.label == label,
+        contractAlbumsLeft = p.contractAlbumsLeft,
+        legend = w.difficulty == Difficulty.legend;
+
+  final Label label;
+
+  /// What the player still lacks for this label to sign them.
+  final List<LabelRequirement> missing;
+  final bool isCurrent;
+  final int contractAlbumsLeft;
+  final bool legend;
+
+  bool get wouldSign => missing.isEmpty;
+  bool get canSign => wouldSign && !isCurrent && contractAlbumsLeft == 0;
+
+  /// Requirements as they apply in this game mode.
+  double get minFans => label.minFans * (legend ? 0.4 : 1.0);
+  double get minFame => label.minFame * (legend ? 0.4 : 1.0);
+  EraResult? get minResult => legend ? null : label.minResult;
 }
 
 enum SalesEra {

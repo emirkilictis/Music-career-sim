@@ -6,6 +6,7 @@ import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/common.dart';
 import '../widgets/image_pickers.dart';
+import 'labels_screen.dart';
 import 'song_detail_screen.dart';
 
 /// Career summary: totals by region, #1s, year by year, all songs.
@@ -63,6 +64,37 @@ class _CareerScreenState extends State<CareerScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         const SkillsSection(),
+        const SizedBox(height: 12),
+        Section(
+          title: l.labelSection,
+          icon: Icons.album_outlined,
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(fmt.labelName(p.label),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            Text(
+                p.label == Label.independent
+                    ? fmt.labelKind(p.label)
+                    : p.contractAlbumsLeft > 0
+                        ? l.labelOwed(
+                            fmt.labelName(p.label), p.contractAlbumsLeft)
+                        : l.labelFree,
+                style: TextStyle(color: AppColors.textMuted)),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => LabelsScreen(state: career))),
+                icon: const Icon(Icons.handshake_outlined),
+                label: Text(l.labelsButton),
+              ),
+            ),
+          ]),
+        ),
         const SizedBox(height: 12),
         Section(
           title: l.artistPhotos,

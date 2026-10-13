@@ -24,6 +24,8 @@ class EventIcon extends StatelessWidget {
       BurnoutOver() => (Icons.edit_note_rounded, AppColors.butter),
       PlatformLaunched() => (Icons.graphic_eq_rounded, AppColors.mint),
       ReleaseOut() => (Icons.rocket_launch_rounded, AppColors.pink),
+      LabelOffer() => (Icons.handshake_rounded, AppColors.gold),
+      LabelDropped() => (Icons.heart_broken_rounded, AppColors.coral),
       ReleaseAnnounced() => (Icons.campaign_rounded, AppColors.sky),
       RivalNumberOne() => (Icons.newspaper_rounded, AppColors.textMuted),
     };

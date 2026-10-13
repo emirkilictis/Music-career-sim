@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'config/difficulty.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
@@ -324,13 +325,49 @@ abstract final class Actions {
     s.production += production * (1 - s.production / 100);
   }
 
+  /// What the player pays for [campaign]: their label pays the rest.
+  static int campaignCostFor(Artist a, Campaign campaign) =>
+      a.tier == ArtistTier.player
+          ? (campaign.costCents * a.label.campaignShare).round()
+          : campaign.costCents;
+
   /// Pays the player's campaign up front (AI labels run theirs implicitly).
   static void _payCampaign(Artist a, Campaign campaign) {
     if (a.tier != ArtistTier.player) return;
-    if (campaign.costCents > a.moneyCents) {
+    final cost = campaignCostFor(a, campaign);
+    if (cost > a.moneyCents) {
       throw ActionException('Not enough money for the campaign');
     }
-    a.moneyCents -= campaign.costCents;
+    a.moneyCents -= cost;
+  }
+
+  // ------------------------------------------------------------- labels
+
+  /// Why [label] would turn the artist down (empty: it signs them). In
+  /// Legend mode labels ask for less and look past a bad era.
+  static List<LabelRequirement> labelMissing(World w, Artist a, Label label) {
+    final legend = w.difficulty == Difficulty.legend;
+    final scale = legend ? 0.4 : 1.0;
+    return [
+      if (a.coreFans < label.minFans * scale) LabelRequirement.fans,
+      if (a.fame < label.minFame * scale) LabelRequirement.fame,
+      if (!legend &&
+          label.minResult != null &&
+          a.lastEraResult != null &&
+          a.lastEraResult!.index < label.minResult!.index)
+        LabelRequirement.lastEra,
+    ];
+  }
+
+  /// Signs with [label] (or leaves to go independent): its reach and
+  /// money split apply from now on, the advance is paid at once.
+  static void signLabel(World w, Artist a, Label label) {
+    a.label = label;
+    a.labelReach = label.reach;
+    a.artistShare = label.artistShare;
+    a.contractAlbumsLeft = label.contractAlbums;
+    a.moneyCents += label.advanceCents;
+    w.dirtyArtists.add(a.id);
   }
 
   /// Applies the campaign to a song and rolls for an editorial playlist add
@@ -454,7 +491,10 @@ abstract final class Actions {
     }
     World.insertSorted(w.activeAlbumIds, album.id);
     a.lastReleaseWeek = w.week;
-    if (type == AlbumType.album) Eras.open(w, a, album);
+    if (type == AlbumType.album) {
+      if (a.contractAlbumsLeft > 0) a.contractAlbumsLeft--;
+      Eras.open(w, a, album);
+    }
     return album;
   }
 
@@ -584,6 +624,12 @@ abstract final class Eras {
         a.anticipation = 0;
         a.flopSupport = 1.0;
         a.devotion -= 0.12;
+        // Bigger labels drop a player after a flop (not in Legend mode).
+        if (a.tier == ArtistTier.player &&
+            a.label.dropsAfterFlop &&
+            w.difficulty != Difficulty.legend) {
+          Actions.signLabel(w, a, Label.independent);
+        }
       case EraResult.disappointing:
         a.anticipationCap = c.anticipationCapBase * 0.08 * (0.5 + a.fame);
         a.devotion -= 0.05;
@@ -604,3 +650,6 @@ abstract final class Eras {
     a.devotion = a.devotion.clamp(0.0, 1.0);
   }
 }
+
+/// What a label asks for that the artist does not have yet.
+enum LabelRequirement { fans, fame, lastEra }

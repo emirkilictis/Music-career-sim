@@ -352,6 +352,8 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
   final l = context.l10n;
   final fmt = context.fmt;
   final money = career.player.moneyCents;
+  final label = career.player.label;
+  int cost(Campaign k) => (k.costCents * label.campaignShare).round();
   return showModalBottomSheet<Campaign>(
     context: context,
     showDragHandle: true,
@@ -370,7 +372,8 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
         ),
         for (final k in Campaign.values)
           ListTile(
-            enabled: k.costCents + extraCents <= money,
+            enabled: k.index <= label.maxCampaign.index &&
+                cost(k) + extraCents <= money,
             leading: Icon(switch (k) {
               Campaign.none => Icons.volume_off_outlined,
               Campaign.standard => Icons.campaign_outlined,
@@ -378,13 +381,15 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
               Campaign.global => Icons.public,
             }),
             title: Text(fmt.campaign(k)),
-            subtitle: Text(switch (k) {
-              Campaign.none => l.campaignNoneHint,
-              Campaign.standard => l.campaignStandardHint,
-              Campaign.intensive => l.campaignIntensiveHint,
-              Campaign.global => l.campaignGlobalHint,
-            }),
-            trailing: Text(fmt.money(k.costCents)),
+            subtitle: Text(k.index > label.maxCampaign.index
+                ? l.campaignLockedHint
+                : switch (k) {
+                    Campaign.none => l.campaignNoneHint,
+                    Campaign.standard => l.campaignStandardHint,
+                    Campaign.intensive => l.campaignIntensiveHint,
+                    Campaign.global => l.campaignGlobalHint,
+                  }),
+            trailing: Text(fmt.money(cost(k))),
             onTap: () => Navigator.pop(c, k),
           ),
         const SizedBox(height: 8),

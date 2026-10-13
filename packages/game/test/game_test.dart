@@ -15,6 +15,7 @@ CareerSetup _setup({
   ArtistKind kind = ArtistKind.solo,
   List<String> members = const [],
   Skills? skills,
+  CareerPath path = CareerPath.independent,
 }) =>
     CareerSetup(
       name: name,
@@ -26,6 +27,7 @@ CareerSetup _setup({
       kind: kind,
       members: members,
       skills: skills,
+      path: path,
       seed: 4242,
     );
 
@@ -403,6 +405,8 @@ void main() {
       g.world.player!
         ..devotion = 1.0
         ..coreFans *= 4;
+      // Big campaigns need a label that can run them (K54).
+      if (g.player.label != Label.giant) g.signLabel(Label.giant);
       final al = g.releaseAlbum('Big', songs, campaign: Campaign.global);
       final events = <(int, GameEvent)>[];
       for (var i = 0; i < 8; i++) {
@@ -502,6 +506,43 @@ void main() {
       expect(withVideo, greaterThan(without * 1.15));
     });
 
+    test('labels: what they ask for, contracts, campaigns, drops', () {
+      final g = GameSession.start(slots, _setup(path: CareerPath.smallLabel));
+      expect(g.player.label, Label.small);
+      expect(g.player.contractAlbumsLeft, 2);
+      // A small label cannot run big campaigns.
+      final song = g.writeSong(budget: BudgetTier.low).id;
+      expect(() => g.releaseSingle(song, campaign: Campaign.intensive),
+          _code('campaignLocked'));
+      // Bound by the contract, and the big labels want fans first.
+      expect(() => g.signLabel(Label.giant), _code('underContract'));
+      final giant = g.labels.firstWhere((v) => v.label == Label.giant);
+      expect(giant.missing, contains(LabelRequirement.fans));
+      // With the albums delivered and fans, a major signs the player.
+      g.world.player!
+        ..contractAlbumsLeft = 0
+        ..coreFans = 1e6
+        ..fame = 0.4;
+      final money = g.player.moneyCents;
+      g.signLabel(Label.major);
+      expect(g.player.label, Label.major);
+      expect(g.player.contractAlbumsLeft, 3);
+      expect(g.player.moneyCents, money + Label.major.advanceCents);
+      // The label pays most of a campaign.
+      final before = g.player.moneyCents;
+      g.releaseSingle(song, campaign: Campaign.global);
+      expect(before - g.player.moneyCents,
+          (Campaign.global.costCents * Label.major.campaignShare).round());
+      // After a flop, a major ends the contract.
+      final p = g.world.player!
+        ..eraOpen = true
+        ..eraUnits = 1
+        ..eraExpected = 1e6;
+      Eras.close(g.world, p);
+      expect(g.player.label, Label.independent);
+      g.close();
+    });
+
     test('an early-2000s single sells CDs, not streams', () {
       final g = GameSession.start(
           slots,
@@ -557,6 +598,8 @@ void main() {
         songs.add(g.writeSong(budget: BudgetTier.high).id);
       }
       expect(g.player.everCharted, isFalse);
+      // Big campaigns need a label that can run them (K54).
+      if (g.player.label != Label.giant) g.signLabel(Label.giant);
       g.releaseSingle(songs.first, campaign: Campaign.global);
       final weekEvents = <GameEvent>[];
       for (var i = 0; i < 3; i++) {
@@ -566,6 +609,8 @@ void main() {
       // The app celebrates the first ever chart entry once.
       expect(g.player.everCharted, isTrue);
 
+      // Big campaigns need a label that can run them (K54).
+      if (g.player.label != Label.giant) g.signLabel(Label.giant);
       g.releaseAlbum('Supernova', songs,
           variantWeeks: const [0, 0, 1], campaign: Campaign.intensive);
       final r = g.advanceWeek();
@@ -613,6 +658,8 @@ void main() {
       final songs = [
         for (var i = 0; i < 3; i++) g.writeSong(budget: BudgetTier.high).id,
       ];
+      // A rising star gets a mid-size label, which runs intensive campaigns.
+      g.signLabel(Label.mid);
       g.releaseSingle(songs.first, campaign: Campaign.intensive);
       final y = g.advanceYear();
       expect(y.weeks, inInclusiveRange(1, 52));

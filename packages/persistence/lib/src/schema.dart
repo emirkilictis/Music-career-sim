@@ -3,7 +3,13 @@ import 'codec.dart';
 /// Versioned schema. Each entry migrates the database from version i to i+1
 /// (docs/data-model.md). Never edit a shipped migration; append a new one.
 /// (v1 has not shipped yet, so it is still being shaped.)
-final List<String> migrations = [_v1(), _v2, _v3, _v4, _v5, _v6, _v7];
+final List<String> migrations = [_v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8];
+
+/// v8: the player's record label and contract (docs K54).
+const _v8 = '''
+  ALTER TABLE artist ADD COLUMN label INTEGER;
+  ALTER TABLE artist ADD COLUMN contractAlbums INTEGER;
+''';
 
 /// v7: the schedule an album came out of (its advance cover).
 const _v7 = 'ALTER TABLE album ADD COLUMN scheduleId INTEGER;';

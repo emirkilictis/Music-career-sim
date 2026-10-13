@@ -77,6 +77,8 @@ void main() {
               Cmd.writeSong(budget: BudgetTier.high, genres: const [0, 18])))
           .id);
     }
+    // A rising star signs with a major label (K54).
+    await c.run(Cmd.signLabel(Label.major));
     await c.run(Cmd.releaseSingle(songs.first, Campaign.intensive));
     for (var i = 0; i < 4; i++) {
       await c.run(Cmd.nextWeek());
@@ -160,6 +162,14 @@ void main() {
 
     await tab(tester, 'Career');
     await shot(tester, '15_career');
+    await tester.ensureVisible(find.text('See labels'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('See labels'));
+    await shot(tester, '15c_labels');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Skills'), -300,
+        scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('Skip'));
     await shot(tester, '15b_skip_menu');
     await tester.tapAt(const Offset(200, 80));

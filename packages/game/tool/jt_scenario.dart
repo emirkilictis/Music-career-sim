@@ -65,9 +65,24 @@ void writeOne(String title, List<int> genres) {
       '${name(CollaboratorRole.songwriter, writerId)} · ${budget.name}';
 }
 
+/// Signs with the biggest label that takes the player, when free (K54),
+/// and keeps campaigns within what the label can run.
+Campaign _withLabel(Campaign wanted) {
+  final p = g.player;
+  if (p.contractAlbumsLeft == 0) {
+    final best = g.labels.reversed.where((l) => l.wouldSign).first.label;
+    if (best.index > p.label.index) {
+      g.signLabel(best);
+      log.add('${_date()}  LABEL    signed with ${best.name}');
+    }
+  }
+  final max = g.player.label.maxCampaign;
+  return wanted.index <= max.index ? wanted : max;
+}
+
 void single(String title, {Campaign campaign = Campaign.intensive}) {
   final id = relSongs[title]!;
-  g.releaseSingle(id, campaign: campaign);
+  g.releaseSingle(id, campaign: _withLabel(campaign));
   log.add('${_date()}  single   "$title" (${_grade(id)})');
 }
 
@@ -78,7 +93,7 @@ void album(String title, List<String> leadTitles, int tracks,
     ..sort(
         (a, b) => g.song(b).estimatedGrade.compareTo(g.song(a).estimatedGrade));
   ids.addAll(rest.take(tracks - ids.length));
-  final al = g.releaseAlbum(title, ids, campaign: campaign);
+  final al = g.releaseAlbum(title, ids, campaign: _withLabel(campaign));
   relAlbums[title] = al.id;
   skillsAt[title] = _skills();
   eraSongs.clear();
@@ -167,7 +182,7 @@ void main(List<String> args) {
       difficulty: Difficulty.normal,
       tier: StartTier.risingStar,
       money: StartMoney.millionaire,
-      path: CareerPath.smallLabel,
+      path: CareerPath.independent,
       premium: true,
       seed: args.isEmpty ? 2002 : int.parse(args.first),
     ),

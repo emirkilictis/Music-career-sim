@@ -204,6 +204,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Uses your profile photo'), findsOneWidget);
     app.picker.next = photo;
+    await tester.ensureVisible(find.text('Profile photo'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Profile photo'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Choose from photos'));

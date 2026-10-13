@@ -257,6 +257,10 @@ class Artist {
   /// Unspent skill points (the player earns one a week; docs K43).
   int skillPoints = 0;
 
+  /// The player's record label and the albums still owed to it (docs K54).
+  Label label = Label.independent;
+  int contractAlbumsLeft = 0;
+
   /// The player's releases set for a later week (docs K45).
   final List<ScheduledRelease> scheduled = [];
 
@@ -768,4 +772,99 @@ enum VideoBudget {
 
   /// Exposure lift before the director's craft and the era.
   final double basePower;
+}
+
+/// Record labels the player can sign with (docs K54). Rivals keep their
+/// own implicit labels ([Artist.labelReach]). Bigger labels reach more
+/// people, run bigger campaigns and pay more of them, but take more of
+/// the money and only sign artists who have proved themselves.
+enum Label {
+  independent(
+      reach: 0.7,
+      artistShare: 1.0,
+      maxCampaign: Campaign.standard,
+      campaignShare: 1.0,
+      advanceCents: 0,
+      contractAlbums: 0,
+      minFans: 0,
+      minFame: 0,
+      minResult: null),
+  small(
+      reach: 1.0,
+      artistShare: 0.6,
+      maxCampaign: Campaign.standard,
+      campaignShare: 0.8,
+      advanceCents: 2500000,
+      contractAlbums: 2,
+      minFans: 0,
+      minFame: 0,
+      minResult: null),
+  mid(
+      reach: 1.15,
+      artistShare: 0.5,
+      maxCampaign: Campaign.intensive,
+      campaignShare: 0.5,
+      advanceCents: 25000000,
+      contractAlbums: 3,
+      minFans: 150000,
+      minFame: 0,
+      minResult: EraResult.disappointing),
+  major(
+      reach: 1.3,
+      artistShare: 0.4,
+      maxCampaign: Campaign.global,
+      campaignShare: 0.35,
+      advanceCents: 200000000,
+      contractAlbums: 3,
+      minFans: 500000,
+      minFame: 0.3,
+      minResult: EraResult.normal),
+  giant(
+      reach: 1.4,
+      artistShare: 0.35,
+      maxCampaign: Campaign.global,
+      campaignShare: 0.2,
+      advanceCents: 1000000000,
+      contractAlbums: 4,
+      minFans: 2000000,
+      minFame: 0.6,
+      minResult: EraResult.success);
+
+  const Label({
+    required this.reach,
+    required this.artistShare,
+    required this.maxCampaign,
+    required this.campaignShare,
+    required this.advanceCents,
+    required this.contractAlbums,
+    required this.minFans,
+    required this.minFame,
+    required this.minResult,
+  });
+
+  /// Promotion and radio reach (multiplies exposure).
+  final double reach;
+
+  /// The artist's share of the money from sales and streams.
+  final double artistShare;
+
+  /// The biggest campaign the label can run.
+  final Campaign maxCampaign;
+
+  /// Share of a campaign's cost the artist pays (the label pays the rest).
+  final double campaignShare;
+
+  /// Paid to the artist on signing.
+  final int advanceCents;
+
+  /// Albums the artist owes before being free to leave (0 = none).
+  final int contractAlbums;
+
+  /// To be signed: core fans, fame and the last era's result at least.
+  final double minFans;
+  final double minFame;
+  final EraResult? minResult;
+
+  /// Labels that drop an artist after a flop.
+  bool get dropsAfterFlop => index >= Label.mid.index;
 }
