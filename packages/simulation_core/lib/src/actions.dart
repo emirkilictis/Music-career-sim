@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
+import 'config/charts.dart';
 import 'config/difficulty.dart';
+import 'config/regions.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
@@ -499,6 +501,7 @@ abstract final class Actions {
         Lifecycle.reactivateSong(w, s);
       }
     }
+    _creditPreSingles(w, a, album);
     World.insertSorted(w.activeAlbumIds, album.id);
     a.lastReleaseWeek = w.week;
     if (type == AlbumType.album) {
@@ -506,6 +509,32 @@ abstract final class Actions {
       Eras.open(w, a, album);
     }
     return album;
+  }
+
+  /// Singles out before the album bring it their sales so far (10 track
+  /// sales = 1 unit; streams from the units era): lifetime units only, kept
+  /// apart from its weeks (docs K56). Their later weeks come in the weekly
+  /// step.
+  static void _creditPreSingles(World w, Artist a, Album album) {
+    final c = w.config;
+    final streamsCount =
+        Charts.songRules(ChartMarket.global, w.week).albumUsesUnits;
+    for (final id in album.songIds) {
+      final s = w.songs[id];
+      if (!isPreSingle(s, album)) continue;
+      for (var k = 0; k < regionCount; k++) {
+        var units = (w.songLifetimeDownloads(s, k) +
+                s.lifetimePhysical * a.regionShare[k]) /
+            c.trackEquivalentAlbum;
+        if (streamsCount) {
+          units += w.songLifetimeStreams(s, k) / c.streamEquivalentAlbum;
+        }
+        album.reg[AlbumReg.lifeUnits + k] += units;
+        a.reg[ArtistReg.lifeUnits + k] += units;
+        album.preSingleUnits += units;
+      }
+    }
+    w.dirtyArtists.add(a.id);
   }
 
   /// Releases set for a later week (docs K45), longest allowed lead time.

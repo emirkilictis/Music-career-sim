@@ -411,7 +411,7 @@ void main(List<String> args) {
         '${e.key.padRight(32)} first week US ${c(a.firstWeekUsUnits).padLeft(6)}'
         ' (pure ${c(a.firstWeekUsPure)})  US ${rec(Charts.usAlbums).padRight(10)}'
         ' UK ${rec(Charts.ukAlbums).padRight(8)} total ${c(a.lifetimeUnits.total)} units'
-        ' / ${c(a.lifetimePure.total)} pure'
+        ' / ${c(a.lifetimePure.total)} pure, pre-singles ${c(a.preSingleUnits)}'
         ' (track eq ${c(g.albumSales(a.id).fold(0.0, (x, w) => x + (w.tea ?? 0)))},'
         ' stream eq ${c(g.albumSales(a.id).fold(0.0, (x, w) => x + (w.sea ?? 0)))},'
         ' all track streams/1500 ${c(a.trackStreams / 1500)})');
@@ -499,7 +499,7 @@ String _markdown() {
     b.writeln(
         '- Listeler: ABD ${rec(a.charts, Charts.usAlbums)} · İngiltere ${rec(a.charts, Charts.ukAlbums)} · Global ${rec(a.charts, Charts.globalAlbums)}');
     b.writeln(
-        '- Toplam: ${c(a.lifetimeUnits.total)} birim (${reg(a.lifetimeUnits)}), ${c(a.lifetimePure.total)} saf');
+        '- Toplam: ${c(a.lifetimeUnits.total)} birim (${reg(a.lifetimeUnits)}), ${c(a.lifetimePure.total)} saf, önceden çıkan single’lardan ${c(a.preSingleUnits)}');
     b.writeln(
         '\n| # | Şarkı | Not | Stream | Satış | Ekip (prodüktör / söz yazarı · bütçe) |');
     b.writeln('|---|---|---|---|---|---|');

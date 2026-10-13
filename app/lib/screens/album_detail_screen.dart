@@ -203,6 +203,10 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   value: fmt.compact(a.lifetimeUnits.total)),
               StatTile(
                   label: l.pureSales, value: fmt.compact(a.lifetimePure.total)),
+              if (a.preSingleUnits >= 1)
+                StatTile(
+                    label: l.preSingleSales,
+                    value: fmt.compact(a.preSingleUnits)),
               if (a.trackStreams >= 1)
                 StatTile(label: l.streams, value: fmt.compact(a.trackStreams)),
               for (final r in Region.values)

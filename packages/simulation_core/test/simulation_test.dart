@@ -217,6 +217,41 @@ void main() {
     expect(units() - before, greaterThanOrEqualTo(owed * 0.999));
   });
 
+  test('pre-released singles count in the total, not the album weeks (K56)',
+      () {
+    final w = WorldGen.create(seed: 56, startYear: 2018);
+    final sim = Simulator(w);
+    final a = WorldGen.addPlayer(w,
+        name: 'Star',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    final lead = Actions.writeSong(w, a, producerSkill: 90, aiMode: true);
+    Actions.releaseSingle(w, a, lead);
+    for (var i = 0; i < 6; i++) {
+      sim.step();
+    }
+    final rest = [
+      for (var i = 0; i < 9; i++)
+        Actions.writeSong(w, a, producerSkill: 90, aiMode: true).id,
+    ];
+    final al = Actions.releaseAlbum(w, a, 'LP', [lead.id, ...rest]);
+    // Its six weeks so far are credited at release.
+    final owed = w.songLifetimeStreams(lead) / w.config.streamEquivalentAlbum +
+        (w.songLifetimeDownloads(lead) + lead.lifetimePhysical) /
+            w.config.trackEquivalentAlbum;
+    expect(owed, greaterThan(1000));
+    expect(al.preSingleUnits, closeTo(owed, owed * 1e-6));
+    expect(al.lifetimeUnits, closeTo(owed, owed * 1e-6));
+    sim.step();
+    // The first week is the album's own; the lead single's week only grows
+    // the lifetime total.
+    final pre = al.preSingleUnits;
+    expect(pre, greaterThan(owed));
+    expect(al.firstWeekUnits, closeTo(al.weekUnits, 1e-6));
+    expect(al.lifetimeUnits, closeTo(al.firstWeekUnits + pre, 1e-3 * pre));
+  });
+
   group('eras and anticipation', () {
     test('a CD-era smash does not make a later era look disappointing', () {
       final w = WorldGen.create(seed: 13, startYear: 2013);

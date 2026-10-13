@@ -480,15 +480,26 @@ class Simulator {
       final reach = Float64List(_r),
           sea = Float64List(_r),
           tea = Float64List(_r);
+      // Singles out before the album earn it units too, but only towards
+      // its lifetime total, kept apart from its weekly sales (docs K56).
+      final preSea = Float64List(_r), preTea = Float64List(_r);
       for (final sid in al.songIds) {
         final i = activeIndex[sid];
         if (i == null) continue;
         final s = w.songs[sid];
+        final pre = isPreSingle(s, al);
         for (var k = 0; k < _r; k++) {
           reach[k] += s.lastReach * p.regionShare[k];
-          sea[k] += streamsR[i * _r + k];
           // Track sales: downloads and CD singles (10 = 1 album).
-          tea[k] += downloadsR[i * _r + k] + s.weekPhysical * p.regionShare[k];
+          final st = streamsR[i * _r + k];
+          final tr = downloadsR[i * _r + k] + s.weekPhysical * p.regionShare[k];
+          if (pre) {
+            preSea[k] += st;
+            preTea[k] += tr;
+          } else {
+            sea[k] += st;
+            tea[k] += tr;
+          }
         }
       }
 
@@ -559,6 +570,13 @@ class Simulator {
           al.reg[AlbumReg.firstWeekPure + k] = pure;
           al.reg[AlbumReg.firstWeekUnits + k] = units;
         }
+        final preUnits = preTea[k] / c.trackEquivalentAlbum +
+            (albumRules.albumUsesUnits
+                ? preSea[k] / c.streamEquivalentAlbum
+                : 0.0);
+        al.reg[AlbumReg.lifeUnits + k] += preUnits;
+        p.reg[ArtistReg.lifeUnits + k] += preUnits;
+        al.preSingleUnits += preUnits;
         tPure += pure;
         tUnits += units;
         tTea += t;
@@ -936,14 +954,18 @@ class Simulator {
         if (al.status == AlbumStatus.dormant) {
           al.reg[AlbumReg.indexStreams + k] = w.artistIndexStreams(a, k);
         }
-        var streams = 0.0;
+        var streams = 0.0, pre = 0.0;
         for (final sid in al.songIds) {
-          streams += w.songLifetimeStreams(w.songs[sid], k);
+          final s = w.songs[sid];
+          final st = w.songLifetimeStreams(s, k);
+          streams += st;
+          if (isPreSingle(s, al)) pre += st;
         }
         // Track sales already counted week by week (docs K49).
         final units = streams / c.streamEquivalentAlbum;
         al.reg[AlbumReg.lifeUnits + k] += units;
         a.reg[ArtistReg.lifeUnits + k] += units;
+        al.preSingleUnits += pre / c.streamEquivalentAlbum;
       }
       w.dirtyAlbums.add(al.id);
       w.dirtyArtists.add(a.id);

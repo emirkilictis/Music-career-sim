@@ -4,8 +4,11 @@ import 'codec.dart';
 /// (docs/data-model.md). Never edit a shipped migration; append a new one.
 /// (v1 has not shipped yet, so it is still being shaped.)
 final List<String> migrations = [
-  _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, //
+  _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, //
 ];
+
+/// v10: album units from pre-released singles (docs K56).
+const _v10 = 'ALTER TABLE album ADD COLUMN preSingleUnits REAL;';
 
 /// v9: album review scores (docs K55).
 const _v9 = 'ALTER TABLE album ADD COLUMN criticScore REAL;';

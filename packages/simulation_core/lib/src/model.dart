@@ -500,6 +500,10 @@ class Album with Charted {
   /// Pitchwork's review score (1.0–10.0) given at release (docs K55).
   double criticScore = -1;
 
+  /// Album units from singles out before the album (docs K56): part of the
+  /// lifetime total, never of a week's sales or the chart.
+  double preSingleUnits = 0;
+
   /// How well edition [k] sells to collectors in [year].
   double editionAppeal(int k, int year) {
     final f = k < variantFormats.length ? variantFormats[k] : -1;
@@ -536,6 +540,11 @@ class Album with Charted {
 
   bool get chartsOnAlbumChart => type != AlbumType.single;
 }
+
+/// Whether [s] came out as a single before [al] (docs K56): its album units
+/// count towards the album's lifetime total, not its weekly sales.
+bool isPreSingle(Song s, Album al) =>
+    s.isSingle && s.singleWeek >= 0 && s.singleWeek < al.releaseWeek;
 
 /// Day jobs (docs K36): steady pay that costs some creative energy every
 /// week. Some teach a little on the side. Index order is stored in saves

@@ -329,6 +329,7 @@ class AlbumView {
         isPlayer = al.artistId == w.playerArtistId,
         scheduleId = al.scheduleId,
         criticScore = al.criticScore,
+        preSingleUnits = al.preSingleUnits,
         trackStreams = al.songIds
             .fold(0.0, (sum, id) => sum + w.songLifetimeStreams(w.songs[id])),
         lifetimePure =
@@ -368,6 +369,10 @@ class AlbumView {
 
   /// Pitchwork's review (1.0–10.0), or -1 for albums from before reviews.
   final double criticScore;
+
+  /// Lifetime units from singles out before the album (part of
+  /// [lifetimeUnits], never of a week's sales; docs K56).
+  final double preSingleUnits;
 
   /// All streams of the album's tracks (singles included).
   final double trackStreams;
