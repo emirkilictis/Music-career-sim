@@ -105,6 +105,8 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F40 | **Festivaller** (Emir: "Festivalleri ekle"). | ✅ K77: 16 uydurma festival, sahne yerleri (manşet → küçük sahne), ücret, izleyici, hayran kazanımı, tür kısıtları, afiş; Kariyer sekmesinde "Festival sezonu". |
 | F41 | **En çok hasılat yapan turneler** (Emir). | ✅ K77: rakipler de turneye çıkıyor; Listeler → TURNELER: yıllık ve tüm zamanlar gişe sıralaması, oyuncu dahil. |
 | F42 | **Efsane modda küçük şirketle başladım, ayrılamıyorum** (Emir). Tek çıkış 2 albüm teslim etmekti (EP sayılmıyordu) ve şirketler ekranı nedenini söylemiyordu. | ✅ K78: sözleşme feshi; bedel yeni şirketin avansından düşülür, Efsane modda yarı fiyat; ekranda borç ve bedel görünür. |
+| F43 | **Normal mod da çok kolay; 2010'larda bile deli gibi pure sales** (Emir): "2013'ten itibaren pure sales'i acayip düşür, ilk hafta yüksek olsun ama sonra ölmeye yakın olsun; ilk haftadan sonra listeler hep stream'le döner." | ✅ K79: 2013'ten itibaren ilk haftadan sonraki satışlar ×0,55 → 2016'dan sonra ×0,28; 2. hafta ilk haftanın ~%10'u, yıllık toplam ilk haftanın ~1,5 katı. |
+| F44 | **Efsane modda şirket beni bırakmıyor** (Emir): sorun şirketin onu düşürmek istememesiydi. | K78'deki fesihle çıkılabiliyor (Efsane modda yarı bedel). Bedelsiz çıkış istenirse ayrıca karar verilecek. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

@@ -512,6 +512,7 @@ class Simulator {
       var variantSum = 0.0;
       final vw = al.variantWeeks;
       final year = GameTime.yearOf(w.week);
+      final tail = c.albumTail(year);
       for (var k = 1; k < vw.length; k++) {
         if (vw[k] == age) {
           variantSum +=
@@ -608,19 +609,20 @@ class Simulator {
                 era.casualPurchaseRate *
                 (1 + al.hypeAtRelease) *
                 (age == 0 ? 1.0 : 0.25);
-        buysAll += superPart + collectorPart + casPart + eventPart;
+        // From 2013 fans buy in week one and everyone else streams (docs
+        // K79): every later week sells less, collector editions aside.
+        final later = age == 0 ? 1.0 : tail;
+        final bought =
+            (superPart + casPart + eventPart) * later + collectorPart;
+        buysAll += bought;
         buysFromReach += reach[k] *
             c.casualBuyRate *
             era.casualPurchaseRate *
+            later *
             (age == 0 ? 1.5 : 1.0) /
             (1 + age / c.albumReachFatigueWeeks);
         // A mixtape is given away: nothing sold (docs K62).
-        final pure = al.isMixtape
-            ? 0.0
-            : (superPart + collectorPart + casPart + eventPart) *
-                noise *
-                tracklist *
-                demand;
+        final pure = al.isMixtape ? 0.0 : bought * noise * tracklist * demand;
         final streams =
             sea[k] + al.sumDormantRate * p.catalogFactor * share * spa[k];
         final t = al.isMixtape ? 0.0 : tea[k] / c.trackEquivalentAlbum;

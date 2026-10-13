@@ -4,7 +4,8 @@ import 'package:simulation_core/simulation_core.dart';
 /// (docs F17/F19): first week vs the rest, and the reach-driven part.
 void main(List<String> args) {
   for (final diff in [Difficulty.normal, Difficulty.legend]) {
-    for (final year in [2006, 2016, 2024]) {
+    for (final year
+        in (args.isEmpty ? [2006, 2016, 2024] : args.map(int.parse))) {
       final w = WorldGen.create(seed: 7, startYear: year, difficulty: diff);
       final sim = Simulator(w);
       while (w.week < GameTime.firstWeekOf(year)) {

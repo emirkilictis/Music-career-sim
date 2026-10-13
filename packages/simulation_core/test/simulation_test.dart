@@ -535,8 +535,11 @@ void main() {
     // Every track charts, several in the top 10.
     expect(mine.length, 13);
     expect(mine.where((x) => x <= 10).length, greaterThanOrEqualTo(3));
-    // Radio is a real part of a top song's points.
-    final top = w.songs[chart.first.entityId];
+    // Radio is a real part of the top established hit's points (the
+    // album's own tracks are a week old, with little radio yet).
+    final top = w.songs[chart
+        .firstWhere((e) => w.songs[e.entityId].primaryArtistId != p.id)
+        .entityId];
     expect(top.weekRadioPtsUs / top.weekPtsUs, greaterThan(0.05));
   });
 
@@ -1493,5 +1496,37 @@ void campaignTests() {
       }
     }
     expect(added, isNotEmpty);
+  });
+
+  test('streaming-era fans buy in week one, then the album streams (K79)', () {
+    final c = SimConfig();
+    expect(c.albumTail(2012), 1.0);
+    expect(c.albumTail(2013), closeTo(0.55, 1e-9));
+    expect(c.albumTail(2020), 0.28);
+    double secondWeek(int year) {
+      final w = WorldGen.create(seed: 7, startYear: year);
+      final sim = Simulator(w);
+      while (w.week < GameTime.firstWeekOf(year)) {
+        sim.step();
+      }
+      final p = WorldGen.addPlayer(w,
+          name: 'Star',
+          genre: 0,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire);
+      final songs = [
+        for (var i = 0; i < 10; i++)
+          Actions.writeSong(w, p, producerSkill: 90, aiMode: true).id,
+      ];
+      final al = Actions.releaseAlbum(w, p, 'LP', songs);
+      sim.step();
+      final first = al.weekPure;
+      sim.step();
+      return al.weekPure / first;
+    }
+
+    // Still a third in the download era; about a tenth from 2016.
+    expect(secondWeek(2010), greaterThan(0.25));
+    expect(secondWeek(2018), lessThan(0.15));
   });
 }
