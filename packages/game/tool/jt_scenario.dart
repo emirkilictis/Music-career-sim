@@ -118,6 +118,21 @@ void playUntil(int w, {List<String> write = const [], List<int>? genres}) {
     if (g.player.hasJob) g.setJob(Job.none);
     _spendPoints();
     final r = g.advanceWeek();
+    if (Platform.environment['JT_CATALOG'] == '1' &&
+        g.world.week % GameTime.weeksPerYear == 0) {
+      final w = g.world, a = w.player!;
+      var active = 0.0;
+      for (final id in w.activeSongIds) {
+        if (w.songs[id].primaryArtistId == a.id) {
+          active += w.songs[id].weekStreams;
+        }
+      }
+      print('CAT ${GameTime.yearOf(w.week - 1)} active ${c(active)}/wk '
+          'catalog ${c(a.weekStreams - active)}/wk pop '
+          '${a.popularity.toStringAsFixed(2)} catF '
+          '${a.catalogFactor.toStringAsFixed(2)} dormantSongs '
+          '${a.dormantSongIds.length} sumRate ${a.sumDormantRate.toStringAsExponential(2)}');
+    }
     for (final e in r.events) {
       final line = switch (e) {
         NumberOne(isFirstTime: true) =>
@@ -179,7 +194,9 @@ void main(List<String> args) {
       genre: 0,
       home: HomeCountry.us,
       startYear: 2002,
-      difficulty: Difficulty.normal,
+      // JT_DIFFICULTY=legend replays the same career in Legend mode.
+      difficulty: Difficulty.values
+          .byName(Platform.environment['JT_DIFFICULTY'] ?? 'normal'),
       tier: StartTier.risingStar,
       money: StartMoney.millionaire,
       path: CareerPath.independent,

@@ -252,6 +252,32 @@ void main() {
     expect(al.lifetimeUnits, closeTo(al.firstWeekUnits + pre, 1e-3 * pre));
   });
 
+  test('the player\'s old songs fade, keeping what they earned (K58)', () {
+    final w = WorldGen.create(seed: 58, startYear: 2016);
+    final sim = Simulator(w);
+    final a = WorldGen.addPlayer(w,
+        name: 'Star',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    final s = Actions.writeSong(w, a, producerSkill: 90, aiMode: true);
+    Actions.releaseSingle(w, a, s);
+    while (s.status != SongStatus.dormant) {
+      sim.step();
+    }
+    final rate0 = s.dormantRate;
+    var life = w.songLifetimeStreams(s);
+    for (var i = 0; i < 2 * GameTime.weeksPerYear; i++) {
+      sim.step();
+      final now = w.songLifetimeStreams(s);
+      // Settling never loses streams already counted.
+      expect(now, greaterThanOrEqualTo(life));
+      life = now;
+    }
+    // About 5% a year in its first decade.
+    expect(s.dormantRate / rate0, closeTo(0.9, 0.02));
+  });
+
   group('eras and anticipation', () {
     test('a CD-era smash does not make a later era look disappointing', () {
       final w = WorldGen.create(seed: 13, startYear: 2013);
@@ -381,7 +407,7 @@ void megaDebutTests() {
         lessThan(1.2e6));
   });
 
-  test('legend mode: a 5M+ week is reachable, realistic stays near 4M', () {
+  test('legend mode: a record week is reachable, realistic stays near 4M', () {
     const maxMoves = [0, 0, 0, 0, 0, 0, 1, 2];
     final legend = _debut(
         year: 2025,
@@ -400,7 +426,10 @@ void megaDebutTests() {
         legend.world.albumFirstWeekIn(legend.album, ChartMarket.us);
     final realUs = real.world.albumFirstWeekIn(real.album, ChartMarket.us);
     printOnFailure('legend $legendUs, realistic $realUs');
-    expect(legendUs, greaterThan(5e6));
+    // Same artist, same moves: Legend opens above the real record (~4M);
+    // the 1.5–2× gap over a career comes from faster growth (docs K58).
+    expect(legendUs, greaterThan(4.5e6));
+    expect(legendUs, greaterThan(1.15 * realUs));
     expect(realUs, lessThan(4.8e6));
   });
 

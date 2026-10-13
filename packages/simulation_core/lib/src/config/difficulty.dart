@@ -2,18 +2,18 @@
 ///
 /// [normal] ("Realistic") is the calibrated, real-world balance: the player
 /// and the AI play by the same rules. [legend] is the power fantasy (become
-/// the biggest artist of all time; 5M+ weeks are reachable with the right
-/// moves): the player gets stronger and the AI steps back a little. [hard]
+/// the biggest artist of all time; record weeks are reachable with the
+/// right moves, and a career ends up ~1.5–2× a Realistic one; docs K58): the player gets stronger and the AI steps back a little. [hard]
 /// only weakens the player.
 enum Difficulty {
   legend(
-    exposure: 1.4,
-    fanConversion: 1.6,
+    exposure: 1.2,
+    fanConversion: 1.3,
     qualityBonus: 5,
-    albumDemand: 1.4,
-    devotionGain: 1.5,
-    aiExposure: 0.85,
-    aiAlbumDemand: 0.85,
+    albumDemand: 1.2,
+    devotionGain: 1.25,
+    aiExposure: 0.9,
+    aiAlbumDemand: 0.9,
   ),
 
   /// "Realistic": the calibrated balance, all factors neutral.

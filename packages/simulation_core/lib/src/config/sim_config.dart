@@ -39,6 +39,9 @@ class SimConfig {
     this.albumWeeklyDecay = 0.86,
     this.trackEquivalentAlbum = 10,
     this.campaignFatigueDecay = 0.9,
+    this.catalogFadeEarly = 0.001,
+    this.catalogFadeLate = 0.0004,
+    this.catalogFadeYears = 10,
     this.streamEquivalentAlbum = 1500,
     this.downloadHitExponent = 1.45,
     this.downloadHitExponentLate = 1.15,
@@ -228,6 +231,12 @@ class SimConfig {
   /// Weekly fade of the player's campaign fatigue (docs K57): ~6.6 weeks
   /// half-life, so a big push every single of an era keeps losing power.
   final double campaignFatigueDecay;
+
+  /// Weekly fade of the player's catalog songs (docs K58): about 5% a year
+  /// in a song's first [catalogFadeYears] years, 2% a year after.
+  final double catalogFadeEarly;
+  final double catalogFadeLate;
+  final double catalogFadeYears;
   final double streamEquivalentAlbum;
   final double songChartStreamDivisor;
   final double songChartRadioDivisor;

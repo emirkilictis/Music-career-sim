@@ -690,6 +690,7 @@ class Simulator {
       a.updateRegionShare();
     }
     _playerIncome();
+    if (w.week % catalogFadeWeeks == 0) _fadePlayerCatalog();
 
     final result = WeekResult(
       week: w.week,
@@ -1003,6 +1004,46 @@ class Simulator {
       w.dirtyAlbums.add(al.id);
       w.dirtyArtists.add(a.id);
     }
+  }
+
+  /// How often the player's catalog fades (a batch of weeks at a time).
+  static const catalogFadeWeeks = 4;
+
+  /// Old songs fade (docs K58): the player's catalog songs lose a little of
+  /// their listeners as they age, faster in their first decade, so a long
+  /// career's catalog does not grow forever. Each song's lifetime so far is
+  /// settled first, then its rate drops. Rivals' catalogs are part of the
+  /// calibrated market and stay as they are.
+  void _fadePlayerCatalog() {
+    final w = world;
+    final c = w.config;
+    final p = w.player;
+    if (p == null || p.dormantSongIds.isEmpty) return;
+    for (final id in p.dormantSongIds) {
+      final s = w.songs[id];
+      final years = (w.week - s.releasedWeek) / GameTime.weeksPerYear;
+      final perWeek =
+          years < c.catalogFadeYears ? c.catalogFadeEarly : c.catalogFadeLate;
+      final rate = s.dormantRate * math.pow(1 - perWeek, catalogFadeWeeks);
+      final drop = s.dormantRate - rate;
+      if (drop <= 0) continue;
+      for (var r = 0; r < regionCount; r++) {
+        s.reg[SongReg.lifeStreams + r] = w.songLifetimeStreams(s, r);
+        s.reg[SongReg.lifeDownloads + r] = w.songLifetimeDownloads(s, r);
+        s.reg[SongReg.indexStreams + r] = p.reg[ArtistReg.indexStreams + r];
+        s.reg[SongReg.indexDownloads + r] = p.reg[ArtistReg.indexDownloads + r];
+      }
+      s.dormantRate = rate;
+      p.sumDormantRate -= drop;
+      if (s.albumId >= 0) {
+        final al = w.albums[s.albumId];
+        Lifecycle.settleAlbum(w, al);
+        al.sumDormantRate = math.max(0.0, al.sumDormantRate - drop);
+      }
+      w.dirtySongs.add(id);
+    }
+    if (p.sumDormantRate < 0) p.sumDormantRate = 0;
+    w.dirtyArtists.add(p.id);
   }
 
   void _playerIncome() {

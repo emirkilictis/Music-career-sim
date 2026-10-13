@@ -614,7 +614,7 @@
   "save": "Save",
   "shootVideo": "Shoot a music video",
   "videoTitle": "Music video",
-  "videoHint": "A video promotes the song for as long as it is out: on music TV, and from 2005 on video sites (where it can also go viral). Your performance and charisma make it better.",
+  "videoHint": "A video promotes the song for as long as it is out: on MusicTV, and from 2005 on ViewTube (where it can also go viral). Your performance and charisma make it better.",
   "videoLow": "Low budget",
   "videoMedium": "Medium budget",
   "videoHigh": "Big budget",
@@ -1059,7 +1059,7 @@
       }
     }
   },
-  "eventViralVideo": "“{title}” is going viral on video sites!",
+  "eventViralVideo": "“{title}” is going viral on ViewTube!",
   "@eventViralVideo": {
     "placeholders": {
       "title": {
@@ -1067,7 +1067,7 @@
       }
     }
   },
-  "eventViral": "“{title}” is going viral on short-video apps!",
+  "eventViral": "“{title}” is going viral on TikTak!",
   "@eventViral": {
     "placeholders": {
       "title": {
