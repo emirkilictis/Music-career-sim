@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:game/game.dart' hide Actions;
 
-import '../core/scope.dart';
 import '../ui/palette.dart';
 import 'common.dart';
 
@@ -68,7 +67,6 @@ class _WeekTransitionState extends State<WeekTransition>
 
   @override
   Widget build(BuildContext context) {
-    final l = context.l10n;
     final fmt = context.fmt;
     return Center(
       child: AnimatedBuilder(
@@ -103,7 +101,7 @@ class _WeekTransitionState extends State<WeekTransition>
                       ),
                     ),
                     child: Text(
-                      l.weekShort(GameTime.weekOfYear(week)),
+                      context.fmt.weekInMonth(week),
                       key: ValueKey(week),
                       style: const TextStyle(
                           fontFamily: AppFonts.condensed,

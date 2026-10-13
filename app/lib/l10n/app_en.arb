@@ -17,9 +17,12 @@
   "cancel": "Cancel",
   "delete": "Delete",
   "ok": "OK",
-  "weekLabel": "Week {week}, {year}",
+  "weekLabel": "{month} {year}, week {week}",
   "@weekLabel": {
     "placeholders": {
+      "month": {
+        "type": "String"
+      },
       "week": {
         "type": "int"
       },
@@ -147,9 +150,12 @@
     }
   },
   "skippingUntilNews": "Playing until something happens…",
-  "weekShort": "Week {week}",
+  "weekShort": "{month}, week {week}",
   "@weekShort": {
     "placeholders": {
+      "month": {
+        "type": "String"
+      },
       "week": {
         "type": "int"
       }
@@ -174,9 +180,12 @@
   "tabReleases": "Releases",
   "tabCharts": "Charts",
   "tabCareer": "Career",
-  "weekNewsTitle": "Week {week}",
+  "weekNewsTitle": "{month}, week {week}",
   "@weekNewsTitle": {
     "placeholders": {
+      "month": {
+        "type": "String"
+      },
       "week": {
         "type": "int"
       }

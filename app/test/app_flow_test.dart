@@ -26,7 +26,7 @@ void main() {
 
     // In the game: name in the header, a full first week ahead.
     expect(find.text('Luna Vale'), findsWidgets);
-    expect(find.text('Week 1, 2024'), findsOneWidget);
+    expect(find.text('January 2024, week 1'), findsOneWidget);
     expect(find.text('Play a week to see what happens.'), findsOneWidget);
 
     await tester.tap(find.text('Studio'));
@@ -43,7 +43,7 @@ void main() {
 
     await tester.tap(find.text('Next week'));
     await tester.pumpAndSettle();
-    expect(find.text('Week 2, 2024'), findsOneWidget);
+    expect(find.text('January 2024, week 2'), findsOneWidget);
 
     await tester.tap(find.text('Releases'));
     await tester.pumpAndSettle();
@@ -248,10 +248,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('In 4 weeks'));
     await tester.pumpAndSettle();
-    expect(find.text('Out: Week 5, 2024'), findsOneWidget);
+    expect(find.text('Out: January 2024, week 5'), findsOneWidget);
     await tester.tap(find.text('2 weeks before'));
     await tester.pumpAndSettle();
-    expect(find.text('Announcement: Week 3, 2024'), findsOneWidget);
+    expect(find.text('Announcement: January 2024, week 3'), findsOneWidget);
     // Longer than the wait: not possible.
     expect(
         tester
@@ -265,9 +265,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('No promotion'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('is set for Week 5, 2024'), findsOneWidget);
+    expect(
+        find.textContaining('is set for January 2024, week 5'), findsOneWidget);
     expect(find.text('Coming up'), findsOneWidget);
-    final tile = find.textContaining('Announcement: Week 3, 2024');
+    final tile = find.textContaining('Announcement: January 2024, week 3');
     expect(tile, findsOneWidget);
 
     // Move it two weeks later, keeping the announcement plan.
@@ -281,7 +282,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Announcement: Week 5, 2024'), findsOneWidget);
-    expect(find.textContaining('Out: Week 7, 2024'), findsOneWidget);
+    expect(find.textContaining('Announcement: January 2024, week 5'),
+        findsOneWidget);
+    expect(find.textContaining('Out: February 2024, week 2'), findsOneWidget);
   });
 }

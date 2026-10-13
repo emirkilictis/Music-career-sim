@@ -92,7 +92,7 @@ class _WeekCard extends StatelessWidget {
     return _Card(
       highlight: top != null && top.event.isMajor,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(l.weekNewsTitle(GameTime.weekOfYear(career.lastWeekPlayed)),
+        Text(context.fmt.weekInMonth(career.lastWeekPlayed),
             style: TextStyle(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w700,

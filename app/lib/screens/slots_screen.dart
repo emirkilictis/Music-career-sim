@@ -124,7 +124,7 @@ class _SlotsScreenState extends State<SlotsScreen> {
                             style:
                                 const TextStyle(fontWeight: FontWeight.w800)),
                         subtitle: Text(
-                            '${l.weekLabel(s['weekOfYear'] as int? ?? 1, s['year'] as int? ?? 0)}'
+                            '${context.fmt.weekOf(s['weekOfYear'] as int? ?? 1, s['year'] as int? ?? 0)}'
                             ' · ${l.fameValue(fmt.percent(fame))}'
                             ' · ${l.fansValue(fmt.compact(fans))}'),
                         onTap: () => _open(id),

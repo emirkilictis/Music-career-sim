@@ -38,7 +38,41 @@ class Fmt {
   String percent(double v) => '${(v * 100).round()}%';
 
   String week(int week) =>
-      l.weekLabel(GameTime.weekOfYear(week), GameTime.yearOf(week));
+      weekOf(GameTime.weekOfYear(week), GameTime.yearOf(week));
+
+  /// "January 2006, week 1": the game's 52 weeks fall into the 12 months.
+  String weekOf(int weekOfYear, int year) {
+    final (month, inMonth) = monthWeek(weekOfYear);
+    return l.weekLabel(monthName(month), inMonth, year);
+  }
+
+  /// "January, week 2" (no year) for an absolute game week.
+  String weekInMonth(int week) {
+    final (month, inMonth) = monthWeek(GameTime.weekOfYear(week));
+    return l.weekShort(monthName(month), inMonth);
+  }
+
+  /// Month (1–12) and week of that month for week [weekOfYear] (1–52).
+  static (int, int) monthWeek(int weekOfYear) {
+    final w = weekOfYear.clamp(1, GameTime.weeksPerYear);
+    final month = (w - 1) * 12 ~/ GameTime.weeksPerYear + 1;
+    final first = ((month - 1) * GameTime.weeksPerYear + 11) ~/ 12 + 1;
+    return (month, w - first + 1);
+  }
+
+  static const _monthsEn = [
+    'January', 'February', 'March', 'April', 'May', 'June', //
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+  static const _monthsTr = [
+    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', //
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
+  ];
+
+  String monthName(int month, {bool short = false}) {
+    final name = (_locale.startsWith('tr') ? _monthsTr : _monthsEn)[month - 1];
+    return short ? name.substring(0, 3) : name;
+  }
 
   String genre(int g) => switch (g) {
         0 => l.genrePop,
@@ -83,8 +117,10 @@ class Fmt {
 
   /// Short chart name for compact lists.
   /// "2006 · 12" (year and week) for tables.
-  String weekShort(int week) =>
-      '${GameTime.yearOf(week)} · ${GameTime.weekOfYear(week)}';
+  String weekShort(int week) {
+    final (month, inMonth) = monthWeek(GameTime.weekOfYear(week));
+    return '${monthName(month, short: true)} ${GameTime.yearOf(week)} · $inMonth';
+  }
 
   String chartShort(int id) => switch (id) {
         Charts.usSongs => l.chartShortUs,

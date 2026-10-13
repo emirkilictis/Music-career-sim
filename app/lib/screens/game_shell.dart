@@ -91,10 +91,7 @@ class _GameShellState extends State<GameShell> {
       }
       final major = lines.where((l) => l.event.isMajor && l != big).toList();
       if (major.isNotEmpty) {
-        await _showNews(
-            context.l10n
-                .weekNewsTitle(GameTime.weekOfYear(state.lastWeekPlayed)),
-            major);
+        await _showNews(context.fmt.weekInMonth(state.lastWeekPlayed), major);
       } else if (lines.isNotEmpty) {
         showInfo(context, context.fmt.event(lines.first),
             icon: Icons.notifications_none_rounded);
