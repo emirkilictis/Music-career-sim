@@ -187,6 +187,8 @@ abstract final class Codec {
     // Added in schema v6, v11.
     'videoBudget', 'videoPower',
     'campaignPower', 'campaignCost', 'campaignReturn',
+    // Added in schema v13.
+    'revenue', 'productionCost',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -209,6 +211,8 @@ abstract final class Codec {
         s.campaignPower,
         s.campaignCostCents,
         s.campaignReturnCents,
+        s.revenueCents,
+        s.productionCostCents,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -258,6 +262,8 @@ abstract final class Codec {
     s.campaignPower = (r['campaignPower'] as num?)?.toDouble() ?? 1;
     s.campaignCostCents = r['campaignCost'] as int? ?? 0;
     s.campaignReturnCents = (r['campaignReturn'] as num?)?.toDouble() ?? 0;
+    s.revenueCents = (r['revenue'] as num?)?.toDouble() ?? 0;
+    s.productionCostCents = r['productionCost'] as int? ?? 0;
     if (r['weekRegion'] case final String wr when wr.isNotEmpty) {
       s.weekRegion =
           Float64List.fromList(wr.split(',').map(double.parse).toList());
@@ -279,6 +285,8 @@ abstract final class Codec {
     'scheduleId', 'criticScore', 'preSingleUnits',
     // Added in schema v11.
     'campaignCost', 'campaignReturn',
+    // Added in schema v13.
+    'revenue',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -296,6 +304,7 @@ abstract final class Codec {
         al.preSingleUnits,
         al.campaignCostCents,
         al.campaignReturnCents,
+        al.revenueCents,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -318,6 +327,7 @@ abstract final class Codec {
       ..preSingleUnits = (r['preSingleUnits'] as num?)?.toDouble() ?? 0
       ..campaignCostCents = r['campaignCost'] as int? ?? 0
       ..campaignReturnCents = (r['campaignReturn'] as num?)?.toDouble() ?? 0
+      ..revenueCents = (r['revenue'] as num?)?.toDouble() ?? 0
       ..variantFormats = r['editionFormats'] == null
           ? const []
           : _parseInts(r['editionFormats'] as String)

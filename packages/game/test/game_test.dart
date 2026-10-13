@@ -170,6 +170,9 @@ void main() {
         final r = g.advanceWeek();
         expect(r.moneyDeltaCents, greaterThanOrEqualTo(Job.cafe.wageCents));
       }
+      // Income and costs per release (docs K60).
+      expect(g.song(song).revenueCents, greaterThan(0));
+      expect(g.song(song).costsCents, greaterThan(0));
       // An action between weeks is saved at once, without playing a week.
       g.writeSong(budget: BudgetTier.low);
       final hash = worldHash(g.world);

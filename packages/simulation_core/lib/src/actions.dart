@@ -213,6 +213,7 @@ abstract final class Actions {
     }
     final index = a.songsWrittenThisWeek % 64;
 
+    var paidCents = 0;
     if (!aiMode) {
       for (final c in [producer, cowriter]) {
         if (c != null && !collaboratorAvailable(c, a)) {
@@ -224,6 +225,7 @@ abstract final class Actions {
           (cowriter?.feeCents ?? 0);
       if (cost > a.moneyCents) throw SongwritingException('Not enough money');
       a.moneyCents -= cost;
+      paidCents = cost;
     }
     // Counted only once the song is really written (a refusal costs nothing).
     a.songsWrittenThisWeek++;
@@ -304,6 +306,7 @@ abstract final class Actions {
       longevity: longevity,
       estimatedGrade: grade,
     );
+    song.productionCostCents = paidCents;
     w.songs.add(song);
     w.dirtySongs.add(song.id);
     if (a.id == w.playerArtistId) w.playerSongIds.add(song.id);

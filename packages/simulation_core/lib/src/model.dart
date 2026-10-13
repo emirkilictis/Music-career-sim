@@ -461,6 +461,11 @@ class Song with Charted {
   int campaignCostCents = 0;
   double campaignReturnCents = 0;
 
+  /// The player's income from this song so far (their share), and what
+  /// writing and recording it cost (docs K60).
+  double revenueCents = 0;
+  int productionCostCents = 0;
+
   /// Scratch: share of this week's attention (and reach) owed to the
   /// campaign.
   double campaignShareOfAttention = 0;
@@ -537,6 +542,10 @@ class Album with Charted {
   /// in through the album's own tracks and sales (estimated; docs K57).
   int campaignCostCents = 0;
   double campaignReturnCents = 0;
+
+  /// The player's income from the album's own sales (their share; its
+  /// tracks keep their own; docs K60).
+  double revenueCents = 0;
 
   /// Scratch: share of this week's sales owed to the campaign.
   double campaignShareOfSales = 0;

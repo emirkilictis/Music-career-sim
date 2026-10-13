@@ -251,6 +251,12 @@ class SongView {
         campaignPower = s.campaignPower,
         campaignCostCents = s.campaignCostCents,
         campaignReturnCents = s.campaignReturnCents.round(),
+        revenueCents = s.revenueCents.round(),
+        costsCents = _songCosts(s),
+        featuredNames = [
+          for (final id in s.featuredArtistIds) w.artists[id].name
+        ],
+        usSingleUnits = _usSingleUnits(w, s),
         scheduledSingleWeek = _scheduledWeek(w, s, album: false),
         scheduledAlbumWeek = _scheduledWeek(w, s, album: true);
 
@@ -276,6 +282,17 @@ class SongView {
   final double campaignPower;
   final int campaignCostCents;
   final int campaignReturnCents;
+
+  /// The player's income from the song and what it cost them: writing,
+  /// its own campaign, its video (docs K60).
+  final int revenueCents;
+  final int costsCents;
+
+  /// Featured artists' names, in credit order.
+  final List<String> featuredNames;
+
+  /// Single units in the US, for certifications (docs K60).
+  final double usSingleUnits;
 
   /// Week a scheduled single / album with this song comes out, or -1
   /// (docs K45).
@@ -360,6 +377,18 @@ class AlbumView {
         preSingleUnits = al.preSingleUnits,
         campaignCostCents = al.campaignCostCents,
         campaignReturnCents = al.campaignReturnCents.round(),
+        revenueCents = (al.revenueCents +
+                al.songIds.fold(0.0, (x, id) => x + w.songs[id].revenueCents))
+            .round(),
+        costsCents = al.campaignCostCents +
+            (al.artistId == w.playerArtistId
+                ? Actions.editionsCostCents(
+                    al.variantWeeks.length, al.variantFormats)
+                : 0) +
+            al.songIds.fold(0, (x, id) => x + _songCosts(w.songs[id])),
+        usLifetimeUnits =
+            CountryShares.usOfNorthAmerica(w.artists[al.artistId].homeCountry) *
+                w.albumLifetimeUnits(al, Region.northAmerica.index),
         trackStreams = al.songIds
             .fold(0.0, (sum, id) => sum + w.songLifetimeStreams(w.songs[id])),
         lifetimePure =
@@ -408,6 +437,15 @@ class AlbumView {
   /// in through the album's own tracks and sales (estimated; docs K57).
   final int campaignCostCents;
   final int campaignReturnCents;
+
+  /// The player's income from the album and its tracks, and everything it
+  /// cost them: songs, campaigns, videos, editions (docs K60).
+  final int revenueCents;
+  final int costsCents;
+  int get profitCents => revenueCents - costsCents;
+
+  /// Album units in the US, for certifications (docs K60).
+  final double usLifetimeUnits;
 
   /// All streams of the album's tracks (singles included).
   final double trackStreams;
@@ -688,4 +726,42 @@ class OpportunityView {
   final String partnerName;
   final int feeCents;
   final List<OpportunityChoice> choices;
+}
+
+/// What a song cost the player: writing it, its own campaign, its video.
+int _songCosts(Song s) =>
+    s.productionCostCents +
+    s.campaignCostCents +
+    (s.videoBudget >= 0 ? VideoBudget.values[s.videoBudget].costCents : 0);
+
+double _usSingleUnits(World w, Song s) {
+  final a = w.primaryOf(s);
+  final na = Region.northAmerica.index;
+  return CountryShares.usOfNorthAmerica(a.homeCountry) *
+      (w.songLifetimeDownloads(s, na) +
+          s.lifetimePhysical * a.regionShare[na] +
+          w.songLifetimeStreams(s, na) / SongView.streamsPerSingleUnit);
+}
+
+/// US certification levels, RIAA-style (docs K60): units sold in the US.
+enum Certification {
+  gold(5e5),
+  platinum(1e6),
+  diamond(1e7);
+
+  const Certification(this.units);
+  final double units;
+
+  /// The level reached with [units] and how many times over (platinum
+  /// counts multiples: 3× platinum), or null below gold.
+  static (Certification, int)? of(double units) {
+    if (units >= diamond.units) {
+      return (diamond, (units / diamond.units).floor());
+    }
+    if (units >= platinum.units) {
+      return (platinum, (units / platinum.units).floor());
+    }
+    if (units >= gold.units) return (gold, 1);
+    return null;
+  }
 }

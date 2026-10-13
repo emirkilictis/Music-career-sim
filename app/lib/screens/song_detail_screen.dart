@@ -4,6 +4,7 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/profit_card.dart';
 import '../widgets/campaign_result.dart';
 import '../widgets/image_pickers.dart';
 import '../core/images.dart';
@@ -200,6 +201,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           if (!s.isPlayer)
             ArtistLink(
                 artistId: s.artistId, name: s.artistName, state: widget.state),
+          if (s.usSingleUnits >= Certification.gold.units) ...[
+            const SizedBox(height: 10),
+            Center(child: CertificationTag(units: s.usSingleUnits)),
+          ],
           const SizedBox(height: 14),
           Section(
             title: fmt.genres(s.genres),
@@ -265,6 +270,18 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       ? [...saleTiles, ...streamTiles]
                       : [...streamTiles, ...saleTiles]),
             ),
+            if (s.isPlayer) ...[
+              const SizedBox(height: 12),
+              ProfitCard(
+                revenueCents: s.revenueCents,
+                costsCents: s.costsCents,
+                sold: s.singleUnits,
+                globalPeak: s.charts
+                    .where((c) => c.chartId == Charts.globalSongs)
+                    .firstOrNull
+                    ?.peak,
+              ),
+            ],
             if (s.isPlayer &&
                 (s.campaignCostCents > 0 || s.campaignReturnCents > 0)) ...[
               const SizedBox(height: 12),

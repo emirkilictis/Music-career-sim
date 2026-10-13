@@ -1080,6 +1080,7 @@ class Simulator {
       final songCents =
           s.weekStreams * 0.35 + s.weekDownloads * 70 + s.weekPhysical * 100;
       cents += songCents;
+      s.revenueCents += songCents * p.artistShare;
       // Campaign profit/loss (docs K57): album cuts earn for the album's
       // campaign, singles for their own.
       final back = songCents * p.artistShare * s.campaignShareOfAttention;
@@ -1095,14 +1096,19 @@ class Simulator {
     for (final id in world.playerSongIds) {
       final s = world.songs[id];
       if (s.status != SongStatus.dormant) continue;
+      var songCents = 0.0;
       for (var r = 0; r < regionCount; r++) {
-        cents += world.songWeekStreamsRegion(s, r) * 0.35;
+        songCents += world.songWeekStreamsRegion(s, r) * 0.35;
       }
+      cents += songCents;
+      s.revenueCents += songCents * p.artistShare;
+      world.dirtySongs.add(id);
     }
     for (final id in world.activeAlbumIds) {
       final al = world.albums[id];
       if (al.artistId != p.id) continue;
       cents += al.weekPure * 600;
+      al.revenueCents += al.weekPure * 600 * p.artistShare;
       al.campaignReturnCents +=
           al.weekPure * 600 * p.artistShare * al.campaignShareOfSales;
     }

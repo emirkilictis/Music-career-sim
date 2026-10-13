@@ -924,6 +924,45 @@
   "totalSales": "Total",
   "pureSales": "Pure sales",
   "albumStats": "Album stats",
+  "profitTitle": "Profit & loss",
+  "netProfit": "Net profit",
+  "netLoss": "Net loss",
+  "revenue": "Revenue",
+  "totalCosts": "Total costs",
+  "unitsSold": "Units sold",
+  "globalPeak": "Global peak",
+  "profitHint": "Your share of sales and streams, against what you spent on songs, campaigns, videos and editions.",
+  "salesLastWeeks": "Sales (last {count} weeks)",
+  "@salesLastWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "weeksAgoShort": "{count}w",
+  "@weeksAgoShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nowShort": "Now",
+  "certGold": "Gold",
+  "certPlatinum": "Platinum",
+  "certDiamond": "Diamond",
+  "certMultiple": "{count}× {level}",
+  "@certMultiple": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "offerInterviewTitle": "Interview request",
   "offerInterviewBody": "A late-night show wants you as a guest. Good for hype (charisma helps); costs {energy} energy.",
   "@offerInterviewBody": {

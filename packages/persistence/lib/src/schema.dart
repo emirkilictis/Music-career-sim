@@ -4,8 +4,15 @@ import 'codec.dart';
 /// (docs/data-model.md). Never edit a shipped migration; append a new one.
 /// (v1 has not shipped yet, so it is still being shaped.)
 final List<String> migrations = [
-  _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, //
+  _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, _v13, //
 ];
+
+/// v13: the player's income per song and album (docs K60).
+const _v13 = '''
+  ALTER TABLE song ADD COLUMN revenue REAL;
+  ALTER TABLE song ADD COLUMN productionCost INTEGER;
+  ALTER TABLE album ADD COLUMN revenue REAL;
+''';
 
 /// v12: the player's waiting offer (docs K59).
 const _v12 = 'ALTER TABLE artist ADD COLUMN opportunity TEXT;';

@@ -90,6 +90,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F25 | **Streaming döneminde albüm parçaları çok daha kolay chart'lamalı** (Emir): parça viral olabiliyor, algoritma öne çıkarıp playlist'e alınca çok stream topluyor. Taylor/Drake seviyesinde sanatçıların albümündeki bütün parçalar Hot 100'e giriyor; Taylor 13 şarkılık albümle ilk 13 sırayı doldurabiliyor. | Not alındı (F11'de 2006 için albüm parçalarını zorlaştırmıştık; streaming döneminde süperstarlar için tersine dönmeli). Sonra birlikte bakılacak. |
 | F26 | **Single'lar için fiziksel varyantlar ve sürümler** (Emir): single'lara da fiziksel varyant (CD/plak vb.) ve liste boost'u; acapella, instrumental, remix, sped up, slowed gibi versiyonlar. | Not alındı. |
 | F27 | **Gerçek sanatçı adları** (Emir): Groove Journey gerçek adları kullanıyor; düet (feat) özelliğinde çok iyi olurdu. | Not alındı. Düşünülecek nokta: mağazada yayınlanan bir oyunda gerçek kişilerin adları hukuki risk taşıyabilir (kişilik hakları, ticari marka). Seçenekler: oyuncunun kendi isimlendirebileceği rakipler (mod/isim düzenleme), ya da gerçek adlar yalnızca oyuncunun cihazında kendisinin girdiği şekilde. Birlikte karar verilecek. |
+| F28 | **Groove Journey albüm ekranı** (Emir, ekran görüntüsü: 12 haftalık satış çubukları, net kâr kartı, Diamond rozeti, puanlı parça listesi; "her şeyi almak zorunda değiliz"). | ✅ K60: çubuk grafik, kâr/zarar kartı, ABD sertifikaları, feat isimli ve notlu parça listesi. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

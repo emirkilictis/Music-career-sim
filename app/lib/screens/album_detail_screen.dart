@@ -4,6 +4,8 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/bar_chart.dart';
+import '../widgets/profit_card.dart';
 import '../widgets/campaign_result.dart';
 import '../widgets/image_pickers.dart';
 import '../core/images.dart';
@@ -71,6 +73,10 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           body: const Center(child: CircularProgressIndicator()));
     }
     final units = [for (final h in _history) h.value];
+    final lastWeeks = [
+      for (final w in _sales.skip(_sales.length > 12 ? _sales.length - 12 : 0))
+        w.units ?? 0.0,
+    ];
     return Scaffold(
       appBar: AppBar(title: Text(a.title)),
       body: ListView(
@@ -88,6 +94,30 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           if (!a.isPlayer)
             ArtistLink(
                 artistId: a.artistId, name: a.artistName, state: widget.state),
+          if (a.usLifetimeUnits >= Certification.gold.units) ...[
+            const SizedBox(height: 10),
+            Center(child: CertificationTag(units: a.usLifetimeUnits)),
+          ],
+          if (a.isPlayer) ...[
+            const SizedBox(height: 14),
+            ProfitCard(
+              revenueCents: a.revenueCents,
+              costsCents: a.costsCents,
+              sold: a.lifetimeUnits.total,
+              globalPeak: a.charts
+                  .where((c) => c.chartId == Charts.globalAlbums)
+                  .firstOrNull
+                  ?.peak,
+            ),
+          ],
+          if (lastWeeks.length > 1) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.salesLastWeeks(lastWeeks.length),
+              icon: Icons.bar_chart_rounded,
+              child: WeeklyBars(values: lastWeeks),
+            ),
+          ],
           if (a.criticScore >= 0) ...[
             const SizedBox(height: 14),
             Section(
@@ -308,7 +338,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   leading: Text('${i + 1}'),
-                  title: Text(_tracks[i].title),
+                  title: Text(_tracks[i].featuredNames.isEmpty
+                      ? _tracks[i].title
+                      : '${_tracks[i].title} (feat. ${_tracks[i].featuredNames.join(', ')})'),
                   subtitle: Text(_tracks[i].isSingle
                       ? l.typeSingle
                       : _tracks[i].scheduledSingleWeek >= 0
@@ -330,7 +362,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                                 },
                           child: Text(l.makeSingle),
                         )
-                      : Text(fmt.songMain(_tracks[i], widget.state.week)),
+                      : a.isPlayer
+                          ? GradeTag(fmt.grade(_tracks[i].estimatedGrade))
+                          : Text(fmt.songMain(_tracks[i], widget.state.week)),
                   onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
