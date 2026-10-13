@@ -271,7 +271,12 @@ class Simulator {
       final fresh = math.exp(-promoAge / 6.0);
       // Album buyers own the deep cuts, so few download them one by one,
       // least in the early download era (docs K50).
-      final d = a * (0.25 + fresh) * (s.isSingle ? 1.0 : albumCutDl);
+      // Mixtape tracks are free downloads: no sales (docs K62).
+      final free = !s.isSingle &&
+          s.albumId >= 0 &&
+          w.albums[s.albumId].type == AlbumType.mixtape;
+      final d =
+          free ? 0.0 : a * (0.25 + fresh) * (s.isSingle ? 1.0 : albumCutDl);
       final radioLife = (1 - math.exp(-(promoAge + 1) / (s.riseWeeks + 3))) *
           math.exp(-promoAge / (s.lifeWeeks + 10));
       final rd = s.radioAppeal *
@@ -587,13 +592,16 @@ class Simulator {
             era.casualPurchaseRate *
             (age == 0 ? 1.5 : 1.0) /
             (1 + age / c.albumReachFatigueWeeks);
-        final pure = (superPart + collectorPart + casPart + eventPart) *
-            noise *
-            tracklist *
-            demand;
+        // A mixtape is given away: nothing sold (docs K62).
+        final pure = al.isMixtape
+            ? 0.0
+            : (superPart + collectorPart + casPart + eventPart) *
+                noise *
+                tracklist *
+                demand;
         final streams =
             sea[k] + al.sumDormantRate * p.catalogFactor * share * spa[k];
-        final t = tea[k] / c.trackEquivalentAlbum;
+        final t = al.isMixtape ? 0.0 : tea[k] / c.trackEquivalentAlbum;
         final se = streams / c.streamEquivalentAlbum;
         final units = albumRules.albumUsesUnits ? pure + t + se : pure + t;
         chartRegion[k] = albumRules.albumUsesUnits ? units : pure;

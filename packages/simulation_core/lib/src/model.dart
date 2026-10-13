@@ -80,7 +80,9 @@ enum ArtistKind {
 /// hidden everywhere; kept so ids stay stable).
 enum SongStatus { vault, active, dormant, scrapped }
 
-enum AlbumType { single, ep, album }
+/// Release types. A mixtape is free (docs K62): streams only, no sales,
+/// no album chart, no era.
+enum AlbumType { single, ep, album, mixtape }
 
 enum AlbumStatus { active, dormant }
 
@@ -587,7 +589,10 @@ class Album with Charted {
       reg[AlbumReg.lifeUnits + 1] +
       reg[AlbumReg.lifeUnits + 2];
 
-  bool get chartsOnAlbumChart => type != AlbumType.single;
+  bool get chartsOnAlbumChart =>
+      type == AlbumType.album || type == AlbumType.ep;
+
+  bool get isMixtape => type == AlbumType.mixtape;
 }
 
 /// Whether [s] came out as a single before [al] (docs K56): its album units

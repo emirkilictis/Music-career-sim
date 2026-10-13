@@ -345,6 +345,7 @@ class Fmt {
         AlbumType.single => l.typeSingle,
         AlbumType.ep => l.typeEp,
         AlbumType.album => l.typeAlbum,
+        AlbumType.mixtape => l.typeMixtape,
       };
 
   String eraResult(EraResult r) => switch (r) {

@@ -537,6 +537,7 @@ abstract final class Actions {
     _creditPreSingles(w, a, album);
     World.insertSorted(w.activeAlbumIds, album.id);
     a.lastReleaseWeek = w.week;
+    if (type == AlbumType.mixtape) _mixtapeBuzz(w, a);
     if (type == AlbumType.album) {
       if (a.contractAlbumsLeft > 0) a.contractAlbumsLeft--;
       Eras.open(w, a, album);
@@ -569,6 +570,21 @@ abstract final class Actions {
     }
     w.dirtyArtists.add(a.id);
   }
+
+  /// A free mixtape gets people talking and listening (docs K62): most in
+  /// hip-hop, most of all in its mixtape years (2007–2016).
+  static void _mixtapeBuzz(World w, Artist a) {
+    final year = GameTime.yearOf(w.week);
+    final f = (a.genre == hipHopGenre ? 1.5 : 1.0) *
+        (year >= 2007 && year <= 2016 ? 1.4 : 1.0);
+    a.buzz += 0.4 * f;
+    a.hype += 0.05 * f;
+    a.casual += a.casual * 0.03 * f;
+    w.dirtyArtists.add(a.id);
+  }
+
+  /// [genreNames] index of hip-hop.
+  static const hipHopGenre = 1;
 
   /// Releases set for a later week (docs K45), longest allowed lead time.
   static const maxScheduleWeeks = 26;

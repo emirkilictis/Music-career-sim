@@ -377,6 +377,8 @@
   "totalSales": "Toplam",
   "pureSales": "Saf satış",
   "albumStats": "Albüm istatistikleri",
+  "typeMixtape": "Mixtape",
+  "mixtapeHint": "Ücretsiz: satış yok, sadece stream. Albüm listelerine girmez ve dönem olarak değerlendirilmez, ama konuşulur ve dinleyici kazandırır. En güçlü hip-hop’ta, özellikle 2007–2016 arasında.",
   "milestonesTitle": "Kilometre taşları",
   "milestonesCount": "{done} / {total}",
   "milestoneReward": "+{sp} yetenek puanı",

@@ -278,6 +278,40 @@ void main() {
     expect(s.dormantRate / rate0, closeTo(0.9, 0.02));
   });
 
+  test('a mixtape is free: streams, buzz, no sales, charts or era (K62)', () {
+    final w = WorldGen.create(seed: 62, startYear: 2012);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2012)) {
+      sim.step();
+    }
+    final a = WorldGen.addPlayer(w,
+        name: 'MC',
+        genre: Actions.hipHopGenre,
+        tier: StartTier.risingStar,
+        money: StartMoney.millionaire);
+    final songs = [
+      for (var i = 0; i < 10; i++)
+        Actions.writeSong(w, a, producerSkill: 80, aiMode: true).id,
+    ];
+    final buzz = a.buzz, casual = a.casual;
+    final tape = Actions.releaseAlbum(w, a, 'Tape', songs,
+        type: AlbumType.mixtape, campaign: Campaign.none);
+    expect(a.buzz, greaterThan(buzz));
+    expect(a.casual, greaterThan(casual));
+    expect(a.eraOpen && a.eraAlbumId == tape.id, isFalse);
+    for (var i = 0; i < 4; i++) {
+      sim.step();
+      expect(tape.weekPure, 0);
+      expect(tape.statsOrNull(Charts.usAlbums), isNull);
+    }
+    final streams =
+        songs.fold(0.0, (x, id) => x + w.songLifetimeStreams(w.songs[id]));
+    final downloads =
+        songs.fold(0.0, (x, id) => x + w.songLifetimeDownloads(w.songs[id]));
+    expect(streams, greaterThan(0));
+    expect(downloads, 0);
+  });
+
   group('opportunities (K59)', () {
     ({World w, Simulator sim, Artist p}) star() {
       final w = WorldGen.create(seed: 59, startYear: 2010);

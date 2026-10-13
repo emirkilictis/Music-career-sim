@@ -924,6 +924,8 @@
   "totalSales": "Total",
   "pureSales": "Pure sales",
   "albumStats": "Album stats",
+  "typeMixtape": "Mixtape",
+  "mixtapeHint": "Free: no sales, streams only. Not on the album charts and not judged as an era, but it gets people talking and wins listeners. Strongest for hip-hop, above all in 2007–2016.",
   "milestonesTitle": "Milestones",
   "milestonesCount": "{done} of {total}",
   "@milestonesCount": {

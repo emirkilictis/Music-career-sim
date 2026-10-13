@@ -590,6 +590,14 @@ class GameSession {
     return ScheduledView.of(world, sr);
   }
 
+  /// How many tracks each release type takes (a mixtape: 5–30; K62).
+  static (int, int) trackRange(AlbumType type) => switch (type) {
+        AlbumType.ep => (minEpTracks, maxEpTracks),
+        AlbumType.mixtape => (minMixtapeTracks, maxMixtapeTracks),
+        _ => (minAlbumTracks, maxAlbumTracks),
+      };
+  static const minMixtapeTracks = 5, maxMixtapeTracks = 30;
+
   static const minEpTracks = 3, maxEpTracks = 7;
   static const minAlbumTracks = 8, maxAlbumTracks = 40;
   static const maxVariants = 8, maxVariantWeek = 12;
@@ -632,9 +640,10 @@ class GameSession {
     if (type == AlbumType.single) {
       throw GameException('invalidType', 'Use releaseSingle for singles');
     }
-    final (lo, hi) = type == AlbumType.ep
-        ? (minEpTracks, maxEpTracks)
-        : (minAlbumTracks, maxAlbumTracks);
+    final (lo, hi) = trackRange(type);
+    if (type == AlbumType.mixtape && variantWeeks.length > 1) {
+      throw GameException('mixtapeEditions', 'A free mixtape has no editions');
+    }
     if (songIds.length < lo || songIds.length > hi) {
       throw GameException('trackCount', 'Needs $lo–$hi tracks');
     }

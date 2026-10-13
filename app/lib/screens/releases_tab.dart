@@ -513,9 +513,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final fmt = context.fmt;
-    final (lo, hi) = _type == AlbumType.ep
-        ? (GameSession.minEpTracks, GameSession.maxEpTracks)
-        : (GameSession.minAlbumTracks, GameSession.maxAlbumTracks);
+    final (lo, hi) = GameSession.trackRange(_type);
     final n = _picked.length;
     final ok = n >= lo && n <= hi && _title.text.trim().isNotEmpty;
     final songs = [...widget.songs]
@@ -545,10 +543,22 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
               ButtonSegment(
                   value: AlbumType.album,
                   label: Text(fmt.albumType(AlbumType.album))),
+              ButtonSegment(
+                  value: AlbumType.mixtape,
+                  label: Text(fmt.albumType(AlbumType.mixtape))),
             ],
             selected: {_type},
-            onSelectionChanged: (s) => setState(() => _type = s.first),
+            onSelectionChanged: (s) => setState(() {
+              _type = s.first;
+              if (_type == AlbumType.mixtape) _extras.clear();
+            }),
           ),
+          if (_type == AlbumType.mixtape)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(l.mixtapeHint,
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+            ),
           const SizedBox(height: 16),
           Section(
             title: l.tracksPicked(n, lo, hi),
@@ -567,46 +577,48 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
                       ),
                   ]),
           ),
-          const SizedBox(height: 12),
-          Section(
-            title: l.editions,
-            trailing: Text(l.editionsCount(_extras.length + 1),
-                style: TextStyle(color: AppColors.textMuted)),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(l.editionsHint,
-                      style: Theme.of(context).textTheme.bodySmall),
-                  for (var i = 0; i < _extras.length; i++)
-                    _EditionEditor(
-                      index: i + 2,
-                      edition: _extras[i],
-                      year: year,
-                      onChanged: () => setState(() {}),
-                      onRemove: () => setState(() => _extras.removeAt(i)),
-                    ),
-                  if (_extras.length < GameSession.maxVariants - 1)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: () => setState(() => _extras.add(_Edition(
-                            year >= 2015
-                                ? EditionFormat.vinyl
-                                : EditionFormat.cd))),
-                        icon: const Icon(Icons.add_circle_outline),
-                        label: Text(l.editionN(_extras.length + 2)),
+          if (_type != AlbumType.mixtape) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.editions,
+              trailing: Text(l.editionsCount(_extras.length + 1),
+                  style: TextStyle(color: AppColors.textMuted)),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(l.editionsHint,
+                        style: Theme.of(context).textTheme.bodySmall),
+                    for (var i = 0; i < _extras.length; i++)
+                      _EditionEditor(
+                        index: i + 2,
+                        edition: _extras[i],
+                        year: year,
+                        onChanged: () => setState(() {}),
+                        onRemove: () => setState(() => _extras.removeAt(i)),
                       ),
-                    ),
-                  if (_extras.isNotEmpty)
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l.staggerEditions),
-                      subtitle: Text(l.staggerEditionsHint),
-                      value: _stagger,
-                      onChanged: (v) => setState(() => _stagger = v),
-                    ),
-                ]),
-          ),
+                    if (_extras.length < GameSession.maxVariants - 1)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: () => setState(() => _extras.add(_Edition(
+                              year >= 2015
+                                  ? EditionFormat.vinyl
+                                  : EditionFormat.cd))),
+                          icon: const Icon(Icons.add_circle_outline),
+                          label: Text(l.editionN(_extras.length + 2)),
+                        ),
+                      ),
+                    if (_extras.isNotEmpty)
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l.staggerEditions),
+                        subtitle: Text(l.staggerEditionsHint),
+                        value: _stagger,
+                        onChanged: (v) => setState(() => _stagger = v),
+                      ),
+                  ]),
+            ),
+          ],
         ],
       ),
       bottomNavigationBar: SafeArea(
