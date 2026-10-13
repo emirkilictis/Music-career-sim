@@ -168,7 +168,7 @@ void _status(GameSession s) {
       '  pop ${(p.popularity * 100).toStringAsFixed(1)}%'
       '  dev ${(p.devotion * 100).round()}%'
       '  fans ${_c(p.coreFans)} listeners ${_c(p.casualListeners)}'
-      '  energy ${p.creativeEnergy.round()} songsLeft ${p.songsLeftThisWeek}'
+      '  energy ${p.creativeEnergy.round()} written ${p.songsWrittenThisWeek}'
       '  ads ${p.adsLeftThisWeek} job ${p.job.name}'
       '  hype ${(p.hype * 100).round()}% antic ${(p.anticipation * 100).round()}%');
 }

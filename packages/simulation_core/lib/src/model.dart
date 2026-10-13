@@ -478,6 +478,17 @@ class Album with Charted {
   /// top for several weeks (docs/game-design.md §8.5).
   List<int> variantWeeks = const [0];
 
+  /// [EditionFormat] index of each edition, parallel to [variantWeeks]
+  /// (docs K46). Empty or shorter (AI albums, older saves): a classic
+  /// edition that sells as before.
+  List<int> variantFormats = const [];
+
+  /// How well edition [k] sells to collectors in [year].
+  double editionAppeal(int k, int year) {
+    final f = k < variantFormats.length ? variantFormats[k] : -1;
+    return f < 0 ? 1.0 : EditionFormat.values[f].appeal(year);
+  }
+
   // Weekly (global totals).
   double weekPure = 0;
   double weekTea = 0;
@@ -664,6 +675,7 @@ class ScheduledRelease {
     required this.createdWeek,
     this.title = '',
     this.variantWeeks = const [0],
+    this.variantFormats = const [],
     this.campaign = Campaign.standard,
     this.paidCents = 0,
     this.buzz = 0,
@@ -676,6 +688,9 @@ class ScheduledRelease {
   final List<int> songIds;
   final String title;
   final List<int> variantWeeks;
+
+  /// [EditionFormat] index per edition (-1 = standard / classic).
+  final List<int> variantFormats;
   final Campaign campaign;
   int releaseWeek;
 
@@ -694,3 +709,40 @@ class ScheduledRelease {
 
 /// A scheduled release that came out: the single's song id or the album id.
 typedef ScheduledOut = ({int scheduleId, bool isAlbum, int id});
+
+/// What an extra album edition is (docs K46). Collectors want different
+/// things in different eras: CDs before streaming, vinyl in its revival,
+/// cassettes as a niche. The standard edition (index 0) is digital + CD.
+enum EditionFormat {
+  cd(4000000),
+  vinyl(6000000),
+  cassette(2000000),
+  deluxe(1500000),
+  signed(8000000);
+
+  const EditionFormat(this.costCents);
+
+  /// Manufacturing and setup cost for the player.
+  final int costCents;
+
+  /// Collector demand relative to a classic edition (1.0) in [year].
+  double appeal(int year) => switch (this) {
+        cd => year < 2008
+            ? 1.0
+            : year < 2015
+                ? 0.85
+                : 0.75,
+        vinyl => year < 2008
+            ? 0.4
+            : year < 2015
+                ? 0.8
+                : 1.3,
+        cassette => year < 2004
+            ? 0.6
+            : year < 2018
+                ? 0.25
+                : 0.55,
+        deluxe => year < 2005 ? 0.35 : 0.8,
+        signed => 1.4,
+      };
+}

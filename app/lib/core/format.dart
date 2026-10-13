@@ -167,6 +167,25 @@ class Fmt {
         Campaign.global => l.campaignGlobal,
       };
 
+  String editionFormat(EditionFormat? f) => switch (f) {
+        null => l.editionStandard,
+        EditionFormat.cd => l.formatCd,
+        EditionFormat.vinyl => l.formatVinyl,
+        EditionFormat.cassette => l.formatCassette,
+        EditionFormat.deluxe => l.formatDeluxe,
+        EditionFormat.signed => l.formatSigned,
+      };
+
+  /// How collectors take a format in [year] (docs K46).
+  String formatAppeal(EditionFormat f, int year) {
+    final a = f.appeal(year);
+    return a >= 1.0
+        ? l.formatAppealHigh
+        : a >= 0.7
+            ? l.formatAppealMid
+            : l.formatAppealLow;
+  }
+
   String albumType(AlbumType t) => switch (t) {
         AlbumType.single => l.typeSingle,
         AlbumType.ep => l.typeEp,
@@ -228,7 +247,7 @@ class Fmt {
     if (e is! GameException) return l.errorGeneric;
     return switch (e.code) {
       'notEnoughMoney' => l.errorNotEnoughMoney,
-      'weeklyLimit' => l.errorWeeklyLimit,
+      'resting' => l.errorResting,
       'noSkillPoints' => l.errorNoSkillPoints,
       'invalidDate' => l.errorInvalidDate,
       'alreadyScheduled' => l.errorAlreadyScheduled,

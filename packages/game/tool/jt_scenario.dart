@@ -36,7 +36,7 @@ int? best(CollaboratorRole role, List<int> genres, int budgetCents) {
 /// Writes one song if energy allows (keeps energy above burnout).
 void writeOne(String title, List<int> genres) {
   final p = g.player;
-  if (p.songsLeftThisWeek == 0 || p.creativeEnergy < 45) return;
+  if (!p.canWrite || p.creativeEnergy < 45) return;
   final money = p.moneyCents;
   final budget = money > 20000000
       ? BudgetTier.high

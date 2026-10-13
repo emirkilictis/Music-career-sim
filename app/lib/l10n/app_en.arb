@@ -234,8 +234,8 @@
   "thisWeek": "This week",
   "newsEmptyStart": "Play a week to see what happens.",
   "newsQuiet": "A quiet week.",
-  "creativeEnergy": "Creative energy",
-  "energy": "Energy",
+  "creativeEnergy": "Creativity",
+  "energy": "Creativity",
   "burnoutWeeks": "Burnout: {weeks} more weeks without writing",
   "@burnoutWeeks": {
     "placeholders": {
@@ -244,10 +244,27 @@
       }
     }
   },
-  "songsLeftThisWeek": "{count} songs left this week",
-  "@songsLeftThisWeek": {
+  "songsWrittenThisWeek": "{count} written this week",
+  "@songsWrittenThisWeek": {
     "placeholders": {
       "count": {
+        "type": "int"
+      }
+    }
+  },
+  "creativityFull": "Full creativity: the next song is at full strength.",
+  "creativityPenalty": "Low creativity: the next song loses {points} quality points. Rest or wait a week.",
+  "@creativityPenalty": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "creativityHint": "Every song uses {cost} creativity; no weekly limit. It comes back each week.",
+  "@creativityHint": {
+    "placeholders": {
+      "cost": {
         "type": "int"
       }
     }
@@ -261,13 +278,13 @@
   "jobStudioAssistant": "Studio assistant",
   "jobBarGigs": "Bar & wedding gigs",
   "jobNightShift": "Night shift",
-  "jobPerkNone": "All your energy goes to music.",
+  "jobPerkNone": "All your creativity goes to music.",
   "jobPerkCafe": "Light work.",
   "jobPerkMusicTeacher": "Your vocals and stage skills grow a little.",
   "jobPerkStudioAssistant": "Your production skill grows a little.",
   "jobPerkBarGigs": "A few new fans every week.",
   "jobPerkNightShift": "The best pay, and the most tiring.",
-  "jobTerms": "{wage} a week · −{energy} energy",
+  "jobTerms": "{wage} a week · −{energy} creativity",
   "@jobTerms": {
     "placeholders": {
       "wage": {
@@ -279,7 +296,7 @@
     }
   },
   "restThisWeek": "Rest this week",
-  "restHint": "No writing this week; +{energy} energy at its end.",
+  "restHint": "No writing this week; +{energy} creativity at its end.",
   "@restHint": {
     "placeholders": {
       "energy": {
@@ -288,7 +305,7 @@
     }
   },
   "restingThisWeek": "Resting this week",
-  "energyNextWeek": "Next week: {change} energy",
+  "energyNextWeek": "Next week: {change} creativity",
   "@energyNextWeek": {
     "placeholders": {
       "change": {
@@ -296,9 +313,9 @@
       }
     }
   },
-  "lowEnergyWarning": "Low energy: songs come out weaker.",
+  "lowEnergyWarning": "Low creativity: songs come out weaker.",
   "burnoutConfirmTitle": "Burn out?",
-  "burnoutConfirmBody": "This song uses up your energy: you won't be able to write for {weeks} weeks.",
+  "burnoutConfirmBody": "This song uses up your creativity: you won't be able to write for {weeks} weeks.",
   "@burnoutConfirmBody": {
     "placeholders": {
       "weeks": {
@@ -536,14 +553,33 @@
       }
     }
   },
-  "editionsHint": "Extra editions (vinyl colors, deluxe…) make devoted fans buy again. {cost} each.",
-  "@editionsHint": {
+  "editionsHint": "Extra editions make devoted fans buy again. Pick a format and a cover for each; what collectors want depends on the era.",
+  "editionN": "Edition {n}",
+  "@editionN": {
     "placeholders": {
-      "cost": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editionStandard": "Standard",
+  "formatCd": "CD",
+  "formatVinyl": "Vinyl",
+  "formatCassette": "Cassette",
+  "formatDeluxe": "Deluxe (digital)",
+  "formatSigned": "Signed CD",
+  "formatAppealHigh": "Collectors love it now",
+  "formatAppealMid": "Sells fine now",
+  "formatAppealLow": "Few buy it now",
+  "editionWeek": "Out {week}",
+  "@editionWeek": {
+    "placeholders": {
+      "week": {
         "type": "String"
       }
     }
   },
+  "editionCover": "Edition cover",
   "staggerEditions": "Release extras in later weeks",
   "staggerEditionsHint": "Keeps the album selling for longer.",
   "release": "Release",
@@ -668,7 +704,7 @@
   "eraSmash": "Smash",
   "errorGeneric": "Something went wrong.",
   "errorNotEnoughMoney": "Not enough money.",
-  "errorWeeklyLimit": "You can write at most 3 songs a week.",
+  "errorResting": "You are resting this week.",
   "errorNoSkillPoints": "No skill points left. You get one every week.",
   "errorSkillMaxed": "This skill is already 100.",
   "errorBurnout": "You are burned out. Rest for a few weeks.",
@@ -972,7 +1008,7 @@
     }
   },
   "stepRestTitle": "Take a breather",
-  "stepRestBody": "Your energy is low and songs come out weaker. Resting this week gives +{energy} energy.",
+  "stepRestBody": "Your creativity is low and songs come out weaker. Resting this week gives +{energy} creativity.",
   "@stepRestBody": {
     "placeholders": {
       "energy": {
@@ -1032,10 +1068,10 @@
   "singleUnitsHint": "Sales + streams ÷ 150",
   "stepJobBody": "Money is tight. A day job pays every week.",
   "stepWriteTitle": "Write a song",
-  "stepWriteBody": "You can write {count} more songs this week.",
+  "stepWriteBody": "Creativity {value}: a good time to write.",
   "@stepWriteBody": {
     "placeholders": {
-      "count": {
+      "value": {
         "type": "int"
       }
     }

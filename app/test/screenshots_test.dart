@@ -69,7 +69,7 @@ void main() {
     final songs = <int>[];
     while (songs.length < 13) {
       final (p, _, _) = await c.run(Cmd.snapshot());
-      if (p.songsLeftThisWeek == 0 || p.creativeEnergy < 30) {
+      if (!p.canWrite || p.creativeEnergy < 30) {
         await c.run(Cmd.nextWeek());
         continue;
       }
@@ -132,6 +132,26 @@ void main() {
     await tester.tap(find.text('Change date'));
     await shot(tester, '06b_release_timing');
     await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
+    // Album builder: extra editions with their own format (K46).
+    await tester.tap(find.text('New album / EP'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Edition 2'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Edition 2'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edition 3'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Cassette').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cassette').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Cassette · \$20,000'), findsOneWidget);
+    await tester.scrollUntilVisible(
+        find.text('Release extras in later weeks'), 200,
+        scrollable: find.byType(Scrollable).first);
+    await shot(tester, '06c_album_editions');
+    await tester.pageBack();
     await tester.pumpAndSettle();
     await tab(tester, 'Charts');
     await shot(tester, '07_charts_songs');
@@ -256,7 +276,7 @@ void main() {
 
     // Energy, rest and day jobs on Home.
     await tab(tester, 'Home');
-    await tester.tap(find.text('Energy'));
+    await tester.tap(find.text('Creativity'));
     await shot(tester, '20_energy_sheet');
     await tester.tapAt(const Offset(200, 80));
     await tester.pumpAndSettle();

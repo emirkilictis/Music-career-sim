@@ -96,12 +96,16 @@ void main() {
       }
     });
 
-    test('max three songs per week', () {
-      for (var i = 0; i < 3; i++) {
+    test('no weekly limit: low creativity weakens songs (K46)', () {
+      for (var i = 0; i < 4; i++) {
         Actions.writeSong(w, p, budget: BudgetTier.low);
       }
-      expect(() => Actions.writeSong(w, p, budget: BudgetTier.low),
-          throwsA(isA<SongwritingException>()));
+      expect(p.creativeEnergy, 20);
+      expect(Actions.canWrite(w, p), isTrue);
+      expect(Actions.creativityPenalty(100), 0);
+      expect(Actions.creativityPenalty(50), 0);
+      expect(Actions.creativityPenalty(20), closeTo(9, 1e-9));
+      expect(Actions.creativityPenalty(0), closeTo(15, 1e-9));
     });
 
     test('writing until energy is gone causes burnout', () {

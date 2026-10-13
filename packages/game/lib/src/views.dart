@@ -81,10 +81,10 @@ class ArtistView {
         creativeEnergy = a.creativeEnergy,
         burnoutWeeksLeft =
             a.burnoutUntilWeek > w.week ? a.burnoutUntilWeek - w.week : 0,
-        songsLeftThisWeek = Actions.canWrite(w, a)
-            ? Actions.maxSongsPerWeek -
-                (a.lastWriteWeek == w.week ? a.songsWrittenThisWeek : 0)
-            : 0,
+        canWrite = Actions.canWrite(w, a),
+        songsWrittenThisWeek =
+            a.lastWriteWeek == w.week ? a.songsWrittenThisWeek : 0,
+        creativityPenalty = Actions.creativityPenalty(a.creativeEnergy),
         adsLeftThisWeek = Actions.adsLeftThisWeek(w, a),
         job = a.job,
         skillPoints = a.skillPoints,
@@ -141,7 +141,13 @@ class ArtistView {
   final double comebackSupport;
   final double creativeEnergy;
   final int burnoutWeeksLeft;
-  final int songsLeftThisWeek;
+
+  /// Not burnt out and not resting: no weekly limit (docs K46).
+  final bool canWrite;
+  final int songsWrittenThisWeek;
+
+  /// Quality the next song loses to low creativity (0 = full strength).
+  final double creativityPenalty;
   final int adsLeftThisWeek;
   final Job job;
   bool get hasJob => job != Job.none;
@@ -263,6 +269,12 @@ class AlbumView {
         releaseWeek = al.releaseWeek,
         trackIds = List.unmodifiable(al.songIds),
         variantWeeks = List.unmodifiable(al.variantWeeks),
+        variantFormats = [
+          for (var k = 0; k < al.variantWeeks.length; k++)
+            k < al.variantFormats.length && al.variantFormats[k] >= 0
+                ? EditionFormat.values[al.variantFormats[k]]
+                : null,
+        ],
         campaign = al.campaign,
         charts = _records(al),
         firstWeekUsUnits = w.albumFirstWeekIn(al, ChartMarket.us),
@@ -286,6 +298,10 @@ class AlbumView {
   final int releaseWeek;
   final List<int> trackIds;
   final List<int> variantWeeks;
+
+  /// Format of each edition (null = standard / classic), parallel to
+  /// [variantWeeks].
+  final List<EditionFormat?> variantFormats;
   final Campaign campaign;
   final List<ChartRecord> charts;
   final double firstWeekUsUnits;

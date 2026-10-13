@@ -96,10 +96,14 @@ abstract final class Cmd {
     required List<int> songIds,
     required AlbumType type,
     required List<int> variantWeeks,
+    List<EditionFormat?> variantFormats = const [],
     required Campaign campaign,
   }) =>
       (s) => s.releaseAlbum(title, songIds,
-          type: type, variantWeeks: variantWeeks, campaign: campaign);
+          type: type,
+          variantWeeks: variantWeeks,
+          variantFormats: variantFormats,
+          campaign: campaign);
 
   static SessionCmd<ScheduledView> scheduleSingle(
           int songId, Campaign campaign, int releaseWeek, int announceWeek) =>
@@ -113,6 +117,7 @@ abstract final class Cmd {
     required List<int> songIds,
     required AlbumType type,
     required List<int> variantWeeks,
+    List<EditionFormat?> variantFormats = const [],
     required Campaign campaign,
     required int releaseWeek,
     required int announceWeek,
@@ -120,6 +125,7 @@ abstract final class Cmd {
       (s) => s.scheduleAlbum(title, songIds,
           type: type,
           variantWeeks: variantWeeks,
+          variantFormats: variantFormats,
           campaign: campaign,
           releaseWeek: releaseWeek,
           announceWeek: announceWeek);

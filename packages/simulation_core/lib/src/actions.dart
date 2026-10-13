@@ -25,7 +25,6 @@ class SongwritingException implements Exception {
 /// Rules: docs/game-design.md §4 (songwriting) and §5 (eras).
 abstract final class Actions {
   static const energyCostPerSong = 20.0;
-  static const maxSongsPerWeek = 3;
   static const burnoutWeeks = 3;
   static const inspirationChance = 0.04;
   static const inspirationBonus = 20.0;
@@ -43,7 +42,7 @@ abstract final class Actions {
   static void setJob(World w, Artist a, Job job) => a.job = job;
 
   /// Skill points the player earns each week, and the skill ceiling.
-  static const skillPointsPerWeek = 1;
+  static const skillPointsPerWeek = 2;
   static const maxSkill = 100.0;
 
   /// Spends one skill point: +1 on [kind], up to [maxSkill].
@@ -131,13 +130,20 @@ abstract final class Actions {
         BudgetTier.high => 10,
       };
 
-  static bool canWrite(World w, Artist a) {
-    if (w.week < a.burnoutUntilWeek) return false;
-    if (a.restWeek == w.week) return false;
-    final writtenThisWeek =
-        a.lastWriteWeek == w.week ? a.songsWrittenThisWeek : 0;
-    return writtenThisWeek < maxSongsPerWeek;
-  }
+  /// No weekly limit (docs K46): creativity is the limit. Each song uses
+  /// [energyCostPerSong] of it, and the lower it is, the weaker the song.
+  static bool canWrite(World w, Artist a) =>
+      w.week >= a.burnoutUntilWeek && a.restWeek != w.week;
+
+  /// Creativity at or above this writes at full strength.
+  static const creativityFull = 50.0;
+
+  /// Quality points lost per point of creativity below [creativityFull].
+  static const creativityPenaltyRate = 0.3;
+
+  /// Quality lost by a song written at creativity [c] (0 at 50+, 15 at 0).
+  static double creativityPenalty(double c) =>
+      c >= creativityFull ? 0 : (creativityFull - c) * creativityPenaltyRate;
 
   /// Writes and records a song into the artist's vault.
   ///
@@ -165,13 +171,13 @@ abstract final class Actions {
     if (!aiMode && !canWrite(w, a)) {
       throw SongwritingException(w.week < a.burnoutUntilWeek
           ? 'Burnout: cannot write until week ${a.burnoutUntilWeek}'
-          : 'Weekly songwriting limit reached');
+          : 'Resting this week');
     }
     if (a.lastWriteWeek != w.week) {
       a.lastWriteWeek = w.week;
       a.songsWrittenThisWeek = 0;
     }
-    final index = a.songsWrittenThisWeek;
+    final index = a.songsWrittenThisWeek % 64;
 
     if (!aiMode) {
       for (final c in [producer, cowriter]) {
@@ -210,8 +216,7 @@ abstract final class Actions {
     final luck = r.nextNormal() * (aiMode ? 8.0 : 6.0);
     final inspired = r.chance(inspirationChance);
     final energyBefore = a.creativeEnergy;
-    final energyPenalty =
-        (!aiMode && energyBefore < 30) ? (30 - energyBefore) * 0.5 : 0.0;
+    final energyPenalty = aiMode ? 0.0 : creativityPenalty(energyBefore);
 
     final raw = skill +
         (a.tier == ArtistTier.player ? w.difficulty.qualityBonus : 0) +
@@ -341,9 +346,21 @@ abstract final class Actions {
   /// Manufacturing/setup cost per extra variant for the player.
   static const variantCostCents = 4000000;
 
+  /// What the player pays for the extra editions [formats] (index 0 is
+  /// the standard edition and free; missing formats cost a classic one).
+  static int editionsCostCents(int count, List<int> formats) {
+    var sum = 0;
+    for (var k = 1; k < count; k++) {
+      final f = k < formats.length ? formats[k] : -1;
+      sum += f < 0 ? variantCostCents : EditionFormat.values[f].costCents;
+    }
+    return sum;
+  }
+
   static Album releaseAlbum(World w, Artist a, String title, List<int> songIds,
       {AlbumType type = AlbumType.album,
       List<int> variantWeeks = const [0],
+      List<int> variantFormats = const [],
       bool payForVariants = false,
       Campaign campaign = Campaign.standard,
       bool prepaid = false,
@@ -366,10 +383,21 @@ abstract final class Actions {
     );
     album.hypeAtRelease = a.hype;
     album.campaign = campaign;
-    album.variantWeeks = (List.of(variantWeeks)..sort());
+    // Formats follow their editions when the weeks are sorted.
+    final order = List.generate(variantWeeks.length, (i) => i)
+      ..sort((x, y) {
+        final d = variantWeeks[x].compareTo(variantWeeks[y]);
+        return d != 0 ? d : x.compareTo(y);
+      });
+    album.variantWeeks = [for (final i in order) variantWeeks[i]];
+    album.variantFormats = [
+      for (final i in order)
+        if (i < variantFormats.length) variantFormats[i] else -1,
+    ];
+    if (album.variantFormats.every((f) => f < 0)) album.variantFormats = [];
     w.dirtyAlbums.add(album.id);
     if (payForVariants && variantWeeks.length > 1) {
-      a.moneyCents -= variantCostCents * (variantWeeks.length - 1);
+      a.moneyCents -= editionsCostCents(variantWeeks.length, variantFormats);
     }
     w.albums.add(album);
     for (final id in songIds) {
@@ -410,6 +438,7 @@ abstract final class Actions {
         final al = releaseAlbum(w, a, sr.title, free,
             type: sr.type,
             variantWeeks: sr.variantWeeks,
+            variantFormats: sr.variantFormats,
             campaign: sr.campaign,
             prepaid: true,
             buzz: sr.buzz);

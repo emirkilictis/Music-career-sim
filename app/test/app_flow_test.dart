@@ -159,6 +159,7 @@ void main() {
     await tester.tap(find.text('Studio'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.textContaining('Write & record'));
+    await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Write & record'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));
@@ -222,6 +223,7 @@ void main() {
     await tester.tap(find.text('Studio'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.textContaining('Write & record'));
+    await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Write & record'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('OK'));

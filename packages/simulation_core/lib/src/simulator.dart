@@ -447,8 +447,12 @@ class Simulator {
       // standard edition) sells extra copies, with diminishing returns.
       var variantSum = 0.0;
       final vw = al.variantWeeks;
+      final year = GameTime.yearOf(w.week);
       for (var k = 1; k < vw.length; k++) {
-        if (vw[k] == age) variantSum += math.pow(c.variantDecay, k - 1);
+        if (vw[k] == age) {
+          variantSum +=
+              math.pow(c.variantDecay, k - 1) * al.editionAppeal(k, year);
+        }
       }
       final noise =
           RandomStream.keyed(w.seed, w.week, al.id, RngPurpose.albumNoise)

@@ -287,7 +287,7 @@ class GameSession {
       throw GameException('burnout', 'Burnout until ${p.burnoutUntilWeek}');
     }
     if (!Actions.canWrite(world, p)) {
-      throw GameException('weeklyLimit', 'Weekly songwriting limit reached');
+      throw GameException('resting', 'Resting this week');
     }
     final producer = _collaborator(producerId, CollaboratorRole.producer);
     final cowriter = _collaborator(cowriterId, CollaboratorRole.songwriter);
@@ -379,14 +379,16 @@ class GameSession {
     List<int> songIds, {
     AlbumType type = AlbumType.album,
     List<int> variantWeeks = const [0],
+    List<EditionFormat?> variantFormats = const [],
     Campaign campaign = Campaign.standard,
     required int releaseWeek,
     required int announceWeek,
   }) {
-    final t = _checkAlbum(title, songIds, type, variantWeeks);
+    final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
     _checkDates(releaseWeek, announceWeek);
+    final formats = _formats(variantFormats);
     final cost = campaign.costCents +
-        Actions.variantCostCents * (variantWeeks.length - 1);
+        Actions.editionsCostCents(variantWeeks.length, formats);
     _requireMoney(cost);
     return _schedule(ScheduledRelease(
       id: _nextScheduleId(),
@@ -394,6 +396,7 @@ class GameSession {
       songIds: List.of(songIds),
       title: t,
       variantWeeks: List.of(variantWeeks),
+      variantFormats: formats,
       releaseWeek: releaseWeek,
       announceWeek: announceWeek,
       createdWeek: world.week,
@@ -469,22 +472,29 @@ class GameSession {
     List<int> songIds, {
     AlbumType type = AlbumType.album,
     List<int> variantWeeks = const [0],
+    List<EditionFormat?> variantFormats = const [],
     Campaign campaign = Campaign.standard,
   }) {
-    final t = _checkAlbum(title, songIds, type, variantWeeks);
+    final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
+    final formats = _formats(variantFormats);
     _requireMoney(campaign.costCents +
-        Actions.variantCostCents * (variantWeeks.length - 1));
+        Actions.editionsCostCents(variantWeeks.length, formats));
     final al = Actions.releaseAlbum(world, _p, t, songIds,
         type: type,
         variantWeeks: variantWeeks,
+        variantFormats: formats,
         payForVariants: true,
         campaign: campaign);
     _saveNow();
     return AlbumView.of(world, al);
   }
 
+  static List<int> _formats(List<EditionFormat?> f) =>
+      [for (final x in f) x?.index ?? -1];
+
   String _checkAlbum(
-      String title, List<int> songIds, AlbumType type, List<int> variantWeeks) {
+      String title, List<int> songIds, AlbumType type, List<int> variantWeeks,
+      [List<EditionFormat?> variantFormats = const []]) {
     final t = title.trim();
     if (t.isEmpty || t.length > 60) {
       throw GameException('invalidTitle', 'Title must be 1–60 chars');
@@ -512,6 +522,11 @@ class GameSession {
         variantWeeks.any((x) => x < 0 || x > maxVariantWeek) ||
         !variantWeeks.contains(0)) {
       throw GameException('invalidVariants', 'Variants must include week 0');
+    }
+    if (variantFormats.length > variantWeeks.length ||
+        (variantFormats.isNotEmpty && variantFormats.first != null)) {
+      throw GameException(
+          'invalidVariants', 'One format per extra edition (not the first)');
     }
     return t;
   }

@@ -82,6 +82,39 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               style: TextStyle(color: Theme.of(context).colorScheme.outline),
             ),
           ),
+          if (a.variantWeeks.length > 1) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.editions,
+              icon: Icons.library_music_outlined,
+              child: Column(children: [
+                for (var k = 0; k < a.variantWeeks.length; k++)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: CoverArt(
+                        seed: albumCoverSeed(a.id) + k,
+                        albumId: a.id,
+                        imageKey: k == 0
+                            ? null
+                            : ImageStore.editionKey(
+                                ImageStore.albumKey(a.id), k),
+                        size: 48),
+                    title: Text(k == 0
+                        ? l.editionStandard
+                        : '${l.editionN(k + 1)} · ${fmt.editionFormat(a.variantFormats[k])}'),
+                    subtitle: Text(l.editionWeek(
+                        fmt.week(a.releaseWeek + a.variantWeeks[k]))),
+                    trailing: const Icon(Icons.edit_outlined),
+                    onTap: () => editImage(
+                        context,
+                        k == 0
+                            ? ImageStore.albumKey(a.id)
+                            : ImageStore.editionKey(
+                                ImageStore.albumKey(a.id), k)),
+                  ),
+              ]),
+            ),
+          ],
           const SizedBox(height: 12),
           Section(
             title: l.firstWeek,

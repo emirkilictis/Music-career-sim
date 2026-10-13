@@ -91,13 +91,15 @@ void main() {
           _code('collaboratorRefused'));
       expect(() => g.writeSong(budget: BudgetTier.low, genres: [0, 0]),
           _code('invalidGenres'));
-      // Refusals did not use up the weekly songwriting slots.
-      expect(g.player.songsLeftThisWeek, 3);
+      // Refusals did not use up any creativity.
+      final creativity = g.player.creativeEnergy;
+      expect(g.player.songsWrittenThisWeek, 0);
       final ids = [
         for (var i = 0; i < 3; i++)
           g.writeSong(budget: BudgetTier.low, genres: [0, 6]).id,
       ];
-      expect(g.writeSong, _code('weeklyLimit'));
+      expect(
+          g.player.creativeEnergy, creativity - 3 * Actions.energyCostPerSong);
       expect(g.vault.length, 3);
       expect(g.song(ids.first).genres, [0, 6]);
 
@@ -115,6 +117,15 @@ void main() {
         g.rewardAd();
       }
       expect(g.rewardAd, _code('adLimit'));
+
+      // No weekly limit (K46): low creativity weakens songs, and writing
+      // on until it runs out means burnout.
+      expect(g.player.creativityPenalty, greaterThan(0));
+      while (g.player.canWrite) {
+        g.writeSong(budget: BudgetTier.low);
+      }
+      expect(g.player.burnoutWeeksLeft, greaterThan(0));
+      expect(g.writeSong, _code('burnout'));
       g.close();
     });
 
@@ -147,7 +158,7 @@ void main() {
       g.close();
     });
 
-    test('a skill point every week, spent up to 100, kept on reopening', () {
+    test('skill points every week, spent up to 100, kept on reopening', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;
       final vocals = g.player.skills[SkillKind.vocals]!;
@@ -158,7 +169,7 @@ void main() {
         g.advanceWeek();
         fame.add(g.player.fame);
       }
-      expect(g.player.skillPoints, 4);
+      expect(g.player.skillPoints, 4 * Actions.skillPointsPerWeek);
       // Near the cap (as after years of practice): the last point fills it.
       g.world.artists[g.player.id].skills.songwriting = 99.5;
       g.spendSkillPoint(SkillKind.songwriting);
@@ -166,11 +177,11 @@ void main() {
       expect(
           () => g.spendSkillPoint(SkillKind.songwriting), _code('skillMaxed'));
       g.spendSkillPoint(SkillKind.vocals);
-      expect(g.player.skillPoints, 2);
+      expect(g.player.skillPoints, 4 * Actions.skillPointsPerWeek - 2);
       g.close();
 
       g = GameSession.resume(slots, id);
-      expect(g.player.skillPoints, 2);
+      expect(g.player.skillPoints, 4 * Actions.skillPointsPerWeek - 2);
       expect(g.player.skills[SkillKind.vocals], vocals + 1);
       // Fame never goes down (docs K44).
       for (var i = 1; i < fame.length; i++) {
@@ -265,7 +276,7 @@ void main() {
         g.world.player!.moneyCents = 1 << 40;
         final songs = <int>[];
         while (songs.length < 8) {
-          if (g.player.songsLeftThisWeek == 0 || g.player.creativeEnergy < 30) {
+          if (!g.player.canWrite || g.player.creativeEnergy < 30) {
             g.advanceWeek();
             continue;
           }
@@ -285,6 +296,44 @@ void main() {
       final surprise = firstWeek(false);
       final announced = firstWeek(true);
       expect(announced, greaterThan(surprise * 1.1));
+    });
+
+    test('edition formats: vinyl beats cassette in the 2020s, costs differ',
+        () {
+      (double, int) firstWeek(EditionFormat f) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2021,
+                premium: true,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire));
+        g.world.player!.moneyCents = 1 << 40;
+        final songs = <int>[];
+        while (songs.length < 8) {
+          if (!g.player.canWrite || g.player.creativeEnergy < 30) {
+            g.advanceWeek();
+            continue;
+          }
+          songs.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        final money = g.player.moneyCents;
+        g.releaseAlbum('Big', songs,
+            variantWeeks: const [0, 0, 0],
+            variantFormats: [null, f, f],
+            campaign: Campaign.none);
+        final paid = money - g.player.moneyCents;
+        expect(g.albums.first.variantFormats, [null, f, f]);
+        final fw = g.advanceWeek().events.whereType<AlbumFirstWeek>().first;
+        g.close();
+        return (fw.globalUnits, paid);
+      }
+
+      final (vinyl, vinylPaid) = firstWeek(EditionFormat.vinyl);
+      final (cassette, cassettePaid) = firstWeek(EditionFormat.cassette);
+      expect(vinyl, greaterThan(cassette));
+      expect(vinylPaid, 2 * EditionFormat.vinyl.costCents);
+      expect(cassettePaid, 2 * EditionFormat.cassette.costCents);
     });
 
     test('an early-2000s single sells CDs, not streams', () {
@@ -335,7 +384,7 @@ void main() {
       g.world.player!.moneyCents = 1 << 40;
       final songs = <int>[];
       while (songs.length < 12) {
-        if (g.player.songsLeftThisWeek == 0 || g.player.creativeEnergy < 30) {
+        if (!g.player.canWrite || g.player.creativeEnergy < 30) {
           g.advanceWeek();
           continue;
         }

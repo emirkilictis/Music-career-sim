@@ -56,15 +56,16 @@ class CoverArt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = _images(context);
+    String? own() => songId != null
+        ? store!.songCover(songId!, albumId ?? -1)
+        : albumId != null
+            ? store!.albumCover(albumId!)
+            : null;
+    // Another stored image first (e.g. an edition's own cover), then the
+    // release's.
     final path = store == null
         ? null
-        : imageKey != null
-            ? store.path(imageKey!)
-            : songId != null
-                ? store.songCover(songId!, albumId ?? -1)
-                : albumId != null
-                    ? store.albumCover(albumId!)
-                    : null;
+        : (imageKey == null ? null : store.path(imageKey!)) ?? own();
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius ?? size * 0.12),
       child: SizedBox.square(

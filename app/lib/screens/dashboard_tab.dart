@@ -168,7 +168,7 @@ class _NextStepCard extends StatelessWidget {
       _
           when p.creativeEnergy < 30 &&
               !p.restingThisWeek &&
-              p.songsLeftThisWeek == Actions.maxSongsPerWeek =>
+              p.songsWrittenThisWeek == 0 =>
         (
           Icons.beach_access_rounded,
           l.stepRestTitle,
@@ -206,10 +206,10 @@ class _NextStepCard extends StatelessWidget {
           l.goCareer,
           () => onOpenTab?.call(4),
         ),
-      _ when p.songsLeftThisWeek > 0 && p.creativeEnergy >= 40 => (
+      _ when p.canWrite && p.creativityPenalty == 0 => (
           Icons.edit_note_rounded,
           l.stepWriteTitle,
-          l.stepWriteBody(p.songsLeftThisWeek),
+          l.stepWriteBody(p.creativeEnergy.round()),
           l.goStudio,
           () => onOpenTab?.call(1),
         ),
@@ -413,7 +413,7 @@ class _EnergySheet extends StatelessWidget {
     final career = context.career;
     final p = career.player;
     final canRest = !p.restingThisWeek &&
-        p.songsLeftThisWeek == Actions.maxSongsPerWeek &&
+        p.songsWrittenThisWeek == 0 &&
         p.burnoutWeeksLeft == 0;
     return SafeArea(
       child: Padding(
@@ -439,7 +439,9 @@ class _EnergySheet extends StatelessWidget {
                   ? l.burnoutWeeks(p.burnoutWeeksLeft)
                   : p.restingThisWeek
                       ? l.restingThisWeek
-                      : l.songsLeftThisWeek(p.songsLeftThisWeek),
+                      : p.creativityPenalty > 0
+                          ? l.creativityPenalty(p.creativityPenalty.round())
+                          : l.creativityFull,
               style: TextStyle(
                   fontWeight: FontWeight.w600, color: AppColors.textMuted),
             ),

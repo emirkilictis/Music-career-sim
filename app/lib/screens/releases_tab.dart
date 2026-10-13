@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
@@ -96,26 +98,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
       ),
     );
     if (song == null || !mounted) return;
-    final when = await pickReleaseTiming(context, week: career.week);
-    if (when == null || !mounted) return;
-    final campaign = await pickCampaign(context, career,
-        header: CoverPickRow(songId: song.id, albumId: song.albumId));
-    if (campaign == null || !mounted) return;
-    try {
-      if (when.releaseWeek == career.week) {
-        await career.act(Cmd.releaseSingle(song.id, campaign));
-        if (mounted) showInfo(context, l.singleReleased(song.title));
-      } else {
-        await career.act(Cmd.scheduleSingle(
-            song.id, campaign, when.releaseWeek, when.announceWeek));
-        if (mounted) {
-          showInfo(context,
-              l.releaseScheduled(song.title, fmt.week(when.releaseWeek)));
-        }
-      }
-    } catch (e) {
-      if (mounted) showError(context, e);
-    }
+    await releaseSingleFlow(context, career, song);
   }
 
   /// Change the date of a scheduled release, or call it off.
@@ -309,6 +292,36 @@ class _ReleasesTabState extends State<ReleasesTab> {
   }
 }
 
+/// Puts [song] out as a single: when (now or later, with its announcement;
+/// docs K45), then the campaign. Returns true if it was released or set.
+Future<bool> releaseSingleFlow(
+    BuildContext context, CareerState career, SongView song) async {
+  final l = context.l10n;
+  final fmt = context.fmt;
+  final when = await pickReleaseTiming(context, week: career.week);
+  if (when == null || !context.mounted) return false;
+  final campaign = await pickCampaign(context, career,
+      header: CoverPickRow(songId: song.id, albumId: song.albumId));
+  if (campaign == null || !context.mounted) return false;
+  try {
+    if (when.releaseWeek == career.week) {
+      await career.act(Cmd.releaseSingle(song.id, campaign));
+      if (context.mounted) showInfo(context, l.singleReleased(song.title));
+    } else {
+      await career.act(Cmd.scheduleSingle(
+          song.id, campaign, when.releaseWeek, when.announceWeek));
+      if (context.mounted) {
+        showInfo(context,
+            l.releaseScheduled(song.title, fmt.week(when.releaseWeek)));
+      }
+    }
+    return true;
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+    return false;
+  }
+}
+
 /// Campaign choice with prices (docs/game-design.md §9).
 Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
     {int extraCents = 0, Widget? header}) {
@@ -373,7 +386,9 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
   final _title = TextEditingController();
   final Set<int> _picked = {};
   AlbumType _type = AlbumType.album;
-  int _editions = 1;
+
+  /// Extra editions after the standard one (docs K46).
+  final List<_Edition> _extras = [];
 
   /// Cover picked before the album exists; saved once it is released.
   String? _cover;
@@ -387,10 +402,23 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
 
   List<int> get _variantWeeks => [
         0,
-        for (var i = 1; i < _editions; i++) _stagger ? i : 0,
+        for (var i = 1; i <= _extras.length; i++) _stagger ? i : 0,
       ];
 
-  int get _variantCost => Actions.variantCostCents * (_editions - 1);
+  List<EditionFormat?> get _variantFormats =>
+      [null, for (final e in _extras) e.format];
+
+  int get _variantCost => _extras.fold(0, (sum, e) => sum + e.format.costCents);
+
+  /// Saves the covers chosen here under the album's (or schedule's) key.
+  void _saveCovers(ImageStore images, String base) {
+    final cover = _cover;
+    if (cover != null) images.save(base, cover);
+    for (var i = 0; i < _extras.length; i++) {
+      final c = _extras[i].cover;
+      if (c != null) images.save(ImageStore.editionKey(base, i + 1), c);
+    }
+  }
 
   Future<void> _release() async {
     final l = context.l10n;
@@ -405,7 +433,6 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
         await pickCampaign(context, career, extraCents: _variantCost);
     if (campaign == null || !mounted) return;
     try {
-      final cover = _cover;
       final images = context.imagesRead;
       if (when.releaseWeek == career.week) {
         final album = await career.act(Cmd.releaseAlbum(
@@ -413,9 +440,10 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           songIds: ordered,
           type: _type,
           variantWeeks: _variantWeeks,
+          variantFormats: _variantFormats,
           campaign: campaign,
         ));
-        if (cover != null) images.save(ImageStore.albumKey(album.id), cover);
+        _saveCovers(images, ImageStore.albumKey(album.id));
         if (!mounted) return;
         Navigator.pop(context);
         showInfo(context, l.albumReleased(album.title));
@@ -425,11 +453,12 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           songIds: ordered,
           type: _type,
           variantWeeks: _variantWeeks,
+          variantFormats: _variantFormats,
           campaign: campaign,
           releaseWeek: when.releaseWeek,
           announceWeek: when.announceWeek,
         ));
-        if (cover != null) images.save(ImageStore.scheduledKey(s.id), cover);
+        _saveCovers(images, ImageStore.scheduledKey(s.id));
         if (!mounted) return;
         Navigator.pop(context);
         showInfo(context,
@@ -451,6 +480,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
     final ok = n >= lo && n <= hi && _title.text.trim().isNotEmpty;
     final songs = [...widget.songs]
       ..sort((a, b) => b.estimatedGrade.compareTo(a.estimatedGrade));
+    final year = GameTime.yearOf(widget.state.week);
     return Scaffold(
       appBar: AppBar(title: Text(l.newAlbum)),
       body: ListView(
@@ -500,25 +530,34 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           const SizedBox(height: 12),
           Section(
             title: l.editions,
+            trailing: Text(l.editionsCount(_extras.length + 1),
+                style: TextStyle(color: AppColors.textMuted)),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(children: [
-                    Expanded(child: Text(l.editionsCount(_editions))),
-                    IconButton(
-                        onPressed: _editions > 1
-                            ? () => setState(() => _editions--)
-                            : null,
-                        icon: const Icon(Icons.remove_circle_outline)),
-                    IconButton(
-                        onPressed: _editions < GameSession.maxVariants
-                            ? () => setState(() => _editions++)
-                            : null,
-                        icon: const Icon(Icons.add_circle_outline)),
-                  ]),
-                  Text(l.editionsHint(fmt.money(Actions.variantCostCents)),
+                  Text(l.editionsHint,
                       style: Theme.of(context).textTheme.bodySmall),
-                  if (_editions > 1)
+                  for (var i = 0; i < _extras.length; i++)
+                    _EditionEditor(
+                      index: i + 2,
+                      edition: _extras[i],
+                      year: year,
+                      onChanged: () => setState(() {}),
+                      onRemove: () => setState(() => _extras.removeAt(i)),
+                    ),
+                  if (_extras.length < GameSession.maxVariants - 1)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => setState(() => _extras.add(_Edition(
+                            year >= 2015
+                                ? EditionFormat.vinyl
+                                : EditionFormat.cd))),
+                        icon: const Icon(Icons.add_circle_outline),
+                        label: Text(l.editionN(_extras.length + 2)),
+                      ),
+                    ),
+                  if (_extras.isNotEmpty)
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(l.staggerEditions),
@@ -542,6 +581,107 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Edition {
+  _Edition(this.format);
+  EditionFormat format;
+  String? cover;
+}
+
+/// One extra edition: its cover (the player's own photo), its format and
+/// how that format sells right now.
+class _EditionEditor extends StatelessWidget {
+  const _EditionEditor({
+    required this.index,
+    required this.edition,
+    required this.year,
+    required this.onChanged,
+    required this.onRemove,
+  });
+  final int index;
+  final _Edition edition;
+  final int year;
+  final VoidCallback onChanged;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final cover = edition.cover;
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHigh,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: () async {
+              final picked = await context.imagesRead.source.pick();
+              if (picked != null) {
+                edition.cover = picked;
+                onChanged();
+              }
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox.square(
+                dimension: 56,
+                child: cover == null
+                    ? ColoredBox(
+                        color: AppColors.surface,
+                        child: Icon(Icons.add_photo_alternate_outlined,
+                            color: AppColors.textMuted))
+                    : Image.file(File(cover), fit: BoxFit.cover),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(l.editionN(index),
+                  style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(
+                  '${fmt.editionFormat(edition.format)} · '
+                  '${fmt.money(edition.format.costCents)}',
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+              Text(fmt.formatAppeal(edition.format, year),
+                  style: TextStyle(
+                      color: edition.format.appeal(year) >= 1.0
+                          ? AppColors.mint
+                          : edition.format.appeal(year) >= 0.7
+                              ? AppColors.textMuted
+                              : AppColors.coral,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600)),
+            ]),
+          ),
+          IconButton(
+              tooltip: l.delete,
+              onPressed: onRemove,
+              icon: const Icon(Icons.close_rounded)),
+        ]),
+        const SizedBox(height: 8),
+        Wrap(spacing: 6, runSpacing: 6, children: [
+          for (final f in EditionFormat.values)
+            ChoiceChip(
+              label: Text(fmt.editionFormat(f)),
+              selected: f == edition.format,
+              onSelected: (_) {
+                edition.format = f;
+                onChanged();
+              },
+            ),
+        ]),
+      ]),
     );
   }
 }

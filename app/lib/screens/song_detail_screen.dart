@@ -44,16 +44,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   }
 
   Future<void> _release(SongView s) async {
-    final l = context.l10n;
-    final campaign = await pickCampaign(context, widget.state);
-    if (campaign == null || !mounted) return;
-    try {
-      await widget.state.act(Cmd.releaseSingle(s.id, campaign));
-      if (mounted) showInfo(context, l.singleReleased(s.title));
-      _load();
-    } catch (e) {
-      if (mounted) showError(context, e);
-    }
+    if (await releaseSingleFlow(context, widget.state, s)) _load();
   }
 
   @override
@@ -138,7 +129,11 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     style:
                         TextStyle(color: Theme.of(context).colorScheme.outline),
                   ),
-                  if (s.inVault || (!s.isSingle && s.albumId >= 0)) ...[
+                  if (s.scheduledSingleWeek >= 0) ...[
+                    const SizedBox(height: 12),
+                    Tag(l.scheduledSingleTag(fmt.week(s.scheduledSingleWeek)),
+                        icon: Icons.event_rounded),
+                  ] else if (s.inVault || (!s.isSingle && s.albumId >= 0)) ...[
                     const SizedBox(height: 12),
                     GradientButton(
                       onPressed: () => _release(s),

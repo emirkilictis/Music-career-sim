@@ -242,6 +242,8 @@ abstract final class Codec {
     'firstWeekUnits', 'firstWeekPure', 'sumDormantRate',
     ...albumRegColumns,
     'charts',
+    // Added in schema v5.
+    'editionFormats',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -253,6 +255,7 @@ abstract final class Codec {
         al.firstWeekUnits, al.firstWeekPure, al.sumDormantRate,
         ...al.reg,
         _encodeCharts(al),
+        _ints(al.variantFormats),
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -270,6 +273,9 @@ abstract final class Codec {
       ..hypeAtRelease = _d(r['hypeAtRelease'])
       ..campaign = Campaign.values[r['campaign'] as int]
       ..variantWeeks = _parseInts(r['variants'] as String)
+      ..variantFormats = r['editionFormats'] == null
+          ? const []
+          : _parseInts(r['editionFormats'] as String)
       ..weekPure = _d(r['weekPure'])
       ..weekTea = _d(r['weekTea'])
       ..weekSea = _d(r['weekSea'])
@@ -355,6 +361,7 @@ abstract final class Codec {
             'songs': sr.songIds,
             'title': sr.title,
             'variants': sr.variantWeeks,
+            'formats': sr.variantFormats,
             'campaign': sr.campaign.index,
             'release': sr.releaseWeek,
             'announce': sr.announceWeek,
@@ -374,6 +381,7 @@ abstract final class Codec {
               songIds: (m['songs'] as List).cast<int>(),
               title: m['title'] as String,
               variantWeeks: (m['variants'] as List).cast<int>(),
+              variantFormats: ((m['formats'] as List?) ?? const []).cast<int>(),
               campaign: Campaign.values[m['campaign'] as int],
               releaseWeek: m['release'] as int,
               announceWeek: m['announce'] as int,

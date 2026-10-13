@@ -59,6 +59,18 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 
 İyi olanlar: tutarlı koyu tema ve pastel renkler, dergi tarzı liste ekranı, Streamify sayfası, hafta geçiş kartı ve alt pencereler.
 
+## F. Emir'in yeni fikirleri (düşünülecek, henüz yapılmadı)
+
+| # | Fikir | Claude'un düşüncesi |
+|---|---|---|
+| F1 | **Arayüz yumuşak değil de biraz keskin mi olsun?** (Emir emin değil.) | Şu an her şey çok yuvarlak (kartlar 22–28 px köşe, hap şeklinde butonlar), bu da "oyuncak / pastel" hissi veriyor. Öneri: tamamen sert değil, **yarı keskin**: kart köşeleri 22 → 10–12 px, butonlar hap yerine 10 px köşeli dikdörtgen, ilerleme çubukları düz uçlu, listeler (chart) zaten dergi gibi keskin, onlar kalsın. Ayarlar'a "Köşe stili: Yumuşak / Keskin" eklenebilir; tema gibi tek yerden değişir (palette'te radius token'ı). Önce iki ekranı yan yana gösterip Emir'e seçtirmek en iyisi. |
+| F2 | **Groove Journey'den: "Albüm #1 için plak al"** (topluluk ipucu). | K46 ile karşılandı: plak versiyonları 2015 sonrası en çok satan ek versiyon. |
+| F3 | **Mixtape dönemi:** çıkış albümünden önce "gösterilmeyen" albümlerle stream, satış ve popülerlik toplamak. | Bizde EP ve single'lar bu işi yapıyor. Gerçek mixtape'ler ücretsiz, listelere ve dönem değerlendirmesine girmez. Öneri: "Mixtape" türü: ücretsiz (satış yok, sadece stream), dönem açmaz ve flop sayılmaz, hayran ve popülerlik kazandırır. 2007–2016 hip-hop döneminde daha güçlü. |
+| F4 | **Seviye sistemi (Level 0–9):** yeni özellikler seviyeyle açılıyor. | Biz kilitleri hayran sayısına bağladık (K39). Seviye yerine "kilometre taşları" daha doğal olabilir: ilk liste girişi, ilk #1, 1M hayran… her biri bir şey açar (ör. turne, menajer, eleştirmen puanı). |
+| F5 | **Eleştirmen puanları (Stitchfork benzeri):** albüme 0–10 puan ve yorum. | Güzel fikir, çünkü kalite görünmez bir sayı ve oyuncu bunu ilk kez "dışarıdan" görür. Kendi kurgusal dergimiz (ör. "Pitchwork") albüm çıkınca puan ve tek cümlelik yorum versin; yüksek puan biraz satış ve prestij getirsin. Paylaşım kartına da girer. |
+| F6 | **Turneler:** kulüp ve kafeler → manşet turnesi → residency; kıta seçimi, kapasite. | Rakip incelemesinde de vardı (✅ listesi). Para ve hayran kaynağı olarak önemli, sahne ve karizma yeteneklerine anlam katar. Büyük iş; ayrı bir faz olarak planlanmalı. |
+| F7 | **Pratik / performans rezervasyonu, menajer, müzik videoları.** | Pratik artık yetenek puanıyla karşılanıyor (K43). Menajer: turne ve büyük şirket teklifleriyle (R5) birlikte. Müzik videosu: single'a tek seferlik bütçe → izlenme ve keşfedilme (video platformu 2005 sonrası). |
+
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 
 `packages/game/tool/jt_scenario.dart`: 2002'de yükselen yıldız (NSYNC sonrası), büyük şirket

@@ -75,6 +75,19 @@ class ImageStore extends ChangeNotifier {
 
   /// An album cover chosen before a scheduled album exists (docs K45).
   static String scheduledKey(int scheduleId) => 'scheduled_$scheduleId';
+
+  /// The cover of extra edition [k] (1+) of an album or scheduled album
+  /// whose own key is [base] (docs K46).
+  static String editionKey(String base, int k) => '${base}_ed$k';
+
+  /// Moves an album's cover and its editions' covers from [from] to [to].
+  void adoptWithEditions(String from, String to) {
+    adopt(from, to);
+    for (var k = 1; k <= 8; k++) {
+      adopt(editionKey(from, k), editionKey(to, k));
+    }
+  }
+
   static String artistKey(int artistId, ArtistPhoto kind) =>
       kind == ArtistPhoto.general
           ? 'artist_$artistId'

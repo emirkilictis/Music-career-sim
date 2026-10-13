@@ -238,7 +238,7 @@ class _StudioTabState extends State<StudioTab> {
     final career = context.career;
     final p = career.player;
     final genres = _genres ?? [p.genre];
-    final canWrite = p.songsLeftThisWeek > 0 && p.burnoutWeeksLeft == 0;
+    final canWrite = p.canWrite;
 
     CollaboratorView? find(List<CollaboratorView> list, int? id) =>
         id == null ? null : list.where((c) => c.id == id).firstOrNull;
@@ -260,11 +260,32 @@ class _StudioTabState extends State<StudioTab> {
                   ? l.burnoutWeeks(p.burnoutWeeksLeft)
                   : p.restingThisWeek
                       ? l.restingThisWeek
-                      : l.songsLeftThisWeek(p.songsLeftThisWeek),
+                      : l.songsWrittenThisWeek(p.songsWrittenThisWeek),
               style: TextStyle(color: AppColors.textMuted)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Creativity: the only limit on writing (docs K46).
+              MeterRow(
+                  label: l.energy,
+                  value: p.creativeEnergy / 100,
+                  text: '${p.creativeEnergy.round()}',
+                  colors: p.creativityPenalty > 0
+                      ? [AppColors.coral, AppColors.peach]
+                      : [AppColors.mint, AppColors.sky]),
+              Text(
+                  p.creativityPenalty > 0
+                      ? l.creativityPenalty(p.creativityPenalty.round())
+                      : l.creativityFull,
+                  style: TextStyle(
+                      color: p.creativityPenalty > 0
+                          ? AppColors.coral
+                          : AppColors.textMuted,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13)),
+              Text(l.creativityHint(Actions.energyCostPerSong.round()),
+                  style: TextStyle(color: AppColors.textFaint, fontSize: 12)),
+              const SizedBox(height: 6),
               _ChoiceRow(
                 label: l.genre,
                 value: fmt.genres(genres),
@@ -315,12 +336,6 @@ class _StudioTabState extends State<StudioTab> {
                   border: const OutlineInputBorder(),
                 ),
               ),
-              if (canWrite && p.creativeEnergy < 30) ...[
-                const SizedBox(height: 12),
-                Text(l.lowEnergyWarning,
-                    style: TextStyle(
-                        color: AppColors.coral, fontWeight: FontWeight.w600)),
-              ],
               const SizedBox(height: 16),
               GradientButton(
                 onPressed: canWrite && !career.busy ? _write : null,

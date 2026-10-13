@@ -146,7 +146,7 @@ Future<void> openCareer(BuildContext context, CareerState state) async {
   await state.refresh();
   if (!context.mounted) return;
   final images = context.imagesRead..open(state.slotId!);
-  state.onScheduledAlbumOut = (scheduleId, albumId) => images.adopt(
+  state.onScheduledAlbumOut = (scheduleId, albumId) => images.adoptWithEditions(
       ImageStore.scheduledKey(scheduleId), ImageStore.albumKey(albumId));
   await Navigator.push(
     context,
