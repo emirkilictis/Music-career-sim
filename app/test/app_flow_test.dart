@@ -202,6 +202,8 @@ void main() {
     // Artist photo: general one from the Career tab.
     await tester.tap(find.text('Career'));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Uses your profile photo'), 200,
+        scrollable: find.byType(Scrollable).first);
     expect(find.text('Uses your profile photo'), findsOneWidget);
     app.picker.next = photo;
     await tester.ensureVisible(find.text('Profile photo'));

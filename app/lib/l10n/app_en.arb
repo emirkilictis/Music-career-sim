@@ -924,6 +924,63 @@
   "totalSales": "Total",
   "pureSales": "Pure sales",
   "albumStats": "Album stats",
+  "milestonesTitle": "Milestones",
+  "milestonesCount": "{done} of {total}",
+  "@milestonesCount": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneReward": "+{sp} skill points",
+  "@milestoneReward": {
+    "placeholders": {
+      "sp": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneReachedOn": "Reached {date}",
+  "@milestoneReachedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "milestonesAll": "All milestones",
+  "eventMilestone": "Milestone: {name}! +{sp} skill points.",
+  "@eventMilestone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "sp": {
+        "type": "int"
+      }
+    }
+  },
+  "msFirstRelease": "First release",
+  "msFirstChart": "First chart entry",
+  "msTop40Single": "A top-40 single",
+  "msTop10Single": "A top-10 single",
+  "msNumberOneSingle": "A #1 single",
+  "msNumberOneAlbum": "A #1 album",
+  "msGold": "Gold record",
+  "msPlatinum": "Platinum record",
+  "msDiamond": "Diamond record",
+  "msFans100k": "100K fans",
+  "msFans1m": "1M fans",
+  "msFans10m": "10M fans",
+  "msMoney1m": "First million",
+  "msMoney100m": "$100M in the bank",
+  "msBillionStreams": "A billion-stream song",
+  "msFirstFestival": "First festival",
+  "msAwardWin": "Award winner",
   "profitTitle": "Profit & loss",
   "netProfit": "Net profit",
   "netLoss": "Net loss",

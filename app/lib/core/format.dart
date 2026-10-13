@@ -224,6 +224,26 @@ class Fmt {
 
   String criticScore(double score) => score.toStringAsFixed(1);
 
+  String milestoneName(Milestone m) => switch (m) {
+        Milestone.firstRelease => l.msFirstRelease,
+        Milestone.firstChart => l.msFirstChart,
+        Milestone.top40Single => l.msTop40Single,
+        Milestone.top10Single => l.msTop10Single,
+        Milestone.numberOneSingle => l.msNumberOneSingle,
+        Milestone.numberOneAlbum => l.msNumberOneAlbum,
+        Milestone.gold => l.msGold,
+        Milestone.platinum => l.msPlatinum,
+        Milestone.diamond => l.msDiamond,
+        Milestone.fans100k => l.msFans100k,
+        Milestone.fans1m => l.msFans1m,
+        Milestone.fans10m => l.msFans10m,
+        Milestone.money1m => l.msMoney1m,
+        Milestone.money100m => l.msMoney100m,
+        Milestone.billionStreams => l.msBillionStreams,
+        Milestone.firstFestival => l.msFirstFestival,
+        Milestone.awardWin => l.msAwardWin,
+      };
+
   String offerTitle(OpportunityKind k) => switch (k) {
         OpportunityKind.interview => l.offerInterviewTitle,
         OpportunityKind.feature => l.offerFeatureTitle,
@@ -438,6 +458,8 @@ class Fmt {
         l.eventCriticReview(t, criticScore(e.score), criticBlurb(e.score)),
       LabelDropped() => l.eventLabelDropped(labelName(e.label)),
       OpportunityCame() => l.eventOfferCame(offerTitle(e.kind)),
+      MilestoneReached(:final milestone) =>
+        l.eventMilestone(milestoneName(milestone), milestone.skillPoints),
       OpportunityLapsed() => e.outcome.kind == OpportunityKind.scandal
           ? offerOutcome(e.outcome)
           : l.eventOfferLapsed(offerTitle(e.outcome.kind)),

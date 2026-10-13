@@ -28,6 +28,7 @@ class EventIcon extends StatelessWidget {
       CriticReview() => (Icons.rate_review_rounded, AppColors.sky),
       LabelDropped() => (Icons.heart_broken_rounded, AppColors.coral),
       OpportunityCame(:final kind) => (opportunityIcon(kind), AppColors.butter),
+      MilestoneReached() => (Icons.flag_rounded, AppColors.gold),
       OpportunityLapsed() => (
           Icons.hourglass_bottom_rounded,
           AppColors.textMuted

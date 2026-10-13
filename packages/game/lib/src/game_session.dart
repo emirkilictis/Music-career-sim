@@ -5,6 +5,7 @@ import 'package:simulation_core/simulation_core.dart';
 
 import 'career_setup.dart';
 import 'events.dart';
+import 'milestones.dart';
 import 'views.dart';
 
 /// Result of one played week.
@@ -404,6 +405,17 @@ class GameSession {
       ? null
       : OpportunityView.of(world, _p.opportunity!);
 
+  /// Every milestone with the week it was reached (null = not yet), and
+  /// progress for count goals (docs K61).
+  List<MilestoneView> get milestones => [
+        for (final m in Milestone.values)
+          MilestoneView(
+            milestone: m,
+            reachedWeek: _p.milestones[m.index],
+            progress: m.progress(world, _p),
+          ),
+      ];
+
   /// Answers the waiting offer.
   OpportunityOutcome answerOpportunity(OpportunityChoice choice) {
     final o = _p.opportunity;
@@ -412,6 +424,11 @@ class GameSession {
       throw GameException('invalidChoice', 'Not an answer to this offer');
     }
     final out = Opportunities.answer(world, _p, choice);
+    if (out.kind == OpportunityKind.festival &&
+        out.choice == OpportunityChoice.accept) {
+      Milestone.firstFestival.mark(world, _p);
+    }
+    if (out.won) Milestone.awardWin.mark(world, _p);
     _saveNow();
     return out;
   }
@@ -722,11 +739,15 @@ class GameSession {
     final p = _p;
     final before = _Snapshot(world, p);
     final r = _sim.step();
+    final milestones = Milestone.check(world, p);
     _store.commitWeek(world, r);
     slots.writeSummary(slotId, world);
     return WeekReport(
       week: r.week,
-      events: _events(r, before),
+      events: [
+        ..._events(r, before),
+        for (final m in milestones) MilestoneReached(m),
+      ],
       moneyDeltaCents: p.moneyCents - before.money,
     );
   }

@@ -170,6 +170,10 @@ void main() {
         final r = g.advanceWeek();
         expect(r.moneyDeltaCents, greaterThanOrEqualTo(Job.cafe.wageCents));
       }
+      // The first release is a milestone, paid in skill points (K61).
+      final first =
+          g.milestones.firstWhere((m) => m.milestone == Milestone.firstRelease);
+      expect(first.reached, isTrue);
       // Income and costs per release (docs K60).
       expect(g.song(song).revenueCents, greaterThan(0));
       expect(g.song(song).costsCents, greaterThan(0));

@@ -4,6 +4,7 @@ import 'package:game/game.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
+import '../widgets/milestones_section.dart';
 import '../widgets/common.dart';
 import '../widgets/image_pickers.dart';
 import 'labels_screen.dart';
@@ -64,6 +65,8 @@ class _CareerScreenState extends State<CareerScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         const SkillsSection(),
+        const SizedBox(height: 12),
+        const MilestonesSection(),
         const SizedBox(height: 12),
         Section(
           title: l.labelSection,

@@ -1,6 +1,7 @@
 import 'package:simulation_core/simulation_core.dart';
 
 import 'events.dart';
+import 'milestones.dart';
 
 /// Read-only screen data built from the world on demand. Views never expose
 /// hidden values (a song's true quality stays hidden; the team's estimate is
@@ -734,6 +735,14 @@ int _songCosts(Song s) =>
     s.campaignCostCents +
     (s.videoBudget >= 0 ? VideoBudget.values[s.videoBudget].costCents : 0);
 
+/// A song's single units in the US (certifications; docs K60).
+double usSingleUnits(World w, Song s) => _usSingleUnits(w, s);
+
+/// An album's units in the US (certifications; docs K60).
+double usAlbumUnits(World w, Album al) =>
+    CountryShares.usOfNorthAmerica(w.artists[al.artistId].homeCountry) *
+    w.albumLifetimeUnits(al, Region.northAmerica.index);
+
 double _usSingleUnits(World w, Song s) {
   final a = w.primaryOf(s);
   final na = Region.northAmerica.index;
@@ -764,4 +773,19 @@ enum Certification {
     if (units >= gold.units) return (gold, 1);
     return null;
   }
+}
+
+/// A career milestone and how far the player is (docs K61).
+class MilestoneView {
+  MilestoneView(
+      {required this.milestone, required this.reachedWeek, this.progress});
+  final Milestone milestone;
+
+  /// Week it was reached, or null.
+  final int? reachedWeek;
+
+  /// (have, need) for count goals.
+  final (double, double)? progress;
+
+  bool get reached => reachedWeek != null;
 }

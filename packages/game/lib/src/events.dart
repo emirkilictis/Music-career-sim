@@ -1,5 +1,7 @@
 import 'package:simulation_core/simulation_core.dart';
 
+import 'milestones.dart';
+
 /// Something worth telling the player after a week (docs/game-design.md §15).
 /// Events carry ids and numbers only; the UI builds the localized text.
 sealed class GameEvent {
@@ -212,4 +214,12 @@ class OpportunityLapsed extends GameEvent {
   final OpportunityOutcome outcome;
   @override
   bool get isMajor => false;
+}
+
+/// A career milestone was reached; it paid skill points (docs K61).
+class MilestoneReached extends GameEvent {
+  const MilestoneReached(this.milestone);
+  final Milestone milestone;
+  @override
+  bool get isMajor => true;
 }

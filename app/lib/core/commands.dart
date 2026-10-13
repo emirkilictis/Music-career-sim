@@ -145,6 +145,7 @@ abstract final class Cmd {
   static SessionCmd<void> scrapSong(int id) => (s) => s.scrapSong(id);
 
   static SessionCmd<List<LabelView>> labels() => (s) => s.labels;
+  static SessionCmd<List<MilestoneView>> milestones() => (s) => s.milestones;
 
   static SessionCmd<void> signLabel(Label label) => (s) => s.signLabel(label);
 

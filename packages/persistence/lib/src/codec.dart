@@ -52,8 +52,8 @@ abstract final class Codec {
     'restWeek', 'skillPoints', 'schedule',
     // Added in schema v8, v11.
     'label', 'contractAlbums', 'campaignFatigue',
-    // Added in schema v12.
-    'opportunity',
+    // Added in schema v12, v14.
+    'opportunity', 'milestones',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -86,6 +86,10 @@ abstract final class Codec {
         a.contractAlbumsLeft,
         a.campaignFatigue,
         Opportunity.encode(a.opportunity),
+        a.milestones.isEmpty
+            ? null
+            : jsonEncode(
+                {for (final e in a.milestones.entries) '${e.key}': e.value}),
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -157,6 +161,11 @@ abstract final class Codec {
     a.contractAlbumsLeft = r['contractAlbums'] as int? ?? 0;
     a.campaignFatigue = (r['campaignFatigue'] as num?)?.toDouble() ?? 0;
     a.opportunity = Opportunity.decode(r['opportunity'] as String?);
+    if (r['milestones'] case final String m when m.isNotEmpty) {
+      for (final e in (jsonDecode(m) as Map<String, Object?>).entries) {
+        a.milestones[int.parse(e.key)] = e.value! as int;
+      }
+    }
     a.pendingAlbumSongIds.addAll(_parseInts(r['pendingSongs'] as String));
     _readReg(r, artistRegColumns, a.reg);
     _readInts(r['no1Singles'] as String, a.no1Singles);

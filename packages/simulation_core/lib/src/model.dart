@@ -276,6 +276,9 @@ class Artist {
   /// An offer waiting for the player's answer (docs K59).
   Opportunity? opportunity;
 
+  /// Career milestones reached: milestone id → week (docs K61).
+  final Map<int, int> milestones = {};
+
   /// The player's releases set for a later week (docs K45).
   final List<ScheduledRelease> scheduled = [];
 
