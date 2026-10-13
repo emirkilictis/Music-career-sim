@@ -354,7 +354,8 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
   final fmt = context.fmt;
   final money = career.player.moneyCents;
   final label = career.player.label;
-  int cost(Campaign k) => (k.costCents * label.campaignShare).round();
+  final power = career.player.campaignPower;
+  int cost(Campaign k) => career.player.campaignCosts[k.index];
   return showModalBottomSheet<Campaign>(
     context: context,
     showDragHandle: true,
@@ -371,6 +372,15 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Text(l.campaignHint, style: Theme.of(c).textTheme.bodySmall),
         ),
+        if (power < 0.95)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.campaignFatigueWarning((power * 100).round()),
+                style: Theme.of(c)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: AppColors.coral)),
+          ),
         for (final k in Campaign.values)
           ListTile(
             enabled: k.index <= label.maxCampaign.index &&

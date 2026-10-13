@@ -48,6 +48,7 @@ int worldHash(World w) {
     addDouble(a.coreFans);
     addDouble(a.casual);
     addDouble(a.devotion);
+    addDouble(a.campaignFatigue);
     addDouble(a.anticipation);
     addAll(a.reg);
     addAll(a.regionShare);
@@ -75,6 +76,8 @@ int worldHash(World w) {
   for (final s in w.songs) {
     addAll(s.reg);
     addDouble(s.videoPower);
+    addDouble(s.campaignPower);
+    addDouble(s.campaignReturnCents);
     addDouble(s.dormantRate);
     addDouble(s.lifetimePhysical);
     for (final g in s.genres) {
@@ -89,6 +92,7 @@ int worldHash(World w) {
   for (final al in w.albums) {
     addAll(al.reg);
     addInt(al.campaign.index);
+    addDouble(al.campaignReturnCents);
     addCharts(al);
   }
   for (final chart in w.charts) {

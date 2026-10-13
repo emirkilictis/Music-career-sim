@@ -4,6 +4,7 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/campaign_result.dart';
 import '../widgets/image_pickers.dart';
 import '../core/images.dart';
 import '../ui/palette.dart';
@@ -215,6 +216,14 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     value: fmt.compact(a.lifetimeUnits[r])),
             ]),
           ),
+          if (a.isPlayer &&
+              (a.campaignCostCents > 0 || a.campaignReturnCents > 0)) ...[
+            const SizedBox(height: 12),
+            CampaignResult(
+                campaign: a.campaign,
+                costCents: a.campaignCostCents,
+                returnCents: a.campaignReturnCents),
+          ],
           const SizedBox(height: 12),
           ChartRecords(records: a.charts),
           const SizedBox(height: 12),

@@ -50,8 +50,8 @@ abstract final class Codec {
     'no1Singles', 'no1SinglesFeatured', 'no1Albums', 'weeksAtNo1',
     // Added in schema v2/v3 (appended: older hot snapshots read null).
     'restWeek', 'skillPoints', 'schedule',
-    // Added in schema v8.
-    'label', 'contractAlbums',
+    // Added in schema v8, v11.
+    'label', 'contractAlbums', 'campaignFatigue',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -82,6 +82,7 @@ abstract final class Codec {
         _encodeSchedule(a.scheduled),
         a.label.index,
         a.contractAlbumsLeft,
+        a.campaignFatigue,
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -151,6 +152,7 @@ abstract final class Codec {
             ? Label.small
             : Label.independent);
     a.contractAlbumsLeft = r['contractAlbums'] as int? ?? 0;
+    a.campaignFatigue = (r['campaignFatigue'] as num?)?.toDouble() ?? 0;
     a.pendingAlbumSongIds.addAll(_parseInts(r['pendingSongs'] as String));
     _readReg(r, artistRegColumns, a.reg);
     _readInts(r['no1Singles'] as String, a.no1Singles);
@@ -178,8 +180,9 @@ abstract final class Codec {
     // Added in schema v2; new columns go last so older hot snapshots still
     // read (missing trailing columns come back as null).
     'weekRegion', 'lifetimePhysical',
-    // Added in schema v6.
+    // Added in schema v6, v11.
     'videoBudget', 'videoPower',
+    'campaignPower', 'campaignCost', 'campaignReturn',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -199,6 +202,9 @@ abstract final class Codec {
         s.lifetimePhysical,
         s.videoBudget,
         s.videoPower,
+        s.campaignPower,
+        s.campaignCostCents,
+        s.campaignReturnCents,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -245,6 +251,9 @@ abstract final class Codec {
     s.lifetimePhysical = (r['lifetimePhysical'] as num?)?.toDouble() ?? 0;
     s.videoBudget = r['videoBudget'] as int? ?? -1;
     s.videoPower = (r['videoPower'] as num?)?.toDouble() ?? 0;
+    s.campaignPower = (r['campaignPower'] as num?)?.toDouble() ?? 1;
+    s.campaignCostCents = r['campaignCost'] as int? ?? 0;
+    s.campaignReturnCents = (r['campaignReturn'] as num?)?.toDouble() ?? 0;
     if (r['weekRegion'] case final String wr when wr.isNotEmpty) {
       s.weekRegion =
           Float64List.fromList(wr.split(',').map(double.parse).toList());
@@ -264,6 +273,8 @@ abstract final class Codec {
     'editionFormats',
     // Added in schema v7, v9, v10.
     'scheduleId', 'criticScore', 'preSingleUnits',
+    // Added in schema v11.
+    'campaignCost', 'campaignReturn',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -279,6 +290,8 @@ abstract final class Codec {
         al.scheduleId,
         al.criticScore,
         al.preSingleUnits,
+        al.campaignCostCents,
+        al.campaignReturnCents,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -299,6 +312,8 @@ abstract final class Codec {
       ..scheduleId = r['scheduleId'] as int? ?? -1
       ..criticScore = (r['criticScore'] as num?)?.toDouble() ?? -1
       ..preSingleUnits = (r['preSingleUnits'] as num?)?.toDouble() ?? 0
+      ..campaignCostCents = r['campaignCost'] as int? ?? 0
+      ..campaignReturnCents = (r['campaignReturn'] as num?)?.toDouble() ?? 0
       ..variantFormats = r['editionFormats'] == null
           ? const []
           : _parseInts(r['editionFormats'] as String)

@@ -38,6 +38,7 @@ class SimConfig {
     this.albumSecondWeekRatio = 0.22,
     this.albumWeeklyDecay = 0.86,
     this.trackEquivalentAlbum = 10,
+    this.campaignFatigueDecay = 0.9,
     this.streamEquivalentAlbum = 1500,
     this.downloadHitExponent = 1.45,
     this.downloadHitExponentLate = 1.15,
@@ -153,13 +154,13 @@ class SimConfig {
           : 0.05 + 0.85 * (year - 2010) / 8;
 
   /// Campaign multiplier on a song's exposure (new listeners) in [year].
-  double campaignExposure(Campaign k, int year) =>
-      math.max(0.1, 1 + k.strength * (0.5 + 0.5 * playlistShare(year)));
+  double campaignExposure(Campaign k, int year, [double power = 1]) =>
+      math.max(0.1, 1 + k.strength * power * (0.5 + 0.5 * playlistShare(year)));
 
   /// Campaign multiplier on a song's radio play in [year]: strongest in the
   /// radio era, weaker once playlists take over.
-  double campaignRadio(Campaign k, int year) =>
-      math.max(0.1, 1 + k.strength * (0.5 + (1 - playlistShare(year))));
+  double campaignRadio(Campaign k, int year, [double power = 1]) =>
+      math.max(0.1, 1 + k.strength * power * (0.5 + (1 - playlistShare(year))));
 
   /// Extra exposure from a mid / big editorial playlist add; fades weekly.
   final double playlistMidBoost;
@@ -223,6 +224,10 @@ class SimConfig {
   final double albumWeeklyDecay;
 
   final double trackEquivalentAlbum;
+
+  /// Weekly fade of the player's campaign fatigue (docs K57): ~6.6 weeks
+  /// half-life, so a big push every single of an era keeps losing power.
+  final double campaignFatigueDecay;
   final double streamEquivalentAlbum;
   final double songChartStreamDivisor;
   final double songChartRadioDivisor;

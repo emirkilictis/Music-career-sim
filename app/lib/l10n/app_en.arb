@@ -728,7 +728,7 @@
     }
   },
   "pickCampaign": "Promotion campaign",
-  "campaignHint": "Campaigns bring new listeners and radio play. In the streaming era they work through playlists.",
+  "campaignHint": "Campaigns bring new listeners and radio play (through playlists in the streaming era). The bigger your audience, the more they cost; your label pays part.",
   "campaignNone": "No promotion",
   "campaignStandard": "Standard",
   "campaignIntensive": "Intensive",
@@ -737,6 +737,35 @@
   "campaignStandardHint": "What labels usually do.",
   "campaignIntensiveHint": "More reach and radio, better playlist chances.",
   "campaignGlobalHint": "The biggest push money can buy.",
+  "campaignResultTitle": "Campaign: {name}",
+  "@campaignResultTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "campaignCost": "Cost",
+  "campaignReturn": "Brought in",
+  "campaignProfit": "Profit",
+  "campaignLoss": "Loss",
+  "campaignReturnHint": "Estimate: the income from listeners the campaign reached, against what you paid.",
+  "campaignFatigued": "Listeners were tired of campaigns: {pct}% of its effect landed.",
+  "@campaignFatigued": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "campaignFatigueWarning": "Listeners are tired of your recent campaigns: a new one works at {pct}%. Waiting a few weeks helps.",
+  "@campaignFatigueWarning": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
   "albumTitle": "Title",
   "typeSingle": "Single",
   "typeEp": "EP",

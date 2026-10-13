@@ -283,8 +283,7 @@ class GameSession {
       if (first.isEmpty) return 0;
       final weeks = world.week - 1 - (first.first['week'] as int);
       if (weeks <= 0) return 0;
-      return (now - (first.first['lifetimeStreams'] as num).toDouble()) /
-          weeks;
+      return (now - (first.first['lifetimeStreams'] as num).toDouble()) / weeks;
     }
     final weeks = world.week - 1 - (rows.first['week'] as int);
     return (now - (rows.first['lifetimeStreams'] as num).toDouble()) / weeks;

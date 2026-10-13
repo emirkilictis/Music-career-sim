@@ -123,6 +123,14 @@ class Simulator {
     final campaignRadio = [
       for (final k in Campaign.values) c.campaignRadio(k, year),
     ];
+    final noCampaign = campaignExposure[Campaign.none.index];
+    // A campaign run on a tired audience lands only in part (docs K57).
+    double exposureOf(Song s) => s.campaignPower >= 1
+        ? campaignExposure[s.campaign.index]
+        : c.campaignExposure(s.campaign, year, s.campaignPower);
+    double radioOf(Song s) => s.campaignPower >= 1
+        ? campaignRadio[s.campaign.index]
+        : c.campaignRadio(s.campaign, year, s.campaignPower);
     final playlistAdds = <int>[];
 
     // 5. Raw demand for active songs, split by region.
@@ -204,6 +212,7 @@ class Simulator {
           chartShape *
           chartShape /
           (1 + weeksCharted / c.chartFatigueWeeks);
+      final campExp = exposureOf(s);
       final exposure = (c.baseExposure +
               c.fameExposure * p.fame +
               chartBoost +
@@ -214,7 +223,7 @@ class Simulator {
           (p.tier == ArtistTier.player
               ? w.difficulty.exposure
               : w.difficulty.aiExposure) *
-          campaignExposure[s.campaign.index] *
+          campExp *
           (1 + s.playlistBoost) *
           (1 + s.videoPower * videoEra);
       if (s.playlistWeek == w.week) playlistAdds.add(s.id);
@@ -240,6 +249,16 @@ class Simulator {
       s.lastAttention = a;
       songAttention[i] = a;
       s.lastReach = (casPart + pubPart + viralPart) * qMult * trackShare;
+      // What the campaign added over none at all, for the player's
+      // profit/loss (docs K57).
+      if (p.tier == ArtistTier.player) {
+        final extra =
+            campExp > noCampaign ? pubPart * (1 - noCampaign / campExp) : 0.0;
+        final all = fanPart + casPart + pubPart + viralPart;
+        final reached = casPart + pubPart + viralPart;
+        s.campaignShareOfAttention = all > 0 ? extra / all : 0;
+        s.campaignShareOfReach = reached > 0 ? extra / reached : 0;
+      }
 
       final fresh = math.exp(-promoAge / 6.0);
       // Album buyers own the deep cuts, so few download them one by one,
@@ -252,7 +271,7 @@ class Simulator {
           (s.isSingle ? 1.0 : 0.03) *
           (0.2 + p.fame) *
           p.labelReach *
-          campaignRadio[s.campaign.index] *
+          radioOf(s) *
           (1 + 8 * chartBoost);
 
       for (var k = 0; k < _r; k++) {
@@ -483,11 +502,15 @@ class Simulator {
       // Singles out before the album earn it units too, but only towards
       // its lifetime total, kept apart from its weekly sales (docs K56).
       final preSea = Float64List(_r), preTea = Float64List(_r);
+      // Reach the album campaign brought through its own tracks (docs K57).
+      var reachAll = 0.0, reachCampaign = 0.0;
       for (final sid in al.songIds) {
         final i = activeIndex[sid];
         if (i == null) continue;
         final s = w.songs[sid];
         final pre = isPreSingle(s, al);
+        reachAll += s.lastReach;
+        if (!s.isSingle) reachCampaign += s.lastReach * s.campaignShareOfReach;
         for (var k = 0; k < _r; k++) {
           reach[k] += s.lastReach * p.regionShare[k];
           // Track sales: downloads and CD singles (10 = 1 album).
@@ -507,6 +530,7 @@ class Simulator {
       // 2015. The album charts rank pure sales until units arrive (2015),
       // as Billboard did; so do era scores and popularity.
       var tPure = 0.0, tUnits = 0.0, tTea = 0.0, tSea = 0.0, tChart = 0.0;
+      var buysAll = 0.0, buysFromReach = 0.0;
       final chartRegion = Float64List(_r);
       for (var k = 0; k < _r; k++) {
         final era = eras[k];
@@ -549,6 +573,12 @@ class Simulator {
                 era.casualPurchaseRate *
                 (1 + al.hypeAtRelease) *
                 (age == 0 ? 1.0 : 0.25);
+        buysAll += superPart + collectorPart + casPart + eventPart;
+        buysFromReach += reach[k] *
+            c.casualBuyRate *
+            era.casualPurchaseRate *
+            (age == 0 ? 1.5 : 1.0) /
+            (1 + age / c.albumReachFatigueWeeks);
         final pure = (superPart + collectorPart + casPart + eventPart) *
             noise *
             tracklist *
@@ -582,6 +612,9 @@ class Simulator {
         tTea += t;
         tSea += se;
       }
+      al.campaignShareOfSales = buysAll > 0 && reachAll > 0
+          ? buysFromReach / buysAll * reachCampaign / reachAll
+          : 0;
       al.weekPure = tPure;
       al.weekTea = tTea;
       al.weekSea = tSea;
@@ -979,8 +1012,18 @@ class Simulator {
     for (final id in world.activeSongIds) {
       final s = world.songs[id];
       if (s.primaryArtistId != p.id) continue;
-      cents +=
+      final songCents =
           s.weekStreams * 0.35 + s.weekDownloads * 70 + s.weekPhysical * 100;
+      cents += songCents;
+      // Campaign profit/loss (docs K57): album cuts earn for the album's
+      // campaign, singles for their own.
+      final back = songCents * p.artistShare * s.campaignShareOfAttention;
+      if (!s.isSingle && s.albumId >= 0) {
+        world.albums[s.albumId].campaignReturnCents += back;
+        world.dirtyAlbums.add(s.albumId);
+      } else {
+        s.campaignReturnCents += back;
+      }
     }
     // Catalog songs keep streaming (and paying) after they leave the active
     // set.
@@ -993,8 +1036,13 @@ class Simulator {
     }
     for (final id in world.activeAlbumIds) {
       final al = world.albums[id];
-      if (al.artistId == p.id) cents += al.weekPure * 600;
+      if (al.artistId != p.id) continue;
+      cents += al.weekPure * 600;
+      al.campaignReturnCents +=
+          al.weekPure * 600 * p.artistShare * al.campaignShareOfSales;
     }
+    // Listeners tire of campaigns less as weeks go by (docs K57).
+    p.campaignFatigue *= world.config.campaignFatigueDecay;
     p.moneyCents += (cents * p.artistShare).round();
     // The label takes no cut of the day job.
     p.moneyCents += p.job.wageCents;

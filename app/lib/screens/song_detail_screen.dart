@@ -4,6 +4,7 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../widgets/campaign_result.dart';
 import '../widgets/image_pickers.dart';
 import '../core/images.dart';
 import '../ui/palette.dart';
@@ -264,6 +265,15 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       ? [...saleTiles, ...streamTiles]
                       : [...streamTiles, ...saleTiles]),
             ),
+            if (s.isPlayer &&
+                (s.campaignCostCents > 0 || s.campaignReturnCents > 0)) ...[
+              const SizedBox(height: 12),
+              CampaignResult(
+                  campaign: s.campaign,
+                  costCents: s.campaignCostCents,
+                  returnCents: s.campaignReturnCents,
+                  power: s.campaignPower),
+            ],
             const SizedBox(height: 12),
             _ChartRecords(records: s.charts),
             const SizedBox(height: 12),

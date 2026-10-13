@@ -97,6 +97,10 @@ class ArtistView {
         skillPoints = a.skillPoints,
         label = a.label,
         contractAlbumsLeft = a.contractAlbumsLeft,
+        campaignCosts = [
+          for (final k in Campaign.values) Actions.campaignCostFor(a, k)
+        ],
+        campaignPower = Actions.campaignPowerFor(a),
         skills = {for (final k in SkillKind.values) k: a.skills[k]},
         lastReleaseWeek = a.lastReleaseWeek,
         everCharted = a.tier == ArtistTier.player &&
@@ -171,6 +175,14 @@ class ArtistView {
   final Label label;
   final int contractAlbumsLeft;
 
+  /// What each campaign costs the artist now (by [Campaign.index]): the
+  /// price grows with the audience, the label pays part (docs K57).
+  final List<int> campaignCosts;
+
+  /// How much of a new campaign's effect would land (1 = all; lower after
+  /// recent campaigns tired the audience).
+  final double campaignPower;
+
   /// Unspent skill points and the current skills (0–100).
   final int skillPoints;
   final Map<SkillKind, double> skills;
@@ -230,6 +242,9 @@ class SongView {
         lifetimeRadio = s.lifetimeRadio,
         isPlayer = s.primaryArtistId == w.playerArtistId,
         video = s.videoBudget < 0 ? null : VideoBudget.values[s.videoBudget],
+        campaignPower = s.campaignPower,
+        campaignCostCents = s.campaignCostCents,
+        campaignReturnCents = s.campaignReturnCents.round(),
         scheduledSingleWeek = _scheduledWeek(w, s, album: false),
         scheduledAlbumWeek = _scheduledWeek(w, s, album: true);
 
@@ -248,6 +263,13 @@ class SongView {
 
   /// The song's music video budget, if it has one (docs K52).
   final VideoBudget? video;
+
+  /// The song's campaign, how much of it landed, what the player paid and
+  /// the income it brought in (estimated; docs K57). Album tracks share
+  /// the album's campaign (see [AlbumView]).
+  final double campaignPower;
+  final int campaignCostCents;
+  final int campaignReturnCents;
 
   /// Week a scheduled single / album with this song comes out, or -1
   /// (docs K45).
@@ -330,6 +352,8 @@ class AlbumView {
         scheduleId = al.scheduleId,
         criticScore = al.criticScore,
         preSingleUnits = al.preSingleUnits,
+        campaignCostCents = al.campaignCostCents,
+        campaignReturnCents = al.campaignReturnCents.round(),
         trackStreams = al.songIds
             .fold(0.0, (sum, id) => sum + w.songLifetimeStreams(w.songs[id])),
         lifetimePure =
@@ -373,6 +397,11 @@ class AlbumView {
   /// Lifetime units from singles out before the album (part of
   /// [lifetimeUnits], never of a week's sales; docs K56).
   final double preSingleUnits;
+
+  /// What the player paid for the album campaign and the income it brought
+  /// in through the album's own tracks and sales (estimated; docs K57).
+  final int campaignCostCents;
+  final int campaignReturnCents;
 
   /// All streams of the album's tracks (singles included).
   final double trackStreams;

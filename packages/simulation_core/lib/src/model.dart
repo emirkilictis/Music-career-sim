@@ -91,18 +91,25 @@ enum BudgetTier { low, medium, high }
 /// the calibrated baseline (what AI labels do); the strength shifts from
 /// radio to streaming playlists over the years ([SimConfig.playlistShare]).
 enum Campaign {
-  none(costCents: 0, strength: -0.4, playlistOdds: 0.05),
-  standard(costCents: 200000, strength: 0, playlistOdds: 0.25),
-  intensive(costCents: 2000000, strength: 0.35, playlistOdds: 0.45),
-  global(costCents: 25000000, strength: 0.7, playlistOdds: 0.65);
+  none(costCents: 0, strength: -0.4, playlistOdds: 0.05, fatigue: 0),
+  standard(costCents: 200000, strength: 0, playlistOdds: 0.25, fatigue: 0.1),
+  intensive(
+      costCents: 6000000, strength: 0.35, playlistOdds: 0.45, fatigue: 0.5),
+  global(costCents: 25000000, strength: 0.7, playlistOdds: 0.65, fatigue: 1);
 
   const Campaign({
     required this.costCents,
     required this.strength,
     required this.playlistOdds,
+    required this.fatigue,
   });
 
+  /// Base price for an artist of up to ~1.5M listeners; bigger audiences
+  /// cost more to reach (docs K57).
   final int costCents;
+
+  /// Listener fatigue it adds (docs K57).
+  final double fatigue;
 
   /// Effect relative to [standard] (0); negative = less than a label's usual.
   final double strength;
@@ -260,6 +267,10 @@ class Artist {
   /// The player's record label and the albums still owed to it (docs K54).
   Label label = Label.independent;
   int contractAlbumsLeft = 0;
+
+  /// Listener fatigue from recent paid campaigns (docs K57): each one adds
+  /// to it, it fades every week, and a new campaign works 1 / (1 + it).
+  double campaignFatigue = 0;
 
   /// The player's releases set for a later week (docs K45).
   final List<ScheduledRelease> scheduled = [];
@@ -437,6 +448,20 @@ class Song with Charted {
   int videoBudget = -1;
   double videoPower = 0;
 
+  /// Share of its campaign's effect that lands (1 = full; less when the
+  /// audience was tired of campaigns; docs K57).
+  double campaignPower = 1;
+
+  /// What the player paid for the song's own campaign, and the income it
+  /// brought in (estimated; docs K57).
+  int campaignCostCents = 0;
+  double campaignReturnCents = 0;
+
+  /// Scratch: share of this week's attention (and reach) owed to the
+  /// campaign.
+  double campaignShareOfAttention = 0;
+  double campaignShareOfReach = 0;
+
   /// This week's streams and downloads per region ([streams ×3,
   /// downloads ×3]); only kept while the song is active.
   Float64List? weekRegion;
@@ -503,6 +528,14 @@ class Album with Charted {
   /// Album units from singles out before the album (docs K56): part of the
   /// lifetime total, never of a week's sales or the chart.
   double preSingleUnits = 0;
+
+  /// What the player paid for the album campaign and the income it brought
+  /// in through the album's own tracks and sales (estimated; docs K57).
+  int campaignCostCents = 0;
+  double campaignReturnCents = 0;
+
+  /// Scratch: share of this week's sales owed to the campaign.
+  double campaignShareOfSales = 0;
 
   /// How well edition [k] sells to collectors in [year].
   double editionAppeal(int k, int year) {
@@ -815,7 +848,7 @@ enum Label {
       reach: 1.15,
       artistShare: 0.5,
       maxCampaign: Campaign.intensive,
-      campaignShare: 0.5,
+      campaignShare: 0.6,
       advanceCents: 25000000,
       contractAlbums: 3,
       minFans: 150000,
@@ -825,7 +858,7 @@ enum Label {
       reach: 1.3,
       artistShare: 0.4,
       maxCampaign: Campaign.global,
-      campaignShare: 0.35,
+      campaignShare: 0.5,
       advanceCents: 200000000,
       contractAlbums: 3,
       minFans: 500000,
@@ -835,7 +868,7 @@ enum Label {
       reach: 1.4,
       artistShare: 0.35,
       maxCampaign: Campaign.global,
-      campaignShare: 0.2,
+      campaignShare: 0.4,
       advanceCents: 1000000000,
       contractAlbums: 4,
       minFans: 2000000,

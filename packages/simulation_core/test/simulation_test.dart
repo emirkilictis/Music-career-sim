@@ -345,6 +345,8 @@ void main() {
       money: StartMoney.millionaire);
   a.devotion = devotion;
   a.hype = hype;
+  // Campaigns are priced for the audience (a superstar's global push ~\$1M).
+  a.moneyCents += 100000000;
   final songs = [
     for (var i = 0; i < 12; i++)
       Actions.writeSong(w, a, producerSkill: 90, aiMode: true).id,
@@ -780,6 +782,45 @@ void campaignTests() {
         money: StartMoney.millionaire);
     return (w: w, sim: sim, p: p);
   }
+
+  test('campaigns cost more for big audiences and tire listeners (K57)', () {
+    final (:w, :sim, :p) = setup(2022);
+    // (Another world: a career has one player.)
+    final w2 = WorldGen.create(seed: 52, startYear: 2022);
+    final star = WorldGen.addPlayer(w2,
+        name: 'S',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    // A newcomer pays the base price; a superstar several times it.
+    expect(
+        Actions.campaignCostFor(p, Campaign.global), Campaign.global.costCents);
+    expect(Actions.campaignCostFor(star, Campaign.global),
+        greaterThan(3 * Campaign.global.costCents));
+    // Bigger labels pay more of it.
+    Actions.signLabel(w2, star, Label.giant);
+    expect(Actions.campaignCostFor(star, Campaign.global),
+        lessThan(Actions.campaignCostFor(p, Campaign.global) * 3));
+
+    p.moneyCents = 1 << 40;
+    final a = Actions.writeSong(w, p, producerSkill: 80, aiMode: true);
+    Actions.releaseSingle(w, p, a, campaign: Campaign.global);
+    expect(a.campaignPower, 1);
+    expect(a.campaignCostCents, Campaign.global.costCents);
+    // Straight after it, the next push lands at half strength.
+    final b = Actions.writeSong(w, p, producerSkill: 80, aiMode: true);
+    Actions.releaseSingle(w, p, b, campaign: Campaign.global);
+    expect(b.campaignPower, closeTo(0.5, 1e-9));
+    expect(w.config.campaignExposure(Campaign.global, 2022, b.campaignPower),
+        lessThan(w.config.campaignExposure(Campaign.global, 2022)));
+    // Weeks later the audience has recovered most of the way, and the
+    // campaign's income has been counted.
+    for (var i = 0; i < 16; i++) {
+      sim.step();
+    }
+    expect(Actions.campaignPowerFor(p), greaterThan(0.7));
+    expect(a.campaignReturnCents, greaterThan(0));
+  });
 
   test('standard is the calibrated baseline in every year', () {
     final c = SimConfig();

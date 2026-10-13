@@ -327,20 +327,43 @@ abstract final class Actions {
     s.production += production * (1 - s.production / 100);
   }
 
-  /// What the player pays for [campaign]: their label pays the rest.
-  static int campaignCostFor(Artist a, Campaign campaign) =>
-      a.tier == ArtistTier.player
-          ? (campaign.costCents * a.label.campaignShare).round()
-          : campaign.costCents;
+  /// How much more a campaign costs for a big audience (docs K57): reaching
+  /// a superstar's ~9M listeners costs about 4× a newcomer's, 18M about 7×.
+  static double campaignSizeFactor(Artist a) => math
+      .pow(math.max(1.0, (a.coreFans + 0.25 * a.casual) / 1.5e6), 0.8)
+      .toDouble();
 
-  /// Pays the player's campaign up front (AI labels run theirs implicitly).
-  static void _payCampaign(Artist a, Campaign campaign) {
-    if (a.tier != ArtistTier.player) return;
+  /// What the player pays for [campaign]: its price grows with their
+  /// audience, and their label pays the rest.
+  static int campaignCostFor(Artist a, Campaign campaign) =>
+      (campaign.costCents *
+              campaignSizeFactor(a) *
+              (a.tier == ArtistTier.player ? a.label.campaignShare : 1.0))
+          .round();
+
+  /// How much of a new campaign's effect lands, given the listeners'
+  /// fatigue from recent ones (docs K57).
+  static double campaignPowerFor(Artist a) => 1 / (1 + a.campaignFatigue);
+
+  /// Pays the player's campaign up front (AI labels run theirs implicitly)
+  /// and returns what was paid.
+  static int _payCampaign(Artist a, Campaign campaign) {
+    if (a.tier != ArtistTier.player) return 0;
     final cost = campaignCostFor(a, campaign);
     if (cost > a.moneyCents) {
       throw ActionException('Not enough money for the campaign');
     }
     a.moneyCents -= cost;
+    return cost;
+  }
+
+  /// A campaign starts: it works as well as the audience's fatigue allows,
+  /// then adds to it (player only; docs K57).
+  static double _startCampaign(Artist a, Campaign campaign) {
+    if (a.tier != ArtistTier.player) return 1;
+    final power = campaignPowerFor(a);
+    a.campaignFatigue += campaign.fatigue;
+    return power;
   }
 
   // ------------------------------------------------------------- labels
@@ -396,8 +419,11 @@ abstract final class Actions {
   static void releaseSingle(World w, Artist a, Song s,
       {Campaign campaign = Campaign.standard,
       bool prepaid = false,
+      int paidCents = 0,
       double buzz = 0}) {
-    if (!prepaid) _payCampaign(a, campaign);
+    s.campaignCostCents = prepaid ? paidCents : _payCampaign(a, campaign);
+    s.campaignReturnCents = 0;
+    s.campaignPower = _startCampaign(a, campaign);
     _convertAnticipation(a, album: false);
     a.hype += buzz;
     s.isSingle = true;
@@ -436,8 +462,10 @@ abstract final class Actions {
       bool payForVariants = false,
       Campaign campaign = Campaign.standard,
       bool prepaid = false,
+      int paidCents = 0,
       double buzz = 0}) {
-    if (!prepaid) _payCampaign(a, campaign);
+    final paid = prepaid ? paidCents : _payCampaign(a, campaign);
+    final power = _startCampaign(a, campaign);
     _convertAnticipation(a, album: type == AlbumType.album);
     a.hype += buzz;
     final quality = songIds.isEmpty
@@ -471,6 +499,7 @@ abstract final class Actions {
     album.hypeAtRelease =
         math.max(0.0, album.hypeAtRelease + (album.criticScore - 6.5) * 0.04);
     album.campaign = campaign;
+    album.campaignCostCents = paid;
     // Formats follow their editions when the weeks are sorted.
     final order = List.generate(variantWeeks.length, (i) => i)
       ..sort((x, y) {
@@ -496,6 +525,7 @@ abstract final class Actions {
         s.releasedWeek = w.week;
         Lifecycle.activateSong(w, s);
         // Earlier singles keep their own campaign; new tracks get the album's.
+        s.campaignPower = power;
         _promote(w, s, campaign);
       } else if (s.status == SongStatus.dormant) {
         Lifecycle.reactivateSong(w, s);
@@ -560,13 +590,18 @@ abstract final class Actions {
             scheduleId: sr.id,
             campaign: sr.campaign,
             prepaid: true,
+            paidCents: sr.paidCents -
+                editionsCostCents(sr.variantWeeks.length, sr.variantFormats),
             buzz: sr.buzz);
         out.add((scheduleId: sr.id, isAlbum: true, id: al.id));
       } else {
         final s = w.songs[sr.songIds.single];
         if (s.isSingle) continue;
         releaseSingle(w, a, s,
-            campaign: sr.campaign, prepaid: true, buzz: sr.buzz);
+            campaign: sr.campaign,
+            prepaid: true,
+            paidCents: sr.paidCents,
+            buzz: sr.buzz);
         out.add((scheduleId: sr.id, isAlbum: false, id: s.id));
       }
     }
