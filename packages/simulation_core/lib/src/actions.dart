@@ -202,6 +202,13 @@ abstract final class Actions {
         BudgetTier.high => 10,
       };
 
+  /// The player's quality ceiling per studio budget (docs F35).
+  static double budgetCeiling(BudgetTier b) => switch (b) {
+        BudgetTier.low => 68,
+        BudgetTier.medium => 82,
+        BudgetTier.high => 100,
+      };
+
   /// No weekly limit (docs K46): creativity is the limit. Each song uses
   /// [energyCostPerSong] of it, and the lower it is, the weaker the song.
   static bool canWrite(World w, Artist a) =>
@@ -303,12 +310,19 @@ abstract final class Actions {
         genreFit +
         luck +
         (inspired ? inspirationBonus : 0);
+    // The studio sets how far the player's craft can carry a song: a cheap
+    // home recording stops around a B however good the artist, the top
+    // grades need studio money (docs F35). Past the ceiling only a third
+    // of the rest counts (an inspired bedroom song can still reach an A).
+    final ceiling = aiMode ? 100.0 : budgetCeiling(budget);
+    final studio = raw <= ceiling ? raw : ceiling + 0.3 * (raw - ceiling);
     // Soft ceiling: 100 stays rare even for top artists; low creativity
     // then takes its share.
-    final quality =
-        ((raw <= 85 ? raw : 85 + 15 * (1 - math.exp(-(raw - 85) / 15))) *
-                (1 - energyPenalty))
-            .clamp(1.0, 100.0);
+    final quality = ((studio <= 85
+                ? studio
+                : 85 + 15 * (1 - math.exp(-(studio - 85) / 15))) *
+            (1 - energyPenalty))
+        .clamp(1.0, 100.0);
 
     // Traits: partly tied to quality, partly random → different kinds of hits.
     final t = RandomStream.keyed(

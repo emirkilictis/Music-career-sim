@@ -345,6 +345,34 @@ void main() {
     expect(a.moneyCents - money, greaterThan(done.netCents * 0.9));
   });
 
+  test('a cheap home recording stops around a B (F35)', () {
+    double mean(BudgetTier budget) {
+      var sum = 0.0;
+      for (var seed = 1; seed <= 6; seed++) {
+        final w = WorldGen.create(seed: seed, startYear: 2018);
+        final p = WorldGen.addPlayer(w,
+            name: 'P',
+            genre: 0,
+            tier: StartTier.unknown,
+            money: StartMoney.millionaire);
+        for (final k in SkillKind.values) {
+          p.skills[k] = Actions.maxSkill;
+        }
+        for (var i = 0; i < 5; i++) {
+          p.creativeEnergy = 100;
+          sum += Actions.writeSong(w, p, budget: budget).quality;
+          w.week++;
+        }
+      }
+      return sum / 30;
+    }
+
+    final low = mean(BudgetTier.low), high = mean(BudgetTier.high);
+    expect(low, inInclusiveRange(70, 80)); // a B
+    expect(mean(BudgetTier.medium), inInclusiveRange(80, 90)); // an A
+    expect(high, greaterThan(90)); // an A+
+  });
+
   test('skill points stop at what the skills can use (F34)', () {
     final w = WorldGen.create(seed: 34, startYear: 2015);
     final p = WorldGen.addPlayer(w,
