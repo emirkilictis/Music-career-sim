@@ -214,4 +214,11 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       PlatformLaunched() => 'platform launched ${Charts.all[e.chartId].key}',
       ReleaseOut() => 'scheduled ${e.kind.name} ${e.entityId} out',
       ReleaseAnnounced() => 'announced "${e.title}" for week ${e.releaseWeek}',
+      OpportunityCame() => 'offer: ${e.kind.name}',
+      OpportunityLapsed() => 'offer lapsed: ${e.outcome.kind.name}',
+      MilestoneReached() => 'milestone ${e.milestone.name}',
+      TourFinished() => 'tour ${e.kind.name} done: net ${e.netCents ~/ 100}',
+      PlatformOpened() => 'platform opened ${e.platform.displayName}',
+      ChartBattle() =>
+        'battle ${e.won ? 'won' : 'lost'} #${e.playerPosition} vs #${e.rivalPosition}',
     };

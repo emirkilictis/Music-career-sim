@@ -311,8 +311,6 @@
   "campaignProfit": "Kâr",
   "campaignLoss": "Zarar",
   "campaignReturnHint": "Tahmini: kampanyanın ulaştığı dinleyicilerden gelen gelir, ödediğinle karşılaştırılır.",
-  "campaignFatigued": "Dinleyiciler kampanyalardan yorgundu: etkisinin %{pct} kadarı işledi.",
-  "campaignFatigueWarning": "Dinleyiciler son kampanyalarından yoruldu: yenisi %{pct} etkili olur. Birkaç hafta beklemek işe yarar.",
   "albumTitle": "Başlık",
   "typeSingle": "Single",
   "typeEp": "EP",

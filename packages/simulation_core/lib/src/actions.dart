@@ -354,10 +354,6 @@ abstract final class Actions {
               (a.tier == ArtistTier.player ? a.label.campaignShare : 1.0))
           .round();
 
-  /// How much of a new campaign's effect lands, given the listeners'
-  /// fatigue from recent ones (docs K57).
-  static double campaignPowerFor(Artist a) => 1 / (1 + a.campaignFatigue);
-
   /// Pays the player's campaign up front (AI labels run theirs implicitly)
   /// and returns what was paid.
   static int _payCampaign(Artist a, Campaign campaign) {
@@ -368,15 +364,6 @@ abstract final class Actions {
     }
     a.moneyCents -= cost;
     return cost;
-  }
-
-  /// A campaign starts: it works as well as the audience's fatigue allows,
-  /// then adds to it (player only; docs K57).
-  static double _startCampaign(Artist a, Campaign campaign) {
-    if (a.tier != ArtistTier.player) return 1;
-    final power = campaignPowerFor(a);
-    a.campaignFatigue += campaign.fatigue;
-    return power;
   }
 
   // ------------------------------------------------------------- labels
@@ -436,7 +423,7 @@ abstract final class Actions {
       double buzz = 0}) {
     s.campaignCostCents = prepaid ? paidCents : _payCampaign(a, campaign);
     s.campaignReturnCents = 0;
-    s.campaignPower = _startCampaign(a, campaign);
+    s.campaignPower = 1;
     _convertAnticipation(a, album: false);
     a.hype += buzz;
     s.isSingle = true;
@@ -478,7 +465,6 @@ abstract final class Actions {
       int paidCents = 0,
       double buzz = 0}) {
     final paid = prepaid ? paidCents : _payCampaign(a, campaign);
-    final power = _startCampaign(a, campaign);
     _convertAnticipation(a, album: type == AlbumType.album);
     a.hype += buzz;
     final quality = songIds.isEmpty
@@ -538,7 +524,7 @@ abstract final class Actions {
         s.releasedWeek = w.week;
         Lifecycle.activateSong(w, s);
         // Earlier singles keep their own campaign; new tracks get the album's.
-        s.campaignPower = power;
+        s.campaignPower = 1;
         _promote(w, s, campaign);
       } else if (s.status == SongStatus.dormant) {
         Lifecycle.reactivateSong(w, s);

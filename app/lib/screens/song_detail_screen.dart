@@ -288,8 +288,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
               CampaignResult(
                   campaign: s.campaign,
                   costCents: s.campaignCostCents,
-                  returnCents: s.campaignReturnCents,
-                  power: s.campaignPower),
+                  returnCents: s.campaignReturnCents),
             ],
             const SizedBox(height: 12),
             _ChartRecords(records: s.charts),

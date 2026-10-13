@@ -95,25 +95,20 @@ enum BudgetTier { low, medium, high }
 /// the calibrated baseline (what AI labels do); the strength shifts from
 /// radio to streaming playlists over the years ([SimConfig.playlistShare]).
 enum Campaign {
-  none(costCents: 0, strength: -0.4, playlistOdds: 0.05, fatigue: 0),
-  standard(costCents: 200000, strength: 0, playlistOdds: 0.25, fatigue: 0.1),
-  intensive(
-      costCents: 6000000, strength: 0.35, playlistOdds: 0.45, fatigue: 0.5),
-  global(costCents: 25000000, strength: 0.7, playlistOdds: 0.65, fatigue: 1);
+  none(costCents: 0, strength: -0.4, playlistOdds: 0.05),
+  standard(costCents: 200000, strength: 0, playlistOdds: 0.25),
+  intensive(costCents: 6000000, strength: 0.35, playlistOdds: 0.45),
+  global(costCents: 25000000, strength: 0.7, playlistOdds: 0.65);
 
   const Campaign({
     required this.costCents,
     required this.strength,
     required this.playlistOdds,
-    required this.fatigue,
   });
 
   /// Base price for an artist of up to ~1.5M listeners; bigger audiences
   /// cost more to reach (docs K57).
   final int costCents;
-
-  /// Listener fatigue it adds (docs K57).
-  final double fatigue;
 
   /// Effect relative to [standard] (0); negative = less than a label's usual.
   final double strength;
@@ -274,8 +269,8 @@ class Artist {
   Label label = Label.independent;
   int contractAlbumsLeft = 0;
 
-  /// Listener fatigue from recent paid campaigns (docs K57): each one adds
-  /// to it, it fades every week, and a new campaign works 1 / (1 + it).
+  /// No longer used: campaign fatigue (K57) was removed. Kept so saves keep
+  /// their layout.
   double campaignFatigue = 0;
 
   /// An offer waiting for the player's answer (docs K59).
@@ -466,8 +461,7 @@ class Song with Charted {
   int videoBudget = -1;
   double videoPower = 0;
 
-  /// Share of its campaign's effect that lands (1 = full; less when the
-  /// audience was tired of campaigns; docs K57).
+  /// No longer used (campaign fatigue was removed); kept for saves.
   double campaignPower = 1;
 
   /// What the player paid for the song's own campaign, and the income it

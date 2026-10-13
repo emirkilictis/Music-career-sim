@@ -137,13 +137,10 @@ class Simulator {
       for (final k in Campaign.values) c.campaignRadio(k, year),
     ];
     final noCampaign = campaignExposure[Campaign.none.index];
-    // A campaign run on a tired audience lands only in part (docs K57).
-    double exposureOf(Song s) => s.campaignPower >= 1
-        ? campaignExposure[s.campaign.index]
-        : c.campaignExposure(s.campaign, year, s.campaignPower);
-    double radioOf(Song s) => s.campaignPower >= 1
-        ? campaignRadio[s.campaign.index]
-        : c.campaignRadio(s.campaign, year, s.campaignPower);
+    // Every campaign works at full strength (the K57 fatigue was removed
+    // on the player's request).
+    double exposureOf(Song s) => campaignExposure[s.campaign.index];
+    double radioOf(Song s) => campaignRadio[s.campaign.index];
     final playlistAdds = <int>[];
 
     // 5. Raw demand for active songs, split by region.
@@ -1137,8 +1134,6 @@ class Simulator {
       al.campaignReturnCents +=
           al.weekPure * 600 * p.artistShare * al.campaignShareOfSales;
     }
-    // Listeners tire of campaigns less as weeks go by (docs K57).
-    p.campaignFatigue *= world.config.campaignFatigueDecay;
     // The manager takes a cut of everything (docs K68).
     p.moneyCents += p.manager.net(cents * p.artistShare).round();
     // The label takes no cut of the day job.

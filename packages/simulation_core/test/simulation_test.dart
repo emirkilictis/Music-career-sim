@@ -1056,7 +1056,7 @@ void campaignTests() {
     return (w: w, sim: sim, p: p);
   }
 
-  test('campaigns cost more for big audiences and tire listeners (K57)', () {
+  test('campaigns cost more for big audiences (K57)', () {
     final (:w, :sim, :p) = setup(2022);
     // (Another world: a career has one player.)
     final w2 = WorldGen.create(seed: 52, startYear: 2022);
@@ -1078,20 +1078,17 @@ void campaignTests() {
     p.moneyCents = 1 << 40;
     final a = Actions.writeSong(w, p, producerSkill: 80, aiMode: true);
     Actions.releaseSingle(w, p, a, campaign: Campaign.global);
-    expect(a.campaignPower, 1);
     expect(a.campaignCostCents, Campaign.global.costCents);
-    // Straight after it, the next push lands at half strength.
+    // Back-to-back campaigns cost the same and work at full strength (the
+    // fatigue was removed on the player's request).
     final b = Actions.writeSong(w, p, producerSkill: 80, aiMode: true);
     Actions.releaseSingle(w, p, b, campaign: Campaign.global);
-    expect(b.campaignPower, closeTo(0.5, 1e-9));
-    expect(w.config.campaignExposure(Campaign.global, 2022, b.campaignPower),
-        lessThan(w.config.campaignExposure(Campaign.global, 2022)));
-    // Weeks later the audience has recovered most of the way, and the
-    // campaign's income has been counted.
+    expect(b.campaignCostCents, Campaign.global.costCents);
+    expect(b.campaignPower, 1);
+    // Weeks later the campaign's income has been counted.
     for (var i = 0; i < 16; i++) {
       sim.step();
     }
-    expect(Actions.campaignPowerFor(p), greaterThan(0.7));
     expect(a.campaignReturnCents, greaterThan(0));
   });
 

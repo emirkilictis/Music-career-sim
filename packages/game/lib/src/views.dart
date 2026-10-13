@@ -101,7 +101,6 @@ class ArtistView {
         campaignCosts = [
           for (final k in Campaign.values) Actions.campaignCostFor(a, k)
         ],
-        campaignPower = Actions.campaignPowerFor(a),
         opportunity = a.opportunity == null
             ? null
             : OpportunityView.of(w, a.opportunity!),
@@ -185,10 +184,6 @@ class ArtistView {
   /// price grows with the audience, the label pays part (docs K57).
   final List<int> campaignCosts;
 
-  /// How much of a new campaign's effect would land (1 = all; lower after
-  /// recent campaigns tired the audience).
-  final double campaignPower;
-
   /// An offer waiting for the player's answer (docs K59).
   final OpportunityView? opportunity;
 
@@ -257,7 +252,6 @@ class SongView {
         lifetimeRadio = s.lifetimeRadio,
         isPlayer = s.primaryArtistId == w.playerArtistId,
         video = s.videoBudget < 0 ? null : VideoBudget.values[s.videoBudget],
-        campaignPower = s.campaignPower,
         campaignCostCents = s.campaignCostCents,
         campaignReturnCents = s.campaignReturnCents.round(),
         revenueCents = s.revenueCents.round(),
@@ -285,10 +279,9 @@ class SongView {
   /// The song's music video budget, if it has one (docs K52).
   final VideoBudget? video;
 
-  /// The song's campaign, how much of it landed, what the player paid and
-  /// the income it brought in (estimated; docs K57). Album tracks share
-  /// the album's campaign (see [AlbumView]).
-  final double campaignPower;
+  /// The song's campaign, what the player paid and the income it brought
+  /// in (estimated; docs K57). Album tracks share the album's campaign
+  /// (see [AlbumView]).
   final int campaignCostCents;
   final int campaignReturnCents;
 

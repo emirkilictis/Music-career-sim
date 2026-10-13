@@ -12,15 +12,11 @@ class CampaignResult extends StatelessWidget {
     required this.campaign,
     required this.costCents,
     required this.returnCents,
-    this.power = 1,
   });
 
   final Campaign campaign;
   final int costCents;
   final int returnCents;
-
-  /// Share of the campaign's effect that landed (fatigue).
-  final double power;
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +36,7 @@ class CampaignResult extends StatelessWidget {
               color: net >= 0 ? AppColors.mint : AppColors.coral),
         ]),
         const SizedBox(height: 6),
-        Text(
-            power < 0.99
-                ? '${l.campaignReturnHint} '
-                    '${l.campaignFatigued((power * 100).round())}'
-                : l.campaignReturnHint,
+        Text(l.campaignReturnHint,
             style: TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
       ]),
     );
