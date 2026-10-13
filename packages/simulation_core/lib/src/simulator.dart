@@ -639,7 +639,6 @@ class Simulator {
       a.updateRegionShare();
     }
     _playerIncome();
-    _playerCatalogAlbumUnits();
 
     final result = WeekResult(
       week: w.week,
@@ -932,6 +931,11 @@ class Simulator {
       if (al.releaseWeek >= w.week) continue;
       final a = w.artists[al.artistId];
       for (var k = 0; k < _r; k++) {
+        // A catalog album's lazy accrual starts now; its earlier streams
+        // come in below with everything else.
+        if (al.status == AlbumStatus.dormant) {
+          al.reg[AlbumReg.indexStreams + k] = w.artistIndexStreams(a, k);
+        }
         var streams = 0.0;
         for (final sid in al.songIds) {
           streams += w.songLifetimeStreams(w.songs[sid], k);
@@ -943,27 +947,6 @@ class Simulator {
       }
       w.dirtyAlbums.add(al.id);
       w.dirtyArtists.add(a.id);
-    }
-  }
-
-  void _playerCatalogAlbumUnits() {
-    final w = world;
-    final p = w.player;
-    if (p == null) return;
-    if (!Charts.songRules(ChartMarket.global, w.week).albumUsesUnits) return;
-    final c = w.config;
-    for (final al in w.albums) {
-      if (al.artistId != p.id || al.status != AlbumStatus.dormant) continue;
-      for (var k = 0; k < _r; k++) {
-        var streams = 0.0;
-        for (final sid in al.songIds) {
-          streams += w.songWeekStreamsRegion(w.songs[sid], k);
-        }
-        final units = streams / c.streamEquivalentAlbum;
-        al.reg[AlbumReg.lifeUnits + k] += units;
-        p.reg[ArtistReg.lifeUnits + k] += units;
-      }
-      w.dirtyAlbums.add(al.id);
     }
   }
 

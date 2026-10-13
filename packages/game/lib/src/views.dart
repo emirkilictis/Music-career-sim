@@ -59,8 +59,7 @@ class ArtistView {
         lifetimeStreams = _regional((r) => w.artistLifetimeStreams(a, r)),
         lifetimePure =
             _regional((r) => a.reg[ArtistReg.lifePure + r].toDouble()),
-        lifetimeUnits =
-            _regional((r) => a.reg[ArtistReg.lifeUnits + r].toDouble()),
+        lifetimeUnits = _regional((r) => w.artistLifetimeUnits(a, r)),
         lifetimeSingleSales = a.tier == ArtistTier.player
             ? w.playerSongIds.fold(
                 0.0,

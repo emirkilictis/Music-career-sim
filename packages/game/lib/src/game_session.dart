@@ -682,7 +682,7 @@ class GameSession {
     final from = world.week;
     final streams0 = world.artistLifetimeStreams(p);
     final pure0 = _sum(p, ArtistReg.lifePure);
-    final units0 = _sum(p, ArtistReg.lifeUnits);
+    final units0 = world.artistLifetimeUnits(p);
     final money0 = p.moneyCents, fans0 = p.coreFans, fame0 = p.fame;
     final singles0 = _singleSales();
     final events = <GameEvent>[];
@@ -707,7 +707,7 @@ class GameSession {
       streamsGained: world.artistLifetimeStreams(p) - streams0,
       singleSalesGained: _singleSales() - singles0,
       pureGained: _sum(p, ArtistReg.lifePure) - pure0,
-      unitsGained: _sum(p, ArtistReg.lifeUnits) - units0,
+      unitsGained: world.artistLifetimeUnits(p) - units0,
       moneyDeltaCents: p.moneyCents - money0,
       coreFansDelta: p.coreFans - fans0,
       fameBefore: fame0,

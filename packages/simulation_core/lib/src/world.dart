@@ -204,6 +204,16 @@ class World {
 
   /// Lifetime units of an album in region [r] (or all regions), including
   /// lazily accrued SEA while dormant.
+  /// An artist's album units: the sum of their albums' (with the catalog
+  /// part accrued lazily).
+  double artistLifetimeUnits(Artist a, [int? r]) {
+    var t = 0.0;
+    for (final al in albums) {
+      if (al.artistId == a.id) t += albumLifetimeUnits(al, r);
+    }
+    return t;
+  }
+
   double albumLifetimeUnits(Album al, [int? r]) {
     if (r == null) {
       var t = 0.0;
@@ -214,6 +224,8 @@ class World {
     }
     final v = al.reg[AlbumReg.lifeUnits + r];
     if (al.status == AlbumStatus.active) return v;
+    // Catalog streams become album units only from 2015 (docs K44, K49).
+    if (!Charts.songRules(ChartMarket.global, week).albumUsesUnits) return v;
     return v +
         al.sumDormantRate *
             (artistIndexStreams(artists[al.artistId], r) -

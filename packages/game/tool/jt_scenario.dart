@@ -398,7 +398,8 @@ void main(List<String> args) {
         ' UK ${rec(Charts.ukAlbums).padRight(8)} total ${c(a.lifetimeUnits.total)} units'
         ' / ${c(a.lifetimePure.total)} pure'
         ' (track eq ${c(g.albumSales(a.id).fold(0.0, (x, w) => x + (w.tea ?? 0)))},'
-        ' stream eq ${c(g.albumSales(a.id).fold(0.0, (x, w) => x + (w.sea ?? 0)))})');
+        ' stream eq ${c(g.albumSales(a.id).fold(0.0, (x, w) => x + (w.sea ?? 0)))},'
+        ' all track streams/1500 ${c(a.trackStreams / 1500)})');
   }
   final p = g.player;
   print(
