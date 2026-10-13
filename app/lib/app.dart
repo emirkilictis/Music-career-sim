@@ -78,13 +78,52 @@ class _MusicCareerAppState extends State<MusicCareerApp> {
                   value: AppColors.isLight
                       ? SystemUiOverlayStyle.dark
                       : SystemUiOverlayStyle.light,
-                  child: child!,
+                  child: DismissKeyboard(child: child!),
                 ),
                 home: const SlotsScreen(),
               );
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Puts the keyboard away when the player is done typing (feedback): a
+/// drag that scrolls the page, or a tap anywhere outside the field being
+/// typed in (a tap on that field, or on another one, keeps it up).
+class DismissKeyboard extends StatelessWidget {
+  const DismissKeyboard({super.key, required this.child});
+  final Widget child;
+
+  static void _unfocus() => FocusManager.instance.primaryFocus?.unfocus();
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollStartNotification>(
+      onNotification: (n) {
+        if (n.dragDetails != null) _unfocus();
+        return false;
+      },
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerUp: (e) {
+          final focus = FocusManager.instance.primaryFocus;
+          final ctx = focus?.context;
+          if (ctx == null) return;
+          // Only text fields hold the keyboard up; measure the whole field
+          // (label and padding included), not just its text.
+          final field = ctx.findAncestorStateOfType<State<TextField>>();
+          final editable = ctx.widget is EditableText ||
+              ctx.findAncestorWidgetOfExactType<EditableText>() != null;
+          if (field == null && !editable) return;
+          final box = (field?.context ?? ctx).findRenderObject();
+          if (box is! RenderBox || !box.attached) return;
+          final rect = box.localToGlobal(Offset.zero) & box.size;
+          if (!rect.contains(e.position)) _unfocus();
+        },
+        child: child,
       ),
     );
   }
