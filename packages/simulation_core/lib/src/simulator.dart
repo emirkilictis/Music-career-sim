@@ -442,7 +442,7 @@ class Simulator {
       // Good albums hold their sales; weak ones fall off faster.
       final q01 = al.quality / 100;
       final secondWeek = c.albumSecondWeekRatio * (0.55 + 0.9 * q01);
-      final decay = 1 - (1 - c.albumWeeklyDecay) * (1.6 - 1.2 * q01);
+      final decay = 1 - (1 - c.albumWeeklyDecay) * (1.5 - 0.7 * q01);
       final superCurve = age == 0 ? 1.0 : secondWeek * math.pow(decay, age - 1);
       // Devoted fanbases buy more (and buy variants).
       final superRate = c.superfanBuyRate * p.devotionBuyFactor;
@@ -509,10 +509,13 @@ class Simulator {
                 era.collectorFactor *
                 variantSum *
                 (1 + al.hypeAtRelease);
+        // Listeners reached by the album's songs buy it, fewer as the album
+        // ages (those who wanted it already have it; docs K51).
         final casPart = reach[k] *
                 c.casualBuyRate *
                 era.casualPurchaseRate *
-                (age == 0 ? 1.5 : 1.0) +
+                (age == 0 ? 1.5 : 1.0) /
+                (1 + age / c.albumReachFatigueWeeks) +
             (age == 0 ? casual * 0.003 * era.casualPurchaseRate : 0.0) +
             casual * c.albumCatalogRate * era.casualPurchaseRate * (0.5 + q01);
         // A superstar's album is an event: even non-fans buy it in the

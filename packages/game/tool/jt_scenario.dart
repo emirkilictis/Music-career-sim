@@ -396,7 +396,9 @@ void main(List<String> args) {
         '${e.key.padRight(32)} first week US ${c(a.firstWeekUsUnits).padLeft(6)}'
         ' (pure ${c(a.firstWeekUsPure)})  US ${rec(Charts.usAlbums).padRight(10)}'
         ' UK ${rec(Charts.ukAlbums).padRight(8)} total ${c(a.lifetimeUnits.total)} units'
-        ' / ${c(a.lifetimePure.total)} pure');
+        ' / ${c(a.lifetimePure.total)} pure'
+        ' (track eq ${c(g.albumSales(a.id).fold(0.0, (x, w) => x + (w.tea ?? 0)))},'
+        ' stream eq ${c(g.albumSales(a.id).fold(0.0, (x, w) => x + (w.sea ?? 0)))})');
   }
   final p = g.player;
   print(

@@ -42,6 +42,7 @@ class SimConfig {
     this.downloadHitExponent = 1.45,
     this.downloadHitExponentLate = 1.15,
     this.aiAlbumHypeCap = 0.5,
+    this.albumReachFatigueWeeks = 6,
     this.announceBuzzAlbum = 0.3,
     this.announceBuzzEp = 0.15,
     this.announceBuzzSingle = 0.1,
@@ -169,6 +170,10 @@ class SimConfig {
   /// The same once the digital catalog is deep and streaming spreads
   /// listening (2014 on); [downloadHitExponentFor] fades between the two.
   final double downloadHitExponentLate;
+
+  /// Weeks after which listeners reached by an album's songs buy it half
+  /// as often as at release.
+  final double albumReachFatigueWeeks;
 
   /// Highest hype a rival's album can open with.
   final double aiAlbumHypeCap;
