@@ -758,6 +758,20 @@
       }
     }
   },
+  "eventStillNumberOne": "“{title}” spends week {weeks} at #1 on the {chart}.",
+  "@eventStillNumberOne": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "chart": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
   "eventNumberOneAgain": "“{title}” is back at #1 on the {chart} ({weeks} weeks in total).",
   "@eventNumberOneAgain": {
     "placeholders": {

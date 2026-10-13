@@ -18,7 +18,7 @@ import 'common.dart';
 /// The big moments worth a full screen (feedback E6): a release's first #1
 /// on a chart, and the career's very first chart entry.
 bool isCelebration(EventLine line, ArtistView? before) => switch (line.event) {
-      NumberOne(isFirstTime: true) => true,
+      NumberOne(firstForRelease: true) => true,
       ChartDebut() => before != null && !before.everCharted,
       _ => false,
     };

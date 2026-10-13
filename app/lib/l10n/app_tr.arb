@@ -338,6 +338,7 @@
   "errorInvalidMembers": "Grubun isimli 2–7 üyesi olmalı.",
   "errorInvalidSkills": "Stat puanları kurallara uymuyor.",
   "eventNumberOne": "“{title}” {chart} listesinde #1!",
+  "eventStillNumberOne": "“{title}” {chart} listesinde {weeks}. haftasında da #1.",
   "eventNumberOneAgain": "“{title}” {chart} listesinde yeniden #1 (toplam {weeks} hafta).",
   "eventDebut": "“{title}” {chart} listesine #{pos}'ten giriş yaptı.",
   "eventNewPeak": "“{title}” yeni zirvesine çıktı: {chart} #{pos}.",

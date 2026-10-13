@@ -29,12 +29,17 @@ class ChartDebut extends GameEvent {
 
 /// A player release reached #1 ([weeksAtNo1] counts this week).
 class NumberOne extends GameEvent {
-  const NumberOne(this.chartId, this.kind, this.entityId, this.weeksAtNo1);
+  const NumberOne(this.chartId, this.kind, this.entityId, this.weeksAtNo1,
+      {this.firstForRelease = false});
   final int chartId;
   final EntityKind kind;
   final int entityId;
   final int weeksAtNo1;
   bool get isFirstTime => weeksAtNo1 == 1;
+
+  /// The release's very first #1 on any chart: the one worth a full-screen
+  /// celebration (later #1s on other charts are ordinary news).
+  final bool firstForRelease;
   @override
   bool get isMajor => true;
 }
@@ -150,6 +155,17 @@ class ReleaseAnnounced extends GameEvent {
   final int songId;
   final String title;
   final int releaseWeek;
+  @override
+  bool get isMajor => false;
+}
+
+/// A player release stayed at #1 on a US chart for another week.
+class StillNumberOne extends GameEvent {
+  const StillNumberOne(this.chartId, this.kind, this.entityId, this.weeksAtNo1);
+  final int chartId;
+  final EntityKind kind;
+  final int entityId;
+  final int weeksAtNo1;
   @override
   bool get isMajor => false;
 }

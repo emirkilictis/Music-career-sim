@@ -33,6 +33,7 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
       switch (e) {
         ChartDebut() => release(e, e.kind, e.entityId),
         NumberOne() => release(e, e.kind, e.entityId),
+        StillNumberOne() => release(e, e.kind, e.entityId),
         NewPeak() => EventLine(e, title: song(e.songId)),
         AlbumFirstWeek() => EventLine(e, title: album(e.albumId)),
         ViralTrend() => EventLine(e, title: song(e.songId)),
@@ -84,6 +85,7 @@ List<(int, int)> scheduledAlbumsOut(List<EventLine> lines) => [
 List<EventLine> sortLines(List<EventLine> lines) {
   int rank(EventLine l) => switch (l.event) {
         NumberOne() => 0,
+        StillNumberOne() => 1,
         AlbumFirstWeek() => 1,
         EraClosed() => 2,
         ViralTrend() => 3,

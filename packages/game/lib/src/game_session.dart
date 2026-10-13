@@ -909,6 +909,9 @@ class GameSession {
     }
 
     void check(Charted e, EntityKind kind, int id, List<int> charts) {
+      // Celebrated once per release: its first #1 on any chart.
+      var hadNumberOne =
+          charts.any((c) => (before.chart[(kind, id, c)]?.$2 ?? 0) == 1);
       for (final c in charts) {
         final st = e.statsOrNull(c);
         if (st == null || st.lastPos == 0) continue;
@@ -920,7 +923,12 @@ class GameSession {
           events.add(ChartDebut(c, kind, id, st.lastPos));
         }
         if (st.lastPos == 1 && prevPos != 1) {
-          events.add(NumberOne(c, kind, id, st.weeksAtNo1));
+          events.add(NumberOne(c, kind, id, st.weeksAtNo1,
+              firstForRelease: !hadNumberOne));
+          hadNumberOne = true;
+        } else if (st.lastPos == 1 &&
+            (c == Charts.usSongs || c == Charts.usAlbums)) {
+          events.add(StillNumberOne(c, kind, id, st.weeksAtNo1));
         } else if (kind == EntityKind.song &&
             !isDebut &&
             c != Charts.ukSongs &&

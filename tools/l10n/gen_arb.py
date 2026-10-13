@@ -357,6 +357,7 @@ k('errorInvalidMembers','A group needs 2–7 members with names.','Grubun isimli
 k('errorInvalidSkills','Stat points do not add up.','Stat puanları kurallara uymuyor.')
 # events
 k('eventNumberOne','“{title}” is #1 on the {chart}!','“{title}” {chart} listesinde #1!', title='String', chart='String')
+k('eventStillNumberOne','“{title}” spends week {weeks} at #1 on the {chart}.','“{title}” {chart} listesinde {weeks}. haftasında da #1.', title='String', chart='String', weeks='int')
 k('eventNumberOneAgain','“{title}” is back at #1 on the {chart} ({weeks} weeks in total).','“{title}” {chart} listesinde yeniden #1 (toplam {weeks} hafta).', title='String', chart='String', weeks='int')
 k('eventDebut','“{title}” debuted at #{pos} on the {chart}.','“{title}” {chart} listesine #{pos}\'ten giriş yaptı.', title='String', chart='String', pos='int')
 k('eventNewPeak','“{title}” climbed to a new peak: #{pos} on the {chart}.','“{title}” yeni zirvesine çıktı: {chart} #{pos}.', title='String', chart='String', pos='int')

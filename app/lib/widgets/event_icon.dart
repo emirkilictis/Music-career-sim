@@ -14,6 +14,7 @@ class EventIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final (icon, color) = switch (event) {
       NumberOne() => (Icons.emoji_events_rounded, AppColors.gold),
+      StillNumberOne() => (Icons.emoji_events_outlined, AppColors.gold),
       ChartDebut() => (Icons.trending_up_rounded, AppColors.sky),
       NewPeak() => (Icons.arrow_upward_rounded, AppColors.mint),
       AlbumFirstWeek() => (Icons.album_rounded, AppColors.lilac),

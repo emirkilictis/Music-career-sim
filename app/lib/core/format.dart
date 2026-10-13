@@ -281,6 +281,8 @@ class Fmt {
       NumberOne() => e.isFirstTime
           ? l.eventNumberOne(t, chart(e.chartId))
           : l.eventNumberOneAgain(t, chart(e.chartId), e.weeksAtNo1),
+      StillNumberOne() =>
+        l.eventStillNumberOne(t, chart(e.chartId), e.weeksAtNo1),
       ChartDebut() => l.eventDebut(t, chart(e.chartId), e.position),
       NewPeak() => l.eventNewPeak(t, chart(e.chartId), e.position),
       AlbumFirstWeek() => e.usPosition > 0

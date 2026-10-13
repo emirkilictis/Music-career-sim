@@ -195,6 +195,8 @@ String _grade(int g) => g >= 90
 
 String _event(GameSession s, GameEvent e) => switch (e) {
       NumberOne() => '#1 on ${Charts.all[e.chartId].key} (${e.weeksAtNo1} wk)',
+      StillNumberOne() =>
+        'still #1 on ${Charts.all[e.chartId].key} (${e.weeksAtNo1} wk)',
       ChartDebut() =>
         'debut #${e.position} ${Charts.all[e.chartId].key} (${e.kind.name} ${e.entityId})',
       NewPeak() => 'new peak #${e.position} ${Charts.all[e.chartId].key}',

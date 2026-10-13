@@ -380,6 +380,57 @@ void main() {
       g.close();
     });
 
+    test('one celebration per release; later weeks at #1 are plain news', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2002,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      g.world.player!.moneyCents = 1 << 40;
+      final songs = <int>[];
+      while (songs.length < 10) {
+        if (!g.player.canWrite || g.player.creativeEnergy < 40) {
+          g.advanceWeek();
+          continue;
+        }
+        songs.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      // A devoted superstar fanbase, so the album reaches #1.
+      g.world.player!
+        ..devotion = 1.0
+        ..coreFans *= 4;
+      final al = g.releaseAlbum('Big', songs, campaign: Campaign.global);
+      final events = <(int, GameEvent)>[];
+      for (var i = 0; i < 8; i++) {
+        final r = g.advanceWeek();
+        events.addAll([for (final e in r.events) (r.week, e)]);
+      }
+      final albumNo1 = [
+        for (final (_, e) in events)
+          if (e is NumberOne &&
+              e.kind == EntityKind.album &&
+              e.entityId == al.id)
+            e
+      ];
+      expect(albumNo1, isNotEmpty);
+      expect(albumNo1.where((e) => e.firstForRelease).length, 1);
+      expect(albumNo1.first.firstForRelease, isTrue);
+      // Every further week at #1 in the US is a plain "still #1" line.
+      final run = g.chartRun(EntityKind.album, al.id);
+      for (var i = 1; i < run.length; i++) {
+        final now = run[i].entries[Charts.usAlbums]?.position;
+        final prev = run[i - 1].entries[Charts.usAlbums]?.position;
+        final still = events.any((x) =>
+            x.$1 == run[i].week &&
+            x.$2 is StillNumberOne &&
+            (x.$2 as StillNumberOne).entityId == al.id);
+        expect(still, now == 1 && prev == 1);
+      }
+      g.close();
+    });
+
     test('an early-2000s single sells CDs, not streams', () {
       final g = GameSession.start(
           slots,
