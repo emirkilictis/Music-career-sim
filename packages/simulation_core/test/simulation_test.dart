@@ -649,6 +649,14 @@ void albumShapeTests() {
 /// Short-video virality (docs/game-design.md §7.3): old catalog songs can go
 /// viral and climb the charts in the short-video era, but not before it.
 void viralTests() {
+  test('unknown artists rarely go viral; known ones as before (T12)', () {
+    final c = SimConfig();
+    expect(c.viralReach(4e3, 2e4), lessThan(0.15));
+    expect(c.viralReach(2e4, 2e5), lessThan(0.3));
+    expect(c.viralReach(4e5, 4e6), greaterThanOrEqualTo(1.0));
+    expect(c.viralReach(1e7, 1e8), 1.3);
+  });
+
   test('old songs go viral and some climb the US chart in the short-video era',
       () {
     final w = WorldGen.create(seed: 42, startYear: 2016);

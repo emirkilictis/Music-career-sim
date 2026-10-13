@@ -201,11 +201,15 @@ class Simulator {
       final viralEra = c.viralEraFactor(GameTime.yearOf(w.week));
       // A music video on the video sites helps a song catch on.
       final videoViral = 1 + 2 * s.videoPower * (viralEra > 0 ? 1 : 0);
+      // Songs people already hear catch on far more often: an unknown
+      // artist rarely goes viral, and smaller when it happens (docs T12).
+      final viralReach = c.viralReach(fans, cas);
       if (r.chance(c.viralWeeklyChance *
           viralEra *
           (0.3 + 2 * s.virality) *
-          videoViral)) {
-        _startViral(s, r, viralEra);
+          videoViral *
+          viralReach)) {
+        _startViral(s, r, viralEra, reach: viralReach);
         virals.add(s.id);
       }
 
@@ -954,8 +958,11 @@ class Simulator {
 
   /// Starts a viral trend: it grows for three weeks, then fades. Most trends
   /// are small; a few become huge and can push a song up the charts.
-  void _startViral(Song s, RandomStream r, double era) {
-    var strength = r.range(0.02, 0.08) * (0.5 + s.virality);
+  void _startViral(Song s, RandomStream r, double era,
+      {double reach = 1}) {
+    var strength = r.range(0.02, 0.08) *
+        (0.5 + s.virality) *
+        (0.4 + 0.6 * math.min(1.0, reach));
     if (r.chance(world.config.megaViralChance)) strength *= r.range(3, 6);
     s.viralBoost = math.max(s.viralBoost, strength * era / 2.7);
     s.viralRamp = 3;

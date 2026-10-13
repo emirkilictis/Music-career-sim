@@ -115,6 +115,12 @@ class SimConfig {
   /// viral on short-video platforms (docs/game-design.md §7.3).
   final double viralRevivalChance;
 
+  /// How much an artist's audience helps a new song catch on online
+  /// (docs T12): √(audience / 1M), audience = core fans + casual / 5, from
+  /// 0.1 for an unknown to 1.3 for a star.
+  double viralReach(double coreFans, double casual) =>
+      math.sqrt((coreFans + casual / 5) / 1e6).clamp(0.1, 1.3).toDouble();
+
   /// Share of viral trends that become huge.
   final double megaViralChance;
 
