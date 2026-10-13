@@ -250,6 +250,23 @@ class TourFinished extends GameEvent {
   bool get isMajor => true;
 }
 
+/// The player played a festival set (docs K77).
+class FestivalPlayed extends GameEvent {
+  const FestivalPlayed(
+      {required this.festival,
+      required this.slot,
+      required this.watched,
+      required this.feeCents,
+      required this.fans});
+  final String festival;
+  final FestivalSlot slot;
+  final double watched;
+  final int feeCents;
+  final double fans;
+  @override
+  bool get isMajor => true;
+}
+
 /// A new platform opened this year (docs K67).
 class PlatformOpened extends GameEvent {
   const PlatformOpened(this.platform);

@@ -179,6 +179,19 @@ abstract final class Cmd {
   static SessionCmd<List<OpenerView>> tourOpeners() => (s) => s.tourOpeners;
   static SessionCmd<void> startTour(TourRequest r) => (s) => s.startTour(r);
 
+  static SessionCmd<List<FestivalView>> festivals() => (s) => s.festivals;
+  static SessionCmd<void> bookFestival(int festival) =>
+      (s) => s.bookFestival(festival);
+  static SessionCmd<void> cancelFestival(int festival, int year) =>
+      (s) => s.cancelFestival(festival, year);
+  static SessionCmd<Map<FestivalSlot, List<FestivalAct>>> festivalLineup(
+          int festival, int year) =>
+      (s) => s.festivalLineup(festival, year);
+
+  /// The year's top tours (null: all time) and the first year on the books.
+  static SessionCmd<(List<TourRankView>, int)> topTours(int? year) => (s) =>
+      (year == null ? s.allTimeTours() : s.topTours(year), s.firstTourYear);
+
   static SessionCmd<void> signLabel(Label label) => (s) => s.signLabel(label);
 
   static SessionCmd<OpportunityOutcome> answerOpportunity(

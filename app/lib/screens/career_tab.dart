@@ -5,6 +5,7 @@ import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/manager_section.dart';
+import '../widgets/festival_section.dart';
 import '../widgets/tour_section.dart';
 import '../widgets/milestones_section.dart';
 import '../widgets/common.dart';
@@ -71,6 +72,8 @@ class _CareerScreenState extends State<CareerScreen> {
         const MilestonesSection(),
         const SizedBox(height: 12),
         const TourSection(),
+        const SizedBox(height: 12),
+        const FestivalSection(),
         const SizedBox(height: 12),
         const ManagerSection(),
         const SizedBox(height: 12),

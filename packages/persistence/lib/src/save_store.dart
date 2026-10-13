@@ -95,6 +95,10 @@ class SaveStore {
       realNames: (meta['realNames'] as int? ?? 0) == 1,
     );
     w.playerArtistId = meta['playerArtistId'] as int;
+    // Box-office records and festival slots (docs K77).
+    w.tourRecords.addAll(TourRecord.decode(meta['tourRecords'] as String?));
+    w.festivalBookings
+        .addAll(FestivalBooking.decode(meta['festivals'] as String?));
     for (final (key, arr) in _metaArrays(w)) {
       for (var i = 0; i < arr.length; i++) {
         arr[i] = _d(meta['$key$i']);
@@ -319,6 +323,8 @@ class SaveStore {
       'playerArtistId': w.playerArtistId,
       'difficulty': w.difficulty.index,
       'realNames': w.realNames ? 1 : 0,
+      'tourRecords': TourRecord.encode(w.tourRecords),
+      'festivals': FestivalBooking.encode(w.festivalBookings),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

@@ -368,6 +368,76 @@ void main() {
     expect(a.moneyCents - money, greaterThan(done.netCents * 0.9));
   });
 
+  test('festivals: slots, booking, a set, a bill (K77)', () {
+    final w = WorldGen.create(seed: 77, startYear: 2015);
+    final sim = Simulator(w);
+    final a = WorldGen.addPlayer(w,
+        name: 'Star',
+        genre: 0,
+        tier: StartTier.risingStar,
+        money: StartMoney.millionaire);
+    expect(Festivals.slotFor(a), FestivalSlot.subHeadliner);
+    a.coreFans = 5e3;
+    a.fame = 0;
+    expect(Festivals.slotFor(a), isNull);
+    expect(() => Festivals.book(w, a, 1), throwsStateError);
+    a.coreFans = 4e6;
+    expect(Festivals.slotFor(a), FestivalSlot.headliner);
+    // A country festival books country acts only.
+    final country = festivals.indexWhere((f) => f.name == 'Cactus Country Jam');
+    expect(() => Festivals.book(w, a, country), throwsStateError);
+    final greenhill = festivals.indexWhere((f) => f.name == 'Greenhill');
+    final b = Festivals.book(w, a, greenhill);
+    expect(b.week, greaterThan(w.week));
+    expect(() => Festivals.book(w, a, greenhill), throwsStateError);
+    // The bill: the player among the headliners.
+    final bill = Festivals.lineup(w, greenhill, b.year);
+    expect(bill[FestivalSlot.headliner], contains(a.id));
+    expect(bill[FestivalSlot.headliner]!.length, 3);
+    // The set pays and wins fans.
+    final money = a.moneyCents;
+    FestivalSet? set;
+    while (set == null) {
+      set = sim.step().festivalSet;
+    }
+    expect(w.week - 1, b.week);
+    expect(
+        set.feeCents,
+        Festivals.feeCents(
+            festivals[greenhill], FestivalSlot.headliner, b.year));
+    expect(a.moneyCents, greaterThan(money));
+    expect(set.fans, greaterThan(0));
+    expect(set.listeners, greaterThan(set.fans));
+    expect(w.festivalBookings, isEmpty);
+    // Saved and read back.
+    final again = FestivalBooking(3, 2016, FestivalSlot.mainStage);
+    final back = FestivalBooking.decode(FestivalBooking.encode([again])).single;
+    expect((back.festival, back.year, back.slot),
+        (3, 2016, FestivalSlot.mainStage));
+  });
+
+  test('rivals tour after albums; the box office counts them (K77)', () {
+    final w = WorldGen.create(seed: 77, startYear: 2006, realNames: true);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2008)) {
+      sim.step();
+    }
+    expect(w.tourRecords.length, greaterThan(20));
+    final r = w.tourRecords.first;
+    expect(r.shows, greaterThanOrEqualTo(3));
+    expect(r.grossCents, greaterThan(0));
+    // Money comes in over its weeks, inside the years it runs.
+    final years = [
+      for (var y = GameTime.yearOf(r.startWeek);
+          y <= GameTime.yearOf(r.endWeek);
+          y++)
+        r.grossIn(y)
+    ];
+    expect(years.fold(0.0, (t, x) => t + x), closeTo(r.grossCents, 1));
+    expect(TourRecord.decode(TourRecord.encode(w.tourRecords)).length,
+        w.tourRecords.length);
+  });
+
   test('tours: cities, venues, prices, support acts (K76)', () {
     final w = WorldGen.create(seed: 76, startYear: 2015);
     final a = WorldGen.addPlayer(w,

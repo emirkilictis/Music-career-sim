@@ -335,6 +335,65 @@ void main() {
       g.close();
     });
 
+    test('festivals are booked, played and kept across reopening (K77)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final id = g.slotId;
+      final list = g.festivals;
+      expect(list.length, Festivals.all.length);
+      expect(list.first.week, lessThanOrEqualTo(list.last.week));
+      final pick = list.firstWhere((f) => f.canBook);
+      expect(pick.slot, FestivalSlot.headliner);
+      expect(pick.feeCents, greaterThan(0));
+      g.bookFestival(pick.index);
+      expect(() => g.bookFestival(pick.index), _code('festivalBooked'));
+      final bill = g.festivalLineup(pick.index, pick.year);
+      expect(bill[FestivalSlot.headliner]!.any((a) => a.isPlayer), isTrue);
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.festivals.firstWhere((f) => f.index == pick.index).booked,
+          FestivalSlot.headliner);
+      final events = <GameEvent>[];
+      while (g.week <= pick.week) {
+        events.addAll(g.advanceWeek().events);
+      }
+      final played = events.whereType<FestivalPlayed>().single;
+      expect(played.festival, pick.festival.name);
+      expect(played.feeCents, pick.feeCents);
+      g.close();
+    });
+
+    test('the box office ranks rivals and the player (K77)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      for (var i = 0; i < 30; i++) {
+        g.advanceWeek();
+      }
+      final year = g.year;
+      final top = g.topTours(year);
+      expect(top, isNotEmpty);
+      expect(top.first.rank, 1);
+      expect(top.first.grossCents, greaterThanOrEqualTo(top.last.grossCents));
+      g.startTour(const TourRequest(
+          name: 'Big Night',
+          legs: [TourLeg(TourMarket.usa, TourKind.stadium, 6)]));
+      g.advanceWeek();
+      final mine = g.topTours(year).where((r) => r.isPlayer).single;
+      expect(mine.tourName, 'Big Night');
+      expect(mine.onGoing, isTrue);
+      expect(g.allTimeTours(), isNotEmpty);
+      expect(g.firstTourYear, lessThanOrEqualTo(year));
+      g.close();
+    });
+
     test('platforms open in their years and split real numbers (K67)', () {
       expect([for (final p in Platforms.openIn(2002)) p], isEmpty);
       expect(Platforms.openIn(2006),

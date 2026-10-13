@@ -841,3 +841,136 @@ const _sponsors = [
 const _arenaWords = ['Arena', 'Center', 'Dome', 'Garden', 'Forum'];
 const _stadiumWords = ['Stadium', 'Field', 'Park'];
 const _civicStadiums = ['Olympic Stadium', 'National Stadium', 'Stadium'];
+
+/// A tour on the books for the box-office rankings (docs K77): a rival's
+/// (projected when it is booked) or the player's (as played).
+class TourRecord {
+  TourRecord({
+    required this.artistId,
+    required this.name,
+    required this.startWeek,
+    required this.endWeek,
+    required this.shows,
+    required this.tickets,
+    required this.grossCents,
+  });
+  final int artistId;
+  final String name;
+  final int startWeek;
+
+  /// First week after the last show.
+  final int endWeek;
+  final int shows;
+  final double tickets;
+  final double grossCents;
+
+  int get weeks => math.max(1, endWeek - startWeek);
+
+  /// Share of the tour played by the end of [week] (its money comes in
+  /// evenly over its weeks).
+  double playedBy(int week) =>
+      ((week - startWeek) / weeks).clamp(0.0, 1.0).toDouble();
+
+  /// Box office earned within [year].
+  double grossIn(int year) {
+    final from = GameTime.firstWeekOf(year),
+        to = GameTime.firstWeekOf(year + 1);
+    final overlap =
+        math.max(0, math.min(endWeek, to) - math.max(startWeek, from));
+    return grossCents * overlap / weeks;
+  }
+
+  List<Object> toJson() =>
+      [artistId, name, startWeek, endWeek, shows, tickets, grossCents];
+
+  static TourRecord fromJson(List<dynamic> j) => TourRecord(
+        artistId: j[0] as int,
+        name: j[1] as String,
+        startWeek: j[2] as int,
+        endWeek: j[3] as int,
+        shows: j[4] as int,
+        tickets: (j[5] as num).toDouble(),
+        grossCents: (j[6] as num).toDouble(),
+      );
+
+  static String encode(List<TourRecord> r) =>
+      jsonEncode([for (final x in r) x.toJson()]);
+
+  static List<TourRecord> decode(String? s) => s == null || s.isEmpty
+      ? []
+      : [for (final x in jsonDecode(s) as List) fromJson(x as List)];
+}
+
+/// Rivals' tours (docs K77): they do not change the weekly simulation, but
+/// fill the box-office rankings the player's tours compete in.
+abstract final class RivalTours {
+  /// Rivals this big may tour.
+  static const minFans = 2e5;
+
+  /// Books this year's tours for rivals with a recent album who have not
+  /// toured lately: their biggest affordable venues, the markets where
+  /// they have listeners, as many nights as their fans fill.
+  static void bookYear(World w) {
+    final year = GameTime.yearOf(w.week);
+    final lastTour = <int, int>{};
+    for (final r in w.tourRecords) {
+      lastTour[r.artistId] = math.max(lastTour[r.artistId] ?? -1, r.endWeek);
+    }
+    for (final id in w.activeArtistIds) {
+      final a = w.artists[id];
+      if (a.tier == ArtistTier.player || a.coreFans < minFans) continue;
+      if (a.lastReleaseWeek < w.week - 78) continue;
+      if ((lastTour[id] ?? -1000) > w.week - 2 * GameTime.weeksPerYear) {
+        continue;
+      }
+      final r = RandomStream.keyed(w.seed, w.week, id, RngPurpose.tour);
+      if (!r.chance(0.6)) continue;
+      // The biggest venues they can fill a run of (at least 10 nights).
+      var shows = 0, tickets = 0.0, gross = 0.0, legs = 0;
+      for (final kind in TourKind.values.reversed) {
+        if (a.coreFans < kind.minFans) continue;
+        shows = 0;
+        tickets = 0;
+        gross = 0;
+        legs = 0;
+        for (final m in TourMarket.values) {
+          final demand = Tours.marketDemand(w, a, m, 1.0, null);
+          final n = (demand / (kind.capacity * 0.85))
+              .round()
+              .clamp(0, Tours.maxShows(m, kind))
+              .toInt();
+          if (n < 3) continue;
+          final sold = math.min(demand, n * kind.capacity.toDouble());
+          shows += n;
+          tickets += sold;
+          gross += sold * Tours.priceFor(kind, year, 1.0);
+          legs++;
+        }
+        if (shows >= 10 || kind == TourKind.club) break;
+      }
+      if (shows == 0) continue;
+      final start = w.week + 4 + r.nextInt(30);
+      w.tourRecords.add(TourRecord(
+        artistId: id,
+        name: _name(w, a, r),
+        startWeek: start,
+        endWeek: start +
+            (shows + Tours.showsPerWeek - 1) ~/ Tours.showsPerWeek +
+            legs,
+        shows: shows,
+        tickets: tickets,
+        grossCents: gross,
+      ));
+    }
+  }
+
+  static String _name(World w, Artist a, RandomStream r) {
+    for (var i = w.albums.length - 1; i >= 0; i--) {
+      final al = w.albums[i];
+      if (al.artistId != a.id) continue;
+      if (al.releaseWeek < w.week - 104) break;
+      return r.chance(0.5) ? '${al.title} Tour' : '${al.title} World Tour';
+    }
+    return '${a.name} Live';
+  }
+}

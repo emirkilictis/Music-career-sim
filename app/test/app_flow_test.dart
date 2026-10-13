@@ -129,7 +129,10 @@ void main() {
         .group(1)!);
     final before = points();
     expect(before, greaterThanOrEqualTo(2));
-    await tester.ensureVisible(find.byTooltip('Raise Vocals'));
+    // Centred: at the very top the floating money bar covers it.
+    await Scrollable.ensureVisible(
+        tester.element(find.byTooltip('Raise Vocals')),
+        alignment: 0.5);
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Raise Vocals'));
     await tester.pumpAndSettle();

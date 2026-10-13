@@ -1010,3 +1010,77 @@ class UpcomingRelease {
   final int week;
   final double fame;
 }
+
+/// A festival's next edition as the player sees it (docs K77).
+class FestivalView {
+  FestivalView({
+    required this.index,
+    required this.festival,
+    required this.year,
+    required this.week,
+    required this.slot,
+    required this.booked,
+    required this.feeCents,
+    required this.watched,
+    required this.fans,
+    required this.fitsGenre,
+  });
+  final int index;
+  final Festival festival;
+  final int year;
+
+  /// Its week in the game calendar.
+  final int week;
+
+  /// The slot the player would get now (null: too small).
+  final FestivalSlot? slot;
+
+  /// The slot already booked (null: not booked).
+  final FestivalSlot? booked;
+
+  /// Fee, people watching and fans won for the slot shown.
+  final int feeCents;
+  final double watched;
+  final double fans;
+
+  /// The festival books the player's genre.
+  final bool fitsGenre;
+
+  bool get canBook => booked == null && slot != null && fitsGenre;
+}
+
+/// One act on a festival bill.
+class FestivalAct {
+  FestivalAct(this.artistId, this.name, this.isPlayer);
+  final int artistId;
+  final String name;
+  final bool isPlayer;
+}
+
+/// A line in the box-office rankings (docs K77).
+class TourRankView {
+  TourRankView({
+    required this.rank,
+    required this.artistId,
+    required this.artistName,
+    required this.tourName,
+    required this.grossCents,
+    required this.tickets,
+    required this.shows,
+    required this.isPlayer,
+    required this.onGoing,
+  });
+  final int rank;
+  final int artistId;
+  final String artistName;
+
+  /// '' when the player left it unnamed.
+  final String tourName;
+  final double grossCents;
+  final double tickets;
+  final int shows;
+  final bool isPlayer;
+
+  /// Still on the road: numbers so far.
+  final bool onGoing;
+}

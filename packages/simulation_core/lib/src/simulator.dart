@@ -6,6 +6,7 @@ import 'ai.dart';
 import 'config/charts.dart';
 import 'config/era_table.dart';
 import 'config/regions.dart';
+import 'festivals.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'opportunities.dart';
@@ -31,6 +32,7 @@ class WeekResult {
     this.newOpportunity,
     this.lapsedOpportunity,
     this.tourFinished,
+    this.festivalSet,
   });
 
   final int week;
@@ -65,6 +67,9 @@ class WeekResult {
 
   /// The player's tour that played its last week (docs K63).
   final Tour? tourFinished;
+
+  /// The player's festival set this week (docs K77).
+  final FestivalSet? festivalSet;
 
   List<ChartEntry> get songChart => charts[Charts.usSongs];
   List<ChartEntry> get albumChart => charts[Charts.usAlbums];
@@ -735,9 +740,22 @@ class Simulator {
     OpportunityOutcome? lapsed;
     Opportunity? offered;
     Tour? toured;
+    FestivalSet? festival;
     final me = w.player;
     if (me != null) {
       toured = Tours.playWeek(w, me);
+      if (toured != null) {
+        w.tourRecords.add(TourRecord(
+          artistId: me.id,
+          name: toured.name,
+          startWeek: toured.startWeek,
+          endWeek: toured.endWeek,
+          shows: toured.shows.where((s) => s.played).length,
+          tickets: toured.tickets,
+          grossCents: toured.grossCents,
+        ));
+      }
+      festival = Festivals.playWeek(w, me);
       if (Opportunities.lapseDue(w, me)) {
         lapsed = Opportunities.answer(w, me, me.opportunity!.lapse);
       }
@@ -763,6 +781,7 @@ class Simulator {
       newOpportunity: offered,
       lapsedOpportunity: lapsed,
       tourFinished: toured,
+      festivalSet: festival,
     );
     w.week++;
     return result;

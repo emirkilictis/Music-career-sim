@@ -1338,6 +1338,119 @@
   "marketLatAm": "Latin America",
   "marketAsia": "Asia",
   "marketOceania": "Australia & NZ",
+  "festivalSection": "Festivals",
+  "festivalSeason": "Festival season",
+  "festivalNone": "No festival slots booked.",
+  "festivalHint": "Festivals pay a fee and put you in front of crowds who may not know you yet. Your slot depends on how big you are when you book.",
+  "festivalWhere": "{city} · {days} days · {crowd} a day",
+  "@festivalWhere": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      },
+      "crowd": {
+        "type": "String"
+      }
+    }
+  },
+  "festivalGenres": "Books: {genres}",
+  "@festivalGenres": {
+    "placeholders": {
+      "genres": {
+        "type": "String"
+      }
+    }
+  },
+  "festivalAllGenres": "All genres",
+  "festivalOffer": "{slot} · {fee} · ~{watched} watch · +{fans} fans",
+  "@festivalOffer": {
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      },
+      "watched": {
+        "type": "String"
+      },
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "festivalTooSmall": "Not big enough yet: needs {fans} fans",
+  "@festivalTooSmall": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "festivalWrongGenre": "Does not book your genre",
+  "festivalBook": "Book",
+  "festivalBooked": "Booked: {slot}",
+  "@festivalBooked": {
+    "placeholders": {
+      "slot": {
+        "type": "String"
+      }
+    }
+  },
+  "festivalCancel": "Cancel",
+  "festivalLineup": "Lineup",
+  "festivalBookedToast": "You are on the bill at {festival}!",
+  "@festivalBookedToast": {
+    "placeholders": {
+      "festival": {
+        "type": "String"
+      }
+    }
+  },
+  "slotHeadliner": "Headliner",
+  "slotSubHeadliner": "Sub-headliner",
+  "slotMainStage": "Main stage",
+  "slotSmallStage": "Small stage",
+  "eventFestivalPlayed": "You played {festival} ({slot}): {watched} watched, {money}, +{fans} fans.",
+  "@eventFestivalPlayed": {
+    "placeholders": {
+      "festival": {
+        "type": "String"
+      },
+      "slot": {
+        "type": "String"
+      },
+      "watched": {
+        "type": "String"
+      },
+      "money": {
+        "type": "String"
+      },
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "chartTopTours": "Top Tours",
+  "chartShortTours": "Tours",
+  "toursAllTime": "All time",
+  "toursGross": "gross",
+  "toursLine": "{tickets} tickets · {shows} shows",
+  "@toursLine": {
+    "placeholders": {
+      "tickets": {
+        "type": "String"
+      },
+      "shows": {
+        "type": "int"
+      }
+    }
+  },
+  "toursOnRoad": "On the road",
+  "toursEmpty": "No tours on the books yet.",
   "eventTourFinished": "{tour} is over: {shows} shows ({soldOut} sold out), {tickets} tickets, {money}, +{fans} fans.",
   "@eventTourFinished": {
     "placeholders": {

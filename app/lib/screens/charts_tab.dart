@@ -28,6 +28,9 @@ const _magazineCharts = [
   Charts.ukAlbums,
 ];
 
+/// The box-office board in the chart tabs (docs K77).
+const _toursChart = -1;
+
 /// Saturday of a game week, for "Week of …" dates.
 DateTime chartDate(int week) {
   final first = DateTime(GameTime.yearOf(week));
@@ -39,6 +42,11 @@ class _ChartsTabState extends State<ChartsTab> {
   int _chart = Charts.usSongs;
   ChartView? _view;
   int _loadedRevision = -1;
+
+  /// Box office: the year shown (null = all time), its rows, first year.
+  int? _tourYear;
+  List<TourRankView>? _tours;
+  int _firstTourYear = 0;
 
   @override
   void didChangeDependencies() {
@@ -52,12 +60,28 @@ class _ChartsTabState extends State<ChartsTab> {
 
   Future<void> _load() async {
     final career = context.careerRead;
+    if (_chart == _toursChart) {
+      final (rows, first) = await career.read(Cmd.topTours(_tourYear));
+      if (mounted) {
+        setState(() {
+          _tours = rows;
+          _firstTourYear = first;
+        });
+      }
+      return;
+    }
     final view = await career.read(Cmd.chart(_chart));
     if (mounted) setState(() => _view = view);
   }
 
   void _select(int chart) {
-    setState(() => _chart = chart);
+    setState(() {
+      if (chart == _toursChart && _chart != _toursChart) {
+        _tourYear = context.careerRead.year;
+        _tours = null;
+      }
+      _chart = chart;
+    });
     _load();
   }
 
@@ -99,14 +123,20 @@ class _ChartsTabState extends State<ChartsTab> {
                       letterSpacing: 3,
                       color: Colors.white70)),
               const SizedBox(height: 4),
-              Text(fmt.chart(_chart).toUpperCase(),
+              Text(
+                  (_chart == _toursChart ? l.chartTopTours : fmt.chart(_chart))
+                      .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
                       fontWeight: FontWeight.w800,
                       fontSize: 38,
                       height: 1.05,
                       color: Colors.white)),
-              Text(l.weekOf(date).toUpperCase(),
+              Text(
+                  (_chart == _toursChart
+                          ? (_tourYear == null ? l.toursAllTime : '$_tourYear')
+                          : l.weekOf(date))
+                      .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
                       fontWeight: FontWeight.w700,
@@ -125,53 +155,77 @@ class _ChartsTabState extends State<ChartsTab> {
                         selected: _chart == id,
                         onTap: () => _select(id),
                       ),
+                    _ChartTab(
+                      label: l.chartShortTours,
+                      selected: _chart == _toursChart,
+                      onTap: () => _select(_toursChart),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
         ),
-        // Column headers.
-        Container(
-          color: PaperColors.bg,
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
-          child: Row(children: [
-            const SizedBox(width: 54 + 60),
-            const Spacer(),
-            for (final h in [l.colLastWeek, l.colPeak, l.colWeeks])
-              SizedBox(
-                width: 38,
-                child: Text(h,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontFamily: AppFonts.condensed,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                        letterSpacing: 0.6,
-                        color: PaperColors.muted)),
-              ),
-          ]),
-        ),
-        Expanded(
-          child: view == null
-              ? const Center(
-                  child: CircularProgressIndicator(color: PaperColors.ink))
-              : view.rows.isEmpty
-                  ? Center(
-                      child: Text(l.chartEmpty,
-                          style: const TextStyle(color: PaperColors.muted)))
-                  : ListView.separated(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      itemCount: view.rows.length,
-                      separatorBuilder: (_, __) => const Divider(
-                          color: PaperColors.line, height: 1, indent: 16),
-                      itemBuilder: (context, i) => _ChartLine(
-                        row: view.rows[i],
-                        albums: view.def.kind == ChartKind.albums,
-                        onTap: () => _open(view.rows[i]),
+        if (_chart == _toursChart)
+          Expanded(
+            child: _ToursBoard(
+              rows: _tours,
+              year: _tourYear,
+              years: [
+                for (var y = context.career.year; y >= _firstTourYear; y--) y
+              ],
+              onYear: (y) {
+                setState(() {
+                  _tourYear = y;
+                  _tours = null;
+                });
+                _load();
+              },
+            ),
+          )
+        else ...[
+          // Column headers.
+          Container(
+            color: PaperColors.bg,
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+            child: Row(children: [
+              const SizedBox(width: 54 + 60),
+              const Spacer(),
+              for (final h in [l.colLastWeek, l.colPeak, l.colWeeks])
+                SizedBox(
+                  width: 38,
+                  child: Text(h,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontFamily: AppFonts.condensed,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          letterSpacing: 0.6,
+                          color: PaperColors.muted)),
+                ),
+            ]),
+          ),
+          Expanded(
+            child: view == null
+                ? const Center(
+                    child: CircularProgressIndicator(color: PaperColors.ink))
+                : view.rows.isEmpty
+                    ? Center(
+                        child: Text(l.chartEmpty,
+                            style: const TextStyle(color: PaperColors.muted)))
+                    : ListView.separated(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        itemCount: view.rows.length,
+                        separatorBuilder: (_, __) => const Divider(
+                            color: PaperColors.line, height: 1, indent: 16),
+                        itemBuilder: (context, i) => _ChartLine(
+                          row: view.rows[i],
+                          albums: view.def.kind == ChartKind.albums,
+                          onTap: () => _open(view.rows[i]),
+                        ),
                       ),
-                    ),
-        ),
+          ),
+        ],
       ]),
     );
   }
@@ -206,6 +260,138 @@ class _ChartTab extends StatelessWidget {
                   color: selected ? Colors.white : Colors.white54)),
         ),
       );
+}
+
+/// Top-grossing tours, magazine style: rank, artist, tour, gross.
+class _ToursBoard extends StatelessWidget {
+  const _ToursBoard(
+      {required this.rows,
+      required this.year,
+      required this.years,
+      required this.onYear});
+  final List<TourRankView>? rows;
+  final int? year;
+  final List<int> years;
+  final ValueChanged<int?> onYear;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final list = rows;
+    return Column(children: [
+      SizedBox(
+        height: 48,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          children: [
+            for (final y in [...years.take(12), null])
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: ChoiceChip(
+                  label: Text(y == null ? l.toursAllTime : '$y'),
+                  selected: year == y,
+                  onSelected: (_) => onYear(y),
+                ),
+              ),
+          ],
+        ),
+      ),
+      Expanded(
+        child: list == null
+            ? const Center(
+                child: CircularProgressIndicator(color: PaperColors.ink))
+            : list.isEmpty
+                ? Center(
+                    child: Text(l.toursEmpty,
+                        style: const TextStyle(color: PaperColors.muted)))
+                : ListView.separated(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    itemCount: list.length,
+                    separatorBuilder: (_, __) => const Divider(
+                        color: PaperColors.line, height: 1, indent: 16),
+                    itemBuilder: (context, i) {
+                      final r = list[i];
+                      final top = r.rank == 1;
+                      return Container(
+                        color: r.isPlayer
+                            ? const Color(0xFFEDE7FF)
+                            : PaperColors.card,
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                        child: Row(children: [
+                          SizedBox(
+                            width: 50,
+                            child: Text('${r.rank}',
+                                style: TextStyle(
+                                    fontFamily: AppFonts.condensed,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: top ? 40 : 30,
+                                    height: 1,
+                                    color: PaperColors.ink)),
+                          ),
+                          Expanded(
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(r.artistName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: top ? 18 : 15.5,
+                                          color: PaperColors.ink)),
+                                  Text(
+                                      r.tourName.isEmpty
+                                          ? l.tourSection
+                                          : r.tourName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontStyle: FontStyle.italic,
+                                          color: PaperColors.ink)),
+                                  Text(
+                                      l.toursLine(
+                                          fmt.compact(r.tickets), r.shows),
+                                      style: const TextStyle(
+                                          fontSize: 12.5,
+                                          color: PaperColors.muted)),
+                                  if (r.isPlayer || r.onGoing) ...[
+                                    const SizedBox(height: 4),
+                                    Wrap(spacing: 6, children: [
+                                      if (r.isPlayer)
+                                        _Badge(l.you, AppColors.lilac,
+                                            const Color(0xFF241A45)),
+                                      if (r.onGoing)
+                                        _Badge(
+                                            l.toursOnRoad,
+                                            const Color(0xFFDDF3E6),
+                                            PaperColors.up),
+                                    ]),
+                                  ],
+                                ]),
+                          ),
+                          Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(fmt.money(r.grossCents.round()),
+                                    style: const TextStyle(
+                                        fontFamily: AppFonts.condensed,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 18,
+                                        color: PaperColors.ink)),
+                                Text(l.toursGross,
+                                    style: const TextStyle(
+                                        fontSize: 11.5,
+                                        color: PaperColors.muted)),
+                              ]),
+                        ]),
+                      );
+                    },
+                  ),
+      ),
+    ]);
+  }
 }
 
 /// One chart position, magazine style.

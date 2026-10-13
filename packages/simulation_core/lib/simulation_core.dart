@@ -9,6 +9,7 @@ export 'src/config/difficulty.dart';
 export 'src/config/era_table.dart';
 export 'src/config/regions.dart';
 export 'src/config/sim_config.dart';
+export 'src/festivals.dart';
 export 'src/lifecycle.dart';
 export 'src/model.dart';
 export 'src/names.dart';

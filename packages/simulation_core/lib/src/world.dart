@@ -4,7 +4,9 @@ import 'config/charts.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
+import 'festivals.dart';
 import 'model.dart';
+import 'tours.dart';
 
 /// The hot, in-memory simulation state ("current world").
 class World {
@@ -35,6 +37,13 @@ class World {
   final List<Collaborator> collaborators = [];
 
   int playerArtistId = -1;
+
+  /// Tours for the box-office rankings: rivals' and the player's finished
+  /// ones (docs K77).
+  final List<TourRecord> tourRecords = [];
+
+  /// The player's festival slots to come (docs K77).
+  final List<FestivalBooking> festivalBookings = [];
 
   /// Non-retired artists, sorted by id. Weekly loops run over these only.
   final List<int> activeArtistIds = [];

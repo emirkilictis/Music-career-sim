@@ -195,6 +195,24 @@ void main() {
     await shot(tester, '15f_tour_schedule');
     await tester.pageBack();
     await tester.pumpAndSettle();
+    // Festivals and the box office (K77).
+    await tester.scrollUntilVisible(find.text('Festival season'), 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Festival season'));
+    await shot(tester, '15g_festivals');
+    await tester.tap(find.text('Lineup').first);
+    await shot(tester, '15h_festival_lineup');
+    await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tab(tester, 'Charts');
+    await tester.drag(find.text('US ALBUMS'), const Offset(-600, 0));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('TOURS'));
+    await shot(tester, '08b_top_tours');
+    await tab(tester, 'Career');
     await tester.scrollUntilVisible(find.text('Skills'), -300,
         scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('Skip'));

@@ -4,6 +4,7 @@ import 'names.dart';
 import 'real_artists.dart';
 import 'rng.dart';
 import 'time.dart';
+import 'tours.dart';
 import 'world.dart';
 import 'world_gen.dart';
 
@@ -212,5 +213,7 @@ abstract final class AiPlanner {
     for (var i = 0; i < ai.length; i++) {
       ai[i].tier = i < c.tierACount ? ArtistTier.a : ArtistTier.b;
     }
+    // Rivals' tours for the box-office rankings (docs K77).
+    RivalTours.bookYear(w);
   }
 }

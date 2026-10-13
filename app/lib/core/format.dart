@@ -301,6 +301,13 @@ class Fmt {
         TourProduction.spectacle => l.tourProdSpectacle,
       };
 
+  String festivalSlot(FestivalSlot s) => switch (s) {
+        FestivalSlot.headliner => l.slotHeadliner,
+        FestivalSlot.subHeadliner => l.slotSubHeadliner,
+        FestivalSlot.mainStage => l.slotMainStage,
+        FestivalSlot.smallStage => l.slotSmallStage,
+      };
+
   /// The player's name for a tour, else named after its biggest venues.
   String tourName(String name, TourKind kind) =>
       name.isEmpty ? tourKind(kind) : name;
@@ -543,6 +550,12 @@ class Fmt {
         }(),
       TourFinished() => l.eventTourFinished(tourName(e.name, e.kind), e.shows,
           e.soldOut, compact(e.tickets), money(e.netCents), compact(e.fans)),
+      FestivalPlayed() => l.eventFestivalPlayed(
+          e.festival,
+          festivalSlot(e.slot),
+          compact(e.watched),
+          money(e.feeCents),
+          compact(e.fans)),
       MilestoneReached(:final milestone) =>
         l.eventMilestone(milestoneName(milestone), milestone.skillPoints),
       OpportunityLapsed() => e.outcome.kind == OpportunityKind.scandal

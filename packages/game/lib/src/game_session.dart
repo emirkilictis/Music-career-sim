@@ -501,6 +501,163 @@ class GameSession {
           'tourShows',
       ];
 
+  // ------------------------------------------------------------ festivals
+
+  /// Every festival's next edition, soonest first (docs K77).
+  List<FestivalView> get festivals {
+    final p = _p;
+    final slot = Festivals.slotFor(p);
+    final out = <FestivalView>[];
+    for (var i = 0; i < Festivals.all.length; i++) {
+      final f = Festivals.all[i];
+      final year = Festivals.nextYear(world, f);
+      final booked = world.festivalBookings
+          .where((b) => b.festival == i && b.year == year)
+          .firstOrNull
+          ?.slot;
+      final shown = booked ?? slot;
+      final watched = shown == null ? 0.0 : Festivals.watched(f, shown, p);
+      out.add(FestivalView(
+        index: i,
+        festival: f,
+        year: year,
+        week: GameTime.firstWeekOf(year) + f.weekOfYear - 1,
+        slot: slot,
+        booked: booked,
+        feeCents: shown == null ? 0 : Festivals.feeCents(f, shown, year),
+        watched: watched,
+        fans: watched * (0.03 + 0.05 * p.skills.charisma / 100),
+        fitsGenre: f.books(p.genre),
+      ));
+    }
+    out.sort((a, b) => a.week.compareTo(b.week));
+    return out;
+  }
+
+  /// Takes the slot the player gets now at [festival]'s next edition.
+  void bookFestival(int festival) {
+    final f = Festivals.all[festival];
+    if (Festivals.slotFor(_p) == null) {
+      throw GameException('festivalTooSmall', 'Not big enough yet');
+    }
+    if (!f.books(_p.genre)) {
+      throw GameException('festivalGenre', 'Not this festival\'s genre');
+    }
+    final year = Festivals.nextYear(world, f);
+    if (world.festivalBookings
+        .any((b) => b.festival == festival && b.year == year)) {
+      throw GameException('festivalBooked', 'Already booked');
+    }
+    Festivals.book(world, _p, festival);
+    _saveNow();
+  }
+
+  /// Calls off a festival slot.
+  void cancelFestival(int festival, int year) {
+    Festivals.cancel(world, festival, year);
+    _saveNow();
+  }
+
+  /// [festival]'s bill for [year], headliners first.
+  Map<FestivalSlot, List<FestivalAct>> festivalLineup(int festival, int year) =>
+      {
+        for (final e in Festivals.lineup(world, festival, year).entries)
+          e.key: [
+            for (final id in e.value)
+              FestivalAct(
+                  id, world.artists[id].name, id == world.playerArtistId)
+          ],
+      };
+
+  // ----------------------------------------------------------- box office
+
+  /// The year's top-grossing tours so far (docs K77): rivals' tours by
+  /// what they have played, the player's own included.
+  List<TourRankView> topTours(int year, {int limit = 25}) {
+    final now = world.week;
+    final rows = <(TourRecord, double, bool)>[];
+    for (final r in world.tourRecords) {
+      // What it has earned in [year] up to now (evenly over its weeks).
+      final until = math.min(now, GameTime.firstWeekOf(year + 1));
+      final from = GameTime.firstWeekOf(year);
+      final overlap =
+          math.max(0, math.min(r.endWeek, until) - math.max(r.startWeek, from));
+      final gross = r.grossCents * overlap / r.weeks;
+      if (gross > 0) rows.add((r, gross, r.endWeek > now));
+    }
+    final t = _p.tour;
+    if (t != null) {
+      var gross = 0.0;
+      for (final s in t.shows) {
+        if (s.played && GameTime.yearOf(s.week) == year) gross += s.grossCents;
+      }
+      if (gross > 0) {
+        rows.add((
+          TourRecord(
+              artistId: _p.id,
+              name: t.name,
+              startWeek: t.startWeek,
+              endWeek: t.endWeek,
+              shows: t.shows.where((s) => s.played).length,
+              tickets: t.tickets,
+              grossCents: t.grossCents),
+          gross,
+          true
+        ));
+      }
+    }
+    return _rank(rows, limit);
+  }
+
+  /// The biggest tours ever played in this world.
+  List<TourRankView> allTimeTours({int limit = 25}) {
+    final rows = <(TourRecord, double, bool)>[
+      for (final r in world.tourRecords)
+        if (r.startWeek < world.week)
+          (r, r.grossCents * r.playedBy(world.week), r.endWeek > world.week),
+    ];
+    final t = _p.tour;
+    if (t != null && t.grossCents > 0) {
+      rows.add((
+        TourRecord(
+            artistId: _p.id,
+            name: t.name,
+            startWeek: t.startWeek,
+            endWeek: t.endWeek,
+            shows: t.shows.where((s) => s.played).length,
+            tickets: t.tickets,
+            grossCents: t.grossCents),
+        t.grossCents,
+        true
+      ));
+    }
+    return _rank(rows, limit);
+  }
+
+  /// First year with tours on the books.
+  int get firstTourYear => world.tourRecords.isEmpty
+      ? year
+      : GameTime.yearOf(
+          world.tourRecords.map((r) => r.startWeek).reduce(math.min));
+
+  List<TourRankView> _rank(List<(TourRecord, double, bool)> rows, int limit) {
+    rows.sort((a, b) => b.$2.compareTo(a.$2));
+    return [
+      for (final (i, (r, gross, live)) in rows.take(limit).indexed)
+        TourRankView(
+          rank: i + 1,
+          artistId: r.artistId,
+          artistName: world.artists[r.artistId].name,
+          tourName: r.name,
+          grossCents: gross,
+          tickets: r.grossCents > 0 ? r.tickets * gross / r.grossCents : 0,
+          shows: r.shows,
+          isPlayer: r.artistId == world.playerArtistId,
+          onGoing: live,
+        ),
+    ];
+  }
+
   /// Rivals who could open the tour, with their fee a night.
   List<OpenerView> get tourOpeners => [
         for (final o in Tours.openerCandidates(world, _p))
@@ -1337,6 +1494,14 @@ class GameSession {
           tickets: t.tickets,
           netCents: t.netCents.round(),
           fans: t.fans));
+    }
+    if (r.festivalSet case final f?) {
+      events.add(FestivalPlayed(
+          festival: f.booking.info.name,
+          slot: f.booking.slot,
+          watched: f.watched,
+          feeCents: f.feeCents,
+          fans: f.fans));
     }
     if (r.newOpportunity case final o?) events.add(OpportunityCame(o.kind));
     for (final al in w.albums.reversed) {
