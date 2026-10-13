@@ -958,8 +958,7 @@ class Simulator {
 
   /// Starts a viral trend: it grows for three weeks, then fades. Most trends
   /// are small; a few become huge and can push a song up the charts.
-  void _startViral(Song s, RandomStream r, double era,
-      {double reach = 1}) {
+  void _startViral(Song s, RandomStream r, double era, {double reach = 1}) {
     var strength = r.range(0.02, 0.08) *
         (0.5 + s.virality) *
         (0.4 + 0.6 * math.min(1.0, reach));

@@ -257,7 +257,9 @@ abstract final class Actions {
     final energyPenalty = aiMode ? 0.0 : creativityPenalty(energyBefore);
 
     final raw = skill +
-        (a.tier == ArtistTier.player ? w.difficulty.qualityBonus : 0) +
+        (a.tier == ArtistTier.player
+            ? w.difficulty.qualityBonus + noviceBonus(skill)
+            : 0) +
         (aiMode ? budgetBonus(budget) : playerBudgetBonus(budget)) +
         genreFit +
         luck +
@@ -337,6 +339,12 @@ abstract final class Actions {
   static double campaignSizeFactor(Artist a) => math
       .pow(math.max(1.0, (a.coreFans + 0.25 * a.casual) / 1.5e6), 0.8)
       .toDouble();
+
+  /// A beginner's first songs get a lift that fades as their craft grows
+  /// (docs T13): +0.45 per point below 50 (about +7 at the free start's
+  /// ~33), nothing from 50 up.
+  static double noviceBonus(double skill) =>
+      skill >= 50 ? 0 : 0.45 * (50 - skill);
 
   /// What the player pays for [campaign]: its price grows with their
   /// audience, and their label pays the rest.

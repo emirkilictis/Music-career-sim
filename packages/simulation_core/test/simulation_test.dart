@@ -189,6 +189,7 @@ void main() {
   group('mega debuts', megaDebutTests);
   group('album shape', albumShapeTests);
   group('viral', viralTests);
+  group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
     final w = WorldGen.create(seed: 15, startYear: 2014);
@@ -648,6 +649,15 @@ void albumShapeTests() {
 
 /// Short-video virality (docs/game-design.md §7.3): old catalog songs can go
 /// viral and climb the charts in the short-video era, but not before it.
+void noviceTests() {
+  test('a beginner gets a lift that fades as skills grow (T13)', () {
+    expect(Actions.noviceBonus(33), closeTo(7.65, 1e-9));
+    expect(Actions.noviceBonus(45), closeTo(2.25, 1e-9));
+    expect(Actions.noviceBonus(50), 0);
+    expect(Actions.noviceBonus(80), 0);
+  });
+}
+
 void viralTests() {
   test('unknown artists rarely go viral; known ones as before (T12)', () {
     final c = SimConfig();

@@ -144,7 +144,7 @@ Aynı başlangıç, ~70 hafta. Notlar ve kilitler belirgin şekilde daha iyi (yu
 |---|---|---|
 | T11 | **Katalog şarkıları para kazandırmıyordu.** Aktif listeden düşen şarkılar haftada yüz binlerce stream alıyordu ama gelir $0 görünüyordu. | ✅ Düzeltildi: katalog stream'leri de ödeniyor (test eklendi). |
 | T12 | **Viral olmak çok sık.** İki test oyununda da ilk 20–40 haftada bir şarkı viral oldu (bu sefer bir EP şarkısı, D notuyla) ve para birkaç haftada $300K'ya çıktı. Haftalık viral şansı şarkı başına ~%0,6; oyuncunun 6–10 aktif şarkısı olunca yılda neredeyse kesin. | Karar bekliyor: tanınmamış sanatçılar için şansı azaltmak ya da viral etkisini hayran sayısına bağlamak. AI kalibrasyonunu da etkiler. ✅ Emir onayladı → K64: şans ve güç kitleye bağlı; tanınmamışta ilk yıl viral %50 → %8. |
-| T13 | **İlk şarkılar hâlâ çoğunlukla E.** Ücretsiz statlarla (≈33), yardımsız ve düşük bütçeyle yazınca kalite ≈35. Gerçekçi ama moral bozucu olabilir. | Karar bekliyor: harf eşiklerini yumuşatmak (ör. D 35'ten başlasın) ya da ilk şarkılara küçük bir "ilk kayıt heyecanı" bonusu. |
+| T13 | **İlk şarkılar hâlâ çoğunlukla E.** Ücretsiz statlarla (≈33), yardımsız ve düşük bütçeyle yazınca kalite ≈35. Gerçekçi ama moral bozucu olabilir. | Karar bekliyor: harf eşiklerini yumuşatmak (ör. D 35'ten başlasın) ya da ilk şarkılara küçük bir "ilk kayıt heyecanı" bonusu. ✅ Emir onayladı → K65: acemi desteği + yumuşak eşikler; düşük bütçede E %83 → %37. |
 
 ## Test oyunu 1 — Claude (normal mod, 2025, ücretsiz başlangıç)
 

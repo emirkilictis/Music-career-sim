@@ -5,7 +5,11 @@ import 'package:simulation_core/simulation_core.dart';
 /// money peak.
 void main(List<String> args) {
   final seeds = args.isNotEmpty ? int.parse(args[0]) : 12;
-  for (final tier in [StartTier.unknown, StartTier.localBuzz, StartTier.risingStar]) {
+  for (final tier in [
+    StartTier.unknown,
+    StartTier.localBuzz,
+    StartTier.risingStar
+  ]) {
     var withViral = 0, virals = 0;
     final peaks = <double>[];
     for (var seed = 1; seed <= seeds; seed++) {
