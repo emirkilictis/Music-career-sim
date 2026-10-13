@@ -1142,7 +1142,7 @@ class Simulator {
     p.moneyCents += p.manager.net(cents * p.artistShare).round();
     // The label takes no cut of the day job.
     p.moneyCents += p.job.wageCents;
-    p.skillPoints += Actions.skillPointsPerWeek;
+    Actions.grantSkillPoints(p, Actions.skillPointsPerWeek);
     // Side benefits of some jobs (docs K36).
     final s = p.skills;
     switch (p.job) {

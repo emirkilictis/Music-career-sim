@@ -134,6 +134,12 @@ void main() {
     await tester.tap(find.byTooltip('Raise Vocals'));
     await tester.pumpAndSettle();
     expect(points(), before - 1);
+    // All the rest at once, lowest skill first (F34).
+    await tester.ensureVisible(find.text('Spread all'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Spread all'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining(left), findsNothing);
   });
 
   testWidgets('free players see Premium starts locked', (tester) async {
@@ -251,7 +257,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byType(ListTile).last);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('In 4 weeks'));
+    await tester.tap(find.widgetWithText(ChoiceChip, 'In 4 weeks'));
     await tester.pumpAndSettle();
     expect(find.text('Out: January 2024, week 5'), findsOneWidget);
     await tester.tap(find.text('2 weeks before'));
@@ -281,7 +287,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Change date'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('In 6 weeks'));
+    await tester.tap(find.widgetWithText(ChoiceChip, 'In 6 weeks'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Save'));
     await tester.pumpAndSettle();

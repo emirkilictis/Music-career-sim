@@ -345,6 +345,32 @@ void main() {
     expect(a.moneyCents - money, greaterThan(done.netCents * 0.9));
   });
 
+  test('skill points stop at what the skills can use (F34)', () {
+    final w = WorldGen.create(seed: 34, startYear: 2015);
+    final p = WorldGen.addPlayer(w,
+        name: 'P', genre: 0, tier: StartTier.unknown, money: StartMoney.basic);
+    for (final k in SkillKind.values) {
+      p.skills[k] = 95;
+    }
+    Actions.grantSkillPoints(p, 1000);
+    expect(p.skillPoints, 25);
+    // Many at once, never past 100.
+    expect(Actions.spendSkillPoints(p, SkillKind.vocals, 10), 5);
+    expect(p.skills[SkillKind.vocals], Actions.maxSkill);
+    expect(p.skillPoints, 20);
+    // Spread: always the lowest skill, until all are full.
+    p.skills[SkillKind.charisma] = 90;
+    Actions.grantSkillPoints(p, 1000);
+    expect(p.skillPoints, 25); // 5 + 5 + 5 + 10 still to learn
+    expect(Actions.spreadSkillPoints(p), 25);
+    for (final k in SkillKind.values) {
+      expect(p.skills[k], Actions.maxSkill);
+    }
+    // Nothing left to learn: no more points.
+    Actions.grantSkillPoints(p, Actions.skillPointsPerWeek);
+    expect(p.skillPoints, 0);
+  });
+
   test('artists and collaborators never share a name (C6)', () {
     for (final real in [false, true]) {
       final w = WorldGen.create(seed: 6, startYear: 2015, realNames: real);

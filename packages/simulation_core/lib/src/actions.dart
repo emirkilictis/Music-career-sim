@@ -53,8 +53,47 @@ abstract final class Actions {
   static void spendSkillPoint(Artist a, SkillKind kind) {
     if (a.skillPoints <= 0) throw ActionException('No skill points');
     if (a.skills[kind] >= maxSkill) throw ActionException('Skill is maxed');
-    a.skills[kind] = math.min(maxSkill, a.skills[kind] + 1);
-    a.skillPoints--;
+    spendSkillPoints(a, kind, 1);
+  }
+
+  /// Points still useful for [kind]: what it lacks to [maxSkill].
+  static int skillRoomFor(Artist a, SkillKind kind) =>
+      math.max(0, (maxSkill - a.skills[kind]).ceil());
+
+  /// Points the artist could still use on all skills (docs F34).
+  static int skillRoom(Artist a) =>
+      SkillKind.values.fold(0, (t, k) => t + skillRoomFor(a, k));
+
+  /// Adds earned points, never more than the skills can still use: once
+  /// every skill is at [maxSkill] points stop piling up (docs F34).
+  static void grantSkillPoints(Artist a, int points) {
+    a.skillPoints = math.min(a.skillPoints + points, skillRoom(a));
+  }
+
+  /// Spends up to [count] points on [kind]; returns how many were spent.
+  static int spendSkillPoints(Artist a, SkillKind kind, int count) {
+    final n = math.min(count, math.min(a.skillPoints, skillRoomFor(a, kind)));
+    if (n <= 0) return 0;
+    a.skills[kind] = math.min(maxSkill, a.skills[kind] + n);
+    a.skillPoints -= n;
+    return n;
+  }
+
+  /// Spends every point, always on the lowest skill (docs F34).
+  static int spreadSkillPoints(Artist a) {
+    var spent = 0;
+    while (a.skillPoints > 0) {
+      SkillKind? low;
+      for (final k in SkillKind.values) {
+        if (a.skills[k] < maxSkill &&
+            (low == null || a.skills[k] < a.skills[low])) {
+          low = k;
+        }
+      }
+      if (low == null) break;
+      spent += spendSkillPoints(a, low, 1);
+    }
+    return spent;
   }
 
   /// Energy gained at the end of a week (before the job's cost).

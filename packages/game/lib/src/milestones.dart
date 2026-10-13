@@ -135,7 +135,7 @@ enum Milestone {
   bool mark(World w, Artist p) {
     if (p.milestones.containsKey(index)) return false;
     p.milestones[index] = w.week;
-    p.skillPoints += skillPoints;
+    Actions.grantSkillPoints(p, skillPoints);
     w.dirtyArtists.add(p.id);
     return true;
   }

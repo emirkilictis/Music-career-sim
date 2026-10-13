@@ -209,6 +209,25 @@ void main() {
       expect(summary['lastAlbumId'], isNonNegative);
     });
 
+    test('piled-up skill points shrink to what is usable (F34)', () {
+      var g = GameSession.start(slots, _setup());
+      final id = g.slotId;
+      final p = g.world.player!;
+      final room = Actions.skillRoom(p);
+      p.skillPoints = 5000; // as saved before F34
+      g.world.dirtyArtists.add(p.id);
+      g.writeSong(budget: BudgetTier.low); // any action saves
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.player.skillPoints, room);
+      final before = g.player.skills[SkillKind.vocals]!;
+      expect(g.spendSkillPoints(SkillKind.vocals, 10), 10);
+      expect(g.player.skills[SkillKind.vocals], before + 10);
+      expect(g.spreadSkillPoints(), room - 10);
+      expect(g.player.skillPoints, 0);
+      g.close();
+    });
+
     test('older saves get the independent reach of docs K70', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;

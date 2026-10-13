@@ -252,26 +252,44 @@ class SkillsSection extends StatelessWidget {
       SkillKind.performance: l.statPerformance,
       SkillKind.charisma: l.statCharisma,
     };
-    Future<void> raise(SkillKind k) async {
+    Future<void> run(SessionCmd<Object?> cmd) async {
       try {
-        await career.act(Cmd.spendSkillPoint(k));
+        await career.act(cmd);
       } catch (e) {
         if (context.mounted) showError(context, e);
       }
     }
 
+    final maxed =
+        SkillKind.values.every((k) => p.skills[k]! >= Actions.maxSkill);
+
     return Section(
       title: l.skillsTitle,
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(
-          p.skillPoints > 0
-              ? l.skillPointsLeft(p.skillPoints)
-              : l.skillPointsHint,
-          style: TextStyle(
-              color: p.skillPoints > 0 ? AppColors.lilac : AppColors.textMuted,
-              fontWeight:
-                  p.skillPoints > 0 ? FontWeight.w800 : FontWeight.w500),
-        ),
+        Row(children: [
+          Expanded(
+            child: Text(
+              p.skillPoints > 0
+                  ? l.skillPointsLeft(p.skillPoints)
+                  : maxed
+                      ? l.skillsMaxed
+                      : l.skillPointsHint(Actions.skillPointsPerWeek),
+              style: TextStyle(
+                  color:
+                      p.skillPoints > 0 ? AppColors.lilac : AppColors.textMuted,
+                  fontWeight:
+                      p.skillPoints > 0 ? FontWeight.w700 : FontWeight.w500),
+            ),
+          ),
+          // Many points at once, lowest skill first (docs F34).
+          if (p.skillPoints > 1)
+            TextButton.icon(
+              onPressed:
+                  career.busy ? null : () => run(Cmd.spreadSkillPoints()),
+              icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+              label: Text(l.skillsSpreadAll),
+            ),
+        ]),
         const SizedBox(height: 6),
         for (final k in SkillKind.values)
           Row(children: [
@@ -282,12 +300,29 @@ class SkillsSection extends StatelessWidget {
                   text: p.skills[k]!.floor().toString()),
             ),
             SizedBox(
+              width: 50,
+              child: p.skillPoints > 1 && p.skills[k]! < Actions.maxSkill - 1
+                  ? TextButton(
+                      style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact),
+                      onPressed: career.busy
+                          ? null
+                          : () => run(Cmd.spendSkillPoints(k, 10)),
+                      child: Text('+10',
+                          semanticsLabel: l.skillRaiseMany(names[k]!, 10)),
+                    )
+                  : null,
+            ),
+            SizedBox(
               width: 44,
               child: p.skillPoints > 0 && p.skills[k]! < Actions.maxSkill
                   ? IconButton(
                       tooltip: l.skillRaise(names[k]!),
                       visualDensity: VisualDensity.compact,
-                      onPressed: () => raise(k),
+                      onPressed: career.busy
+                          ? null
+                          : () => run(Cmd.spendSkillPoint(k)),
                       icon: Icon(Icons.add_circle_rounded,
                           color: AppColors.lilac),
                     )

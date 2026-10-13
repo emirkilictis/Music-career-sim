@@ -1929,7 +1929,14 @@
       }
     }
   },
-  "skillPointsHint": "You get 1 skill point every week. Each skill goes up to 100.",
+  "skillPointsHint": "You get {count} skill points every week. Each skill goes up to 100.",
+  "@skillPointsHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "skillRaise": "Raise {skill}",
   "@skillRaise": {
     "placeholders": {
@@ -1938,6 +1945,19 @@
       }
     }
   },
+  "skillRaiseMany": "Raise {skill} by {count}",
+  "@skillRaiseMany": {
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "skillsSpreadAll": "Spread all",
+  "skillsMaxed": "Every skill is at 100: there is nothing left to learn, so no more points come.",
   "singleUnits": "Single units",
   "singleUnitsHint": "Sales + streams ÷ 150",
   "stepJobBody": "Money is tight. A day job pays every week.",

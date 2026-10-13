@@ -191,6 +191,11 @@ abstract final class Cmd {
   static SessionCmd<void> spendSkillPoint(SkillKind kind) =>
       (s) => s.spendSkillPoint(kind);
 
+  static SessionCmd<int> spendSkillPoints(SkillKind kind, int count) =>
+      (s) => s.spendSkillPoints(kind, count);
+
+  static SessionCmd<int> spreadSkillPoints() => (s) => s.spreadSkillPoints();
+
   static SessionCmd<void> rewardAd() => (s) => s.rewardAd();
 
   static SessionCmd<bool> dailyBonus(bool premium) =>

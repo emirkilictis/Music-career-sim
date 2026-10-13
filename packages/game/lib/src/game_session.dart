@@ -232,6 +232,11 @@ class GameSession {
       p.labelReach = p.label.reach;
       world.dirtyArtists.add(p.id);
     }
+    // Points piled up before docs F34 shrink to what the skills can use.
+    if (p != null && p.skillPoints > Actions.skillRoom(p)) {
+      p.skillPoints = Actions.skillRoom(p);
+      world.dirtyArtists.add(p.id);
+    }
     return GameSession._(slots, slotId, store, world);
   }
 
@@ -887,6 +892,27 @@ class GameSession {
     }
     Actions.spendSkillPoint(_p, kind);
     _saveNow();
+  }
+
+  /// Spends up to [count] points on [kind] at once (docs F34); returns how
+  /// many were spent.
+  int spendSkillPoints(SkillKind kind, int count) {
+    if (_p.skillPoints <= 0) {
+      throw GameException('noSkillPoints', 'No skill points left');
+    }
+    if (_p.skills[kind] >= Actions.maxSkill) {
+      throw GameException('skillMaxed', 'This skill is maxed');
+    }
+    final n = Actions.spendSkillPoints(_p, kind, count);
+    _saveNow();
+    return n;
+  }
+
+  /// Spends every point, lowest skill first (docs F34).
+  int spreadSkillPoints() {
+    final n = Actions.spreadSkillPoints(_p);
+    _saveNow();
+    return n;
   }
 
   /// Shoots a music video for one of the player's songs (docs K52); it
