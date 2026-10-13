@@ -10,4 +10,5 @@ export 'src/career_setup.dart';
 export 'src/events.dart';
 export 'src/game_session.dart';
 export 'src/milestones.dart';
+export 'src/platforms.dart';
 export 'src/views.dart';

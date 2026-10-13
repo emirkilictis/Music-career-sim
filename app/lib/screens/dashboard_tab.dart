@@ -6,15 +6,13 @@ import 'package:game/game.dart';
 import 'album_detail_screen.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
-import '../core/format.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
+import '../widgets/platforms_list.dart';
 import '../widgets/tour_section.dart';
 import '../widgets/opportunity_card.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
-import 'streamify/streamify_tab.dart';
-import 'game_shell.dart';
 
 /// Home, built for focus (feedback E1): what happened this week, the one
 /// thing worth doing next, three small status numbers; everything else is
@@ -589,33 +587,8 @@ class _MoreSection extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 fontSize: 13))),
       ),
-      // Platforms appear in their real launch years (docs K38).
-      if (GameTime.yearOf(career.week) <
-          Charts.all[Charts.platformGlobal].startYear)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
-          child: Text(l.platformsLater,
-              style: TextStyle(color: AppColors.textFaint)),
-        )
-      else
-        ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-          leading: Container(
-            width: 36,
-            height: 36,
-            decoration: const BoxDecoration(
-                color: StreamifyColors.accent, shape: BoxShape.circle),
-            child: const Icon(Icons.graphic_eq_rounded,
-                color: Colors.black, size: 20),
-          ),
-          title: const Text(platformName,
-              style: TextStyle(fontWeight: FontWeight.w600)),
-          subtitle: Text(l.streamifyTileHint,
-              style: TextStyle(color: AppColors.textFaint)),
-          trailing:
-              Icon(Icons.chevron_right_rounded, color: AppColors.textFaint),
-          onTap: () => pushInCareer(context, const StreamifyScreen()),
-        ),
+      // Platforms open in their real launch years (docs K67).
+      const PlatformsList(),
     ]);
   }
 }

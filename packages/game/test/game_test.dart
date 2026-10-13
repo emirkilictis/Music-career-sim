@@ -194,6 +194,37 @@ void main() {
       g.close();
     });
 
+    test('platforms open in their years and split real numbers (K67)', () {
+      expect([for (final p in Platforms.openIn(2002)) p], isEmpty);
+      expect(Platforms.openIn(2006),
+          [MusicPlatform.fruitTunes, MusicPlatform.viewTube]);
+      for (var y = 2005; y <= 2030; y++) {
+        final total =
+            MusicPlatform.values.fold(0.0, (t, p) => t + p.streamShare(y));
+        expect(total, closeTo(1.0, 1e-9), reason: '$y');
+      }
+      final g = GameSession.start(slots, _setup(startYear: 2018));
+      final song = g.writeSong(budget: BudgetTier.low).id;
+      g.releaseSingle(song);
+      for (var i = 0; i < 3; i++) {
+        g.advanceWeek();
+      }
+      final open = g.platforms;
+      expect([for (final v in open) v.platform], MusicPlatform.values);
+      final streamify =
+          open.firstWhere((v) => v.platform == MusicPlatform.streamify);
+      expect(streamify.playerWeek, greaterThan(0));
+      expect(streamify.rows.length, Platforms.chartSize);
+      for (var i = 1; i < streamify.rows.length; i++) {
+        expect(streamify.rows[i].value,
+            lessThanOrEqualTo(streamify.rows[i - 1].value));
+      }
+      // Streamify's share of the song's streams is the familiar 45%.
+      expect(streamify.playerWeek,
+          closeTo(g.song(song).weekStreams * Streamify.share, 1));
+      g.close();
+    });
+
     test('weeks autosave; resuming continues exactly where it was', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;

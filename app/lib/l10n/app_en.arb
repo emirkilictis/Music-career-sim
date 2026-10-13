@@ -927,6 +927,74 @@
   "totalSales": "Total",
   "pureSales": "Pure sales",
   "albumStats": "Album stats",
+  "platformWeekDownloads": "{count} downloads this week",
+  "@platformWeekDownloads": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "platformWeekViews": "{count} views this week",
+  "@platformWeekViews": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "platformWeekPlays": "{count} plays this week",
+  "@platformWeekPlays": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "platformWeekVideos": "{count} new videos with your songs",
+  "@platformWeekVideos": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "platformNothingYet": "Nothing of yours here yet",
+  "platformTop": "Top {count} this week",
+  "@platformTop": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "platformYourWeek": "Your week here",
+  "platformBest": "Your biggest: {title}",
+  "@platformBest": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "platformEmpty": "Nothing is trending here yet.",
+  "taglineFruitTunes": "Songs to buy, one by one",
+  "taglineViewTube": "Music videos and everything else",
+  "taglineNoiseCloud": "New sounds, new artists",
+  "taglineStreamify": "Stream everything",
+  "taglineFruitMusic": "Streaming from the Fruit Tunes people",
+  "taglineTikTak": "The sounds everyone makes videos with",
+  "eventPlatformOpened": "{platform} opened: {tagline}.",
+  "@eventPlatformOpened": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      },
+      "tagline": {
+        "type": "String"
+      }
+    }
+  },
   "realNames": "Real artist names",
   "realNamesHint": "Rivals carry real artists' names, arriving in the year they broke through. Off: made-up names.",
   "tourSection": "Touring",
@@ -1785,7 +1853,7 @@
       }
     }
   },
-  "platformsLater": "Streaming platforms arrive in the late 2000s.",
+  "platformsLater": "Music platforms start arriving in 2003.",
   "celebrateNumberOne": "Number one!",
   "celebrateFirstChart": "Your first chart entry!",
   "share": "Share",

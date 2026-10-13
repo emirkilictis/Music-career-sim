@@ -6,6 +6,7 @@ import 'package:simulation_core/simulation_core.dart';
 import 'career_setup.dart';
 import 'events.dart';
 import 'milestones.dart';
+import 'platforms.dart';
 import 'views.dart';
 
 /// Result of one played week.
@@ -407,6 +408,18 @@ class GameSession {
   OpportunityView? get opportunity => _p.opportunity == null
       ? null
       : OpportunityView.of(world, _p.opportunity!);
+
+  // ------------------------------------------------------------ platforms
+
+  /// A platform last week: its Top 50 and the player's numbers (docs K67).
+  PlatformView platform(MusicPlatform p) => Platforms.view(world, p);
+
+  /// The platforms open now with the player's numbers there last week.
+  List<PlatformView> get platforms => [
+        for (final p
+            in Platforms.openIn(GameTime.yearOf(math.max(0, world.week - 1))))
+          Platforms.view(world, p),
+      ];
 
   // ---------------------------------------------------------------- tours
 
@@ -1188,6 +1201,15 @@ class GameSession {
             : w.albums[id].artistId;
         if (artistId != p.id) {
           events.add(RivalNumberOne(c, kind, id, artistId));
+        }
+      }
+    }
+    // Platforms opening this year (Streamify by its charts below).
+    if (GameTime.weekOfYear(r.week) == 1) {
+      for (final p in MusicPlatform.values) {
+        if (p != MusicPlatform.streamify &&
+            p.launchYear == GameTime.yearOf(r.week)) {
+          events.add(PlatformOpened(p));
         }
       }
     }

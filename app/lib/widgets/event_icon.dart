@@ -30,6 +30,10 @@ class EventIcon extends StatelessWidget {
       OpportunityCame(:final kind) => (opportunityIcon(kind), AppColors.butter),
       MilestoneReached() => (Icons.flag_rounded, AppColors.gold),
       TourFinished() => (Icons.stadium_rounded, AppColors.peach),
+      PlatformOpened(:final platform) => (
+          platformIcon(platform),
+          platformColor(platform)
+        ),
       OpportunityLapsed() => (
           Icons.hourglass_bottom_rounded,
           AppColors.textMuted
@@ -48,4 +52,23 @@ IconData opportunityIcon(OpportunityKind k) => switch (k) {
       OpportunityKind.brandDeal => Icons.storefront_rounded,
       OpportunityKind.scandal => Icons.warning_amber_rounded,
       OpportunityKind.award => Icons.emoji_events_rounded,
+    };
+
+/// Each platform's brand colour and icon (docs K67).
+Color platformColor(MusicPlatform p) => switch (p) {
+      MusicPlatform.fruitTunes => const Color(0xFF3E8EF7),
+      MusicPlatform.viewTube => const Color(0xFFFF2D3B),
+      MusicPlatform.noiseCloud => const Color(0xFFFF6A1A),
+      MusicPlatform.streamify => const Color(0xFF2BD97C),
+      MusicPlatform.fruitMusic => const Color(0xFFFA2D6A),
+      MusicPlatform.tikTak => const Color(0xFF25F4EE),
+    };
+
+IconData platformIcon(MusicPlatform p) => switch (p) {
+      MusicPlatform.fruitTunes => Icons.shopping_bag_rounded,
+      MusicPlatform.viewTube => Icons.smart_display_rounded,
+      MusicPlatform.noiseCloud => Icons.cloud_rounded,
+      MusicPlatform.streamify => Icons.graphic_eq_rounded,
+      MusicPlatform.fruitMusic => Icons.music_note_rounded,
+      MusicPlatform.tikTak => Icons.music_video_rounded,
     };

@@ -187,6 +187,10 @@ void main() {
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
     await shot(tester, '04b_home_platforms');
+    await tester.tap(find.text('ViewTube'));
+    await shot(tester, '09c_viewtube');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Streamify'));
     await shot(tester, '09_streamify');
     await tester.tap(find.text('Velvet Avenue').last);

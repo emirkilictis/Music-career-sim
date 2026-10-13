@@ -1,6 +1,7 @@
 import 'package:simulation_core/simulation_core.dart';
 
 import 'milestones.dart';
+import 'platforms.dart';
 
 /// Something worth telling the player after a week (docs/game-design.md §15).
 /// Events carry ids and numbers only; the UI builds the localized text.
@@ -237,4 +238,12 @@ class TourFinished extends GameEvent {
   final double fans;
   @override
   bool get isMajor => true;
+}
+
+/// A new platform opened this year (docs K67).
+class PlatformOpened extends GameEvent {
+  const PlatformOpened(this.platform);
+  final MusicPlatform platform;
+  @override
+  bool get isMajor => false;
 }

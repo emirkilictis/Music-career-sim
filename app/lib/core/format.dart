@@ -246,6 +246,23 @@ class Fmt {
         Milestone.stadiumTour => l.msStadiumTour,
       };
 
+  String platformTagline(MusicPlatform p) => switch (p) {
+        MusicPlatform.fruitTunes => l.taglineFruitTunes,
+        MusicPlatform.viewTube => l.taglineViewTube,
+        MusicPlatform.noiseCloud => l.taglineNoiseCloud,
+        MusicPlatform.streamify => l.taglineStreamify,
+        MusicPlatform.fruitMusic => l.taglineFruitMusic,
+        MusicPlatform.tikTak => l.taglineTikTak,
+      };
+
+  /// "12K downloads this week" etc. for the player's numbers on [p].
+  String platformWeek(MusicPlatform p, double v) => switch (p.metric) {
+        PlatformMetric.downloads => l.platformWeekDownloads(compact(v)),
+        PlatformMetric.views => l.platformWeekViews(compact(v)),
+        PlatformMetric.plays => l.platformWeekPlays(compact(v)),
+        PlatformMetric.videos => l.platformWeekVideos(compact(v)),
+      };
+
   String tourKind(TourKind k) => switch (k) {
         TourKind.club => l.tourClub,
         TourKind.theater => l.tourTheater,
@@ -468,6 +485,8 @@ class Fmt {
         l.eventCriticReview(t, criticScore(e.score), criticBlurb(e.score)),
       LabelDropped() => l.eventLabelDropped(labelName(e.label)),
       OpportunityCame() => l.eventOfferCame(offerTitle(e.kind)),
+      PlatformOpened(:final platform) =>
+        l.eventPlatformOpened(platform.displayName, platformTagline(platform)),
       TourFinished() => l.eventTourFinished(tourKind(e.kind),
           compact(e.tickets), money(e.netCents), compact(e.fans)),
       MilestoneReached(:final milestone) =>

@@ -146,6 +146,9 @@ abstract final class Cmd {
 
   static SessionCmd<List<LabelView>> labels() => (s) => s.labels;
   static SessionCmd<List<MilestoneView>> milestones() => (s) => s.milestones;
+  static SessionCmd<List<PlatformView>> platforms() => (s) => s.platforms;
+  static SessionCmd<PlatformView> platform(MusicPlatform p) =>
+      (s) => s.platform(p);
   static SessionCmd<List<TourPlanView>> tourPlans(List<Region> regions) =>
       (s) => s.tourPlans(regions);
   static SessionCmd<void> startTour(TourKind kind, List<Region> regions) =>
