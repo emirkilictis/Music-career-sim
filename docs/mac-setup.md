@@ -69,7 +69,8 @@ indirmesine izin ver, sonra `flutter doctor --android-licenses`.
    `key.properties` dosyalarını `app/android/` klasörüne koy. **Bunlar git'e girmez; kaybetme ve kimseyle
    paylaşma.** Hep aynı anahtarla imzalanan APK'lar eskisinin üstüne kurulur ve kayıtlar korunur; başka
    anahtarla imzalanan bir APK için test edenlerin uygulamayı silmesi (kayıtlarını kaybetmesi) gerekir.
-2. `cd app && flutter build apk --release`
+2. `cd app && flutter build apk --release --target-platform android-arm64` (25 MB; bugünkü telefonların
+   neredeyse hepsi arm64. Bayraksız tüm işlemciler için ~64 MB çıkar.)
 3. Dosya: `app/build/app/outputs/flutter-apk/app-release.apk`. WhatsApp/Drive ile gönder; telefonda
    "bilinmeyen kaynaklardan yüklemeye izin ver" denip kurulur.
 4. Her yeni test sürümünde `app/pubspec.yaml` içindeki `version: 0.1.0+1` satırının `+` sonrasını bir
