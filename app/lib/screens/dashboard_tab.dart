@@ -452,7 +452,8 @@ class _EnergySheet extends StatelessWidget {
                   : p.restingThisWeek
                       ? l.restingThisWeek
                       : p.creativityPenalty > 0
-                          ? l.creativityPenalty(p.creativityPenalty.round())
+                          ? l.creativityPenalty(
+                              (p.creativityPenalty * 100).round())
                           : l.creativityFull,
               style: TextStyle(
                   fontWeight: FontWeight.w600, color: AppColors.textMuted),

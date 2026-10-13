@@ -262,10 +262,10 @@
     }
   },
   "creativityFull": "Full creativity: the next song is at full strength.",
-  "creativityPenalty": "Low creativity: the next song loses {points} quality points. Rest or wait a week.",
+  "creativityPenalty": "Low creativity: the next song comes out {percent}% weaker. Rest or wait a week.",
   "@creativityPenalty": {
     "placeholders": {
-      "points": {
+      "percent": {
         "type": "int"
       }
     }

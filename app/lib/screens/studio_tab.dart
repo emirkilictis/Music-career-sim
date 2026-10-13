@@ -275,7 +275,7 @@ class _StudioTabState extends State<StudioTab> {
                       : [AppColors.mint, AppColors.sky]),
               Text(
                   p.creativityPenalty > 0
-                      ? l.creativityPenalty(p.creativityPenalty.round())
+                      ? l.creativityPenalty((p.creativityPenalty * 100).round())
                       : l.creativityFull,
                   style: TextStyle(
                       color: p.creativityPenalty > 0

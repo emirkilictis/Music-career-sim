@@ -166,12 +166,15 @@ abstract final class Actions {
   /// Creativity at or above this writes at full strength.
   static const creativityFull = 50.0;
 
-  /// Quality points lost per point of creativity below [creativityFull].
-  static const creativityPenaltyRate = 0.3;
+  /// Share of the song's quality lost at creativity 0.
+  static const creativityPenaltyMax = 0.5;
 
-  /// Quality lost by a song written at creativity [c] (0 at 50+, 15 at 0).
-  static double creativityPenalty(double c) =>
-      c >= creativityFull ? 0 : (creativityFull - c) * creativityPenaltyRate;
+  /// Share of quality lost by a song written at creativity [c]: none at
+  /// 50+, 10% at 40, 30% at 20, half at 0. A share, not points, so even
+  /// a maxed-out artist writes weak songs when spent (docs K46).
+  static double creativityPenalty(double c) => c >= creativityFull
+      ? 0
+      : (creativityFull - c) / creativityFull * creativityPenaltyMax;
 
   /// Writes and records a song into the artist's vault.
   ///
@@ -251,11 +254,12 @@ abstract final class Actions {
         (aiMode ? budgetBonus(budget) : playerBudgetBonus(budget)) +
         genreFit +
         luck +
-        (inspired ? inspirationBonus : 0) -
-        energyPenalty;
-    // Soft ceiling: 100 stays rare even for top artists.
+        (inspired ? inspirationBonus : 0);
+    // Soft ceiling: 100 stays rare even for top artists; low creativity
+    // then takes its share.
     final quality =
-        (raw <= 85 ? raw : 85 + 15 * (1 - math.exp(-(raw - 85) / 15)))
+        ((raw <= 85 ? raw : 85 + 15 * (1 - math.exp(-(raw - 85) / 15))) *
+                (1 - energyPenalty))
             .clamp(1.0, 100.0);
 
     // Traits: partly tied to quality, partly random → different kinds of hits.

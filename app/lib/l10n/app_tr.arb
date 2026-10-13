@@ -114,7 +114,7 @@
   "burnoutWeeks": "Burnout: {weeks} hafta daha yazamazsın",
   "songsWrittenThisWeek": "Bu hafta {count} şarkı yazdın",
   "creativityFull": "Yaratıcılığın tam: sonraki şarkı tam güçte çıkar.",
-  "creativityPenalty": "Yaratıcılık düşük: sonraki şarkı {points} kalite puanı kaybeder. Dinlen ya da bir hafta bekle.",
+  "creativityPenalty": "Yaratıcılık düşük: sonraki şarkı %{percent} daha zayıf çıkar. Dinlen ya da bir hafta bekle.",
   "creativityHint": "Her şarkı {cost} yaratıcılık harcar; haftalık sınır yok. Her hafta geri dolar.",
   "sideIncome": "Ek gelir",
   "dayJob": "Gündelik iş",

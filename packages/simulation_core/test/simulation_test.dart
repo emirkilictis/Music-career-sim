@@ -104,8 +104,9 @@ void main() {
       expect(Actions.canWrite(w, p), isTrue);
       expect(Actions.creativityPenalty(100), 0);
       expect(Actions.creativityPenalty(50), 0);
-      expect(Actions.creativityPenalty(20), closeTo(9, 1e-9));
-      expect(Actions.creativityPenalty(0), closeTo(15, 1e-9));
+      expect(Actions.creativityPenalty(40), closeTo(0.1, 1e-9));
+      expect(Actions.creativityPenalty(20), closeTo(0.3, 1e-9));
+      expect(Actions.creativityPenalty(0), closeTo(0.5, 1e-9));
     });
 
     test('writing until energy is gone causes burnout', () {

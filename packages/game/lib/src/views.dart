@@ -159,7 +159,8 @@ class ArtistView {
   final bool canWrite;
   final int songsWrittenThisWeek;
 
-  /// Quality the next song loses to low creativity (0 = full strength).
+  /// Share of quality the next song loses to low creativity (0 = full
+  /// strength, 0.5 at creativity 0).
   final double creativityPenalty;
   final int adsLeftThisWeek;
   final Job job;
