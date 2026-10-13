@@ -3,7 +3,13 @@ import 'codec.dart';
 /// Versioned schema. Each entry migrates the database from version i to i+1
 /// (docs/data-model.md). Never edit a shipped migration; append a new one.
 /// (v1 has not shipped yet, so it is still being shaped.)
-final List<String> migrations = [_v1(), _v2, _v3, _v4, _v5];
+final List<String> migrations = [_v1(), _v2, _v3, _v4, _v5, _v6];
+
+/// v6: music videos (docs K52).
+const _v6 = '''
+  ALTER TABLE song ADD COLUMN videoBudget INTEGER;
+  ALTER TABLE song ADD COLUMN videoPower REAL;
+''';
 
 /// v5: album edition formats (docs K46).
 const _v5 = 'ALTER TABLE album ADD COLUMN editionFormats TEXT;';

@@ -207,6 +207,12 @@ class Fmt {
         Campaign.global => l.campaignGlobal,
       };
 
+  String videoBudget(VideoBudget b) => switch (b) {
+        VideoBudget.low => l.videoLow,
+        VideoBudget.medium => l.videoMedium,
+        VideoBudget.high => l.videoHigh,
+      };
+
   String editionFormat(EditionFormat? f) => switch (f) {
         null => l.editionStandard,
         EditionFormat.cd => l.formatCd,
@@ -291,6 +297,7 @@ class Fmt {
       'noSkillPoints' => l.errorNoSkillPoints,
       'invalidDate' => l.errorInvalidDate,
       'songScheduled' => l.errorSongScheduled,
+      'hasVideo' => l.errorHasVideo,
       'alreadyScheduled' => l.errorAlreadyScheduled,
       'skillMaxed' => l.errorSkillMaxed,
       'burnout' => l.errorBurnout,

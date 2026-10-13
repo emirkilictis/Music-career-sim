@@ -128,6 +128,14 @@ class SimConfig {
                   ? 1.0
                   : 1.2;
 
+  /// How much a music video does by year: music TV (2000–04), music TV
+  /// plus video sites (2005–12), then video sites in the streaming era.
+  double videoEraFactor(int year) => year < 2005
+      ? 1.0
+      : year < 2013
+          ? 1.15
+          : 0.9;
+
   /// Download demand of an album cut (not a single) relative to a single:
   /// low in the early download era, when buyers took whole albums.
   double albumCutDownloadShare(int year) => year < 2009

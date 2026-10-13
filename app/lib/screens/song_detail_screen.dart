@@ -50,6 +50,54 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
+  Future<void> _shootVideo(SongView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final money = widget.state.player.moneyCents;
+    final budget = await showModalBottomSheet<VideoBudget>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: Text(l.shootVideo, style: Theme.of(c).textTheme.titleLarge),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.videoHint, style: Theme.of(c).textTheme.bodySmall),
+          ),
+          for (final b in VideoBudget.values)
+            ListTile(
+              enabled: b.costCents <= money,
+              leading: Icon(switch (b) {
+                VideoBudget.low => Icons.videocam_outlined,
+                VideoBudget.medium => Icons.movie_creation_outlined,
+                VideoBudget.high => Icons.theaters_rounded,
+              }),
+              title: Text(fmt.videoBudget(b)),
+              subtitle: Text(switch (b) {
+                VideoBudget.low => l.videoLowHint,
+                VideoBudget.medium => l.videoMediumHint,
+                VideoBudget.high => l.videoHighHint,
+              }),
+              trailing: Text(fmt.money(b.costCents)),
+              onTap: () => Navigator.pop(c, b),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (budget == null || !mounted) return;
+    try {
+      await widget.state.act(Cmd.shootVideo(s.id, budget));
+      if (mounted) showInfo(context, l.videoShot(s.title));
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _scrap(SongView s) async {
     final l = context.l10n;
     final ok = await showDialog<bool>(
@@ -181,6 +229,18 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       icon: Icons.music_note_rounded,
                       label: l.releaseAsSingle,
                     ),
+                  ],
+                  if (s.isPlayer && s.video == null) ...[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => _shootVideo(s),
+                      icon: const Icon(Icons.videocam_rounded),
+                      label: Text(l.shootVideo),
+                    ),
+                  ] else if (s.video != null) ...[
+                    const SizedBox(height: 8),
+                    Tag(l.hasVideo(fmt.videoBudget(s.video!)),
+                        icon: Icons.videocam_rounded),
                   ],
                   if (s.isPlayer &&
                       s.inVault &&

@@ -491,6 +491,32 @@
   "announceLocked": "Already announced. You can still move the date, but pushing it back costs some of the excitement.",
   "continueAction": "Continue",
   "save": "Save",
+  "shootVideo": "Shoot a music video",
+  "videoTitle": "Music video",
+  "videoHint": "A video promotes the song for as long as it is out: on music TV, and from 2005 on video sites (where it can also go viral). Your performance and charisma make it better.",
+  "videoLow": "Low budget",
+  "videoMedium": "Medium budget",
+  "videoHigh": "Big budget",
+  "videoLowHint": "A simple performance video.",
+  "videoMediumHint": "A real director and a story.",
+  "videoHighHint": "An event: sets, choreography, premiere on TV.",
+  "videoShot": "The video for “{title}” is done.",
+  "@videoShot": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "hasVideo": "Video: {budget}",
+  "@hasVideo": {
+    "placeholders": {
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "errorHasVideo": "This song already has a video.",
   "scrapSong": "Scrap this song",
   "scrapSongTitle": "Scrap “{title}”?",
   "@scrapSongTitle": {

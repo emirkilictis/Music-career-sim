@@ -428,6 +428,11 @@ class Song with Charted {
   /// Physical (CD) singles sold, all regions.
   double lifetimePhysical = 0;
 
+  /// Music video (docs K52): its budget (-1 = none) and strength (0..~0.6),
+  /// fixed when it is shot.
+  int videoBudget = -1;
+  double videoPower = 0;
+
   /// This week's streams and downloads per region ([streams ×3,
   /// downloads ×3]); only kept while the song is active.
   Float64List? weekRegion;
@@ -747,4 +752,17 @@ enum EditionFormat {
         deluxe => year < 2005 ? 0.35 : 0.8,
         signed => 1.4,
       };
+}
+
+/// Music video budgets (docs K52).
+enum VideoBudget {
+  low(2000000, 0.12),
+  medium(15000000, 0.28),
+  high(100000000, 0.45);
+
+  const VideoBudget(this.costCents, this.basePower);
+  final int costCents;
+
+  /// Exposure lift before the director's craft and the era.
+  final double basePower;
 }

@@ -116,6 +116,7 @@ class Simulator {
     // before streaming playlists, mostly through playlists after.
     final year = GameTime.yearOf(w.week);
     final albumCutDl = c.albumCutDownloadShare(year);
+    final videoEra = c.videoEraFactor(year);
     final campaignExposure = [
       for (final k in Campaign.values) c.campaignExposure(k, year),
     ];
@@ -177,7 +178,12 @@ class Simulator {
         s.viralBoost *= 0.88;
       }
       final viralEra = c.viralEraFactor(GameTime.yearOf(w.week));
-      if (r.chance(c.viralWeeklyChance * viralEra * (0.3 + 2 * s.virality))) {
+      // A music video on the video sites helps a song catch on.
+      final videoViral = 1 + 2 * s.videoPower * (viralEra > 0 ? 1 : 0);
+      if (r.chance(c.viralWeeklyChance *
+          viralEra *
+          (0.3 + 2 * s.virality) *
+          videoViral)) {
         _startViral(s, r, viralEra);
         virals.add(s.id);
       }
@@ -209,7 +215,8 @@ class Simulator {
               ? w.difficulty.exposure
               : w.difficulty.aiExposure) *
           campaignExposure[s.campaign.index] *
-          (1 + s.playlistBoost);
+          (1 + s.playlistBoost) *
+          (1 + s.videoPower * videoEra);
       if (s.playlistWeek == w.week) playlistAdds.add(s.id);
       s.playlistBoost *= c.playlistFade;
       final qMult = 0.35 + 0.65 * math.pow(s.quality / 100, 1.4);

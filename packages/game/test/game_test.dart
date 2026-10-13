@@ -472,6 +472,36 @@ void main() {
       g.close();
     });
 
+    test('a music video promotes its song; one per song, saved', () {
+      double streams(bool video) {
+        var g = GameSession.start(
+            slots, _setup(premium: true, money: StartMoney.millionaire));
+        final id = g.slotId;
+        g.world.player!.moneyCents = 1 << 40;
+        final song = g.writeSong(budget: BudgetTier.high).id;
+        if (video) {
+          final money = g.player.moneyCents;
+          g.shootVideo(song, VideoBudget.high);
+          expect(g.player.moneyCents, money - VideoBudget.high.costCents);
+          expect(() => g.shootVideo(song, VideoBudget.low), _code('hasVideo'));
+        }
+        g.releaseSingle(song, campaign: Campaign.standard);
+        for (var i = 0; i < 8; i++) {
+          g.advanceWeek();
+        }
+        g.close();
+        g = GameSession.resume(slots, id);
+        expect(g.song(song).video, video ? VideoBudget.high : null);
+        final total = g.song(song).lifetimeStreams.total;
+        g.close();
+        return total;
+      }
+
+      final without = streams(false);
+      final withVideo = streams(true);
+      expect(withVideo, greaterThan(without * 1.15));
+    });
+
     test('an early-2000s single sells CDs, not streams', () {
       final g = GameSession.start(
           slots,

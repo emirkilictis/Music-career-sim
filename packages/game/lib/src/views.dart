@@ -223,6 +223,7 @@ class SongView {
         lifetimePhysical = s.lifetimePhysical,
         lifetimeRadio = s.lifetimeRadio,
         isPlayer = s.primaryArtistId == w.playerArtistId,
+        video = s.videoBudget < 0 ? null : VideoBudget.values[s.videoBudget],
         scheduledSingleWeek = _scheduledWeek(w, s, album: false),
         scheduledAlbumWeek = _scheduledWeek(w, s, album: true);
 
@@ -238,6 +239,9 @@ class SongView {
   }
 
   final bool isPlayer;
+
+  /// The song's music video budget, if it has one (docs K52).
+  final VideoBudget? video;
 
   /// Week a scheduled single / album with this song comes out, or -1
   /// (docs K45).

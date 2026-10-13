@@ -587,6 +587,18 @@ class GameSession {
     _saveNow();
   }
 
+  /// Shoots a music video for one of the player's songs (docs K52); it
+  /// promotes the song from its release on.
+  void shootVideo(int songId, VideoBudget budget) {
+    final s = _ownSong(songId);
+    if (s.videoBudget >= 0) {
+      throw GameException('hasVideo', 'This song already has a video');
+    }
+    _requireMoney(budget.costCents);
+    Actions.shootVideo(world, _p, s, budget);
+    _saveNow();
+  }
+
   /// Throws away an unreleased song from the vault (docs K48).
   void scrapSong(int songId) {
     final s = _ownSong(songId);

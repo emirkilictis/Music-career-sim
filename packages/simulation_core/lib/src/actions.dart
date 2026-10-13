@@ -57,6 +57,24 @@ abstract final class Actions {
   static const energyRegenWriting = 14.0, energyRegenIdle = 24.0;
   static const energyRestBonus = 20.0;
 
+  /// Shoots a music video for [s] (docs K52). Its strength comes from the
+  /// budget and the artist's performance and charisma on camera.
+  static void shootVideo(World w, Artist a, Song s, VideoBudget budget) {
+    if (s.videoBudget >= 0) throw ActionException('Already has a video');
+    if (a.tier == ArtistTier.player) {
+      if (budget.costCents > a.moneyCents) {
+        throw ActionException('Not enough money');
+      }
+      a.moneyCents -= budget.costCents;
+    }
+    final craft = 0.6 +
+        0.25 * a.skills.performance / 100 +
+        0.15 * a.skills.charisma / 100;
+    s.videoBudget = budget.index;
+    s.videoPower = budget.basePower * craft;
+    w.dirtySongs.add(s.id);
+  }
+
   /// Throws away an unreleased song (docs K48). Its recording cost is not
   /// refunded.
   static void scrapSong(World w, Song s) {
