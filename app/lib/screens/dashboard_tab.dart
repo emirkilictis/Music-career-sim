@@ -246,11 +246,11 @@ class _NextStepCard extends StatelessWidget {
     final (icon, title, body, button, action) = step;
     return _Card(
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(l.nextStep,
-            style: TextStyle(
+        Text(caps(context, l.nextStep),
+            style: capsStyle(TextStyle(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w700,
-                fontSize: 13)),
+                fontSize: 13))),
         const SizedBox(height: 10),
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           IconBubble(icon, color: AppColors.lilac),
@@ -368,7 +368,11 @@ class _StatusTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(AppShape.r(18)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppShape.r(18)),
+          side: AppShape.sharp
+              ? BorderSide(color: AppColors.line)
+              : BorderSide.none),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppShape.r(18)),
         onTap: onTap,
@@ -376,13 +380,13 @@ class _StatusTile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(label,
+            Text(caps(context, label),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: capsStyle(TextStyle(
                     color: AppColors.textMuted,
                     fontSize: 12.5,
-                    fontWeight: FontWeight.w600)),
+                    fontWeight: FontWeight.w600))),
             const SizedBox(height: 4),
             Text(value,
                 maxLines: 1,
@@ -555,11 +559,11 @@ class _MoreSection extends StatelessWidget {
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Padding(
         padding: const EdgeInsets.only(left: 4, bottom: 4),
-        child: Text(l.sideIncome,
-            style: TextStyle(
+        child: Text(caps(context, l.sideIncome),
+            style: capsStyle(TextStyle(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w700,
-                fontSize: 13)),
+                fontSize: 13))),
       ),
       row(
         Icons.work_outline_rounded,
@@ -579,11 +583,11 @@ class _MoreSection extends StatelessWidget {
       const SizedBox(height: 14),
       Padding(
         padding: const EdgeInsets.only(left: 4, bottom: 4),
-        child: Text(l.platforms,
-            style: TextStyle(
+        child: Text(caps(context, l.platforms),
+            style: capsStyle(TextStyle(
                 color: AppColors.textMuted,
                 fontWeight: FontWeight.w700,
-                fontSize: 13)),
+                fontSize: 13))),
       ),
       // Platforms appear in their real launch years (docs K38).
       if (GameTime.yearOf(career.week) <
@@ -631,6 +635,7 @@ class _Card extends StatelessWidget {
               ? AppColors.haze(AppColors.lilac, AppColors.pink)
               : null,
           borderRadius: BorderRadius.circular(AppShape.r(22)),
+          border: AppShape.sharp ? Border.all(color: AppColors.line) : null,
         ),
         padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
         child: child,

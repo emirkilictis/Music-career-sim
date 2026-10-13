@@ -306,11 +306,11 @@ class _StudioTabState extends State<StudioTab> {
                     l.cowriter, _writers, _cowriter, (v) => _cowriter = v),
               ),
               const SizedBox(height: 14),
-              Text(l.studioBudget,
-                  style: TextStyle(
+              Text(caps(context, l.studioBudget),
+                  style: capsStyle(TextStyle(
                       color: AppColors.textMuted,
                       fontWeight: FontWeight.w600,
-                      fontSize: 13)),
+                      fontSize: 13))),
               const SizedBox(height: 8),
               SegmentedButton<BudgetTier>(
                 showSelectedIcon: false,
@@ -393,11 +393,11 @@ class _ChoiceRow extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label,
-                        style: TextStyle(
+                    Text(caps(context, label),
+                        style: capsStyle(TextStyle(
                             color: AppColors.textMuted,
                             fontWeight: FontWeight.w600,
-                            fontSize: 13)),
+                            fontSize: 13))),
                     const SizedBox(height: 2),
                     Text(value,
                         maxLines: 1,

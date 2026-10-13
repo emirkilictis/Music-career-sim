@@ -53,7 +53,12 @@ class Section extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppShape.r(22)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppShape.r(22)),
+            // Sharp panels get a thin frame (docs F1).
+            side: AppShape.sharp
+                ? BorderSide(color: AppColors.line)
+                : BorderSide.none),
         child: Padding(
           padding: padding,
           child: Column(
@@ -65,11 +70,11 @@ class Section extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
                 Expanded(
-                  child: Text(title,
-                      style: TextStyle(
+                  child: Text(caps(context, title),
+                      style: capsStyle(TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textMuted)),
+                          color: AppColors.textMuted))),
                 ),
                 if (trailing != null)
                   Flexible(
@@ -110,11 +115,11 @@ class StatTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis),
         const SizedBox(height: 2),
-        Text(label,
-            style: TextStyle(
+        Text(caps(context, label),
+            style: capsStyle(TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textMuted),
+                color: AppColors.textMuted)),
             maxLines: 1,
             overflow: TextOverflow.ellipsis),
       ],
@@ -410,3 +415,21 @@ class GradeTag extends StatelessWidget {
     );
   }
 }
+
+/// Headings in the sharp style (docs F1): capitals, condensed and spaced,
+/// like a printed spec sheet; as written in the soft style. Turkish keeps
+/// its dotted capital İ.
+String caps(BuildContext context, String s) {
+  if (!AppShape.sharp) return s;
+  final tr = Localizations.localeOf(context).languageCode == 'tr';
+  return (tr ? s.replaceAll('i', 'İ').replaceAll('ı', 'I') : s).toUpperCase();
+}
+
+/// [base] for a heading or label, restyled for capitals in the sharp style.
+TextStyle capsStyle(TextStyle base) => AppShape.sharp
+    ? base.copyWith(
+        fontFamily: AppFonts.condensed,
+        fontWeight: FontWeight.w700,
+        letterSpacing: 1.2,
+        fontSize: (base.fontSize ?? 13) + 1)
+    : base;
