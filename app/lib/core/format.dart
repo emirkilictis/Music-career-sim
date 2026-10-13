@@ -263,6 +263,21 @@ class Fmt {
         PlatformMetric.videos => l.platformWeekVideos(compact(v)),
       };
 
+  String managerName(Manager m) => switch (m) {
+        Manager.none => l.managerNone,
+        Manager.local => l.managerLocal,
+        Manager.pro => l.managerPro,
+        Manager.star => l.managerStar,
+      };
+
+  String managerTerms(Manager m) => m == Manager.none
+      ? l.managerNoneHint
+      : l.managerTerms(
+          (m.commission * 100).round(),
+          m.offerBoost.toStringAsFixed(1),
+          m.feeBoost.toStringAsFixed(1),
+          (m.tourCut * 100).round());
+
   String tourKind(TourKind k) => switch (k) {
         TourKind.club => l.tourClub,
         TourKind.theater => l.tourTheater,

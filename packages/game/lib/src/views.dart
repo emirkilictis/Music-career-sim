@@ -106,6 +106,7 @@ class ArtistView {
             ? null
             : OpportunityView.of(w, a.opportunity!),
         tour = a.tour == null ? null : TourView.of(w, a.tour!),
+        manager = a.manager,
         skills = {for (final k in SkillKind.values) k: a.skills[k]},
         lastReleaseWeek = a.lastReleaseWeek,
         everCharted = a.tier == ArtistTier.player &&
@@ -193,6 +194,9 @@ class ArtistView {
 
   /// The tour on the road (docs K63).
   final TourView? tour;
+
+  /// The player's manager (docs K68).
+  final Manager manager;
 
   /// Unspent skill points and the current skills (0–100).
   final int skillPoints;
@@ -826,7 +830,8 @@ class TourPlanView {
       {required this.kind,
       required this.regions,
       required this.available,
-      required this.estimate});
+      required this.estimate,
+      required this.netCents});
   final TourKind kind;
   final List<Region> regions;
 
@@ -835,6 +840,7 @@ class TourPlanView {
   final TourWeek estimate;
 
   int get weeks => regions.length * kind.weeksPerRegion;
-  int get netCents =>
-      (estimate.grossCents * Tours.artistCut - estimate.costCents).round();
+
+  /// What the player would keep (their manager's cut taken; K68).
+  final int netCents;
 }

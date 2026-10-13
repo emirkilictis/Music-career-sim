@@ -1139,7 +1139,8 @@ class Simulator {
     }
     // Listeners tire of campaigns less as weeks go by (docs K57).
     p.campaignFatigue *= world.config.campaignFatigueDecay;
-    p.moneyCents += (cents * p.artistShare).round();
+    // The manager takes a cut of everything (docs K68).
+    p.moneyCents += p.manager.net(cents * p.artistShare).round();
     // The label takes no cut of the day job.
     p.moneyCents += p.job.wageCents;
     p.skillPoints += Actions.skillPointsPerWeek;

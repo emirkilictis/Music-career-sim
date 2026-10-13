@@ -131,12 +131,14 @@ abstract final class Opportunities {
     final fame = p.fame;
     final roll = r.nextDouble();
     var at = 0.0;
-    bool hit(double chance) {
-      at += chance;
+    // A manager books more of everything but scandals (docs K68).
+    final boost = p.manager.offerBoost;
+    bool hit(double chance, {bool booked = true}) {
+      at += chance * (booked ? boost : 1);
       return roll < at;
     }
 
-    if (fame > 0.3 && hit(0.008)) {
+    if (fame > 0.3 && hit(0.008, booked: false)) {
       return Opportunity(kind: OpportunityKind.scandal, week: w.week);
     }
     if (fame > 0.05 && hit(recent ? 0.12 : 0.04)) {
@@ -146,13 +148,13 @@ abstract final class Opportunities {
       return Opportunity(
           kind: OpportunityKind.festival,
           week: w.week,
-          feeCents: _fee(2e6, 2e8, fame, r));
+          feeCents: (_fee(2e6, 2e8, fame, r) * p.manager.feeBoost).round());
     }
     if (fame > 0.3 && hit(0.025)) {
       return Opportunity(
           kind: OpportunityKind.brandDeal,
           week: w.week,
-          feeCents: _fee(1e7, 1e9, fame, r));
+          feeCents: (_fee(1e7, 1e9, fame, r) * p.manager.feeBoost).round());
     }
     if (fame > 0.15 && hit(0.03)) {
       final partner = _partner(w, p, r);
@@ -161,7 +163,7 @@ abstract final class Opportunities {
             kind: OpportunityKind.feature,
             week: w.week,
             partnerArtistId: partner.id,
-            feeCents: _fee(5e5, 5e7, fame, r));
+            feeCents: (_fee(5e5, 5e7, fame, r) * p.manager.feeBoost).round());
       }
     }
     return null;
@@ -247,6 +249,7 @@ abstract final class Opportunities {
       case _:
         break; // declined
     }
+    money = p.manager.net(money.toDouble()).round();
     p.moneyCents += money;
     p.hype = math.max(0.0, p.hype + hype);
     p.coreFans += fans;

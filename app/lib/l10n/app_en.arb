@@ -927,6 +927,47 @@
   "totalSales": "Total",
   "pureSales": "Pure sales",
   "albumStats": "Album stats",
+  "managerSection": "Manager",
+  "managerNone": "No manager",
+  "managerLocal": "Local manager",
+  "managerPro": "Industry manager",
+  "managerStar": "Star manager",
+  "managerTerms": "Keeps {commission}% of your income · {offers}× offers · {fees}× fees · +{tour} pts of tour tickets",
+  "@managerTerms": {
+    "placeholders": {
+      "commission": {
+        "type": "int"
+      },
+      "offers": {
+        "type": "String"
+      },
+      "fees": {
+        "type": "String"
+      },
+      "tour": {
+        "type": "int"
+      }
+    }
+  },
+  "managerNoneHint": "You keep everything and book yourself.",
+  "managerChoose": "Choose a manager",
+  "managerNeedsFans": "Works with artists with {fans}+ fans",
+  "@managerNeedsFans": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "managerHired": "{name} now runs your business.",
+  "@managerHired": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "managerLetGo": "You manage yourself again.",
   "platformWeekDownloads": "{count} downloads this week",
   "@platformWeekDownloads": {
     "placeholders": {

@@ -57,6 +57,7 @@ class Tour {
     this.grossCents = 0,
     this.costCents = 0,
     this.fans = 0,
+    this.cut = Tours.artistCut,
   });
 
   final TourKind kind;
@@ -71,6 +72,9 @@ class Tour {
   double costCents;
   double fans;
 
+  /// The artist's share of ticket money (better with a manager; K68).
+  final double cut;
+
   int get weeks => regions.length * kind.weeksPerRegion;
   int get endWeek => startWeek + weeks;
 
@@ -79,7 +83,7 @@ class Tour {
       ((week - startWeek) ~/ kind.weeksPerRegion).clamp(0, regions.length - 1)];
 
   /// The artist's take after the promoter's cut and the show costs.
-  double get netCents => grossCents * Tours.artistCut - costCents;
+  double get netCents => grossCents * cut - costCents;
 
   Map<String, Object?> toJson() => {
         'k': kind.index,
@@ -89,6 +93,7 @@ class Tour {
         'g': grossCents,
         'c': costCents,
         'f': fans,
+        'cut': cut,
       };
 
   static Tour fromJson(Map<String, Object?> j) => Tour(
@@ -99,6 +104,7 @@ class Tour {
         grossCents: (j['g'] as num).toDouble(),
         costCents: (j['c'] as num).toDouble(),
         fans: (j['f'] as num).toDouble(),
+        cut: (j['cut'] as num?)?.toDouble() ?? Tours.artistCut,
       );
 
   static String? encode(Tour? t) => t == null ? null : jsonEncode(t.toJson());
@@ -131,6 +137,15 @@ abstract final class Tours {
   /// Share of the ticket money the artist keeps (the rest: promoter,
   /// venue, agent).
   static const artistCut = 0.7;
+
+  /// The artist's share of ticket money with their manager (docs K68).
+  static double cutFor(Artist a) => artistCut + a.manager.tourCut;
+
+  /// What [a] would keep of a tour estimated as [e].
+  static double netFor(Artist a, TourWeek e) {
+    final net = e.grossCents * cutFor(a) - e.costCents;
+    return net > 0 ? a.manager.net(net) : net;
+  }
 
   /// Energy a tour week takes.
   static const energyPerWeek = 12.0;
@@ -191,7 +206,11 @@ abstract final class Tours {
       throw ArgumentError('Pick each region once');
     }
     if (!canStart(a, kind)) throw StateError('Cannot start this tour');
-    final t = Tour(kind: kind, regions: List.of(regions), startWeek: w.week);
+    final t = Tour(
+        kind: kind,
+        regions: List.of(regions),
+        startWeek: w.week,
+        cut: cutFor(a));
     a.tour = t;
     w.dirtyArtists.add(a.id);
     return t;
@@ -206,7 +225,9 @@ abstract final class Tours {
     t.grossCents += wk.grossCents;
     t.costCents += wk.costCents;
     t.fans += wk.fans;
-    a.moneyCents += (wk.grossCents * artistCut - wk.costCents).round();
+    final net = wk.grossCents * t.cut - wk.costCents;
+    // The manager's cut comes out of a profit, not a loss.
+    a.moneyCents += (net > 0 ? a.manager.net(net) : net).round();
     a.coreFans += wk.fans;
     a.devotion = math.min(1.0, a.devotion + 0.002 * wk.fill);
     a.hype = math.max(a.hype, 0.1 * wk.fill);

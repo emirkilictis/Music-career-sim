@@ -427,14 +427,33 @@ class GameSession {
   /// (docs K63).
   List<TourPlanView> tourPlans(List<Region> regions) => [
         for (final k in TourKind.values)
-          TourPlanView(
-            kind: k,
-            regions: regions,
-            available: Tours.canStart(_p, k),
-            estimate: Tours.estimate(
-                world, _p, k, [for (final r in regions) r.index]),
-          ),
+          () {
+            final e = Tours.estimate(
+                world, _p, k, [for (final r in regions) r.index]);
+            return TourPlanView(
+              kind: k,
+              regions: regions,
+              available: Tours.canStart(_p, k),
+              estimate: e,
+              netCents: Tours.netFor(_p, e).round(),
+            );
+          }(),
       ];
+
+  // ------------------------------------------------------------- managers
+
+  /// Hires [m] (or lets the manager go with [Manager.none]; docs K68).
+  void hireManager(Manager m) {
+    if (m == _p.manager) {
+      throw GameException('sameManager', 'Already your manager');
+    }
+    if (_p.coreFans < m.minFans) {
+      throw GameException('managerRefused', 'Needs more fans');
+    }
+    _p.manager = m;
+    world.dirtyArtists.add(_p.id);
+    _saveNow();
+  }
 
   /// Goes on tour from this week.
   void startTour(TourKind kind, List<Region> regions) {

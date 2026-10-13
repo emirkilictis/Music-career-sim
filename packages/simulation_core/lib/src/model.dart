@@ -284,6 +284,9 @@ class Artist {
   /// The player's tour on the road (docs K63).
   Tour? tour;
 
+  /// The player's manager (docs K68).
+  Manager manager = Manager.none;
+
   /// Career milestones reached: milestone id → week (docs K61).
   final Map<int, int> milestones = {};
 
@@ -831,6 +834,56 @@ enum EditionFormat {
         deluxe => year < 2005 ? 0.35 : 0.8,
         signed => 1.4,
       };
+}
+
+/// Managers (docs K68): they book more and better offers and get better
+/// tour terms, for a cut of everything the player earns.
+enum Manager {
+  none(commission: 0, minFans: 0, offerBoost: 1, feeBoost: 1, tourCut: 0),
+  local(
+      commission: 0.10,
+      minFans: 0,
+      offerBoost: 1.3,
+      feeBoost: 1.2,
+      tourCut: 0.03),
+  pro(
+      commission: 0.15,
+      minFans: 1e5,
+      offerBoost: 1.7,
+      feeBoost: 1.5,
+      tourCut: 0.06),
+  star(
+      commission: 0.20,
+      minFans: 1e6,
+      offerBoost: 2.2,
+      feeBoost: 2.0,
+      tourCut: 0.10);
+
+  const Manager({
+    required this.commission,
+    required this.minFans,
+    required this.offerBoost,
+    required this.feeBoost,
+    required this.tourCut,
+  });
+
+  /// Share of the player's income the manager keeps.
+  final double commission;
+
+  /// Core fans a manager wants before taking the player on.
+  final double minFans;
+
+  /// More offers (interviews, duets, festivals, brand deals) ...
+  final double offerBoost;
+
+  /// ... paying more ...
+  final double feeBoost;
+
+  /// ... and a bigger share of the ticket money on tour.
+  final double tourCut;
+
+  /// What the player keeps of [cents] earned.
+  double net(double cents) => cents * (1 - commission);
 }
 
 /// Music video budgets (docs K52).

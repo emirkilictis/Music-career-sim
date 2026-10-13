@@ -386,6 +386,44 @@ void main() {
     expect(fake.artists.where((a) => real.contains(a.name)), isEmpty);
   });
 
+  test('a manager books more and better, for a cut (K68)', () {
+    int offers(Manager m) {
+      final w = WorldGen.create(seed: 68, startYear: 2010);
+      final sim = Simulator(w);
+      final p = WorldGen.addPlayer(w,
+          name: 'Star',
+          genre: 0,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire);
+      p.manager = m;
+      var n = 0;
+      for (var i = 0; i < 2 * GameTime.weeksPerYear; i++) {
+        final r = sim.step();
+        if (r.newOpportunity != null) {
+          n++;
+          // Answer at once so the next one can come.
+          Opportunities.answer(w, p, r.newOpportunity!.lapse);
+        }
+      }
+      return n;
+    }
+
+    expect(offers(Manager.star), greaterThan(offers(Manager.none)));
+    expect(Manager.pro.net(1000), 850);
+    // Better tour terms.
+    final w = WorldGen.create(seed: 68, startYear: 2010);
+    final p = WorldGen.addPlayer(w,
+        name: 'Star',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    final e = Tours.estimate(w, p, TourKind.arena, [0]);
+    final alone = Tours.netFor(p, e);
+    p.manager = Manager.star;
+    expect(Tours.cutFor(p), closeTo(0.8, 1e-9));
+    expect(Tours.netFor(p, e), isNot(alone));
+  });
+
   group('opportunities (K59)', () {
     ({World w, Simulator sim, Artist p}) star() {
       final w = WorldGen.create(seed: 59, startYear: 2010);

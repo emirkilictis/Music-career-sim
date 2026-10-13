@@ -225,6 +225,21 @@ void main() {
       g.close();
     });
 
+    test('managers want fans and stay hired across reopening (K68)', () {
+      var g = GameSession.start(slots, _setup());
+      final id = g.slotId;
+      expect(() => g.hireManager(Manager.star), throwsA(isA<GameException>()));
+      g.hireManager(Manager.local);
+      expect(g.player.manager, Manager.local);
+      expect(() => g.hireManager(Manager.local), throwsA(isA<GameException>()));
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.player.manager, Manager.local);
+      g.hireManager(Manager.none);
+      expect(g.player.manager, Manager.none);
+      g.close();
+    });
+
     test('weeks autosave; resuming continues exactly where it was', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;
