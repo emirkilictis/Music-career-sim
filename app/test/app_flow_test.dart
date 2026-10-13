@@ -291,4 +291,56 @@ void main() {
         findsOneWidget);
     expect(find.textContaining('Out: February 2024, week 2'), findsOneWidget);
   });
+
+  testWidgets('an EP kept in the vault, released later (F31)', (tester) async {
+    phoneView(tester);
+    final app = TestApp.create();
+    addTearDown(app.dispose);
+    await tester.pumpWidget(app.widget);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('New career'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Luna Vale');
+    await tester.tap(find.text('Start career'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Studio'));
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 3; i++) {
+      await tester.ensureVisible(find.textContaining('Write & record'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('Write & record'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    }
+
+    await tester.tap(find.text('Releases'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('New album / EP'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Someday');
+    await tester.tap(find.text('EP'));
+    await tester.pumpAndSettle();
+    for (final box in find.byType(CheckboxListTile).evaluate().toList()) {
+      await tester.tap(find.byWidget(box.widget));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.text('Keep in vault'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('is waiting in your vault'), findsOneWidget);
+    expect(find.text('Drafts in your vault'), findsOneWidget);
+    expect(find.text('Coming up'), findsNothing);
+
+    // Weeks later it comes out.
+    await tester.tap(find.text('Next week'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Someday'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Release now'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('No promotion'));
+    await tester.pumpAndSettle();
+    expect(find.text('“Someday” is out!'), findsOneWidget);
+    expect(find.text('Drafts in your vault'), findsNothing);
+  });
 }

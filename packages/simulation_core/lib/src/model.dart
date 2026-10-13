@@ -788,6 +788,13 @@ class ScheduledRelease {
   bool get isAlbum => type != AlbumType.single;
   bool get isSurprise => announceWeek >= releaseWeek;
   bool announcedBy(int week) => !isSurprise && week >= announceWeek;
+
+  /// An album kept in the vault with no date yet (docs F31): it never comes
+  /// out by itself and nothing has been paid for it.
+  bool get isDraft => releaseWeek >= draftWeek;
+
+  /// [releaseWeek] (and [announceWeek]) of a draft.
+  static const draftWeek = 1 << 30;
 }
 
 /// A scheduled release that came out: the single's song id or the album id.

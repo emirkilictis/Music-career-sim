@@ -701,6 +701,37 @@
   "statusSurprise": "Surprise",
   "buzzLabel": "Excitement",
   "changeDate": "Change date",
+  "saveDraft": "Keep in vault",
+  "draftSaved": "“{title}” is waiting in your vault. Release it whenever you like.",
+  "@draftSaved": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "drafts": "Drafts in your vault",
+  "draftHint": "Ready albums with no date yet. Nothing is paid until they come out.",
+  "draftSubtitle": "{type} · {tracks} tracks · saved {when}",
+  "@draftSubtitle": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "tracks": {
+        "type": "int"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "releaseDraftNow": "Release now",
+  "pickDraftDate": "Pick a date",
+  "deleteDraft": "Delete draft",
+  "deleteDraftTitle": "Delete this draft?",
+  "deleteDraftBody": "Its songs go back to the vault.",
+  "draftDeleted": "Draft deleted.",
   "cancelRelease": "Call off",
   "cancelReleaseTitle": "Call off this release?",
   "cancelReleaseBody": "Its songs are free again and {money} comes back. Any excitement is lost.",

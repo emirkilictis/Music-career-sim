@@ -131,6 +131,67 @@ void main() {
       g.close();
     });
 
+    test('a draft album waits in the vault, then comes out (F31)', () {
+      var g = GameSession.start(
+          slots, _setup(premium: true, money: StartMoney.millionaire));
+      final id = g.slotId;
+      List<int> write(int n) => [
+            for (var i = 0; i < n; i++)
+              (() {
+                g.world.player!.creativeEnergy = 100;
+                g.world.player!.burnoutUntilWeek = -1;
+                return g.writeSong(budget: BudgetTier.low).id;
+              })(),
+          ];
+      final songs = write(8);
+      final money = g.player.moneyCents;
+      final draft = g.saveDraft('Later', songs,
+          variantWeeks: [0, 1], variantFormats: [null, EditionFormat.cd]);
+      expect(draft.isDraft, isTrue);
+      expect(draft.editionsCostCents, EditionFormat.cd.costCents);
+      // Nothing paid yet; its songs are taken.
+      expect(g.player.moneyCents, money);
+      expect(
+          () => g.releaseAlbum('Other', songs), _code('trackOnOtherRelease'));
+      expect(() => g.reschedule(draft.id, releaseWeek: g.week + 2),
+          _code('isDraft'));
+      // A single from it may still come out first.
+      g.releaseSingle(songs.first, campaign: Campaign.none);
+      for (var i = 0; i < 30; i++) {
+        g.advanceWeek();
+      }
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.scheduled.single.isDraft, isTrue);
+      expect(g.albums, isEmpty);
+      final before = g.player.moneyCents;
+      final album = g.releaseDraft(draft.id, campaign: Campaign.none);
+      expect(album.scheduleId, draft.id);
+      expect(album.trackIds, songs);
+      expect(before - g.player.moneyCents, EditionFormat.cd.costCents);
+      expect(g.scheduled, isEmpty);
+
+      // Another draft, dated later: it comes out on its week.
+      final second = g.saveDraft('Even later', write(3), type: AlbumType.ep);
+      expect(() => g.releaseDraft(-5), _code('notScheduled'));
+      final dated = g.scheduleDraft(second.id,
+          campaign: Campaign.none,
+          releaseWeek: g.week + 2,
+          announceWeek: g.week + 2);
+      expect(dated.isDraft, isFalse);
+      expect(dated.id, second.id);
+      final outs = [
+        for (var i = 0; i < 3; i++)
+          ...g.advanceWeek().events.whereType<ReleaseOut>()
+      ];
+      expect(outs.single.scheduleId, second.id);
+      // A draft can also just be thrown away.
+      final third = g.saveDraft('Never', write(3), type: AlbumType.ep);
+      g.cancelScheduled(third.id);
+      expect(g.scheduled, isEmpty);
+      g.close();
+    });
+
     test('older saves get the independent reach of docs K70', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;

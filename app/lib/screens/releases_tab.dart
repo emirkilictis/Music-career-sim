@@ -128,6 +128,92 @@ class _ReleasesTabState extends State<ReleasesTab> {
     await releaseSingleFlow(context, career, song);
   }
 
+  /// A draft in the vault: release it, give it a date, or delete it.
+  Future<void> _editDraft(ScheduledView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final images = context.imagesRead;
+    final action = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(
+            title: Text(s.title,
+                style: const TextStyle(fontWeight: FontWeight.w800)),
+            subtitle: Text(l.draftSubtitle(fmt.albumType(s.type),
+                s.songIds.length, fmt.week(s.createdWeek))),
+          ),
+          PendingKeyCoverRow(imageKey: ImageStore.scheduledKey(s.id)),
+          ListTile(
+            leading: const Icon(Icons.rocket_launch_rounded),
+            title: Text(l.releaseDraftNow),
+            onTap: () => Navigator.pop(c, 0),
+          ),
+          ListTile(
+            leading: const Icon(Icons.edit_calendar_rounded),
+            title: Text(l.pickDraftDate),
+            onTap: () => Navigator.pop(c, 1),
+          ),
+          ListTile(
+            leading: Icon(Icons.delete_outline_rounded, color: AppColors.coral),
+            title: Text(l.deleteDraft),
+            onTap: () => Navigator.pop(c, 2),
+          ),
+        ]),
+      ),
+    );
+    if (action == null || !mounted) return;
+    try {
+      if (action == 2) {
+        final ok = await showDialog<bool>(
+          context: context,
+          builder: (c) => AlertDialog(
+            title: Text(l.deleteDraftTitle),
+            content: Text(l.deleteDraftBody),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(c, false),
+                  child: Text(l.cancel)),
+              FilledButton(
+                  onPressed: () => Navigator.pop(c, true),
+                  child: Text(l.deleteDraft)),
+            ],
+          ),
+        );
+        if (ok != true || !mounted) return;
+        await career.act(Cmd.cancelScheduled(s.id));
+        images.remove(ImageStore.scheduledKey(s.id));
+        if (mounted) showInfo(context, l.draftDeleted);
+        return;
+      }
+      var releaseWeek = career.week, announceWeek = career.week;
+      if (action == 1) {
+        final when = await pickReleaseTiming(context, career);
+        if (when == null || !mounted) return;
+        (releaseWeek, announceWeek) = (when.releaseWeek, when.announceWeek);
+      }
+      final campaign =
+          await pickCampaign(context, career, extraCents: s.editionsCostCents);
+      if (campaign == null || !mounted) return;
+      if (releaseWeek == career.week) {
+        final album = await career.act(Cmd.releaseDraft(s.id, campaign));
+        images.adoptWithEditions(
+            ImageStore.scheduledKey(s.id), ImageStore.albumKey(album.id));
+        if (mounted) showInfo(context, l.albumReleased(album.title));
+      } else {
+        await career
+            .act(Cmd.scheduleDraft(s.id, campaign, releaseWeek, announceWeek));
+        if (mounted) {
+          showInfo(context, l.releaseScheduled(s.title, fmt.week(releaseWeek)));
+        }
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   /// Change the date of a scheduled release, or call it off.
   Future<void> _editScheduled(ScheduledView s) async {
     final l = context.l10n;
@@ -200,6 +286,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final fmt = context.fmt;
     final career = context.career;
     final singles = _songs.where((s) => s.isSingle).toList();
+    final dated = _scheduled.where((s) => !s.isDraft).toList();
+    final drafts = _scheduled.where((s) => s.isDraft).toList();
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -233,12 +321,12 @@ class _ReleasesTabState extends State<ReleasesTab> {
           ),
         ]),
         const SizedBox(height: 16),
-        if (_scheduled.isNotEmpty) ...[
+        if (dated.isNotEmpty) ...[
           Section(
             title: l.upcoming,
             icon: Icons.event_rounded,
             child: Column(children: [
-              for (final s in _scheduled)
+              for (final s in dated)
                 MediaTile(
                   coverSeed: s.isAlbum
                       ? albumCoverSeed(s.id)
@@ -253,6 +341,28 @@ class _ReleasesTabState extends State<ReleasesTab> {
                   onTap: career.busy ? null : () => _editScheduled(s),
                 ),
             ]),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (drafts.isNotEmpty) ...[
+          Section(
+            title: l.drafts,
+            icon: Icons.inventory_2_outlined,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.draftHint,
+                      style: Theme.of(context).textTheme.bodySmall),
+                  for (final s in drafts)
+                    MediaTile(
+                      coverSeed: albumCoverSeed(s.id),
+                      imageKey: ImageStore.scheduledKey(s.id),
+                      title: s.title,
+                      subtitle: l.draftSubtitle(fmt.albumType(s.type),
+                          s.songIds.length, fmt.week(s.createdWeek)),
+                      onTap: career.busy ? null : () => _editDraft(s),
+                    ),
+                ]),
           ),
           const SizedBox(height: 12),
         ],
@@ -483,13 +593,36 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
     }
   }
 
+  List<int> get _ordered => [
+        for (final s in widget.songs)
+          if (_picked.contains(s.id)) s.id
+      ];
+
+  /// Keeps the album in the vault with no date (docs F31).
+  Future<void> _saveDraft() async {
+    final l = context.l10n;
+    try {
+      final images = context.imagesRead;
+      final s = await widget.state.act(Cmd.saveDraft(
+        title: _title.text,
+        songIds: _ordered,
+        type: _type,
+        variantWeeks: _variantWeeks,
+        variantFormats: _variantFormats,
+      ));
+      _saveCovers(images, ImageStore.scheduledKey(s.id));
+      if (!mounted) return;
+      Navigator.pop(context);
+      showInfo(context, l.draftSaved(s.title));
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _release() async {
     final l = context.l10n;
     final career = widget.state;
-    final ordered = [
-      for (final s in widget.songs)
-        if (_picked.contains(s.id)) s.id
-    ];
+    final ordered = _ordered;
     final when = await pickReleaseTiming(context, career);
     if (when == null || !mounted) return;
     final campaign =
@@ -647,13 +780,20 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: GradientButton(
-            onPressed: ok && !widget.state.busy ? _release : null,
-            icon: Icons.rocket_launch_rounded,
-            label: _variantCost > 0
-                ? l.releaseWithCost(fmt.money(_variantCost))
-                : l.release,
-          ),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            GradientButton(
+              onPressed: ok && !widget.state.busy ? _release : null,
+              icon: Icons.rocket_launch_rounded,
+              label: _variantCost > 0
+                  ? l.releaseWithCost(fmt.money(_variantCost))
+                  : l.release,
+            ),
+            TextButton.icon(
+              onPressed: ok && !widget.state.busy ? _saveDraft : null,
+              icon: const Icon(Icons.inventory_2_outlined, size: 18),
+              label: Text(l.saveDraft),
+            ),
+          ]),
         ),
       ),
     );

@@ -633,6 +633,10 @@ class ScheduledView {
         announceWeek = sr.announceWeek,
         announced = sr.announcedBy(w.week),
         isSurprise = sr.isSurprise,
+        isDraft = sr.isDraft,
+        createdWeek = sr.createdWeek,
+        editionsCostCents = Actions.editionsCostCents(
+            sr.variantWeeks.length, sr.variantFormats),
         campaign = sr.campaign,
         paidCents = sr.paidCents,
         buzz = sr.buzz,
@@ -650,6 +654,15 @@ class ScheduledView {
   final int announceWeek;
   final bool announced;
   final bool isSurprise;
+
+  /// Kept in the vault with no date (docs F31); [releaseWeek] means nothing.
+  final bool isDraft;
+
+  /// When it was scheduled or saved as a draft.
+  final int createdWeek;
+
+  /// What its extra editions cost (paid when a draft is released or dated).
+  final int editionsCostCents;
   final Campaign campaign;
   final int paidCents;
 

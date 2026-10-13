@@ -641,10 +641,98 @@ class GameSession {
     ));
   }
 
+  /// Keeps an album, EP or mixtape in the vault with no date (docs F31):
+  /// its songs, title and editions are set and its cover can be chosen;
+  /// nothing is paid until it is released ([releaseDraft]) or dated
+  /// ([scheduleDraft]). It can wait for years.
+  ScheduledView saveDraft(
+    String title,
+    List<int> songIds, {
+    AlbumType type = AlbumType.album,
+    List<int> variantWeeks = const [0],
+    List<EditionFormat?> variantFormats = const [],
+  }) {
+    final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
+    return _schedule(ScheduledRelease(
+      id: _nextScheduleId(),
+      type: type,
+      songIds: List.of(songIds),
+      title: t,
+      variantWeeks: List.of(variantWeeks),
+      variantFormats: _formats(variantFormats),
+      releaseWeek: ScheduledRelease.draftWeek,
+      announceWeek: ScheduledRelease.draftWeek,
+      createdWeek: world.week,
+      campaign: Campaign.none,
+    ));
+  }
+
+  /// Releases a draft this week with [campaign]. Its schedule id stays on
+  /// the album, so a cover chosen for the draft follows it.
+  AlbumView releaseDraft(int id, {Campaign campaign = Campaign.standard}) {
+    final sr = _draftById(id);
+    _p.scheduled.remove(sr);
+    try {
+      _checkAlbum(sr.title, sr.songIds, sr.type, sr.variantWeeks,
+          _editionFormats(sr.variantFormats));
+      _requireMoney(_campaignCost(campaign) +
+          Actions.editionsCostCents(sr.variantWeeks.length, sr.variantFormats));
+    } on GameException {
+      _p.scheduled.add(sr);
+      rethrow;
+    }
+    final al = Actions.releaseAlbum(world, _p, sr.title, sr.songIds,
+        type: sr.type,
+        variantWeeks: sr.variantWeeks,
+        variantFormats: sr.variantFormats,
+        scheduleId: sr.id,
+        payForVariants: true,
+        campaign: campaign);
+    _saveNow();
+    return AlbumView.of(world, al);
+  }
+
+  /// Gives a draft a date like [scheduleAlbum]; the campaign and editions
+  /// are paid now.
+  ScheduledView scheduleDraft(int id,
+      {Campaign campaign = Campaign.standard,
+      required int releaseWeek,
+      required int announceWeek}) {
+    final sr = _draftById(id);
+    _checkDates(releaseWeek, announceWeek);
+    final cost = _campaignCost(campaign) +
+        Actions.editionsCostCents(sr.variantWeeks.length, sr.variantFormats);
+    _requireMoney(cost);
+    _p.scheduled.remove(sr);
+    return _schedule(ScheduledRelease(
+      id: sr.id,
+      type: sr.type,
+      songIds: sr.songIds,
+      title: sr.title,
+      variantWeeks: sr.variantWeeks,
+      variantFormats: sr.variantFormats,
+      releaseWeek: releaseWeek,
+      announceWeek: announceWeek,
+      createdWeek: sr.createdWeek,
+      campaign: campaign,
+      paidCents: cost,
+    ));
+  }
+
+  ScheduledRelease _draftById(int id) {
+    final sr = _scheduledById(id);
+    if (!sr.isDraft) throw GameException('notDraft', 'Already has a date');
+    return sr;
+  }
+
+  static List<EditionFormat?> _editionFormats(List<int> f) =>
+      [for (final x in f) x < 0 ? null : EditionFormat.values[x]];
+
   /// Moves a scheduled release. Once announced, the announcement stays;
   /// pushing an announced release back costs part of its buzz.
   void reschedule(int id, {required int releaseWeek, int? announceWeek}) {
     final sr = _scheduledById(id);
+    if (sr.isDraft) throw GameException('isDraft', 'Use scheduleDraft');
     final announced = sr.announcedBy(world.week);
     final announce = announced ? sr.announceWeek : announceWeek ?? releaseWeek;
     if (releaseWeek <= world.week ||

@@ -130,6 +130,28 @@ abstract final class Cmd {
           releaseWeek: releaseWeek,
           announceWeek: announceWeek);
 
+  static SessionCmd<ScheduledView> saveDraft({
+    required String title,
+    required List<int> songIds,
+    required AlbumType type,
+    required List<int> variantWeeks,
+    List<EditionFormat?> variantFormats = const [],
+  }) =>
+      (s) => s.saveDraft(title, songIds,
+          type: type,
+          variantWeeks: variantWeeks,
+          variantFormats: variantFormats);
+
+  static SessionCmd<AlbumView> releaseDraft(int id, Campaign campaign) =>
+      (s) => s.releaseDraft(id, campaign: campaign);
+
+  static SessionCmd<ScheduledView> scheduleDraft(
+          int id, Campaign campaign, int releaseWeek, int announceWeek) =>
+      (s) => s.scheduleDraft(id,
+          campaign: campaign,
+          releaseWeek: releaseWeek,
+          announceWeek: announceWeek);
+
   static SessionCmd<void> reschedule(
           int id, int releaseWeek, int? announceWeek) =>
       (s) => s.reschedule(id,

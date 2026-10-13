@@ -67,7 +67,7 @@ void main() {
         port.sendPort));
     port.close();
     final songs = <int>[];
-    while (songs.length < 13) {
+    while (songs.length < 16) {
       final (p, _, _) = await c.run(Cmd.snapshot());
       if (!p.canWrite || p.creativeEnergy < 30) {
         await c.run(Cmd.nextWeek());
@@ -94,6 +94,12 @@ void main() {
     final (_, now, _) = await c.run(Cmd.snapshot());
     await c.run(
         Cmd.scheduleSingle(songs[12], Campaign.standard, now + 8, now + 4));
+    // An EP waits in the vault for its moment (F31).
+    await c.run(Cmd.saveDraft(
+        title: 'Midnight Tapes',
+        songIds: songs.sublist(13),
+        type: AlbumType.ep,
+        variantWeeks: const [0]));
     await c.exec(Cmd.closeCareer());
 
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
