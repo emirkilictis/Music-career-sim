@@ -345,6 +345,43 @@ void main() {
     expect(a.moneyCents - money, greaterThan(done.netCents * 0.9));
   });
 
+  test('streaming-era albums flood the song chart; radio counts (F25, F37)',
+      () {
+    final c = SimConfig();
+    expect(c.songChartRadioDivisor, 450);
+    final w = WorldGen.create(seed: 25, startYear: 2022, realNames: true);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2022)) {
+      sim.step();
+    }
+    final p = WorldGen.addPlayer(w,
+        name: 'Probe Star',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    for (final k in SkillKind.values) {
+      p.skills[k] = 100;
+    }
+    Actions.signLabel(w, p, Label.giant);
+    final ids = <int>[];
+    for (var i = 0; i < 13; i++) {
+      p.creativeEnergy = 100;
+      ids.add(Actions.writeSong(w, p, budget: BudgetTier.high).id);
+    }
+    Actions.releaseAlbum(w, p, 'Probe', ids, campaign: Campaign.global);
+    final chart = sim.step().charts[Charts.usSongs];
+    final mine = [
+      for (final e in chart)
+        if (w.songs[e.entityId].primaryArtistId == p.id) e.position
+    ];
+    // Every track charts, several in the top 10.
+    expect(mine.length, 13);
+    expect(mine.where((x) => x <= 10).length, greaterThanOrEqualTo(3));
+    // Radio is a real part of a top song's points.
+    final top = w.songs[chart.first.entityId];
+    expect(top.weekRadioPtsUs / top.weekPtsUs, greaterThan(0.05));
+  });
+
   test('a cheap home recording stops around a B (F35)', () {
     double mean(BudgetTier budget) {
       var sum = 0.0;
@@ -835,10 +872,11 @@ void albumShapeTests() {
   test('more tracks raise the debut with diminishing returns', () {
     final ten = _albumRun(tracks: 10, skill: 90, weeks: 1).first;
     final forty = _albumRun(tracks: 40, skill: 90, weeks: 1).first;
-    // About +25% for 4× the tracks (longer tracklist + streaming
-    // equivalents of the extra tracks), never anything like 4×.
+    // About +25–40% for 4× the tracks (longer tracklist + streaming
+    // equivalents of the extra tracks, which fans play in release week
+    // since docs F25), never anything like 4×.
     print('40 vs 10 tracks: ${(forty / ten).toStringAsFixed(3)}');
-    expect(forty / ten, inInclusiveRange(1.18, 1.35));
+    expect(forty / ten, inInclusiveRange(1.18, 1.45));
     expect(forty, lessThan(1.8 * ten));
   });
 }

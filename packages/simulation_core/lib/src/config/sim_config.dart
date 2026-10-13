@@ -24,6 +24,8 @@ class SimConfig {
     this.chartFeedback = 0.12,
     this.chartFatigueWeeks = 12,
     this.albumTrackFanShare = 0.6,
+    this.albumEventFanBoost = 12,
+    this.albumEventWeeks = 1.5,
     this.catalogTail = 0.05,
     this.viralWeeklyChance = 0.0025,
     this.viralRevivalChance = 0.4,
@@ -53,7 +55,8 @@ class SimConfig {
     this.announceBuzzSingle = 0.1,
     this.announceBuildRate = 0.35,
     this.songChartStreamDivisor = 125,
-    this.songChartRadioDivisor = 900,
+    // 900 until docs F37: radio counts twice as much on the song charts.
+    this.songChartRadioDivisor = 450,
     this.songChartSize = 100,
     this.albumChartSize = 200,
     this.recurrentWeeks = 20,
@@ -113,6 +116,11 @@ class SimConfig {
 
   /// Share of fan attention that non-single album tracks get.
   final double albumTrackFanShare;
+
+  /// Extra fan listening of a new album's cuts in the streaming era (×
+  /// playlist share; fades with [albumEventWeeks]) (docs F25).
+  final double albumEventFanBoost;
+  final double albumEventWeeks;
 
   /// Long-term catalog level as a fraction of a song's peak-period audience.
   final double catalogTail;

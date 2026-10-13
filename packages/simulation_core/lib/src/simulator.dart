@@ -244,12 +244,21 @@ class Simulator {
       s.playlistBoost *= c.playlistFade;
       final qMult = 0.35 + 0.65 * math.pow(s.quality / 100, 1.4);
 
-      // Fans replay singles; deep cuts get less of their time.
+      // Fans replay singles; deep cuts get less of their time, except in
+      // a streaming-era album's first weeks, when fans play the whole
+      // record and its cuts flood the song charts, then fall back (docs
+      // F25).
+      final albumEvent = s.isSingle || s.albumId < 0
+          ? 1.0
+          : 1 +
+              c.albumEventFanBoost *
+                  c.playlistShare(year) *
+                  math.exp(-ageRel / c.albumEventWeeks);
       final fanPart = fans *
           s.fanAppeal *
           fanCurve *
           (1 + p.hype) *
-          (s.isSingle ? 1.0 : c.albumTrackFanShare);
+          (s.isSingle ? 1.0 : c.albumTrackFanShare * albumEvent);
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
       final pubPart = c.publicPool * s.commercial * life * exposure;
       // A viral trend reaches people regardless of the song's age.
@@ -428,6 +437,8 @@ class Simulator {
       final uk = CountryShares.ukOfEurope(p.homeCountry);
       songPts[Charts.usSongs][i] =
           us * pts(rulesUs, ph[na], dw[na], st[na], rd[na]);
+      s.weekPtsUs = songPts[Charts.usSongs][i];
+      s.weekRadioPtsUs = us * rd[na] / c.songChartRadioDivisor;
       // UK "accelerated decline" (2017+): long-running songs' streams count
       // at a reduced rate.
       final ukStreams = rulesUk.streamFactor > 0 &&

@@ -439,6 +439,11 @@ class Song with Charted {
   double weekPhysical = 0;
   double weekRadio = 0;
 
+  /// US song chart points from radio and in all this week (not saved;
+  /// for chart breakdowns and probes).
+  double weekRadioPtsUs = 0;
+  double weekPtsUs = 0;
+
   /// Global chart points this week.
   double weekPoints = 0;
   double viralBoost = 0;
