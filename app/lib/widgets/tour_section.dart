@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/scope.dart';
+import '../screens/tour_detail_screen.dart';
 import '../screens/tour_screen.dart';
 import '../ui/palette.dart';
 import 'common.dart';
@@ -32,7 +33,7 @@ class TourSection extends StatelessWidget {
               ),
             )
           : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              Text(fmt.tourKind(t.kind),
+              Text(fmt.tourName(t.name, t.kind),
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.w800)),
               const SizedBox(height: 4),
@@ -48,11 +49,31 @@ class TourSection extends StatelessWidget {
                   color: AppColors.peach,
                 ),
               ),
+              if (t.thisWeek.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(l.tourThisWeek,
+                    style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w600)),
+                Text(
+                    {for (final s in t.thisWeek) '${s.city} · ${s.venue}'}
+                        .join('\n'),
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+              ],
               const SizedBox(height: 6),
-              Text(l.tourNow(fmt.region(t.region)),
-                  style: TextStyle(color: AppColors.textMuted)),
               Text(l.tourSoFar(fmt.compact(t.tickets), fmt.money(t.netCents)),
                   style: TextStyle(color: AppColors.textMuted)),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => TourDetailScreen(state: career))),
+                  icon: const Icon(Icons.list_alt_rounded),
+                  label: Text(l.tourDetails),
+                ),
+              ),
             ]),
     );
   }

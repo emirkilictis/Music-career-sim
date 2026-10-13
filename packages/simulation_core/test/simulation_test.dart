@@ -324,10 +324,31 @@ void main() {
     expect(Tours.canStart(a, TourKind.arena), isTrue);
     a.coreFans = 2e4;
     expect(Tours.canStart(a, TourKind.arena), isFalse);
+    expect(
+        () => Tours.start(
+            w,
+            a,
+            Tours.plan(w, a,
+                legs: const [TourLeg(TourMarket.usa, TourKind.arena, 10)])),
+        throwsStateError);
     a.coreFans = 5e6;
-    final t = Tours.start(w, a, TourKind.arena, [0, 1]);
-    expect(t.weeks, 2 * TourKind.arena.weeksPerRegion);
-    expect(() => Tours.start(w, a, TourKind.club, [0]), throwsStateError);
+    final t = Tours.start(
+        w,
+        a,
+        Tours.plan(w, a, legs: const [
+          TourLeg(TourMarket.usa, TourKind.arena, 12),
+          TourLeg(TourMarket.ukIreland, TourKind.arena, 6),
+        ]));
+    // Three a week, a new week for each leg.
+    expect(t.shows.length, 18);
+    expect(t.weeks, 4 + 2);
+    expect(
+        () => Tours.start(
+            w,
+            a,
+            Tours.plan(w, a,
+                legs: const [TourLeg(TourMarket.usa, TourKind.club, 3)])),
+        throwsStateError);
     final money = a.moneyCents;
     Tour? done;
     var weeks = 0;
@@ -341,8 +362,75 @@ void main() {
     expect(a.tour, isNull);
     expect(done.tickets, greaterThan(0));
     expect(done.fans, greaterThan(0));
+    expect(done.shows.every((s) => s.played), isTrue);
+    expect(done.merchCents, greaterThan(0));
     // A sold arena tour pays well beyond a few weeks of royalties.
     expect(a.moneyCents - money, greaterThan(done.netCents * 0.9));
+  });
+
+  test('tours: cities, venues, prices, support acts (K76)', () {
+    final w = WorldGen.create(seed: 76, startYear: 2015);
+    final a = WorldGen.addPlayer(w,
+        name: 'Star',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    final t = Tours.plan(w, a,
+        legs: const [TourLeg(TourMarket.usa, TourKind.arena, 20)]);
+    // Big cities get more nights; every night in a city is the same venue.
+    int nights(String city) => t.shows.where((s) => s.cityName == city).length;
+    expect(nights('New York'), greaterThan(nights('Seattle')));
+    final ny = t.shows.where((s) => s.cityName == 'New York').toList();
+    expect(ny.map((s) => s.venue).toSet().length, 1);
+    expect(
+        ny.first.capacity,
+        inInclusiveRange(
+            TourKind.arena.minCapacity, TourKind.arena.maxCapacity));
+    // The same venue in the same world, every tour.
+    final again = Tours.plan(w, a,
+        legs: const [TourLeg(TourMarket.usa, TourKind.arena, 3)]);
+    expect(again.shows.first.venue, ny.first.venue);
+    expect(Tours.maxShows(TourMarket.canada, TourKind.stadium), 24);
+    // Ticket prices follow the era.
+    expect(Tours.priceFor(TourKind.arena, 2000, 1),
+        lessThan(Tours.priceFor(TourKind.arena, 2024, 1)));
+    // Dearer tickets sell fewer, mostly to casual fans; gross can rise.
+    final cheap = Tours.marketDemand(w, a, TourMarket.usa, 0.7, null);
+    final dear = Tours.marketDemand(w, a, TourMarket.usa, 1.8, null);
+    expect(dear, lessThan(cheap));
+    // A support act costs a fee and draws some of their own fans.
+    final opener = Tours.openerCandidates(w, a).first;
+    expect(opener.fame, lessThan(a.fame));
+    expect(Tours.marketDemand(w, a, TourMarket.usa, 1, opener),
+        greaterThan(Tours.marketDemand(w, a, TourMarket.usa, 1, null)));
+    final withOpener = Tours.plan(w, a,
+        legs: const [TourLeg(TourMarket.usa, TourKind.arena, 20)],
+        openerId: opener.id);
+    final (alone, _) = Tours.estimate(w, a, t);
+    final (helped, _) = Tours.estimate(w, a, withOpener);
+    expect(helped.openerCents,
+        closeTo(20 * Tours.openerFeeCents(opener).toDouble(), 1));
+    expect(alone.openerCents, 0);
+    // A spectacle costs more and wins more fans.
+    final big = Tours.plan(w, a,
+        legs: const [TourLeg(TourMarket.usa, TourKind.arena, 20)],
+        production: TourProduction.spectacle);
+    final (show, _) = Tours.estimate(w, a, big);
+    expect(show.productionCents, greaterThan(alone.productionCents));
+    expect(show.fans, greaterThan(alone.fans));
+    // Saved and read back, nights and all.
+    final back = Tour.decode(Tour.encode(withOpener))!;
+    expect(back.shows.length, withOpener.shows.length);
+    expect(back.shows.first.venue, withOpener.shows.first.venue);
+    expect(back.openerId, opener.id);
+    // A tour saved before K76 is laid out when it next plays.
+    final old = Tour.decode('{"k":2,"r":[0,1],"w":${w.week},"t":0,"g":0,'
+        '"c":0,"f":0,"cut":0.7}')!;
+    expect(old.legs.map((l) => l.market), [TourMarket.usa, TourMarket.europe]);
+    a.tour = old;
+    Tours.playWeek(w, a);
+    expect(old.shows.length, 2 * 5 * Tours.showsPerWeek);
+    expect(old.shows.where((s) => s.played).length, Tours.showsPerWeek);
   });
 
   test('streaming-era albums flood the song chart; radio counts (F25, F37)',
@@ -566,7 +654,11 @@ void main() {
         genre: 0,
         tier: StartTier.superstar,
         money: StartMoney.millionaire);
-    final e = Tours.estimate(w, p, TourKind.arena, [0]);
+    final (e, _) = Tours.estimate(
+        w,
+        p,
+        Tours.plan(w, p,
+            legs: const [TourLeg(TourMarket.usa, TourKind.arena, 10)]));
     final alone = Tours.netFor(p, e);
     p.manager = Manager.star;
     expect(Tours.cutFor(p), closeTo(0.8, 1e-9));

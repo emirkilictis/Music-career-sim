@@ -285,6 +285,26 @@ class Fmt {
         TourKind.stadium => l.tourStadium,
       };
 
+  String tourMarket(TourMarket m) => switch (m) {
+        TourMarket.usa => l.marketUsa,
+        TourMarket.canada => l.marketCanada,
+        TourMarket.ukIreland => l.marketUk,
+        TourMarket.europe => l.marketEurope,
+        TourMarket.latinAmerica => l.marketLatAm,
+        TourMarket.asia => l.marketAsia,
+        TourMarket.oceania => l.marketOceania,
+      };
+
+  String tourProduction(TourProduction p) => switch (p) {
+        TourProduction.basic => l.tourProdBasic,
+        TourProduction.standard => l.tourProdStandard,
+        TourProduction.spectacle => l.tourProdSpectacle,
+      };
+
+  /// The player's name for a tour, else named after its biggest venues.
+  String tourName(String name, TourKind kind) =>
+      name.isEmpty ? tourKind(kind) : name;
+
   String offerTitle(OpportunityKind k) => switch (k) {
         OpportunityKind.interview => l.offerInterviewTitle,
         OpportunityKind.feature => l.offerFeatureTitle,
@@ -521,8 +541,8 @@ class Fmt {
               : l.battleLost(t, pos(e.playerPosition), line.artistName,
                   pos(e.rivalPosition));
         }(),
-      TourFinished() => l.eventTourFinished(tourKind(e.kind),
-          compact(e.tickets), money(e.netCents), compact(e.fans)),
+      TourFinished() => l.eventTourFinished(tourName(e.name, e.kind), e.shows,
+          e.soldOut, compact(e.tickets), money(e.netCents), compact(e.fans)),
       MilestoneReached(:final milestone) =>
         l.eventMilestone(milestoneName(milestone), milestone.skillPoints),
       OpportunityLapsed() => e.outcome.kind == OpportunityKind.scandal

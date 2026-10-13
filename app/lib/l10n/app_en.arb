@@ -1239,11 +1239,116 @@
       }
     }
   },
-  "eventTourFinished": "{tour} is over: {tickets} tickets, {money}, +{fans} fans.",
+  "tourName": "Tour name",
+  "tourNameHint": "e.g. Midnight World Tour",
+  "tourLegsHint": "Pick markets, a venue size and how many shows. Big cities get extra nights; fans from cities you skip travel in, a few.",
+  "tourShowsCount": "{count} shows",
+  "@tourShowsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tourLegEstimate": "~{fill}% full · {tickets} tickets · {price} a ticket",
+  "@tourLegEstimate": {
+    "placeholders": {
+      "fill": {
+        "type": "int"
+      },
+      "tickets": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "tourTickets": "Ticket price",
+  "tourPriceFactor": "{pct}% of the usual price",
+  "@tourPriceFactor": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "tourPriceHint": "Dearer tickets sell fewer, mostly to casual listeners; your core fans pay.",
+  "tourProduction": "Production",
+  "tourProdBasic": "Basic",
+  "tourProdStandard": "Standard",
+  "tourProdSpectacle": "Spectacle",
+  "tourProdHint": "A bigger show costs more a night and wins more fans, devotion and buzz.",
+  "tourOpener": "Opening act",
+  "tourOpenerNone": "No opening act",
+  "tourOpenerFee": "{money} a night",
+  "@tourOpenerFee": {
+    "placeholders": {
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "tourOpenerHint": "An opener draws some of their own fans and wins new ones; they cost a fee every night.",
+  "tourPickOpener": "Pick an opening act",
+  "tourExpected": "Expected",
+  "tourStatShows": "Shows",
+  "tourStatWeeks": "Weeks",
+  "tourStatTickets": "Tickets",
+  "tourStatFill": "Full",
+  "tourStatSoldOut": "Sold-out nights",
+  "tourStatGross": "Box office",
+  "tourStatShare": "Your share",
+  "tourStatMerch": "Merch",
+  "tourStatProduction": "Production",
+  "tourStatFreight": "Freight & travel",
+  "tourStatNet": "Net",
+  "tourStatFans": "New fans",
+  "tourSchedule": "Schedule",
+  "tourShowWeek": "Week {week}",
+  "@tourShowWeek": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      }
+    }
+  },
+  "tourProblemOnTour": "You are already on tour.",
+  "tourProblemMarkets": "Pick at least one market.",
+  "tourProblemTooBig": "You need more fans for these venues.",
+  "tourProblemShows": "Too many shows for one market.",
+  "tourDetails": "Tour details",
+  "tourPlayed": "{played} of {total} shows played",
+  "@tourPlayed": {
+    "placeholders": {
+      "played": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "tourThisWeek": "This week",
+  "tourSoldOutTag": "Sold out",
+  "marketUsa": "United States",
+  "marketCanada": "Canada",
+  "marketUk": "UK & Ireland",
+  "marketEurope": "Europe",
+  "marketLatAm": "Latin America",
+  "marketAsia": "Asia",
+  "marketOceania": "Australia & NZ",
+  "eventTourFinished": "{tour} is over: {shows} shows ({soldOut} sold out), {tickets} tickets, {money}, +{fans} fans.",
   "@eventTourFinished": {
     "placeholders": {
       "tour": {
         "type": "String"
+      },
+      "shows": {
+        "type": "int"
+      },
+      "soldOut": {
+        "type": "int"
       },
       "tickets": {
         "type": "String"

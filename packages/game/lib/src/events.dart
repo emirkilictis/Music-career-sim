@@ -225,14 +225,24 @@ class MilestoneReached extends GameEvent {
   bool get isMajor => true;
 }
 
-/// The player's tour played its last show (docs K63).
+/// The player's tour played its last show (docs K63, K76).
 class TourFinished extends GameEvent {
   const TourFinished(
       {required this.kind,
+      this.name = '',
+      this.shows = 0,
+      this.soldOut = 0,
+      this.grossCents = 0,
       required this.tickets,
       required this.netCents,
       required this.fans});
   final TourKind kind;
+
+  /// The player's name for it ('' = named after its venues).
+  final String name;
+  final int shows;
+  final int soldOut;
+  final int grossCents;
   final double tickets;
   final int netCents;
   final double fans;

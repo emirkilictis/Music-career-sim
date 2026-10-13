@@ -441,19 +441,76 @@ class GameSession {
 
   /// What a tour of each size would do over [regions], as planned now
   /// (docs K63).
-  List<TourPlanView> tourPlans(List<Region> regions) => [
-        for (final k in TourKind.values)
-          () {
-            final e = Tours.estimate(
-                world, _p, k, [for (final r in regions) r.index]);
-            return TourPlanView(
-              kind: k,
-              regions: regions,
-              available: Tours.canStart(_p, k),
-              estimate: e,
-              netCents: Tours.netFor(_p, e).round(),
-            );
-          }(),
+  /// A tour as it would go if it started this week (docs K76): each
+  /// night's expected turnout, the money, and what stops it.
+  TourPlanView tourPreview(TourRequest r) {
+    final legs = [
+      for (final l in r.legs)
+        TourLeg(l.market, l.kind,
+            l.shows.clamp(1, Tours.maxShows(l.market, l.kind)).toInt())
+    ];
+    final opener = r.openerId >= 0 ? world.artists[r.openerId] : null;
+    final t = Tours.plan(world, _p,
+        legs: legs,
+        name: r.name,
+        priceFactor: r.priceFactor,
+        production: r.production,
+        openerId: opener?.id ?? -1);
+    final (e, each) = Tours.estimate(world, _p, t);
+    final legViews = <TourLegView>[];
+    for (var i = 0; i < legs.length; i++) {
+      var tickets = 0.0, seats = 0.0, gross = 0.0;
+      for (var k = 0; k < t.shows.length; k++) {
+        if (t.shows[k].leg != i) continue;
+        tickets += each[k].sold;
+        seats += t.shows[k].capacity;
+        gross += each[k].grossCents;
+      }
+      legViews.add(TourLegView(
+          leg: legs[i],
+          tickets: tickets,
+          fill: seats == 0 ? 0 : tickets / seats,
+          grossCents: gross.round(),
+          maxShows: Tours.maxShows(legs[i].market, legs[i].kind),
+          priceCents: Tours.priceFor(legs[i].kind, year, t.priceFactor)));
+    }
+    return TourPlanView(
+      request: r,
+      problems: _tourProblems(r),
+      estimate: e,
+      netCents: Tours.netFor(_p, e).round(),
+      weeks: legs.isEmpty ? 0 : t.weeks,
+      legs: legViews,
+      schedule: [
+        for (var k = 0; k < t.shows.length; k++)
+          TourShowView.of(t, t.shows[k], each[k])
+      ],
+      openerName: opener?.name,
+      openerFeeCents: opener == null ? 0 : Tours.openerFeeCents(opener),
+    );
+  }
+
+  List<String> _tourProblems(TourRequest r) => [
+        if (_p.tour != null) 'onTour',
+        if (r.legs.isEmpty ||
+            r.legs.map((l) => l.market).toSet().length != r.legs.length)
+          'tourMarkets',
+        if (r.legs.any((l) => _p.coreFans < l.kind.minFans)) 'tourTooBig',
+        if (r.legs.any(
+            (l) => l.shows < 1 || l.shows > Tours.maxShows(l.market, l.kind)))
+          'tourShows',
+      ];
+
+  /// Rivals who could open the tour, with their fee a night.
+  List<OpenerView> get tourOpeners => [
+        for (final o in Tours.openerCandidates(world, _p))
+          OpenerView(
+              artistId: o.id,
+              name: o.name,
+              genre: o.genre,
+              fame: o.fame,
+              coreFans: o.coreFans,
+              feeCents: Tours.openerFeeCents(o)),
       ];
 
   // ---------------------------------------------------------------- rivals
@@ -508,18 +565,25 @@ class GameSession {
     _saveNow();
   }
 
-  /// Goes on tour from this week.
-  void startTour(TourKind kind, List<Region> regions) {
-    if (_p.tour != null) throw GameException('onTour', 'Already on tour');
-    if (_p.coreFans < kind.minFans) {
-      throw GameException('tourTooBig', 'Not enough fans for this tour');
+  /// Goes on tour from this week (docs K76).
+  void startTour(TourRequest r) {
+    final problems = _tourProblems(r);
+    if (problems.isNotEmpty) {
+      throw GameException(problems.first, 'Cannot start this tour');
     }
-    if (regions.isEmpty || regions.toSet().length != regions.length) {
-      throw GameException('tourRegions', 'Pick where to tour');
+    if (r.openerId >= 0 &&
+        !Tours.openerCandidates(world, _p).any((o) => o.id == r.openerId)) {
+      throw GameException('tourOpener', 'That act cannot open for you');
     }
-    Tours.start(world, _p, kind, [for (final r in regions) r.index]);
+    final t = Tours.plan(world, _p,
+        legs: r.legs,
+        name: r.name,
+        priceFactor: r.priceFactor,
+        production: r.production,
+        openerId: r.openerId);
+    Tours.start(world, _p, t);
     Milestone.firstTour.mark(world, _p);
-    if (kind == TourKind.stadium) Milestone.stadiumTour.mark(world, _p);
+    if (t.kind == TourKind.stadium) Milestone.stadiumTour.mark(world, _p);
     _saveNow();
   }
 
@@ -1266,6 +1330,10 @@ class GameSession {
     if (r.tourFinished case final t?) {
       events.add(TourFinished(
           kind: t.kind,
+          name: t.name,
+          shows: t.shows.where((s) => s.played).length,
+          soldOut: t.soldOut,
+          grossCents: t.grossCents.round(),
           tickets: t.tickets,
           netCents: t.netCents.round(),
           fans: t.fans));

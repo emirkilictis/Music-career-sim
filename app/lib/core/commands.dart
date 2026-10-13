@@ -174,10 +174,10 @@ abstract final class Cmd {
       (s) => s.upcomingRivalAlbums;
   static SessionCmd<PlatformView> platform(MusicPlatform p) =>
       (s) => s.platform(p);
-  static SessionCmd<List<TourPlanView>> tourPlans(List<Region> regions) =>
-      (s) => s.tourPlans(regions);
-  static SessionCmd<void> startTour(TourKind kind, List<Region> regions) =>
-      (s) => s.startTour(kind, regions);
+  static SessionCmd<TourPlanView> tourPreview(TourRequest r) =>
+      (s) => s.tourPreview(r);
+  static SessionCmd<List<OpenerView>> tourOpeners() => (s) => s.tourOpeners;
+  static SessionCmd<void> startTour(TourRequest r) => (s) => s.startTour(r);
 
   static SessionCmd<void> signLabel(Label label) => (s) => s.signLabel(label);
 

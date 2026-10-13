@@ -185,6 +185,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Plan a tour'));
     await shot(tester, '15d_tour');
+    await tester.scrollUntilVisible(find.text('Expected'), 400,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await shot(tester, '15e_tour_estimate');
+    await tester.scrollUntilVisible(find.text('Schedule'), 400,
+        scrollable: find.byType(Scrollable).first);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -300));
+    await shot(tester, '15f_tour_schedule');
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Skills'), -300,

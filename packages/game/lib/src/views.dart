@@ -820,48 +820,179 @@ class MilestoneView {
 /// A tour on the road (docs K63).
 class TourView {
   TourView.of(World w, Tour t)
-      : kind = t.kind,
-        regions = [for (final r in t.regions) Region.values[r]],
+      : name = t.name,
+        kind = t.kind,
+        legs = List.unmodifiable(t.legs),
+        production = t.production,
+        priceFactor = t.priceFactor,
+        openerName = t.openerId >= 0 ? w.artists[t.openerId].name : null,
         weeks = t.weeks,
         weekOfTour = (w.week - t.startWeek + 1).clamp(1, t.weeks),
-        region = Region.values[t.regionAt(w.week)],
+        shows = [for (final s in t.shows) TourShowView.of(t, s)],
+        thisWeek = [for (final s in t.showsIn(w.week)) TourShowView.of(t, s)],
         tickets = t.tickets,
+        grossCents = t.grossCents.round(),
+        merchCents = t.merchCents.round(),
+        costCents = t.costCents.round(),
         netCents = t.netCents.round(),
-        fans = t.fans;
+        fans = t.fans,
+        soldOut = t.soldOut;
 
+  /// The player's name for it ('' = named after its biggest venues).
+  final String name;
+
+  /// The biggest venues on the tour.
   final TourKind kind;
-  final List<Region> regions;
+  final List<TourLeg> legs;
+  final TourProduction production;
+  final double priceFactor;
+  final String? openerName;
   final int weeks;
 
   /// The week of the tour about to be played (1-based).
   final int weekOfTour;
 
-  /// Where this week's shows are.
-  final Region region;
+  /// Every night, played ones with their numbers.
+  final List<TourShowView> shows;
+
+  /// Nights this coming week.
+  final List<TourShowView> thisWeek;
   final double tickets;
+  final int grossCents;
+  final int merchCents;
+  final int costCents;
   final int netCents;
   final double fans;
+  final int soldOut;
+
+  int get played => shows.where((s) => s.played).length;
 }
 
-/// A tour as planned now: can the player start it and what it would do.
-class TourPlanView {
-  TourPlanView(
-      {required this.kind,
-      required this.regions,
-      required this.available,
-      required this.estimate,
-      required this.netCents});
+/// One night of a tour (docs K76): where, when, how big, and its tickets
+/// (sold once played, else expected when planning).
+class TourShowView {
+  TourShowView({
+    required this.weekOfTour,
+    required this.market,
+    required this.city,
+    required this.venue,
+    required this.kind,
+    required this.capacity,
+    required this.priceCents,
+    required this.played,
+    required this.tickets,
+    required this.grossCents,
+  });
+
+  TourShowView.of(Tour t, TourShow s, [ShowResult? expected])
+      : weekOfTour = s.week - t.startWeek + 1,
+        market = s.market,
+        city = s.cityName,
+        venue = s.venue,
+        kind = t.legs[s.leg].kind,
+        capacity = s.capacity,
+        priceCents = s.priceCents,
+        played = s.played,
+        tickets = s.played ? s.sold : (expected?.sold ?? 0),
+        grossCents =
+            (s.played ? s.grossCents : (expected?.grossCents ?? 0)).round();
+
+  final int weekOfTour;
+  final TourMarket market;
+  final String city;
+  final String venue;
   final TourKind kind;
-  final List<Region> regions;
+  final int capacity;
+  final int priceCents;
+  final bool played;
+  final double tickets;
+  final int grossCents;
 
-  /// Enough fans and not already on tour.
-  final bool available;
+  bool get soldOut => tickets >= capacity * Tours.soldOutShare;
+}
+
+/// What the player asks for when planning a tour (docs K76).
+class TourRequest {
+  const TourRequest({
+    required this.legs,
+    this.name = '',
+    this.priceFactor = 1.0,
+    this.production = TourProduction.standard,
+    this.openerId = -1,
+  });
+  final List<TourLeg> legs;
+  final String name;
+  final double priceFactor;
+  final TourProduction production;
+  final int openerId;
+}
+
+/// One leg as planned: its expected turnout.
+class TourLegView {
+  TourLegView(
+      {required this.leg,
+      required this.tickets,
+      required this.fill,
+      required this.grossCents,
+      required this.maxShows,
+      required this.priceCents});
+  final TourLeg leg;
+  final double tickets;
+  final double fill;
+  final int grossCents;
+
+  /// Most shows this market can take at this size.
+  final int maxShows;
+  final int priceCents;
+}
+
+/// A rival who could open the tour, and their fee a night.
+class OpenerView {
+  OpenerView(
+      {required this.artistId,
+      required this.name,
+      required this.genre,
+      required this.fame,
+      required this.coreFans,
+      required this.feeCents});
+  final int artistId;
+  final String name;
+  final int genre;
+  final double fame;
+  final double coreFans;
+  final int feeCents;
+}
+
+/// A tour as planned now: what it would do, night by night, and what
+/// stops it (docs K76).
+class TourPlanView {
+  TourPlanView({
+    required this.request,
+    required this.problems,
+    required this.estimate,
+    required this.netCents,
+    required this.weeks,
+    required this.legs,
+    required this.schedule,
+    required this.openerName,
+    required this.openerFeeCents,
+  });
+  final TourRequest request;
+
+  /// Why it cannot start: 'onTour', 'tourMarkets', 'tourTooBig',
+  /// 'tourShows' (empty = ready).
+  final List<String> problems;
   final TourWeek estimate;
-
-  int get weeks => regions.length * kind.weeksPerRegion;
 
   /// What the player would keep (their manager's cut taken; K68).
   final int netCents;
+  final int weeks;
+  final List<TourLegView> legs;
+  final List<TourShowView> schedule;
+  final String? openerName;
+  final int openerFeeCents;
+
+  bool get available => problems.isEmpty;
 }
 
 /// A big rival's album due soon (docs K69): release dates are known about

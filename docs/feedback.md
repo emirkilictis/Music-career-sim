@@ -101,6 +101,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F36 | **Notu (grade) gizlemek?** (Emir): "albümün hit olup olmayacağı çok bariz gibi". | ✅ K74 (Emir: "tahmin aralığı göster"): kasadaki şarkıda kesin not yerine ekibin aralığı ("C–A"); iyi prodüktörle aralık dar. Yayınlanınca gerçek not görünür. |
 | F37 | **Her şeyin #1 olmasına çözüm: listede radyonun etkisini artır** (Emir). | ✅ K75: radyo şarkı listelerinde 2 kat sayılıyor (tepe şarkılarda radyo payı %8 → %16–27; gerçekte ~%30). Albüm parçaları stream'le girer ama #1 için radyo gerekir. ×3 de denendi: bağımsız erken kariyeri bir yıl yavaşlattığı için ×2 seçildi. **Not:** dev şirketli çok güçlü oyuncu 4.–5. yılda yine her single'da #1 (radyoyu da en çok o alıyor); F24 hâlâ açık. |
 | F38 | **Grup ve vokal grubun solo sanatçıdan neredeyse farkı yok** (Emir). | Not alındı; sırada. |
+| F39 | **Turne çok basit** (Emir): kaç konser, hangi kıtalar, hangi arenalar/stadyumlar; uydurma mekan adları, ortalama bilet fiyatı, ön grup, "her türlü detay". | ✅ K76: bacaklar (pazar + mekan boyu + konser sayısı), gerçek şehirler, uydurma mekanlar, konser takvimi, bilet fiyatı, prodüksiyon, ön grup, merch, nakliye, kapalı gişe; planlayıcıda tahmin ve program, yoldayken konser konser sonuçlar. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

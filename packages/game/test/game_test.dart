@@ -296,15 +296,25 @@ void main() {
               tier: StartTier.superstar,
               money: StartMoney.millionaire));
       final id = g.slotId;
-      final plans = g.tourPlans([Region.northAmerica]);
-      expect(plans.length, TourKind.values.length);
-      expect(plans.first.available, isTrue);
-      expect(() => g.startTour(TourKind.club, const []),
-          throwsA(isA<GameException>()));
-      g.startTour(TourKind.club, [Region.northAmerica]);
-      expect(g.player.tour?.weeks, TourKind.club.weeksPerRegion);
-      expect(() => g.startTour(TourKind.club, [Region.europe]),
-          throwsA(isA<GameException>()));
+      const request = TourRequest(
+          name: 'Neon Nights',
+          legs: [TourLeg(TourMarket.usa, TourKind.club, 6)]);
+      final plan = g.tourPreview(request);
+      expect(plan.available, isTrue);
+      expect(plan.schedule.length, 6);
+      expect(plan.weeks, 2);
+      expect(plan.legs.single.tickets, greaterThan(0));
+      expect(g.tourPreview(const TourRequest(legs: [])).problems,
+          contains('tourMarkets'));
+      expect(
+          () => g.startTour(const TourRequest(legs: [])), _code('tourMarkets'));
+      final opener = g.tourOpeners.first;
+      g.startTour(TourRequest(
+          name: request.name, legs: request.legs, openerId: opener.artistId));
+      expect(g.player.tour?.weeks, 2);
+      expect(g.player.tour?.name, 'Neon Nights');
+      expect(g.player.tour?.openerName, opener.name);
+      expect(() => g.startTour(request), _code('onTour'));
       expect(
           g.milestones
               .firstWhere((m) => m.milestone == Milestone.firstTour)
@@ -313,11 +323,14 @@ void main() {
       g.close();
       g = GameSession.resume(slots, id);
       expect(g.player.tour?.kind, TourKind.club);
+      expect(g.player.tour?.thisWeek.length, 3);
       final events = <GameEvent>[];
-      for (var i = 0; i < TourKind.club.weeksPerRegion; i++) {
+      for (var i = 0; i < 2; i++) {
         events.addAll(g.advanceWeek().events);
       }
-      expect(events.whereType<TourFinished>().length, 1);
+      final done = events.whereType<TourFinished>().single;
+      expect(done.name, 'Neon Nights');
+      expect(done.shows, 6);
       expect(g.player.tour, isNull);
       g.close();
     });
