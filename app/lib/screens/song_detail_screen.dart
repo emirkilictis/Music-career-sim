@@ -138,9 +138,9 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           ReleaseHeader(
-            coverSeed: songCoverSeed(s.id, s.albumId),
+            coverSeed: songCoverSeed(s.id, s.coverAlbumId),
             songId: s.id,
-            albumId: s.albumId,
+            albumId: s.coverAlbumId,
             onCoverTap: s.isPlayer
                 ? () => editImage(context, ImageStore.songKey(s.id))
                 : null,

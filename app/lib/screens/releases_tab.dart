@@ -106,9 +106,9 @@ class _ReleasesTabState extends State<ReleasesTab> {
               for (final s in group)
                 ListTile(
                   leading: CoverArt(
-                      seed: songCoverSeed(s.id, s.albumId),
+                      seed: songCoverSeed(s.id, s.coverAlbumId),
                       songId: s.id,
-                      albumId: s.albumId),
+                      albumId: s.coverAlbumId),
                   trailing: GradeTag(fmt.grade(s.estimatedGrade)),
                   title: Text(s.title),
                   subtitle: Text(s.inVault
@@ -291,9 +291,9 @@ class _ReleasesTabState extends State<ReleasesTab> {
               : Column(children: [
                   for (final s in singles)
                     MediaTile(
-                      coverSeed: songCoverSeed(s.id, s.albumId),
+                      coverSeed: songCoverSeed(s.id, s.coverAlbumId),
                       songId: s.id,
-                      albumId: s.albumId,
+                      albumId: s.coverAlbumId,
                       badge: PeakTag(s.charts
                               .where((c) => c.chartId == Charts.usSongs)
                               .firstOrNull
@@ -325,7 +325,7 @@ Future<bool> releaseSingleFlow(
   final when = await pickReleaseTiming(context, week: career.week);
   if (when == null || !context.mounted) return false;
   final campaign = await pickCampaign(context, career,
-      header: CoverPickRow(songId: song.id, albumId: song.albumId));
+      header: CoverPickRow(songId: song.id, albumId: song.coverAlbumId));
   if (campaign == null || !context.mounted) return false;
   try {
     if (when.releaseWeek == career.week) {

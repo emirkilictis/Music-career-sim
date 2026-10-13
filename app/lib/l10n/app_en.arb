@@ -501,6 +501,15 @@
     }
   },
   "errorSongScheduled": "This song is on a scheduled release.",
+  "albumSingles": "Singles from the album",
+  "albumSinglesTotal": "{sales} single sales together · every 10 count as 1 album unit",
+  "@albumSinglesTotal": {
+    "placeholders": {
+      "sales": {
+        "type": "String"
+      }
+    }
+  },
   "upcoming": "Coming up",
   "lastWeekSales": "Last week sales",
   "lastWeekUs": "Last week (US)",

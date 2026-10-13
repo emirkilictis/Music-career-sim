@@ -477,11 +477,16 @@ class Simulator {
         for (var k = 0; k < _r; k++) {
           reach[k] += s.lastReach * p.regionShare[k];
           sea[k] += streamsR[i * _r + k];
-          tea[k] += downloadsR[i * _r + k];
+          // Track sales: downloads and CD singles (10 = 1 album).
+          tea[k] += downloadsR[i * _r + k] + s.weekPhysical * p.regionShare[k];
         }
       }
 
-      var tPure = 0.0, tUnits = 0.0, tTea = 0.0, tSea = 0.0;
+      // Album units count track sales in every era (docs K49); streams from
+      // 2015. The album charts rank pure sales until units arrive (2015),
+      // as Billboard did; so do era scores and popularity.
+      var tPure = 0.0, tUnits = 0.0, tTea = 0.0, tSea = 0.0, tChart = 0.0;
+      final chartRegion = Float64List(_r);
       for (var k = 0; k < _r; k++) {
         final era = eras[k];
         final share = p.regionShare[k];
@@ -528,7 +533,9 @@ class Simulator {
             sea[k] + al.sumDormantRate * p.catalogFactor * share * spa[k];
         final t = tea[k] / c.trackEquivalentAlbum;
         final se = streams / c.streamEquivalentAlbum;
-        final units = albumRules.albumUsesUnits ? pure + t + se : pure;
+        final units = albumRules.albumUsesUnits ? pure + t + se : pure + t;
+        chartRegion[k] = albumRules.albumUsesUnits ? units : pure;
+        tChart += chartRegion[k];
         al.weekRegion[k] = pure;
         al.weekRegion[_r + k] = units;
         al.reg[AlbumReg.lifePure + k] += pure;
@@ -549,16 +556,15 @@ class Simulator {
       al.weekSea = tSea;
       al.weekUnits = tUnits;
       if (p.isRetired) w.dirtyArtists.add(p.id);
-      p.weekPoints += tUnits * 0.5;
-      if (p.eraOpen && p.eraAlbumId == al.id) p.eraUnits += tUnits;
+      p.weekPoints += tChart * 0.5;
+      if (p.eraOpen && p.eraAlbumId == al.id) p.eraUnits += tChart;
 
       final na = Region.northAmerica.index, eu = Region.europe.index;
       albumPts[Charts.usAlbums][ai] =
-          CountryShares.usOfNorthAmerica(p.homeCountry) *
-              al.weekRegion[_r + na];
+          CountryShares.usOfNorthAmerica(p.homeCountry) * chartRegion[na];
       albumPts[Charts.ukAlbums][ai] =
-          CountryShares.ukOfEurope(p.homeCountry) * al.weekRegion[_r + eu];
-      albumPts[Charts.globalAlbums][ai] = tUnits;
+          CountryShares.ukOfEurope(p.homeCountry) * chartRegion[eu];
+      albumPts[Charts.globalAlbums][ai] = tChart;
 
       if (age == 0) {
         al.firstWeekUnits = tUnits;
@@ -591,9 +597,14 @@ class Simulator {
       final target = 1 - math.exp(-a.weekPoints / (1.5 * topPoints));
       a.popularity +=
           (target > a.popularity ? 0.15 : 0.03) * (target - a.popularity);
-      // Fame (being known) only grows: a star stays a household name
-      // through a long break; popularity (current buzz) is what fades.
-      if (a.popularity > a.fame) a.fame += 0.02 * (a.popularity - a.fame);
+      // The player's fame (being known) only grows: a star stays a
+      // household name through a long break (docs K44). Rivals' fame
+      // slowly fades with their popularity, so the field keeps renewing.
+      if (a.popularity > a.fame) {
+        a.fame += 0.02 * (a.popularity - a.fame);
+      } else if (a.tier != ArtistTier.player) {
+        a.fame += 0.002 * (a.popularity - a.fame);
+      }
       // Growth saturates: you cannot convert people who are already fans.
       final casualRoom = math.max(0.0, 1 - a.casual / c.publicPool);
       final fanRoom = math.max(0.0, 1 - a.coreFans / (0.04 * c.publicPool));
@@ -908,14 +919,12 @@ class Simulator {
       if (al.releaseWeek >= w.week) continue;
       final a = w.artists[al.artistId];
       for (var k = 0; k < _r; k++) {
-        var streams = 0.0, downloads = 0.0;
+        var streams = 0.0;
         for (final sid in al.songIds) {
-          final s = w.songs[sid];
-          streams += w.songLifetimeStreams(s, k);
-          downloads += w.songLifetimeDownloads(s, k);
+          streams += w.songLifetimeStreams(w.songs[sid], k);
         }
-        final units = streams / c.streamEquivalentAlbum +
-            downloads / c.trackEquivalentAlbum;
+        // Track sales already counted week by week (docs K49).
+        final units = streams / c.streamEquivalentAlbum;
         al.reg[AlbumReg.lifeUnits + k] += units;
         a.reg[ArtistReg.lifeUnits + k] += units;
       }

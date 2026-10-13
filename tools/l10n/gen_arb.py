@@ -208,6 +208,8 @@ k('scrapSongTitle','Scrap “{title}”?','“{title}” çöpe atılsın mı?',
 k('scrapSongBody','It leaves your vault for good. Recording costs are not refunded.','Kasandan tamamen çıkar. Kayıt masrafı geri gelmez.')
 k('songScrapped','“{title}” was scrapped.','“{title}” çöpe atıldı.', title='String')
 k('errorSongScheduled','This song is on a scheduled release.','Bu şarkı planlanmış bir yayında.')
+k('albumSingles','Singles from the album','Albümün single\'ları')
+k('albumSinglesTotal','{sales} single sales together · every 10 count as 1 album unit','Toplam {sales} single satışı · her 10 satış 1 albüm ünitesi sayılır', sales='String')
 k('upcoming','Coming up','Yakında')
 k('lastWeekSales','Last week sales','Geçen haftanın satışı')
 k('lastWeekUs','Last week (US)','Geçen hafta (ABD)')

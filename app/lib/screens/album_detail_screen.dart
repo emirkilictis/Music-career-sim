@@ -177,6 +177,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   value: fmt.compact(a.lifetimeUnits.total)),
               StatTile(
                   label: l.pureSales, value: fmt.compact(a.lifetimePure.total)),
+              if (a.trackStreams >= 1)
+                StatTile(label: l.streams, value: fmt.compact(a.trackStreams)),
               for (final r in Region.values)
                 StatTile(
                     label: fmt.region(r),
@@ -217,6 +219,45 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               child: LineChart(
                   values: units,
                   topLabel: fmt.compact(units.reduce((x, y) => x > y ? x : y))),
+            ),
+          ],
+          if (_tracks.any((t) => t.isSingle)) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.albumSingles,
+              icon: Icons.music_note_outlined,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                        l.albumSinglesTotal(fmt.compact(_tracks
+                            .where((t) => t.isSingle)
+                            .fold(0.0, (sum, t) => sum + t.singleSales))),
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 13)),
+                    for (final t in _tracks.where((t) => t.isSingle))
+                      ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(t.title,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w700)),
+                        subtitle: Text([
+                          if (t.charts.any((c) => c.chartId == Charts.usSongs))
+                            '${fmt.chartShort(Charts.usSongs)} #${t.charts.firstWhere((c) => c.chartId == Charts.usSongs).peak}',
+                          if (t.lifetimeStreams.total >= 1)
+                            '${fmt.compact(t.singleUnits)} ${l.singleUnits}',
+                        ].join(' · ')),
+                        trailing: Text(fmt.compact(t.singleSales),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w800)),
+                        onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => SongDetailScreen(
+                                    songId: t.id, state: widget.state))),
+                      ),
+                  ]),
             ),
           ],
           const SizedBox(height: 12),

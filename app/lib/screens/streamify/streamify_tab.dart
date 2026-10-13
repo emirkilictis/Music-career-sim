@@ -198,9 +198,9 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
                                     color: StreamifyColors.muted,
                                     fontWeight: FontWeight.w600))),
                         CoverArt(
-                            seed: songCoverSeed(s.id, s.albumId),
+                            seed: songCoverSeed(s.id, s.coverAlbumId),
                             songId: s.id,
-                            albumId: s.albumId,
+                            albumId: s.coverAlbumId,
                             size: 48,
                             radius: 2),
                         const SizedBox(width: 12),

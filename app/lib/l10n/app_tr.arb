@@ -196,6 +196,8 @@
   "scrapSongBody": "Kasandan tamamen çıkar. Kayıt masrafı geri gelmez.",
   "songScrapped": "“{title}” çöpe atıldı.",
   "errorSongScheduled": "Bu şarkı planlanmış bir yayında.",
+  "albumSingles": "Albümün single'ları",
+  "albumSinglesTotal": "Toplam {sales} single satışı · her 10 satış 1 albüm ünitesi sayılır",
   "upcoming": "Yakında",
   "lastWeekSales": "Geçen haftanın satışı",
   "lastWeekUs": "Geçen hafta (ABD)",

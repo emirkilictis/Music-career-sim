@@ -41,6 +41,7 @@ class SimConfig {
     this.streamEquivalentAlbum = 1500,
     this.downloadHitExponent = 1.45,
     this.downloadHitExponentLate = 1.15,
+    this.aiAlbumHypeCap = 0.5,
     this.announceBuzzAlbum = 0.3,
     this.announceBuzzEp = 0.15,
     this.announceBuzzSingle = 0.1,
@@ -160,6 +161,9 @@ class SimConfig {
   /// The same once the digital catalog is deep and streaming spreads
   /// listening (2014 on); [downloadHitExponentFor] fades between the two.
   final double downloadHitExponentLate;
+
+  /// Highest hype a rival's album can open with.
+  final double aiAlbumHypeCap;
 
   /// Most buzz an announced release can build, × (0.5 + fame) (docs K45).
   final double announceBuzzAlbum, announceBuzzEp, announceBuzzSingle;

@@ -9,7 +9,9 @@ void main(List<String> args) {
   for (final chart in [Charts.ukSongs, Charts.ukAlbums]) {
     final count = <HomeCountry, int>{};
     var total = 0;
-    final w2 = chart == Charts.ukSongs ? w : WorldGen.create(seed: seed, startYear: 2005);
+    final w2 = chart == Charts.ukSongs
+        ? w
+        : WorldGen.create(seed: seed, startYear: 2005);
     final s2 = chart == Charts.ukSongs ? sim : Simulator(w2);
     while (w2.week < GameTime.firstWeekOf(2013)) {
       final r = s2.step();

@@ -391,7 +391,12 @@ abstract final class Actions {
       songIds: List.of(songIds),
       quality: quality,
     );
-    album.hypeAtRelease = a.hype;
+    // Rivals' event albums: their comeback hype is capped, so a 1M+ week
+    // stays rare as in reality (a few a year at most); the player's is not
+    // (docs K42).
+    album.hypeAtRelease = a.tier == ArtistTier.player
+        ? a.hype
+        : math.min(a.hype, w.config.aiAlbumHypeCap);
     album.campaign = campaign;
     // Formats follow their editions when the weeks are sorted.
     final order = List.generate(variantWeeks.length, (i) => i)
@@ -482,6 +487,13 @@ abstract final class Actions {
   /// event, e.g. a comeback single two months before the album).
   static void _convertAnticipation(Artist a, {required bool album}) {
     if (a.eraOpen || a.anticipation <= 0) return;
+    if (a.tier != ArtistTier.player) {
+      // Rivals: their first comeback release uses it up (calibrated).
+      a.hype += a.anticipation;
+      a.anticipation = 0;
+      a.anticipationCap = 0;
+      return;
+    }
     a.hype = math.max(a.hype, a.anticipation);
     if (album) {
       a.anticipation = 0;

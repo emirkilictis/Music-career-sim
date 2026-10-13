@@ -26,7 +26,8 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
   String entity(EntityKind k, int id) =>
       k == EntityKind.song ? song(id) : album(id);
   EventLine release(GameEvent e, EntityKind k, int id) => k == EntityKind.song
-      ? EventLine(e, title: song(id), songId: id, albumId: w.songs[id].albumId)
+      ? EventLine(e,
+          title: song(id), songId: id, albumId: coverAlbumOf(w, w.songs[id]))
       : EventLine(e, title: album(id), albumId: id);
   return [
     for (final e in events)

@@ -186,6 +186,15 @@ class ArtistView {
   final bool isRetired;
 }
 
+/// The album whose cover a song shows when it has none of its own: its
+/// album's, unless it came out as a single before that album (a lead
+/// single keeps its own look), else -1.
+int coverAlbumOf(World w, Song s) {
+  if (s.albumId < 0) return -1;
+  if (s.isSingle && s.singleWeek < w.albums[s.albumId].releaseWeek) return -1;
+  return s.albumId;
+}
+
 class SongView {
   SongView._(World w, Song s)
       : id = s.id,
@@ -200,6 +209,7 @@ class SongView {
         releasedWeek = s.releasedWeek,
         singleWeek = s.singleWeek,
         albumId = s.albumId,
+        coverAlbumId = coverAlbumOf(w, s),
         estimatedGrade = s.estimatedGrade,
         campaign = s.campaign,
         playlistAdd = s.playlistAdd,
@@ -246,6 +256,9 @@ class SongView {
   final int releasedWeek;
   final int singleWeek;
   final int albumId;
+
+  /// Album whose cover this song shows (see [coverAlbumOf]).
+  final int coverAlbumId;
 
   /// The team's estimate of the song's quality (1–100), not the true value.
   final int estimatedGrade;
@@ -304,6 +317,8 @@ class AlbumView {
             ? albumWeekUnitsIn(w, al, ChartMarket.us)
             : 0,
         isPlayer = al.artistId == w.playerArtistId,
+        trackStreams = al.songIds
+            .fold(0.0, (sum, id) => sum + w.songLifetimeStreams(w.songs[id])),
         lifetimePure =
             _regional((r) => al.reg[AlbumReg.lifePure + r].toDouble()),
         lifetimeUnits = _regional((r) => w.albumLifetimeUnits(al, r));
@@ -335,6 +350,9 @@ class AlbumView {
   final double weekPure;
   final double weekUsUnits;
   final bool isPlayer;
+
+  /// All streams of the album's tracks (singles included).
+  final double trackStreams;
   final RegionalNumbers lifetimePure;
   final RegionalNumbers lifetimeUnits;
 }
@@ -387,23 +405,25 @@ class ChartView {
     final rows = [
       for (final e in w.charts[chartId])
         _row(w, def.market, kind, e.position, e.lastPos, e.peak, e.weeksOn,
-            e.entityId),
+            e.entityId, e.points),
     ];
     return ChartView._(def, w.week - 1, rows);
   }
 
   static ChartRow _row(World w, ChartMarket market, EntityKind kind,
-      int position, int lastPos, int peak, int weeksOn, int id) {
+      int position, int lastPos, int peak, int weeksOn, int id, double points) {
     final title =
         kind == EntityKind.song ? w.songs[id].title : w.albums[id].title;
     final artistId = kind == EntityKind.song
         ? w.songs[id].primaryArtistId
         : w.albums[id].artistId;
     return ChartRow(
-      albumId: kind == EntityKind.song ? w.songs[id].albumId : id,
+      albumId: kind == EntityKind.song ? coverAlbumOf(w, w.songs[id]) : id,
       weekValue: kind == EntityKind.song
           ? w.songWeekStreamsIn(w.songs[id], market)
-          : albumWeekUnitsIn(w, w.albums[id], market),
+          // What the album chart ranked: pure sales before 2015, units
+          // after (docs K49).
+          : points,
       position: position,
       lastPos: lastPos,
       peak: peak,

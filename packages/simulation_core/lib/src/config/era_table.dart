@@ -137,7 +137,7 @@ class EraTable {
             downloadsWeekly: 0,
             physicalSinglesWeekly: 1.0e6,
             radioWeekly: 6.0e9,
-            casualPurchaseRate: 1.00,
+            casualPurchaseRate: 0.62,
             superfanFactor: 1.00,
             collectorFactor: 0.15),
         EraValues(
@@ -146,7 +146,7 @@ class EraTable {
             downloadsWeekly: 0.4e6,
             physicalSinglesWeekly: 0.3e6,
             radioWeekly: 6.0e9,
-            casualPurchaseRate: 0.88,
+            casualPurchaseRate: 0.55,
             superfanFactor: 0.95,
             collectorFactor: 0.15),
         EraValues(
@@ -155,7 +155,7 @@ class EraTable {
             downloadsWeekly: 6.8e6,
             physicalSinglesWeekly: 0.1e6,
             radioWeekly: 6.0e9,
-            casualPurchaseRate: 0.75,
+            casualPurchaseRate: 0.50,
             superfanFactor: 0.90,
             collectorFactor: 0.15),
         EraValues(
@@ -164,7 +164,7 @@ class EraTable {
             downloadsWeekly: 20e6,
             physicalSinglesWeekly: 0.02e6,
             radioWeekly: 6.0e9,
-            casualPurchaseRate: 0.55,
+            casualPurchaseRate: 0.50,
             superfanFactor: 0.82,
             collectorFactor: 0.18),
         EraValues(

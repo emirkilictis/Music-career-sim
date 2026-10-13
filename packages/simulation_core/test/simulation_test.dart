@@ -189,17 +189,17 @@ void main() {
   group('album shape', albumShapeTests);
   group('viral', viralTests);
 
-  test('in 2015 every album collects its earlier streams and downloads', () {
+  test('in 2015 every album collects its earlier streams (K44, K49)', () {
     final w = WorldGen.create(seed: 15, startYear: 2014);
     final sim = Simulator(w);
     while (w.week < GameTime.firstWeekOf(2015)) {
       sim.step();
     }
-    // The biggest album released before the streaming-unit era.
+    // The most streamed album released before the streaming-unit era.
     final old = w.albums.where((al) => al.releaseWeek < w.week).toList()
       ..sort((x, y) => w
-          .songLifetimeDownloads(w.songs[y.songIds.first])
-          .compareTo(w.songLifetimeDownloads(w.songs[x.songIds.first])));
+          .songLifetimeStreams(w.songs[y.songIds.first])
+          .compareTo(w.songLifetimeStreams(w.songs[x.songIds.first])));
     final al = old.first;
     double units() => [
           for (var k = 0; k < regionCount; k++) al.reg[AlbumReg.lifeUnits + k]
@@ -207,10 +207,10 @@ void main() {
     var owed = 0.0;
     for (final id in al.songIds) {
       final s = w.songs[id];
-      owed += w.songLifetimeStreams(s) / w.config.streamEquivalentAlbum +
-          w.songLifetimeDownloads(s) / w.config.trackEquivalentAlbum;
+      // Track sales were already counted week by week.
+      owed += w.songLifetimeStreams(s) / w.config.streamEquivalentAlbum;
     }
-    expect(owed, greaterThan(1000));
+    expect(owed, greaterThan(100));
     final before = units();
     sim.step();
     expect(units() - before, greaterThanOrEqualTo(owed * 0.999));

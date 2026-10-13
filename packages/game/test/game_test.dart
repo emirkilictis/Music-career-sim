@@ -373,7 +373,9 @@ void main() {
           .rows
           .firstWhere((r) => !r.isPlayer && r.weeksOn > 2);
       final rw = g.albumSales(rival.entityId);
-      expect(rw.length, greaterThanOrEqualTo(rival.weeksOn));
+      // Only weeks played since the career started are saved.
+      expect(rw, isNotEmpty);
+      expect(rw.length, lessThanOrEqualTo(rival.weeksOn));
       expect(rw.last.usUnits, greaterThan(0));
       expect(rw.last.pure, isNull);
       expect(g.album(rival.entityId).isPlayer, isFalse);
@@ -451,6 +453,22 @@ void main() {
       g = GameSession.resume(slots, id);
       expect(g.songs.map((s) => s.id), isNot(contains(a)));
       expect(g.player.vaultCount, 0);
+      g.close();
+    });
+
+    test('a lead single keeps its own cover; album tracks use the album\'s',
+        () {
+      final g = GameSession.start(slots, _setup());
+      final songs = [
+        for (var i = 0; i < 3; i++) g.writeSong(budget: BudgetTier.low).id,
+      ];
+      g.releaseSingle(songs[0], campaign: Campaign.none);
+      g.advanceWeek();
+      final ep = g.releaseAlbum('EP', songs,
+          type: AlbumType.ep, campaign: Campaign.none);
+      expect(g.song(songs[0]).albumId, ep.id);
+      expect(g.song(songs[0]).coverAlbumId, -1);
+      expect(g.song(songs[1]).coverAlbumId, ep.id);
       g.close();
     });
 

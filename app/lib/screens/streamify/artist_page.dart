@@ -82,7 +82,7 @@ class _ArtistPageState extends State<ArtistPage> {
       for (final s in page.singles)
         (
           s.title,
-          songCoverSeed(s.id, s.albumId),
+          songCoverSeed(s.id, s.coverAlbumId),
           '${GameTime.yearOf(s.singleWeek)} · ${fmt.albumType(AlbumType.single)}',
           a.isPlayer
               ? () => Navigator.push(
@@ -92,7 +92,7 @@ class _ArtistPageState extends State<ArtistPage> {
                           SongDetailScreen(songId: s.id, state: career)))
               : null,
           s.id,
-          s.albumId,
+          s.coverAlbumId,
         ),
     ];
     final (c1, c2) = _headerColors(a.id);
@@ -236,11 +236,11 @@ class _ArtistPageState extends State<ArtistPage> {
                           fontWeight: FontWeight.w600)),
                 ),
                 CoverArt(
-                    seed: songCoverSeed(s.id, s.albumId),
+                    seed: songCoverSeed(s.id, s.coverAlbumId),
                     size: 46,
                     radius: 2,
                     songId: s.id,
-                    albumId: s.albumId),
+                    albumId: s.coverAlbumId),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

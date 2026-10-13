@@ -354,9 +354,9 @@ class _StudioTabState extends State<StudioTab> {
               : Column(children: [
                   for (final s in _vault)
                     MediaTile(
-                      coverSeed: songCoverSeed(s.id, s.albumId),
+                      coverSeed: songCoverSeed(s.id, s.coverAlbumId),
                       songId: s.id,
-                      albumId: s.albumId,
+                      albumId: s.coverAlbumId,
                       title: s.title,
                       subtitle: fmt.genres(s.genres),
                       badge: GradeTag(fmt.grade(s.estimatedGrade)),
