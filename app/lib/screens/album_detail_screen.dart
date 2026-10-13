@@ -6,8 +6,11 @@ import '../core/commands.dart';
 import '../core/scope.dart';
 import '../widgets/image_pickers.dart';
 import '../core/images.dart';
+import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/artist_link.dart';
+import '../widgets/history_tables.dart';
 import '../widgets/line_chart.dart';
 import 'song_detail_screen.dart';
 
@@ -26,6 +29,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   AlbumView? _album;
   List<SongView> _tracks = const [];
   List<HistoryPoint> _history = const [];
+  List<AlbumSalesWeek> _sales = const [];
+  List<ChartWeek> _run = const [];
 
   @override
   void initState() {
@@ -40,11 +45,15 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
       for (final id in album.trackIds) await st.read(Cmd.song(id))
     ];
     final history = await st.read(Cmd.albumHistory(widget.albumId));
+    final sales = await st.read(Cmd.albumSales(widget.albumId));
+    final run = await st.read(Cmd.chartRun(EntityKind.album, widget.albumId));
     if (mounted) {
       setState(() {
         _album = album;
         _tracks = tracks;
         _history = history;
+        _sales = sales;
+        _run = run;
       });
     }
   }
@@ -68,10 +77,15 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           ReleaseHeader(
             coverSeed: albumCoverSeed(a.id),
             albumId: a.id,
-            onCoverTap: () => editImage(context, ImageStore.albumKey(a.id)),
+            onCoverTap: a.isPlayer
+                ? () => editImage(context, ImageStore.albumKey(a.id))
+                : null,
             title: a.title,
             subtitle: '${a.artistName} · ${fmt.albumType(a.type)}',
           ),
+          if (!a.isPlayer)
+            ArtistLink(
+                artistId: a.artistId, name: a.artistName, state: widget.state),
           const SizedBox(height: 14),
           Section(
             title: l.details,
@@ -101,17 +115,41 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                         size: 48),
                     title: Text(k == 0
                         ? l.editionStandard
-                        : '${l.editionN(k + 1)} · ${fmt.editionFormat(a.variantFormats[k])}'),
+                        : a.variantFormats[k] == null
+                            ? l.editionN(k + 1)
+                            : '${l.editionN(k + 1)} · ${fmt.editionFormat(a.variantFormats[k])}'),
                     subtitle: Text(l.editionWeek(
                         fmt.week(a.releaseWeek + a.variantWeeks[k]))),
-                    trailing: const Icon(Icons.edit_outlined),
-                    onTap: () => editImage(
-                        context,
-                        k == 0
-                            ? ImageStore.albumKey(a.id)
-                            : ImageStore.editionKey(
-                                ImageStore.albumKey(a.id), k)),
+                    trailing:
+                        a.isPlayer ? const Icon(Icons.edit_outlined) : null,
+                    onTap: !a.isPlayer
+                        ? null
+                        : () => editImage(
+                            context,
+                            k == 0
+                                ? ImageStore.albumKey(a.id)
+                                : ImageStore.editionKey(
+                                    ImageStore.albumKey(a.id), k)),
                   ),
+              ]),
+            ),
+          ],
+          if (a.weekUnits > 0) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.lastWeekSales,
+              icon: Icons.bar_chart_rounded,
+              child: StatGrid(tiles: [
+                StatTile(label: l.globalUnits, value: fmt.compact(a.weekUnits)),
+                StatTile(label: l.usUnits, value: fmt.compact(a.weekUsUnits)),
+                if (a.isPlayer)
+                  StatTile(
+                      label: l.lastWeekPure, value: fmt.compact(a.weekPure)),
+                if (_sales.isNotEmpty &&
+                    _sales.last.positions[Charts.usAlbums] != null)
+                  StatTile(
+                      label: l.lastWeekPosition,
+                      value: '#${_sales.last.positions[Charts.usAlbums]}'),
               ]),
             ),
           ],
@@ -146,6 +184,31 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           ),
           const SizedBox(height: 12),
           ChartRecords(records: a.charts),
+          const SizedBox(height: 12),
+          Section(
+            title: l.chartRunTitle,
+            icon: Icons.timeline_rounded,
+            child: ChartRunTable(run: _run),
+          ),
+          if (_sales.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.weeklySales,
+              icon: Icons.table_rows_outlined,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (!a.isPlayer)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(l.weeklySalesRivalHint,
+                            style: TextStyle(
+                                color: AppColors.textMuted, fontSize: 12)),
+                      ),
+                    AlbumSalesTable(weeks: _sales, full: a.isPlayer),
+                  ]),
+            ),
+          ],
           if (units.length > 1) ...[
             const SizedBox(height: 12),
             Section(

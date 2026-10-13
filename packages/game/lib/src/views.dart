@@ -199,6 +199,7 @@ class SongView {
         lifetimeDownloads = w.songLifetimeDownloads(s),
         lifetimePhysical = s.lifetimePhysical,
         lifetimeRadio = s.lifetimeRadio,
+        isPlayer = s.primaryArtistId == w.playerArtistId,
         scheduledSingleWeek = _scheduledWeek(w, s, album: false),
         scheduledAlbumWeek = _scheduledWeek(w, s, album: true);
 
@@ -212,6 +213,8 @@ class SongView {
     }
     return -1;
   }
+
+  final bool isPlayer;
 
   /// Week a scheduled single / album with this song comes out, or -1
   /// (docs K45).
@@ -284,6 +287,10 @@ class AlbumView {
         firstWeekPure = al.firstWeekPure,
         weekUnits = al.status == AlbumStatus.active ? al.weekUnits : 0,
         weekPure = al.status == AlbumStatus.active ? al.weekPure : 0,
+        weekUsUnits = al.status == AlbumStatus.active
+            ? albumWeekUnitsIn(w, al, ChartMarket.us)
+            : 0,
+        isPlayer = al.artistId == w.playerArtistId,
         lifetimePure =
             _regional((r) => al.reg[AlbumReg.lifePure + r].toDouble()),
         lifetimeUnits = _regional((r) => w.albumLifetimeUnits(al, r));
@@ -309,8 +316,12 @@ class AlbumView {
   final double firstWeekUkUnits;
   final double firstWeekUnits;
   final double firstWeekPure;
+
+  /// Last played week (0 once the album is in the catalog).
   final double weekUnits;
   final double weekPure;
+  final double weekUsUnits;
+  final bool isPlayer;
   final RegionalNumbers lifetimePure;
   final RegionalNumbers lifetimeUnits;
 }

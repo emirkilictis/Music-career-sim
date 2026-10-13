@@ -171,5 +171,9 @@ abstract final class Cmd {
       (s) => s.songHistory(id);
   static SessionCmd<List<HistoryPoint>> albumHistory(int id) =>
       (s) => s.albumHistory(id);
+  static SessionCmd<List<AlbumSalesWeek>> albumSales(int id) =>
+      (s) => s.albumSales(id);
+  static SessionCmd<List<ChartWeek>> chartRun(EntityKind kind, int id) =>
+      (s) => s.chartRun(kind, id);
   static SessionCmd<List<CareerYear>> careerByYear() => (s) => s.careerByYear();
 }

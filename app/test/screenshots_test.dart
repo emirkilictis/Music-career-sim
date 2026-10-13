@@ -192,6 +192,11 @@ void main() {
     await tab(tester, 'Releases');
     await tester.tap(find.text('Neon Bloom'));
     await shot(tester, '14_album_detail');
+    await tester.scrollUntilVisible(
+        find.text('Week by week on the charts'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -180));
+    await shot(tester, '14b_album_weekly');
     await tester.pageBack();
     await tester.pumpAndSettle();
 

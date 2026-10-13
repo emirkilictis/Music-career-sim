@@ -483,6 +483,33 @@
   "continueAction": "Continue",
   "save": "Save",
   "upcoming": "Coming up",
+  "lastWeekSales": "Last week sales",
+  "lastWeekUs": "Last week (US)",
+  "lastWeekPure": "Pure sales last week",
+  "lastWeekPosition": "US position",
+  "weeklySales": "Week by week",
+  "weeklySalesRivalHint": "Rival albums show the units their chart entries reveal.",
+  "chartHistory": "Chart history",
+  "openArtist": "Artist page",
+  "chartRunTitle": "Week by week on the charts",
+  "colWeek": "Week",
+  "colPos": "#",
+  "colUnits": "Units",
+  "colUsUnits": "US",
+  "colPure": "Pure",
+  "colTea": "Track eq.",
+  "colSea": "Stream eq.",
+  "colPoints": "Points",
+  "showAllRows": "Show all {count} weeks",
+  "@showAllRows": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "showFewerRows": "Show fewer",
+  "notOnChart": "Never charted",
   "statusAnnounced": "Announced",
   "statusSurprise": "Surprise",
   "buzzLabel": "Excitement",
@@ -658,7 +685,6 @@
       }
     }
   },
-  "chartHistory": "Chart history",
   "neverCharted": "Has not charted yet.",
   "chartRecordLine": "debut #{debut} · {weeks} weeks · {no1} weeks at #1 · now {now}",
   "@chartRecordLine": {

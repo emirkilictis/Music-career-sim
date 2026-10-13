@@ -8,6 +8,8 @@ import '../widgets/image_pickers.dart';
 import '../core/images.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/artist_link.dart';
+import '../widgets/history_tables.dart';
 import '../widgets/line_chart.dart';
 import 'releases_tab.dart';
 
@@ -25,6 +27,7 @@ class SongDetailScreen extends StatefulWidget {
 class _SongDetailScreenState extends State<SongDetailScreen> {
   SongView? _song;
   List<HistoryPoint> _history = const [];
+  List<ChartWeek> _run = const [];
 
   @override
   void initState() {
@@ -35,10 +38,13 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   Future<void> _load() async {
     final song = await widget.state.read(Cmd.song(widget.songId));
     final history = await widget.state.read(Cmd.songHistory(widget.songId));
+    final run =
+        await widget.state.read(Cmd.chartRun(EntityKind.song, widget.songId));
     if (mounted) {
       setState(() {
         _song = song;
         _history = history;
+        _run = run;
       });
     }
   }
@@ -106,11 +112,16 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             coverSeed: songCoverSeed(s.id, s.albumId),
             songId: s.id,
             albumId: s.albumId,
-            onCoverTap: () => editImage(context, ImageStore.songKey(s.id)),
+            onCoverTap: s.isPlayer
+                ? () => editImage(context, ImageStore.songKey(s.id))
+                : null,
             title: s.title,
             subtitle: '${s.artistName} · ${fmt.songStatus(s)}',
-            trailing: GradeTag(fmt.grade(s.estimatedGrade)),
+            trailing: s.isPlayer ? GradeTag(fmt.grade(s.estimatedGrade)) : null,
           ),
+          if (!s.isPlayer)
+            ArtistLink(
+                artistId: s.artistId, name: s.artistName, state: widget.state),
           const SizedBox(height: 14),
           Section(
             title: fmt.genres(s.genres),
@@ -133,7 +144,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     const SizedBox(height: 12),
                     Tag(l.scheduledSingleTag(fmt.week(s.scheduledSingleWeek)),
                         icon: Icons.event_rounded),
-                  ] else if (s.inVault || (!s.isSingle && s.albumId >= 0)) ...[
+                  ] else if (s.isPlayer &&
+                      (s.inVault || (!s.isSingle && s.albumId >= 0))) ...[
                     const SizedBox(height: 12),
                     GradientButton(
                       onPressed: () => _release(s),
@@ -154,6 +166,12 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             ),
             const SizedBox(height: 12),
             _ChartRecords(records: s.charts),
+            const SizedBox(height: 12),
+            Section(
+              title: l.chartRunTitle,
+              icon: Icons.timeline_rounded,
+              child: ChartRunTable(run: _run),
+            ),
             ...[
               if (salesFirst) salesChart,
               streamChart,

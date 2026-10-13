@@ -336,6 +336,50 @@ void main() {
       expect(cassettePaid, 2 * EditionFormat.cassette.costCents);
     });
 
+    test('album week-by-week sales and chart runs, also for rivals', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      g.world.player!.moneyCents = 1 << 40;
+      final songs = <int>[];
+      while (songs.length < 8) {
+        if (!g.player.canWrite || g.player.creativeEnergy < 30) {
+          g.advanceWeek();
+          continue;
+        }
+        songs.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final al = g.releaseAlbum('Big', songs);
+      for (var i = 0; i < 3; i++) {
+        g.advanceWeek();
+      }
+      final weeks = g.albumSales(al.id);
+      expect(weeks.length, 3);
+      expect(weeks.first.week, al.releaseWeek);
+      expect(weeks.first.units, closeTo(g.album(al.id).firstWeekUnits, 1));
+      expect(weeks.first.pure, greaterThan(0));
+      expect(weeks.first.positions[Charts.usAlbums], isNotNull);
+      expect(g.album(al.id).weekUnits, closeTo(weeks.last.units!, 1));
+      final run = g.chartRun(EntityKind.album, al.id);
+      expect(run.first.entries[Charts.usAlbums]!.position,
+          weeks.first.positions[Charts.usAlbums]);
+
+      // A rival's album: chart weeks with units, no private breakdown.
+      final rival = g
+          .chart(Charts.usAlbums)
+          .rows
+          .firstWhere((r) => !r.isPlayer && r.weeksOn > 2);
+      final rw = g.albumSales(rival.entityId);
+      expect(rw.length, greaterThanOrEqualTo(rival.weeksOn));
+      expect(rw.last.usUnits, greaterThan(0));
+      expect(rw.last.pure, isNull);
+      expect(g.album(rival.entityId).isPlayer, isFalse);
+      g.close();
+    });
+
     test('an early-2000s single sells CDs, not streams', () {
       final g = GameSession.start(
           slots,

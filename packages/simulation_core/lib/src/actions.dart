@@ -42,7 +42,7 @@ abstract final class Actions {
   static void setJob(World w, Artist a, Job job) => a.job = job;
 
   /// Skill points the player earns each week, and the skill ceiling.
-  static const skillPointsPerWeek = 2;
+  static const skillPointsPerWeek = 5;
   static const maxSkill = 100.0;
 
   /// Spends one skill point: +1 on [kind], up to [maxSkill].

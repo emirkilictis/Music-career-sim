@@ -8,9 +8,7 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import 'album_detail_screen.dart';
-import 'game_shell.dart';
 import 'song_detail_screen.dart';
-import 'streamify/artist_page.dart';
 
 /// The charts as a music magazine prints them: paper white, big black
 /// ranks, last week / peak / weeks columns (docs/game-design.md §11.1).
@@ -66,19 +64,13 @@ class _ChartsTabState extends State<ChartsTab> {
   void _open(ChartRow r) {
     final career = context.careerRead;
     final songs = _view!.def.kind == ChartKind.songs;
-    if (r.isPlayer) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (_) => songs
-                  ? SongDetailScreen(songId: r.entityId, state: career)
-                  : AlbumDetailScreen(albumId: r.entityId, state: career)));
-    } else if (GameTime.yearOf(career.week) >=
-        Charts.all[Charts.platformGlobal].startYear) {
-      // Rival pages live on the streaming platform, which only exists from
-      // its launch year (docs K38).
-      pushInCareer(context, ArtistPage(artistId: r.artistId));
-    }
+    // Any entry opens its stats, rivals' too (docs K47).
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => songs
+                ? SongDetailScreen(songId: r.entityId, state: career)
+                : AlbumDetailScreen(albumId: r.entityId, state: career)));
   }
 
   @override

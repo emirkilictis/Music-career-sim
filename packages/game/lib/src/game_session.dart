@@ -102,6 +102,39 @@ class HistoryPoint {
   final Map<int, int> positions;
 }
 
+/// One week of an album's sales (docs K47). The player's albums have the
+/// full breakdown; a rival's has only what its chart entries show (units
+/// in the chart's market), the rest is null.
+class AlbumSalesWeek {
+  AlbumSalesWeek({
+    required this.week,
+    required this.positions,
+    this.units,
+    this.pure,
+    this.tea,
+    this.sea,
+    this.usUnits,
+  });
+  final int week;
+
+  /// Chart position by chart id that week (only charts it was on).
+  final Map<int, int> positions;
+
+  /// Global units, pure sales, track and stream equivalents.
+  final double? units, pure, tea, sea;
+
+  /// US units (from the US album chart, when it charted there).
+  final double? usUnits;
+}
+
+/// One week of a release's chart run: position and chart points (album
+/// charts: units in the chart's market) per chart it was on.
+class ChartWeek {
+  ChartWeek(this.week, this.entries);
+  final int week;
+  final Map<int, ({int position, double points})> entries;
+}
+
 /// One row of the career summary, per year.
 class CareerYear {
   CareerYear({
@@ -691,6 +724,66 @@ class GameSession {
         HistoryPoint(r['week'] as int, (r['v'] as num).toDouble(),
             pos[r['week'] as int] ?? const {},
             sales: (r['s'] as num?)?.toDouble() ?? 0),
+    ];
+  }
+
+  /// Every chart week of a song or album, any artist's (docs K47).
+  List<ChartWeek> chartRun(EntityKind kind, int id) {
+    final ids = [
+      for (final c in Charts.all)
+        if ((c.kind == ChartKind.songs) == (kind == EntityKind.song)) c.id
+    ];
+    final weeks = <int, Map<int, ({int position, double points})>>{};
+    for (final r in _store.db.select(
+        'SELECT week, chartId, position, points FROM chartEntry '
+        'WHERE entityId = ? AND chartId IN (${ids.join(',')}) ORDER BY week',
+        [id])) {
+      (weeks[r['week'] as int] ??= {})[r['chartId'] as int] = (
+        position: r['position'] as int,
+        points: (r['points'] as num).toDouble(),
+      );
+    }
+    return [
+      for (final e in weeks.entries) ChartWeek(e.key, e.value),
+    ];
+  }
+
+  /// Week-by-week sales of an album, newest last (docs K47).
+  List<AlbumSalesWeek> albumSales(int albumId) {
+    final run = {
+      for (final c in chartRun(EntityKind.album, albumId)) c.week: c.entries
+    };
+    Map<int, int> pos(int week) => {
+          for (final e in (run[week] ?? const {}).entries)
+            e.key: e.value.position
+        };
+    double? us(int week) => run[week]?[Charts.usAlbums]?.points;
+    final al = world.albums[albumId];
+    if (al.artistId == _p.id) {
+      return [
+        for (final r in _store.db.select(
+            'SELECT week, pure, tea, sea, units FROM albumWeek '
+            'WHERE albumId = ? ORDER BY week',
+            [albumId]))
+          AlbumSalesWeek(
+            week: r['week'] as int,
+            positions: pos(r['week'] as int),
+            units: (r['units'] as num?)?.toDouble(),
+            pure: (r['pure'] as num?)?.toDouble(),
+            tea: (r['tea'] as num?)?.toDouble(),
+            sea: (r['sea'] as num?)?.toDouble(),
+            usUnits: us(r['week'] as int),
+          ),
+      ];
+    }
+    return [
+      for (final week in run.keys)
+        AlbumSalesWeek(
+          week: week,
+          positions: pos(week),
+          units: run[week]?[Charts.globalAlbums]?.points,
+          usUnits: us(week),
+        ),
     ];
   }
 

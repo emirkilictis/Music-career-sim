@@ -82,6 +82,10 @@ class Fmt {
       };
 
   /// Short chart name for compact lists.
+  /// "2006 · 12" (year and week) for tables.
+  String weekShort(int week) =>
+      '${GameTime.yearOf(week)} · ${GameTime.weekOfYear(week)}';
+
   String chartShort(int id) => switch (id) {
         Charts.usSongs => l.chartShortUs,
         Charts.ukSongs => l.chartShortUk,

@@ -65,11 +65,22 @@ void main() {
     expect(find.text('US TOP 100 SONGS'), findsOneWidget);
     expect(find.text('LW'), findsOneWidget);
 
-    // A rival's Streamify page from the chart.
+    // A rival's song from the chart: its stats and week-by-week run, then
+    // the artist's Streamify page.
     await tester.tap(find.byType(CoverArt).at(1));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+        find.text('Week by week on the charts'), 300,
+        scrollable: find.byType(Scrollable).first);
+    expect(find.text('Week by week on the charts'), findsOneWidget);
+    await tester.scrollUntilVisible(find.textContaining('Artist page'), -300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.textContaining('Artist page'));
     await tester.pumpAndSettle();
     expect(find.textContaining('monthly listeners'), findsOneWidget);
     expect(find.text('Popular'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
 
