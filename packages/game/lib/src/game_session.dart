@@ -781,18 +781,20 @@ class GameSession {
       ];
 
   /// Signs with [label] (or goes independent with [Label.independent]).
-  /// Not possible while albums are still owed to the current label.
+  /// While albums are still owed, the contract is bought out (docs K78):
+  /// the new advance goes towards it, the player pays the rest.
   void signLabel(Label label) {
     if (label == _p.label) {
       throw GameException('sameLabel', 'Already with this label');
     }
-    if (_p.contractAlbumsLeft > 0) {
-      throw GameException('underContract', 'Albums still owed to the label');
-    }
     if (Actions.labelMissing(world, _p, label).isNotEmpty) {
       throw GameException('labelRefused', 'The label turned you down');
     }
-    Actions.signLabel(world, _p, label);
+    final buyout = Actions.buyoutCents(world, _p);
+    if (buyout > _p.moneyCents + label.advanceCents) {
+      throw GameException('buyoutMoney', 'Not enough money for the buyout');
+    }
+    Actions.signLabel(world, _p, label, buyout: buyout > 0);
     _saveNow();
   }
 
@@ -1595,9 +1597,9 @@ class GameSession {
       events.add(EraClosed(p.lastEraResult!, p.lastEraUnits, p.eraExpected));
       if (before.label != Label.independent && p.label == Label.independent) {
         events.add(LabelDropped(before.label));
-      } else if (p.contractAlbumsLeft == 0 &&
-          p.lastEraResult!.index >= EraResult.normal.index) {
-        // A good era: the biggest label that would sign the player calls.
+      } else if (p.lastEraResult!.index >= EraResult.normal.index) {
+        // A good era: the biggest label that would sign the player calls
+        // (under contract too: it can buy the player out, docs K78).
         final offer = Label.values.reversed.firstWhere(
             (l) => Actions.labelMissing(w, p, l).isEmpty,
             orElse: () => p.label);

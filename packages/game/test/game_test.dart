@@ -886,20 +886,32 @@ void main() {
       final song = g.writeSong(budget: BudgetTier.low).id;
       expect(() => g.releaseSingle(song, campaign: Campaign.intensive),
           _code('campaignLocked'));
-      // Bound by the contract, and the big labels want fans first.
-      expect(() => g.signLabel(Label.giant), _code('underContract'));
+      // The big labels want fans first.
+      expect(() => g.signLabel(Label.giant), _code('labelRefused'));
       final giant = g.labels.firstWhere((v) => v.label == Label.giant);
       expect(giant.missing, contains(LabelRequirement.fans));
-      // With the albums delivered and fans, a major signs the player.
+      // Leaving early means buying out the contract (K78): per album owed,
+      // half the $25K advance back and the label's 40% of 50¢ a fan.
       g.world.player!
-        ..contractAlbumsLeft = 0
         ..coreFans = 1e6
-        ..fame = 0.4;
-      final money = g.player.moneyCents;
+        ..fame = 0.4
+        ..moneyCents = 0;
+      final major = g.labels.firstWhere((v) => v.label == Label.major);
+      expect(major.buyoutCents, 2 * (1250000 + 20000000));
+      expect(major.canSign, isTrue);
+      // Going independent pays it all, and there is no money for it.
+      final own = g.labels.firstWhere((v) => v.label == Label.independent);
+      expect(own.canSign, isFalse);
+      expect(() => g.signLabel(Label.independent), _code('buyoutMoney'));
+      // The major's advance pays for it.
       g.signLabel(Label.major);
       expect(g.player.label, Label.major);
       expect(g.player.contractAlbumsLeft, 3);
-      expect(g.player.moneyCents, money + Label.major.advanceCents);
+      expect(g.player.moneyCents, major.netCents);
+      // With the albums delivered, leaving is free.
+      g.world.player!.contractAlbumsLeft = 0;
+      expect(
+          g.labels.firstWhere((v) => v.label == Label.giant).buyoutCents, 0);
       // The label pays most of a campaign.
       final before = g.player.moneyCents;
       g.releaseSingle(song, campaign: Campaign.global);

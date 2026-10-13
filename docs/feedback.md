@@ -104,6 +104,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F39 | **Turne çok basit** (Emir): kaç konser, hangi kıtalar, hangi arenalar/stadyumlar; uydurma mekan adları, ortalama bilet fiyatı, ön grup, "her türlü detay". | ✅ K76: bacaklar (pazar + mekan boyu + konser sayısı), gerçek şehirler, uydurma mekanlar, konser takvimi, bilet fiyatı, prodüksiyon, ön grup, merch, nakliye, kapalı gişe; planlayıcıda tahmin ve program, yoldayken konser konser sonuçlar. |
 | F40 | **Festivaller** (Emir: "Festivalleri ekle"). | ✅ K77: 16 uydurma festival, sahne yerleri (manşet → küçük sahne), ücret, izleyici, hayran kazanımı, tür kısıtları, afiş; Kariyer sekmesinde "Festival sezonu". |
 | F41 | **En çok hasılat yapan turneler** (Emir). | ✅ K77: rakipler de turneye çıkıyor; Listeler → TURNELER: yıllık ve tüm zamanlar gişe sıralaması, oyuncu dahil. |
+| F42 | **Efsane modda küçük şirketle başladım, ayrılamıyorum** (Emir). Tek çıkış 2 albüm teslim etmekti (EP sayılmıyordu) ve şirketler ekranı nedenini söylemiyordu. | ✅ K78: sözleşme feshi; bedel yeni şirketin avansından düşülür, Efsane modda yarı fiyat; ekranda borç ve bedel görünür. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

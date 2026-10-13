@@ -489,6 +489,7 @@ class Fmt {
       'hasVideo' => l.errorHasVideo,
       'campaignLocked' => l.errorCampaignLocked,
       'underContract' => l.errorUnderContract,
+      'buyoutMoney' => l.errorBuyoutMoney,
       'labelRefused' => l.errorLabelRefused,
       'alreadyScheduled' => l.errorAlreadyScheduled,
       'skillMaxed' => l.errorSkillMaxed,

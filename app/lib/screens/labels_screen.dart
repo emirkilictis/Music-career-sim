@@ -46,12 +46,22 @@ class _LabelsScreenState extends State<LabelsScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final legend = _labels.isNotEmpty && _labels.first.legend;
+    final current = _labels.where((v) => v.isCurrent).firstOrNull;
+    final fmt = context.fmt;
     return Scaffold(
       appBar: AppBar(title: Text(l.labelsTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Text(l.labelsHint, style: TextStyle(color: AppColors.textMuted)),
+          if (current != null && current.buyoutCents > 0) ...[
+            const SizedBox(height: 6),
+            Text(
+                l.labelsContractHint(
+                    fmt.labelName(current.label), current.contractAlbumsLeft),
+                style: TextStyle(
+                    color: AppColors.gold, fontWeight: FontWeight.w600)),
+          ],
           if (legend) ...[
             const SizedBox(height: 6),
             Text(l.labelsLegendHint,
@@ -122,6 +132,14 @@ class _LabelCard extends StatelessWidget {
         term(l.labelMaxCampaign, fmt.campaign(x.maxCampaign)),
         term(l.labelCampaignShare, '${(x.campaignShare * 100).round()}%'),
         if (x.advanceCents > 0) term(l.labelAdvance, fmt.money(x.advanceCents)),
+        if (!view.isCurrent && view.buyoutCents > 0) ...[
+          term(l.labelBuyout, '−${fmt.money(view.buyoutCents)}'),
+          term(
+              l.labelNet,
+              view.netCents < 0
+                  ? '−${fmt.money(-view.netCents)}'
+                  : fmt.money(view.netCents)),
+        ],
         term(
             l.labelContract,
             x.contractAlbums == 0
@@ -140,11 +158,21 @@ class _LabelCard extends StatelessWidget {
               Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
             ]),
         if (!view.isCurrent) ...[
+          if (view.wouldSign && !view.canAfford) ...[
+            const SizedBox(height: 8),
+            Text(l.labelBuyoutShort,
+                style: TextStyle(color: AppColors.coral, fontSize: 13)),
+          ],
           const SizedBox(height: 10),
           FilledButton(
             onPressed: busy ? null : onSign,
-            child: Text(
-                x == Label.independent ? l.labelGoIndependent : l.labelSign),
+            child: Text(view.buyoutCents > 0
+                ? (x == Label.independent
+                    ? l.labelBuyoutIndependent
+                    : l.labelBuyoutSign)
+                : x == Label.independent
+                    ? l.labelGoIndependent
+                    : l.labelSign),
           ),
         ],
       ]),

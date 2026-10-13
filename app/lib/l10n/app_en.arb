@@ -193,7 +193,7 @@
       }
     }
   },
-  "labelOwed": "You owe {label} {count} more albums.",
+  "labelOwed": "You owe {label} {count} more albums (EPs don't count), or buy out the contract.",
   "@labelOwed": {
     "placeholders": {
       "label": {
@@ -206,7 +206,23 @@
   },
   "labelFree": "No albums owed: you can sign with another label.",
   "labelsHint": "Bigger labels reach more people, run bigger campaigns and pay more of them, but take more of your income. They sign artists with fans, and after a flop they drop you.",
-  "labelsLegendHint": "Legend mode: labels ask for less and never drop you.",
+  "labelsLegendHint": "Legend mode: labels ask for less, never drop you and let you buy out a contract for half.",
+  "labelsContractHint": "You owe {label} {count} more albums. To leave now, buy out the contract: a new label's advance pays for it first.",
+  "@labelsContractHint": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "labelBuyout": "Contract buyout",
+  "labelNet": "Left after the buyout",
+  "labelBuyoutSign": "Buy out and sign",
+  "labelBuyoutIndependent": "Buy out and go independent",
+  "labelBuyoutShort": "Not enough money for the buyout.",
   "campaignLockedHint": "Your label can't run this one",
   "eventLabelOffer": "{label} wants to sign you! See Career → Record label.",
   "@eventLabelOffer": {
@@ -226,6 +242,7 @@
   },
   "errorCampaignLocked": "Your label can't run that big a campaign.",
   "errorUnderContract": "You still owe your label albums.",
+  "errorBuyoutMoney": "Not enough money to buy out your contract.",
   "errorLabelRefused": "This label won't sign you yet.",
   "startLevel": "Start level",
   "tierUnknown": "Unknown",

@@ -690,6 +690,8 @@ class LabelView {
   LabelView.of(World w, Artist p, this.label, this.missing)
       : isCurrent = p.label == label,
         contractAlbumsLeft = p.contractAlbumsLeft,
+        buyoutCents = Actions.buyoutCents(w, p),
+        moneyCents = p.moneyCents,
         legend = w.difficulty == Difficulty.legend;
 
   final Label label;
@@ -698,10 +700,18 @@ class LabelView {
   final List<LabelRequirement> missing;
   final bool isCurrent;
   final int contractAlbumsLeft;
+
+  /// What leaving the current label costs now (0: free to go; docs K78).
+  final int buyoutCents;
+  final int moneyCents;
   final bool legend;
 
   bool get wouldSign => missing.isEmpty;
-  bool get canSign => wouldSign && !isCurrent && contractAlbumsLeft == 0;
+
+  /// Money in hand after signing: the advance less the buyout.
+  int get netCents => label.advanceCents - buyoutCents;
+  bool get canAfford => moneyCents + netCents >= 0;
+  bool get canSign => wouldSign && !isCurrent && canAfford;
 
   /// Requirements as they apply in this game mode.
   double get minFans => label.minFans * (legend ? 0.4 : 1.0);

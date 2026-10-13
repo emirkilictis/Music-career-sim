@@ -438,9 +438,25 @@ abstract final class Actions {
     ];
   }
 
+  /// What leaving the current label costs while albums are still owed
+  /// (docs K78): for each album owed, its part of the advance back and the
+  /// label's cut of what the artist's audience would buy (50¢ a core fan).
+  /// Half in Legend mode; nothing once the contract is done.
+  static int buyoutCents(World w, Artist a) {
+    final l = a.label;
+    if (a.contractAlbumsLeft <= 0 || l.contractAlbums == 0) return 0;
+    final perAlbum = l.advanceCents / l.contractAlbums +
+        (1 - l.artistShare) * a.coreFans * 50;
+    final scale = w.difficulty == Difficulty.legend ? 0.5 : 1.0;
+    return (a.contractAlbumsLeft * perAlbum * scale).round();
+  }
+
   /// Signs with [label] (or leaves to go independent): its reach and
-  /// money split apply from now on, the advance is paid at once.
-  static void signLabel(World w, Artist a, Label label) {
+  /// money split apply from now on, the advance is paid at once. Leaving
+  /// before the albums owed are delivered pays [buyoutCents] (the new
+  /// label's advance goes towards it).
+  static void signLabel(World w, Artist a, Label label, {bool buyout = false}) {
+    if (buyout) a.moneyCents -= buyoutCents(w, a);
     a.label = label;
     a.labelReach = label.reach;
     a.artistShare = label.artistShare;
