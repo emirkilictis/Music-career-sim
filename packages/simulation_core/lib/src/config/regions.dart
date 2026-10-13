@@ -215,10 +215,17 @@ abstract final class CountryShares {
         _ => 0.89,
       };
 
+  /// Share of an artist's European listening that happens in the UK. The
+  /// UK is the most open European market to US/Canadian pop, so those
+  /// artists get more than the UK's size; continental European artists
+  /// mostly stay at home. Tuned so the UK top 40 (2005–12) is roughly
+  /// 45% UK / 40% US acts (`tools/sim_cli/bin/uk_probe.dart`, feedback T17).
   static double ukOfEurope(HomeCountry home) => switch (home) {
-        HomeCountry.uk => 0.35,
-        HomeCountry.europe => 0.10,
-        _ => 0.16,
+        HomeCountry.uk => 0.25,
+        HomeCountry.europe => 0.08,
+        HomeCountry.us => 0.34,
+        HomeCountry.canada => 0.34,
+        HomeCountry.other => 0.20,
       };
 }
 
