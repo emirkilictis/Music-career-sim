@@ -543,6 +543,36 @@ void main() {
       g.close();
     });
 
+    test('Pitchwork reviews every album; better albums score higher', () {
+      var g = GameSession.start(
+          slots, _setup(premium: true, money: StartMoney.millionaire));
+      final id = g.slotId;
+      g.world.player!.moneyCents = 1 << 40;
+      final good = [
+        for (var i = 0; i < 3; i++) g.writeSong(budget: BudgetTier.high).id,
+      ];
+      // Written exhausted: half the quality (K46).
+      final weak = <int>[];
+      for (var i = 0; i < 3; i++) {
+        g.world.player!
+          ..creativeEnergy = 1
+          ..burnoutUntilWeek = 0;
+        weak.add(g.writeSong(budget: BudgetTier.low).id);
+      }
+      final a = g.releaseAlbum('Great', good, type: AlbumType.ep);
+      final b = g.releaseAlbum('Poor', weak, type: AlbumType.ep);
+      final r = g.advanceWeek();
+      final reviews = r.events.whereType<CriticReview>().toList();
+      expect(reviews.map((e) => e.albumId), containsAll([a.id, b.id]));
+      expect(g.album(a.id).criticScore,
+          greaterThan(g.album(b.id).criticScore + 1));
+      final score = g.album(a.id).criticScore;
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.album(a.id).criticScore, score);
+      g.close();
+    });
+
     test('an early-2000s single sells CDs, not streams', () {
       final g = GameSession.start(
           slots,

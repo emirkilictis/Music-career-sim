@@ -86,6 +86,29 @@
   "pathSmallLabel": "Small label",
   "pathIndependentHint": "You keep 100% of recording income, but reach fewer people.",
   "pathSmallLabelHint": "A $25K advance and more reach; the label keeps 40% of the income and you owe it 2 albums. Bigger labels sign you once you have fans.",
+  "criticName": "Pitchwork",
+  "criticReviewTitle": "Review",
+  "eventCriticReview": "Pitchwork gives “{title}” {score}: {blurb}",
+  "@eventCriticReview": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      },
+      "blurb": {
+        "type": "String"
+      }
+    }
+  },
+  "critic10": "A landmark. Best New Music.",
+  "critic9": "Brilliant from start to finish.",
+  "critic8": "Confident and inventive.",
+  "critic7": "Solid, with standout moments.",
+  "critic6": "Uneven, but with a few highlights.",
+  "critic5": "Mostly forgettable.",
+  "critic4": "A misstep.",
   "labelSection": "Record label",
   "labelsTitle": "Record labels",
   "labelsButton": "See labels",

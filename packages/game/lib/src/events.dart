@@ -187,3 +187,12 @@ class LabelDropped extends GameEvent {
   @override
   bool get isMajor => true;
 }
+
+/// Pitchwork reviewed a player album that came out this week (docs K55).
+class CriticReview extends GameEvent {
+  const CriticReview(this.albumId, this.score);
+  final int albumId;
+  final double score;
+  @override
+  bool get isMajor => false;
+}

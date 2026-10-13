@@ -497,6 +497,9 @@ class Album with Charted {
   /// The player's schedule it came out of (docs K45), or -1.
   int scheduleId = -1;
 
+  /// Pitchwork's review score (1.0–10.0) given at release (docs K55).
+  double criticScore = -1;
+
   /// How well edition [k] sells to collectors in [year].
   double editionAppeal(int k, int year) {
     final f = k < variantFormats.length ? variantFormats[k] : -1;

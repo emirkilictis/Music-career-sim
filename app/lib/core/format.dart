@@ -207,6 +207,23 @@ class Fmt {
         Campaign.global => l.campaignGlobal,
       };
 
+  /// Pitchwork's one-liner for a review [score] (docs K55).
+  String criticBlurb(double score) => score >= 9.5
+      ? l.critic10
+      : score >= 8.8
+          ? l.critic9
+          : score >= 8.0
+              ? l.critic8
+              : score >= 7.0
+                  ? l.critic7
+                  : score >= 5.5
+                      ? l.critic6
+                      : score >= 4.0
+                          ? l.critic5
+                          : l.critic4;
+
+  String criticScore(double score) => score.toStringAsFixed(1);
+
   String labelName(Label x) => switch (x) {
         Label.independent => l.labelIndependent,
         Label.small => l.labelSmall,
@@ -361,6 +378,8 @@ class Fmt {
       BurnoutOver() => l.eventBurnoutOver,
       ReleaseOut() => l.eventReleaseOut(t),
       LabelOffer() => l.eventLabelOffer(labelName(e.label)),
+      CriticReview() =>
+        l.eventCriticReview(t, criticScore(e.score), criticBlurb(e.score)),
       LabelDropped() => l.eventLabelDropped(labelName(e.label)),
       ReleaseAnnounced() => l.eventReleaseAnnounced(t, week(e.releaseWeek)),
       PlatformLaunched() => e.chartId == Charts.platformGlobal

@@ -271,7 +271,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
                           0),
                       title: a.title,
                       subtitle:
-                          '${fmt.albumType(a.type)} · ${GameTime.yearOf(a.releaseWeek)} · '
+                          '${fmt.albumType(a.type)} · ${GameTime.yearOf(a.releaseWeek)}'
+                          '${a.criticScore >= 0 ? ' · ${l.criticName} ${fmt.criticScore(a.criticScore)}' : ''} · '
                           '${l.firstWeekShort(fmt.compact(a.firstWeekUsUnits))}',
                       value: fmt.compact(a.lifetimeUnits.total),
                       onTap: () => Navigator.push(

@@ -195,6 +195,7 @@ String _grade(int g) => g >= 90
 
 String _event(GameSession s, GameEvent e) => switch (e) {
       NumberOne() => '#1 on ${Charts.all[e.chartId].key} (${e.weeksAtNo1} wk)',
+      CriticReview() => 'review ${e.score}',
       LabelOffer() => 'label offer: ${e.label.name}',
       LabelDropped() => 'dropped by ${e.label.name}',
       StillNumberOne() =>

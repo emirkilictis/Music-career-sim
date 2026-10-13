@@ -262,8 +262,8 @@ abstract final class Codec {
     'charts',
     // Added in schema v5.
     'editionFormats',
-    // Added in schema v7.
-    'scheduleId',
+    // Added in schema v7, v9.
+    'scheduleId', 'criticScore',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -277,6 +277,7 @@ abstract final class Codec {
         _encodeCharts(al),
         _ints(al.variantFormats),
         al.scheduleId,
+        al.criticScore,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -295,6 +296,7 @@ abstract final class Codec {
       ..campaign = Campaign.values[r['campaign'] as int]
       ..variantWeeks = _parseInts(r['variants'] as String)
       ..scheduleId = r['scheduleId'] as int? ?? -1
+      ..criticScore = (r['criticScore'] as num?)?.toDouble() ?? -1
       ..variantFormats = r['editionFormats'] == null
           ? const []
           : _parseInts(r['editionFormats'] as String)

@@ -44,6 +44,7 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         PlatformLaunched() => EventLine(e),
         ReleaseOut() => release(e, e.kind, e.entityId),
         LabelOffer() => EventLine(e),
+        CriticReview() => release(e, EntityKind.album, e.albumId),
         LabelDropped() => EventLine(e),
         ReleaseAnnounced() =>
           EventLine(e, title: e.title, songId: e.songId < 0 ? null : e.songId),
@@ -97,6 +98,7 @@ List<EventLine> sortLines(List<EventLine> lines) {
         PlaylistAdded() => 6,
         ReleaseOut() => 2,
         LabelOffer() => 2,
+        CriticReview() => 3,
         LabelDropped() => 2,
         ReleaseAnnounced() => 6,
         BurnoutOver() => 7,

@@ -458,6 +458,16 @@ abstract final class Actions {
     album.hypeAtRelease = a.tier == ArtistTier.player
         ? a.hype
         : math.min(a.hype, w.config.aiAlbumHypeCap);
+    // Critics review it: mostly the true quality, a little taste. A rave
+    // lifts the opening, a pan holds it back (docs K55).
+    final rc =
+        RandomStream.keyed(w.seed, w.week, album.id, RngPurpose.criticReview);
+    album.criticScore =
+        (((quality - 10) / 9 + rc.nextNormal() * 0.5).clamp(1.0, 10.0) * 10)
+                .round() /
+            10;
+    album.hypeAtRelease =
+        math.max(0.0, album.hypeAtRelease + (album.criticScore - 6.5) * 0.04);
     album.campaign = campaign;
     // Formats follow their editions when the weeks are sorted.
     final order = List.generate(variantWeeks.length, (i) => i)

@@ -963,6 +963,14 @@ class GameSession {
         if (w.albums[id].artistId == p.id) id,
     };
 
+    for (final al in w.albums.reversed) {
+      if (al.releaseWeek < r.week) break;
+      if (al.artistId == p.id &&
+          al.releaseWeek == r.week &&
+          al.criticScore >= 0) {
+        events.add(CriticReview(al.id, al.criticScore));
+      }
+    }
     for (final id in debutAlbums) {
       final al = w.albums[id];
       events.add(AlbumFirstWeek(

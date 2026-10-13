@@ -87,6 +87,32 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           if (!a.isPlayer)
             ArtistLink(
                 artistId: a.artistId, name: a.artistName, state: widget.state),
+          if (a.criticScore >= 0) ...[
+            const SizedBox(height: 14),
+            Section(
+              title: '${l.criticName} · ${l.criticReviewTitle}',
+              icon: Icons.rate_review_outlined,
+              child: Row(children: [
+                Text(fmt.criticScore(a.criticScore),
+                    style: TextStyle(
+                        fontFamily: AppFonts.condensed,
+                        fontSize: 40,
+                        height: 1,
+                        fontWeight: FontWeight.w800,
+                        color: a.criticScore >= 8
+                            ? AppColors.gold
+                            : a.criticScore >= 6
+                                ? AppColors.text
+                                : AppColors.coral)),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text('“${fmt.criticBlurb(a.criticScore)}”',
+                      style: const TextStyle(
+                          fontStyle: FontStyle.italic, fontSize: 15)),
+                ),
+              ]),
+            ),
+          ],
           const SizedBox(height: 14),
           Section(
             title: l.details,
