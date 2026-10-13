@@ -490,6 +490,9 @@ class Album with Charted {
   /// edition that sells as before.
   List<int> variantFormats = const [];
 
+  /// The player's schedule it came out of (docs K45), or -1.
+  int scheduleId = -1;
+
   /// How well edition [k] sells to collectors in [year].
   double editionAppeal(int k, int year) {
     final f = k < variantFormats.length ? variantFormats[k] : -1;

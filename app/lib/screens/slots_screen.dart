@@ -146,6 +146,8 @@ Future<void> openCareer(BuildContext context, CareerState state) async {
   await state.refresh();
   if (!context.mounted) return;
   final images = context.imagesRead..open(state.slotId!);
+  await _relinkScheduledCovers(state, images);
+  if (!context.mounted) return;
   state.onScheduledAlbumOut = (scheduleId, albumId) => images.adoptWithEditions(
       ImageStore.scheduledKey(scheduleId), ImageStore.albumKey(albumId));
   await Navigator.push(
@@ -154,4 +156,30 @@ Future<void> openCareer(BuildContext context, CareerState state) async {
   );
   images.close();
   await state.controller.exec(Cmd.closeCareer());
+}
+
+/// Covers chosen for scheduled albums that older versions left under the
+/// schedule's name: link each to the album that came out of it (by its
+/// schedule id, or for older saves the first album released after it was
+/// scheduled that has no cover yet).
+Future<void> _relinkScheduledCovers(
+    CareerState state, ImageStore images) async {
+  final orphans = images.scheduledCoverIds;
+  if (orphans.isEmpty) return;
+  final pending = {for (final s in await state.read(Cmd.scheduled())) s.id};
+  final albums = [...await state.read(Cmd.albums())]
+    ..sort((a, b) => a.releaseWeek.compareTo(b.releaseWeek));
+  for (final sid in orphans..sort()) {
+    if (pending.contains(sid)) continue;
+    final album = albums.where((a) => a.scheduleId == sid).firstOrNull ??
+        albums
+            .where((a) =>
+                a.scheduleId < 0 &&
+                a.releaseWeek >= sid ~/ 64 &&
+                images.albumCover(a.id) == null)
+            .firstOrNull;
+    if (album == null) continue;
+    images.adoptWithEditions(
+        ImageStore.scheduledKey(sid), ImageStore.albumKey(album.id));
+  }
 }

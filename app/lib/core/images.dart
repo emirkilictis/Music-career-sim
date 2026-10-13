@@ -133,14 +133,32 @@ class ImageStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Moves the image of [from] to [to] (a scheduled album came out).
+  /// Moves the image of [from] to [to] (a scheduled album came out). The
+  /// file is renamed too, so the link survives reopening the career.
   void adopt(String from, String to) {
     final path = _files.remove(from);
     if (path == null) return;
     _deleteFile(to);
-    _files[to] = path;
+    final dot = path.lastIndexOf('.');
+    final ext = dot > path.lastIndexOf('/') ? path.substring(dot) : '.jpg';
+    final target = '${File(path).parent.path}/'
+        '${to}_${DateTime.now().microsecondsSinceEpoch}$ext';
+    try {
+      File(path).renameSync(target);
+      _files[to] = target;
+    } on FileSystemException {
+      _files[to] = path;
+    }
     notifyListeners();
   }
+
+  /// Schedule ids whose album cover is still stored under the schedule
+  /// (older versions forgot to rename it when the album came out).
+  List<int> get scheduledCoverIds => [
+        for (final k in _files.keys)
+          if (k.startsWith('scheduled_') && !k.contains('_ed'))
+            int.tryParse(k.substring('scheduled_'.length)) ?? -1,
+      ]..removeWhere((id) => id < 0);
 
   void remove(String key) {
     _deleteFile(key);

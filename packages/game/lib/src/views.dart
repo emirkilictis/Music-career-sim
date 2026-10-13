@@ -321,6 +321,7 @@ class AlbumView {
             ? albumWeekUnitsIn(w, al, ChartMarket.us)
             : 0,
         isPlayer = al.artistId == w.playerArtistId,
+        scheduleId = al.scheduleId,
         trackStreams = al.songIds
             .fold(0.0, (sum, id) => sum + w.songLifetimeStreams(w.songs[id])),
         lifetimePure =
@@ -354,6 +355,9 @@ class AlbumView {
   final double weekPure;
   final double weekUsUnits;
   final bool isPlayer;
+
+  /// The schedule it came out of, or -1.
+  final int scheduleId;
 
   /// All streams of the album's tracks (singles included).
   final double trackStreams;

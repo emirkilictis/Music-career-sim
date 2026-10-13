@@ -250,6 +250,8 @@ abstract final class Codec {
     'charts',
     // Added in schema v5.
     'editionFormats',
+    // Added in schema v7.
+    'scheduleId',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -262,6 +264,7 @@ abstract final class Codec {
         ...al.reg,
         _encodeCharts(al),
         _ints(al.variantFormats),
+        al.scheduleId,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -279,6 +282,7 @@ abstract final class Codec {
       ..hypeAtRelease = _d(r['hypeAtRelease'])
       ..campaign = Campaign.values[r['campaign'] as int]
       ..variantWeeks = _parseInts(r['variants'] as String)
+      ..scheduleId = r['scheduleId'] as int? ?? -1
       ..variantFormats = r['editionFormats'] == null
           ? const []
           : _parseInts(r['editionFormats'] as String)

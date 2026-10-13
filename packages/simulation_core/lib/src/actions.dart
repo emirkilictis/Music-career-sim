@@ -393,6 +393,7 @@ abstract final class Actions {
       {AlbumType type = AlbumType.album,
       List<int> variantWeeks = const [0],
       List<int> variantFormats = const [],
+      int scheduleId = -1,
       bool payForVariants = false,
       Campaign campaign = Campaign.standard,
       bool prepaid = false,
@@ -416,6 +417,7 @@ abstract final class Actions {
     // Rivals' event albums: their comeback hype is capped, so a 1M+ week
     // stays rare as in reality (a few a year at most); the player's is not
     // (docs K42).
+    album.scheduleId = scheduleId;
     album.hypeAtRelease = a.tier == ArtistTier.player
         ? a.hype
         : math.min(a.hype, w.config.aiAlbumHypeCap);
@@ -476,6 +478,7 @@ abstract final class Actions {
             type: sr.type,
             variantWeeks: sr.variantWeeks,
             variantFormats: sr.variantFormats,
+            scheduleId: sr.id,
             campaign: sr.campaign,
             prepaid: true,
             buzz: sr.buzz);
