@@ -386,6 +386,45 @@ void main() {
     expect(fake.artists.where((a) => real.contains(a.name)), isEmpty);
   });
 
+  test('real names keep the market size; a star push fades (K70)', () {
+    (World, double) world(bool real) {
+      final w = WorldGen.create(seed: 7, startYear: 2010, realNames: real);
+      final sim = Simulator(w);
+      while (w.week < GameTime.firstWeekOf(2010)) {
+        sim.step();
+      }
+      var audience = 0.0;
+      for (final a in w.artists) {
+        if (a.isRetired || a.tier == ArtistTier.player) continue;
+        audience += a.coreFans + a.casual / 5;
+      }
+      return (w, audience);
+    }
+
+    final (w, real) = world(true);
+    final (_, fake) = world(false);
+    // Real stars rise from the same market: no bigger crowd for the
+    // player to compete with.
+    expect(real / fake, inInclusiveRange(0.9, 1.1));
+    // Their extra label reach is gone once they have had their years.
+    var pushed = 0, faded = 0;
+    for (final a in w.artists) {
+      if (a.isRetired || realStar(a.name) < 2) continue;
+      final years = (w.week - a.debutWeek) / GameTime.weeksPerYear;
+      if (years >= w.config.realStarPushYears + 1) {
+        faded++;
+        expect(a.labelReach, lessThanOrEqualTo(1.1));
+      } else if (a.labelReach > 1.1) {
+        pushed++;
+      }
+    }
+    expect(faded, greaterThan(0));
+    expect(pushed, greaterThan(0));
+    // Players become known faster than the calibrated rivals.
+    expect(w.config.playerFameRate, greaterThan(w.config.fameRate));
+    expect(Label.independent.reach, 0.85);
+  });
+
   test('a manager books more and better, for a cut (K68)', () {
     int offers(Manager m) {
       final w = WorldGen.create(seed: 68, startYear: 2010);

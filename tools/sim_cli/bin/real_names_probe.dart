@@ -4,7 +4,8 @@ import 'package:simulation_core/simulation_core.dart';
 /// real superstars by year, and the top 10 artists by fame.
 void main(List<String> args) {
   final year = args.isNotEmpty ? int.parse(args[0]) : 2022;
-  final w = WorldGen.create(seed: 7, startYear: year, realNames: true);
+  final real = args.length < 2 || args[1] != 'fake';
+  final w = WorldGen.create(seed: 7, startYear: year, realNames: real);
   final sim = Simulator(w);
   final no1 = <String, int>{};
   WeekResult? last;

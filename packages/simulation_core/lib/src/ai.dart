@@ -162,6 +162,16 @@ abstract final class AiPlanner {
       if (a.tier == ArtistTier.player || a.isRetired) continue;
       final r = RandomStream.keyed(w.seed, w.week, a.id, RngPurpose.newArtists);
       final yearsActive = (w.week - a.debutWeek) / GameTime.weeksPerYear;
+      // A real star's label push helps them break through, then their
+      // songs and fans have to carry them; otherwise every year's stars
+      // would pile up and crowd out everyone else (docs K70).
+      if (w.realNames &&
+          yearsActive >= c.realStarPushYears &&
+          a.labelReach > 1.0 &&
+          realStar(a.name) >= 2) {
+        a.labelReach = 1.0;
+        w.dirtyArtists.add(a.id);
+      }
       if (_protected(w, a, yearsActive)) continue;
       final weak = a.fame < 0.06 && yearsActive > 4;
       final p = (weak ? 0.15 : 0.0) + (yearsActive > 25 ? 0.10 : 0.0);

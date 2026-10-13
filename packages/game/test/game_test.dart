@@ -131,6 +131,20 @@ void main() {
       g.close();
     });
 
+    test('older saves get the independent reach of docs K70', () {
+      var g = GameSession.start(slots, _setup());
+      final id = g.slotId;
+      final p = g.world.player!;
+      expect(p.labelReach, Label.independent.reach);
+      p.labelReach = 0.7; // as saved before K70
+      g.world.dirtyArtists.add(p.id);
+      g.writeSong(budget: BudgetTier.low); // any action saves
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.world.player!.labelReach, 0.85);
+      g.close();
+    });
+
     test('an offer waits across reopening; answers are checked (K59)', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;

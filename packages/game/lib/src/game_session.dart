@@ -224,7 +224,15 @@ class GameSession {
   /// Opens a saved career exactly where it was left.
   static GameSession resume(SaveSlots slots, String slotId) {
     final store = slots.open(slotId);
-    return GameSession._(slots, slotId, store, store.load());
+    final world = store.load();
+    // The player's reach always follows their label: older saves get the
+    // independent reach raised in docs K70.
+    final p = world.player;
+    if (p != null && p.labelReach != p.label.reach) {
+      p.labelReach = p.label.reach;
+      world.dirtyArtists.add(p.id);
+    }
+    return GameSession._(slots, slotId, store, world);
   }
 
   /// Saves search tables and closes the save file. Call when the app goes to

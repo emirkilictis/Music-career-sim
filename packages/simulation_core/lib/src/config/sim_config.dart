@@ -19,6 +19,8 @@ class SimConfig {
     this.albumTrackExposure = 0.30,
     this.baseExposure = 0.0015,
     this.fameExposure = 0.020,
+    this.fameRate = 0.02,
+    this.playerFameRate = 0.04,
     this.chartFeedback = 0.12,
     this.chartFatigueWeeks = 12,
     this.albumTrackFanShare = 0.6,
@@ -69,6 +71,7 @@ class SimConfig {
     this.tierACount = 30,
     this.tierBCount = 300,
     this.newArtistsPerYear = 30,
+    this.realStarPushYears = 6,
     this.burnInYears = 3,
     this.catalogStartYear = 2002,
   }) : era = era ?? EraTable.usDefault();
@@ -98,6 +101,11 @@ class SimConfig {
   final double albumTrackExposure;
   final double baseExposure;
   final double fameExposure;
+
+  /// Weekly step of fame toward popularity while it is higher: rivals and
+  /// the player (docs K70).
+  final double fameRate;
+  final double playerFameRate;
   final double chartFeedback;
 
   /// Chart feedback halves after this many weeks on the charts.
@@ -275,6 +283,9 @@ class SimConfig {
   final int tierACount;
   final int tierBCount;
   final int newArtistsPerYear;
+
+  /// Years a real star's extra label reach lasts (docs K70).
+  final int realStarPushYears;
 
   /// Years simulated silently before the start year so charts are populated.
   final int burnInYears;

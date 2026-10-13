@@ -108,11 +108,18 @@ abstract final class WorldGen {
     final r = RandomStream.keyed(w.seed, 0, id, RngPurpose.worldGen);
     final n = RandomStream.keyed(w.seed, 0, id, RngPurpose.names);
     final isA = tier == ArtistTier.a;
-    final real =
-        w.realNames ? _pickReal(w, id, isA: isA, newcomer: newcomer) : null;
-    // Newcomers who became stars in real life start with a star's craft;
-    // whether they make it is up to the simulation.
-    final craftA = isA || (real != null && real.star >= 2);
+    // The home is drawn first so real names keep the made-up world's mix
+    // of countries (docs K70).
+    final homeRoll =
+        _homeCountry(RandomStream.keyed(w.seed, 1, id, RngPurpose.worldGen));
+    final real = w.realNames
+        ? _pickReal(w, id, isA: isA, newcomer: newcomer, home: homeRoll)
+        : null;
+    // Newcomers who became stars in real life start with a star's craft
+    // and a label behind them; whether they make it is up to the
+    // simulation. Their audience starts like anyone's, so real names do not
+    // make the market bigger than a made-up world's (docs K70).
+    final craftA = isA || (newcomer && real != null && real.star >= 2);
     double skill(double lo, double hi) => r.range(lo, hi);
     final skills = Skills(
       songwriting: craftA ? skill(60, 92) : skill(35, 78),
@@ -126,11 +133,8 @@ abstract final class WorldGen {
     final double casual;
     if (newcomer) {
       fame = r.range(0.01, 0.10);
-      // Labels back the acts who broke through for real (docs K66): a
-      // bigger first audience, the rest is up to their songs.
-      final backing = real == null ? 1.0 : 1.0 + real.star;
-      coreFans = 2e4 * r.logNormal(0.8) * backing;
-      casual = 2e5 * r.logNormal(0.8) * backing;
+      coreFans = 2e4 * r.logNormal(0.8);
+      casual = 2e5 * r.logNormal(0.8);
     } else if (isA) {
       fame = r.range(0.55, 0.95);
       coreFans = 1.6e6 * r.logNormal(0.8) * (0.5 + fame);
@@ -156,8 +160,6 @@ abstract final class WorldGen {
             ArtistKind.band => 3 + m.nextInt(3),
             ArtistKind.vocalGroup => 4 + m.nextInt(4),
           };
-    final homeRoll =
-        _homeCountry(RandomStream.keyed(w.seed, 1, id, RngPurpose.worldGen));
     final genreRoll = _weightedGenre(r.nextDouble());
     // Drawn only for founding rivals, as before (keeps made-up worlds the
     // same).
@@ -188,7 +190,6 @@ abstract final class WorldGen {
     a.devotion = newcomer
         ? r.range(0.05, 0.2)
         : (isA ? r.range(0.15, 0.6) : r.range(0.05, 0.35));
-    if (newcomer && real != null && real.star >= 2) a.hype = 0.3 * real.star;
     a.nextEraWeek =
         w.week + (newcomer ? r.nextInt(30) : r.nextInt(isA ? 150 : 90));
     w.addArtist(a);
@@ -200,7 +201,7 @@ abstract final class WorldGen {
   /// through this year or just before, biggest first. Never a name already
   /// in the world. Null when none is left: the rival gets a made-up name.
   static RealArtist? _pickReal(World w, int id,
-      {required bool isA, required bool newcomer}) {
+      {required bool isA, required bool newcomer, required HomeCountry home}) {
     final year = GameTime.yearOf(w.week);
     final used = {for (final a in w.artists) a.name.toLowerCase()};
     final pool = [
@@ -208,6 +209,7 @@ abstract final class WorldGen {
         if (!used.contains(ra.name.toLowerCase()) &&
             ra.debut <= year &&
             (!newcomer || ra.debut >= year - 2) &&
+            ra.home == home &&
             (!isA || ra.star >= 2))
           ra,
     ];

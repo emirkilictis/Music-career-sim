@@ -899,7 +899,8 @@ enum VideoBudget {
 /// the money and only sign artists who have proved themselves.
 enum Label {
   independent(
-      reach: 0.7,
+      // 0.7 until docs K70: too little to ever chart without a label.
+      reach: 0.85,
       artistShare: 1.0,
       maxCampaign: Campaign.standard,
       campaignShare: 1.0,

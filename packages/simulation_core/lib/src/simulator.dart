@@ -687,7 +687,11 @@ class Simulator {
       // household name through a long break (docs K44). Rivals' fame
       // slowly fades with their popularity, so the field keeps renewing.
       if (a.popularity > a.fame) {
-        a.fame += 0.02 * (a.popularity - a.fame);
+        // The player becomes known faster than the calibrated rivals: a
+        // career is a game, not 30 years of waiting (docs K70).
+        final rate =
+            a.tier == ArtistTier.player ? c.playerFameRate : c.fameRate;
+        a.fame += rate * (a.popularity - a.fame);
       } else if (a.tier != ArtistTier.player) {
         a.fame += 0.002 * (a.popularity - a.fame);
       }
