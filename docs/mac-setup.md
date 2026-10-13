@@ -52,12 +52,28 @@ Birden fazla cihaz varsa listeden iPhone'u seç. İlk kurulumdan sonra telefonda
 - Yeni sürümü almak için: `git pull` → `flutter pub get` → `flutter run --release`.
   Çalışma dalı: `git checkout claude/nifty-archimedes-pceuh4` (bir kez), sonra
   `git pull origin claude/nifty-archimedes-pceuh4`.
-- **Kablosuz kurulum (kablo bir kez gerekir):** iPhone'u kabloyla bağla → Xcode → **Window →
-  Devices and Simulators** → iPhone'u seç → **Connect via network** kutusunu işaretle. Bundan sonra
-  Mac ile iPhone aynı Wi-Fi'deyken kablosuz `flutter run --release` çalışır (`flutter devices`
-  iPhone'u kablosuz olarak listeler; ilk seferde biraz yavaş bulabilir). Kayıtlar silinmez, sadece
-  uygulama güncellenir.
+- **Kablosuz kurulum (kablo bir kez gerekir):** Xcode 15+ ve iOS 17+ ile ayrı bir ayar yok. iPhone'u
+  bir kez kabloyla bağla, telefonda "Bu bilgisayara güven" de ve bir kez `flutter run --release`
+  çalıştır. Sonra kabloyu çıkar: Mac ile iPhone aynı Wi-Fi'deyken `flutter devices` iPhone'u
+  "wireless" olarak listeler ve `flutter run --release` kablosuz kurar. Cihaz listesini görmek
+  istersen: Xcode açıkken üst menü çubuğunda **Window → Devices and Simulators** (⇧⌘2); kablosuz
+  bağlı cihazın yanında küre simgesi olur. Kayıtlar silinmez, sadece uygulama güncellenir.
 - Simülatörde denemek istersen: `open -a Simulator` → `flutter run`.
+
+## Android APK (test edenler için)
+
+Mac'te bir kez: Android Studio'yu kur (ya da sadece Android SDK komut satırı araçlarını), açıp SDK'yı
+indirmesine izin ver, sonra `flutter doctor --android-licenses`.
+
+1. İmza anahtarı: Claude'un verdiği `android-signing.zip` içindeki `upload-keystore.jks` ve
+   `key.properties` dosyalarını `app/android/` klasörüne koy. **Bunlar git'e girmez; kaybetme ve kimseyle
+   paylaşma.** Hep aynı anahtarla imzalanan APK'lar eskisinin üstüne kurulur ve kayıtlar korunur; başka
+   anahtarla imzalanan bir APK için test edenlerin uygulamayı silmesi (kayıtlarını kaybetmesi) gerekir.
+2. `cd app && flutter build apk --release`
+3. Dosya: `app/build/app/outputs/flutter-apk/app-release.apk`. WhatsApp/Drive ile gönder; telefonda
+   "bilinmeyen kaynaklardan yüklemeye izin ver" denip kurulur.
+4. Her yeni test sürümünde `app/pubspec.yaml` içindeki `version: 0.1.0+1` satırının `+` sonrasını bir
+   artır (ör. `+2`), yoksa Android güncellemeyi kurmayabilir.
 
 ## Test sürümüne özel notlar
 
