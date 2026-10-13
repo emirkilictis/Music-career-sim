@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:game/game.dart';
 
+import '../core/career_state.dart';
+import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import 'common.dart';
@@ -18,20 +20,27 @@ const _announceOffsets = [-1, 1, 2, 4, 6, 8, 0];
 /// Asks when a release should come out and when to announce it. [week] is
 /// the current week. With [editing], the release week 0 is not offered and
 /// an announcement already made cannot be taken back.
-Future<ReleaseTiming?> pickReleaseTiming(BuildContext context,
-    {required int week, ScheduledView? editing}) {
+Future<ReleaseTiming?> pickReleaseTiming(
+    BuildContext context, CareerState career,
+    {ScheduledView? editing}) async {
+  // Big rival albums near the dates on offer (docs K69).
+  final rivals = await career.read(Cmd.upcomingRivalAlbums());
+  if (!context.mounted) return null;
   return showModalBottomSheet<ReleaseTiming>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
-    builder: (_) => _TimingSheet(week: week, editing: editing),
+    builder: (_) =>
+        _TimingSheet(week: career.week, editing: editing, rivals: rivals),
   );
 }
 
 class _TimingSheet extends StatefulWidget {
-  const _TimingSheet({required this.week, this.editing});
+  const _TimingSheet(
+      {required this.week, this.editing, this.rivals = const []});
   final int week;
   final ScheduledView? editing;
+  final List<UpcomingRelease> rivals;
 
   @override
   State<_TimingSheet> createState() => _TimingSheetState();
@@ -72,6 +81,12 @@ class _TimingSheetState extends State<_TimingSheet> {
   }
 
   bool get _locked => widget.editing?.announced ?? false;
+
+  /// Big rival albums out the week chosen (docs K69).
+  List<UpcomingRelease> get _clash => [
+        for (final r in widget.rivals)
+          if (r.week == _releaseWeek) r
+      ];
 
   int get _releaseWeek => widget.week + _in;
 
@@ -122,6 +137,12 @@ class _TimingSheetState extends State<_TimingSheet> {
                     _ => l.inWeeks(x),
                   },
               _setRelease),
+          if (_clash.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(l.rivalSameWeek(_clash.map((r) => r.artistName).join(', ')),
+                style: TextStyle(
+                    color: AppColors.peach, fontWeight: FontWeight.w700)),
+          ],
           if (later) ...[
             const SizedBox(height: 8),
             Text(l.releaseDate(fmt.week(_releaseWeek)),

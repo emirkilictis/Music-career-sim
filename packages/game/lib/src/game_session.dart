@@ -440,6 +440,43 @@ class GameSession {
           }(),
       ];
 
+  // ---------------------------------------------------------------- rivals
+
+  /// How far ahead big rival albums are known (docs K69).
+  static const rivalLookaheadWeeks = 8;
+
+  /// Big rivals' albums due in the next [rivalLookaheadWeeks] weeks, soonest
+  /// first.
+  List<UpcomingRelease> get upcomingRivalAlbums {
+    final w = world;
+    final out = <UpcomingRelease>[];
+    for (final a in w.artists) {
+      if (a.tier == ArtistTier.player || a.isRetired || !_bigRival(a)) {
+        continue;
+      }
+      for (final pr in a.plan) {
+        if (pr.kind == PlannedKind.album &&
+            pr.week >= w.week &&
+            pr.week < w.week + rivalLookaheadWeeks) {
+          out.add(UpcomingRelease(
+              artistId: a.id,
+              artistName: a.name,
+              title: a.pendingAlbumTitle,
+              week: pr.week,
+              fame: a.fame));
+        }
+      }
+    }
+    out.sort((x, y) {
+      final d = x.week.compareTo(y.week);
+      return d != 0 ? d : y.fame.compareTo(x.fame);
+    });
+    return out;
+  }
+
+  /// Rivals whose releases make news: the top tier or well known.
+  static bool _bigRival(Artist a) => a.tier == ArtistTier.a || a.fame >= 0.35;
+
   // ------------------------------------------------------------- managers
 
   /// Hires [m] (or lets the manager go with [Manager.none]; docs K68).
@@ -1223,6 +1260,63 @@ class GameSession {
         }
       }
     }
+    // Chart battles: the player's release against the biggest rival one out
+    // the same week (docs K69).
+    for (final id in debutAlbums) {
+      Album? rival;
+      for (final al in w.albums.reversed) {
+        if (al.releaseWeek < r.week) break;
+        if (al.releaseWeek != r.week ||
+            al.artistId == p.id ||
+            !al.chartsOnAlbumChart ||
+            !_bigRival(w.artists[al.artistId])) {
+          continue;
+        }
+        if (rival == null || al.firstWeekUnits > rival.firstWeekUnits) {
+          rival = al;
+        }
+      }
+      if (rival != null) {
+        events.add(ChartBattle(
+          kind: EntityKind.album,
+          playerEntityId: id,
+          rivalEntityId: rival.id,
+          rivalArtistId: rival.artistId,
+          playerPosition: w.albums[id].lastPosOn(Charts.usAlbums),
+          rivalPosition: rival.lastPosOn(Charts.usAlbums),
+        ));
+      }
+    }
+    for (final id in w.playerSongIds) {
+      final mine = w.songs[id];
+      if (!mine.isSingle || mine.singleWeek != r.week) continue;
+      Song? rival;
+      for (final sid in w.activeSongIds) {
+        final s = w.songs[sid];
+        if (!s.isSingle ||
+            s.singleWeek != r.week ||
+            s.primaryArtistId == p.id ||
+            !_bigRival(w.artists[s.primaryArtistId])) {
+          continue;
+        }
+        if (rival == null || s.weekPoints > rival.weekPoints) rival = s;
+      }
+      if (rival != null) {
+        final battle = ChartBattle(
+          kind: EntityKind.song,
+          playerEntityId: id,
+          rivalEntityId: rival.id,
+          rivalArtistId: rival.primaryArtistId,
+          playerPosition: mine.lastPosOn(Charts.usSongs),
+          rivalPosition: rival.lastPosOn(Charts.usSongs),
+        );
+        // Two songs nowhere near the chart are no battle.
+        if (battle.playerPosition > 0 || battle.rivalPosition > 0) {
+          events.add(battle);
+        }
+      }
+    }
+
     // Platforms opening this year (Streamify by its charts below).
     if (GameTime.weekOfYear(r.week) == 1) {
       for (final p in MusicPlatform.values) {

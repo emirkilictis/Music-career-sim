@@ -240,6 +240,62 @@ void main() {
       g.close();
     });
 
+    test(
+        'same-week releases make a chart battle; rival albums show ahead '
+        '(K69)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final w = g.world;
+      final rival = w.artists.firstWhere(
+          (a) => a.tier == ArtistTier.a && !a.isRetired && a.plan.isEmpty);
+      // Known two months ahead.
+      rival.plan.add(PlannedRelease(week: w.week + 3, kind: PlannedKind.album));
+      rival.pendingAlbumTitle = 'Big Return';
+      expect(
+          g.upcomingRivalAlbums
+              .any((u) => u.artistId == rival.id && u.title == 'Big Return'),
+          isTrue);
+      rival.plan.clear();
+      // Both albums out this week.
+      final theirs = [
+        for (var i = 0; i < 10; i++)
+          Actions.writeSong(w, rival, producerSkill: 80, aiMode: true).id,
+      ];
+      Actions.releaseAlbum(w, rival, 'Theirs', theirs);
+      final mine = <int>[];
+      for (var i = 0; i < 8; i++) {
+        w.player!.creativeEnergy = 100;
+        w.player!.burnoutUntilWeek = -1;
+        mine.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      g.releaseAlbum('Mine', mine);
+      final events = g.advanceWeek().events;
+      final battle = events.whereType<ChartBattle>().single;
+      expect(battle.kind, EntityKind.album);
+      // The biggest rival album out this week (ours or another star's).
+      final week = g.world.week - 1;
+      final rivalAlbums = [
+        for (final al in w.albums)
+          if (al.releaseWeek == week && al.artistId != w.playerArtistId) al
+      ];
+      final theirsOut = rivalAlbums.firstWhere((al) => al.title == 'Theirs');
+      final battled =
+          rivalAlbums.firstWhere((al) => al.id == battle.rivalEntityId);
+      expect(battled.artistId, battle.rivalArtistId);
+      expect(battled.firstWeekUnits,
+          greaterThanOrEqualTo(theirsOut.firstWeekUnits));
+      expect(
+          battle.won,
+          battle.playerPosition > 0 &&
+              (battle.rivalPosition == 0 ||
+                  battle.playerPosition < battle.rivalPosition));
+      g.close();
+    });
+
     test('weeks autosave; resuming continues exactly where it was', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;

@@ -30,6 +30,10 @@ class EventIcon extends StatelessWidget {
       OpportunityCame(:final kind) => (opportunityIcon(kind), AppColors.butter),
       MilestoneReached() => (Icons.flag_rounded, AppColors.gold),
       TourFinished() => (Icons.stadium_rounded, AppColors.peach),
+      ChartBattle(:final won) => (
+          Icons.sports_mma_rounded,
+          won ? AppColors.gold : AppColors.coral
+        ),
       PlatformOpened(:final platform) => (
           platformIcon(platform),
           platformColor(platform)

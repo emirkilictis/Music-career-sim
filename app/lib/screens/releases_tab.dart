@@ -28,6 +28,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
   List<SongView> _songs = const [];
   List<AlbumView> _albums = const [];
   List<ScheduledView> _scheduled = const [];
+  List<UpcomingRelease> _rivals = const [];
   int _loadedRevision = -1;
 
   @override
@@ -45,11 +46,13 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final songs = await career.read(Cmd.songs());
     final albums = await career.read(Cmd.albums());
     final scheduled = await career.read(Cmd.scheduled());
+    final rivals = await career.read(Cmd.upcomingRivalAlbums());
     if (mounted) {
       setState(() {
         _songs = songs;
         _albums = albums;
         _scheduled = scheduled;
+        _rivals = rivals;
       });
     }
   }
@@ -159,8 +162,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
     if (action == null || !mounted) return;
     try {
       if (action) {
-        final when =
-            await pickReleaseTiming(context, week: career.week, editing: s);
+        final when = await pickReleaseTiming(context, career, editing: s);
         if (when == null || !mounted) return;
         await career
             .act(Cmd.reschedule(s.id, when.releaseWeek, when.announceWeek));
@@ -312,6 +314,37 @@ class _ReleasesTabState extends State<ReleasesTab> {
                     ),
                 ]),
         ),
+        const SizedBox(height: 12),
+        if (_rivals.isNotEmpty) ...[
+          Section(
+            title: l.rivalReleases,
+            icon: Icons.sports_mma_outlined,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.rivalReleasesHint,
+                      style:
+                          TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                  const SizedBox(height: 4),
+                  for (final r in _rivals.take(6))
+                    ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(r.artistName,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      subtitle:
+                          Text(l.rivalReleaseLine(fmt.week(r.week), r.title)),
+                      trailing: Text(
+                          switch (r.week - career.week) {
+                            0 => l.releaseNow,
+                            1 => l.inOneWeek,
+                            final n => l.inWeeks(n),
+                          },
+                          style: TextStyle(color: AppColors.textFaint)),
+                    ),
+                ]),
+          ),
+        ],
       ],
     );
   }
@@ -323,7 +356,7 @@ Future<bool> releaseSingleFlow(
     BuildContext context, CareerState career, SongView song) async {
   final l = context.l10n;
   final fmt = context.fmt;
-  final when = await pickReleaseTiming(context, week: career.week);
+  final when = await pickReleaseTiming(context, career);
   if (when == null || !context.mounted) return false;
   final campaign = await pickCampaign(context, career,
       header: CoverPickRow(songId: song.id, albumId: song.coverAlbumId));
@@ -467,7 +500,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
       for (final s in widget.songs)
         if (_picked.contains(s.id)) s.id
     ];
-    final when = await pickReleaseTiming(context, week: career.week);
+    final when = await pickReleaseTiming(context, career);
     if (when == null || !mounted) return;
     final campaign =
         await pickCampaign(context, career, extraCents: _variantCost);

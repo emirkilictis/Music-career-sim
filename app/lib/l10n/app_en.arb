@@ -927,6 +927,62 @@
   "totalSales": "Total",
   "pureSales": "Pure sales",
   "albumStats": "Album stats",
+  "battleWon": "Chart battle won: “{title}” {mine} vs {rival} {theirs}.",
+  "@battleWon": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "mine": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      },
+      "theirs": {
+        "type": "String"
+      }
+    }
+  },
+  "battleLost": "Chart battle lost: {rival} {theirs}, “{title}” {mine}.",
+  "@battleLost": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "mine": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      },
+      "theirs": {
+        "type": "String"
+      }
+    }
+  },
+  "offChart": "off the chart",
+  "rivalReleases": "Big releases coming",
+  "rivalReleasesHint": "Coming out the same week means a chart battle.",
+  "rivalReleaseLine": "{date} · {title}",
+  "@rivalReleaseLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "rivalSameWeek": "{artists} also release that week: a chart battle!",
+  "@rivalSameWeek": {
+    "placeholders": {
+      "artists": {
+        "type": "String"
+      }
+    }
+  },
   "managerSection": "Manager",
   "managerNone": "No manager",
   "managerLocal": "Local manager",

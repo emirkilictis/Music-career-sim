@@ -502,6 +502,14 @@ class Fmt {
       OpportunityCame() => l.eventOfferCame(offerTitle(e.kind)),
       PlatformOpened(:final platform) =>
         l.eventPlatformOpened(platform.displayName, platformTagline(platform)),
+      ChartBattle() => () {
+          String pos(int p) => p > 0 ? '#$p' : l.offChart;
+          return e.won
+              ? l.battleWon(t, pos(e.playerPosition), line.artistName,
+                  pos(e.rivalPosition))
+              : l.battleLost(t, pos(e.playerPosition), line.artistName,
+                  pos(e.rivalPosition));
+        }(),
       TourFinished() => l.eventTourFinished(tourKind(e.kind),
           compact(e.tickets), money(e.netCents), compact(e.fans)),
       MilestoneReached(:final milestone) =>

@@ -844,3 +844,19 @@ class TourPlanView {
   /// What the player would keep (their manager's cut taken; K68).
   final int netCents;
 }
+
+/// A big rival's album due soon (docs K69): release dates are known about
+/// two months ahead, so the player can pick their week around it.
+class UpcomingRelease {
+  UpcomingRelease(
+      {required this.artistId,
+      required this.artistName,
+      required this.title,
+      required this.week,
+      required this.fame});
+  final int artistId;
+  final String artistName;
+  final String title;
+  final int week;
+  final double fame;
+}

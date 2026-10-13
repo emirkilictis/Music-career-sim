@@ -247,3 +247,29 @@ class PlatformOpened extends GameEvent {
   @override
   bool get isMajor => false;
 }
+
+/// The player's release came out the same week as a big rival's (docs
+/// K69): where each landed on the US chart that week. A position of 0 is
+/// off the chart.
+class ChartBattle extends GameEvent {
+  const ChartBattle({
+    required this.kind,
+    required this.playerEntityId,
+    required this.rivalEntityId,
+    required this.rivalArtistId,
+    required this.playerPosition,
+    required this.rivalPosition,
+  });
+  final EntityKind kind;
+  final int playerEntityId;
+  final int rivalEntityId;
+  final int rivalArtistId;
+  final int playerPosition;
+  final int rivalPosition;
+
+  bool get won =>
+      playerPosition > 0 &&
+      (rivalPosition == 0 || playerPosition < rivalPosition);
+  @override
+  bool get isMajor => true;
+}
