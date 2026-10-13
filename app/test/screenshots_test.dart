@@ -320,5 +320,17 @@ void main() {
     await shot(tester, '23_studio_light');
     app.settings.setLightTheme(false);
     await tester.pumpAndSettle();
+
+    // Corner styles side by side, same moment (docs F1).
+    await tab(tester, 'Home');
+    await shot(tester, '26_home_soft');
+    app.settings.setSharpCorners(true);
+    await tester.pumpAndSettle();
+    await shot(tester, '27_home_sharp');
+    await tab(tester, 'Studio');
+    await shot(tester, '28_studio_sharp');
+    app.settings.setSharpCorners(false);
+    await tester.pumpAndSettle();
+    await shot(tester, '29_studio_soft');
   });
 }

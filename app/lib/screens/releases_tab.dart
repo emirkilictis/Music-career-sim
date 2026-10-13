@@ -669,12 +669,12 @@ class _EditionEditor extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.surfaceHigh,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppShape.r(16)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
           InkWell(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppShape.r(8)),
             onTap: () async {
               final picked = await context.imagesRead.source.pick();
               if (picked != null) {
@@ -683,7 +683,7 @@ class _EditionEditor extends StatelessWidget {
               }
             },
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppShape.r(8)),
               child: SizedBox.square(
                 dimension: 56,
                 child: cover == null
@@ -751,15 +751,15 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(AppShape.r(22)),
         color: Colors.transparent,
         child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(AppShape.r(22)),
             gradient: AppColors.haze(color, AppColors.surface),
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(AppShape.r(22)),
             onTap: onTap,
             child: Padding(
               padding: const EdgeInsets.all(16),

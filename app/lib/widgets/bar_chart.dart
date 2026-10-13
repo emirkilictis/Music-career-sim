@@ -50,7 +50,7 @@ class WeeklyBars extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                     decoration: BoxDecoration(
                       color: AppColors.surfaceLow,
-                      borderRadius: BorderRadius.circular(3),
+                      borderRadius: BorderRadius.circular(AppShape.r(3)),
                     ),
                     child: FractionallySizedBox(
                       heightFactor:
@@ -58,7 +58,7 @@ class WeeklyBars extends StatelessWidget {
                       widthFactor: 1,
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(3),
+                          borderRadius: BorderRadius.circular(AppShape.r(3)),
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,

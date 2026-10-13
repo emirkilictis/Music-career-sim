@@ -28,6 +28,7 @@ class MusicCareerApp extends StatefulWidget {
 
 class _MusicCareerAppState extends State<MusicCareerApp> {
   late Palette _palette = AppColors.palette;
+  late bool _sharp = AppShape.sharp;
 
   /// Widgets read [AppColors] directly, so a theme change rebuilds every
   /// element (screens and their state stay as they are).
@@ -53,8 +54,10 @@ class _MusicCareerAppState extends State<MusicCareerApp> {
           child: ListenableBuilder(
             listenable: settings,
             builder: (context, _) {
-              if (!identical(_palette, AppColors.palette)) {
+              if (!identical(_palette, AppColors.palette) ||
+                  _sharp != AppShape.sharp) {
                 _palette = AppColors.palette;
+                _sharp = AppShape.sharp;
                 WidgetsBinding.instance.addPostFrameCallback(
                     (_) => mounted ? _rebuildAll() : null);
               }

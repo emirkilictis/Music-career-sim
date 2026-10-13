@@ -36,7 +36,7 @@ class OpportunityCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(AppShape.r(22)),
         border: Border.all(
             color: (scandal ? AppColors.coral : AppColors.butter)
                 .withValues(alpha: 0.6),

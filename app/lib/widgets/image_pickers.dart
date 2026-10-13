@@ -99,7 +99,7 @@ class PendingCoverRow extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppShape.r(8)),
         child: SizedBox.square(
           dimension: 52,
           child: p == null

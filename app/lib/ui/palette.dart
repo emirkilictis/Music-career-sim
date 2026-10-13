@@ -148,6 +148,15 @@ abstract final class PaperColors {
 }
 
 /// Fonts bundled in assets/fonts (SIL OFL).
+/// Corner style (docs F1): soft (rounded, default) or sharp (squared, a
+/// harder look). Widgets pass their soft radius through [r].
+abstract final class AppShape {
+  static bool sharp = false;
+
+  /// [soft] in the soft style; at most 4 px in the sharp one.
+  static double r(double soft) => sharp && soft > 4 ? 4 : soft;
+}
+
 abstract final class AppFonts {
   static const ui = 'Figtree';
   static const condensed = 'BarlowCondensed';

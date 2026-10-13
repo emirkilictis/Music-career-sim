@@ -351,13 +351,13 @@ class MoneyPill extends StatelessWidget {
         padding: const EdgeInsets.all(1.6),
         decoration: BoxDecoration(
           gradient: AppColors.sunset,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(AppShape.r(30)),
         ),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(AppShape.r(30)),
           ),
           child: Text(text,
               style:

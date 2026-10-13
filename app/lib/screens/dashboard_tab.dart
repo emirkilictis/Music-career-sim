@@ -368,9 +368,9 @@ class _StatusTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(AppShape.r(18)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppShape.r(18)),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
@@ -630,7 +630,7 @@ class _Card extends StatelessWidget {
           gradient: highlight
               ? AppColors.haze(AppColors.lilac, AppColors.pink)
               : null,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(AppShape.r(22)),
         ),
         padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
         child: child,

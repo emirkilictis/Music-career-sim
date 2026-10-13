@@ -33,6 +33,15 @@ class SettingsScreen extends StatelessWidget {
             RadioListTile<bool>(value: true, title: Text(l.themeLight)),
           ]),
         ),
+        ListTile(title: Text(l.cornersTitle)),
+        RadioGroup<bool>(
+          groupValue: settings.sharpCorners,
+          onChanged: (v) => settings.setSharpCorners(v ?? false),
+          child: Column(children: [
+            RadioListTile<bool>(value: false, title: Text(l.cornersSoft)),
+            RadioListTile<bool>(value: true, title: Text(l.cornersSharp)),
+          ]),
+        ),
         const Divider(),
         SwitchListTile(
           title: Text(l.weekTransition),

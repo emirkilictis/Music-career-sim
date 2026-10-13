@@ -25,6 +25,9 @@ class AppSettings extends ChangeNotifier {
   /// App colors: vivid navy (default) or light (docs K41).
   bool lightTheme = false;
 
+  /// Corner style: soft (default) or sharp (docs F1).
+  bool sharpCorners = false;
+
   Locale? get locale => languageCode == null ? null : Locale(languageCode!);
 
   static Future<AppSettings> load(File? file) async {
@@ -36,11 +39,13 @@ class AppSettings extends ChangeNotifier {
         s.premium = m['premium'] as bool? ?? false;
         s.weekTransition = m['weekTransition'] as bool? ?? true;
         s.lightTheme = m['theme'] == 'light';
+        s.sharpCorners = m['corners'] == 'sharp';
       } on FormatException {
         // A broken settings file falls back to defaults.
       }
     }
     AppColors.palette = s.lightTheme ? Palette.light : Palette.navy;
+    AppShape.sharp = s.sharpCorners;
     return s;
   }
 
@@ -60,6 +65,12 @@ class AppSettings extends ChangeNotifier {
     _save();
   }
 
+  void setSharpCorners(bool on) {
+    sharpCorners = on;
+    AppShape.sharp = on;
+    _save();
+  }
+
   void setWeekTransition(bool on) {
     weekTransition = on;
     _save();
@@ -75,6 +86,7 @@ class AppSettings extends ChangeNotifier {
       'premium': premium,
       'weekTransition': weekTransition,
       'theme': lightTheme ? 'light' : 'navy',
+      'corners': sharpCorners ? 'sharp' : 'soft',
     }));
   }
 }

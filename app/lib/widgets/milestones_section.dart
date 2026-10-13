@@ -110,7 +110,7 @@ class _MilestoneRow extends StatelessWidget {
             else if (progress != null) ...[
               const SizedBox(height: 5),
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(AppShape.r(4)),
                 child: LinearProgressIndicator(
                   value: (progress.$1 / progress.$2).clamp(0.0, 1.0),
                   minHeight: 6,

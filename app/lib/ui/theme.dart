@@ -36,8 +36,8 @@ ThemeData appTheme() {
     scaffoldBackgroundColor: AppColors.bg,
   );
   final t = base.textTheme;
-  final shape20 =
-      RoundedRectangleBorder(borderRadius: BorderRadius.circular(20));
+  final shape20 = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(AppShape.r(20)));
   return base.copyWith(
     textTheme: t.copyWith(
       headlineLarge: t.headlineLarge?.copyWith(fontWeight: FontWeight.w800),
@@ -70,14 +70,14 @@ ThemeData appTheme() {
         contentPadding: EdgeInsets.symmetric(horizontal: 16)),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        shape: const StadiumBorder(),
+        shape: _pill(),
         textStyle: const TextStyle(
             fontFamily: AppFonts.ui, fontWeight: FontWeight.w800, fontSize: 15),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        shape: const StadiumBorder(),
+        shape: _pill(),
         side: BorderSide(color: AppColors.line, width: 1.4),
         foregroundColor: AppColors.text,
         textStyle: const TextStyle(
@@ -94,7 +94,7 @@ ThemeData appTheme() {
       backgroundColor: AppColors.surfaceHigh,
       selectedColor: AppColors.accentSoft,
       side: BorderSide.none,
-      shape: const StadiumBorder(),
+      shape: _pill(),
       labelStyle: TextStyle(
           fontFamily: AppFonts.ui,
           fontWeight: FontWeight.w600,
@@ -108,6 +108,7 @@ ThemeData appTheme() {
         selectedForegroundColor: AppColors.text,
         foregroundColor: AppColors.textMuted,
         side: BorderSide.none,
+        shape: _pill(),
         textStyle: const TextStyle(
             fontFamily: AppFonts.ui, fontWeight: FontWeight.w700),
       ),
@@ -116,11 +117,13 @@ ThemeData appTheme() {
       filled: true,
       fillColor: AppColors.surfaceHigh,
       border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+          borderRadius: BorderRadius.circular(AppShape.r(14)),
+          borderSide: BorderSide.none),
       enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+          borderRadius: BorderRadius.circular(AppShape.r(14)),
+          borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppShape.r(14)),
           borderSide: BorderSide(color: AppColors.lilac, width: 1.5)),
       labelStyle: TextStyle(color: AppColors.textMuted),
     ),
@@ -144,6 +147,7 @@ ThemeData appTheme() {
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: AppColors.surfaceLow,
       indicatorColor: AppColors.accentSoft,
+      indicatorShape: _pill(),
       height: 66,
       labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
             fontFamily: AppFonts.ui,
@@ -165,11 +169,13 @@ ThemeData appTheme() {
       backgroundColor: AppColors.surface,
       showDragHandle: true,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(AppShape.r(28)))),
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppShape.r(28))),
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
@@ -178,7 +184,8 @@ ThemeData appTheme() {
           fontFamily: AppFonts.ui,
           color: AppColors.text,
           fontWeight: FontWeight.w600),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppShape.r(16))),
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(
       color: AppColors.lilac,
@@ -186,3 +193,8 @@ ThemeData appTheme() {
     ),
   );
 }
+
+/// Pill-shaped in the soft style, squared off in the sharp one (docs F1).
+OutlinedBorder _pill() => AppShape.sharp
+    ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
+    : const StadiumBorder();

@@ -40,7 +40,7 @@ class TourSection extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 6),
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(AppShape.r(4)),
                 child: LinearProgressIndicator(
                   value: (t.weekOfTour - 1) / t.weeks,
                   minHeight: 6,

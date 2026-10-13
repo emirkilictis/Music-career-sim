@@ -67,7 +67,7 @@ class CoverArt extends StatelessWidget {
         ? null
         : (imageKey == null ? null : store.path(imageKey!)) ?? own();
     return ClipRRect(
-      borderRadius: BorderRadius.circular(radius ?? size * 0.12),
+      borderRadius: BorderRadius.circular(AppShape.r(radius ?? size * 0.12)),
       child: SizedBox.square(
         dimension: size,
         child: path != null

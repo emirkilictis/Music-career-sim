@@ -78,7 +78,7 @@ class _WeekTransitionState extends State<WeekTransition>
           final week = arrived ? o.week : widget.fromWeek;
           return Material(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(AppShape.r(28)),
             child: Container(
               width: 250,
               padding: const EdgeInsets.fromLTRB(24, 22, 24, 22),

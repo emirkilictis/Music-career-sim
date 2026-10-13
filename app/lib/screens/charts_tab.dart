@@ -337,8 +337,8 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration:
-            BoxDecoration(color: bg, borderRadius: BorderRadius.circular(3)),
+        decoration: BoxDecoration(
+            color: bg, borderRadius: BorderRadius.circular(AppShape.r(3))),
         child: Text(text,
             style: TextStyle(
                 fontFamily: AppFonts.condensed,

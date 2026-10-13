@@ -53,7 +53,7 @@ class Section extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(AppShape.r(22)),
         child: Padding(
           padding: padding,
           child: Column(
@@ -195,7 +195,7 @@ class PillBar extends StatelessWidget {
         height: height,
         decoration: BoxDecoration(
           color: AppColors.surfaceHigh,
-          borderRadius: BorderRadius.circular(height),
+          borderRadius: BorderRadius.circular(AppShape.r(height)),
         ),
         alignment: Alignment.centerLeft,
         child: v <= 0
@@ -205,7 +205,7 @@ class PillBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                       colors: colors ?? [AppColors.lilac, AppColors.pink]),
-                  borderRadius: BorderRadius.circular(height),
+                  borderRadius: BorderRadius.circular(AppShape.r(height)),
                 ),
               ),
       );
@@ -248,7 +248,7 @@ class Tag extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.16),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppShape.r(20)),
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           if (icon != null) ...[
@@ -285,7 +285,7 @@ class GradientButton extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: AppColors.sunset,
-          borderRadius: BorderRadius.circular(height),
+          borderRadius: BorderRadius.circular(AppShape.r(height)),
           boxShadow: [
             BoxShadow(
                 color: AppColors.pink.withValues(alpha: 0.25),
@@ -296,7 +296,7 @@ class GradientButton extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(height),
+            borderRadius: BorderRadius.circular(AppShape.r(height)),
             onTap: onPressed,
             child: Container(
               height: height,
@@ -345,7 +345,7 @@ class IconBubble extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.16),
-          borderRadius: BorderRadius.circular(size * 0.36),
+          borderRadius: BorderRadius.circular(AppShape.r(size * 0.36)),
         ),
         child: Icon(icon, color: color, size: size * 0.52),
       );
@@ -369,7 +369,7 @@ class PosBadge extends StatelessWidget {
             : highlight
                 ? AppColors.accentSoft
                 : AppColors.surfaceHigh,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppShape.r(12)),
       ),
       child: Text(pos > 0 ? '#$pos' : '–',
           textAlign: TextAlign.center,
@@ -401,7 +401,7 @@ class GradeTag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppShape.r(10)),
       ),
       child: Text(grade,
           textAlign: TextAlign.center,

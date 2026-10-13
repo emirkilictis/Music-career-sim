@@ -386,7 +386,7 @@ class ReleaseHeader extends StatelessWidget {
         const SizedBox(height: 4),
         DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(AppShape.r(18)),
             boxShadow: const [
               BoxShadow(
                   blurRadius: 30, offset: Offset(0, 12), color: Colors.black54),
