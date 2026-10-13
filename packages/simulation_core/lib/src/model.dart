@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'config/charts.dart';
 import 'config/regions.dart';
+import 'opportunities.dart';
 
 enum ArtistTier { player, a, b }
 
@@ -271,6 +272,9 @@ class Artist {
   /// Listener fatigue from recent paid campaigns (docs K57): each one adds
   /// to it, it fades every week, and a new campaign works 1 / (1 + it).
   double campaignFatigue = 0;
+
+  /// An offer waiting for the player's answer (docs K59).
+  Opportunity? opportunity;
 
   /// The player's releases set for a later week (docs K45).
   final List<ScheduledRelease> scheduled = [];

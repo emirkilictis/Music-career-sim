@@ -8,6 +8,7 @@ import 'config/era_table.dart';
 import 'config/regions.dart';
 import 'lifecycle.dart';
 import 'model.dart';
+import 'opportunities.dart';
 import 'rng.dart';
 import 'time.dart';
 import 'world.dart';
@@ -26,6 +27,8 @@ class WeekResult {
     required this.activeAlbums,
     required this.dormantSongs,
     required this.microseconds,
+    this.newOpportunity,
+    this.lapsedOpportunity,
   });
 
   final int week;
@@ -52,6 +55,11 @@ class WeekResult {
   final int activeAlbums;
   final int dormantSongs;
   final int microseconds;
+
+  /// An offer that came up for the player this week, and one that ran out
+  /// unanswered (docs K59).
+  final Opportunity? newOpportunity;
+  final OpportunityOutcome? lapsedOpportunity;
 
   List<ChartEntry> get songChart => charts[Charts.usSongs];
   List<ChartEntry> get albumChart => charts[Charts.usAlbums];
@@ -691,6 +699,20 @@ class Simulator {
     }
     _playerIncome();
     if (w.week % catalogFadeWeeks == 0) _fadePlayerCatalog();
+    // Offers between releases (docs K59).
+    OpportunityOutcome? lapsed;
+    Opportunity? offered;
+    final me = w.player;
+    if (me != null) {
+      if (Opportunities.lapseDue(w, me)) {
+        lapsed = Opportunities.answer(w, me, me.opportunity!.lapse);
+      }
+      offered = Opportunities.roll(w, me);
+      if (offered != null) {
+        me.opportunity = offered;
+        w.dirtyArtists.add(me.id);
+      }
+    }
 
     final result = WeekResult(
       week: w.week,
@@ -704,6 +726,8 @@ class Simulator {
       activeAlbums: w.activeAlbumIds.length,
       dormantSongs: w.dormantSongCount,
       microseconds: sw.elapsedMicroseconds,
+      newOpportunity: offered,
+      lapsedOpportunity: lapsed,
     );
     w.week++;
     return result;

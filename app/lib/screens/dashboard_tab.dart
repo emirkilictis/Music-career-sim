@@ -9,6 +9,7 @@ import '../core/commands.dart';
 import '../core/format.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
+import '../widgets/opportunity_card.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
 import 'streamify/streamify_tab.dart';
@@ -29,6 +30,10 @@ class DashboardTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
+        if (context.career.player.opportunity case final offer?) ...[
+          OpportunityCard(offer: offer),
+          const SizedBox(height: 12),
+        ],
         const _WeekCard(),
         const SizedBox(height: 12),
         _NextStepCard(onOpenTab: onOpenTab, onNextWeek: onNextWeek),

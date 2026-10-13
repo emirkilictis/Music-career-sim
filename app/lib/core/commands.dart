@@ -148,6 +148,10 @@ abstract final class Cmd {
 
   static SessionCmd<void> signLabel(Label label) => (s) => s.signLabel(label);
 
+  static SessionCmd<OpportunityOutcome> answerOpportunity(
+          OpportunityChoice choice) =>
+      (s) => s.answerOpportunity(choice);
+
   static SessionCmd<void> shootVideo(int id, VideoBudget budget) =>
       (s) => s.shootVideo(id, budget);
 

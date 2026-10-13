@@ -397,6 +397,25 @@ class GameSession {
     return Actions.campaignCostFor(_p, campaign);
   }
 
+  // -------------------------------------------------------- opportunities
+
+  /// The offer waiting for an answer, if any (docs K59).
+  OpportunityView? get opportunity => _p.opportunity == null
+      ? null
+      : OpportunityView.of(world, _p.opportunity!);
+
+  /// Answers the waiting offer.
+  OpportunityOutcome answerOpportunity(OpportunityChoice choice) {
+    final o = _p.opportunity;
+    if (o == null) throw GameException('noOffer', 'Nothing to answer');
+    if (!o.choices.contains(choice)) {
+      throw GameException('invalidChoice', 'Not an answer to this offer');
+    }
+    final out = Opportunities.answer(world, _p, choice);
+    _saveNow();
+    return out;
+  }
+
   // ------------------------------------------------------------- labels
 
   /// Every label, with its terms and whether it would sign the player.
@@ -986,6 +1005,8 @@ class GameSession {
         if (w.albums[id].artistId == p.id) id,
     };
 
+    if (r.lapsedOpportunity case final o?) events.add(OpportunityLapsed(o));
+    if (r.newOpportunity case final o?) events.add(OpportunityCame(o.kind));
     for (final al in w.albums.reversed) {
       if (al.releaseWeek < r.week) break;
       if (al.artistId == p.id &&

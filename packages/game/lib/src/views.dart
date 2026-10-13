@@ -101,6 +101,9 @@ class ArtistView {
           for (final k in Campaign.values) Actions.campaignCostFor(a, k)
         ],
         campaignPower = Actions.campaignPowerFor(a),
+        opportunity = a.opportunity == null
+            ? null
+            : OpportunityView.of(w, a.opportunity!),
         skills = {for (final k in SkillKind.values) k: a.skills[k]},
         lastReleaseWeek = a.lastReleaseWeek,
         everCharted = a.tier == ArtistTier.player &&
@@ -182,6 +185,9 @@ class ArtistView {
   /// How much of a new campaign's effect would land (1 = all; lower after
   /// recent campaigns tired the audience).
   final double campaignPower;
+
+  /// An offer waiting for the player's answer (docs K59).
+  final OpportunityView? opportunity;
 
   /// Unspent skill points and the current skills (0–100).
   final int skillPoints;
@@ -659,4 +665,27 @@ bool _charted(Charted e) {
     if ((e.statsOrNull(c)?.weeksOn ?? 0) > 0) return true;
   }
   return false;
+}
+
+/// An offer waiting for the player's answer (docs K59).
+class OpportunityView {
+  OpportunityView.of(World w, Opportunity o)
+      : kind = o.kind,
+        week = o.week,
+        weeksLeft = o.week + Opportunities.answerWeeks + 1 - w.week,
+        partnerArtistId = o.partnerArtistId,
+        partnerName =
+            o.partnerArtistId >= 0 ? w.artists[o.partnerArtistId].name : '',
+        feeCents = o.feeCents,
+        choices = o.choices;
+
+  final OpportunityKind kind;
+  final int week;
+
+  /// Weeks still played before it lapses (1 = answer before next week).
+  final int weeksLeft;
+  final int partnerArtistId;
+  final String partnerName;
+  final int feeCents;
+  final List<OpportunityChoice> choices;
 }

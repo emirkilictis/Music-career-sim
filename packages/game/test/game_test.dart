@@ -131,6 +131,35 @@ void main() {
       g.close();
     });
 
+    test('an offer waits across reopening; answers are checked (K59)', () {
+      var g = GameSession.start(slots, _setup());
+      final id = g.slotId;
+      expect(() => g.answerOpportunity(OpportunityChoice.accept),
+          throwsA(isA<GameException>()));
+      final p = g.world.player!;
+      p.opportunity = Opportunity(
+          kind: OpportunityKind.festival, week: g.world.week, feeCents: 1000);
+      g.world.dirtyArtists.add(p.id);
+      g.writeSong(budget: BudgetTier.low); // any action saves
+      expect(g.player.opportunity?.kind, OpportunityKind.festival);
+      expect(g.player.opportunity?.weeksLeft, 3);
+      g.close();
+
+      g = GameSession.resume(slots, id);
+      expect(g.opportunity?.feeCents, 1000);
+      expect(() => g.answerOpportunity(OpportunityChoice.perform),
+          throwsA(isA<GameException>()));
+      final money = g.player.moneyCents;
+      final out = g.answerOpportunity(OpportunityChoice.accept);
+      expect(out.moneyCents, 1000);
+      expect(g.player.moneyCents, money + 1000);
+      expect(g.opportunity, isNull);
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.opportunity, isNull);
+      g.close();
+    });
+
     test('weeks autosave; resuming continues exactly where it was', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;

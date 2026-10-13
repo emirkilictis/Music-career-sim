@@ -12,6 +12,7 @@ export 'src/config/sim_config.dart';
 export 'src/lifecycle.dart';
 export 'src/model.dart';
 export 'src/names.dart';
+export 'src/opportunities.dart';
 export 'src/rng.dart';
 export 'src/simulator.dart';
 export 'src/time.dart';

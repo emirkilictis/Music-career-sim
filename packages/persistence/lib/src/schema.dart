@@ -4,8 +4,11 @@ import 'codec.dart';
 /// (docs/data-model.md). Never edit a shipped migration; append a new one.
 /// (v1 has not shipped yet, so it is still being shaped.)
 final List<String> migrations = [
-  _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, //
+  _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, //
 ];
+
+/// v12: the player's waiting offer (docs K59).
+const _v12 = 'ALTER TABLE artist ADD COLUMN opportunity TEXT;';
 
 /// v11: campaign fatigue and profit/loss (docs K57).
 const _v11 = '''

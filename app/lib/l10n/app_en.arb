@@ -924,6 +924,155 @@
   "totalSales": "Total",
   "pureSales": "Pure sales",
   "albumStats": "Album stats",
+  "offerInterviewTitle": "Interview request",
+  "offerInterviewBody": "A late-night show wants you as a guest. Good for hype (charisma helps); costs {energy} energy.",
+  "@offerInterviewBody": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "offerFeatureTitle": "Duet request",
+  "offerFeatureBody": "{artist} wants you on their next single, for {fee}. Their fans will hear you (vocals help); costs {energy} energy.",
+  "@offerFeatureBody": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "offerFestivalTitle": "Festival invitation",
+  "offerFestivalBody": "A summer festival offers {fee} for a set. A good show wins new fans (performance helps); costs {energy} energy.",
+  "@offerFestivalBody": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "offerBrandTitle": "Brand deal",
+  "offerBrandBody": "A brand offers {fee} to put your face on its ads. Easy money, but some fans may see it as selling out.",
+  "@offerBrandBody": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "offerScandalTitle": "Scandal!",
+  "offerScandalBody": "An old video of you is all over the gossip sites. How do you respond?",
+  "offerAwardTitle": "Award nomination",
+  "offerAwardBody": "You are nominated at the Golden Record Awards for last year’s hits. Performing on the night ({energy} energy) gives you a better shot and a big moment.",
+  "@offerAwardBody": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "offerAnswerSoon": "Answer before next week",
+  "offerAnswerWeeks": "Answer within {count} weeks",
+  "@offerAnswerWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "choiceAccept": "Accept",
+  "choiceDecline": "Decline",
+  "choiceApologize": "Apologize",
+  "choiceIgnore": "Ignore it",
+  "choiceLeanIn": "Lean into it",
+  "choicePerform": "Attend and perform",
+  "choiceAttend": "Just attend",
+  "choiceStayHome": "Stay home",
+  "outcomeDeclined": "You turned it down.",
+  "outcomeInterview": "Great interview: +{fans} fans, hype is up.",
+  "@outcomeInterview": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeFeature": "The duet is out: +{fans} fans and {money}.",
+  "@outcomeFeature": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      },
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeFestival": "What a set: +{fans} fans and {money}.",
+  "@outcomeFestival": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      },
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeBrand": "Deal signed: {money}. A few fans grumble.",
+  "@outcomeBrand": {
+    "placeholders": {
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeApologize": "The apology calmed things down, at a small cost.",
+  "outcomeIgnoreOk": "The scandal blew over by itself.",
+  "outcomeIgnoreBad": "The scandal did not blow over: popularity and devotion took a hit.",
+  "outcomeLeanIn": "You leaned into it: more buzz and +{fans} fans, but some fans are put off.",
+  "@outcomeLeanIn": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeAwardWon": "You won at the Golden Record Awards! Fame and hype are up.",
+  "outcomeAwardLost": "No award this time, but the night got you noticed: +{fans} fans.",
+  "@outcomeAwardLost": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeAwardSkipped": "You skipped the awards.",
+  "eventOfferCame": "{what}: answer on the Home screen.",
+  "@eventOfferCame": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "eventOfferLapsed": "An offer ran out: {what}.",
+  "@eventOfferLapsed": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
   "albumPageTotals": "{count} songs · {plays} plays",
   "@albumPageTotals": {
     "placeholders": {

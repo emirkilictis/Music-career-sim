@@ -224,6 +224,62 @@ class Fmt {
 
   String criticScore(double score) => score.toStringAsFixed(1);
 
+  String offerTitle(OpportunityKind k) => switch (k) {
+        OpportunityKind.interview => l.offerInterviewTitle,
+        OpportunityKind.feature => l.offerFeatureTitle,
+        OpportunityKind.festival => l.offerFestivalTitle,
+        OpportunityKind.brandDeal => l.offerBrandTitle,
+        OpportunityKind.scandal => l.offerScandalTitle,
+        OpportunityKind.award => l.offerAwardTitle,
+      };
+
+  String offerBody(OpportunityView o) => switch (o.kind) {
+        OpportunityKind.interview =>
+          l.offerInterviewBody(Opportunities.interviewEnergy.round()),
+        OpportunityKind.feature => l.offerFeatureBody(o.partnerName,
+            money(o.feeCents), Opportunities.featureEnergy.round()),
+        OpportunityKind.festival => l.offerFestivalBody(
+            money(o.feeCents), Opportunities.festivalEnergy.round()),
+        OpportunityKind.brandDeal => l.offerBrandBody(money(o.feeCents)),
+        OpportunityKind.scandal => l.offerScandalBody,
+        OpportunityKind.award =>
+          l.offerAwardBody(Opportunities.performEnergy.round()),
+      };
+
+  String offerChoice(OpportunityKind k, OpportunityChoice c) => switch (c) {
+        OpportunityChoice.accept =>
+          k == OpportunityKind.award ? l.choiceAttend : l.choiceAccept,
+        OpportunityChoice.decline =>
+          k == OpportunityKind.award ? l.choiceStayHome : l.choiceDecline,
+        OpportunityChoice.apologize => l.choiceApologize,
+        OpportunityChoice.ignore => l.choiceIgnore,
+        OpportunityChoice.leanIn => l.choiceLeanIn,
+        OpportunityChoice.perform => l.choicePerform,
+      };
+
+  /// What an answer did (shown right after it, or in the news if it lapsed).
+  String offerOutcome(OpportunityOutcome o) {
+    final fans = compact(o.fans);
+    return switch ((o.kind, o.choice)) {
+      (OpportunityKind.scandal, OpportunityChoice.apologize) =>
+        l.outcomeApologize,
+      (OpportunityKind.scandal, OpportunityChoice.ignore) =>
+        o.blewOver ? l.outcomeIgnoreOk : l.outcomeIgnoreBad,
+      (OpportunityKind.scandal, _) => l.outcomeLeanIn(fans),
+      (OpportunityKind.award, OpportunityChoice.decline) =>
+        l.outcomeAwardSkipped,
+      (OpportunityKind.award, _) =>
+        o.won ? l.outcomeAwardWon : l.outcomeAwardLost(fans),
+      (_, OpportunityChoice.decline) => l.outcomeDeclined,
+      (OpportunityKind.interview, _) => l.outcomeInterview(fans),
+      (OpportunityKind.feature, _) =>
+        l.outcomeFeature(fans, money(o.moneyCents)),
+      (OpportunityKind.festival, _) =>
+        l.outcomeFestival(fans, money(o.moneyCents)),
+      (OpportunityKind.brandDeal, _) => l.outcomeBrand(money(o.moneyCents)),
+    };
+  }
+
   String labelName(Label x) => switch (x) {
         Label.independent => l.labelIndependent,
         Label.small => l.labelSmall,
@@ -381,6 +437,10 @@ class Fmt {
       CriticReview() =>
         l.eventCriticReview(t, criticScore(e.score), criticBlurb(e.score)),
       LabelDropped() => l.eventLabelDropped(labelName(e.label)),
+      OpportunityCame() => l.eventOfferCame(offerTitle(e.kind)),
+      OpportunityLapsed() => e.outcome.kind == OpportunityKind.scandal
+          ? offerOutcome(e.outcome)
+          : l.eventOfferLapsed(offerTitle(e.outcome.kind)),
       ReleaseAnnounced() => l.eventReleaseAnnounced(t, week(e.releaseWeek)),
       PlatformLaunched() => e.chartId == Charts.platformGlobal
           ? l.eventPlatformLaunched(platformName)

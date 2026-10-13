@@ -196,3 +196,20 @@ class CriticReview extends GameEvent {
   @override
   bool get isMajor => false;
 }
+
+/// An offer came up and waits for the player's answer (docs K59). An
+/// interview is small news; the rest stop a skip so the player can answer.
+class OpportunityCame extends GameEvent {
+  const OpportunityCame(this.kind);
+  final OpportunityKind kind;
+  @override
+  bool get isMajor => kind != OpportunityKind.interview;
+}
+
+/// An offer ran out unanswered (a scandal left alone plays out by itself).
+class OpportunityLapsed extends GameEvent {
+  const OpportunityLapsed(this.outcome);
+  final OpportunityOutcome outcome;
+  @override
+  bool get isMajor => false;
+}

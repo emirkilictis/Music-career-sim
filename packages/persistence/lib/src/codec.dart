@@ -52,6 +52,8 @@ abstract final class Codec {
     'restWeek', 'skillPoints', 'schedule',
     // Added in schema v8, v11.
     'label', 'contractAlbums', 'campaignFatigue',
+    // Added in schema v12.
+    'opportunity',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -83,6 +85,7 @@ abstract final class Codec {
         a.label.index,
         a.contractAlbumsLeft,
         a.campaignFatigue,
+        Opportunity.encode(a.opportunity),
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -153,6 +156,7 @@ abstract final class Codec {
             : Label.independent);
     a.contractAlbumsLeft = r['contractAlbums'] as int? ?? 0;
     a.campaignFatigue = (r['campaignFatigue'] as num?)?.toDouble() ?? 0;
+    a.opportunity = Opportunity.decode(r['opportunity'] as String?);
     a.pendingAlbumSongIds.addAll(_parseInts(r['pendingSongs'] as String));
     _readReg(r, artistRegColumns, a.reg);
     _readInts(r['no1Singles'] as String, a.no1Singles);

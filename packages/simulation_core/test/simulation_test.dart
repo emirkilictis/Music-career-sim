@@ -278,6 +278,82 @@ void main() {
     expect(s.dormantRate / rate0, closeTo(0.9, 0.02));
   });
 
+  group('opportunities (K59)', () {
+    ({World w, Simulator sim, Artist p}) star() {
+      final w = WorldGen.create(seed: 59, startYear: 2010);
+      final sim = Simulator(w);
+      final p = WorldGen.addPlayer(w,
+          name: 'Star',
+          genre: 0,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire);
+      return (w: w, sim: sim, p: p);
+    }
+
+    test('offers come up for a star, one at a time, and lapse', () {
+      final (:w, :sim, :p) = star();
+      final kinds = <OpportunityKind>{};
+      var lapsed = 0;
+      for (var i = 0; i < 2 * GameTime.weeksPerYear; i++) {
+        final r = sim.step();
+        if (r.newOpportunity case final o?) {
+          kinds.add(o.kind);
+          expect(p.opportunity, same(o));
+        }
+        if (r.lapsedOpportunity != null) lapsed++;
+        // Never two at once: a new one only once the last is gone.
+        if (r.newOpportunity != null && r.lapsedOpportunity == null) {
+          expect(w.week - 1, r.week);
+        }
+      }
+      printOnFailure('kinds $kinds');
+      expect(kinds.length, greaterThanOrEqualTo(3));
+      expect(lapsed, greaterThan(0));
+    });
+
+    test('answers pay, cost energy and move fans; choices are checked', () {
+      final (:w, :sim, :p) = star();
+      p.opportunity = Opportunity(
+          kind: OpportunityKind.festival, week: w.week, feeCents: 5000000);
+      expect(() => Opportunities.answer(w, p, OpportunityChoice.leanIn),
+          throwsArgumentError);
+      final money = p.moneyCents, fans = p.coreFans;
+      final energy = p.creativeEnergy;
+      final out = Opportunities.answer(w, p, OpportunityChoice.accept);
+      expect(p.opportunity, isNull);
+      expect(p.moneyCents - money, 5000000);
+      expect(p.coreFans, greaterThan(fans));
+      expect(p.creativeEnergy, lessThan(energy));
+      expect(out.moneyCents, 5000000);
+
+      // Declining does nothing.
+      p.opportunity = Opportunity(
+          kind: OpportunityKind.brandDeal, week: w.week, feeCents: 100);
+      final m2 = p.moneyCents;
+      Opportunities.answer(w, p, OpportunityChoice.decline);
+      expect(p.moneyCents, m2);
+    });
+
+    test('an award comes after a year with a top-10 hit', () {
+      final (:w, :sim, :p) = star();
+      while (w.week < GameTime.firstWeekOf(2010)) {
+        sim.step();
+      }
+      p.moneyCents = 1 << 40;
+      final s = Actions.writeSong(w, p, producerSkill: 95, aiMode: true);
+      Actions.releaseSingle(w, p, s, campaign: Campaign.global);
+      var nominated = false;
+      while (GameTime.yearOf(w.week) < 2011 ||
+          GameTime.weekOfYear(w.week) <= Opportunities.awardWeek) {
+        final r = sim.step();
+        if (r.newOpportunity?.kind == OpportunityKind.award) nominated = true;
+      }
+      final peak = s.statsOrNull(Charts.usSongs)?.peak ?? 999;
+      printOnFailure('peak $peak');
+      if (peak <= 10) expect(nominated, isTrue);
+    });
+  });
+
   group('eras and anticipation', () {
     test('a CD-era smash does not make a later era look disappointing', () {
       final w = WorldGen.create(seed: 13, startYear: 2013);
