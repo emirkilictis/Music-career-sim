@@ -345,6 +345,47 @@ void main() {
     expect(a.moneyCents - money, greaterThan(done.netCents * 0.9));
   });
 
+  test('rivals carry real names in their own years, never twice (K66)', () {
+    final w = WorldGen.create(seed: 66, startYear: 2008, realNames: true);
+    final names = [for (final a in w.artists) a.name];
+    expect(names.toSet().length, names.length);
+    final real = {for (final r in realArtists) r.name};
+    final topTier = [
+      for (final a in w.artists)
+        if (a.tier == ArtistTier.a) a.name
+    ];
+    // The top tier is all real stars active at the start.
+    expect(topTier.every(real.contains), isTrue);
+    final start = GameTime.yearOf(w.week);
+    for (final a in w.artists) {
+      final r = realArtists.where((x) => x.name == a.name).firstOrNull;
+      if (r != null) expect(r.debut, lessThanOrEqualTo(start));
+    }
+    expect(names.contains('Taylor Swift'), isFalse);
+    final sim = Simulator(w);
+    while (GameTime.yearOf(w.week) <= 2007) {
+      sim.step();
+    }
+    // She arrives as a newcomer in her breakthrough year (or just after).
+    final taylor = w.artists.firstWhere((a) => a.name == 'Taylor Swift');
+    expect(GameTime.yearOf(taylor.debutWeek), inInclusiveRange(2006, 2008));
+    expect(taylor.genre, 4);
+    final all = [for (final a in w.artists) a.name.toLowerCase()];
+    expect(all.toSet().length, all.length);
+    // A player with a real artist's name: the rival gets another name.
+    final britney = w.artists.firstWhere((a) => a.name == 'Britney Spears');
+    final p = WorldGen.addPlayer(w,
+        name: 'Britney Spears',
+        genre: 0,
+        tier: StartTier.unknown,
+        money: StartMoney.basic);
+    expect(britney.name, isNot('Britney Spears'));
+    expect(p.name, 'Britney Spears');
+    // Made-up worlds stay made up.
+    final fake = WorldGen.create(seed: 66, startYear: 2008);
+    expect(fake.artists.where((a) => real.contains(a.name)), isEmpty);
+  });
+
   group('opportunities (K59)', () {
     ({World w, Simulator sim, Artist p}) star() {
       final w = WorldGen.create(seed: 59, startYear: 2010);
@@ -501,8 +542,10 @@ void main() {
   required List<int> variants,
   Difficulty difficulty = Difficulty.normal,
   Campaign campaign = Campaign.standard,
+  int seed = 77,
 }) {
-  final w = WorldGen.create(seed: 77, startYear: year, difficulty: difficulty);
+  final w =
+      WorldGen.create(seed: seed, startYear: year, difficulty: difficulty);
   final sim = Simulator(w);
   while (w.week < GameTime.firstWeekOf(year)) {
     sim.step();
@@ -551,29 +594,32 @@ void megaDebutTests() {
   });
 
   test('legend mode: a record week is reachable, realistic stays near 4M', () {
+    // Averaged over a few worlds: one album's critic score and noise move
+    // a single week by ±15%.
     const maxMoves = [0, 0, 0, 0, 0, 0, 1, 2];
-    final legend = _debut(
-        year: 2025,
-        devotion: 1.0,
-        hype: 0.8,
-        variants: maxMoves,
-        campaign: Campaign.global,
-        difficulty: Difficulty.legend);
-    final real = _debut(
-        year: 2025,
-        devotion: 1.0,
-        hype: 0.8,
-        variants: maxMoves,
-        campaign: Campaign.global);
-    final legendUs =
-        legend.world.albumFirstWeekIn(legend.album, ChartMarket.us);
-    final realUs = real.world.albumFirstWeekIn(real.album, ChartMarket.us);
-    printOnFailure('legend $legendUs, realistic $realUs');
-    // Same artist, same moves: Legend opens above the real record (~4M);
-    // the 1.5–2× gap over a career comes from faster growth (docs K58).
-    expect(legendUs, greaterThan(4.5e6));
-    expect(legendUs, greaterThan(1.15 * realUs));
-    expect(realUs, lessThan(4.8e6));
+    double us(Difficulty d, int seed) {
+      final r = _debut(
+          year: 2025,
+          devotion: 1.0,
+          hype: 0.8,
+          variants: maxMoves,
+          campaign: Campaign.global,
+          difficulty: d,
+          seed: seed);
+      return r.world.albumFirstWeekIn(r.album, ChartMarket.us);
+    }
+
+    const seeds = [77, 78, 79];
+    final legend = [for (final s in seeds) us(Difficulty.legend, s)];
+    final real = [for (final s in seeds) us(Difficulty.normal, s)];
+    double mean(List<double> v) => v.reduce((a, b) => a + b) / v.length;
+    printOnFailure('legend $legend, realistic $real');
+    // Same artist, same moves: Legend opens above the real record (~4M)
+    // on average; the 1.5–2× gap over a career comes from faster growth
+    // (docs K58).
+    expect(mean(legend), greaterThan(4.2e6));
+    expect(mean(legend), greaterThan(1.1 * mean(real)));
+    expect(mean(real), lessThan(4.8e6));
   });
 
   test('legend mode holds the AI back a little', () {

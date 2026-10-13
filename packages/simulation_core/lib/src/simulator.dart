@@ -705,7 +705,10 @@ class Simulator {
       final conv = charm *
           (a.tier == ArtistTier.player ? w.difficulty.fanConversion : 1);
       a.coreFans += c.fanConversion * conv * a.weekReach * fanRoom -
-          c.coreFanDecay * a.kind.fanDecay * a.coreFans;
+          c.coreFanDecay *
+              a.kind.fanDecay *
+              c.rivalAgeFade(a, w.week) *
+              a.coreFans;
       if (a.coreFans < 100) a.coreFans = 100;
       if (a.casual < 1000) a.casual = 1000;
       if (a.eraOpen && w.week - a.eraStartWeek >= c.eraLengthWeeks) {

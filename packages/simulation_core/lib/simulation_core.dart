@@ -13,6 +13,7 @@ export 'src/lifecycle.dart';
 export 'src/model.dart';
 export 'src/names.dart';
 export 'src/opportunities.dart';
+export 'src/real_artists.dart';
 export 'src/rng.dart';
 export 'src/simulator.dart';
 export 'src/time.dart';

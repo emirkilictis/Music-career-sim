@@ -144,7 +144,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('New career'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Superstar'));
+    await tester.scrollUntilVisible(find.text('Superstar'), 200,
+        scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Superstar'));
     await tester.pump();

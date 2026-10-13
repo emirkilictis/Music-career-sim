@@ -268,6 +268,15 @@ class SimConfig {
   final double casualDecay;
   final double coreFanDecay;
 
+  /// Rivals' fan bases thin out faster after their first decade (docs
+  /// K66): ×1 up to 10 years active, +12% a year after (×2.2 at 20 years),
+  /// so the charts renew. The player is never affected.
+  double rivalAgeFade(Artist a, int week) {
+    if (a.tier == ArtistTier.player) return 1;
+    final years = (week - a.debutWeek) / 52;
+    return years <= 10 ? 1 : 1 + 0.12 * (years - 10);
+  }
+
   final int tierACount;
   final int tierBCount;
   final int newArtistsPerYear;

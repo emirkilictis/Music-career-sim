@@ -191,7 +191,10 @@ class GameSession {
     final seed =
         setup.seed ?? DateTime.now().microsecondsSinceEpoch & 0x7fffffffffff;
     final w = WorldGen.create(
-        seed: seed, startYear: setup.startYear, difficulty: setup.difficulty);
+        seed: seed,
+        startYear: setup.startYear,
+        difficulty: setup.difficulty,
+        realNames: setup.realNames);
     final sim = Simulator(w);
     final start = GameTime.firstWeekOf(setup.startYear);
     final total = start - w.week;

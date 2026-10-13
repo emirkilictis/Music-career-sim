@@ -1,6 +1,7 @@
 import 'actions.dart';
 import 'model.dart';
 import 'names.dart';
+import 'real_artists.dart';
 import 'rng.dart';
 import 'time.dart';
 import 'world.dart';
@@ -149,6 +150,11 @@ abstract final class AiPlanner {
     return const [];
   }
 
+  /// Real stars get their first 12 years to break through before a weak
+  /// start can end their career (docs K66).
+  static bool _protected(World w, Artist a, double yearsActive) =>
+      w.realNames && yearsActive < 12 && realStar(a.name) >= 2;
+
   static void _yearlyUpkeep(World w) {
     final c = w.config;
     // Retirements.
@@ -156,6 +162,7 @@ abstract final class AiPlanner {
       if (a.tier == ArtistTier.player || a.isRetired) continue;
       final r = RandomStream.keyed(w.seed, w.week, a.id, RngPurpose.newArtists);
       final yearsActive = (w.week - a.debutWeek) / GameTime.weeksPerYear;
+      if (_protected(w, a, yearsActive)) continue;
       final weak = a.fame < 0.06 && yearsActive > 4;
       final p = (weak ? 0.15 : 0.0) + (yearsActive > 25 ? 0.10 : 0.0);
       if (r.chance(p) && a.plan.isEmpty) w.retire(a);
@@ -174,6 +181,9 @@ abstract final class AiPlanner {
     for (final a in alive) {
       if (excess <= 0) break;
       if (a.plan.isNotEmpty || a.eraOpen) continue;
+      if (_protected(w, a, (w.week - a.debutWeek) / GameTime.weeksPerYear)) {
+        continue;
+      }
       w.retire(a);
       excess--;
     }

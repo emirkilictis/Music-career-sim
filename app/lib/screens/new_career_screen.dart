@@ -26,6 +26,7 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
   HomeCountry _home = HomeCountry.us;
   int _startYear = 2024;
   Difficulty _difficulty = Difficulty.normal;
+  bool _realNames = true;
   CareerPath _path = CareerPath.independent;
   StartTier _tier = StartTier.unknown;
   StartMoney _money = StartMoney.basic;
@@ -94,6 +95,7 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
         charisma: _stats[4].toDouble(),
       ),
       premium: premium,
+      realNames: _realNames,
     );
     try {
       setup.validate();
@@ -313,6 +315,14 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
                         Difficulty.hard => l.difficultyHardHint,
                       },
                       style: t.bodySmall),
+                  const SizedBox(height: 4),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l.realNames),
+                    subtitle: Text(l.realNamesHint),
+                    value: _realNames,
+                    onChanged: (v) => setState(() => _realNames = v),
+                  ),
                 ]),
           ),
           const SizedBox(height: 12),

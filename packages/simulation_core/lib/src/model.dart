@@ -216,7 +216,9 @@ class Artist {
   }
 
   final int id;
-  final String name;
+
+  /// Not final: an AI rival sharing the player's name is renamed (K66).
+  String name;
   ArtistTier tier;
   final int genre;
   final HomeCountry homeCountry;

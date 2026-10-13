@@ -28,6 +28,7 @@ class CareerSetup {
     this.path = CareerPath.independent,
     this.skills,
     this.premium = false,
+    this.realNames = true,
     this.seed,
   });
 
@@ -47,6 +48,9 @@ class CareerSetup {
 
   /// Whether the player has Premium right now (checked by the app's store).
   final bool premium;
+
+  /// Rivals use real artists' names where one fits (docs K66).
+  final bool realNames;
 
   /// World seed; null picks one from the clock.
   final int? seed;

@@ -927,6 +927,8 @@
   "totalSales": "Total",
   "pureSales": "Pure sales",
   "albumStats": "Album stats",
+  "realNames": "Real artist names",
+  "realNamesHint": "Rivals carry real artists' names, arriving in the year they broke through. Off: made-up names.",
   "tourSection": "Touring",
   "tourPlan": "Plan a tour",
   "tourClub": "Club tour",

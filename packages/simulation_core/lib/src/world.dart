@@ -13,6 +13,7 @@ class World {
     required this.seed,
     required this.week,
     this.difficulty = Difficulty.normal,
+    this.realNames = false,
   }) : regionalEra = RegionalEra(config.era);
 
   final SimConfig config;
@@ -21,6 +22,9 @@ class World {
 
   /// Chosen when the career starts; scales only the player's numbers.
   final Difficulty difficulty;
+
+  /// Rivals carry real artists' names where one fits (docs K66).
+  final bool realNames;
 
   /// Current week (the next week to be simulated).
   int week;

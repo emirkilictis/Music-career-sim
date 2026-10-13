@@ -5,6 +5,7 @@ import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'model.dart';
 import 'names.dart';
+import 'real_artists.dart';
 import 'rng.dart';
 import 'time.dart';
 import 'world.dart';
@@ -78,6 +79,7 @@ abstract final class WorldGen {
     required int startYear,
     SimConfig? config,
     Difficulty difficulty = Difficulty.normal,
+    bool realNames = false,
   }) {
     final cfg = config ?? SimConfig();
     final w = World(
@@ -85,6 +87,7 @@ abstract final class WorldGen {
       seed: seed,
       week: GameTime.firstWeekOf(cfg.worldStartYear(startYear)),
       difficulty: difficulty,
+      realNames: realNames,
     );
     for (var i = 0; i < cfg.tierACount; i++) {
       _addAiArtist(w, ArtistTier.a);
@@ -105,21 +108,29 @@ abstract final class WorldGen {
     final r = RandomStream.keyed(w.seed, 0, id, RngPurpose.worldGen);
     final n = RandomStream.keyed(w.seed, 0, id, RngPurpose.names);
     final isA = tier == ArtistTier.a;
+    final real =
+        w.realNames ? _pickReal(w, id, isA: isA, newcomer: newcomer) : null;
+    // Newcomers who became stars in real life start with a star's craft;
+    // whether they make it is up to the simulation.
+    final craftA = isA || (real != null && real.star >= 2);
     double skill(double lo, double hi) => r.range(lo, hi);
     final skills = Skills(
-      songwriting: isA ? skill(60, 92) : skill(35, 78),
-      vocals: isA ? skill(60, 95) : skill(35, 80),
-      production: isA ? skill(40, 85) : skill(25, 70),
-      performance: isA ? skill(55, 95) : skill(30, 80),
-      charisma: isA ? skill(55, 95) : skill(25, 80),
+      songwriting: craftA ? skill(60, 92) : skill(35, 78),
+      vocals: craftA ? skill(60, 95) : skill(35, 80),
+      production: craftA ? skill(40, 85) : skill(25, 70),
+      performance: craftA ? skill(55, 95) : skill(30, 80),
+      charisma: craftA ? skill(55, 95) : skill(25, 80),
     );
     final double fame;
     final double coreFans;
     final double casual;
     if (newcomer) {
       fame = r.range(0.01, 0.10);
-      coreFans = 2e4 * r.logNormal(0.8);
-      casual = 2e5 * r.logNormal(0.8);
+      // Labels back the acts who broke through for real (docs K66): a
+      // bigger first audience, the rest is up to their songs.
+      final backing = real == null ? 1.0 : 1.0 + real.star;
+      coreFans = 2e4 * r.logNormal(0.8) * backing;
+      casual = 2e5 * r.logNormal(0.8) * backing;
     } else if (isA) {
       fame = r.range(0.55, 0.95);
       coreFans = 1.6e6 * r.logNormal(0.8) * (0.5 + fame);
@@ -133,40 +144,93 @@ abstract final class WorldGen {
     // Kind and members use their own streams so the other draws stay put.
     final k = RandomStream.keyed(w.seed, 2, id, RngPurpose.worldGen);
     final kindRoll = k.nextDouble();
-    final kind = kindRoll < 0.12
-        ? ArtistKind.band
-        : (kindRoll < 0.20 ? ArtistKind.vocalGroup : ArtistKind.solo);
+    final kind = real?.kind ??
+        (kindRoll < 0.12
+            ? ArtistKind.band
+            : (kindRoll < 0.20 ? ArtistKind.vocalGroup : ArtistKind.solo));
     final m = RandomStream.keyed(w.seed, 3, id, RngPurpose.names);
-    final memberCount = switch (kind) {
-      ArtistKind.solo => 0,
-      ArtistKind.band => 3 + m.nextInt(3),
-      ArtistKind.vocalGroup => 4 + m.nextInt(4),
-    };
+    final memberCount = real != null
+        ? 0
+        : switch (kind) {
+            ArtistKind.solo => 0,
+            ArtistKind.band => 3 + m.nextInt(3),
+            ArtistKind.vocalGroup => 4 + m.nextInt(4),
+          };
+    final homeRoll =
+        _homeCountry(RandomStream.keyed(w.seed, 1, id, RngPurpose.worldGen));
+    final genreRoll = _weightedGenre(r.nextDouble());
+    // Drawn only for founding rivals, as before (keeps made-up worlds the
+    // same).
+    final debutRoll = newcomer ? 0 : r.nextInt(GameTime.weeksPerYear * 12);
     final a = Artist(
       id: id,
-      name: kind.isGroup ? Names.group(n) : Names.solo(n),
+      name: real?.name ??
+          _freeName(w, () => kind.isGroup ? Names.group(n) : Names.solo(n)),
       kind: kind,
       members: [for (var i = 0; i < memberCount; i++) Names.person(m)],
       tier: tier,
-      homeCountry:
-          _homeCountry(RandomStream.keyed(w.seed, 1, id, RngPurpose.worldGen)),
-      genre: _weightedGenre(r.nextDouble()),
-      debutWeek:
-          newcomer ? w.week : w.week - r.nextInt(GameTime.weeksPerYear * 12),
+      homeCountry: real?.home ?? homeRoll,
+      genre: real?.genre ?? genreRoll,
+      debutWeek: newcomer
+          ? w.week
+          : real != null
+              ? math.min(
+                  w.week, GameTime.firstWeekOf(real.debut) + debutRoll % 40)
+              : w.week - debutRoll,
       skills: skills,
       fame: fame,
       coreFans: coreFans * scale,
       casual: casual * scale,
-      labelReach: isA ? r.range(1.1, 1.4) : r.range(0.6, 1.1),
+      labelReach:
+          isA || (newcomer && craftA) ? r.range(1.1, 1.4) : r.range(0.6, 1.1),
       artistShare: 0.5,
     );
     a.devotion = newcomer
         ? r.range(0.05, 0.2)
         : (isA ? r.range(0.15, 0.6) : r.range(0.05, 0.35));
+    if (newcomer && real != null && real.star >= 2) a.hype = 0.3 * real.star;
     a.nextEraWeek =
         w.week + (newcomer ? r.nextInt(30) : r.nextInt(isA ? 150 : 90));
     w.addArtist(a);
     return a;
+  }
+
+  /// A real artist for a new rival (docs K66): at world creation, one active
+  /// by now (the biggest ones fill the top tier); later, one who broke
+  /// through this year or just before, biggest first. Never a name already
+  /// in the world. Null when none is left: the rival gets a made-up name.
+  static RealArtist? _pickReal(World w, int id,
+      {required bool isA, required bool newcomer}) {
+    final year = GameTime.yearOf(w.week);
+    final used = {for (final a in w.artists) a.name.toLowerCase()};
+    final pool = [
+      for (final ra in realArtists)
+        if (!used.contains(ra.name.toLowerCase()) &&
+            ra.debut <= year &&
+            (!newcomer || ra.debut >= year - 2) &&
+            (!isA || ra.star >= 2))
+          ra,
+    ];
+    if (pool.isEmpty) return null;
+    // The top tier and newcomers take the biggest names first.
+    final top =
+        isA || newcomer ? pool.fold(0, (m, ra) => math.max(m, ra.star)) : 0;
+    final group = [
+      for (final ra in pool)
+        if (ra.star >= top) ra
+    ];
+    final r = RandomStream.keyed(w.seed, 4, id, RngPurpose.names);
+    return group[r.nextInt(group.length)];
+  }
+
+  /// A made-up name no one in the world has yet (tries a few draws).
+  static String _freeName(World w, String Function() draw) {
+    final used = {for (final a in w.artists) a.name.toLowerCase()};
+    var name = draw();
+    for (var i = 0; i < 8 && used.contains(name.toLowerCase()); i++) {
+      name = draw();
+    }
+    return name;
   }
 
   /// AI home countries: half American, a third European, the rest elsewhere.
@@ -241,6 +305,15 @@ abstract final class WorldGen {
     };
     final isLabel = path == CareerPath.smallLabel;
     if (isLabel) cash += Label.small.advanceCents;
+    // A rival with the player's own name (a real artist) takes another one.
+    for (final other in w.artists) {
+      if (other.name.toLowerCase() == name.trim().toLowerCase()) {
+        final n = RandomStream.keyed(w.seed, 5, other.id, RngPurpose.names);
+        other.name = _freeName(
+            w, () => other.kind.isGroup ? Names.group(n) : Names.solo(n));
+        w.dirtyArtists.add(other.id);
+      }
+    }
     final a = Artist(
       id: w.artists.length,
       name: name,

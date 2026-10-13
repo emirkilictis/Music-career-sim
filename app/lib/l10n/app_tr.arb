@@ -380,6 +380,8 @@
   "totalSales": "Toplam",
   "pureSales": "Saf satış",
   "albumStats": "Albüm istatistikleri",
+  "realNames": "Gerçek sanatçı adları",
+  "realNamesHint": "Rakipler gerçek sanatçıların adlarını taşır, çıkış yaptıkları yılda gelirler. Kapalı: uydurma isimler.",
   "tourSection": "Turne",
   "tourPlan": "Turne planla",
   "tourClub": "Kulüp turnesi",
