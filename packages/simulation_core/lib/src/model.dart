@@ -421,6 +421,10 @@ class Song with Charted {
   final double longevity;
   final int estimatedGrade;
 
+  /// How unsure the team is: the estimate is shown as [estimatedGrade] ±
+  /// this (docs F36). Better producers judge more surely.
+  int gradeSpread = 6;
+
   SongStatus status = SongStatus.vault;
   int releasedWeek = -1;
   int albumId = -1;

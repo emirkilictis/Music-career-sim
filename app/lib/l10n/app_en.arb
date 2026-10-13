@@ -566,6 +566,7 @@
   },
   "songRecorded": "Song recorded",
   "teamEstimate": "Your team's estimate",
+  "gradeRevealHint": "The real grade shows once it is out. A better producer judges more surely.",
   "vaultCount": "Vault ({count})",
   "@vaultCount": {
     "placeholders": {

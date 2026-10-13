@@ -112,7 +112,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
                       seed: songCoverSeed(s.id, s.coverAlbumId),
                       songId: s.id,
                       albumId: s.coverAlbumId),
-                  trailing: GradeTag(fmt.grade(s.estimatedGrade)),
+                  trailing: GradeTag(fmt.songGrade(s)),
                   title: Text(s.title),
                   subtitle: Text(s.inVault
                       ? fmt.genres(s.genres)
@@ -729,7 +729,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
                             on! ? _picked.add(s.id) : _picked.remove(s.id)),
                         title: Text(s.title),
                         subtitle: Text(
-                            '${fmt.grade(s.estimatedGrade)} · ${fmt.songStatus(s)} · ${fmt.genres(s.genres)}'),
+                            '${fmt.songGrade(s)} · ${fmt.songStatus(s)} · ${fmt.genres(s.genres)}'),
                       ),
                   ]),
           ),

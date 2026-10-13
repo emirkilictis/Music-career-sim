@@ -196,7 +196,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                 : null,
             title: s.title,
             subtitle: '${s.artistName} · ${fmt.songStatus(s)}',
-            trailing: s.isPlayer ? GradeTag(fmt.grade(s.estimatedGrade)) : null,
+            trailing: s.isPlayer ? GradeTag(fmt.songGrade(s)) : null,
           ),
           if (!s.isPlayer)
             ArtistLink(

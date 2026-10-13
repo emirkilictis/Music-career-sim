@@ -560,7 +560,8 @@ class SaveSlots {
     var lastAlbum = -1, hit = -1, hitPeak = 0;
     for (final id in w.playerSongIds) {
       final s = w.songs[id];
-      if (s.albumId > lastAlbum && w.albums[s.albumId].type != AlbumType.single) {
+      if (s.albumId > lastAlbum &&
+          w.albums[s.albumId].type != AlbumType.single) {
         lastAlbum = s.albumId;
       }
       final peak = s.statsOrNull(Charts.usSongs)?.peak ?? 0;

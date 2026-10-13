@@ -202,8 +202,8 @@ abstract final class Codec {
     // Added in schema v6, v11.
     'videoBudget', 'videoPower',
     'campaignPower', 'campaignCost', 'campaignReturn',
-    // Added in schema v13.
-    'revenue', 'productionCost',
+    // Added in schema v13, v17.
+    'revenue', 'productionCost', 'gradeSpread',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -228,6 +228,7 @@ abstract final class Codec {
         s.campaignReturnCents,
         s.revenueCents,
         s.productionCostCents,
+        s.gradeSpread,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -247,6 +248,7 @@ abstract final class Codec {
       estimatedGrade: r['estimatedGrade'] as int,
       featuredArtistIds: featured,
     );
+    s.gradeSpread = r['gradeSpread'] as int? ?? 6;
     s
       ..status = SongStatus.values[r['status'] as int]
       ..releasedWeek = r['releasedWeek'] as int

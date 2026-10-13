@@ -212,12 +212,15 @@ class _StudioTabState extends State<StudioTab> {
                 style: Theme.of(c).textTheme.titleLarge,
                 textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            Text(fmt.grade(song.estimatedGrade),
+            Text(fmt.songGrade(song),
                 style: Theme.of(c)
                     .textTheme
                     .displayMedium
                     ?.copyWith(fontWeight: FontWeight.w800)),
             Text(l.teamEstimate, textAlign: TextAlign.center),
+            Text(l.gradeRevealHint,
+                textAlign: TextAlign.center,
+                style: Theme.of(c).textTheme.bodySmall),
             const SizedBox(height: 8),
             Text(fmt.genres(song.genres)),
           ]),
@@ -359,7 +362,7 @@ class _StudioTabState extends State<StudioTab> {
                       albumId: s.coverAlbumId,
                       title: s.title,
                       subtitle: fmt.genres(s.genres),
-                      badge: GradeTag(fmt.grade(s.estimatedGrade)),
+                      badge: GradeTag(fmt.songGrade(s)),
                       onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(

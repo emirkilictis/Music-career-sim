@@ -237,6 +237,7 @@ k('budgetHigh','High','Yüksek')
 k('writeAndRecord','Write & record · {cost}','Yaz ve kaydet · {cost}', cost='String')
 k('songRecorded','Song recorded','Şarkı kaydedildi')
 k('teamEstimate','Your team\'s estimate','Ekibinin tahmini')
+k('gradeRevealHint','The real grade shows once it is out. A better producer judges more surely.','Gerçek not yayınlanınca görünür. İyi prodüktör daha isabetli tahmin eder.')
 k('vaultCount','Vault ({count})','Kasa ({count})', count='int')
 k('vaultEmpty','No unreleased songs. Write one above.','Yayınlanmamış şarkı yok. Yukarıdan bir tane yaz.')
 # releases

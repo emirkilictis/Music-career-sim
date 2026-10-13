@@ -363,7 +363,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                           child: Text(l.makeSingle),
                         )
                       : a.isPlayer
-                          ? GradeTag(fmt.grade(_tracks[i].estimatedGrade))
+                          ? GradeTag(fmt.songGrade(_tracks[i]))
                           : Text(fmt.songMain(_tracks[i], widget.state.week)),
                   onTap: () => Navigator.push(
                       context,

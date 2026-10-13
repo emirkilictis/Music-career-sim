@@ -402,8 +402,9 @@ class GradeTag extends StatelessWidget {
       _ => AppColors.coral,
     };
     return Container(
-      width: 34,
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      // A range ("C–A") is wider than one grade (docs F36).
+      constraints: const BoxConstraints(minWidth: 34),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 5),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(AppShape.r(10)),

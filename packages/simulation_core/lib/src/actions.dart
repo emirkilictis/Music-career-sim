@@ -363,6 +363,7 @@ abstract final class Actions {
       longevity: longevity,
       estimatedGrade: grade,
     );
+    song.gradeSpread = (1.5 * estimateNoise).round();
     song.productionCostCents = paidCents;
     w.songs.add(song);
     w.dirtySongs.add(song.id);

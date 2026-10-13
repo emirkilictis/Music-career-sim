@@ -226,6 +226,7 @@
   "writeAndRecord": "Yaz ve kaydet · {cost}",
   "songRecorded": "Şarkı kaydedildi",
   "teamEstimate": "Ekibinin tahmini",
+  "gradeRevealHint": "Gerçek not yayınlanınca görünür. İyi prodüktör daha isabetli tahmin eder.",
   "vaultCount": "Kasa ({count})",
   "vaultEmpty": "Yayınlanmamış şarkı yok. Yukarıdan bir tane yaz.",
   "releaseSingle": "Single çıkar",

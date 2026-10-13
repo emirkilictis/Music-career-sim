@@ -192,6 +192,23 @@ void main() {
       g.close();
     });
 
+    test('a range before release, the real grade after (F36)', () {
+      var g = GameSession.start(slots, _setup());
+      final id = g.slotId;
+      final song = g.writeSong(budget: BudgetTier.low);
+      final spread = g.world.songs[song.id].gradeSpread;
+      expect(spread, greaterThan(0));
+      expect(song.grade, -1);
+      expect(song.gradeLow, lessThan(song.estimatedGrade));
+      expect(song.gradeHigh, greaterThan(song.estimatedGrade));
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.world.songs[song.id].gradeSpread, spread);
+      g.releaseSingle(song.id, campaign: Campaign.none);
+      expect(g.song(song.id).grade, g.world.songs[song.id].quality.round());
+      g.close();
+    });
+
     test('the career list shows the latest album (E9)', () {
       final g = GameSession.start(slots, _setup());
       final ids = [

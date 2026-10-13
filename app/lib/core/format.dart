@@ -440,6 +440,17 @@ class Fmt {
                       ? 'D'
                       : 'E';
 
+  /// "B" or "C–A": the team's range while a song is in the vault (docs
+  /// F36).
+  String gradeRange(int lo, int hi) {
+    final a = grade(lo), b = grade(hi);
+    return a == b ? a : '$a–$b';
+  }
+
+  /// What the player sees: the real grade once out, the range before.
+  String songGrade(SongView s) =>
+      s.grade >= 0 ? grade(s.grade) : gradeRange(s.gradeLow, s.gradeHigh);
+
   String error(Object e) {
     if (e is! GameException) return l.errorGeneric;
     return switch (e.code) {

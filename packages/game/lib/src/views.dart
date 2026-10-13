@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:simulation_core/simulation_core.dart';
 
 import 'events.dart';
@@ -239,6 +241,9 @@ class SongView {
         albumId = s.albumId,
         coverAlbumId = coverAlbumOf(w, s),
         estimatedGrade = s.estimatedGrade,
+        gradeLow = math.max(1, s.estimatedGrade - s.gradeSpread),
+        gradeHigh = math.min(100, s.estimatedGrade + s.gradeSpread),
+        grade = s.status == SongStatus.vault ? -1 : s.quality.round(),
         campaign = s.campaign,
         playlistAdd = s.playlistAdd,
         charts = _records(s),
@@ -319,6 +324,14 @@ class SongView {
 
   /// The team's estimate of the song's quality (1–100), not the true value.
   final int estimatedGrade;
+
+  /// The range the team is fairly sure of (docs F36): what the player sees
+  /// before the song comes out.
+  final int gradeLow;
+  final int gradeHigh;
+
+  /// The song's real grade once it is out (-1 while in the vault).
+  final int grade;
   final Campaign campaign;
   final PlaylistAdd playlistAdd;
   final List<ChartRecord> charts;
