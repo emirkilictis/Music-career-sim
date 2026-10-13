@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
 import '../core/images.dart';
 import '../widgets/art.dart';
+import '../ui/palette.dart';
 import '../widgets/common.dart';
 import 'game_shell.dart';
 import 'new_career_screen.dart';
@@ -115,23 +118,91 @@ class _SlotsScreenState extends State<SlotsScreen> {
                     final name = s['artistName'] as String? ?? '?';
                     final fame = (s['fame'] as num?)?.toDouble() ?? 0;
                     final fans = (s['coreFans'] as num?)?.toDouble() ?? 0;
+                    final album = s['lastAlbumId'] as int? ?? -1;
+                    final hit = s['hitTitle'] as String?;
+                    final albumTitle = s['lastAlbumTitle'] as String?;
+                    final cover = album < 0
+                        ? null
+                        : context.imagesRead
+                            .pathIn(id, ImageStore.albumKey(album));
+                    // The biggest hit, else the latest album (E9).
+                    final story = hit != null
+                        ? l.biggestHit(hit, s['hitPeak'] as int? ?? 0)
+                        : albumTitle != null
+                            ? l.latestAlbum(albumTitle)
+                            : null;
                     return Card(
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 6),
-                        leading: ArtistAvatar(name: name, seed: id.hashCode),
-                        title: Text(name,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w800)),
-                        subtitle: Text(
-                            '${context.fmt.weekOf(s['weekOfYear'] as int? ?? 1, s['year'] as int? ?? 0)}'
-                            ' · ${l.fameValue(fmt.percent(fame))}'
-                            ' · ${l.fansValue(fmt.compact(fans))}'),
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
                         onTap: () => _open(id),
-                        trailing: IconButton(
-                          tooltip: l.delete,
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _delete(id, name),
+                        onLongPress: () => _delete(id, name),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
+                          child: Row(children: [
+                            album < 0
+                                ? ArtistAvatar(
+                                    name: name, seed: id.hashCode, size: 64)
+                                : ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.circular(AppShape.r(10)),
+                                    child: cover != null
+                                        ? Image.file(File(cover),
+                                            width: 64,
+                                            height: 64,
+                                            fit: BoxFit.cover,
+                                            cacheWidth: 192)
+                                        : CoverArt(
+                                            seed: albumCoverSeed(album),
+                                            size: 64),
+                                  ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontSize: 16.5,
+                                            fontWeight: FontWeight.w700)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                        '${fmt.weekOf(s['weekOfYear'] as int? ?? 1, s['year'] as int? ?? 0)}'
+                                        ' · ${l.fameValue(fmt.percent(fame))}'
+                                        ' · ${l.fansValue(fmt.compact(fans))}',
+                                        style: TextStyle(
+                                            color: AppColors.textMuted,
+                                            fontSize: 13)),
+                                    if (story != null) ...[
+                                      const SizedBox(height: 4),
+                                      Text(story,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontSize: 13.5,
+                                              fontWeight: FontWeight.w600)),
+                                    ],
+                                  ]),
+                            ),
+                            PopupMenuButton<int>(
+                              tooltip: l.careerMenu,
+                              icon: Icon(Icons.more_vert_rounded,
+                                  color: AppColors.textMuted),
+                              onSelected: (_) => _delete(id, name),
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: 0,
+                                  child: Row(children: [
+                                    Icon(Icons.delete_outline_rounded,
+                                        color: AppColors.coral),
+                                    const SizedBox(width: 12),
+                                    Text(l.delete),
+                                  ]),
+                                ),
+                              ],
+                            ),
+                          ]),
                         ),
                       ),
                     );

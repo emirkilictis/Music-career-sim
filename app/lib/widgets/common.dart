@@ -109,7 +109,7 @@ class StatTile extends StatelessWidget {
         Text(value,
             style: TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 letterSpacing: -0.4,
                 color: color ?? AppColors.text),
             maxLines: 1,
@@ -324,7 +324,7 @@ class GradientButton extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             color: AppColors.onAccent,
-                            fontWeight: FontWeight.w900,
+                            fontWeight: FontWeight.w800,
                             fontSize: 16)),
                   ),
                 ],

@@ -240,6 +240,9 @@ class GameSession {
   void close() {
     if (_closed) return;
     _store.flushActive(world);
+    // The career list shows what changed since the last week (money, a new
+    // album).
+    slots.writeSummary(slotId, world);
     _store.close();
     _closed = true;
   }

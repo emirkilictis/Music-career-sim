@@ -105,44 +105,63 @@ class _CoverPainter extends CustomPainter {
   _CoverPainter(this.h);
   final int h;
 
+  /// Number of motifs; picked from other bits of the hash than the colors
+  /// so any palette meets any motif (E5).
+  static const motifs = 10;
+
   @override
   void paint(Canvas canvas, Size size) {
     final r = math.Random(h);
     final (a, b) = _pairs[h % _pairs.length];
     final rect = Offset.zero & size;
-    final angle = r.nextDouble() * math.pi * 2;
-    canvas.drawRect(
-        rect,
-        Paint()
-          ..shader = LinearGradient(
-            begin: Alignment(math.cos(angle), math.sin(angle)),
-            end: Alignment(-math.cos(angle), -math.sin(angle)),
-            colors: [a, b],
-          ).createShader(rect));
     final w = size.width;
-    switch (h ~/ _pairs.length % 4) {
+    final white = Colors.white;
+    Paint fill(Color c, double alpha) =>
+        Paint()..color = c.withValues(alpha: alpha);
+    Paint line(Color c, double alpha, double width) => Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width
+      ..color = c.withValues(alpha: alpha);
+
+    // Background: a gradient, a flat color or a two-tone split.
+    switch ((h >> 10) % 4) {
+      case 0:
+        canvas.drawRect(rect, Paint()..color = b);
+      case 1:
+        canvas.drawRect(rect, Paint()..color = b);
+        final split = Path()
+          ..moveTo(0, w * (0.3 + 0.4 * r.nextDouble()))
+          ..lineTo(w, w * (0.3 + 0.4 * r.nextDouble()))
+          ..lineTo(w, w)
+          ..lineTo(0, w)
+          ..close();
+        canvas.drawPath(split, Paint()..color = a);
+      case _:
+        final angle = r.nextDouble() * math.pi * 2;
+        canvas.drawRect(
+            rect,
+            Paint()
+              ..shader = LinearGradient(
+                begin: Alignment(math.cos(angle), math.sin(angle)),
+                end: Alignment(-math.cos(angle), -math.sin(angle)),
+                colors: [a, b],
+              ).createShader(rect));
+    }
+
+    switch ((h >> 4) % motifs) {
       case 0: // sun
         canvas.drawCircle(
             Offset(w * (0.25 + 0.5 * r.nextDouble()),
                 w * (0.25 + 0.4 * r.nextDouble())),
             w * (0.18 + 0.14 * r.nextDouble()),
-            Paint()..color = Colors.white.withValues(alpha: 0.32));
+            fill(white, 0.32));
       case 1: // rings
         final c = Offset(w * r.nextDouble(), w * r.nextDouble());
         for (var i = 1; i <= 4; i++) {
-          canvas.drawCircle(
-              c,
-              w * 0.18 * i,
-              Paint()
-                ..style = PaintingStyle.stroke
-                ..strokeWidth = w * 0.035
-                ..color = Colors.white.withValues(alpha: 0.18));
+          canvas.drawCircle(c, w * 0.18 * i, line(white, 0.18, w * 0.035));
         }
       case 2: // waves
-        final p = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = w * 0.04
-          ..color = Colors.white.withValues(alpha: 0.22);
+        final p = line(white, 0.22, w * 0.04);
         for (var i = 0; i < 3; i++) {
           final y = w * (0.45 + 0.15 * i);
           final path = Path()..moveTo(0, y);
@@ -151,12 +170,72 @@ class _CoverPainter extends CustomPainter {
           }
           canvas.drawPath(path, p);
         }
-      case _: // horizon
+      case 3: // horizon
         canvas.drawRect(
             Rect.fromLTWH(0, w * (0.55 + 0.2 * r.nextDouble()), w, w),
-            Paint()..color = Colors.black.withValues(alpha: 0.22));
-        canvas.drawCircle(Offset(w * 0.5, w * 0.6), w * 0.22,
-            Paint()..color = AppColors.butter.withValues(alpha: 0.55));
+            fill(Colors.black, 0.22));
+        canvas.drawCircle(
+            Offset(w * 0.5, w * 0.6), w * 0.22, fill(AppColors.butter, 0.55));
+      case 4: // halftone dots, growing toward a corner
+        final n = 7;
+        final step = w / n;
+        final flip = r.nextBool();
+        for (var i = 0; i < n; i++) {
+          for (var j = 0; j < n; j++) {
+            final t = ((flip ? n - 1 - i : i) + j) / (2 * (n - 1));
+            canvas.drawCircle(Offset(step * (i + 0.5), step * (j + 0.5)),
+                step * 0.42 * t, fill(white, 0.35));
+          }
+        }
+      case 5: // diagonal stripes
+        final p = line(white, 0.2, w * 0.06);
+        final up = r.nextBool();
+        for (var k = -w; k < 2 * w; k += w * 0.17) {
+          canvas.drawLine(Offset(k, up ? w : 0), Offset(k + w, up ? 0 : w), p);
+        }
+      case 6: // mountains
+        for (var layer = 0; layer < 2; layer++) {
+          final base = w * (0.6 + 0.15 * layer);
+          final peak = Path()..moveTo(0, w);
+          var x = 0.0;
+          peak.lineTo(0, base);
+          while (x < w) {
+            final dx = w * (0.18 + 0.2 * r.nextDouble());
+            peak.lineTo(x + dx / 2, base - w * (0.15 + 0.25 * r.nextDouble()));
+            x += dx;
+            peak.lineTo(x, base);
+          }
+          peak
+            ..lineTo(w, w)
+            ..close();
+          canvas.drawPath(peak,
+              fill(layer == 0 ? white : Colors.black, 0.18 + 0.1 * layer));
+        }
+      case 7: // nested squares, slightly turned
+        canvas.save();
+        canvas.translate(w / 2, w / 2);
+        canvas.rotate((r.nextDouble() - 0.5) * 0.6);
+        for (var i = 1; i <= 4; i++) {
+          final half = w * 0.11 * i;
+          canvas.drawRect(Rect.fromLTRB(-half, -half, half, half),
+              line(white, 0.25, w * 0.03));
+        }
+        canvas.restore();
+      case 8: // big type-like bars (a poster)
+        final bars = 3 + r.nextInt(3);
+        for (var i = 0; i < bars; i++) {
+          final y = w * (0.12 + 0.76 * i / bars);
+          final len = w * (0.35 + 0.5 * r.nextDouble());
+          canvas.drawRRect(
+              RRect.fromRectAndRadius(Rect.fromLTWH(w * 0.1, y, len, w * 0.09),
+                  Radius.circular(w * 0.02)),
+              fill(i == 0 ? a : white, i == 0 ? 0.9 : 0.28));
+        }
+      case _: // eclipse: a disc with a bright edge
+        final c = Offset(w * (0.35 + 0.3 * r.nextDouble()), w * 0.45);
+        canvas.drawCircle(c, w * 0.3, fill(a, 0.85));
+        canvas.drawCircle(
+            c + Offset(w * 0.06, -w * 0.04), w * 0.27, fill(b, 0.95));
     }
   }
 

@@ -256,7 +256,7 @@ class _GameShellState extends State<GameShell> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w900)),
+                                  fontSize: 18, fontWeight: FontWeight.w800)),
                           Text(fmt.week(career.week),
                               style: TextStyle(
                                   color: AppColors.textMuted,
@@ -287,10 +287,12 @@ class _GameShellState extends State<GameShell> {
             children: [
               Container(
                 color: AppColors.bg,
-                padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                // Slim strip: the content gets the room (E4).
+                padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
                 child: Row(children: [
                   Expanded(
                     child: GradientButton(
+                      height: 46,
                       label: l.nextWeek,
                       icon: Icons.skip_next_rounded,
                       busy: career.busy,
@@ -299,7 +301,7 @@ class _GameShellState extends State<GameShell> {
                   ),
                   const SizedBox(width: 10),
                   SizedBox(
-                    height: 54,
+                    height: 46,
                     child: OutlinedButton.icon(
                       onPressed: career.busy ? null : _skipMenu,
                       icon: const Icon(Icons.fast_forward_rounded, size: 20),
@@ -361,7 +363,7 @@ class MoneyPill extends StatelessWidget {
           ),
           child: Text(text,
               style:
-                  const TextStyle(fontWeight: FontWeight.w900, fontSize: 15)),
+                  const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
         ),
       );
 }

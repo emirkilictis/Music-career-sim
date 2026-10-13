@@ -306,7 +306,9 @@ class _StatusRow extends StatelessWidget {
               label: l.coreFans,
               value: fmt.compact(p.coreFans),
               change: delta(p.coreFans, b?.coreFans, fmt.compact),
-              up: b == null || p.coreFans >= b.coreFans)),
+              up: b == null || p.coreFans >= b.coreFans,
+              info: true,
+              onTap: () => _infoSheet(context, fame: false))),
       const SizedBox(width: 10),
       Expanded(
           child: _StatusTile(
@@ -314,7 +316,9 @@ class _StatusRow extends StatelessWidget {
               value: fmt.percent(p.fame),
               change: delta(p.fame * 100, b == null ? null : b.fame * 100,
                   (v) => v.toStringAsFixed(1)),
-              up: b == null || p.fame >= b.fame)),
+              up: b == null || p.fame >= b.fame,
+              info: true,
+              onTap: () => _infoSheet(context, fame: true))),
       const SizedBox(width: 10),
       Expanded(
           child: _StatusTile(
@@ -330,6 +334,66 @@ class _StatusRow extends StatelessWidget {
         onTap: () => _energySheet(context),
       )),
     ]);
+  }
+
+  /// What fame or fans mean, how they grow and the numbers behind them
+  /// (E7).
+  void _infoSheet(BuildContext context, {required bool fame}) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final p = career.player;
+    // Labels ask for less in Legend mode (see Actions.labelMissing).
+    final scale = career.difficulty == Difficulty.legend ? 0.4 : 1.0;
+    Widget row(String label, String value, String hint) => Padding(
+          padding: const EdgeInsets.only(top: 14),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Expanded(
+                  child: Text(label,
+                      style: const TextStyle(fontWeight: FontWeight.w700))),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w800)),
+            ]),
+            const SizedBox(height: 2),
+            Text(hint,
+                style: TextStyle(color: AppColors.textMuted, fontSize: 13.5)),
+          ]),
+        );
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: fame
+                  ? [
+                      Text('${l.fame} · ${fmt.percent(p.fame)}',
+                          style: Theme.of(c).textTheme.titleLarge),
+                      const SizedBox(height: 8),
+                      Text(l.fameInfo),
+                      const SizedBox(height: 8),
+                      Text(l.fameEffect(
+                          fmt.percent(Label.major.minFame * scale),
+                          fmt.percent(Label.giant.minFame * scale))),
+                      row(l.popularityNow, fmt.percent(p.popularity),
+                          l.popularityInfo),
+                    ]
+                  : [
+                      Text('${l.coreFans} · ${fmt.compact(p.coreFans)}',
+                          style: Theme.of(c).textTheme.titleLarge),
+                      const SizedBox(height: 8),
+                      Text(l.fansInfo),
+                      row(l.devotion, fmt.percent(p.devotion), l.devotionInfo),
+                      row(l.listeners, fmt.compact(p.casualListeners),
+                          l.listenersInfo),
+                    ]),
+        ),
+      ),
+    );
   }
 
   void _energySheet(BuildContext context) {
@@ -350,6 +414,7 @@ class _StatusTile extends StatelessWidget {
     this.up = true,
     this.arrow = true,
     this.warn = false,
+    this.info = false,
     this.onTap,
   });
   final String label;
@@ -360,6 +425,9 @@ class _StatusTile extends StatelessWidget {
   /// Shows [change] with an up/down arrow (a delta, not a note).
   final bool arrow;
   final bool warn;
+
+  /// Shows a small "i": a tap explains the number.
+  final bool info;
   final VoidCallback? onTap;
 
   @override
@@ -378,19 +446,30 @@ class _StatusTile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(caps(context, label),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: capsStyle(TextStyle(
+            Row(children: [
+              Flexible(
+                child: Text(caps(context, label),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: capsStyle(TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w600))),
+              ),
+              if (info) ...[
+                const SizedBox(width: 4),
+                Icon(Icons.info_outline_rounded,
+                    size: 13,
                     color: AppColors.textMuted,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600))),
+                    semanticLabel: context.l10n.tapForInfo),
+              ],
+            ]),
             const SizedBox(height: 4),
             Text(value,
                 maxLines: 1,
                 style: TextStyle(
                     fontSize: 20,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: warn ? AppColors.coral : AppColors.text)),
             const SizedBox(height: 2),
             SizedBox(

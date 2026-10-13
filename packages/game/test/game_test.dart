@@ -192,6 +192,23 @@ void main() {
       g.close();
     });
 
+    test('the career list shows the latest album (E9)', () {
+      final g = GameSession.start(slots, _setup());
+      final ids = [
+        for (var i = 0; i < 3; i++)
+          (() {
+            g.world.player!.creativeEnergy = 100;
+            return g.writeSong(budget: BudgetTier.low).id;
+          })(),
+      ];
+      g.releaseAlbum('First Steps', ids,
+          type: AlbumType.ep, campaign: Campaign.none);
+      g.close();
+      final summary = slots.list().single;
+      expect(summary['lastAlbumTitle'], 'First Steps');
+      expect(summary['lastAlbumId'], isNonNegative);
+    });
+
     test('older saves get the independent reach of docs K70', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;

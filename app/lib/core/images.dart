@@ -70,6 +70,17 @@ class ImageStore extends ChangeNotifier {
     _files.clear();
   }
 
+  /// [key]'s image in a career that is not open (the career list), if any.
+  String? pathIn(String slotId, String key) {
+    final dir = Directory('$careersRoot/$slotId/images');
+    if (!dir.existsSync()) return null;
+    for (final f in dir.listSync().whereType<File>()) {
+      final name = f.uri.pathSegments.last;
+      if (name.startsWith('${key}_')) return f.path;
+    }
+    return null;
+  }
+
   static String songKey(int songId) => 'song_$songId';
   static String albumKey(int albumId) => 'album_$albumId';
 

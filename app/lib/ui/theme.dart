@@ -44,9 +44,10 @@ ThemeData appTheme() {
       headlineMedium: t.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
       headlineSmall: t.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
       titleLarge: t.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-      titleMedium: t.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-      titleSmall: t.titleSmall?.copyWith(fontWeight: FontWeight.w700),
-      labelLarge: t.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+      // Headings bold, item titles semi-bold, body regular (E8).
+      titleMedium: t.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+      titleSmall: t.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+      labelLarge: t.labelLarge?.copyWith(fontWeight: FontWeight.w600),
       bodySmall: t.bodySmall?.copyWith(color: AppColors.textMuted),
     ),
     cardTheme: CardThemeData(
@@ -72,7 +73,7 @@ ThemeData appTheme() {
       style: FilledButton.styleFrom(
         shape: _pill(),
         textStyle: const TextStyle(
-            fontFamily: AppFonts.ui, fontWeight: FontWeight.w800, fontSize: 15),
+            fontFamily: AppFonts.ui, fontWeight: FontWeight.w700, fontSize: 15),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -148,7 +149,7 @@ ThemeData appTheme() {
       backgroundColor: AppColors.surfaceLow,
       indicatorColor: AppColors.accentSoft,
       indicatorShape: _pill(),
-      height: 66,
+      height: 60,
       labelTextStyle: WidgetStateProperty.resolveWith((s) => TextStyle(
             fontFamily: AppFonts.ui,
             fontSize: 12,

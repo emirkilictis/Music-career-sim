@@ -203,7 +203,10 @@ abstract final class WorldGen {
   static RealArtist? _pickReal(World w, int id,
       {required bool isA, required bool newcomer, required HomeCountry home}) {
     final year = GameTime.yearOf(w.week);
-    final used = {for (final a in w.artists) a.name.toLowerCase()};
+    final used = {
+      for (final a in w.artists) a.name.toLowerCase(),
+      for (final c in w.collaborators) c.name.toLowerCase(),
+    };
     final pool = [
       for (final ra in realArtists)
         if (!used.contains(ra.name.toLowerCase()) &&
@@ -225,11 +228,15 @@ abstract final class WorldGen {
     return group[r.nextInt(group.length)];
   }
 
-  /// A made-up name no one in the world has yet (tries a few draws).
+  /// A made-up name no artist or collaborator in the world has yet (tries
+  /// a few draws).
   static String _freeName(World w, String Function() draw) {
-    final used = {for (final a in w.artists) a.name.toLowerCase()};
+    final used = {
+      for (final a in w.artists) a.name.toLowerCase(),
+      for (final c in w.collaborators) c.name.toLowerCase(),
+    };
     var name = draw();
-    for (var i = 0; i < 8 && used.contains(name.toLowerCase()); i++) {
+    for (var i = 0; i < 20 && used.contains(name.toLowerCase()); i++) {
       name = draw();
     }
     return name;
@@ -263,7 +270,8 @@ abstract final class WorldGen {
       final skill = 20 + 78 * math.pow(r.nextDouble(), 0.9).toDouble();
       w.collaborators.add(Collaborator(
         id: i,
-        name: Names.person(n),
+        // Unique across artists and collaborators (C6).
+        name: _freeName(w, () => Names.person(n)),
         role:
             i.isEven ? CollaboratorRole.producer : CollaboratorRole.songwriter,
         skill: skill,

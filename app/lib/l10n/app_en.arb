@@ -6,6 +6,26 @@
   "noCareersTitle": "No careers yet",
   "noCareersBody": "Start a new career and make your first song.",
   "deleteCareerTitle": "Delete career?",
+  "biggestHit": "Biggest hit #{peak} · {title}",
+  "@biggestHit": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "peak": {
+        "type": "int"
+      }
+    }
+  },
+  "latestAlbum": "Latest album: {title}",
+  "@latestAlbum": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "careerMenu": "Career options",
   "deleteCareerBody": "“{name}” and its whole history will be deleted. This cannot be undone.",
   "@deleteCareerBody": {
     "placeholders": {
@@ -345,6 +365,24 @@
   "devotion": "Devotion",
   "coreFans": "Core fans",
   "listeners": "Listeners",
+  "fameInfo": "How well known you are. It climbs toward your popularity while your music is hot, and never drops: a star stays a household name.",
+  "fameEffect": "More fame: every release reaches more people and albums open bigger. Labels look at it: a major wants {major}, a giant {giant}.",
+  "@fameEffect": {
+    "placeholders": {
+      "major": {
+        "type": "String"
+      },
+      "giant": {
+        "type": "String"
+      }
+    }
+  },
+  "popularityNow": "Popularity this week",
+  "popularityInfo": "Your chart points this week next to the world’s #1 song. When it is above your fame, fame rises.",
+  "fansInfo": "Core fans stream your new songs from day one and buy your albums. They come from the people your songs reach; charisma, good eras and tours win more of them.",
+  "devotionInfo": "How loyal your fans are. Good eras raise it; devoted fans buy more, editions too.",
+  "listenersInfo": "People who know a few of your songs. Some become fans; they stream your hits.",
+  "tapForInfo": "What is this?",
   "streams": "Streams",
   "albumUnits": "Album units",
   "anticipationValue": "Anticipation {value}",

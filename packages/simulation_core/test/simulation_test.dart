@@ -345,6 +345,25 @@ void main() {
     expect(a.moneyCents - money, greaterThan(done.netCents * 0.9));
   });
 
+  test('artists and collaborators never share a name (C6)', () {
+    for (final real in [false, true]) {
+      final w = WorldGen.create(seed: 6, startYear: 2015, realNames: real);
+      final names = [
+        for (final a in w.artists) a.name.toLowerCase(),
+        for (final c in w.collaborators) c.name.toLowerCase(),
+      ];
+      expect(names.toSet().length, names.length);
+      // Surnames vary: no surname is shared by more than a handful.
+      final surnames = <String, int>{};
+      for (final c in w.collaborators) {
+        final last = c.name.split(' ').last;
+        surnames[last] = (surnames[last] ?? 0) + 1;
+      }
+      expect(surnames.values.reduce((a, b) => a > b ? a : b),
+          lessThanOrEqualTo(4));
+    }
+  });
+
   test('rivals carry real names in their own years, never twice (K66)', () {
     final w = WorldGen.create(seed: 66, startYear: 2008, realNames: true);
     final names = [for (final a in w.artists) a.name];

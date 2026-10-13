@@ -556,6 +556,19 @@ class SaveSlots {
 
   void writeSummary(String slotId, World w) {
     final p = w.player;
+    // The latest album and the biggest US hit, for the career list (E9).
+    var lastAlbum = -1, hit = -1, hitPeak = 0;
+    for (final id in w.playerSongIds) {
+      final s = w.songs[id];
+      if (s.albumId > lastAlbum && w.albums[s.albumId].type != AlbumType.single) {
+        lastAlbum = s.albumId;
+      }
+      final peak = s.statsOrNull(Charts.usSongs)?.peak ?? 0;
+      if (peak > 0 && (hit < 0 || peak < hitPeak)) {
+        hit = id;
+        hitPeak = peak;
+      }
+    }
     File('${root.path}/$slotId/summary.json').writeAsStringSync(jsonEncode({
       'slotId': slotId,
       'artistName': p?.name,
@@ -567,6 +580,10 @@ class SaveSlots {
       'fame': p?.fame,
       'coreFans': p?.coreFans,
       'moneyCents': p?.moneyCents,
+      'lastAlbumId': lastAlbum,
+      'lastAlbumTitle': lastAlbum >= 0 ? w.albums[lastAlbum].title : null,
+      'hitTitle': hit >= 0 ? w.songs[hit].title : null,
+      'hitPeak': hitPeak,
       'savedAt': DateTime.now().toUtc().toIso8601String(),
     }));
   }

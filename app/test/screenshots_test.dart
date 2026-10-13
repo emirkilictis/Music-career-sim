@@ -126,6 +126,11 @@ void main() {
     ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first))
         .removeCurrentSnackBar();
     await shot(tester, '04_home');
+    // What fame means and the numbers behind it (E7).
+    await tester.tap(find.text('Fame'));
+    await shot(tester, '04c_fame_info');
+    await tester.tapAt(const Offset(200, 80));
+    await tester.pumpAndSettle();
 
     await tab(tester, 'Studio');
     await shot(tester, '05_studio');
