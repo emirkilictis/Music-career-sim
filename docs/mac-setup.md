@@ -50,6 +50,13 @@ Birden fazla cihaz varsa listeden iPhone'u seç. İlk kurulumdan sonra telefonda
   "debug mode Flutter apps can only be launched from Flutter tooling" der. Release sürüm kablosuz da
   açılır (ücretsiz Apple ID'de 7 gün geçerli, sonra aynı komutla yeniden kur).
 - Yeni sürümü almak için: `git pull` → `flutter pub get` → `flutter run --release`.
+  Çalışma dalı: `git checkout claude/nifty-archimedes-pceuh4` (bir kez), sonra
+  `git pull origin claude/nifty-archimedes-pceuh4`.
+- **Kablosuz kurulum (kablo bir kez gerekir):** iPhone'u kabloyla bağla → Xcode → **Window →
+  Devices and Simulators** → iPhone'u seç → **Connect via network** kutusunu işaretle. Bundan sonra
+  Mac ile iPhone aynı Wi-Fi'deyken kablosuz `flutter run --release` çalışır (`flutter devices`
+  iPhone'u kablosuz olarak listeler; ilk seferde biraz yavaş bulabilir). Kayıtlar silinmez, sadece
+  uygulama güncellenir.
 - Simülatörde denemek istersen: `open -a Simulator` → `flutter run`.
 
 ## Test sürümüne özel notlar
