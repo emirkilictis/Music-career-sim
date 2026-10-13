@@ -671,6 +671,9 @@ void main() {
       expect(page.popular.length, lessThanOrEqualTo(10));
       expect(page.albums.single.title, 'Supernova');
       expect(page.monthlyListeners, greaterThan(0));
+      // Monthly listeners follow the last weeks' average, not this week.
+      expect(page.listenerStreams, greaterThan(0));
+      expect(page.listenerStreams, isNot(page.weeklyStreams));
       final us = g.chart(Charts.usSongs);
       expect(us.rows.first.weekValue, greaterThan(us.rows.last.weekValue));
       final rival = g.artistPage(us.rows.first.artistId);

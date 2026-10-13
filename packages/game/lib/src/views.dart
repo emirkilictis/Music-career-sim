@@ -518,10 +518,11 @@ class ArtistPageView {
   ArtistPageView({
     required this.artist,
     required this.weeklyStreams,
+    double? listenerStreams,
     required this.popular,
     required this.albums,
     required this.singles,
-  });
+  }) : listenerStreams = listenerStreams ?? weeklyStreams;
 
   final ArtistView artist;
 
@@ -537,7 +538,11 @@ class ArtistPageView {
   /// Singles not on an album, newest first.
   final List<SongView> singles;
 
-  double get monthlyListeners => Streamify.monthlyListeners(weeklyStreams);
+  /// Weekly streams averaged over the last month where known (the player);
+  /// monthly listeners follow it rather than a single week.
+  final double listenerStreams;
+
+  double get monthlyListeners => Streamify.monthlyListeners(listenerStreams);
 }
 
 /// Which number best tells a song's success in a given year (docs K38):

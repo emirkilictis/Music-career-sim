@@ -104,61 +104,78 @@ class _ArtistPageState extends State<ArtistPage> {
         pinned: true,
         backgroundColor: c2,
         foregroundColor: Colors.white,
-        flexibleSpace: FlexibleSpaceBar(
-          titlePadding: const EdgeInsetsDirectional.only(start: 56, bottom: 14),
-          title: Text(a.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  fontWeight: FontWeight.w900, color: Colors.white)),
-          expandedTitleScale: 2.1,
-          background: Stack(fit: StackFit.expand, children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [c1, c2],
+        flexibleSpace: LayoutBuilder(builder: (context, box) {
+          // 0 = collapsed bar, 1 = fully open header. The name grows from
+          // the bar's title to a big left-aligned headline under the badge.
+          final top = MediaQuery.paddingOf(context).top;
+          final t =
+              ((box.maxHeight - top - kToolbarHeight) / (300 - kToolbarHeight))
+                  .clamp(0.0, 1.0);
+          return Stack(fit: StackFit.expand, children: [
+            FlexibleSpaceBar(
+              background: Stack(fit: StackFit.expand, children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [c1, c2],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Align(
-              alignment: const Alignment(0.7, -0.2),
-              child: Opacity(
-                opacity: 0.9,
-                child: ArtistAvatar(
-                    name: a.name,
-                    seed: a.id,
-                    size: 170,
-                    artistId: a.id,
-                    photo: ArtistPhoto.streamify),
-              ),
-            ),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Color(0xCC121212)],
-                  stops: [0.45, 1],
+                Align(
+                  alignment: const Alignment(0.7, -0.2),
+                  child: Opacity(
+                    opacity: 0.9,
+                    child: ArtistAvatar(
+                        name: a.name,
+                        seed: a.id,
+                        size: 170,
+                        artistId: a.id,
+                        photo: ArtistPhoto.streamify),
+                  ),
                 ),
-              ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Color(0xCC121212)],
+                      stops: [0.45, 1],
+                    ),
+                  ),
+                ),
+                if (a.fame > 0.25)
+                  Positioned(
+                    left: 16,
+                    bottom: 70,
+                    child: Row(children: [
+                      const Icon(Icons.verified_rounded,
+                          color: Color(0xFF4CB3FF), size: 20),
+                      const SizedBox(width: 6),
+                      Text(l.verifiedArtist,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700)),
+                    ]),
+                  ),
+              ]),
             ),
-            if (a.fame > 0.25)
-              Positioned(
-                left: 16,
-                bottom: 66,
-                child: Row(children: [
-                  const Icon(Icons.verified_rounded,
-                      color: Color(0xFF4CB3FF), size: 20),
-                  const SizedBox(width: 6),
-                  Text(l.verifiedArtist,
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w700)),
-                ]),
-              ),
-          ]),
-        ),
+            Positioned(
+              left: 16 + 40 * (1 - t),
+              right: 16,
+              bottom: 14,
+              child: Text(a.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontSize: 20 + 20 * t,
+                      height: 1.1,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white)),
+            ),
+          ]);
+        }),
       ),
       SliverToBoxAdapter(
         child: Padding(

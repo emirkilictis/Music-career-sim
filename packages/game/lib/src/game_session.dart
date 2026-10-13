@@ -268,6 +268,28 @@ class GameSession {
           if (al.artistId == _p.id) AlbumView.of(world, al),
       ];
 
+  /// The player's average weekly streams over the last four weeks (monthly
+  /// listeners count a 28-day window, so a release week does not make them
+  /// jump; docs F20).
+  double _fourWeekStreams() {
+    final now = world.artistLifetimeStreams(_p);
+    final rows = _store.db.select(
+        'SELECT week, lifetimeStreams FROM playerWeek WHERE week <= ? '
+        'ORDER BY week DESC LIMIT 1',
+        [world.week - 5]);
+    if (rows.isEmpty) {
+      final first = _store.db.select(
+          'SELECT week, lifetimeStreams FROM playerWeek ORDER BY week LIMIT 1');
+      if (first.isEmpty) return 0;
+      final weeks = world.week - 1 - (first.first['week'] as int);
+      if (weeks <= 0) return 0;
+      return (now - (first.first['lifetimeStreams'] as num).toDouble()) /
+          weeks;
+    }
+    final weeks = world.week - 1 - (rows.first['week'] as int);
+    return (now - (rows.first['lifetimeStreams'] as num).toDouble()) / weeks;
+  }
+
   /// Streamify artist page for any artist (player or rival).
   ArtistPageView artistPage(int artistId) {
     final w = world;
@@ -283,9 +305,11 @@ class GameSession {
         final d = weekly[y.id]!.compareTo(weekly[x.id]!);
         return d != 0 ? d : y.lifetimeStreams.compareTo(x.lifetimeStreams);
       });
+    final total = weekly.values.fold(0.0, (x, y) => x + y);
     return ArtistPageView(
       artist: ArtistView.of(w, a),
-      weeklyStreams: weekly.values.fold(0.0, (x, y) => x + y),
+      weeklyStreams: total,
+      listenerStreams: artistId == _p.id ? _fourWeekStreams() : total,
       popular: [for (final s in popular.take(10)) SongView.of(w, s)],
       albums: [
         for (final al in w.albums.reversed)
