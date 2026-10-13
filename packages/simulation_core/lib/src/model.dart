@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'config/charts.dart';
 import 'config/regions.dart';
 import 'opportunities.dart';
+import 'tours.dart';
 
 enum ArtistTier { player, a, b }
 
@@ -277,6 +278,9 @@ class Artist {
 
   /// An offer waiting for the player's answer (docs K59).
   Opportunity? opportunity;
+
+  /// The player's tour on the road (docs K63).
+  Tour? tour;
 
   /// Career milestones reached: milestone id → week (docs K61).
   final Map<int, int> milestones = {};

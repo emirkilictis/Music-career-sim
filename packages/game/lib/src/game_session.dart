@@ -405,6 +405,36 @@ class GameSession {
       ? null
       : OpportunityView.of(world, _p.opportunity!);
 
+  // ---------------------------------------------------------------- tours
+
+  /// What a tour of each size would do over [regions], as planned now
+  /// (docs K63).
+  List<TourPlanView> tourPlans(List<Region> regions) => [
+        for (final k in TourKind.values)
+          TourPlanView(
+            kind: k,
+            regions: regions,
+            available: Tours.canStart(_p, k),
+            estimate: Tours.estimate(
+                world, _p, k, [for (final r in regions) r.index]),
+          ),
+      ];
+
+  /// Goes on tour from this week.
+  void startTour(TourKind kind, List<Region> regions) {
+    if (_p.tour != null) throw GameException('onTour', 'Already on tour');
+    if (_p.coreFans < kind.minFans) {
+      throw GameException('tourTooBig', 'Not enough fans for this tour');
+    }
+    if (regions.isEmpty || regions.toSet().length != regions.length) {
+      throw GameException('tourRegions', 'Pick where to tour');
+    }
+    Tours.start(world, _p, kind, [for (final r in regions) r.index]);
+    Milestone.firstTour.mark(world, _p);
+    if (kind == TourKind.stadium) Milestone.stadiumTour.mark(world, _p);
+    _saveNow();
+  }
+
   /// Every milestone with the week it was reached (null = not yet), and
   /// progress for count goals (docs K61).
   List<MilestoneView> get milestones => [
@@ -1036,6 +1066,13 @@ class GameSession {
     };
 
     if (r.lapsedOpportunity case final o?) events.add(OpportunityLapsed(o));
+    if (r.tourFinished case final t?) {
+      events.add(TourFinished(
+          kind: t.kind,
+          tickets: t.tickets,
+          netCents: t.netCents.round(),
+          fans: t.fans));
+    }
     if (r.newOpportunity case final o?) events.add(OpportunityCame(o.kind));
     for (final al in w.albums.reversed) {
       if (al.releaseWeek < r.week) break;

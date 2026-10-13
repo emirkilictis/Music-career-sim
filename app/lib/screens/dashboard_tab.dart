@@ -9,6 +9,7 @@ import '../core/commands.dart';
 import '../core/format.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
+import '../widgets/tour_section.dart';
 import '../widgets/opportunity_card.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
@@ -32,6 +33,10 @@ class DashboardTab extends StatelessWidget {
       children: [
         if (context.career.player.opportunity case final offer?) ...[
           OpportunityCard(offer: offer),
+          const SizedBox(height: 12),
+        ],
+        if (context.career.player.tour != null) ...[
+          const TourSection(),
           const SizedBox(height: 12),
         ],
         const _WeekCard(),

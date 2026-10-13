@@ -4,6 +4,7 @@ import 'package:game/game.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
+import '../widgets/tour_section.dart';
 import '../widgets/milestones_section.dart';
 import '../widgets/common.dart';
 import '../widgets/image_pickers.dart';
@@ -67,6 +68,8 @@ class _CareerScreenState extends State<CareerScreen> {
         const SkillsSection(),
         const SizedBox(height: 12),
         const MilestonesSection(),
+        const SizedBox(height: 12),
+        const TourSection(),
         const SizedBox(height: 12),
         Section(
           title: l.labelSection,

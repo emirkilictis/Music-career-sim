@@ -223,3 +223,18 @@ class MilestoneReached extends GameEvent {
   @override
   bool get isMajor => true;
 }
+
+/// The player's tour played its last show (docs K63).
+class TourFinished extends GameEvent {
+  const TourFinished(
+      {required this.kind,
+      required this.tickets,
+      required this.netCents,
+      required this.fans});
+  final TourKind kind;
+  final double tickets;
+  final int netCents;
+  final double fans;
+  @override
+  bool get isMajor => true;
+}

@@ -29,6 +29,7 @@ class EventIcon extends StatelessWidget {
       LabelDropped() => (Icons.heart_broken_rounded, AppColors.coral),
       OpportunityCame(:final kind) => (opportunityIcon(kind), AppColors.butter),
       MilestoneReached() => (Icons.flag_rounded, AppColors.gold),
+      TourFinished() => (Icons.stadium_rounded, AppColors.peach),
       OpportunityLapsed() => (
           Icons.hourglass_bottom_rounded,
           AppColors.textMuted

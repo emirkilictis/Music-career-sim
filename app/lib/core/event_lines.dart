@@ -49,6 +49,7 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         OpportunityCame() => EventLine(e),
         OpportunityLapsed() => EventLine(e),
         MilestoneReached() => EventLine(e),
+        TourFinished() => EventLine(e),
         ReleaseAnnounced() =>
           EventLine(e, title: e.title, songId: e.songId < 0 ? null : e.songId),
         RivalNumberOne() => EventLine(e,
@@ -105,6 +106,7 @@ List<EventLine> sortLines(List<EventLine> lines) {
         LabelDropped() => 2,
         OpportunityCame() => 3,
         MilestoneReached() => 2,
+        TourFinished() => 2,
         OpportunityLapsed() => 6,
         ReleaseAnnounced() => 6,
         BurnoutOver() => 7,

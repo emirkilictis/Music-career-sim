@@ -6,6 +6,7 @@ import 'config/regions.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
+import 'tours.dart';
 import 'names.dart';
 import 'time.dart';
 import 'world.dart';
@@ -102,7 +103,8 @@ abstract final class Actions {
     final wrote = a.lastWriteWeek == w.week && a.songsWrittenThisWeek > 0;
     return (wrote ? energyRegenWriting : energyRegenIdle) +
         (a.restWeek == w.week ? energyRestBonus : 0) -
-        a.job.energyCost;
+        a.job.energyCost -
+        (a.tour != null ? Tours.energyPerWeek : 0);
   }
 
   /// Core fans a collaborator wants before working with you: none up to

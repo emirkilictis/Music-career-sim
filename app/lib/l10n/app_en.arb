@@ -924,6 +924,116 @@
   "totalSales": "Total",
   "pureSales": "Pure sales",
   "albumStats": "Album stats",
+  "tourSection": "Touring",
+  "tourPlan": "Plan a tour",
+  "tourClub": "Club tour",
+  "tourTheater": "Theater tour",
+  "tourArena": "Arena tour",
+  "tourStadium": "Stadium tour",
+  "tourWhere": "Where to play",
+  "tourSpec": "{seats} seats · {price} a ticket · {weeks} weeks",
+  "@tourSpec": {
+    "placeholders": {
+      "seats": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "tourNeedsFans": "Needs {fans} fans",
+  "@tourNeedsFans": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "tourEstimate": "Expected: {fill}% full, {tickets} tickets, +{fans} fans",
+  "@tourEstimate": {
+    "placeholders": {
+      "fill": {
+        "type": "int"
+      },
+      "tickets": {
+        "type": "String"
+      },
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "tourNet": "Net {money}",
+  "@tourNet": {
+    "placeholders": {
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "tourStart": "Go on tour",
+  "tourStarted": "You are on tour!",
+  "tourOnRoad": "On tour: week {week} of {weeks}",
+  "@tourOnRoad": {
+    "placeholders": {
+      "week": {
+        "type": "int"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "tourNow": "This week: {region}",
+  "@tourNow": {
+    "placeholders": {
+      "region": {
+        "type": "String"
+      }
+    }
+  },
+  "tourSoFar": "{tickets} tickets so far, {money}",
+  "@tourSoFar": {
+    "placeholders": {
+      "tickets": {
+        "type": "String"
+      },
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "tourHint": "Shows take {energy} energy a week and a great performance wins more fans. Empty seats still cost the production.",
+  "@tourHint": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "eventTourFinished": "{tour} is over: {tickets} tickets, {money}, +{fans} fans.",
+  "@eventTourFinished": {
+    "placeholders": {
+      "tour": {
+        "type": "String"
+      },
+      "tickets": {
+        "type": "String"
+      },
+      "money": {
+        "type": "String"
+      },
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "msFirstTour": "First tour",
+  "msStadiumTour": "Stadium tour",
   "typeMixtape": "Mixtape",
   "mixtapeHint": "Free: no sales, streams only. Not on the album charts and not judged as an era, but it gets people talking and wins listeners. Strongest for hip-hop, above all in 2007–2016.",
   "milestonesTitle": "Milestones",

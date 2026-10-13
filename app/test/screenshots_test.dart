@@ -162,10 +162,18 @@ void main() {
 
     await tab(tester, 'Career');
     await shot(tester, '15_career');
-    await tester.ensureVisible(find.text('See labels'));
+    await tester.scrollUntilVisible(find.text('See labels'), 300,
+        scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
     await tester.tap(find.text('See labels'));
     await shot(tester, '15c_labels');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Plan a tour'), -200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Plan a tour'));
+    await shot(tester, '15d_tour');
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Skills'), -300,

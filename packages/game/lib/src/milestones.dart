@@ -24,7 +24,9 @@ enum Milestone {
   money100m(10),
   billionStreams(25),
   firstFestival(5),
-  awardWin(25);
+  awardWin(25),
+  firstTour(5),
+  stadiumTour(25);
 
   const Milestone(this.skillPoints);
 

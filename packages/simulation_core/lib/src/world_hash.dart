@@ -51,6 +51,7 @@ int worldHash(World w) {
     addDouble(a.campaignFatigue);
     addInt(a.opportunity?.kind.index ?? -1);
     addInt(a.milestones.length);
+    addDouble(a.tour?.tickets ?? -1);
     addDouble(a.anticipation);
     addAll(a.reg);
     addAll(a.regionShare);

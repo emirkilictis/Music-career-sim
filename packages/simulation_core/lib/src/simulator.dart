@@ -9,6 +9,7 @@ import 'config/regions.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'opportunities.dart';
+import 'tours.dart';
 import 'rng.dart';
 import 'time.dart';
 import 'world.dart';
@@ -29,6 +30,7 @@ class WeekResult {
     required this.microseconds,
     this.newOpportunity,
     this.lapsedOpportunity,
+    this.tourFinished,
   });
 
   final int week;
@@ -60,6 +62,9 @@ class WeekResult {
   /// unanswered (docs K59).
   final Opportunity? newOpportunity;
   final OpportunityOutcome? lapsedOpportunity;
+
+  /// The player's tour that played its last week (docs K63).
+  final Tour? tourFinished;
 
   List<ChartEntry> get songChart => charts[Charts.usSongs];
   List<ChartEntry> get albumChart => charts[Charts.usAlbums];
@@ -710,8 +715,10 @@ class Simulator {
     // Offers between releases (docs K59).
     OpportunityOutcome? lapsed;
     Opportunity? offered;
+    Tour? toured;
     final me = w.player;
     if (me != null) {
+      toured = Tours.playWeek(w, me);
       if (Opportunities.lapseDue(w, me)) {
         lapsed = Opportunities.answer(w, me, me.opportunity!.lapse);
       }
@@ -736,6 +743,7 @@ class Simulator {
       microseconds: sw.elapsedMicroseconds,
       newOpportunity: offered,
       lapsedOpportunity: lapsed,
+      tourFinished: toured,
     );
     w.week++;
     return result;

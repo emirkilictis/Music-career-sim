@@ -242,6 +242,15 @@ class Fmt {
         Milestone.billionStreams => l.msBillionStreams,
         Milestone.firstFestival => l.msFirstFestival,
         Milestone.awardWin => l.msAwardWin,
+        Milestone.firstTour => l.msFirstTour,
+        Milestone.stadiumTour => l.msStadiumTour,
+      };
+
+  String tourKind(TourKind k) => switch (k) {
+        TourKind.club => l.tourClub,
+        TourKind.theater => l.tourTheater,
+        TourKind.arena => l.tourArena,
+        TourKind.stadium => l.tourStadium,
       };
 
   String offerTitle(OpportunityKind k) => switch (k) {
@@ -459,6 +468,8 @@ class Fmt {
         l.eventCriticReview(t, criticScore(e.score), criticBlurb(e.score)),
       LabelDropped() => l.eventLabelDropped(labelName(e.label)),
       OpportunityCame() => l.eventOfferCame(offerTitle(e.kind)),
+      TourFinished() => l.eventTourFinished(tourKind(e.kind),
+          compact(e.tickets), money(e.netCents), compact(e.fans)),
       MilestoneReached(:final milestone) =>
         l.eventMilestone(milestoneName(milestone), milestone.skillPoints),
       OpportunityLapsed() => e.outcome.kind == OpportunityKind.scandal

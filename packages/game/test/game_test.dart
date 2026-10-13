@@ -160,6 +160,40 @@ void main() {
       g.close();
     });
 
+    test('a tour is planned, survives reopening and is reported (K63)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final id = g.slotId;
+      final plans = g.tourPlans([Region.northAmerica]);
+      expect(plans.length, TourKind.values.length);
+      expect(plans.first.available, isTrue);
+      expect(() => g.startTour(TourKind.club, const []),
+          throwsA(isA<GameException>()));
+      g.startTour(TourKind.club, [Region.northAmerica]);
+      expect(g.player.tour?.weeks, TourKind.club.weeksPerRegion);
+      expect(() => g.startTour(TourKind.club, [Region.europe]),
+          throwsA(isA<GameException>()));
+      expect(
+          g.milestones
+              .firstWhere((m) => m.milestone == Milestone.firstTour)
+              .reached,
+          isTrue);
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.player.tour?.kind, TourKind.club);
+      final events = <GameEvent>[];
+      for (var i = 0; i < TourKind.club.weeksPerRegion; i++) {
+        events.addAll(g.advanceWeek().events);
+      }
+      expect(events.whereType<TourFinished>().length, 1);
+      expect(g.player.tour, isNull);
+      g.close();
+    });
+
     test('weeks autosave; resuming continues exactly where it was', () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;

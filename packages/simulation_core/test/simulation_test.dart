@@ -312,6 +312,38 @@ void main() {
     expect(downloads, 0);
   });
 
+  test('a tour sells tickets, pays, wins fans and ends (K63)', () {
+    final w = WorldGen.create(seed: 63, startYear: 2010);
+    final sim = Simulator(w);
+    final a = WorldGen.addPlayer(w,
+        name: 'Star',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    expect(Tours.canStart(a, TourKind.arena), isTrue);
+    a.coreFans = 2e4;
+    expect(Tours.canStart(a, TourKind.arena), isFalse);
+    a.coreFans = 5e6;
+    final t = Tours.start(w, a, TourKind.arena, [0, 1]);
+    expect(t.weeks, 2 * TourKind.arena.weeksPerRegion);
+    expect(() => Tours.start(w, a, TourKind.club, [0]), throwsStateError);
+    final money = a.moneyCents;
+    Tour? done;
+    var weeks = 0;
+    while (done == null) {
+      final r = sim.step();
+      weeks++;
+      done = r.tourFinished;
+      if (done == null) expect(a.tour, isNotNull);
+    }
+    expect(weeks, t.weeks);
+    expect(a.tour, isNull);
+    expect(done.tickets, greaterThan(0));
+    expect(done.fans, greaterThan(0));
+    // A sold arena tour pays well beyond a few weeks of royalties.
+    expect(a.moneyCents - money, greaterThan(done.netCents * 0.9));
+  });
+
   group('opportunities (K59)', () {
     ({World w, Simulator sim, Artist p}) star() {
       final w = WorldGen.create(seed: 59, startYear: 2010);

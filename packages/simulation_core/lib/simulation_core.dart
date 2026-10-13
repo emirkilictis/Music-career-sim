@@ -16,6 +16,7 @@ export 'src/opportunities.dart';
 export 'src/rng.dart';
 export 'src/simulator.dart';
 export 'src/time.dart';
+export 'src/tours.dart';
 export 'src/world.dart';
 export 'src/world_gen.dart';
 export 'src/world_hash.dart';

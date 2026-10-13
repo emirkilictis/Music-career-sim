@@ -105,6 +105,7 @@ class ArtistView {
         opportunity = a.opportunity == null
             ? null
             : OpportunityView.of(w, a.opportunity!),
+        tour = a.tour == null ? null : TourView.of(w, a.tour!),
         skills = {for (final k in SkillKind.values) k: a.skills[k]},
         lastReleaseWeek = a.lastReleaseWeek,
         everCharted = a.tier == ArtistTier.player &&
@@ -189,6 +190,9 @@ class ArtistView {
 
   /// An offer waiting for the player's answer (docs K59).
   final OpportunityView? opportunity;
+
+  /// The tour on the road (docs K63).
+  final TourView? tour;
 
   /// Unspent skill points and the current skills (0–100).
   final int skillPoints;
@@ -788,4 +792,49 @@ class MilestoneView {
   final (double, double)? progress;
 
   bool get reached => reachedWeek != null;
+}
+
+/// A tour on the road (docs K63).
+class TourView {
+  TourView.of(World w, Tour t)
+      : kind = t.kind,
+        regions = [for (final r in t.regions) Region.values[r]],
+        weeks = t.weeks,
+        weekOfTour = (w.week - t.startWeek + 1).clamp(1, t.weeks),
+        region = Region.values[t.regionAt(w.week)],
+        tickets = t.tickets,
+        netCents = t.netCents.round(),
+        fans = t.fans;
+
+  final TourKind kind;
+  final List<Region> regions;
+  final int weeks;
+
+  /// The week of the tour about to be played (1-based).
+  final int weekOfTour;
+
+  /// Where this week's shows are.
+  final Region region;
+  final double tickets;
+  final int netCents;
+  final double fans;
+}
+
+/// A tour as planned now: can the player start it and what it would do.
+class TourPlanView {
+  TourPlanView(
+      {required this.kind,
+      required this.regions,
+      required this.available,
+      required this.estimate});
+  final TourKind kind;
+  final List<Region> regions;
+
+  /// Enough fans and not already on tour.
+  final bool available;
+  final TourWeek estimate;
+
+  int get weeks => regions.length * kind.weeksPerRegion;
+  int get netCents =>
+      (estimate.grossCents * Tours.artistCut - estimate.costCents).round();
 }
