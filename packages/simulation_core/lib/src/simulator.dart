@@ -115,6 +115,7 @@ class Simulator {
     // Campaign effects for this year: promotion works mostly through radio
     // before streaming playlists, mostly through playlists after.
     final year = GameTime.yearOf(w.week);
+    final albumCutDl = c.albumCutDownloadShare(year);
     final campaignExposure = [
       for (final k in Campaign.values) c.campaignExposure(k, year),
     ];
@@ -234,7 +235,9 @@ class Simulator {
       s.lastReach = (casPart + pubPart + viralPart) * qMult * trackShare;
 
       final fresh = math.exp(-promoAge / 6.0);
-      final d = a * (0.25 + fresh) * (s.isSingle ? 1.0 : 0.5);
+      // Album buyers own the deep cuts, so few download them one by one,
+      // least in the early download era (docs K50).
+      final d = a * (0.25 + fresh) * (s.isSingle ? 1.0 : albumCutDl);
       final radioLife = (1 - math.exp(-(promoAge + 1) / (s.riseWeeks + 3))) *
           math.exp(-promoAge / (s.lifeWeeks + 10));
       final rd = s.radioAppeal *

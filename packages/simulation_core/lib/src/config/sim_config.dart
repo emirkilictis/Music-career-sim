@@ -127,6 +127,14 @@ class SimConfig {
                   ? 1.0
                   : 1.2;
 
+  /// Download demand of an album cut (not a single) relative to a single:
+  /// low in the early download era, when buyers took whole albums.
+  double albumCutDownloadShare(int year) => year < 2009
+      ? 0.2
+      : year < 2013
+          ? 0.35
+          : 0.5;
+
   /// Share of promotion that works through streaming playlists rather than
   /// radio: radio era before 2010, playlist era from 2018.
   double playlistShare(int year) => year < 2010
