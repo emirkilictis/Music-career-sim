@@ -76,6 +76,8 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F11 ✅ | **2006'da single olmayan albüm parçaları listelere çok kolay giriyor.** | Gerçekte 2005 öncesi Hot 100 radyo ağırlıklıydı; dijital indirmeyle albüm parçaları ara sıra girebildi ama nadirdi. **Yapıldı (K50):** albüm parçalarının indirme talebi 2009 öncesi single'ın %20'si. Efsane modda süperstar albümü: 2006–2007'de 3–7 parça → 0 parça listeye giriyor; 2010'da dev albüm parçaları alt sıralara girebiliyor (gerçekteki gibi). |
 | F12 | **Albüm kapakları kayboldu** (Emir, güncellemeden sonra). | Kod yolu bulunamadı; Emir'den ayrıntı bekleniyor (albüm detayında da yok mu, güncellemeden hemen sonra mı). |
 | F13 ✅ | **#1'de kalma süreleri çok uzun** (JT tekrarında FS/LS 17, Man of the Woods 19 hafta; rakip dünyasında yılda 11–20 farklı #1). | **Yapıldı (K51):** albüm satışları zamanla doyuyor. Yılda 23–34 farklı #1, JT albümleri 7–10 hafta #1 (kalite yüksek olduğu için hâlâ uzun ama makul). |
+| F14 ✅ | **Yorgunken (düşük yaratıcılık) bile A+ şarkı çıkıyor.** | **Yapıldı:** ceza puan değil yüzde: 40'ta %10, 20'de %30, 0'da %50 daha zayıf (K46). |
+| F15 ✅ | **Efsane modda 2013–14'te 46M satıp "disappointing" aldım; önceki dönem 2006'da 146M'di.** | **Yapıldı (K53):** beklenti önceki dönemin ham satışını değil, kendi beklentisine oranını taşır; taban bugünün pazarından hesaplanır. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

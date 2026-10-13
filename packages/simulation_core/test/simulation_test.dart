@@ -218,6 +218,36 @@ void main() {
   });
 
   group('eras and anticipation', () {
+    test('a CD-era smash does not make a later era look disappointing', () {
+      final w = WorldGen.create(seed: 13, startYear: 2013);
+      final a = WorldGen.addPlayer(w, name: 'Big', genre: 0);
+      a.coreFans = 3e6;
+      a.casual = 2e7;
+      a.fame = 0.9;
+      // 2006: 146M against a 50M expectation (a smash).
+      a.eraOpen = true;
+      a.eraUnits = 146e6;
+      a.eraExpected = 50e6;
+      Eras.close(w, a);
+      expect(a.lastEraResult, EraResult.smash);
+      // 2013: a new album; expectations follow today's market.
+      final al = Album(
+          id: w.albums.length,
+          title: 'Next',
+          artistId: a.id,
+          type: AlbumType.album,
+          releaseWeek: w.week,
+          songIds: const [],
+          quality: 80);
+      w.albums.add(al);
+      Eras.open(w, a, al);
+      expect(a.eraExpected, lessThan(46e6));
+      a.eraUnits = 46e6;
+      Eras.close(w, a);
+      expect(a.lastEraResult,
+          anyOf(EraResult.success, EraResult.smash, EraResult.normal));
+    });
+
     test('after a successful era anticipation builds up and never decays', () {
       final w = WorldGen.create(seed: 11, startYear: 2010);
       final a = WorldGen.addPlayer(w, name: 'Hiatus', genre: 0);

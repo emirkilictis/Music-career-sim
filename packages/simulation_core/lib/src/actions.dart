@@ -547,8 +547,13 @@ abstract final class Eras {
     a.eraAlbumId = album.id;
     a.eraStartWeek = w.week;
     a.eraUnits = 0;
-    a.eraExpected =
-        a.lastEraUnits > 0 ? 0.55 * a.lastEraUnits + 0.45 * baseline : baseline;
+    // The last era carries over as how it did against its own
+    // expectation, not as raw units: markets shrink and grow (a 2006 CD
+    // smash says little about 2013 sales; docs K53).
+    final lastScore = a.lastEraUnits > 0 && a.eraExpected > 0
+        ? (a.lastEraUnits / a.eraExpected).clamp(0.5, 2.5)
+        : 1.0;
+    a.eraExpected = baseline * (0.45 + 0.55 * lastScore);
     a.anticipation = 0;
     a.anticipationCap = 0;
     a.flopSupport = 0;
