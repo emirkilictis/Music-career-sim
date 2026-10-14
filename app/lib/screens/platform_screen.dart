@@ -3,6 +3,7 @@ import 'package:game/game.dart';
 
 import '../core/career_state.dart';
 import '../core/commands.dart';
+import '../core/images.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
@@ -81,26 +82,7 @@ class _PlatformScreenState extends State<PlatformScreen> {
                   Text(fmt.platformTagline(p),
                       style: TextStyle(color: AppColors.textMuted)),
                   const SizedBox(height: 12),
-                  if (v != null)
-                    Section(
-                      title: l.platformYourWeek,
-                      icon: platformIcon(p),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                v.playerWeek < 1
-                                    ? l.platformNothingYet
-                                    : fmt.platformWeek(p, v.playerWeek),
-                                style: const TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.w800)),
-                            if (v.playerBestSongId >= 0) ...[
-                              const SizedBox(height: 4),
-                              Text(l.platformBest(v.playerBestTitle),
-                                  style: TextStyle(color: AppColors.textMuted)),
-                            ],
-                          ]),
-                    ),
+                  if (v != null) _ProfileCard(view: v, color: color),
                   const SizedBox(height: 16),
                   Text(caps(context, l.platformTop(Platforms.chartSize)),
                       style: capsStyle(const TextStyle(
@@ -180,6 +162,83 @@ class _PlatformScreenState extends State<PlatformScreen> {
             },
           ),
         const SliverToBoxAdapter(child: SizedBox(height: 24)),
+      ]),
+    );
+  }
+}
+
+/// The player's own page on the platform (docs K82): photo, name, the
+/// blue tick, followers, and their week there.
+class _ProfileCard extends StatelessWidget {
+  const _ProfileCard({required this.view, required this.color});
+  final PlatformView view;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final v = view;
+    final me = v.profile;
+    final p = v.platform;
+    final followers = me?.followers;
+    return Section(
+      title: l.platformYourWeek,
+      icon: platformIcon(p),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        if (me != null) ...[
+          Row(children: [
+            ArtistAvatar(
+                name: me.name,
+                seed: me.artistId,
+                size: 60,
+                artistId: me.artistId,
+                photo: p == MusicPlatform.streamify
+                    ? ArtistPhoto.streamify
+                    : ArtistPhoto.general),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Flexible(
+                        child: Text(me.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                                fontSize: 19, fontWeight: FontWeight.w900)),
+                      ),
+                      if (me.verified) ...[
+                        const SizedBox(width: 6),
+                        Icon(Icons.verified_rounded, size: 18, color: color),
+                      ],
+                    ]),
+                    if (followers != null)
+                      Text(
+                          p == MusicPlatform.viewTube
+                              ? l.subscribersValue(fmt.compact(followers))
+                              : l.followersValue(fmt.compact(followers)),
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                    if (me.monthlyListeners >= 1)
+                      Text(l.monthlyListeners(fmt.compact(me.monthlyListeners)),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 13)),
+                  ]),
+            ),
+          ]),
+          const SizedBox(height: 14),
+        ],
+        Text(
+            v.playerWeek < 1
+                ? l.platformNothingYet
+                : fmt.platformWeek(p, v.playerWeek),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+        if (v.playerBestSongId >= 0) ...[
+          const SizedBox(height: 4),
+          Text(l.platformBest(v.playerBestTitle),
+              style: TextStyle(color: AppColors.textMuted)),
+        ],
       ]),
     );
   }

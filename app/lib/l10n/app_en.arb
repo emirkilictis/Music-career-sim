@@ -1139,7 +1139,7 @@
       }
     }
   },
-  "platformYourWeek": "Your week here",
+  "platformYourWeek": "Your page",
   "platformBest": "Your biggest: {title}",
   "@platformBest": {
     "placeholders": {
@@ -2025,6 +2025,14 @@
   "about": "About",
   "followersValue": "{count} followers",
   "@followersValue": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "subscribersValue": "{count} subscribers",
+  "@subscribersValue": {
     "placeholders": {
       "count": {
         "type": "String"

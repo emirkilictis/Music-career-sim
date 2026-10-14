@@ -610,7 +610,11 @@ class ArtistPageView {
     required this.popular,
     required this.albums,
     required this.singles,
+    this.followers = 0,
   }) : listenerStreams = listenerStreams ?? weeklyStreams;
+
+  /// Followers on Streamify (docs K82).
+  final double followers;
 
   final ArtistView artist;
 

@@ -330,6 +330,9 @@ class GameSession {
       artist: ArtistView.of(w, a),
       weeklyStreams: total,
       listenerStreams: artistId == _p.id ? _fourWeekStreams() : total,
+      followers: Platforms.followers(
+              w, a, MusicPlatform.streamify, GameTime.yearOf(w.week)) ??
+          0,
       popular: [for (final s in popular.take(10)) SongView.of(w, s)],
       albums: [
         for (final al in w.albums.reversed)

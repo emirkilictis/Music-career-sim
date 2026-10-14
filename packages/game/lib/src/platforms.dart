@@ -100,6 +100,28 @@ class PlatformRow {
   final bool isPlayer;
 }
 
+/// The player's own page on a platform (docs K82).
+class PlatformProfile {
+  PlatformProfile({
+    required this.artistId,
+    required this.name,
+    required this.followers,
+    required this.monthlyListeners,
+    required this.verified,
+  });
+  final int artistId;
+  final String name;
+
+  /// Followers (subscribers on the video site); null in the download store.
+  final double? followers;
+
+  /// On the streaming apps (0 elsewhere).
+  final double monthlyListeners;
+
+  /// The blue tick: a known name there.
+  final bool verified;
+}
+
 /// A platform this week: its Top 50 and the player's numbers there.
 class PlatformView {
   PlatformView({
@@ -110,7 +132,11 @@ class PlatformView {
     required this.playerBestSongId,
     required this.playerBestTitle,
     required this.playerBestValue,
+    this.profile,
   });
+
+  /// The player's page there (null before a career has a player).
+  final PlatformProfile? profile;
   final MusicPlatform platform;
 
   /// The week the numbers are from.
@@ -128,6 +154,48 @@ class PlatformView {
 
 abstract final class Platforms {
   static const chartSize = 50;
+
+  /// Followers of [a] on [p] in [year] (docs K82): core fans follow, a
+  /// few casual listeners too, more the longer the platform has been
+  /// around (full after 4 years). Each platform has its own crowd: the
+  /// video site follows music videos, the short-video app charisma, the
+  /// second streaming service North America. Null in the download store.
+  static double? followers(World w, Artist a, MusicPlatform p, int year) {
+    if (!p.openIn(year)) return 0;
+    final m = ((year - p.launchYear + 1) / 4).clamp(0.25, 1.0);
+    final fans = a.coreFans, cas = a.casual;
+    switch (p) {
+      case MusicPlatform.fruitTunes:
+        return null;
+      case MusicPlatform.streamify:
+        return (0.85 * fans + 0.05 * cas) * m;
+      case MusicPlatform.fruitMusic:
+        return (0.25 * fans + 0.02 * cas) *
+            m *
+            (0.5 + a.regionShare[Region.northAmerica.index]);
+      case MusicPlatform.viewTube:
+        var videos = 0;
+        for (final s in w.songs) {
+          if (s.primaryArtistId == a.id && s.videoBudget >= 0) videos++;
+        }
+        return (0.6 * fans + 0.06 * cas) *
+            m *
+            (0.8 + 0.4 * math.min(1, videos / 5));
+      case MusicPlatform.noiseCloud:
+        return (0.1 * fans + 0.008 * cas) * m;
+      case MusicPlatform.tikTak:
+        return (0.25 * fans + 0.06 * cas) *
+            m *
+            (0.6 + 0.8 * a.skills.charisma / 100);
+    }
+  }
+
+  /// Monthly listeners on a streaming app from a week's plays there
+  /// (about 12 plays per listener a month; see [Streamify]).
+  static double monthlyListeners(MusicPlatform p, double weekPlays) =>
+      p == MusicPlatform.streamify || p == MusicPlatform.fruitMusic
+          ? weekPlays * 4.3 / 12
+          : 0;
 
   /// Platforms open in [year], in launch order.
   static List<MusicPlatform> openIn(int year) => [
@@ -216,6 +284,16 @@ abstract final class Platforms {
       playerBestSongId: best,
       playerBestTitle: best >= 0 ? w.songs[best].title : '',
       playerBestValue: bestValue,
+      profile: player == null
+          ? null
+          : PlatformProfile(
+              artistId: player.id,
+              name: player.name,
+              followers: followers(w, player, p, year),
+              monthlyListeners: monthlyListeners(p, mine),
+              verified: player.fame >= 0.1 ||
+                  (followers(w, player, p, year) ?? 0) >= 1e5,
+            ),
     );
   }
 }

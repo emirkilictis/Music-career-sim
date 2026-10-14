@@ -110,6 +110,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F45 | **Oyun hâlâ çok kolay; yetenek puanı haftada 1 olsun, başarılar zaten çok puan veriyor** (Emir). | ✅ K80: haftada 1 puan. Kırılmadan sonra hakimiyet (her şey #1) ayrıca ölçülüyor. |
 | F46 | **Şarkı ekranındaki rakamlar çok karışık** (Emir, ekran görüntüsü: 10 rakam). | ✅ K80: 4 ana rakam + bölge çubuğu, gerisi "Diğer rakamlar"da. |
 | F47 | **2010–2012 pure sales de fazla; düşür ama 2013 sonrası kadar sert değil** (Emir). | ✅ K79 güncellendi: ilk haftadan sonraki haftalar 2010 ×0,75, 2011 ×0,69, 2012 ×0,62. |
+| F48 | **Her streaming platformunda kendi profilimiz, takipçi sayımız olmalı** (Emir). | ✅ K82: her platform ekranında profil kartı (fotoğraf, mavi tik, takipçi/abone, aylık dinleyici, haftalık rakam). |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

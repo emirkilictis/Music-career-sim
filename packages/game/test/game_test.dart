@@ -878,6 +878,29 @@ void main() {
       expect(withVideo, greaterThan(without * 1.15));
     });
 
+    test('a profile with followers on every platform (K82)', () {
+      final g = GameSession.start(slots, _setup(path: CareerPath.smallLabel));
+      g.world.player!
+        ..coreFans = 1e6
+        ..casual = 1e7;
+      final year = GameTime.yearOf(g.world.week);
+      double? f(MusicPlatform p) =>
+          Platforms.followers(g.world, g.world.player!, p, year);
+      // The download store has no followers; the big app has the most.
+      expect(f(MusicPlatform.fruitTunes), isNull);
+      for (final p in Platforms.openIn(year)) {
+        if (p == MusicPlatform.fruitTunes) continue;
+        expect(f(p), greaterThan(0));
+        expect(f(p), lessThanOrEqualTo(f(MusicPlatform.streamify)!));
+      }
+      final view = g.platform(MusicPlatform.streamify);
+      expect(view.profile!.name, g.player.name);
+      expect(view.profile!.followers, f(MusicPlatform.streamify));
+      expect(view.profile!.verified, isTrue);
+      expect(g.artistPage(g.player.id).followers, f(MusicPlatform.streamify));
+      g.close();
+    });
+
     test('labels: what they ask for, contracts, campaigns, drops', () {
       final g = GameSession.start(slots, _setup(path: CareerPath.smallLabel));
       expect(g.player.label, Label.small);

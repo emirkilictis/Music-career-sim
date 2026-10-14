@@ -369,7 +369,7 @@ class _ArtistPageState extends State<ArtistPage> {
                     style: const TextStyle(color: StreamifyColors.muted)),
               ],
               const SizedBox(height: 14),
-              Text(l.followersValue(fmt.compact(a.coreFans)),
+              Text(l.followersValue(fmt.compact(page.followers)),
                   style: const TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 14),
               Text(l.whereListen,
