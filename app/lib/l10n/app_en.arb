@@ -2176,7 +2176,14 @@
       }
     }
   },
-  "skillPointsHint": "You get a skill point every week and more from milestones. Each skill goes up to 100.",
+  "skillPointsHint": "You get {count} skill points every week and more from milestones. Each skill goes up to 100.",
+  "@skillPointsHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "skillRaise": "Raise {skill}",
   "@skillRaise": {
     "placeholders": {

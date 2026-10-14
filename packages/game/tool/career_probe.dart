@@ -61,7 +61,7 @@ void main(List<String> args) {
       }
       // Best US peaks of songs released this year.
       final yr = s.year - 1;
-      var best = 999, top40 = 0, top10 = 0;
+      var best = 999, top40 = 0, top10 = 0, no1 = 0;
       for (final song in s.songs) {
         if (song.releasedWeek < 0 || GameTime.yearOf(song.releasedWeek) != yr) {
           continue;
@@ -71,6 +71,7 @@ void main(List<String> args) {
           if (c.peak < best) best = c.peak;
           if (c.peak <= 40) top40++;
           if (c.peak <= 10) top10++;
+          if (c.peak == 1) no1++;
         }
       }
       if (Platform.environment['PROBE_LOG'] == '$seed') {
@@ -115,6 +116,7 @@ void main(List<String> args) {
         bestAlb,
         p.fame * 100,
         p.label.index,
+        no1,
       ]);
     }
     s.close();
@@ -139,6 +141,7 @@ void main(List<String> args) {
         '${_k(med(2)).padLeft(7)} ${_k(med(3)).padLeft(7)} '
         '${_k(med(4)).padLeft(7)}  ${(lo(5) >= 999 ? '-' : '${lo(5)}').padLeft(4)} '
         '${med(6).toStringAsFixed(0).padLeft(4)} ${med(7).toStringAsFixed(0).padLeft(4)}'
+        ' #1s ${med(11).toStringAsFixed(0)}'
         '  fame ${med(9).toStringAsFixed(0)}% label ${med(10).toStringAsFixed(0)}'
         '  US song peaks [${peaks(5)}] album [${peaks(8)}]');
   }

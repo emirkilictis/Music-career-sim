@@ -753,7 +753,7 @@
   "goCareer": "Kariyere git",
   "skillsTitle": "Yetenekler",
   "skillPointsLeft": "Harcanacak {count} yetenek puanı",
-  "skillPointsHint": "Her hafta 1 yetenek puanı, kilometre taşlarından daha fazlasını kazanırsın. Her yetenek 100’e kadar çıkar.",
+  "skillPointsHint": "Her hafta {count} yetenek puanı, kilometre taşlarından daha fazlasını kazanırsın. Her yetenek 100’e kadar çıkar.",
   "skillRaise": "{skill} artır",
   "skillRaiseMany": "{skill} +{count}",
   "skillsSpreadAll": "Hepsini dağıt",

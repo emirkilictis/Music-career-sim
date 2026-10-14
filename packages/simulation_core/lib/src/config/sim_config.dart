@@ -15,6 +15,7 @@ class SimConfig {
     this.albumCatalogRate = 0.0008,
     this.fanCurveFloor = 0.12,
     this.fanCurveHalfLifeWeeks = 3.0,
+    this.fanShareExponent = 0.8,
     this.singleExposure = 1.0,
     this.albumTrackExposure = 0.30,
     this.baseExposure = 0.0015,
@@ -100,6 +101,10 @@ class SimConfig {
 
   final double fanCurveFloor;
   final double fanCurveHalfLifeWeeks;
+
+  /// How fully fans split their time between an artist's fresh singles
+  /// (docs K83): each gets load^-x of its fan plays (1 = a fixed budget).
+  final double fanShareExponent;
   final double singleExposure;
   final double albumTrackExposure;
   final double baseExposure;

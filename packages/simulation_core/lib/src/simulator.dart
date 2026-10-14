@@ -6,6 +6,7 @@ import 'ai.dart';
 import 'config/charts.dart';
 import 'config/era_table.dart';
 import 'config/regions.dart';
+import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'lifecycle.dart';
 import 'model.dart';
@@ -157,6 +158,18 @@ class Simulator {
     final sumA = Float64List(_r), sumD = Float64List(_r);
     final sumR = Float64List(_r), sumSingles = Float64List(_r);
     final songAttention = Float64List(n);
+    // How many fresh singles each artist's fans are splitting their time
+    // between (docs K83): each single released in the last 26 weeks
+    // weighs its fan curve now.
+    final singleLoad = <int, double>{};
+    for (var i = 0; i < n; i++) {
+      final s = w.songs[ids[i]];
+      if (!s.isSingle || w.week - s.singleWeek >= 26) continue;
+      final ageRel = w.week - s.releasedWeek;
+      singleLoad[s.primaryArtistId] =
+          (singleLoad[s.primaryArtistId] ?? 0) + _fanCurve(c, ageRel);
+    }
+
     final activeIndex = <int, int>{};
     for (var i = 0; i < n; i++) {
       final s = w.songs[ids[i]];
@@ -167,10 +180,14 @@ class Simulator {
 
       final ageRel = w.week - s.releasedWeek;
       final promoAge = s.isSingle ? w.week - s.singleWeek : ageRel;
-      // Fans stream hard at release, then settle to a floor that fades over ~2 years.
-      final fanFloor = c.fanCurveFloor * math.exp(-ageRel / 104.0);
-      final fanCurve = fanFloor +
-          (1 - fanFloor) * math.pow(0.5, ageRel / c.fanCurveHalfLifeWeeks);
+      final fanCurve = _fanCurve(c, ageRel);
+      // Fans' time is shared between the artist's fresh singles: a new
+      // single every few weeks gets less of it each (docs K83).
+      final load = s.isSingle && promoAge < 26
+          ? (singleLoad[s.primaryArtistId] ?? 1.0)
+          : 1.0;
+      final fanShare =
+          load <= 1 ? 1.0 : math.pow(load, -c.fanShareExponent).toDouble();
       // Catalog level fades very slowly over decades (10-year time constant).
       final tail =
           c.catalogTail * (0.5 + s.longevity) * math.exp(-ageRel / 520.0);
@@ -264,6 +281,7 @@ class Simulator {
       final fanPart = fans *
           s.fanAppeal *
           fanCurve *
+          fanShare *
           (1 + p.hype) *
           (s.isSingle ? 1.0 : c.albumTrackFanShare * albumEvent);
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
@@ -996,6 +1014,14 @@ class Simulator {
 
   /// Starts a viral trend: it grows for three weeks, then fades. Most trends
   /// are small; a few become huge and can push a song up the charts.
+  /// Fans stream hard at release, then settle to a floor that fades over
+  /// ~2 years.
+  static double _fanCurve(SimConfig c, int ageRel) {
+    final floor = c.fanCurveFloor * math.exp(-ageRel / 104.0);
+    return floor +
+        (1 - floor) * math.pow(0.5, ageRel / c.fanCurveHalfLifeWeeks);
+  }
+
   /// A campaign's lift on exposure for an artist this famous: the lift
   /// above no campaign shrinks to half at full fame (docs K81).
   static double _knownCampaign(double lift, double fame) =>

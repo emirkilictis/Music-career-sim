@@ -276,7 +276,7 @@ class SkillsSection extends StatelessWidget {
                   ? l.skillPointsLeft(p.skillPoints)
                   : maxed
                       ? l.skillsMaxed
-                      : l.skillPointsHint,
+                      : l.skillPointsHint(Actions.skillPointsPerWeek),
               style: TextStyle(
                   color:
                       p.skillPoints > 0 ? AppColors.lilac : AppColors.textMuted,

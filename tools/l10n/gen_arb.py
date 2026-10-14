@@ -758,7 +758,7 @@ k('stepSkillsBody','{count} points waiting. Better skills make better songs.','{
 k('goCareer','Open Career','Kariyere git')
 k('skillsTitle','Skills','Yetenekler')
 k('skillPointsLeft','{count} skill points to spend','Harcanacak {count} yetenek puanı', count='int')
-k('skillPointsHint','You get a skill point every week and more from milestones. Each skill goes up to 100.','Her hafta 1 yetenek puanı, kilometre taşlarından daha fazlasını kazanırsın. Her yetenek 100’e kadar çıkar.')
+k('skillPointsHint','You get {count} skill points every week and more from milestones. Each skill goes up to 100.','Her hafta {count} yetenek puanı, kilometre taşlarından daha fazlasını kazanırsın. Her yetenek 100’e kadar çıkar.', count='int')
 k('skillRaise','Raise {skill}','{skill} artır', skill='String')
 k('skillRaiseMany','Raise {skill} by {count}','{skill} +{count}', skill='String', count='int')
 k('skillsSpreadAll','Spread all','Hepsini dağıt')
