@@ -202,8 +202,8 @@ abstract final class Codec {
     // Added in schema v6, v11.
     'videoBudget', 'videoPower',
     'campaignPower', 'campaignCost', 'campaignReturn',
-    // Added in schema v13, v17.
-    'revenue', 'productionCost', 'gradeSpread',
+    // Added in schema v13, v17, v18.
+    'revenue', 'productionCost', 'gradeSpread', 'radioPush',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -229,6 +229,7 @@ abstract final class Codec {
         s.revenueCents,
         s.productionCostCents,
         s.gradeSpread,
+        s.radioPush.index,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -249,6 +250,8 @@ abstract final class Codec {
       featuredArtistIds: featured,
     );
     s.gradeSpread = r['gradeSpread'] as int? ?? 6;
+    // Before v18 every single had the radio a standard push gives now.
+    s.radioPush = RadioPush.values[r['radioPush'] as int? ?? 1];
     s
       ..status = SongStatus.values[r['status'] as int]
       ..releasedWeek = r['releasedWeek'] as int
@@ -435,6 +438,7 @@ abstract final class Codec {
             'variants': sr.variantWeeks,
             'formats': sr.variantFormats,
             'campaign': sr.campaign.index,
+            'radio': sr.radioPush.index,
             'release': sr.releaseWeek,
             'announce': sr.announceWeek,
             'created': sr.createdWeek,
@@ -455,6 +459,8 @@ abstract final class Codec {
               variantWeeks: (m['variants'] as List).cast<int>(),
               variantFormats: ((m['formats'] as List?) ?? const []).cast<int>(),
               campaign: Campaign.values[m['campaign'] as int],
+              // Saved before docs K84: the radio a standard push gives.
+              radioPush: RadioPush.values[m['radio'] as int? ?? 1],
               releaseWeek: m['release'] as int,
               announceWeek: m['announce'] as int,
               createdWeek: m['created'] as int,

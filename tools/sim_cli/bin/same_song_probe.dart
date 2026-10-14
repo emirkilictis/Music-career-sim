@@ -17,7 +17,9 @@ void main(List<String> args) {
         var d = w.retiredDormantAttention[Region.northAmerica.index];
         for (final id in w.activeArtistIds) {
           final a = w.artists[id];
-          d += a.sumDormantRate * a.catalogFactor * a.regionShare[Region.northAmerica.index];
+          d += a.sumDormantRate *
+              a.catalogFactor *
+              a.regionShare[Region.northAmerica.index];
         }
         dorm += d;
       }
@@ -43,7 +45,9 @@ void main(List<String> args) {
         var d = w.retiredDormantAttention[Region.northAmerica.index];
         for (final id in w.activeArtistIds) {
           final a = w.artists[id];
-          d += a.sumDormantRate * a.catalogFactor * a.regionShare[Region.northAmerica.index];
+          d += a.sumDormantRate *
+              a.catalogFactor *
+              a.regionShare[Region.northAmerica.index];
         }
         dorm += d;
       }

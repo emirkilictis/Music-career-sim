@@ -6,9 +6,8 @@ import 'package:simulation_core/simulation_core.dart';
 /// Usage: dart run bin/radio_cuts_probe.dart [year] [difficulty]
 void main(List<String> args) {
   final year = args.isNotEmpty ? int.parse(args[0]) : 2022;
-  final diff = args.length > 1
-      ? Difficulty.values.byName(args[1])
-      : Difficulty.normal;
+  final diff =
+      args.length > 1 ? Difficulty.values.byName(args[1]) : Difficulty.normal;
   final w = WorldGen.create(
       seed: 25, startYear: year, realNames: true, difficulty: diff);
   final sim = Simulator(w);
@@ -41,7 +40,10 @@ void main(List<String> args) {
     }
   }
   print('${year - 1} US songs (${diff.name}): radio share of points '
-      '${[for (var i = 0; i < pos.length; i++) '#${pos[i]} ${(100 * radioShare[i] / weeks).round()}%'].join(', ')}');
+      '${[
+    for (var i = 0; i < pos.length; i++)
+      '#${pos[i]} ${(100 * radioShare[i] / weeks).round()}%'
+  ].join(', ')}');
   print('  album cuts ${(100 * cutEntries / entries).toStringAsFixed(1)}% of '
       'entries, $cutTop10 top-10 cut entries, '
       '${top10Artists.length} artists in the top 10 over the year');
@@ -69,8 +71,9 @@ void main(List<String> args) {
       for (final e in chart)
         if (w.songs[e.entityId].primaryArtistId == p.id) e.position
     ];
-    String us(int id) => (w.songWeekStreamsIn(w.songs[id], ChartMarket.us) / 1e6)
-        .toStringAsFixed(1);
+    String us(int id) =>
+        (w.songWeekStreamsIn(w.songs[id], ChartMarket.us) / 1e6)
+            .toStringAsFixed(1);
     final st = [for (final id in ids) us(id)];
     print('    US streams per track (M): $st; #1 ${us(chart[0].entityId)}M '
         '(${(chart[0].points / 1e3).round()}K pts), #10 '

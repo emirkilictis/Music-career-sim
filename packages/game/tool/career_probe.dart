@@ -225,9 +225,11 @@ int _week(GameSession s, void Function(int) setSingle, int Function() single,
   if (s.week - single() >= 6 && vault.length >= 2) {
     final best = vault.first;
     final c = _campaign(s, s.player.moneyCents ~/ 4);
+    final left = s.player.moneyCents ~/ 4 - s.player.campaignCosts[c.index];
+    final radio = _radio(s, left);
     final before = s.player.moneyCents;
     try {
-      s.releaseSingle(best.id, campaign: c);
+      s.releaseSingle(best.id, campaign: c, radio: radio);
       spent += before - s.player.moneyCents;
       setSingle(s.week);
     } on GameException {/* skip */}
@@ -262,6 +264,16 @@ Campaign _campaign(GameSession s, int budget) {
     if (p.campaignCosts[k.index] <= budget) return k;
   }
   return Campaign.none;
+}
+
+/// The biggest radio push the label allows within [budget] (docs K84).
+RadioPush _radio(GameSession s, int budget) {
+  final costs = s.radioPushCosts;
+  for (final r in RadioPush.values.reversed) {
+    if (r.index > s.maxRadioPush.index) continue;
+    if (costs[r]! <= budget) return r;
+  }
+  return RadioPush.none;
 }
 
 String _k(double v) => v.abs() >= 1e6

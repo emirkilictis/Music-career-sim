@@ -404,13 +404,33 @@ class GameSession {
     return SongView.of(world, s);
   }
 
-  /// Releases a vault song as a single, or pushes an album track as a single.
-  void releaseSingle(int songId, {Campaign campaign = Campaign.standard}) {
+  /// Releases a vault song as a single, or pushes an album track as a single,
+  /// with a [radio] push bought on top of the campaign (docs K84).
+  void releaseSingle(int songId,
+      {Campaign campaign = Campaign.standard,
+      RadioPush radio = RadioPush.none}) {
     final s = _checkSingle(songId);
-    _requireMoney(_campaignCost(campaign));
-    Actions.releaseSingle(world, _p, s, campaign: campaign);
+    _requireMoney(_campaignCost(campaign) + _radioCost(radio));
+    Actions.releaseSingle(world, _p, s, campaign: campaign, radio: radio);
     _saveNow();
   }
+
+  /// What the player pays for a radio push, after checking the label can
+  /// arrange it (heavy rotation needs a mid-size label or bigger).
+  int _radioCost(RadioPush radio) {
+    if (radio.index > Actions.maxRadioPush(_p.label).index) {
+      throw GameException('radioLocked', 'The label cannot arrange this');
+    }
+    return Actions.radioPushCostFor(_p, radio);
+  }
+
+  /// The radio push prices for the player now (docs K84).
+  Map<RadioPush, int> get radioPushCosts => {
+        for (final r in RadioPush.values) r: Actions.radioPushCostFor(_p, r),
+      };
+
+  /// The biggest radio push the player's label can arrange.
+  RadioPush get maxRadioPush => Actions.maxRadioPush(_p.label);
 
   /// What the player pays for [campaign] with their label, after checking
   /// the label can run it at all (docs K54).
@@ -825,11 +845,13 @@ class GameSession {
   /// release week itself = a surprise drop). The campaign is paid now.
   ScheduledView scheduleSingle(int songId,
       {Campaign campaign = Campaign.standard,
+      RadioPush radio = RadioPush.none,
       required int releaseWeek,
       required int announceWeek}) {
     final s = _checkSingle(songId);
     _checkDates(releaseWeek, announceWeek);
-    _requireMoney(_campaignCost(campaign));
+    final cost = _campaignCost(campaign) + _radioCost(radio);
+    _requireMoney(cost);
     return _schedule(ScheduledRelease(
       id: _nextScheduleId(),
       type: AlbumType.single,
@@ -838,7 +860,8 @@ class GameSession {
       announceWeek: announceWeek,
       createdWeek: world.week,
       campaign: campaign,
-      paidCents: _campaignCost(campaign),
+      radioPush: radio,
+      paidCents: cost,
     ));
   }
 

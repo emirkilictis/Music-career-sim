@@ -878,6 +878,36 @@ void main() {
       expect(withVideo, greaterThan(without * 1.15));
     });
 
+    test('radio push: paid apart, heavy needs a bigger label (K84)', () {
+      final g = GameSession.start(slots, _setup(path: CareerPath.smallLabel));
+      g.world.player!.moneyCents = 1 << 40;
+      final a = g.writeSong(budget: BudgetTier.low).id;
+      final b = g.writeSong(budget: BudgetTier.low).id;
+      // A small label can't arrange heavy rotation.
+      expect(g.maxRadioPush, RadioPush.standard);
+      expect(() => g.releaseSingle(a, radio: RadioPush.heavy),
+          _code('radioLocked'));
+      final before = g.player.moneyCents;
+      g.releaseSingle(a, radio: RadioPush.standard);
+      expect(before - g.player.moneyCents,
+          g.radioPushCosts[RadioPush.standard]! + g.player.campaignCosts[1]);
+      expect(g.song(a).radioPush, RadioPush.standard);
+      // A scheduled single keeps its push across reopening.
+      final now = g.week;
+      g.scheduleSingle(b,
+          radio: RadioPush.standard, releaseWeek: now + 3, announceWeek: now);
+      final id = g.slotId;
+      g.close();
+      final h = GameSession.resume(slots, id);
+      expect(h.scheduled.single.radioPush, RadioPush.standard);
+      for (var i = 0; i < 3; i++) {
+        h.advanceWeek();
+      }
+      expect(h.song(b).radioPush, RadioPush.standard);
+      expect(h.song(a).radioPush, RadioPush.standard);
+      h.close();
+    });
+
     test('a profile with followers on every platform (K82)', () {
       final g = GameSession.start(slots, _setup(path: CareerPath.smallLabel));
       g.world.player!
@@ -933,8 +963,7 @@ void main() {
       expect(g.player.moneyCents, major.netCents);
       // With the albums delivered, leaving is free.
       g.world.player!.contractAlbumsLeft = 0;
-      expect(
-          g.labels.firstWhere((v) => v.label == Label.giant).buyoutCents, 0);
+      expect(g.labels.firstWhere((v) => v.label == Label.giant).buyoutCents, 0);
       // The label pays most of a campaign.
       final before = g.player.moneyCents;
       g.releaseSingle(song, campaign: Campaign.global);

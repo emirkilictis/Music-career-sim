@@ -146,7 +146,9 @@ class Simulator {
     // Every campaign works at full strength (the K57 fatigue was removed
     // on the player's request).
     double exposureOf(Song s) => campaignExposure[s.campaign.index];
-    double radioOf(Song s) => campaignRadio[s.campaign.index];
+    // Radio comes from the paid push; the campaign adds a little (K84).
+    double radioOf(Song s) =>
+        campaignRadio[s.campaign.index] * s.radioPush.factor;
     final playlistAdds = <int>[];
 
     // 5. Raw demand for active songs, split by region.
@@ -161,13 +163,24 @@ class Simulator {
     // How many fresh singles each artist's fans are splitting their time
     // between (docs K83): each single released in the last 26 weeks
     // weighs its fan curve now.
+    // The same fresh singles also compete for the artist's radio slots and
+    // new listeners (docs K84): each weighs its radio and promo curves.
     final singleLoad = <int, double>{};
+    final radioLoad = <int, double>{}, promoLoad = <int, double>{};
     for (var i = 0; i < n; i++) {
       final s = w.songs[ids[i]];
-      if (!s.isSingle || w.week - s.singleWeek >= 26) continue;
+      final promoAge = w.week - s.singleWeek;
+      if (!s.isSingle || promoAge >= 26) continue;
       final ageRel = w.week - s.releasedWeek;
-      singleLoad[s.primaryArtistId] =
-          (singleLoad[s.primaryArtistId] ?? 0) + _fanCurve(c, ageRel);
+      final id = s.primaryArtistId;
+      singleLoad[id] = (singleLoad[id] ?? 0) + _fanCurve(c, ageRel);
+      radioLoad[id] = (radioLoad[id] ?? 0) + _radioLife(s, promoAge);
+      promoLoad[id] = (promoLoad[id] ?? 0) + _promoLife(s, promoAge);
+    }
+    double share(Map<int, double> load, Song s, int promoAge) {
+      if (!s.isSingle || promoAge >= 26) return 1;
+      final l = load[s.primaryArtistId] ?? 1;
+      return l <= 1 ? 1 : math.pow(l, -c.selfCompetitionExponent).toDouble();
     }
 
     final activeIndex = <int, int>{};
@@ -191,9 +204,7 @@ class Simulator {
       // Catalog level fades very slowly over decades (10-year time constant).
       final tail =
           c.catalogTail * (0.5 + s.longevity) * math.exp(-ageRel / 520.0);
-      final life = (1 - math.exp(-(promoAge + 1) / s.riseWeeks)) *
-              math.exp(-promoAge / s.lifeWeeks) +
-          tail;
+      final life = _promoLife(s, promoAge) + tail;
       final promo = s.isSingle ? c.singleExposure : c.albumTrackExposure;
       // Long albums: listeners' time is split between tracks. Up to 10 tracks
       // each gets full attention; beyond that each track gets less, so 40
@@ -285,7 +296,11 @@ class Simulator {
           (1 + p.hype) *
           (s.isSingle ? 1.0 : c.albumTrackFanShare * albumEvent);
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
-      final pubPart = c.publicPool * s.commercial * life * exposure;
+      final pubPart = c.publicPool *
+          s.commercial *
+          life *
+          exposure *
+          share(promoLoad, s, promoAge);
       // A viral trend reaches people regardless of the song's age.
       final viralPart =
           c.publicPool * (0.5 + 0.5 * s.commercial) * s.viralBoost * 0.1;
@@ -317,10 +332,9 @@ class Simulator {
           w.albums[s.albumId].type == AlbumType.mixtape;
       final d =
           free ? 0.0 : a * (0.25 + fresh) * (s.isSingle ? 1.0 : albumCutDl);
-      final radioLife = (1 - math.exp(-(promoAge + 1) / (s.riseWeeks + 3))) *
-          math.exp(-promoAge / (s.lifeWeeks + 10));
       final rd = s.radioAppeal *
-          radioLife *
+          _radioLife(s, promoAge) *
+          share(radioLoad, s, promoAge) *
           (s.isSingle ? 1.0 : 0.03) *
           (0.2 + p.fame) *
           p.labelReach *
@@ -1014,6 +1028,16 @@ class Simulator {
 
   /// Starts a viral trend: it grows for three weeks, then fades. Most trends
   /// are small; a few become huge and can push a song up the charts.
+  /// A single's run on the radio: builds over its first weeks, then fades.
+  static double _radioLife(Song s, int promoAge) =>
+      (1 - math.exp(-(promoAge + 1) / (s.riseWeeks + 3))) *
+      math.exp(-promoAge / (s.lifeWeeks + 10));
+
+  /// A song's promotion run (new listeners), before its catalog tail.
+  static double _promoLife(Song s, int promoAge) =>
+      (1 - math.exp(-(promoAge + 1) / s.riseWeeks)) *
+      math.exp(-promoAge / s.lifeWeeks);
+
   /// Fans stream hard at release, then settle to a floor that fades over
   /// ~2 years.
   static double _fanCurve(SimConfig c, int ageRel) {

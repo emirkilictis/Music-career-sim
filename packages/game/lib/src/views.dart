@@ -103,6 +103,10 @@ class ArtistView {
         campaignCosts = [
           for (final k in Campaign.values) Actions.campaignCostFor(a, k)
         ],
+        radioPushCosts = [
+          for (final r in RadioPush.values) Actions.radioPushCostFor(a, r)
+        ],
+        maxRadioPush = Actions.maxRadioPush(a.label),
         opportunity = a.opportunity == null
             ? null
             : OpportunityView.of(w, a.opportunity!),
@@ -186,6 +190,11 @@ class ArtistView {
   /// price grows with the audience, the label pays part (docs K57).
   final List<int> campaignCosts;
 
+  /// What each radio push costs now (by [RadioPush.index]; docs K84), and
+  /// the biggest one the label can arrange.
+  final List<int> radioPushCosts;
+  final RadioPush maxRadioPush;
+
   /// An offer waiting for the player's answer (docs K59).
   final OpportunityView? opportunity;
 
@@ -245,6 +254,7 @@ class SongView {
         gradeHigh = math.min(100, s.estimatedGrade + s.gradeSpread),
         grade = s.status == SongStatus.vault ? -1 : s.quality.round(),
         campaign = s.campaign,
+        radioPush = s.radioPush,
         playlistAdd = s.playlistAdd,
         charts = _records(s),
         weekStreamsUs =
@@ -333,6 +343,9 @@ class SongView {
   /// The song's real grade once it is out (-1 while in the vault).
   final int grade;
   final Campaign campaign;
+
+  /// The radio push bought for it as a single (docs K84).
+  final RadioPush radioPush;
   final PlaylistAdd playlistAdd;
   final List<ChartRecord> charts;
   final double weekStreamsUs;
@@ -655,6 +668,7 @@ class ScheduledView {
         editionsCostCents = Actions.editionsCostCents(
             sr.variantWeeks.length, sr.variantFormats),
         campaign = sr.campaign,
+        radioPush = sr.radioPush,
         paidCents = sr.paidCents,
         buzz = sr.buzz,
         buzzCap = w.config.announceBuzzCap(sr.type, w.player!.fame);
@@ -681,6 +695,7 @@ class ScheduledView {
   /// What its extra editions cost (paid when a draft is released or dated).
   final int editionsCostCents;
   final Campaign campaign;
+  final RadioPush radioPush;
   final int paidCents;
 
   /// Excitement built since the announcement, and its ceiling.

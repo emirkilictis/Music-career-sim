@@ -417,8 +417,28 @@ abstract final class Actions {
               (a.tier == ArtistTier.player ? a.label.campaignShare : 1.0))
           .round();
 
+  /// What the player pays for a radio push (docs K84): its price grows
+  /// with the square root of the audience (a superstar's heavy push is
+  /// about 2.6× a newcomer's), the label pays its campaign share.
+  static int radioPushCostFor(Artist a, RadioPush push) => (push.costCents *
+          math.sqrt(campaignSizeFactor(a)) *
+          (a.tier == ArtistTier.player ? a.label.campaignShare : 1.0))
+      .round();
+
+  /// The biggest radio push a label can arrange: heavy rotation needs at
+  /// least a mid-size label.
+  static RadioPush maxRadioPush(Label l) =>
+      l.index >= Label.mid.index ? RadioPush.heavy : RadioPush.standard;
+
   /// Pays the player's campaign up front (AI labels run theirs implicitly)
   /// and returns what was paid.
+  static int _payRadio(Artist a, RadioPush radio) {
+    if (a.tier != ArtistTier.player) return 0;
+    final cost = radioPushCostFor(a, radio);
+    a.moneyCents -= cost;
+    return cost;
+  }
+
   static int _payCampaign(Artist a, Campaign campaign) {
     if (a.tier != ArtistTier.player) return 0;
     final cost = campaignCostFor(a, campaign);
@@ -497,10 +517,19 @@ abstract final class Actions {
   /// Releases a vault song as a single, or promotes an album track to single.
   static void releaseSingle(World w, Artist a, Song s,
       {Campaign campaign = Campaign.standard,
+      RadioPush radio = RadioPush.none,
       bool prepaid = false,
       int paidCents = 0,
       double buzz = 0}) {
-    s.campaignCostCents = prepaid ? paidCents : _payCampaign(a, campaign);
+    if (!prepaid && a.tier == ArtistTier.player) {
+      final total = campaignCostFor(a, campaign) + radioPushCostFor(a, radio);
+      if (total > a.moneyCents) {
+        throw ActionException('Not enough money for the campaign');
+      }
+    }
+    s.campaignCostCents =
+        prepaid ? paidCents : _payCampaign(a, campaign) + _payRadio(a, radio);
+    s.radioPush = radio;
     s.campaignReturnCents = 0;
     s.campaignPower = 1;
     _convertAnticipation(a, album: false);
@@ -693,6 +722,7 @@ abstract final class Actions {
         if (s.isSingle) continue;
         releaseSingle(w, a, s,
             campaign: sr.campaign,
+            radio: sr.radioPush,
             prepaid: true,
             paidCents: sr.paidCents,
             buzz: sr.buzz);

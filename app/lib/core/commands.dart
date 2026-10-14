@@ -88,8 +88,9 @@ abstract final class Cmd {
           genres: genres,
           title: title);
 
-  static SessionCmd<void> releaseSingle(int songId, Campaign campaign) =>
-      (s) => s.releaseSingle(songId, campaign: campaign);
+  static SessionCmd<void> releaseSingle(int songId, Campaign campaign,
+          [RadioPush radio = RadioPush.none]) =>
+      (s) => s.releaseSingle(songId, campaign: campaign, radio: radio);
 
   static SessionCmd<AlbumView> releaseAlbum({
     required String title,
@@ -106,9 +107,11 @@ abstract final class Cmd {
           campaign: campaign);
 
   static SessionCmd<ScheduledView> scheduleSingle(
-          int songId, Campaign campaign, int releaseWeek, int announceWeek) =>
+          int songId, Campaign campaign, int releaseWeek, int announceWeek,
+          [RadioPush radio = RadioPush.none]) =>
       (s) => s.scheduleSingle(songId,
           campaign: campaign,
+          radio: radio,
           releaseWeek: releaseWeek,
           announceWeek: announceWeek);
 

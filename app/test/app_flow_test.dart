@@ -58,6 +58,10 @@ void main() {
     expect(find.text('Promotion campaign'), findsOneWidget);
     await tester.tap(find.text('No promotion'));
     await tester.pumpAndSettle();
+    // Then the radio push, paid apart (K84).
+    expect(find.text('Radio push'), findsWidgets);
+    await tester.tap(find.text('No radio push'));
+    await tester.pumpAndSettle();
     expect(find.textContaining('is out!'), findsOneWidget);
 
     await tester.tap(find.text('Charts'));
@@ -210,6 +214,8 @@ void main() {
     expect(find.byType(Image), findsWidgets);
     await tester.tap(find.text('No promotion'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('No radio push'));
+    await tester.pumpAndSettle();
     // The single's tile in Releases shows the uploaded cover.
     expect(find.byType(Image), findsWidgets);
 
@@ -282,6 +288,8 @@ void main() {
     await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('No promotion'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('No radio push'));
     await tester.pumpAndSettle();
     expect(
         find.textContaining('is set for January 2024, week 5'), findsOneWidget);

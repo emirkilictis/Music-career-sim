@@ -200,6 +200,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       if (s.releasedWeek >= 0)
                         l.releasedOn(fmt.week(s.releasedWeek)),
                       if (s.releasedWeek >= 0) fmt.campaign(s.campaign),
+                      if (s.isSingle && s.releasedWeek >= 0)
+                        fmt.radioPush(s.radioPush),
                       if (s.playlistAdd != PlaylistAdd.none) l.onPlaylist,
                     ].join(' · '),
                     style:

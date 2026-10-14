@@ -82,6 +82,7 @@ int worldHash(World w) {
     addDouble(s.videoPower);
     addDouble(s.campaignPower);
     addDouble(s.campaignReturnCents);
+    addInt(s.radioPush.index);
     addDouble(s.dormantRate);
     addDouble(s.lifetimePhysical);
     for (final g in s.genres) {

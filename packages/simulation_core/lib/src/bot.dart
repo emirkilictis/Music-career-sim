@@ -120,7 +120,8 @@ class BotPlayer {
       }
       pick ??= vault.isNotEmpty ? vault.first : null;
       if (pick == null) return;
-      Actions.releaseSingle(w, a, pick, campaign: _campaign(a));
+      Actions.releaseSingle(w, a, pick,
+          campaign: _campaign(a), radio: RadioPush.standard);
       _lastSingleWeek = w.week;
     }
   }

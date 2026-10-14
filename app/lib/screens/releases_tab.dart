@@ -471,13 +471,16 @@ Future<bool> releaseSingleFlow(
   final campaign = await pickCampaign(context, career,
       header: CoverPickRow(songId: song.id, albumId: song.coverAlbumId));
   if (campaign == null || !context.mounted) return false;
+  final radio = await pickRadioPush(context, career,
+      extraCents: career.player.campaignCosts[campaign.index]);
+  if (radio == null || !context.mounted) return false;
   try {
     if (when.releaseWeek == career.week) {
-      await career.act(Cmd.releaseSingle(song.id, campaign));
+      await career.act(Cmd.releaseSingle(song.id, campaign, radio));
       if (context.mounted) showInfo(context, l.singleReleased(song.title));
     } else {
       await career.act(Cmd.scheduleSingle(
-          song.id, campaign, when.releaseWeek, when.announceWeek));
+          song.id, campaign, when.releaseWeek, when.announceWeek, radio));
       if (context.mounted) {
         showInfo(context,
             l.releaseScheduled(song.title, fmt.week(when.releaseWeek)));
@@ -535,6 +538,54 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
                   }),
             trailing: Text(fmt.money(cost(k))),
             onTap: () => Navigator.pop(c, k),
+          ),
+        const SizedBox(height: 8),
+      ])),
+    ),
+  );
+}
+
+/// Radio push for a single, bought on top of the campaign (docs K84).
+Future<RadioPush?> pickRadioPush(BuildContext context, CareerState career,
+    {int extraCents = 0}) {
+  final l = context.l10n;
+  final fmt = context.fmt;
+  final p = career.player;
+  int cost(RadioPush r) => p.radioPushCosts[r.index];
+  return showModalBottomSheet<RadioPush>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (c) => SafeArea(
+      child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+          child: Text(l.pickRadioPush, style: Theme.of(c).textTheme.titleLarge),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Text(l.radioPushHint, style: Theme.of(c).textTheme.bodySmall),
+        ),
+        for (final r in RadioPush.values)
+          ListTile(
+            enabled: r.index <= p.maxRadioPush.index &&
+                cost(r) + extraCents <= p.moneyCents,
+            leading: Icon(switch (r) {
+              RadioPush.none => Icons.radio_outlined,
+              RadioPush.standard => Icons.radio,
+              RadioPush.heavy => Icons.cell_tower_rounded,
+            }),
+            title: Text(fmt.radioPush(r)),
+            subtitle: Text(r.index > p.maxRadioPush.index
+                ? l.radioLockedHint
+                : switch (r) {
+                    RadioPush.none => l.radioNoneHint,
+                    RadioPush.standard => l.radioStandardHint,
+                    RadioPush.heavy => l.radioHeavyHint,
+                  }),
+            trailing: Text(fmt.money(cost(r))),
+            onTap: () => Navigator.pop(c, r),
           ),
         const SizedBox(height: 8),
       ])),

@@ -26,7 +26,14 @@ abstract final class AiPlanner {
       final p = a.plan.removeAt(0);
       switch (p.kind) {
         case PlannedKind.leadSingle || PlannedKind.single:
-          Actions.releaseSingle(w, a, w.songs[p.songId]);
+          // Stars' labels promote hard: a bigger campaign, and heavy radio
+          // for the lead single (docs K84). Working artists get the usual.
+          final star = a.tier == ArtistTier.a;
+          Actions.releaseSingle(w, a, w.songs[p.songId],
+              campaign: star ? Campaign.intensive : Campaign.standard,
+              radio: star && p.kind == PlannedKind.leadSingle
+                  ? RadioPush.heavy
+                  : RadioPush.standard);
         case PlannedKind.album:
           Actions.releaseAlbum(w, a, a.pendingAlbumTitle, a.pendingAlbumSongIds,
               type: a.pendingAlbumType, variantWeeks: a.pendingVariantWeeks);
@@ -92,11 +99,18 @@ abstract final class AiPlanner {
           kind: PlannedKind.single,
           songId: ranked[1].id));
     }
-    if (isA && ranked.length > 2 && r.chance(0.6)) {
+    // Stars keep an era going with more singles (docs K84).
+    if (isA && ranked.length > 2) {
       a.plan.add(PlannedRelease(
-          week: albumWeek + 18 + r.nextInt(9),
+          week: albumWeek + 16 + r.nextInt(8),
           kind: PlannedKind.single,
           songId: ranked[2].id));
+    }
+    if (isA && ranked.length > 3 && r.chance(0.5)) {
+      a.plan.add(PlannedRelease(
+          week: albumWeek + 28 + r.nextInt(10),
+          kind: PlannedKind.single,
+          songId: ranked[3].id));
     }
     a.pendingAlbumSongIds
       ..clear()

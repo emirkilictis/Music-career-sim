@@ -200,6 +200,12 @@ class Fmt {
         Job.nightShift => l.jobPerkNightShift,
       };
 
+  String radioPush(RadioPush r) => switch (r) {
+        RadioPush.none => l.radioNone,
+        RadioPush.standard => l.radioStandard,
+        RadioPush.heavy => l.radioHeavy,
+      };
+
   String campaign(Campaign c) => switch (c) {
         Campaign.none => l.campaignNone,
         Campaign.standard => l.campaignStandard,
@@ -490,6 +496,7 @@ class Fmt {
       'campaignLocked' => l.errorCampaignLocked,
       'underContract' => l.errorUnderContract,
       'buyoutMoney' => l.errorBuyoutMoney,
+      'radioLocked' => l.errorRadioLocked,
       'labelRefused' => l.errorLabelRefused,
       'alreadyScheduled' => l.errorAlreadyScheduled,
       'skillMaxed' => l.errorSkillMaxed,

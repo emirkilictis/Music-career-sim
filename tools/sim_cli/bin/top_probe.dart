@@ -37,7 +37,11 @@ void main(List<String> args) {
   for (var n = 0; n < 4; n++) {
     p.creativeEnergy = 100;
     final s = Actions.writeSong(w, p, budget: BudgetTier.high);
-    Actions.releaseSingle(w, p, s, campaign: Campaign.global);
+    Actions.releaseSingle(w, p, s,
+        campaign: Campaign.global,
+        radio: args.length > 2
+            ? RadioPush.values.byName(args[2])
+            : RadioPush.heavy);
     for (var k = 0; k < 6; k++) {
       final r = sim.step();
       final chart = r.charts[Charts.usSongs];

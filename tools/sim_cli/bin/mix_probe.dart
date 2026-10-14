@@ -40,7 +40,10 @@ void main(List<String> args) {
     print('${real ? 'REAL' : 'FAKE'} audience ${(total / 1e6).round()}M, '
         'NA share ${(100 * usAtt / total).round()}%');
     print('  US song chart points (last 2 years) '
-        '${[for (var i = 0; i < pos.length; i++) '#${pos[i]} ${(sum[i] / weeks / 1e3).toStringAsFixed(1)}K'].join(', ')}');
+        '${[
+      for (var i = 0; i < pos.length; i++)
+        '#${pos[i]} ${(sum[i] / weeks / 1e3).toStringAsFixed(1)}K'
+    ].join(', ')}');
     print('  home: ${top(home)}');
     print('  genre: ${top(genre)}');
   }

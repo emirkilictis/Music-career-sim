@@ -224,6 +224,16 @@
   "labelBuyoutIndependent": "Buy out and go independent",
   "labelBuyoutShort": "Not enough money for the buyout.",
   "campaignLockedHint": "Your label can't run this one",
+  "pickRadioPush": "Radio push",
+  "radioPushHint": "Paid on top of the campaign. Without it a single only gets the radio its song and your fame earn: about half.",
+  "radioNone": "No radio push",
+  "radioStandard": "Radio push",
+  "radioHeavy": "Heavy rotation",
+  "radioNoneHint": "About half the radio play.",
+  "radioStandardHint": "Regular rotation on the big stations.",
+  "radioHeavyHint": "On every station, all day.",
+  "radioLockedHint": "Heavy rotation needs a mid-size label or bigger",
+  "errorRadioLocked": "Your label can't arrange that much radio.",
   "eventLabelOffer": "{label} wants to sign you! See Career → Record label.",
   "@eventLabelOffer": {
     "placeholders": {

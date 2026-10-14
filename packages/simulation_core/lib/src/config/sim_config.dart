@@ -16,6 +16,7 @@ class SimConfig {
     this.fanCurveFloor = 0.12,
     this.fanCurveHalfLifeWeeks = 3.0,
     this.fanShareExponent = 0.8,
+    this.selfCompetitionExponent = 0.5,
     this.singleExposure = 1.0,
     this.albumTrackExposure = 0.30,
     this.baseExposure = 0.0015,
@@ -105,6 +106,10 @@ class SimConfig {
   /// How fully fans split their time between an artist's fresh singles
   /// (docs K83): each gets load^-x of its fan plays (1 = a fixed budget).
   final double fanShareExponent;
+
+  /// How much an artist's fresh singles take radio slots and new listeners
+  /// from each other (docs K84): load^-x each.
+  final double selfCompetitionExponent;
   final double singleExposure;
   final double albumTrackExposure;
   final double baseExposure;
@@ -197,9 +202,11 @@ class SimConfig {
       math.max(0.1, 1 + k.strength * (0.5 + 0.5 * playlistShare(year)));
 
   /// Campaign multiplier on a song's radio play in [year]: strongest in the
-  /// radio era, weaker once playlists take over.
+  /// radio era, weaker once playlists take over. Since docs K84 the paid
+  /// radio push does most of it ([RadioPush]); the campaign adds a third
+  /// of what it used to.
   double campaignRadio(Campaign k, int year) =>
-      math.max(0.1, 1 + k.strength * (0.5 + (1 - playlistShare(year))));
+      math.max(0.1, 1 + 0.35 * k.strength * (0.5 + (1 - playlistShare(year))));
 
   /// Extra exposure from a mid / big editorial playlist add; fades weekly.
   final double playlistMidBoost;

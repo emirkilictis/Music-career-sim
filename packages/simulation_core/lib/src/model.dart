@@ -117,6 +117,24 @@ enum Campaign {
   final double playlistOdds;
 }
 
+/// Radio promotion for a single, bought apart from the campaign (docs
+/// K84). Without it a single gets only the radio its quality and fame earn
+/// on their own, about half of a promoted single's.
+enum RadioPush {
+  none(costCents: 0, factor: 0.5),
+  standard(costCents: 15000000, factor: 1.0),
+  heavy(costCents: 60000000, factor: 1.6);
+
+  const RadioPush({required this.costCents, required this.factor});
+
+  /// Base price; a bigger artist's push costs more (rotation on more and
+  /// bigger stations).
+  final int costCents;
+
+  /// Multiplier on the single's radio play.
+  final double factor;
+}
+
 /// Editorial playlist pickup of a release.
 enum PlaylistAdd { none, mid, big }
 
@@ -454,6 +472,9 @@ class Song with Charted {
   /// Promotion campaign it was released (or pushed as a single) with.
   Campaign campaign = Campaign.standard;
 
+  /// Radio promotion bought for it as a single (docs K84).
+  RadioPush radioPush = RadioPush.standard;
+
   /// Editorial playlist pickup: extra exposure that fades week by week.
   PlaylistAdd playlistAdd = PlaylistAdd.none;
   int playlistWeek = -1;
@@ -769,6 +790,7 @@ class ScheduledRelease {
     this.variantWeeks = const [0],
     this.variantFormats = const [],
     this.campaign = Campaign.standard,
+    this.radioPush = RadioPush.none,
     this.paidCents = 0,
     this.buzz = 0,
   });
@@ -784,6 +806,9 @@ class ScheduledRelease {
   /// [EditionFormat] index per edition (-1 = standard / classic).
   final List<int> variantFormats;
   final Campaign campaign;
+
+  /// Radio push for a single (docs K84).
+  final RadioPush radioPush;
   int releaseWeek;
 
   /// Equal to [releaseWeek]: a surprise release with no announcement.
