@@ -112,6 +112,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F47 | **2010–2012 pure sales de fazla; düşür ama 2013 sonrası kadar sert değil** (Emir). | ✅ K79 güncellendi: ilk haftadan sonraki haftalar 2010 ×0,75, 2011 ×0,69, 2012 ×0,62. |
 | F48 | **Her streaming platformunda kendi profilimiz, takipçi sayımız olmalı** (Emir). | ✅ K82: her platform ekranında profil kartı (fotoğraf, mavi tik, takipçi/abone, aylık dinleyici, haftalık rakam). |
 | F49 | **SZA'nın SOS'u 200 haftadır Billboard 200'de, hiç Top 25'ten çıkmadı — "bizim oyunu oynuyor"** (Emir) → "ölç", "yap". | ✅ K85: eski albümler listeyi tıkıyordu (%62–66, bir sanatçının 13 albümü); katalog artık hitlerde toplanıyor ve herkesinki sönüyor. Eski albüm payı %41–49, hitli albümler 100–257 hafta kesintisiz Top 25. |
+| F50 | **Groove Journey'deki gibi diskografi ve tüm kariyer satışını kapaklı çubuklarla gösteren, oyuncunun görsel olarak üretip paylaşabileceği grafik** (Emir: "en çok istediğim şey bu"). | ✅ K86: Kariyer → Diskografi; kapaklı satış grafiği + "Grafiği paylaş" (PNG), albüm/single listesi zirve, ilk hafta, toplam ve sertifikayla. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

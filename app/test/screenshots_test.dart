@@ -180,6 +180,18 @@ void main() {
     await shot(tester, '15c_labels');
     await tester.pageBack();
     await tester.pumpAndSettle();
+    // Discography and the sales chart of covers (K86).
+    final disco = find.text('Discography & sales chart');
+    await tester.scrollUntilVisible(disco, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(disco), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(disco);
+    await shot(tester, '15i_discography');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -520));
+    await shot(tester, '15j_discography_list');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('Plan a tour'), -200,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
@@ -392,4 +404,65 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '29_studio_soft');
   });
+  testWidgets('screenshots: a discography', skip: !enabled, (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+
+    // A star with five albums over four years (docs K86).
+    final c = app.controller;
+    final port = ReceivePort();
+    await c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2014,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 86,
+        ),
+        port.sendPort));
+    port.close();
+    await c.run(_fiveAlbums());
+    await c.exec(Cmd.closeCareer());
+
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nova Reyes'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Career');
+    final disco = find.text('Discography & sales chart');
+    await tester.scrollUntilVisible(disco, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(disco), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(disco);
+    await shot(tester, '15k_sales_chart');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -640));
+    await shot(tester, '15l_discography_list');
+  });
 }
+
+/// Five albums of ten songs, about forty weeks apart (screenshots, K86).
+SessionCmd<void> _fiveAlbums() => (s) {
+      const titles = [
+        'Midnight Signals',
+        'Golden Hour',
+        'Paper Crowns',
+        'Afterglow',
+        'Northern Lights',
+      ];
+      for (final t in titles) {
+        final ids = <int>[];
+        for (var i = 0; i < 10; i++) {
+          s.world.player!
+            ..creativeEnergy = 100
+            ..moneyCents = 1 << 40;
+          ids.add(s.writeSong(budget: BudgetTier.high).id);
+        }
+        s.releaseAlbum(t, ids);
+        s.advanceWeeks(40, stop: SkipStop.never);
+      }
+    };

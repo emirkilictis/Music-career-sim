@@ -10,6 +10,7 @@ import '../widgets/tour_section.dart';
 import '../widgets/milestones_section.dart';
 import '../widgets/common.dart';
 import '../widgets/image_pickers.dart';
+import 'discography_screen.dart';
 import 'labels_screen.dart';
 import 'song_detail_screen.dart';
 
@@ -162,6 +163,28 @@ class _CareerScreenState extends State<CareerScreen> {
                     Text(fmt.compact(p.lifetimeUnits[r])),
                   ]),
               ],
+            ),
+          ]),
+        ),
+        const SizedBox(height: 12),
+        Section(
+          title: l.discography,
+          icon: Icons.bar_chart_rounded,
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(l.discographyHint,
+                style: TextStyle(color: AppColors.textMuted)),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => DiscographyScreen(state: career))),
+                icon: const Icon(Icons.library_music_outlined),
+                label: Text(l.discographyButton),
+              ),
             ),
           ]),
         ),

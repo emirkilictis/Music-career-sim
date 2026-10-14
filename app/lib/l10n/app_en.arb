@@ -2284,6 +2284,99 @@
   "celebrateNumberOne": "Number one!",
   "celebrateFirstChart": "Your first chart entry!",
   "share": "Share",
+  "discographyHint": "Every release with its peak, first week and certification, and your sales chart to share.",
+  "discographyButton": "Discography & sales chart",
+  "discoAlbums": "Albums",
+  "discoEmpty": "Nothing released yet.",
+  "shareSalesChart": "Share the chart",
+  "salesChartShareText": "{name}'s career in {app}",
+  "@salesChartShareText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "salesChartTitle": "{name}'s album sales",
+  "@salesChartTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "salesChartSinglesTitle": "{name}'s biggest singles",
+  "@salesChartSinglesTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "salesChartTotal": "{units} units",
+  "@salesChartTotal": {
+    "placeholders": {
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "salesChartUnitsNote": "Units = sales + streams",
+  "discoNoChart": "Did not chart",
+  "discoOtherPeak": "{chart} peak #{peak}",
+  "@discoOtherPeak": {
+    "placeholders": {
+      "chart": {
+        "type": "String"
+      },
+      "peak": {
+        "type": "int"
+      }
+    }
+  },
+  "discoNo1": "US #1 · {weeks} wk at #1",
+  "@discoNo1": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "discoPeak": "US peak #{peak}",
+  "@discoPeak": {
+    "placeholders": {
+      "peak": {
+        "type": "int"
+      }
+    }
+  },
+  "discoTracks": "{count} tracks",
+  "@discoTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "discoFirstWeek": "first week {units}",
+  "@discoFirstWeek": {
+    "placeholders": {
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "discoTotal": "{units} units",
+  "@discoTotal": {
+    "placeholders": {
+      "units": {
+        "type": "String"
+      }
+    }
+  },
   "continueLabel": "Continue",
   "shareMomentText": "“{title}” is #{position} on {chart}! — {app}",
   "@shareMomentText": {
