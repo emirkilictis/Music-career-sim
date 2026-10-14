@@ -288,10 +288,10 @@ abstract final class Actions {
         co == null ? own : 0.6 * math.max(own, co) + 0.4 * math.min(own, co);
     final prod = producer?.skill ?? producerSkill ?? a.skills.production * 0.8;
     final wq = a.kind.qualityWeights;
-    final skill = wq.writing * writing +
+    final skill = topCraft(wq.writing * writing +
         wq.production * prod +
         wq.vocals * a.skills.vocals +
-        wq.perf * a.skills.performance;
+        wq.perf * a.skills.performance);
 
     final genreFit =
         (producer != null && songGenres.contains(producer.genre)) ? 3.0 : 0.0;
@@ -316,13 +316,10 @@ abstract final class Actions {
     // of the rest counts (an inspired bedroom song can still reach an A).
     final ceiling = aiMode ? 100.0 : budgetCeiling(budget);
     final studio = raw <= ceiling ? raw : ceiling + 0.3 * (raw - ceiling);
-    // Soft ceiling: 100 stays rare even for top artists; low creativity
-    // then takes its share.
-    final quality = ((studio <= 85
-                ? studio
-                : 85 + 15 * (1 - math.exp(-(studio - 85) / 15))) *
-            (1 - energyPenalty))
-        .clamp(1.0, 100.0);
+    // Soft ceiling: an A+ stays rare even for the best (docs K81); low
+    // creativity then takes its share.
+    final quality =
+        (softCeiling(studio) * (1 - energyPenalty)).clamp(1.0, 100.0);
 
     // Traits: partly tied to quality, partly random → different kinds of hits.
     final t = RandomStream.keyed(
@@ -393,6 +390,18 @@ abstract final class Actions {
   static double campaignSizeFactor(Artist a) => math
       .pow(math.max(1.0, (a.coreFans + 0.25 * a.casual) / 1.5e6), 0.8)
       .toDouble();
+
+  /// Craft beyond 80 counts half (docs K81): a master writes great songs,
+  /// not perfect ones every time, so maxed skills land among the best
+  /// rivals instead of far above them.
+  static double topCraft(double skill) =>
+      skill <= 80 ? skill : 80 + 0.5 * (skill - 80);
+
+  /// Quality from the studio's raw score: as is up to 80, then bending
+  /// towards 100 (docs K81). A maxed artist with a top studio averages
+  /// ~88 (A) and reaches an A+ (90) about one song in five.
+  static double softCeiling(double raw) =>
+      raw <= 80 ? raw : 80 + 20 * (1 - math.exp(-(raw - 80) / 40));
 
   /// A beginner's first songs get a lift that fades as their craft grows
   /// (docs T13): +0.45 per point below 50 (about +7 at the free start's

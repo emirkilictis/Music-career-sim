@@ -568,7 +568,9 @@ void main() {
     final low = mean(BudgetTier.low), high = mean(BudgetTier.high);
     expect(low, inInclusiveRange(70, 80)); // a B
     expect(mean(BudgetTier.medium), inInclusiveRange(80, 90)); // an A
-    expect(high, greaterThan(90)); // an A+
+    // A top studio: an A on average, the A+ (90) now and then (K81).
+    expect(high, inInclusiveRange(84, 90));
+    expect(high, greaterThan(mean(BudgetTier.medium)));
   });
 
   test('skill points stop at what the skills can use (F34)', () {

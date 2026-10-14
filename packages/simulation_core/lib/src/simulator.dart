@@ -231,7 +231,9 @@ class Simulator {
           chartShape *
           chartShape /
           (1 + weeksCharted / c.chartFatigueWeeks);
-      final campExp = exposureOf(s);
+      // People already know a famous artist: a campaign adds less on top
+      // of fame (half as much for a household name; docs K81).
+      final campExp = _knownCampaign(exposureOf(s), p.fame);
       final exposure = (c.baseExposure +
               c.fameExposure * p.fame +
               chartBoost +
@@ -994,6 +996,11 @@ class Simulator {
 
   /// Starts a viral trend: it grows for three weeks, then fades. Most trends
   /// are small; a few become huge and can push a song up the charts.
+  /// A campaign's lift on exposure for an artist this famous: the lift
+  /// above no campaign shrinks to half at full fame (docs K81).
+  static double _knownCampaign(double lift, double fame) =>
+      lift <= 1 ? lift : 1 + (lift - 1) * (1 - 0.5 * fame.clamp(0.0, 1.0));
+
   void _startViral(Song s, RandomStream r, double era, {double reach = 1}) {
     var strength = r.range(0.02, 0.08) *
         (0.5 + s.virality) *
