@@ -148,7 +148,8 @@ class Simulator {
     double exposureOf(Song s) => campaignExposure[s.campaign.index];
     // Radio comes from the paid push; the campaign adds a little (K84).
     double radioOf(Song s) =>
-        campaignRadio[s.campaign.index] * s.radioPush.factor;
+        campaignRadio[s.campaign.index] *
+        s.radioPush.factorFor(w.artists[s.primaryArtistId].fame);
     final playlistAdds = <int>[];
 
     // 5. Raw demand for active songs, split by region.

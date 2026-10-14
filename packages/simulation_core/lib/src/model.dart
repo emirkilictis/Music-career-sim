@@ -118,8 +118,9 @@ enum Campaign {
 }
 
 /// Radio promotion for a single, bought apart from the campaign (docs
-/// K84). Without it a single gets only the radio its quality and fame earn
-/// on their own, about half of a promoted single's.
+/// K84). Without it a star's single gets about half the radio: their
+/// airplay comes from the label's promotion machine. A newcomer's few
+/// spins are local and earned, so skipping the push costs them little.
 enum RadioPush {
   none(costCents: 0, factor: 0.5),
   standard(costCents: 15000000, factor: 1.0),
@@ -127,12 +128,17 @@ enum RadioPush {
 
   const RadioPush({required this.costCents, required this.factor});
 
-  /// Base price; a bigger artist's push costs more (rotation on more and
-  /// bigger stations).
+  /// Price for an artist of ~1.5M listeners; it scales with the audience
+  /// (see Actions.radioPushCostFor).
   final int costCents;
 
-  /// Multiplier on the single's radio play.
+  /// Multiplier on a star's single's radio play.
   final double factor;
+
+  /// The multiplier for an artist this famous: no push costs a newcomer
+  /// ×0.85, anyone from 50% fame ×0.5.
+  double factorFor(double fame) =>
+      this == none ? 0.85 - 0.7 * fame.clamp(0.0, 0.5) : factor;
 }
 
 /// Editorial playlist pickup of a release.
