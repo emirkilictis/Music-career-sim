@@ -1548,4 +1548,60 @@ void campaignTests() {
     expect(secondWeek(2010), greaterThan(0.15));
     expect(secondWeek(2018), lessThan(0.15));
   });
+
+  test('kinds: strengths, group life and the comeback (K87)', () {
+    final w = WorldGen.create(seed: 87, startYear: 2016);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2016)) {
+      sim.step();
+    }
+    Artist add(ArtistKind kind, String name) => WorldGen.addPlayer(w,
+        name: name,
+        genre: 0,
+        kind: kind,
+        members: kind.isGroup ? const ['Ava', 'Bo', 'Cy', 'Dee'] : const [],
+        tier: StartTier.risingStar,
+        money: StartMoney.millionaire);
+    final solo = add(ArtistKind.solo, 'S');
+    final band = add(ArtistKind.band, 'B');
+    // Same audience and stage: the band's tour draws 35% more.
+    band
+      ..coreFans = solo.coreFans
+      ..casual = solo.casual
+      ..hype = solo.hype
+      ..popularity = solo.popularity
+      ..skills.performance = solo.skills.performance;
+    band.regionShare.setAll(0, solo.regionShare);
+    double demand(Artist a) =>
+        Tours.marketDemand(w, a, TourMarket.usa, 1, null);
+    expect(demand(band) / demand(solo), closeTo(1.35, 1e-9));
+    expect(ArtistKind.solo.viral, greaterThan(ArtistKind.band.viral));
+    expect(ArtistKind.vocalGroup.collector,
+        greaterThan(ArtistKind.band.collector));
+
+    // A member's solo record: new listeners, less creativity.
+    final group = add(ArtistKind.vocalGroup, 'G');
+    group
+      ..creativeEnergy = 100
+      ..opportunity = Opportunity(
+          kind: OpportunityKind.memberSolo, week: w.week, member: 1);
+    final casual = group.casual;
+    final out = Opportunities.answer(w, group, OpportunityChoice.accept);
+    expect(group.casual, greaterThan(casual));
+    expect(out.energy, -Opportunities.memberSoloEnergy);
+    // A feud left alone lapses into "let it pass".
+    group.opportunity =
+        Opportunity(kind: OpportunityKind.memberRift, week: w.week, member: 2);
+    expect(group.opportunity!.lapse, OpportunityChoice.ignore);
+    expect(group.opportunity!.choices, contains(OpportunityChoice.leanIn));
+    group.opportunity = null;
+
+    // Back after two years: a reunion is an event.
+    group
+      ..lastReleaseWeek = w.week - Actions.comebackWeeks
+      ..hype = 0;
+    final song = Actions.writeSong(w, group, producerSkill: 80, aiMode: true);
+    Actions.releaseSingle(w, group, song);
+    expect(group.hype, closeTo(0.35 * (0.5 + group.fame), 1e-9));
+  });
 }

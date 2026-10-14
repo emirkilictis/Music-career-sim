@@ -772,9 +772,15 @@ class OpportunityView {
         partnerName =
             o.partnerArtistId >= 0 ? w.artists[o.partnerArtistId].name : '',
         feeCents = o.feeCents,
+        memberName = o.member >= 0 && o.member < w.player!.members.length
+            ? w.player!.members[o.member]
+            : '',
         choices = o.choices;
 
   final OpportunityKind kind;
+
+  /// The group member it is about (docs K87).
+  final String memberName;
   final int week;
 
   /// Weeks still played before it lapses (1 = answer before next week).

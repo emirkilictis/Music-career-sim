@@ -9,7 +9,20 @@ import 'world.dart';
 
 /// Things that come up in a career between releases (docs K59): offers the
 /// player takes or turns down, a scandal to handle, an award nomination.
-enum OpportunityKind { interview, feature, festival, brandDeal, scandal, award }
+enum OpportunityKind {
+  interview,
+  feature,
+  festival,
+  brandDeal,
+  scandal,
+  award,
+
+  /// A group member wants to put out a solo record (docs K87).
+  memberSolo,
+
+  /// A member is feuding with the rest of the group, in public (K87).
+  memberRift,
+}
 
 /// How the player answers. Most offers are [accept] / [decline]; a scandal
 /// is [apologize] / [ignore] / [leanIn]; an award is [perform] (attend and
@@ -23,6 +36,7 @@ class Opportunity {
     required this.week,
     this.partnerArtistId = -1,
     this.feeCents = 0,
+    this.member = -1,
   });
 
   final OpportunityKind kind;
@@ -36,8 +50,11 @@ class Opportunity {
   /// What it pays (festival, brand deal, duet).
   final int feeCents;
 
+  /// The group member it is about (index in [Artist.members]).
+  final int member;
+
   List<OpportunityChoice> get choices => switch (kind) {
-        OpportunityKind.scandal => const [
+        OpportunityKind.scandal || OpportunityKind.memberRift => const [
             OpportunityChoice.apologize,
             OpportunityChoice.ignore,
             OpportunityChoice.leanIn,
@@ -51,15 +68,17 @@ class Opportunity {
       };
 
   /// What happens when it lapses unanswered.
-  OpportunityChoice get lapse => kind == OpportunityKind.scandal
-      ? OpportunityChoice.ignore
-      : OpportunityChoice.decline;
+  OpportunityChoice get lapse =>
+      kind == OpportunityKind.scandal || kind == OpportunityKind.memberRift
+          ? OpportunityChoice.ignore
+          : OpportunityChoice.decline;
 
   Map<String, Object?> toJson() => {
         'k': kind.index,
         'w': week,
         'p': partnerArtistId,
         'f': feeCents,
+        'm': member,
       };
 
   static Opportunity fromJson(Map<String, Object?> j) => Opportunity(
@@ -67,6 +86,7 @@ class Opportunity {
         week: j['w'] as int,
         partnerArtistId: j['p'] as int? ?? -1,
         feeCents: j['f'] as int? ?? 0,
+        member: j['m'] as int? ?? -1,
       );
 
   static String? encode(Opportunity? o) =>
@@ -115,7 +135,9 @@ abstract final class Opportunities {
   static const interviewEnergy = 10.0,
       featureEnergy = 20.0,
       festivalEnergy = 25.0,
-      performEnergy = 15.0;
+      performEnergy = 15.0,
+      memberSoloEnergy = 20.0,
+      memberTalkEnergy = 25.0;
 
   /// A new offer may come up for the player this week (none while one is
   /// waiting). Deterministic per week.
@@ -140,6 +162,21 @@ abstract final class Opportunities {
 
     if (fame > 0.3 && hit(0.008, booked: false)) {
       return Opportunity(kind: OpportunityKind.scandal, week: w.week);
+    }
+    // Group life (docs K87): a member's solo plans, a feud in public.
+    if (p.kind.isGroup && p.members.length >= 2) {
+      if (fame > 0.1 && hit(0.006, booked: false)) {
+        return Opportunity(
+            kind: OpportunityKind.memberRift,
+            week: w.week,
+            member: r.nextInt(p.members.length));
+      }
+      if (fame > 0.15 && hit(0.01, booked: false)) {
+        return Opportunity(
+            kind: OpportunityKind.memberSolo,
+            week: w.week,
+            member: r.nextInt(p.members.length));
+      }
     }
     if (fame > 0.05 && hit(recent ? 0.12 : 0.04)) {
       return Opportunity(kind: OpportunityKind.interview, week: w.week);
@@ -246,6 +283,33 @@ abstract final class Opportunities {
           p.fame = math.min(1.0, p.fame + 0.03);
           p.devotion = math.min(1.0, p.devotion + 0.02);
         }
+      // Backing a member's solo record: their audience finds the group, but
+      // they are away from the studio for a while.
+      case (OpportunityKind.memberSolo, OpportunityChoice.accept):
+        spendEnergy(memberSoloEnergy);
+        fans = p.casual * 0.008;
+        p.casual *= 1.03;
+        hype = 0.04;
+      // Asked to wait: some fans wanted it.
+      case (OpportunityKind.memberSolo, OpportunityChoice.decline):
+        p.devotion = math.max(0.0, p.devotion - 0.02);
+      // Talking it out takes time, and the fans are relieved.
+      case (OpportunityKind.memberRift, OpportunityChoice.apologize):
+        spendEnergy(memberTalkEnergy);
+        p.devotion = math.min(1.0, p.devotion + 0.01);
+      case (OpportunityKind.memberRift, OpportunityChoice.ignore):
+        blewOver = r.chance(0.5);
+        if (!blewOver) {
+          fans = -p.coreFans * 0.03;
+          p.devotion = math.max(0.0, p.devotion - 0.04);
+          hype = -0.05;
+        }
+      // Airing it out: everyone talks about the group, some fans leave.
+      case (OpportunityKind.memberRift, OpportunityChoice.leanIn):
+        hype = 0.12;
+        p.buzz += 0.5;
+        fans = -p.coreFans * 0.01;
+        p.devotion = math.max(0.0, p.devotion - 0.04);
       case _:
         break; // declined
     }

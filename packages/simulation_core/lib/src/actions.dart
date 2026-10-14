@@ -430,6 +430,21 @@ abstract final class Actions {
   static RadioPush maxRadioPush(Label l) =>
       l.index >= Label.mid.index ? RadioPush.heavy : RadioPush.standard;
 
+  /// A long break makes the return an event (docs K87): after two years
+  /// without a release, fans and press are hungry, most of all for a
+  /// group's reunion.
+  static const comebackWeeks = 104;
+
+  static void _comeback(World w, Artist a) {
+    if (a.lastReleaseWeek < 0 || w.week - a.lastReleaseWeek < comebackWeeks) {
+      return;
+    }
+    final group = a.kind.isGroup;
+    a.hype += (group ? 0.35 : 0.2) * (0.5 + a.fame);
+    if (group) a.devotion = math.min(1.0, a.devotion + 0.03);
+    w.dirtyArtists.add(a.id);
+  }
+
   /// Pays the player's campaign up front (AI labels run theirs implicitly)
   /// and returns what was paid.
   static int _payRadio(Artist a, RadioPush radio) {
@@ -532,6 +547,7 @@ abstract final class Actions {
     s.radioPush = radio;
     s.campaignReturnCents = 0;
     s.campaignPower = 1;
+    _comeback(w, a);
     _convertAnticipation(a, album: false);
     a.hype += buzz;
     s.isSingle = true;
@@ -573,6 +589,7 @@ abstract final class Actions {
       int paidCents = 0,
       double buzz = 0}) {
     final paid = prepaid ? paidCents : _payCampaign(a, campaign);
+    _comeback(w, a);
     _convertAnticipation(a, album: type == AlbumType.album);
     a.hype += buzz;
     final quality = songIds.isEmpty

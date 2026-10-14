@@ -13,7 +13,10 @@ import 'tours.dart';
 enum ArtistTier { player, a, b }
 
 /// Solo artist, band, or vocal group (boy band / girl group);
-/// docs/game-design.md §2.4. Kinds differ in strengths, never in penalties.
+/// docs/game-design.md §2.4, K87. Kinds differ in strengths, never in
+/// penalties: a solo star's singles travel (viral, reach), a band lives on
+/// albums and the road over a long career, a vocal group's fandom collects,
+/// fills arenas and grows fast.
 enum ArtistKind {
   solo(
     qualityWeights: (writing: 0.45, production: 0.30, vocals: 0.25, perf: 0.0),
@@ -21,26 +24,39 @@ enum ArtistKind {
     devotionGain: 1.0,
     devotionDrift: 1.0,
     fanDecay: 1.0,
+    viral: 1.35,
+    singleReach: 1.12,
   ),
 
   /// Plays its own instruments: production and stage performance matter more,
-  /// and the fanbase is loyal over long careers.
+  /// fans play whole albums, the road pays, and the fanbase is loyal over
+  /// long careers.
   band(
     qualityWeights: (writing: 0.40, production: 0.30, vocals: 0.15, perf: 0.15),
     statWeights: [0.35, 0.15, 0.25, 0.20, 0.05],
     devotionGain: 1.0,
     devotionDrift: 1.0,
     fanDecay: 0.8,
+    albumAffinity: 1.3,
+    collector: 1.15,
+    tourDemand: 1.35,
+    merch: 1.2,
   ),
 
   /// Boy band / girl group: vocals, choreography and charisma; builds a
-  /// devoted, collecting fandom quickly.
+  /// devoted, collecting fandom quickly that buys every edition and the
+  /// merch.
   vocalGroup(
     qualityWeights: (writing: 0.35, production: 0.25, vocals: 0.30, perf: 0.10),
     statWeights: [0.25, 0.35, 0.10, 0.20, 0.10],
     devotionGain: 1.4,
     devotionDrift: 0.5,
     fanDecay: 1.0,
+    albumAffinity: 1.1,
+    collector: 1.8,
+    fanConversion: 1.25,
+    tourDemand: 1.15,
+    merch: 1.5,
   );
 
   const ArtistKind({
@@ -49,7 +65,35 @@ enum ArtistKind {
     required this.devotionGain,
     required this.devotionDrift,
     required this.fanDecay,
+    this.viral = 1,
+    this.singleReach = 1,
+    this.albumAffinity = 1,
+    this.collector = 1,
+    this.fanConversion = 1,
+    this.tourDemand = 1,
+    this.merch = 1,
   });
+
+  /// Chance a song catches a viral trend.
+  final double viral;
+
+  /// New listeners a single reaches.
+  final double singleReach;
+
+  /// Fans playing and buying the album (deep cuts, superfan copies).
+  final double albumAffinity;
+
+  /// Collector copies of extra editions.
+  final double collector;
+
+  /// Listeners turned into core fans.
+  final double fanConversion;
+
+  /// Tickets wanted on tour.
+  final double tourDemand;
+
+  /// Merch bought per ticket.
+  final double merch;
 
   /// How skills combine into song quality (sums to 1).
   final ({

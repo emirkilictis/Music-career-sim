@@ -625,7 +625,7 @@ abstract final class Tours {
             m.share *
             0.03 /
             priceFactor;
-    return (core + casual) * hot * live + support;
+    return (core + casual) * hot * live * a.kind.tourDemand + support;
   }
 
   /// A night's turnout: the market's demand shared by the cities on the
@@ -688,7 +688,10 @@ abstract final class Tours {
       tickets += r.sold;
       seats += s.capacity;
       gross += r.grossCents;
-      merch += r.sold * merchPerHeadCents(GameTime.yearOf(s.week)) * merchKeep;
+      merch += r.sold *
+          merchPerHeadCents(GameTime.yearOf(s.week)) *
+          a.kind.merch *
+          merchKeep;
       fans += fansFrom(a, t, r.sold);
       production += c.production;
       opener += c.opener;
@@ -754,8 +757,10 @@ abstract final class Tours {
         final r = showResult(w, a, t, s, noise: noise);
         final c = showCosts(w, a, t, s);
         final cost = c.production + c.opener + c.freight;
-        final merch =
-            r.sold * merchPerHeadCents(GameTime.yearOf(w.week)) * merchKeep;
+        final merch = r.sold *
+            merchPerHeadCents(GameTime.yearOf(w.week)) *
+            a.kind.merch *
+            merchKeep;
         final fans = fansFrom(a, t, r.sold);
         s.sold = r.sold;
         s.grossCents = r.grossCents;

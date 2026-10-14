@@ -663,21 +663,25 @@ class GameSession {
       : GameTime.yearOf(
           world.tourRecords.map((r) => r.startWeek).reduce(math.min));
 
+  /// The top [limit], plus the player's own tours further down with their
+  /// real rank (the player always sees where they stand).
   List<TourRankView> _rank(List<(TourRecord, double, bool)> rows, int limit) {
     rows.sort((a, b) => b.$2.compareTo(a.$2));
+    final me = world.playerArtistId;
     return [
-      for (final (i, (r, gross, live)) in rows.take(limit).indexed)
-        TourRankView(
-          rank: i + 1,
-          artistId: r.artistId,
-          artistName: world.artists[r.artistId].name,
-          tourName: r.name,
-          grossCents: gross,
-          tickets: r.grossCents > 0 ? r.tickets * gross / r.grossCents : 0,
-          shows: r.shows,
-          isPlayer: r.artistId == world.playerArtistId,
-          onGoing: live,
-        ),
+      for (final (i, (r, gross, live)) in rows.indexed)
+        if (i < limit || r.artistId == me)
+          TourRankView(
+            rank: i + 1,
+            artistId: r.artistId,
+            artistName: world.artists[r.artistId].name,
+            tourName: r.name,
+            grossCents: gross,
+            tickets: r.grossCents > 0 ? r.tickets * gross / r.grossCents : 0,
+            shows: r.shows,
+            isPlayer: r.artistId == world.playerArtistId,
+            onGoing: live,
+          ),
     ];
   }
 

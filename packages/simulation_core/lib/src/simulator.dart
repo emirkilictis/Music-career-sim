@@ -211,7 +211,9 @@ class Simulator {
       final tail =
           c.catalogTail * (0.5 + s.longevity) * math.exp(-ageRel / 520.0);
       final life = _promoLife(s, promoAge) + tail;
-      final promo = s.isSingle ? c.singleExposure : c.albumTrackExposure;
+      final promo = s.isSingle
+          ? c.singleExposure * p.kind.singleReach
+          : c.albumTrackExposure;
       // Long albums: listeners' time is split between tracks. Up to 10 tracks
       // each gets full attention; beyond that each track gets less, so 40
       // tracks add streams but nowhere near 4× (docs/game-design.md §10.2).
@@ -241,6 +243,7 @@ class Simulator {
       // artist rarely goes viral, and smaller when it happens (docs T12).
       final viralReach = c.viralReach(fans, cas);
       if (r.chance(c.viralWeeklyChance *
+          p.kind.viral *
           viralEra *
           (0.3 + 2 * s.virality) *
           videoViral *
@@ -300,7 +303,9 @@ class Simulator {
           fanCurve *
           fanShare *
           (1 + p.hype) *
-          (s.isSingle ? 1.0 : c.albumTrackFanShare * albumEvent);
+          (s.isSingle
+              ? 1.0
+              : c.albumTrackFanShare * albumEvent * p.kind.albumAffinity);
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
       final pubPart = c.publicPool *
           s.commercial *
@@ -615,6 +620,7 @@ class Simulator {
         final casual = p.casual * share;
         final superPart = fans *
             superRate *
+            p.kind.albumAffinity *
             era.superfanFactor *
             superCurve *
             (1 + al.hypeAtRelease) *
@@ -623,6 +629,7 @@ class Simulator {
             ? 0.0
             : fans *
                 c.collectorRate *
+                p.kind.collector *
                 p.devotionCollectorFactor *
                 era.collectorFactor *
                 variantSum *
@@ -762,6 +769,7 @@ class Simulator {
       a.casual += c.casualConversion * charm * a.weekReach * casualRoom -
           c.casualDecay * a.casual;
       final conv = charm *
+          a.kind.fanConversion *
           (a.tier == ArtistTier.player ? w.difficulty.fanConversion : 1);
       a.coreFans += c.fanConversion * conv * a.weekReach * fanRoom -
           c.coreFanDecay *

@@ -20,6 +20,8 @@ void main(List<String> args) {
   final diff =
       args.length > 2 ? Difficulty.values.byName(args[2]) : Difficulty.normal;
   final years = args.length > 3 ? int.parse(args[3]) : 4;
+  final kind =
+      ArtistKind.values.byName(Platform.environment['PROBE_KIND'] ?? 'solo');
   final us = Charts.all.indexWhere((c) => c.key == 'chart.us.songs');
   final usAlb = Charts.all.indexWhere((c) => c.key == 'chart.us.albums');
   final dir = Directory.systemTemp.createTempSync('probe');
@@ -37,6 +39,8 @@ void main(List<String> args) {
             startYear: startYear,
             difficulty: diff,
             tier: tier,
+            kind: kind,
+            members: kind.isGroup ? const ['Ava', 'Bo', 'Cy', 'Dee'] : const [],
             premium: tier != StartTier.unknown,
             realNames: Platform.environment['PROBE_REAL'] != '0',
             seed: seed),

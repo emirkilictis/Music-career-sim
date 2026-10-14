@@ -325,6 +325,8 @@ class Fmt {
         OpportunityKind.brandDeal => l.offerBrandTitle,
         OpportunityKind.scandal => l.offerScandalTitle,
         OpportunityKind.award => l.offerAwardTitle,
+        OpportunityKind.memberSolo => l.offerMemberSoloTitle,
+        OpportunityKind.memberRift => l.offerMemberRiftTitle,
       };
 
   String offerBody(OpportunityView o) => switch (o.kind) {
@@ -338,9 +340,23 @@ class Fmt {
         OpportunityKind.scandal => l.offerScandalBody,
         OpportunityKind.award =>
           l.offerAwardBody(Opportunities.performEnergy.round()),
+        OpportunityKind.memberSolo => l.offerMemberSoloBody(
+            o.memberName, Opportunities.memberSoloEnergy.round()),
+        OpportunityKind.memberRift => l.offerMemberRiftBody(
+            o.memberName, Opportunities.memberTalkEnergy.round()),
       };
 
   String offerChoice(OpportunityKind k, OpportunityChoice c) => switch (c) {
+        OpportunityChoice.accept when k == OpportunityKind.memberSolo =>
+          l.choiceSupport,
+        OpportunityChoice.decline when k == OpportunityKind.memberSolo =>
+          l.choiceAskToWait,
+        OpportunityChoice.apologize when k == OpportunityKind.memberRift =>
+          l.choiceTalkItOut,
+        OpportunityChoice.ignore when k == OpportunityKind.memberRift =>
+          l.choiceLetItPass,
+        OpportunityChoice.leanIn when k == OpportunityKind.memberRift =>
+          l.choiceAirItOut,
         OpportunityChoice.accept =>
           k == OpportunityKind.award ? l.choiceAttend : l.choiceAccept,
         OpportunityChoice.decline =>
@@ -364,6 +380,14 @@ class Fmt {
         l.outcomeAwardSkipped,
       (OpportunityKind.award, _) =>
         o.won ? l.outcomeAwardWon : l.outcomeAwardLost(fans),
+      (OpportunityKind.memberSolo, OpportunityChoice.accept) =>
+        l.outcomeMemberSolo(fans),
+      (OpportunityKind.memberSolo, _) => l.outcomeMemberWaits,
+      (OpportunityKind.memberRift, OpportunityChoice.apologize) =>
+        l.outcomeRiftTalked,
+      (OpportunityKind.memberRift, OpportunityChoice.ignore) =>
+        o.blewOver ? l.outcomeRiftPassed : l.outcomeRiftBad(compact(-o.fans)),
+      (OpportunityKind.memberRift, _) => l.outcomeRiftAired(compact(-o.fans)),
       (_, OpportunityChoice.decline) => l.outcomeDeclined,
       (OpportunityKind.interview, _) => l.outcomeInterview(fans),
       (OpportunityKind.feature, _) =>
@@ -566,7 +590,8 @@ class Fmt {
           compact(e.fans)),
       MilestoneReached(:final milestone) =>
         l.eventMilestone(milestoneName(milestone), milestone.skillPoints),
-      OpportunityLapsed() => e.outcome.kind == OpportunityKind.scandal
+      OpportunityLapsed() => e.outcome.kind == OpportunityKind.scandal ||
+              e.outcome.kind == OpportunityKind.memberRift
           ? offerOutcome(e.outcome)
           : l.eventOfferLapsed(offerTitle(e.outcome.kind)),
       ReleaseAnnounced() => l.eventReleaseAnnounced(t, week(e.releaseWeek)),

@@ -6,6 +6,7 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../ui/palette.dart';
 import '../widgets/common.dart';
 import 'slots_screen.dart';
 
@@ -207,6 +208,16 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
                     selected: {_kind},
                     onSelectionChanged: (s) => _setKind(s.first, premium),
                   ),
+                  const SizedBox(height: 6),
+                  // What each kind is good at (docs K87).
+                  Text(
+                      switch (_kind) {
+                        ArtistKind.solo => l.kindSoloHint,
+                        ArtistKind.band => l.kindBandHint,
+                        ArtistKind.vocalGroup => l.kindVocalGroupHint,
+                      },
+                      style:
+                          TextStyle(color: AppColors.textMuted, fontSize: 13)),
                   if (_kind.isGroup) ...[
                     const SizedBox(height: 12),
                     Row(children: [

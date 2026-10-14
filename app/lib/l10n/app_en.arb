@@ -2284,6 +2284,65 @@
   "celebrateNumberOne": "Number one!",
   "celebrateFirstChart": "Your first chart entry!",
   "share": "Share",
+  "kindSoloHint": "Singles travel: more viral moments and more new listeners for every single.",
+  "kindBandHint": "Albums and the road: fans play whole records, tours sell more tickets and merch, and the fanbase lasts.",
+  "kindVocalGroupHint": "A collecting fandom: every edition sells, fans come fast and stay devoted, big merch and arenas. Members bring their own drama.",
+  "offerMemberSoloTitle": "A solo record",
+  "offerMemberSoloBody": "{member} wants to put out a solo record. Their fans would find the group, but they'd be away from the studio for a while (−{energy} creativity).",
+  "@offerMemberSoloBody": {
+    "placeholders": {
+      "member": {
+        "type": "String"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "offerMemberRiftTitle": "Trouble in the group",
+  "offerMemberRiftBody": "{member} is feuding with the rest of the group, and it's getting out. Talking it out takes time (−{energy} creativity).",
+  "@offerMemberRiftBody": {
+    "placeholders": {
+      "member": {
+        "type": "String"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "choiceSupport": "Back them",
+  "choiceAskToWait": "Ask them to wait",
+  "choiceTalkItOut": "Talk it out",
+  "choiceLetItPass": "Let it pass",
+  "choiceAirItOut": "Air it out",
+  "outcomeMemberSolo": "The solo record brought new listeners to the group: +{fans} fans.",
+  "@outcomeMemberSolo": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeMemberWaits": "They agreed to wait. Some fans are disappointed.",
+  "outcomeRiftTalked": "You talked it out. The fans are relieved.",
+  "outcomeRiftPassed": "It blew over by itself.",
+  "outcomeRiftBad": "It didn't blow over: −{fans} fans.",
+  "@outcomeRiftBad": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeRiftAired": "Everyone is talking about the group, but −{fans} fans left.",
+  "@outcomeRiftAired": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
   "discographyHint": "Every release with its peak, first week and certification, and your sales chart to share.",
   "discographyButton": "Discography & sales chart",
   "discoAlbums": "Albums",

@@ -57,6 +57,8 @@ IconData opportunityIcon(OpportunityKind k) => switch (k) {
       OpportunityKind.brandDeal => Icons.storefront_rounded,
       OpportunityKind.scandal => Icons.warning_amber_rounded,
       OpportunityKind.award => Icons.emoji_events_rounded,
+      OpportunityKind.memberSolo => Icons.person_rounded,
+      OpportunityKind.memberRift => Icons.group_off_rounded,
     };
 
 /// Each platform's brand colour and icon (docs K67).
