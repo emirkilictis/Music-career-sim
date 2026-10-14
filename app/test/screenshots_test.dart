@@ -262,6 +262,24 @@ void main() {
     await shot(tester, '14b_album_weekly');
     await tester.pageBack();
     await tester.pumpAndSettle();
+    // A single's numbers (F46): four figures, regions as one bar.
+    final single = find.textContaining(RegExp(r'^[\d.,]+[KMB]? streams$'));
+    await tester.scrollUntilVisible(single.first, 300,
+        scrollable: find.byType(Scrollable).first);
+    // Clear of the floating week bar at the bottom.
+    await Scrollable.ensureVisible(tester.element(single.first),
+        alignment: 0.3);
+    await tester.pumpAndSettle();
+    await tester.tap(single.first);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('More numbers'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('More numbers'));
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 330));
+    await shot(tester, '14c_song_numbers');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
 
     app.settings.setLanguage('tr');
     await tester.pumpAndSettle();

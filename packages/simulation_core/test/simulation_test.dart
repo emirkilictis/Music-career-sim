@@ -1500,7 +1500,9 @@ void campaignTests() {
 
   test('streaming-era fans buy in week one, then the album streams (K79)', () {
     final c = SimConfig();
-    expect(c.albumTail(2012), 1.0);
+    expect(c.albumTail(2009), 1.0);
+    expect(c.albumTail(2010), closeTo(0.75, 1e-9));
+    expect(c.albumTail(2012), closeTo(0.62, 1e-9));
     expect(c.albumTail(2013), closeTo(0.55, 1e-9));
     expect(c.albumTail(2020), 0.28);
     double secondWeek(int year) {
@@ -1525,8 +1527,8 @@ void campaignTests() {
       return al.weekPure / first;
     }
 
-    // Still a third in the download era; about a tenth from 2016.
-    expect(secondWeek(2010), greaterThan(0.25));
+    // Still a fifth in the download era; about a tenth from 2016.
+    expect(secondWeek(2010), greaterThan(0.18));
     expect(secondWeek(2018), lessThan(0.15));
   });
 }

@@ -75,6 +75,10 @@ void main() {
     expect(find.text('Week by week on the charts'), findsOneWidget);
     await tester.scrollUntilVisible(find.textContaining('Artist page'), -300,
         scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(
+        tester.element(find.textContaining('Artist page')),
+        alignment: 0.5);
+    await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Artist page'));
     await tester.pumpAndSettle();
     expect(find.textContaining('monthly listeners'), findsOneWidget);

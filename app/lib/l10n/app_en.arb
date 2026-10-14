@@ -962,6 +962,9 @@
   "thisWeekStreams": "This week",
   "downloads": "Downloads",
   "radioAudience": "Radio audience",
+  "streamsByRegion": "Where the streams come from",
+  "moreNumbers": "More numbers",
+  "fewerNumbers": "Fewer numbers",
   "weeklyStreams": "Weekly streams",
   "weeklyUnits": "Weekly units",
   "positionOn": "Position on {chart}",
@@ -2165,14 +2168,7 @@
       }
     }
   },
-  "skillPointsHint": "You get {count} skill points every week. Each skill goes up to 100.",
-  "@skillPointsHint": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "skillPointsHint": "You get a skill point every week and more from milestones. Each skill goes up to 100.",
   "skillRaise": "Raise {skill}",
   "@skillRaise": {
     "placeholders": {

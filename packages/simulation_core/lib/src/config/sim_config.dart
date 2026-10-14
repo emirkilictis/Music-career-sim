@@ -161,11 +161,15 @@ class SimConfig {
           ? 1.15
           : 0.9;
 
-  /// Album sales after the first week against the download era (docs K79):
-  /// from 2013 fans buy at release and the rest stream it, so later weeks
-  /// sell 55% as much in 2013, 45% in 2014, 35% in 2015 and 28% from 2016.
-  double albumTail(int year) =>
-      year < 2013 ? 1.0 : math.max(0.28, 0.55 - 0.1 * (year - 2013));
+  /// Album sales after the first week against the 2000s (docs K79): as
+  /// listening moves online fans buy at release and the rest stream it.
+  /// Later weeks sell 75% as much in 2010, 69% in 2011, 62% in 2012, then
+  /// 55% in 2013, 45% in 2014, 35% in 2015 and 28% from 2016.
+  double albumTail(int year) => year < 2010
+      ? 1.0
+      : year < 2013
+          ? 0.75 - 0.065 * (year - 2010)
+          : math.max(0.28, 0.55 - 0.1 * (year - 2013));
 
   /// Download demand of an album cut (not a single) relative to a single:
   /// low in the early download era, when buyers took whole albums.

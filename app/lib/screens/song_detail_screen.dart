@@ -144,26 +144,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
     final streams = [for (final h in _history) h.value];
     final sales = [for (final h in _history) h.sales];
-    final hasStreams = s.lifetimeStreams.total >= 1;
     final salesFirst =
         SalesEra.of(GameTime.yearOf(widget.state.week)) != SalesEra.streaming;
-    final saleTiles = [
-      StatTile(label: l.singleSales, value: fmt.compact(s.singleSales)),
-      StatTile(label: l.downloads, value: fmt.compact(s.lifetimeDownloads)),
-      if (s.lifetimePhysical >= 1)
-        StatTile(label: l.cdSingles, value: fmt.compact(s.lifetimePhysical)),
-      StatTile(label: l.radioAudience, value: fmt.compact(s.lifetimeRadio)),
-    ];
-    final streamTiles = [
-      if (hasStreams) ...[
-        StatTile(label: l.thisWeekStreams, value: fmt.compact(s.weekStreams)),
-        StatTile(label: l.streams, value: fmt.compact(s.lifetimeStreams.total)),
-        StatTile(label: l.singleUnits, value: fmt.compact(s.singleUnits)),
-        for (final r in Region.values)
-          StatTile(
-              label: fmt.region(r), value: fmt.compact(s.lifetimeStreams[r])),
-      ],
-    ];
     Widget chart(String title, List<double> v) => Padding(
           padding: const EdgeInsets.only(top: 12),
           child: Section(
@@ -263,13 +245,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           ),
           if (!s.inVault) ...[
             const SizedBox(height: 12),
-            Section(
-              title: l.numbers,
-              child: StatGrid(
-                  tiles: salesFirst
-                      ? [...saleTiles, ...streamTiles]
-                      : [...streamTiles, ...saleTiles]),
-            ),
+            _SongNumbers(song: s, salesFirst: salesFirst),
             if (s.isPlayer) ...[
               const SizedBox(height: 12),
               ProfitCard(
@@ -319,6 +295,127 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           ],
         ],
       ),
+    );
+  }
+}
+
+/// The song's numbers (F46): four headline figures for the era, where its
+/// streams come from as one bar, the rest folded away.
+class _SongNumbers extends StatefulWidget {
+  const _SongNumbers({required this.song, required this.salesFirst});
+  final SongView song;
+  final bool salesFirst;
+
+  @override
+  State<_SongNumbers> createState() => _SongNumbersState();
+}
+
+class _SongNumbersState extends State<_SongNumbers> {
+  bool _more = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final s = widget.song;
+    final streams = s.lifetimeStreams.total;
+    final hasStreams = streams >= 1;
+    StatTile tile(String label, double v) =>
+        StatTile(label: label, value: fmt.compact(v));
+    final head = widget.salesFirst || !hasStreams
+        ? [
+            tile(l.singleSales, s.singleSales),
+            tile(l.radioAudience, s.lifetimeRadio),
+            if (hasStreams) tile(l.streams, streams),
+            tile(l.singleUnits, s.singleUnits),
+          ]
+        : [
+            tile(l.streams, streams),
+            tile(l.thisWeekStreams, s.weekStreams),
+            tile(l.singleUnits, s.singleUnits),
+            tile(l.singleSales, s.singleSales),
+          ];
+    Widget row(String label, double v) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(children: [
+            Expanded(
+                child:
+                    Text(label, style: TextStyle(color: AppColors.textMuted))),
+            Text(fmt.compact(v),
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+          ]),
+        );
+    final regionColors = [AppColors.lilac, AppColors.pink, AppColors.sky];
+    return Section(
+      title: l.numbers,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        StatGrid(tiles: head),
+        if (hasStreams) ...[
+          const SizedBox(height: 18),
+          Text(l.streamsByRegion,
+              style: TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: SizedBox(
+              height: 10,
+              child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final r in Region.values)
+                      if (s.lifetimeStreams[r] > 0)
+                        Expanded(
+                            flex: (s.lifetimeStreams[r] / streams * 1000)
+                                .round()
+                                .clamp(1, 1000),
+                            child:
+                                ColoredBox(color: regionColors[r.index % 3])),
+                  ]),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(spacing: 14, runSpacing: 4, children: [
+            for (final r in Region.values)
+              Row(mainAxisSize: MainAxisSize.min, children: [
+                Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                        color: regionColors[r.index % 3],
+                        shape: BoxShape.circle)),
+                const SizedBox(width: 6),
+                Text(
+                    '${fmt.region(r)} '
+                    '${(s.lifetimeStreams[r] / streams * 100).round()}%',
+                    style: const TextStyle(fontSize: 13)),
+              ]),
+          ]),
+        ],
+        const SizedBox(height: 6),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => setState(() => _more = !_more),
+            icon: Icon(
+                _more ? Icons.expand_less_rounded : Icons.expand_more_rounded),
+            label: Text(_more ? l.fewerNumbers : l.moreNumbers),
+          ),
+        ),
+        if (_more) ...[
+          if (hasStreams)
+            for (final r in Region.values)
+              row(fmt.region(r), s.lifetimeStreams[r]),
+          row(l.downloads, s.lifetimeDownloads),
+          if (s.lifetimePhysical >= 1) row(l.cdSingles, s.lifetimePhysical),
+          if (!widget.salesFirst && hasStreams)
+            row(l.radioAudience, s.lifetimeRadio),
+          if (widget.salesFirst && hasStreams)
+            row(l.thisWeekStreams, s.weekStreams),
+        ],
+      ]),
     );
   }
 }
