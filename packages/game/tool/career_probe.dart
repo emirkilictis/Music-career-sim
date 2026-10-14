@@ -24,7 +24,10 @@ void main(List<String> args) {
   final usAlb = Charts.all.indexWhere((c) => c.key == 'chart.us.albums');
   final dir = Directory.systemTemp.createTempSync('probe');
   final rows = List.generate(years, (_) => <List<num>>[]);
-  for (final seed in [11, 22, 33, 44, 55, 66]) {
+  final seeds =
+      Platform.environment['PROBE_SEEDS']?.split(',').map(int.parse).toList() ??
+          [11, 22, 33, 44, 55, 66];
+  for (final seed in seeds) {
     final slots = SaveSlots(Directory('${dir.path}/$seed'));
     final s = GameSession.start(
         slots,
@@ -70,6 +73,29 @@ void main(List<String> args) {
           if (c.peak <= 10) top10++;
         }
       }
+      if (Platform.environment['PROBE_LOG'] == '$seed') {
+        final p = s.player;
+        print('-- seed $seed year ${y + 1} label ${p.label.name} '
+            'fame ${(p.fame * 100).round()}% fans ${(p.coreFans / 1e3).round()}K '
+            'skills ${[
+          for (final k in SkillKind.values) p.skills[k]!.round()
+        ]}');
+        for (final song in s.songs) {
+          if (song.releasedWeek < 0 ||
+              GameTime.yearOf(song.releasedWeek) != yr ||
+              !song.isSingle) {
+            continue;
+          }
+          final pk = song.charts
+              .where((c) => c.chartId == us)
+              .map((c) => c.peak)
+              .fold(999, (a, b) => a < b ? a : b);
+          print('   wk ${song.releasedWeek - GameTime.firstWeekOf(yr) + 1} '
+              'grade ${song.grade} ${song.campaign.name} '
+              'peak ${pk == 999 ? '-' : pk} '
+              'streams ${(song.lifetimeStreams.total / 1e6).toStringAsFixed(1)}M');
+        }
+      }
       var bestAlb = 999;
       for (final al in s.albums) {
         for (final c in al.charts) {
@@ -94,7 +120,8 @@ void main(List<String> args) {
     s.close();
   }
   dir.deleteSync(recursive: true);
-  print('start $startYear ${tier.name} ${diff.name}, 6 worlds; medians '
+  print(
+      'start $startYear ${tier.name} ${diff.name}, ${seeds.length} worlds; medians '
       '(best peaks: min over worlds)');
   print('yr   money   Δmoney  songRev   spent    fans  bestUS top40 top10 '
       'bestAlbum');
