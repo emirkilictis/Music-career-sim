@@ -777,7 +777,7 @@ class Simulator {
       a.updateRegionShare();
     }
     _playerIncome();
-    if (w.week % catalogFadeWeeks == 0) _fadePlayerCatalog();
+    _fadeCatalogs();
     // Offers between releases (docs K59).
     OpportunityOutcome? lapsed;
     Opportunity? offered;
@@ -1151,44 +1151,70 @@ class Simulator {
     }
   }
 
-  /// How often the player's catalog fades (a batch of weeks at a time).
-  static const catalogFadeWeeks = 4;
+  /// How often each artist's catalog fades (a batch of weeks at a time).
+  static const catalogFadeWeeks = 13;
 
-  /// Old songs fade (docs K58): the player's catalog songs lose a little of
-  /// their listeners as they age, faster in their first decade, so a long
-  /// career's catalog does not grow forever. Each song's lifetime so far is
-  /// settled first, then its rate drops. Rivals' catalogs are part of the
-  /// calibrated market and stay as they are.
-  void _fadePlayerCatalog() {
+  /// A catalog song this quiet stops being tracked (its listeners are
+  /// gone): the fade then has nothing left to do for it.
+  static const catalogGoneRate = 20000.0;
+
+  /// Old songs fade (docs K58, K85), everyone's: people keep coming back to
+  /// the hits, an album's other tracks are forgotten within a few years.
+  /// A top-10 single loses 12% of its listeners a year in its first decade
+  /// and 3% after (the classics stay); other singles and charting album
+  /// tracks 25% a year; the rest 45%. Each song's lifetime so far is
+  /// settled first, then its rate drops.
+  void _fadeCatalogs() {
     final w = world;
     final c = w.config;
-    final p = w.player;
-    if (p == null || p.dormantSongIds.isEmpty) return;
-    for (final id in p.dormantSongIds) {
-      final s = w.songs[id];
-      final years = (w.week - s.releasedWeek) / GameTime.weeksPerYear;
-      final perWeek =
-          years < c.catalogFadeYears ? c.catalogFadeEarly : c.catalogFadeLate;
-      final rate = s.dormantRate * math.pow(1 - perWeek, catalogFadeWeeks);
-      final drop = s.dormantRate - rate;
-      if (drop <= 0) continue;
-      for (var r = 0; r < regionCount; r++) {
-        s.reg[SongReg.lifeStreams + r] = w.songLifetimeStreams(s, r);
-        s.reg[SongReg.lifeDownloads + r] = w.songLifetimeDownloads(s, r);
-        s.reg[SongReg.indexStreams + r] = p.reg[ArtistReg.indexStreams + r];
-        s.reg[SongReg.indexDownloads + r] = p.reg[ArtistReg.indexDownloads + r];
+    // A thirteenth of the artists each week, so the work (and the songs
+    // to save) is spread evenly.
+    final turn = w.week % catalogFadeWeeks;
+    for (final a in w.artists) {
+      if (a.dormantSongIds.isEmpty || a.id % catalogFadeWeeks != turn) {
+        continue;
       }
-      s.dormantRate = rate;
-      p.sumDormantRate -= drop;
-      if (s.albumId >= 0) {
-        final al = w.albums[s.albumId];
-        Lifecycle.settleAlbum(w, al);
-        al.sumDormantRate = math.max(0.0, al.sumDormantRate - drop);
+      w.settleRetired(a);
+      var dropped = 0.0;
+      // In id order: the list's order differs after loading a save, and
+      // the sums must come out the same to the last bit.
+      for (final id in a.dormantSongIds.toList()..sort()) {
+        final s = w.songs[id];
+        if (s.dormantRate <= 0) continue;
+        final years = (w.week - s.releasedWeek) / GameTime.weeksPerYear;
+        final perYear = c.catalogFadePerYear(Lifecycle.catalogWeight(s), years);
+        var rate = s.dormantRate *
+            math.pow(1 - perYear, catalogFadeWeeks / GameTime.weeksPerYear);
+        if (rate < catalogGoneRate) rate = 0;
+        final drop = s.dormantRate - rate;
+        if (drop <= 0) continue;
+        for (var r = 0; r < regionCount; r++) {
+          s.reg[SongReg.lifeStreams + r] = w.songLifetimeStreams(s, r);
+          s.reg[SongReg.lifeDownloads + r] = w.songLifetimeDownloads(s, r);
+          s.reg[SongReg.indexStreams + r] = w.artistIndexStreams(a, r);
+          s.reg[SongReg.indexDownloads + r] = w.artistIndexDownloads(a, r);
+        }
+        s.dormantRate = rate;
+        dropped += drop;
+        if (s.albumId >= 0) {
+          final al = w.albums[s.albumId];
+          Lifecycle.settleAlbum(w, al);
+          al.sumDormantRate = math.max(0.0, al.sumDormantRate - drop);
+        }
+        w.dirtySongs.add(id);
       }
-      w.dirtySongs.add(id);
+      if (dropped <= 0) continue;
+      a.sumDormantRate = math.max(0.0, a.sumDormantRate - dropped);
+      if (a.isRetired) {
+        for (var r = 0; r < regionCount; r++) {
+          w.retiredDormantAttention[r] = math.max(
+              0.0,
+              w.retiredDormantAttention[r] -
+                  dropped * a.catalogFactor * a.regionShare[r]);
+        }
+      }
+      w.dirtyArtists.add(a.id);
     }
-    if (p.sumDormantRate < 0) p.sumDormantRate = 0;
-    w.dirtyArtists.add(p.id);
   }
 
   void _playerIncome() {

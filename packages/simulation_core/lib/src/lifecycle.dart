@@ -1,3 +1,4 @@
+import 'config/charts.dart';
 import 'config/regions.dart';
 import 'model.dart';
 import 'world.dart';
@@ -11,10 +12,37 @@ abstract final class Lifecycle {
     w.dirtySongs.add(s.id);
   }
 
+  /// How much of its last listening a song keeps in the catalog (docs
+  /// K85): people come back to the hits, not to an album's other tracks.
+  /// Top-10 singles keep far more than deep cuts that never charted; the
+  /// overall level is [SimConfig.catalogLevel].
+  static double catalogWeight(Song s) {
+    var best = 999;
+    for (final ch in Charts.mainSongCharts) {
+      final peak = s.statsOrNull(ch)?.peak ?? 0;
+      if (peak > 0 && peak < best) best = peak;
+    }
+    if (s.isSingle) {
+      return best <= 10
+          ? 1.8
+          : best <= 40
+              ? 1.2
+              : 0.7;
+    }
+    return best <= 10
+        ? 1.0
+        : best <= 40
+            ? 0.5
+            : 0.25;
+  }
+
   static void makeSongDormant(World w, Song s) {
     final a = w.primaryOf(s);
     w.settleRetired(a);
-    final rate = s.lastAttention / a.catalogFactor;
+    final rate = s.lastAttention /
+        a.catalogFactor *
+        catalogWeight(s) *
+        w.config.catalogLevel;
     s.dormantRate = rate;
     for (var r = 0; r < regionCount; r++) {
       s.reg[SongReg.indexStreams + r] = a.reg[ArtistReg.indexStreams + r];

@@ -57,9 +57,34 @@ void main(List<String> args) {
   for (final id in (weeksOn.keys.toList()
         ..sort((a, b) => weeksOn[b]!.compareTo(weeksOn[a]!)))
       .take(12)) {
+    final al = w.albums[id];
+    final active =
+        al.songIds.where((x) => w.songs[x].status == SongStatus.active);
+    print('       tracks active ${active.length}/${al.songIds.length}, '
+        'streams/wk ${[
+      for (final x in al.songIds.take(5))
+        (w.songs[x].weekStreams / 1e6).toStringAsFixed(1)
+    ]}M, '
+        'artist fame ${w.artists[al.artistId].fame.toStringAsFixed(2)} '
+        'pop ${w.artists[al.artistId].popularity.toStringAsFixed(2)} '
+        'dormant ${al.sumDormantRate.toStringAsExponential(1)} '
+        'weights ${[
+      for (final x in al.songIds) Lifecycle.catalogWeight(w.songs[x])
+    ]} '
+        'rates ${[
+      for (final x in al.songIds.take(4))
+        w.songs[x].dormantRate.toStringAsExponential(1)
+    ]}');
+    print('       last week: pure ${al.weekPure.round()} '
+        'sea ${al.weekSea.round()} tea ${al.weekTea.round()} '
+        'units ${al.weekUnits.round()}');
     print('  ${weeksOn[id]!.toString().padLeft(4)} wk  peak #${peak[id]}  '
         'top-25 run ${best25[id] ?? 0}  top-10 ${top10[id] ?? 0}  ${name(id)}');
   }
+  final last = w.charts[Charts.usAlbums];
+  print(
+      '\n#1 ${last.first.points.round()} pts, #50 ${last[49].points.round()}, '
+      '#100 ${last.last.points.round()}');
   print('\nLongest unbroken top-25 run:');
   for (final id in (best25.keys.toList()
         ..sort((a, b) => best25[b]!.compareTo(best25[a]!)))
@@ -76,6 +101,23 @@ void main(List<String> args) {
         '  $y  catalog ${(c.reduce((a, b) => a + b) / c.length * 100).round()}%'
         '  one artist up to ${(m.reduce((a, b) => a + b) / m.length).toStringAsFixed(1)}');
   }
+  {
+    var cat = 0.0, act = 0.0;
+    for (var r = 0; r < 3; r++) {
+      cat += w.retiredDormantAttention[r];
+    }
+    for (final id in w.activeArtistIds) {
+      final a = w.artists[id];
+      cat += a.sumDormantRate * a.catalogFactor;
+    }
+    for (final id in w.activeSongIds) {
+      act += w.songs[id].lastAttention;
+    }
+    print(
+        'catalog share of attention ${(cat / (cat + act) * 100).toStringAsFixed(1)}%');
+  }
+  print(
+      'dormant songs ${w.dormantSongCount}, all songs ${w.songs.length}, retired artists ${w.artists.where((a) => a.isRetired).length}');
   final counts = [52, 104, 200];
   for (final c in counts) {
     print('albums with ${c}+ weeks on: '

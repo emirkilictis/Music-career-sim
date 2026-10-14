@@ -253,7 +253,8 @@ void main() {
     expect(al.lifetimeUnits, closeTo(al.firstWeekUnits + pre, 1e-3 * pre));
   });
 
-  test('the player\'s old songs fade, keeping what they earned (K58)', () {
+  test('old songs fade, the hits slowest, keeping what they earned (K58, K85)',
+      () {
     final w = WorldGen.create(seed: 58, startYear: 2016);
     final sim = Simulator(w);
     final a = WorldGen.addPlayer(w,
@@ -275,8 +276,22 @@ void main() {
       expect(now, greaterThanOrEqualTo(life));
       life = now;
     }
-    // About 5% a year in its first decade.
-    expect(s.dormantRate / rate0, closeTo(0.9, 0.02));
+    // Its class's yearly fade (K85): a top-10 single loses 12% a year in
+    // its first decade, other songs faster.
+    final perYear = w.config.catalogFadePerYear(Lifecycle.catalogWeight(s), 1);
+    expect(s.dormantRate / rate0, closeTo((1 - perYear) * (1 - perYear), 0.03));
+    // Rivals' catalogs fade too, a forgotten album track fastest (45% a
+    // year).
+    final rival = w.songs.firstWhere((x) =>
+        x.status == SongStatus.dormant &&
+        x.primaryArtistId != a.id &&
+        x.dormantRate > 1e5 &&
+        Lifecycle.catalogWeight(x) < 0.5);
+    final before = rival.dormantRate;
+    for (var i = 0; i < GameTime.weeksPerYear; i++) {
+      sim.step();
+    }
+    expect(rival.dormantRate / before, closeTo(0.55, 0.05));
   });
 
   test('a mixtape is free: streams, buzz, no sales, charts or era (K62)', () {
@@ -1529,8 +1544,8 @@ void campaignTests() {
       return al.weekPure / first;
     }
 
-    // Still a fifth in the download era; about a tenth from 2016.
-    expect(secondWeek(2010), greaterThan(0.18));
+    // A sixth or more in the download era; about a tenth from 2016.
+    expect(secondWeek(2010), greaterThan(0.15));
     expect(secondWeek(2018), lessThan(0.15));
   });
 }

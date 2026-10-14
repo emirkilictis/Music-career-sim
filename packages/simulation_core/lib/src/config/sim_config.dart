@@ -47,6 +47,7 @@ class SimConfig {
     this.catalogFadeEarly = 0.001,
     this.catalogFadeLate = 0.0004,
     this.catalogFadeYears = 10,
+    this.catalogLevel = 2.2,
     this.streamEquivalentAlbum = 1500,
     this.downloadHitExponent = 1.45,
     this.downloadHitExponentLate = 1.15,
@@ -272,11 +273,26 @@ class SimConfig {
 
   final double trackEquivalentAlbum;
 
-  /// Weekly fade of the player's catalog songs (docs K58): about 5% a year
-  /// in a song's first [catalogFadeYears] years, 2% a year after.
+  /// No longer used: the player-only catalog fade of docs K58, replaced by
+  /// [catalogFadePerYear] for everyone (K85).
   final double catalogFadeEarly;
   final double catalogFadeLate;
   final double catalogFadeYears;
+
+  /// Catalog listening against a song's last weeks (docs K85): with the
+  /// fade, old songs keep ~70% of all listening, as in the US streaming
+  /// market (catalog ~73% of consumption in 2023).
+  final double catalogLevel;
+
+  /// Share of a catalog song's listeners lost per year (docs K85), by its
+  /// catalog weight (see Lifecycle.catalogWeight): top-10 singles 12% in
+  /// their first decade, then 3%; other singles and charting album tracks
+  /// 25%; the rest 45%.
+  double catalogFadePerYear(double weight, double years) => weight >= 1.8
+      ? (years < 10 ? 0.12 : 0.03)
+      : weight >= 0.5
+          ? 0.25
+          : 0.45;
   final double streamEquivalentAlbum;
   final double songChartStreamDivisor;
   final double songChartRadioDivisor;
