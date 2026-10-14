@@ -16,7 +16,7 @@ class SimConfig {
     this.fanCurveFloor = 0.12,
     this.fanCurveHalfLifeWeeks = 3.0,
     this.fanShareExponent = 0.8,
-    this.selfCompetitionExponent = 0.5,
+    this.selfCompetitionExponent = 0.6,
     this.singleExposure = 1.0,
     this.albumTrackExposure = 0.30,
     this.baseExposure = 0.0015,
@@ -108,7 +108,8 @@ class SimConfig {
   final double fanShareExponent;
 
   /// How much an artist's fresh singles take radio slots and new listeners
-  /// from each other (docs K84): load^-x each.
+  /// from each other (docs K84): load^-x each, x growing with fame (full
+  /// from 50%).
   final double selfCompetitionExponent;
   final double singleExposure;
   final double albumTrackExposure;

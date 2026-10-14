@@ -178,10 +178,15 @@ class Simulator {
       radioLoad[id] = (radioLoad[id] ?? 0) + _radioLife(s, promoAge);
       promoLoad[id] = (promoLoad[id] ?? 0) + _promoLife(s, promoAge);
     }
+    // A newcomer's singles each find their own small crowd; a star's all
+    // go to the same stations and playlists. Full from 50% fame.
     double share(Map<int, double> load, Song s, int promoAge) {
       if (!s.isSingle || promoAge >= 26) return 1;
       final l = load[s.primaryArtistId] ?? 1;
-      return l <= 1 ? 1 : math.pow(l, -c.selfCompetitionExponent).toDouble();
+      if (l <= 1) return 1;
+      final fame = w.artists[s.primaryArtistId].fame;
+      final x = c.selfCompetitionExponent * math.min(1.0, 2 * fame);
+      return math.pow(l, -x).toDouble();
     }
 
     final activeIndex = <int, int>{};
