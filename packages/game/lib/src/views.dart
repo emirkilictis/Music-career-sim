@@ -486,6 +486,13 @@ class ChartRow {
   ChartRow({
     required this.albumId,
     required this.weekValue,
+    this.points = 0,
+    this.streams = 0,
+    this.sales = 0,
+    this.radio = 0,
+    this.pure = 0,
+    this.sea = 0,
+    this.tea = 0,
     required this.position,
     required this.lastPos,
     required this.peak,
@@ -504,6 +511,12 @@ class ChartRow {
   /// This week's streams (song charts) or units (album charts) in the
   /// chart's market.
   final double weekValue;
+
+  /// The week in the chart's market, opened under the row (docs K89):
+  /// chart points; for a song its streams, sales (downloads and CD
+  /// singles) and radio audience; for an album its pure sales and the
+  /// units from streams (SEA) and from track sales (TEA).
+  final double points, streams, sales, radio, pure, sea, tea;
 
   /// 0 = new or re-entry this week.
   final int lastPos;
@@ -541,7 +554,42 @@ class ChartView {
     final artistId = kind == EntityKind.song
         ? w.songs[id].primaryArtistId
         : w.albums[id].artistId;
+    final artist = w.artists[artistId];
+    // A by-region number as the chart's market sees it.
+    double inMarket(double Function(int r) byRegion) => switch (market) {
+          ChartMarket.us => CountryShares.usOfNorthAmerica(artist.homeCountry) *
+              byRegion(Region.northAmerica.index),
+          ChartMarket.uk => CountryShares.ukOfEurope(artist.homeCountry) *
+              byRegion(Region.europe.index),
+          _ => byRegion(0) + byRegion(1) + byRegion(2),
+        };
+    double streams = 0, sales = 0, radio = 0, pure = 0, sea = 0, tea = 0;
+    if (kind == EntityKind.song) {
+      final s = w.songs[id];
+      final wr = s.weekRegion;
+      streams = w.songWeekStreamsIn(s, market);
+      sales = inMarket((r) =>
+          (wr == null ? 0 : wr[regionCount + r]) +
+          s.weekPhysical * artist.regionShare[r]);
+      radio = inMarket((r) => s.weekRadio * artist.regionShare[r]);
+    } else {
+      final al = w.albums[id];
+      final wr = al.weekRegion;
+      pure = inMarket((r) => wr[r]);
+      final units = inMarket((r) => wr[regionCount + r]);
+      // SEA and TEA are kept worldwide; the market gets its share.
+      final share = al.weekUnits > 0 ? units / al.weekUnits : 0.0;
+      sea = al.weekSea * share;
+      tea = al.weekTea * share;
+    }
     return ChartRow(
+      points: points,
+      streams: streams,
+      sales: sales,
+      radio: radio,
+      pure: pure,
+      sea: sea,
+      tea: tea,
       albumId: kind == EntityKind.song ? coverAlbumOf(w, w.songs[id]) : id,
       weekValue: kind == EntityKind.song
           ? w.songWeekStreamsIn(w.songs[id], market)

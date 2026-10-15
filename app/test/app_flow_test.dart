@@ -73,6 +73,10 @@ void main() {
     // the artist's Streamify page.
     await tester.tap(find.byType(CoverArt).at(1));
     await tester.pumpAndSettle();
+    // The row opens its week first (K89); then the page.
+    expect(_ci('Streams'), findsWidgets);
+    await tester.tap(_ci('Song page'));
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(_ci('Week by week on the charts'), 300,
         scrollable: find.byType(Scrollable).first);
     expect(_ci('Week by week on the charts'), findsOneWidget);

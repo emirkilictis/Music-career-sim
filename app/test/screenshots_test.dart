@@ -12,6 +12,7 @@ import 'package:music_career_sim/core/commands.dart';
 import 'package:music_career_sim/core/event_lines.dart';
 import 'package:music_career_sim/core/scope.dart';
 import 'package:music_career_sim/screens/charts_tab.dart';
+import 'package:music_career_sim/widgets/art.dart';
 import 'package:music_career_sim/widgets/celebration.dart';
 import 'package:music_career_sim/widgets/media_tile.dart';
 
@@ -168,8 +169,13 @@ void main() {
     await tester.pumpAndSettle();
     await tab(tester, 'Charts');
     await shot(tester, '07_charts_songs');
+    // A row opens its week underneath (K89).
+    await tester.tap(find.byType(CoverArt).at(1));
+    await shot(tester, '07b_chart_row_open');
     await tester.tap(_ci('US ALBUMS'));
     await shot(tester, '08_charts_albums');
+    await tester.tap(find.byType(CoverArt).first);
+    await shot(tester, '08c_album_row_open');
 
     await tab(tester, 'Career');
     await shot(tester, '15_career');

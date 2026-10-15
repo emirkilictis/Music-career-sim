@@ -41,6 +41,9 @@ DateTime chartDate(int week) {
 class _ChartsTabState extends State<ChartsTab> {
   int _chart = Charts.usSongs;
   ChartView? _view;
+
+  /// The row opened under itself (docs K89), by entity id.
+  int? _openId;
   int _loadedRevision = -1;
 
   /// Box office: the year shown (null = all time), its rows, first year.
@@ -71,7 +74,12 @@ class _ChartsTabState extends State<ChartsTab> {
       return;
     }
     final view = await career.read(Cmd.chart(_chart));
-    if (mounted) setState(() => _view = view);
+    if (mounted) {
+      setState(() {
+        _view = view;
+        _openId = null;
+      });
+    }
   }
 
   void _select(int chart) {
@@ -218,11 +226,27 @@ class _ChartsTabState extends State<ChartsTab> {
                         itemCount: view.rows.length,
                         separatorBuilder: (_, __) => const Divider(
                             color: PaperColors.line, height: 1, indent: 16),
-                        itemBuilder: (context, i) => _ChartLine(
-                          row: view.rows[i],
-                          albums: view.def.kind == ChartKind.albums,
-                          onTap: () => _open(view.rows[i]),
-                        ),
+                        itemBuilder: (context, i) {
+                          final r = view.rows[i];
+                          final albums = view.def.kind == ChartKind.albums;
+                          final open = _openId == r.entityId;
+                          return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _ChartLine(
+                                  row: r,
+                                  albums: albums,
+                                  open: open,
+                                  onTap: () => setState(
+                                      () => _openId = open ? null : r.entityId),
+                                ),
+                                if (open)
+                                  _ChartDetails(
+                                      row: r,
+                                      albums: albums,
+                                      onOpen: () => _open(r)),
+                              ]);
+                        },
                       ),
           ),
         ],
@@ -316,7 +340,7 @@ class _ToursBoard extends StatelessWidget {
                       final top = r.rank == 1;
                       return Container(
                         color: r.isPlayer
-                            ? const Color(0xFFEDE7FF)
+                            ? const Color(0xFFFFE9DE)
                             : PaperColors.card,
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                         child: Row(children: [
@@ -397,10 +421,16 @@ class _ToursBoard extends StatelessWidget {
 /// One chart position, magazine style.
 class _ChartLine extends StatelessWidget {
   const _ChartLine(
-      {required this.row, required this.albums, required this.onTap});
+      {required this.row,
+      required this.albums,
+      required this.onTap,
+      this.open = false});
   final ChartRow row;
   final bool albums;
   final VoidCallback onTap;
+
+  /// Its details are showing underneath.
+  final bool open;
 
   @override
   Widget build(BuildContext context) {
@@ -434,7 +464,7 @@ class _ChartLine extends StatelessWidget {
         fontSize: 17,
         color: PaperColors.ink);
     return Material(
-      color: r.isPlayer ? const Color(0xFFEDE7FF) : PaperColors.card,
+      color: r.isPlayer ? const Color(0xFFFFE9DE) : PaperColors.card,
       child: InkWell(
         onTap: onTap,
         child: Container(
@@ -507,9 +537,82 @@ class _ChartLine extends StatelessWidget {
                 child: Text(v > 0 ? '$v' : '–',
                     textAlign: TextAlign.center, style: num),
               ),
+            Icon(open ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                size: 18, color: PaperColors.muted),
           ]),
         ),
       ),
+    );
+  }
+}
+
+/// The week of a chart entry, opened under its row (docs K89): what made
+/// its points in this chart's market, and a way to its full page.
+class _ChartDetails extends StatelessWidget {
+  const _ChartDetails(
+      {required this.row, required this.albums, required this.onOpen});
+  final ChartRow row;
+  final bool albums;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final r = row;
+    final stats = <(String, double)>[
+      if (albums) ...[
+        (l.chartStatUnits, r.weekValue),
+        (l.chartStatPure, r.pure),
+        (l.chartStatSea, r.sea),
+        (l.chartStatTea, r.tea),
+      ] else ...[
+        (l.chartStatPoints, r.points),
+        (l.chartStatStreams, r.streams),
+        (l.chartStatSales, r.sales),
+        (l.chartStatRadio, r.radio),
+      ],
+    ].where((x) => x.$2 >= 1).toList();
+    return Container(
+      color: const Color(0xFFF2EFE8),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(l.chartThisWeek.toUpperCase(),
+            style: const TextStyle(
+                fontFamily: AppFonts.condensed,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+                letterSpacing: 0.8,
+                color: PaperColors.muted)),
+        const SizedBox(height: 6),
+        Wrap(spacing: 20, runSpacing: 8, children: [
+          for (final (label, v) in stats)
+            Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(fmt.compact(v),
+                      style: const TextStyle(
+                          fontFamily: AppFonts.condensed,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 22,
+                          height: 1.1,
+                          color: PaperColors.ink)),
+                  Text(label,
+                      style: const TextStyle(
+                          fontSize: 12, color: PaperColors.muted)),
+                ]),
+        ]),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(foregroundColor: PaperColors.ink),
+            onPressed: onOpen,
+            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+            label: Text(albums ? l.chartOpenAlbum : l.chartOpenSong),
+          ),
+        ),
+      ]),
     );
   }
 }
