@@ -115,6 +115,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F50 | **Groove Journey'deki gibi diskografi ve tüm kariyer satışını kapaklı çubuklarla gösteren, oyuncunun görsel olarak üretip paylaşabileceği grafik** (Emir: "en çok istediğim şey bu"). | ✅ K86: Kariyer → Diskografi; kapaklı satış grafiği + "Grafiği paylaş" (PNG), albüm/single listesi zirve, ilk hafta, toplam ve sertifikayla. |
 | F51 | **Her şey çok yumuşak, generic AI tasarımı gibi; daha keskin olsun ama aşırı değil** (Emir). | ✅ K88: mürekkep/kâğıt paleti, tek turuncu vurgu, renk geçişi yok, 6 px köşeler, dar başlıklar. |
 | F52 | **Billboard tarzı listede şarkıya/albüme tıklayınca sayfaya gitmeden altta stream, satış, radyo gibi rakamlar açılsın** (Emir). | ✅ K89: satır yerinde açılır; şarkıda puan/stream/satış/radyo, albümde ünite/saf satış/SEA/TEA; sayfa bağlantısı. |
+| F53 | (Claude) Üretilen kapaklar hâlâ pastel geçişli, en "AI" görünen yer; kutlama kartı ve Streamify başlıkları da eski mor tonda. | ✅ K90: düz baskı paletli poster kapaklar, düz avatarlar, kapaktan gelen başlık rengi, kâğıt kutlama kartı. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

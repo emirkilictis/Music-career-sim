@@ -11,7 +11,6 @@ import '../../widgets/art.dart';
 import '../../widgets/common.dart';
 import '../album_detail_screen.dart';
 import '../song_detail_screen.dart';
-import 'artist_page.dart';
 
 /// Streamify album page, laid out like a big streaming app's (docs F23):
 /// cover over a tinted header, title and artist, controls, the tracklist
@@ -72,7 +71,7 @@ class _StreamifyAlbumPageState extends State<StreamifyAlbumPage> {
     final fmt = context.fmt;
     final career = context.careerRead;
     final plays = NumberFormat.decimalPattern(l.localeName);
-    final (c1, _) = streamifyHeaderColors(al.id);
+    final c1 = coverColor(albumCoverSeed(al.id));
     final year = GameTime.yearOf(al.releaseWeek);
     final (month, _) = Fmt.monthWeek(GameTime.weekOfYear(al.releaseWeek));
     final total = tracks.fold(0.0, (sum, s) => sum + s.lifetimeStreams.total);

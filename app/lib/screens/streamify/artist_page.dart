@@ -397,16 +397,11 @@ class _ArtistPageState extends State<ArtistPage> {
   }
 }
 
+/// Header colors of an artist page, taken from the avatar like Streamify
+/// takes them from the artist's picture.
 (Color, Color) streamifyHeaderColors(int seed) {
-  const sets = [
-    (Color(0xFF6D4BC4), Color(0xFF2A1D52)),
-    (Color(0xFFB4436C), Color(0xFF3D1528)),
-    (Color(0xFF2E7D6B), Color(0xFF10302A)),
-    (Color(0xFF3F64B5), Color(0xFF14254A)),
-    (Color(0xFFC0673B), Color(0xFF45200F)),
-    (Color(0xFF7A5BA8), Color(0xFF1E1530)),
-  ];
-  return sets[seed % sets.length];
+  final c = avatarColor(seed);
+  return (Color.lerp(c, Colors.black, 0.3)!, Color.lerp(c, Colors.black, 0.8)!);
 }
 
 /// Small helper so other screens can show Streamify play counts.

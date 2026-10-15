@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:ui' show PointMode;
 
 import 'package:flutter/material.dart';
 
@@ -7,20 +8,43 @@ import '../core/images.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 
-/// Curated color pairs for generated covers: soft and varied.
-const _pairs = <(Color, Color)>[
-  (Color(0xFFB9A6FF), Color(0xFF5B3FD1)),
-  (Color(0xFFFFA8C5), Color(0xFF8E2C5A)),
-  (Color(0xFFFFC59E), Color(0xFFC2452F)),
-  (Color(0xFF9BE7C4), Color(0xFF1C6B5A)),
-  (Color(0xFF9CCBFF), Color(0xFF23408E)),
-  (Color(0xFFFFE29A), Color(0xFFB0532A)),
-  (Color(0xFFE3B5FF), Color(0xFF2E2A7A)),
-  (Color(0xFFFFB3B3), Color(0xFF3B1F4F)),
-  (Color(0xFFB8F2E6), Color(0xFF5E4AE3)),
-  (Color(0xFFF7D6E0), Color(0xFF6B4C9A)),
-  (Color(0xFFC6E2FF), Color(0xFFE76F51)),
-  (Color(0xFF1F1B2E), Color(0xFFFF8FAB)),
+// Flat print inks for generated covers (docs K90): no pastel gradients,
+// a background, an ink and an accent that always read against each other.
+const _ink = Color(0xFF141414);
+const _paper = Color(0xFFF2EFE8);
+const _orange = Color(0xFFFF5A1F);
+const _cobalt = Color(0xFF1F4BD8);
+const _red = Color(0xFFD7263D);
+const _mustard = Color(0xFFE8B21E);
+const _green = Color(0xFF0F7B4F);
+const _pink = Color(0xFFFF7EB6);
+const _plum = Color(0xFF3B1E54);
+const _teal = Color(0xFF0E6E73);
+const _brick = Color(0xFF9C3B22);
+const _lime = Color(0xFFC8E02B);
+const _sky = Color(0xFF6FB7E8);
+const _olive = Color(0xFF5E5E1C);
+
+/// (background, ink, accent).
+const _schemes = <(Color, Color, Color)>[
+  (_paper, _ink, _orange),
+  (_ink, _paper, _orange),
+  (_orange, _ink, _paper),
+  (_cobalt, _paper, _mustard),
+  (_red, _paper, _ink),
+  (_mustard, _ink, _red),
+  (_green, _paper, _pink),
+  (_ink, _mustard, _red),
+  (_pink, _ink, _cobalt),
+  (_plum, _orange, _paper),
+  (_teal, _paper, _mustard),
+  (_paper, _cobalt, _red),
+  (_brick, _paper, _ink),
+  (_lime, _ink, _cobalt),
+  (_paper, _red, _ink),
+  (_ink, _pink, _paper),
+  (_sky, _ink, _orange),
+  (_olive, _paper, _orange),
 ];
 
 int _hash(int seed) {
@@ -107,135 +131,212 @@ class _CoverPainter extends CustomPainter {
 
   /// Number of motifs; picked from other bits of the hash than the colors
   /// so any palette meets any motif (E5).
-  static const motifs = 10;
+  static const motifs = 14;
 
   @override
   void paint(Canvas canvas, Size size) {
     final r = math.Random(h);
-    final (a, b) = _pairs[h % _pairs.length];
+    final (bg, fg, ac) = _schemes[h % _schemes.length];
     final rect = Offset.zero & size;
     final w = size.width;
-    final white = Colors.white;
-    Paint fill(Color c, double alpha) =>
-        Paint()..color = c.withValues(alpha: alpha);
-    Paint line(Color c, double alpha, double width) => Paint()
+    Paint fill(Color c) => Paint()..color = c;
+    Paint line(Color c, double width) => Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = width
-      ..color = c.withValues(alpha: alpha);
+      ..color = c;
+    Offset at(double x, double y) => Offset(w * x, w * y);
+    double rnd(double lo, double hi) => lo + (hi - lo) * r.nextDouble();
 
-    // Background: a gradient, a flat color or a two-tone split.
-    switch ((h >> 10) % 4) {
-      case 0:
-        canvas.drawRect(rect, Paint()..color = b);
-      case 1:
-        canvas.drawRect(rect, Paint()..color = b);
-        final split = Path()
-          ..moveTo(0, w * (0.3 + 0.4 * r.nextDouble()))
-          ..lineTo(w, w * (0.3 + 0.4 * r.nextDouble()))
+    canvas.clipRect(rect);
+    canvas.drawRect(rect, fill(bg));
+
+    switch ((h >> 5) % motifs) {
+      case 0: // a big sun, often cropped by the edge, and a small moon
+        final c = at(rnd(0.2, 0.8), rnd(0.2, 0.7));
+        canvas.drawCircle(c, w * rnd(0.28, 0.42), fill(fg));
+        canvas.drawCircle(
+            at(rnd(0.15, 0.85), rnd(0.75, 0.88)), w * 0.06, fill(ac));
+      case 1: // target rings, solid, from a corner
+        final c = at(r.nextBool() ? 0.15 : 0.85, r.nextBool() ? 0.15 : 0.85);
+        final colors = [fg, bg, ac, bg];
+        for (var i = 7; i >= 1; i--) {
+          canvas.drawCircle(c, w * 0.15 * i, fill(colors[i % 4]));
+        }
+      case 2: // bands like a flag, across or down
+        canvas.save();
+        if (r.nextBool()) {
+          canvas.translate(w, 0);
+          canvas.rotate(math.pi / 2);
+        }
+        final n = 3 + r.nextInt(3);
+        final weights = [for (var i = 0; i < n; i++) rnd(0.5, 1.5)];
+        final total = weights.fold(0.0, (a, b) => a + b);
+        final colors = [bg, fg, ac, fg, bg];
+        var y = 0.0;
+        for (var i = 0; i < n; i++) {
+          final hgt = w * weights[i] / total;
+          canvas.drawRect(Rect.fromLTWH(0, y, w, hgt), fill(colors[i]));
+          y += hgt;
+        }
+        canvas.restore();
+      case 3: // a dot grid with one dot out of line
+        final n = 5 + r.nextInt(3);
+        final step = w / n;
+        final odd = r.nextInt(n * n);
+        for (var i = 0; i < n * n; i++) {
+          canvas.drawCircle(Offset(step * (i % n + 0.5), step * (i ~/ n + 0.5)),
+              step * (i == odd ? 0.46 : 0.3), fill(i == odd ? ac : fg));
+        }
+      case 4: // a diagonal split, the circle changing color across it
+        final half = Path()
+          ..moveTo(0, w * rnd(0.2, 0.8))
+          ..lineTo(w, w * rnd(0.2, 0.8))
           ..lineTo(w, w)
           ..lineTo(0, w)
           ..close();
-        canvas.drawPath(split, Paint()..color = a);
-      case _:
-        final angle = r.nextDouble() * math.pi * 2;
-        canvas.drawRect(
-            rect,
-            Paint()
-              ..shader = LinearGradient(
-                begin: Alignment(math.cos(angle), math.sin(angle)),
-                end: Alignment(-math.cos(angle), -math.sin(angle)),
-                colors: [a, b],
-              ).createShader(rect));
-    }
-
-    switch ((h >> 4) % motifs) {
-      case 0: // sun
-        canvas.drawCircle(
-            Offset(w * (0.25 + 0.5 * r.nextDouble()),
-                w * (0.25 + 0.4 * r.nextDouble())),
-            w * (0.18 + 0.14 * r.nextDouble()),
-            fill(white, 0.32));
-      case 1: // rings
-        final c = Offset(w * r.nextDouble(), w * r.nextDouble());
-        for (var i = 1; i <= 4; i++) {
-          canvas.drawCircle(c, w * 0.18 * i, line(white, 0.18, w * 0.035));
+        canvas.drawPath(half, fill(fg));
+        final c = at(rnd(0.35, 0.65), 0.5);
+        final rad = w * rnd(0.22, 0.32);
+        canvas.drawCircle(c, rad, fill(ac));
+        canvas.save();
+        canvas.clipPath(half);
+        canvas.drawCircle(c, rad, fill(bg));
+        canvas.restore();
+      case 5: // arches rising from the bottom
+        final cx = w * rnd(0.3, 0.7);
+        final colors = [fg, ac, bg, fg, ac];
+        for (var i = 0; i < 5; i++) {
+          canvas.drawCircle(
+              Offset(cx, w), w * (0.62 - 0.12 * i), fill(colors[i]));
         }
-      case 2: // waves
-        final p = line(white, 0.22, w * 0.04);
-        for (var i = 0; i < 3; i++) {
-          final y = w * (0.45 + 0.15 * i);
-          final path = Path()..moveTo(0, y);
-          for (var x = 0.0; x <= w; x += w / 16) {
-            path.lineTo(x, y + math.sin(x / w * math.pi * 3 + i) * w * 0.06);
+      case 6: // Bauhaus tiles: quarter circles in a 2×2 grid
+        final t = w / 2;
+        for (var i = 0; i < 4; i++) {
+          final o = Offset(t * (i % 2), t * (i ~/ 2));
+          final dark = (i + (h >> 13)) % 2 == 0;
+          canvas.drawRect(o & Size(t, t), fill(dark ? fg : bg));
+          final corner = o +
+              Offset(t * r.nextInt(2).toDouble(), t * r.nextInt(2).toDouble());
+          canvas.save();
+          canvas.clipRect(o & Size(t, t));
+          canvas.drawCircle(
+              corner, t, fill(r.nextInt(3) == 0 ? ac : (dark ? bg : fg)));
+          canvas.restore();
+        }
+      case 7: // a thick frame with one small block
+        canvas.drawRect(Rect.fromLTWH(w * 0.12, w * 0.12, w * 0.76, w * 0.76),
+            line(fg, w * 0.07));
+        final s = w * rnd(0.12, 0.2);
+        canvas.drawRect(
+            Rect.fromLTWH(
+                w * rnd(0.22, 0.78) - s / 2, w * rnd(0.22, 0.78) - s / 2, s, s),
+            fill(ac));
+      case 8: // equalizer bars, the tallest in the accent
+        final n = 7 + r.nextInt(5);
+        final gap = w * 0.025;
+        final bw = (w * 0.84 - gap * (n - 1)) / n;
+        final heights = [for (var i = 0; i < n; i++) rnd(0.15, 0.75)];
+        final top = heights.indexOf(heights.reduce(math.max));
+        for (var i = 0; i < n; i++) {
+          canvas.drawRect(
+              Rect.fromLTWH(w * 0.08 + i * (bw + gap), w * (0.88 - heights[i]),
+                  bw, w * heights[i]),
+              fill(i == top ? ac : fg));
+        }
+      case 9: // thick waves
+        for (var i = 0; i < 4; i++) {
+          final p = line(i == 1 ? ac : fg, w * 0.07);
+          final y = w * (0.2 + 0.2 * i);
+          final phase = rnd(0, math.pi);
+          final path = Path()..moveTo(-w * 0.1, y);
+          for (var x = -w * 0.1; x <= w * 1.1; x += w / 24) {
+            path.lineTo(
+                x, y + math.sin(x / w * math.pi * 4 + phase) * w * 0.05);
           }
           canvas.drawPath(path, p);
         }
-      case 3: // horizon
+      case 10: // eclipse: a crescent and a thin ring
+        final c = at(rnd(0.35, 0.65), rnd(0.4, 0.6));
+        canvas.drawCircle(c, w * 0.4, line(fg, w * 0.012));
+        canvas.drawCircle(c, w * 0.3, fill(ac));
+        canvas.drawCircle(c + at(rnd(0.05, 0.1), -0.05), w * 0.27, fill(bg));
+      case 11: // a checkered strip under a disc
+        final n = 8;
+        final s = w / n;
+        final y = w * rnd(0.55, 0.7);
+        for (var row = 0; row < 2; row++) {
+          for (var col = 0; col < n; col++) {
+            if ((row + col).isEven) {
+              canvas.drawRect(
+                  Rect.fromLTWH(col * s, y + row * s, s, s), fill(fg));
+            }
+          }
+        }
+        canvas.drawCircle(at(rnd(0.3, 0.7), 0.3), w * 0.16, fill(ac));
+      case 12: // peaks in front of each other
+        canvas.drawCircle(at(rnd(0.6, 0.8), 0.25), w * 0.1, fill(ac));
+        final back = Path()
+          ..moveTo(-w * 0.1, w)
+          ..lineTo(w * rnd(0.3, 0.5), w * rnd(0.2, 0.35))
+          ..lineTo(w * 1.0, w)
+          ..close();
+        canvas.drawPath(back, fill(fg));
+        final front = Path()
+          ..moveTo(w * 0.35, w)
+          ..lineTo(w * rnd(0.65, 0.8), w * rnd(0.45, 0.6))
+          ..lineTo(w * 1.2, w)
+          ..close();
+        canvas.drawPath(front, fill(ac));
+      case _: // a record sliding out of its sleeve
+        final c = at(rnd(0.58, 0.68), 0.5);
+        canvas.drawCircle(c, w * 0.38, fill(fg));
+        for (var i = 1; i <= 3; i++) {
+          canvas.drawCircle(c, w * (0.18 + 0.06 * i),
+              line(bg.withValues(alpha: 0.25), w * 0.006));
+        }
+        canvas.drawCircle(c, w * 0.12, fill(bg));
+        canvas.drawCircle(c, w * 0.015, fill(fg));
         canvas.drawRect(
-            Rect.fromLTWH(0, w * (0.55 + 0.2 * r.nextDouble()), w, w),
-            fill(Colors.black, 0.22));
-        canvas.drawCircle(
-            Offset(w * 0.5, w * 0.6), w * 0.22, fill(AppColors.butter, 0.55));
-      case 4: // halftone dots, growing toward a corner
-        final n = 7;
-        final step = w / n;
-        final flip = r.nextBool();
-        for (var i = 0; i < n; i++) {
-          for (var j = 0; j < n; j++) {
-            final t = ((flip ? n - 1 - i : i) + j) / (2 * (n - 1));
-            canvas.drawCircle(Offset(step * (i + 0.5), step * (j + 0.5)),
-                step * 0.42 * t, fill(white, 0.35));
-          }
-        }
-      case 5: // diagonal stripes
-        final p = line(white, 0.2, w * 0.06);
-        final up = r.nextBool();
-        for (var k = -w; k < 2 * w; k += w * 0.17) {
-          canvas.drawLine(Offset(k, up ? w : 0), Offset(k + w, up ? 0 : w), p);
-        }
-      case 6: // mountains
-        for (var layer = 0; layer < 2; layer++) {
-          final base = w * (0.6 + 0.15 * layer);
-          final peak = Path()..moveTo(0, w);
-          var x = 0.0;
-          peak.lineTo(0, base);
-          while (x < w) {
-            final dx = w * (0.18 + 0.2 * r.nextDouble());
-            peak.lineTo(x + dx / 2, base - w * (0.15 + 0.25 * r.nextDouble()));
-            x += dx;
-            peak.lineTo(x, base);
-          }
-          peak
-            ..lineTo(w, w)
-            ..close();
-          canvas.drawPath(peak,
-              fill(layer == 0 ? white : Colors.black, 0.18 + 0.1 * layer));
-        }
-      case 7: // nested squares, slightly turned
-        canvas.save();
-        canvas.translate(w / 2, w / 2);
-        canvas.rotate((r.nextDouble() - 0.5) * 0.6);
-        for (var i = 1; i <= 4; i++) {
-          final half = w * 0.11 * i;
-          canvas.drawRect(Rect.fromLTRB(-half, -half, half, half),
-              line(white, 0.25, w * 0.03));
-        }
-        canvas.restore();
-      case 8: // big type-like bars (a poster)
-        final bars = 3 + r.nextInt(3);
-        for (var i = 0; i < bars; i++) {
-          final y = w * (0.12 + 0.76 * i / bars);
-          final len = w * (0.35 + 0.5 * r.nextDouble());
-          canvas.drawRRect(
-              RRect.fromRectAndRadius(Rect.fromLTWH(w * 0.1, y, len, w * 0.09),
-                  Radius.circular(w * 0.02)),
-              fill(i == 0 ? a : white, i == 0 ? 0.9 : 0.28));
-        }
-      case _: // eclipse: a disc with a bright edge
-        final c = Offset(w * (0.35 + 0.3 * r.nextDouble()), w * 0.45);
-        canvas.drawCircle(c, w * 0.3, fill(a, 0.85));
-        canvas.drawCircle(
-            c + Offset(w * 0.06, -w * 0.04), w * 0.27, fill(b, 0.95));
+            Rect.fromLTWH(0, w * 0.08, w * 0.5, w * 0.84), fill(ac));
+    }
+
+    // A hairline edge so a black or paper cover keeps its shape on a
+    // background of the same color.
+    final dim = bg.computeLuminance() < 0.05;
+    final pale = bg.computeLuminance() > 0.7;
+    if (dim || pale) {
+      final edge = math.max(1.0, w / 160);
+      canvas.drawRect(
+          rect.deflate(edge / 2),
+          line(
+              dim
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : Colors.black.withValues(alpha: 0.1),
+              edge));
+    }
+
+    // A light print grain so the flat inks don't look rendered.
+    if (w >= 40) {
+      final count = math.min(3000, (w * w / 28).round());
+      final dark = <Offset>[];
+      final light = <Offset>[];
+      for (var i = 0; i < count; i++) {
+        (i.isEven ? dark : light)
+            .add(Offset(r.nextDouble() * w, r.nextDouble() * w));
+      }
+      final dot = math.max(1.0, w / 180);
+      canvas.drawPoints(
+          PointMode.points,
+          dark,
+          Paint()
+            ..color = Colors.black.withValues(alpha: 0.08)
+            ..strokeWidth = dot);
+      canvas.drawPoints(
+          PointMode.points,
+          light,
+          Paint()
+            ..color = Colors.white.withValues(alpha: 0.08)
+            ..strokeWidth = dot);
     }
   }
 
@@ -243,7 +344,7 @@ class _CoverPainter extends CustomPainter {
   bool shouldRepaint(_CoverPainter old) => old.h != h;
 }
 
-/// Round gradient avatar with initials, or the artist's uploaded photo when
+/// Round flat-color avatar with initials, or the artist's uploaded photo when
 /// [artistId] has one (for [photo]'s place, else the general photo).
 class ArtistAvatar extends StatelessWidget {
   const ArtistAvatar(
@@ -273,31 +374,30 @@ class ArtistAvatar extends StatelessWidget {
     if (path != null) {
       return ClipOval(child: _Photo(path: path, size: size));
     }
-    final (a, b) = _pairs[_hash(seed + 7) % _pairs.length];
+    final (bg, fg, _) = _schemes[_hash(seed + 7) % _schemes.length];
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [a, b]),
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: bg),
       child: Text(
         _initials,
         style: TextStyle(
           fontFamily: AppFonts.ui,
           fontWeight: FontWeight.w900,
           fontSize: size * 0.36,
-          color: Colors.white,
-          shadows: const [Shadow(blurRadius: 8, color: Colors.black26)],
+          color: fg,
         ),
       ),
     );
   }
 }
+
+/// The background ink of a generated cover, for pages tinted by their art.
+Color coverColor(int seed) => _schemes[_hash(seed) % _schemes.length].$1;
+
+/// The background of an artist's generated avatar.
+Color avatarColor(int seed) => _schemes[_hash(seed + 7) % _schemes.length].$1;
 
 /// Cover seed of a song: its album's cover when it is on one.
 int songCoverSeed(int songId, int albumId) =>

@@ -135,9 +135,11 @@ class _CelebrationState extends State<_Celebration>
                 Text(_isNo1 ? l.celebrateNumberOne : l.celebrateFirstChart,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
+                        fontFamily: AppFonts.condensed,
                         color: Colors.white,
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900)),
+                        fontSize: 34,
+                        letterSpacing: 0.5,
+                        fontWeight: FontWeight.w800)),
                 const SizedBox(height: 18),
                 RepaintBoundary(
                   key: _card,
@@ -209,75 +211,96 @@ class _MomentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final songId = line.songId;
+    // Printed like the career sales chart: paper, ink, one solid block of
+    // color for the position (docs K90).
+    const paper = Color(0xFFF2EFE8);
+    const ink = Color(0xFF141414);
+    const muted = Color(0xFF6B675F);
     return Container(
       width: 310,
-      padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
+        color: paper,
         borderRadius: BorderRadius.circular(AppShape.r(28)),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [const Color(0xFF2A2350), const Color(0xFF14182E)],
-        ),
-        border: Border.all(color: accent.withValues(alpha: 0.6), width: 1.5),
       ),
-      child: Column(children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         CoverArt(
           seed: songId != null
               ? songCoverSeed(songId, line.albumId)
               : albumCoverSeed(line.albumId),
           songId: songId,
           albumId: line.albumId,
-          size: 200,
-          radius: 16,
+          size: 274,
+          radius: 2,
         ),
         const SizedBox(height: 14),
-        Text('#$position',
-            style: TextStyle(
-                fontFamily: AppFonts.condensed,
-                fontSize: 72,
-                height: 1,
-                fontWeight: FontWeight.w800,
-                color: accent)),
-        const SizedBox(height: 6),
-        Text(line.title,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w800)),
-        const SizedBox(height: 2),
-        Text(artistName,
-            style: const TextStyle(
-                color: Color(0xFFC9C2E6), fontWeight: FontWeight.w600)),
+        Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+          Container(
+            color: accent,
+            padding: const EdgeInsets.fromLTRB(10, 4, 10, 2),
+            child: Text('#$position',
+                style: const TextStyle(
+                    fontFamily: AppFonts.condensed,
+                    fontSize: 54,
+                    height: 1,
+                    fontWeight: FontWeight.w800,
+                    color: ink)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(line.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: ink,
+                      fontSize: 19,
+                      height: 1.15,
+                      fontWeight: FontWeight.w800)),
+              const SizedBox(height: 2),
+              Text(artistName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: muted, fontWeight: FontWeight.w600)),
+            ]),
+          ),
+        ]),
         const SizedBox(height: 12),
+        Container(height: 2, color: ink),
+        const SizedBox(height: 8),
         Text(chartName.toUpperCase(),
-            textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
                 fontFamily: AppFonts.condensed,
-                letterSpacing: 1.2,
-                fontSize: 17,
+                letterSpacing: 1,
+                fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: accent)),
-        Text(week,
-            style: const TextStyle(color: Color(0xFF9E97BD), fontSize: 13)),
-        const SizedBox(height: 14),
+                color: ink)),
+        Text(week, style: const TextStyle(color: muted, fontSize: 13)),
+        const SizedBox(height: 12),
         Row(children: [
-          const Icon(Icons.graphic_eq_rounded,
-              size: 16, color: Color(0xFF9E97BD)),
+          const Icon(Icons.graphic_eq_rounded, size: 16, color: muted),
           const SizedBox(width: 6),
           Expanded(
             child: Text(l.appTitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                    color: Color(0xFF9E97BD),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700)),
+                    color: muted, fontSize: 12, fontWeight: FontWeight.w700)),
           ),
-          Tag(mode, color: accent),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration:
+                BoxDecoration(border: Border.all(color: ink, width: 1.4)),
+            child: Text(mode.toUpperCase(),
+                style: const TextStyle(
+                    fontFamily: AppFonts.condensed,
+                    letterSpacing: 0.8,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: ink)),
+          ),
         ]),
       ]),
     );
