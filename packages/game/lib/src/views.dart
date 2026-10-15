@@ -274,6 +274,8 @@ class SongView {
         lifetimeRadio = s.lifetimeRadio,
         isPlayer = s.primaryArtistId == w.playerArtistId,
         video = s.videoBudget < 0 ? null : VideoBudget.values[s.videoBudget],
+        versions = List.unmodifiable(s.versions),
+        variants = List.unmodifiable(s.variants),
         campaignCostCents = s.campaignCostCents,
         campaignReturnCents = s.campaignReturnCents.round(),
         revenueCents = s.revenueCents.round(),
@@ -300,6 +302,11 @@ class SongView {
 
   /// The song's music video budget, if it has one (docs K52).
   final VideoBudget? video;
+
+  /// Versions out and the single's physical editions, with their weeks
+  /// (docs K92, F26).
+  final List<(SongVersion, int)> versions;
+  final List<(SingleFormat, int)> variants;
 
   /// The song's campaign, what the player paid and the income it brought
   /// in (estimated; docs K57). Album tracks share the album's campaign

@@ -5,8 +5,15 @@ import 'codec.dart';
 /// (v1 has not shipped yet, so it is still being shaped.)
 final List<String> migrations = [
   _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, _v13,
-  _v14, _v15, _v16, _v17, _v18, //
+  _v14, _v15, _v16, _v17, _v18, _v19, //
 ];
+
+/// v19: a song's versions and a single's physical editions (docs K92).
+const _v19 = '''
+ALTER TABLE song ADD COLUMN versions TEXT;
+ALTER TABLE song ADD COLUMN variants TEXT;
+ALTER TABLE song ADD COLUMN versionBoost REAL;
+''';
 
 /// v18: a single's paid radio push (docs K84).
 const _v18 = 'ALTER TABLE song ADD COLUMN radioPush INTEGER;';

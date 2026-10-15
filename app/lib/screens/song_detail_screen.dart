@@ -100,6 +100,113 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
+  /// Picks another version of the song to put out (docs K92, F26).
+  Future<void> _newVersion(SongView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final money = widget.state.player.moneyCents;
+    final year = GameTime.yearOf(widget.state.week);
+    final recent =
+        s.versions.where((x) => widget.state.week - x.$2 < 8).isNotEmpty;
+    final v = await showModalBottomSheet<SongVersion>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.newVersion, style: Theme.of(c).textTheme.titleLarge),
+          ),
+          for (final v in SongVersion.values)
+            ListTile(
+              enabled:
+                  v.costCents <= money && !s.versions.any((x) => x.$1 == v),
+              leading: Icon(switch (v) {
+                SongVersion.remix => Icons.equalizer_rounded,
+                SongVersion.spedUp => Icons.fast_forward_rounded,
+                SongVersion.slowed => Icons.slow_motion_video_rounded,
+                SongVersion.acapella => Icons.record_voice_over_rounded,
+                SongVersion.instrumental => Icons.piano_rounded,
+              }),
+              title: Text(fmt.songVersion(v)),
+              subtitle: Text([
+                switch (v.boost(year)) {
+                  >= 0.3 => l.waveBig,
+                  >= 0.1 => l.waveMid,
+                  _ => l.waveSmall,
+                },
+                if (v.trendy && year >= 2020) l.waveTrend,
+                if (recent) l.waveLess,
+              ].join(' · ')),
+              trailing: Text(fmt.money(v.costCents)),
+              onTap: () => Navigator.pop(c, v),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (v == null || !mounted) return;
+    try {
+      await widget.state.act(Cmd.releaseVersion(s.id, v));
+      if (mounted) {
+        showInfo(context, l.versionReleased(s.title, fmt.songVersion(v)));
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  /// Picks a physical edition of the single to put out (docs K92, F26).
+  Future<void> _newEdition(SongView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final money = widget.state.player.moneyCents;
+    final year = GameTime.yearOf(widget.state.week);
+    final f = await showModalBottomSheet<SingleFormat>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.newEdition, style: Theme.of(c).textTheme.titleLarge),
+          ),
+          for (final f in SingleFormat.values)
+            ListTile(
+              enabled:
+                  f.costCents <= money && !s.variants.any((x) => x.$1 == f),
+              leading: Icon(switch (f) {
+                SingleFormat.cd => Icons.album_rounded,
+                SingleFormat.vinyl => Icons.radio_button_checked_rounded,
+                SingleFormat.cassette => Icons.cable_rounded,
+                SingleFormat.signed => Icons.draw_rounded,
+              }),
+              title: Text(fmt.singleFormat(f)),
+              subtitle: Text(switch (f.appeal(year)) {
+                >= 0.9 => l.collectorsHigh,
+                >= 0.45 => l.collectorsMid,
+                _ => l.collectorsLow,
+              }),
+              trailing: Text(fmt.money(f.costCents)),
+              onTap: () => Navigator.pop(c, f),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (f == null || !mounted) return;
+    try {
+      await widget.state.act(Cmd.releaseVariant(s.id, f));
+      if (mounted) {
+        showInfo(context, l.editionReleased(s.title, fmt.singleFormat(f)));
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _scrap(SongView s) async {
     final l = context.l10n;
     final ok = await showDialog<bool>(
@@ -245,6 +352,43 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     ),
                 ]),
           ),
+          if (s.isPlayer && s.releasedWeek >= 0) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.versionsSection,
+              icon: Icons.library_add_rounded,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (s.versions.isEmpty && s.variants.isEmpty)
+                      Text(l.versionsHint,
+                          style: TextStyle(color: AppColors.textMuted))
+                    else
+                      Wrap(spacing: 8, runSpacing: 8, children: [
+                        for (final (v, wk) in s.versions)
+                          Tag('${fmt.songVersion(v)} · ${fmt.weekInMonth(wk)}',
+                              icon: Icons.graphic_eq_rounded),
+                        for (final (f, wk) in s.variants)
+                          Tag('${fmt.singleFormat(f)} · ${fmt.weekInMonth(wk)}',
+                              icon: Icons.album_rounded, color: AppColors.gold),
+                      ]),
+                    const SizedBox(height: 10),
+                    Wrap(spacing: 8, runSpacing: 8, children: [
+                      OutlinedButton.icon(
+                        onPressed: () => _newVersion(s),
+                        icon: const Icon(Icons.graphic_eq_rounded),
+                        label: Text(l.newVersion),
+                      ),
+                      if (s.isSingle)
+                        OutlinedButton.icon(
+                          onPressed: () => _newEdition(s),
+                          icon: const Icon(Icons.album_rounded),
+                          label: Text(l.newEdition),
+                        ),
+                    ]),
+                  ]),
+            ),
+          ],
           if (!s.inVault) ...[
             const SizedBox(height: 12),
             _SongNumbers(song: s, salesFirst: salesFirst),

@@ -2589,5 +2589,51 @@
       }
     }
   },
-  "awardsStat": "Golden Record Awards"
+  "awardsStat": "Golden Record Awards",
+  "versionsSection": "Versions & editions",
+  "versionsHint": "Other versions count with the song and bring a wave of listening. Physical editions of a single sell to fans in their week and count on the charts.",
+  "newVersion": "New version",
+  "newEdition": "Physical edition",
+  "versionRemix": "Remix",
+  "versionSpedUp": "Sped up",
+  "versionSlowed": "Slowed + reverb",
+  "versionAcapella": "A cappella",
+  "versionInstrumental": "Instrumental",
+  "formatCdSingle": "CD single",
+  "formatVinylSingle": "7\" vinyl",
+  "formatCassetteSingle": "Cassette single",
+  "formatSignedSingle": "Signed CD",
+  "waveBig": "A big wave of listening",
+  "waveMid": "A wave of listening",
+  "waveSmall": "A small lift",
+  "waveTrend": "can start a trend",
+  "waveLess": "less right after another version",
+  "collectorsHigh": "Collectors want it",
+  "collectorsMid": "Some collectors",
+  "collectorsLow": "Few buyers these days",
+  "versionReleased": "{title}: {version} is out.",
+  "@versionReleased": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "editionReleased": "{title}: the {format} is out this week.",
+  "@editionReleased": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "errorVersionOut": "That version is already out.",
+  "errorEditionOut": "That edition is already out.",
+  "errorNotSingle": "Only released singles get physical editions."
 }

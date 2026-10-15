@@ -291,10 +291,13 @@ class Simulator {
               ? w.difficulty.exposure
               : w.difficulty.aiExposure) *
           campExp *
-          (1 + s.playlistBoost) *
+          (1 + s.playlistBoost + s.versionBoost) *
           (1 + s.videoPower * videoEra);
       if (s.playlistWeek == w.week) playlistAdds.add(s.id);
       s.playlistBoost *= c.playlistFade;
+      // New versions bring a wave of listening (docs K92).
+      s.versionBoost *= c.versionFade;
+      if (s.versionBoost < 1e-4) s.versionBoost = 0;
       final qMult = 0.35 + 0.65 * math.pow(s.quality / 100, 1.4);
 
       // Fans replay singles; deep cuts get less of their time, except in
@@ -458,16 +461,18 @@ class Simulator {
         (radioCounts ? rad / c.songChartRadioDivisor : 0);
     final st = Float64List(_r), dw = Float64List(_r);
     final rd = Float64List(_r), ph = Float64List(_r);
+    final variantSales = Float64List(_r);
     for (var i = 0; i < n; i++) {
       final s = w.songs[ids[i]];
       final p = w.artists[s.primaryArtistId];
       var tS = 0.0, tD = 0.0, tR = 0.0, tP = 0.0;
+      _variantSales(s, p, eras, variantSales);
       for (var k = 0; k < _r; k++) {
         final j = i * _r + k;
         st[k] = att[j] * spa[k];
         dw[k] = dl[j] * dpa[k];
         rd[k] = radio[j] * rpr[k];
-        ph[k] = s.isSingle ? att[j] * ppa[k] : 0;
+        ph[k] = s.isSingle ? att[j] * ppa[k] + variantSales[k] : 0;
         streamsR[j] = st[k];
         downloadsR[j] = dw[k];
         tS += st[k];
@@ -854,6 +859,37 @@ class Simulator {
     );
     w.week++;
     return result;
+  }
+
+  /// Collector sales of a single's physical editions this week, per region
+  /// (docs K92): fans buy an edition mostly in its week; several in the
+  /// same week sell less each.
+  void _variantSales(Song s, Artist p, List<EraValues> eras, Float64List out) {
+    out.fillRange(0, _r, 0);
+    if (s.variants.isEmpty) return;
+    final w = world;
+    final year = GameTime.yearOf(w.week);
+    var sum = 0.0;
+    final sameWeek = <int, int>{};
+    for (final (f, week) in s.variants) {
+      final age = w.week - week;
+      if (age < 0 || age > 3) continue;
+      final k = sameWeek[week] = (sameWeek[week] ?? -1) + 1;
+      sum += f.appeal(year) *
+          math.pow(w.config.variantDecay, k) *
+          const [1.0, 0.3, 0.1, 0.03][age];
+    }
+    if (sum == 0) return;
+    for (var k = 0; k < _r; k++) {
+      out[k] = p.coreFans *
+          p.regionShare[k] *
+          w.config.singleCollectorRate *
+          p.kind.collector *
+          p.devotionCollectorFactor *
+          eras[k].collectorFactor *
+          sum *
+          (1 + p.hype);
+    }
   }
 
   /// Ranks [entityIds] by [points] and updates per-chart stats.

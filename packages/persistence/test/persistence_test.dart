@@ -36,6 +36,13 @@ void _playerMoves(World w, int i) {
     Actions.releaseSingle(w, p, w.songs[vault.first],
         campaign: Campaign.intensive);
   }
+  if (i == 34) {
+    // A remix and a CD single (docs K92).
+    final single =
+        w.songs.firstWhere((s) => s.primaryArtistId == p.id && s.isSingle);
+    Actions.releaseVersion(w, p, single, SongVersion.remix);
+    Actions.releaseVariant(w, p, single, SingleFormat.cd);
+  }
   if (i == 60) {
     final vault = [
       for (final s in w.songs)

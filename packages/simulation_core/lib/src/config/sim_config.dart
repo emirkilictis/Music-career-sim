@@ -39,6 +39,8 @@ class SimConfig {
     this.eventBuyRate = 0.11,
     this.superfanBuyRate = 0.07,
     this.collectorRate = 0.19,
+    this.singleCollectorRate = 0.03,
+    this.versionFade = 0.8,
     this.variantDecay = 0.6,
     this.casualBuyRate = 0.012,
     this.albumSecondWeekRatio = 0.22,
@@ -266,6 +268,11 @@ class SimConfig {
   /// Extra copies per core fan for the 2nd variant (scaled by devotion and
   /// era collector culture); each further variant sells [variantDecay]× less.
   final double collectorRate;
+
+  /// Fans buying a physical single edition in its week (docs K92), and how
+  /// fast a version's wave of listening fades.
+  final double singleCollectorRate;
+  final double versionFade;
   final double variantDecay;
   final double casualBuyRate;
   final double albumSecondWeekRatio;

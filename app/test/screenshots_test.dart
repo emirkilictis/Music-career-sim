@@ -295,6 +295,24 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(find.byType(Scrollable).first, const Offset(0, 330));
     await shot(tester, '14c_song_numbers');
+    // A remix and a CD single from the song page (docs K92, F26).
+    final newVersion = _ci('New version');
+    await tester.scrollUntilVisible(newVersion, -300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(newVersion), alignment: 0.4);
+    await tester.pumpAndSettle();
+    await tester.tap(newVersion);
+    await tester.pumpAndSettle();
+    await shot(tester, '14d_version_sheet');
+    await tester.tap(_ci('Remix'));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Physical edition'));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('CD single'));
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await Scrollable.ensureVisible(tester.element(_ci('Versions & editions')),
+        alignment: 0.2);
+    await shot(tester, '14e_versions');
     await tester.pageBack();
     await tester.pumpAndSettle();
 

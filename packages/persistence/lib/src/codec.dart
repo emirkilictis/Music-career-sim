@@ -183,6 +183,17 @@ abstract final class Codec {
     return a;
   }
 
+  /// "kind:week,kind:week" ('' when empty).
+  static String _pairs(List<(int, int)> v) =>
+      [for (final (a, b) in v) '$a:$b'].join(',');
+
+  static List<(int, int)> _parsePairs(String? s) => s == null || s.isEmpty
+      ? const []
+      : [
+          for (final p in s.split(','))
+            (int.parse(p.split(':')[0]), int.parse(p.split(':')[1]))
+        ];
+
   // ------------------------------------------------------------------ song
   static final songColumns = [
     'id', 'title', 'genre', 'primaryArtistId', 'writtenWeek', //
@@ -202,8 +213,9 @@ abstract final class Codec {
     // Added in schema v6, v11.
     'videoBudget', 'videoPower',
     'campaignPower', 'campaignCost', 'campaignReturn',
-    // Added in schema v13, v17, v18.
+    // Added in schema v13, v17, v18, v19.
     'revenue', 'productionCost', 'gradeSpread', 'radioPush',
+    'versions', 'variants', 'versionBoost',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -230,6 +242,9 @@ abstract final class Codec {
         s.productionCostCents,
         s.gradeSpread,
         s.radioPush.index,
+        _pairs([for (final (v, wk) in s.versions) (v.index, wk)]),
+        _pairs([for (final (f, wk) in s.variants) (f.index, wk)]),
+        s.versionBoost,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -252,6 +267,14 @@ abstract final class Codec {
     s.gradeSpread = r['gradeSpread'] as int? ?? 6;
     // Before v18 every single had the radio a standard push gives now.
     s.radioPush = RadioPush.values[r['radioPush'] as int? ?? 1];
+    // Versions and physical single editions (v19, docs K92).
+    for (final (i, wk) in _parsePairs(r['versions'] as String?)) {
+      s.versions.add((SongVersion.values[i], wk));
+    }
+    for (final (i, wk) in _parsePairs(r['variants'] as String?)) {
+      s.variants.add((SingleFormat.values[i], wk));
+    }
+    s.versionBoost = (r['versionBoost'] as num?)?.toDouble() ?? 0;
     s
       ..status = SongStatus.values[r['status'] as int]
       ..releasedWeek = r['releasedWeek'] as int

@@ -211,6 +211,10 @@ abstract final class Cmd {
 
   static SessionCmd<void> shootVideo(int id, VideoBudget budget) =>
       (s) => s.shootVideo(id, budget);
+  static SessionCmd<void> releaseVersion(int id, SongVersion v) =>
+      (s) => s.releaseVersion(id, v);
+  static SessionCmd<void> releaseVariant(int id, SingleFormat f) =>
+      (s) => s.releaseVariant(id, f);
 
   static SessionCmd<void> spendSkillPoint(SkillKind kind) =>
       (s) => s.spendSkillPoint(kind);

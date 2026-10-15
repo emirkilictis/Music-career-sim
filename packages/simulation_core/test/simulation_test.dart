@@ -188,6 +188,7 @@ void main() {
   group('difficulty', difficultyTests);
   group('mega debuts', megaDebutTests);
   group('album shape', albumShapeTests);
+  group('versions and editions', versionTests);
   group('viral', viralTests);
   group('novice', noviceTests);
 
@@ -1053,7 +1054,9 @@ void megaDebutTests() {
     // (docs K58).
     expect(mean(legend), greaterThan(4.2e6));
     expect(mean(legend), greaterThan(1.1 * mean(real)));
-    expect(mean(real), lessThan(4.8e6));
+    // The rest of the world (rivals' awards, editions) moves the mean by a
+    // few percent; seeds alone span 4.5–5.1M.
+    expect(mean(real), lessThan(5.0e6));
   });
 
   test('legend mode holds the AI back a little', () {
@@ -1668,5 +1671,81 @@ void campaignTests() {
     final song = Actions.writeSong(w, group, producerSkill: 80, aiMode: true);
     Actions.releaseSingle(w, group, song);
     expect(group.hype, closeTo(0.35 * (0.5 + group.fame), 1e-9));
+  });
+}
+
+/// A superstar's single four weeks out, in a fresh 2024 world; then
+/// [extra] runs and the next [weeks] weeks are played (docs K92).
+({World w, Artist p, Song s, List<double> streams, List<double> physical})
+    _singleRun(void Function(World, Artist, Song)? extra, {int weeks = 2}) {
+  final w = WorldGen.create(seed: 92, startYear: 2024);
+  final sim = Simulator(w);
+  while (w.week < GameTime.firstWeekOf(2024)) {
+    sim.step();
+  }
+  final p = WorldGen.addPlayer(w,
+      name: 'Star',
+      genre: 0,
+      tier: StartTier.superstar,
+      money: StartMoney.millionaire);
+  final s = Actions.writeSong(w, p, producerSkill: 80, aiMode: true);
+  Actions.releaseSingle(w, p, s);
+  for (var i = 0; i < 4; i++) {
+    sim.step();
+  }
+  extra?.call(w, p, s);
+  final streams = <double>[], physical = <double>[];
+  for (var i = 0; i < weeks; i++) {
+    sim.step();
+    streams.add(s.weekStreams);
+    physical.add(s.weekPhysical);
+  }
+  return (w: w, p: p, s: s, streams: streams, physical: physical);
+}
+
+void versionTests() {
+  test('a new version brings a wave of listening, once per kind (K92)', () {
+    final base = _singleRun(null);
+    final remix = _singleRun((w, p, s) {
+      final money = p.moneyCents;
+      Actions.releaseVersion(w, p, s, SongVersion.remix);
+      expect(money - p.moneyCents, SongVersion.remix.costCents);
+      expect(() => Actions.releaseVersion(w, p, s, SongVersion.remix),
+          throwsA(isA<ActionException>()));
+    });
+    printOnFailure('${base.streams} vs ${remix.streams}');
+    expect(remix.streams[0], greaterThan(base.streams[0] * 1.1));
+    expect(remix.s.versions.single.$1, SongVersion.remix);
+    // A second version within weeks adds less than the first.
+    final two = _singleRun((w, p, s) {
+      Actions.releaseVersion(w, p, s, SongVersion.remix);
+      final first = s.versionBoost;
+      Actions.releaseVersion(w, p, s, SongVersion.spedUp);
+      expect(s.versionBoost - first, lessThan(SongVersion.spedUp.boost(2024)));
+    });
+    expect(two.streams[0], greaterThan(remix.streams[0]));
+  });
+
+  test('a physical single edition sells to fans in its week (K92)', () {
+    final base = _singleRun(null);
+    final cd = _singleRun((w, p, s) {
+      Actions.releaseVariant(w, p, s, SingleFormat.cd);
+      expect(() => Actions.releaseVariant(w, p, s, SingleFormat.cd),
+          throwsA(isA<ActionException>()));
+    }, weeks: 3);
+    final extra = [
+      for (var i = 0; i < 2; i++) cd.physical[i] - base.physical[i]
+    ];
+    printOnFailure('extra copies $extra');
+    // A superstar's CD single: tens of thousands, mostly in week one.
+    expect(extra[0], inInclusiveRange(1e4, 2e5));
+    expect(extra[1], lessThan(extra[0] * 0.5));
+    expect(cd.s.statsOrNull(Charts.usSongs)?.peak ?? 999,
+        lessThanOrEqualTo(base.s.statsOrNull(Charts.usSongs)?.peak ?? 999));
+    // Only singles.
+    final w = cd.w, p = cd.p;
+    final track = Actions.writeSong(w, p, producerSkill: 50, aiMode: true);
+    expect(() => Actions.releaseVariant(w, p, track, SingleFormat.vinyl),
+        throwsA(isA<ActionException>()));
   });
 }

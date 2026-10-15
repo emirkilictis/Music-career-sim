@@ -101,6 +101,13 @@ int worldHash(World w) {
     addInt(s.campaign.index);
     addInt(s.playlistAdd.index);
     addDouble(s.playlistBoost);
+    addDouble(s.versionBoost);
+    for (final (v, wk) in s.versions) {
+      addInt(v.index * 100000 + wk);
+    }
+    for (final (f, wk) in s.variants) {
+      addInt(f.index * 100000 + wk);
+    }
     addCharts(s);
   }
   addInt(w.albums.length);

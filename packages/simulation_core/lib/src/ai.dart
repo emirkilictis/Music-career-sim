@@ -34,6 +34,15 @@ abstract final class AiPlanner {
               radio: star && p.kind == PlannedKind.leadSingle
                   ? RadioPush.heavy
                   : RadioPush.standard);
+          // Stars sell a CD single of the lead to fans again (docs K92).
+          if (star &&
+              p.kind == PlannedKind.leadSingle &&
+              GameTime.yearOf(w.week) >= 2019 &&
+              RandomStream.keyed(
+                      w.seed, w.week, a.id, RngPurpose.aiPlanning + 40)
+                  .chance(0.5)) {
+            Actions.releaseVariant(w, a, w.songs[p.songId], SingleFormat.cd);
+          }
         case PlannedKind.album:
           Actions.releaseAlbum(w, a, a.pendingAlbumTitle, a.pendingAlbumSongIds,
               type: a.pendingAlbumType, variantWeeks: a.pendingVariantWeeks);

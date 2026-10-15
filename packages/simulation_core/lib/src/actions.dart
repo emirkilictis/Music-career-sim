@@ -118,6 +118,64 @@ abstract final class Actions {
     w.dirtySongs.add(s.id);
   }
 
+  /// Puts out another version of a released song (docs K92, F26): a remix,
+  /// a sped-up or slowed version, an a cappella or instrumental. It is
+  /// counted with the song and brings a wave of listening; each further
+  /// version in the same couple of months brings less. A sped-up or slowed
+  /// version can start a short-video trend.
+  static void releaseVersion(World w, Artist a, Song s, SongVersion v) {
+    if (s.releasedWeek < 0 || s.status == SongStatus.scrapped) {
+      throw ActionException('Only released songs get versions');
+    }
+    if (s.versions.any((x) => x.$1 == v)) {
+      throw ActionException('That version is already out');
+    }
+    if (a.tier == ArtistTier.player) {
+      if (v.costCents > a.moneyCents) throw ActionException('Not enough money');
+      a.moneyCents -= v.costCents;
+      s.productionCostCents += v.costCents;
+    }
+    if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
+    s.weeksBelowCutoff = 0;
+    final year = GameTime.yearOf(w.week);
+    final recent = s.versions.where((x) => w.week - x.$2 < 8).length;
+    s.versionBoost += v.boost(year) * math.pow(0.7, recent);
+    s.versions.add((v, w.week));
+    if (v.trendy) {
+      final r = RandomStream.keyed(w.seed, w.week, s.id, RngPurpose.viral + 50);
+      final era = w.config.viralEraFactor(year);
+      if (year >= 2020 && r.chance(0.12 * (0.5 + s.virality))) {
+        s.viralBoost = math.max(
+            s.viralBoost, r.range(0.02, 0.06) * (0.5 + s.virality) * era / 2.7);
+        s.viralRamp = 3;
+      }
+    }
+    w.dirtySongs.add(s.id);
+    w.dirtyArtists.add(a.id);
+  }
+
+  /// Puts out a physical edition of a single (docs K92, F26): a CD, a 7"
+  /// vinyl, a cassette or a signed CD. Fans buy it mostly in its week; the
+  /// sales count on the charts.
+  static void releaseVariant(World w, Artist a, Song s, SingleFormat f) {
+    if (!s.isSingle || s.releasedWeek < 0) {
+      throw ActionException('Only singles get physical editions');
+    }
+    if (s.variants.any((x) => x.$1 == f)) {
+      throw ActionException('That edition is already out');
+    }
+    if (a.tier == ArtistTier.player) {
+      if (f.costCents > a.moneyCents) throw ActionException('Not enough money');
+      a.moneyCents -= f.costCents;
+      s.productionCostCents += f.costCents;
+    }
+    if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
+    s.weeksBelowCutoff = 0;
+    s.variants.add((f, w.week));
+    w.dirtySongs.add(s.id);
+    w.dirtyArtists.add(a.id);
+  }
+
   /// Throws away an unreleased song (docs K48). Its recording cost is not
   /// refunded.
   static void scrapSong(World w, Song s) {

@@ -52,6 +52,21 @@ class Fmt {
     return '${monthName(month)} ${GameTime.yearOf(week)}';
   }
 
+  String songVersion(SongVersion v) => switch (v) {
+        SongVersion.remix => l.versionRemix,
+        SongVersion.spedUp => l.versionSpedUp,
+        SongVersion.slowed => l.versionSlowed,
+        SongVersion.acapella => l.versionAcapella,
+        SongVersion.instrumental => l.versionInstrumental,
+      };
+
+  String singleFormat(SingleFormat f) => switch (f) {
+        SingleFormat.cd => l.formatCdSingle,
+        SingleFormat.vinyl => l.formatVinylSingle,
+        SingleFormat.cassette => l.formatCassetteSingle,
+        SingleFormat.signed => l.formatSignedSingle,
+      };
+
   /// A Golden Record Awards category (docs K91).
   String awardCategory(AwardCategory c, [int genre = -1]) => switch (c) {
         AwardCategory.record => l.awardRecord,
@@ -538,6 +553,9 @@ class Fmt {
       'underContract' => l.errorUnderContract,
       'buyoutMoney' => l.errorBuyoutMoney,
       'radioLocked' => l.errorRadioLocked,
+      'versionOut' => l.errorVersionOut,
+      'variantOut' => l.errorEditionOut,
+      'notSingle' => l.errorNotSingle,
       'labelRefused' => l.errorLabelRefused,
       'alreadyScheduled' => l.errorAlreadyScheduled,
       'skillMaxed' => l.errorSkillMaxed,

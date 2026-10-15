@@ -185,6 +185,73 @@ enum RadioPush {
       this == none ? 0.85 - 0.7 * fame.clamp(0.0, 0.5) : factor;
 }
 
+/// Extra versions of a released song (docs K92, F26). Streaming services
+/// and the charts count them with the song; each brings a wave of
+/// listening. Index order is stored in saves: only append.
+enum SongVersion {
+  remix(1500000),
+  spedUp(100000),
+  slowed(100000),
+  acapella(50000),
+  instrumental(50000);
+
+  const SongVersion(this.costCents);
+  final int costCents;
+
+  /// Extra exposure it brings the song in [year] (fading week by week).
+  /// Sped-up and slowed versions are a short-video thing.
+  double boost(int year) => switch (this) {
+        remix => 0.35,
+        spedUp => year >= 2021
+            ? 0.45
+            : year >= 2018
+                ? 0.15
+                : 0.03,
+        slowed => year >= 2021
+            ? 0.35
+            : year >= 2018
+                ? 0.12
+                : 0.03,
+        acapella || instrumental => 0.05,
+      };
+
+  /// Can set off a short-video trend.
+  bool get trendy => this == spedUp || this == slowed;
+}
+
+/// Physical editions of a single (docs K92, F26): collectors buy them in
+/// the week they come out, and they count on the charts. Index order is
+/// stored in saves: only append.
+enum SingleFormat {
+  cd(1000000),
+  vinyl(1500000),
+  cassette(500000),
+  signed(2000000);
+
+  const SingleFormat(this.costCents);
+  final int costCents;
+
+  /// Collector demand in [year] (1 = a CD single in the CD era).
+  double appeal(int year) => switch (this) {
+        cd => year < 2008
+            ? 1.0
+            : year < 2019
+                ? 0.35
+                : 0.8,
+        vinyl => year < 2008
+            ? 0.3
+            : year < 2015
+                ? 0.5
+                : 1.0,
+        cassette => year < 2003
+            ? 0.8
+            : year < 2018
+                ? 0.1
+                : 0.45,
+        signed => 1.4,
+      };
+}
+
 /// Editorial playlist pickup of a release.
 enum PlaylistAdd { none, mid, big }
 
@@ -524,6 +591,14 @@ class Song with Charted {
 
   /// Radio promotion bought for it as a single (docs K84).
   RadioPush radioPush = RadioPush.standard;
+
+  /// Versions out, and physical editions of the single, with their weeks
+  /// (docs K92, F26).
+  final List<(SongVersion, int)> versions = [];
+  final List<(SingleFormat, int)> variants = [];
+
+  /// Extra exposure from new versions; fades week by week.
+  double versionBoost = 0;
 
   /// Editorial playlist pickup: extra exposure that fades week by week.
   PlaylistAdd playlistAdd = PlaylistAdd.none;

@@ -1190,6 +1190,34 @@ class GameSession {
     _saveNow();
   }
 
+  /// Puts out another version of a released song (docs K92, F26).
+  void releaseVersion(int songId, SongVersion v) {
+    final s = _ownSong(songId);
+    if (s.releasedWeek < 0) {
+      throw GameException('notReleased', 'Only released songs');
+    }
+    if (s.versions.any((x) => x.$1 == v)) {
+      throw GameException('versionOut', 'That version is already out');
+    }
+    _requireMoney(v.costCents);
+    Actions.releaseVersion(world, _p, s, v);
+    _saveNow();
+  }
+
+  /// Puts out a physical edition of a released single (docs K92, F26).
+  void releaseVariant(int songId, SingleFormat f) {
+    final s = _ownSong(songId);
+    if (!s.isSingle || s.releasedWeek < 0) {
+      throw GameException('notSingle', 'Only released singles');
+    }
+    if (s.variants.any((x) => x.$1 == f)) {
+      throw GameException('variantOut', 'That edition is already out');
+    }
+    _requireMoney(f.costCents);
+    Actions.releaseVariant(world, _p, s, f);
+    _saveNow();
+  }
+
   /// Throws away an unreleased song from the vault (docs K48).
   void scrapSong(int songId) {
     final s = _ownSong(songId);
