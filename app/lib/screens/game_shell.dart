@@ -343,7 +343,7 @@ class _GameShellState extends State<GameShell> {
   }
 }
 
-/// Money with a thin gradient ring.
+/// Money in a thin accent frame.
 class MoneyPill extends StatelessWidget {
   const MoneyPill({super.key, required this.text});
   final String text;

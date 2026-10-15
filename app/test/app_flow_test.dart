@@ -16,67 +16,66 @@ void main() {
     addTearDown(app.dispose);
     await tester.pumpWidget(app.widget);
     await tester.pumpAndSettle();
-    expect(find.text('No careers yet'), findsOneWidget);
+    expect(_ci('No careers yet'), findsOneWidget);
 
-    await tester.tap(find.text('New career'));
+    await tester.tap(_ci('New career'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Luna Vale');
-    await tester.tap(find.text('Start career'));
+    await tester.tap(_ci('Start career'));
     await tester.pumpAndSettle();
 
     // In the game: name in the header, a full first week ahead.
-    expect(find.text('Luna Vale'), findsWidgets);
-    expect(find.text('January 2024, week 1'), findsOneWidget);
-    expect(find.text('Play a week to see what happens.'), findsOneWidget);
+    expect(_ci('Luna Vale'), findsWidgets);
+    expect(_ci('January 2024, week 1'), findsOneWidget);
+    expect(_ci('Play a week to see what happens.'), findsOneWidget);
 
-    await tester.tap(find.text('Studio'));
+    await tester.tap(_ci('Studio'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.textContaining('Write & record'));
     await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Write & record'));
     await tester.pumpAndSettle();
-    expect(find.text('Song recorded'), findsOneWidget);
-    await tester.tap(find.text('OK'));
+    expect(_ci('Song recorded'), findsOneWidget);
+    await tester.tap(_ci('OK'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Vault (1)'));
-    expect(find.text('Vault (1)'), findsOneWidget);
+    await tester.ensureVisible(_ci('Vault (1)'));
+    expect(_ci('Vault (1)'), findsOneWidget);
 
-    await tester.tap(find.text('Next week'));
+    await tester.tap(_ci('Next week'));
     await tester.pumpAndSettle();
-    expect(find.text('January 2024, week 2'), findsOneWidget);
+    expect(_ci('January 2024, week 2'), findsOneWidget);
 
-    await tester.tap(find.text('Releases'));
+    await tester.tap(_ci('Releases'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Release a single'));
+    await tester.tap(_ci('Release a single'));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(ListTile).last);
     await tester.pumpAndSettle();
     // When: this week (the default).
-    expect(find.text('When should it come out?'), findsOneWidget);
-    await tester.tap(find.text('Continue'));
+    expect(_ci('When should it come out?'), findsOneWidget);
+    await tester.tap(_ci('Continue'));
     await tester.pumpAndSettle();
-    expect(find.text('Promotion campaign'), findsOneWidget);
-    await tester.tap(find.text('No promotion'));
+    expect(_ci('Promotion campaign'), findsOneWidget);
+    await tester.tap(_ci('No promotion'));
     await tester.pumpAndSettle();
     // Then the radio push, paid apart (K84).
-    expect(find.text('Radio push'), findsWidgets);
-    await tester.tap(find.text('No radio push'));
+    expect(_ci('Radio push'), findsWidgets);
+    await tester.tap(_ci('No radio push'));
     await tester.pumpAndSettle();
     expect(find.textContaining('is out!'), findsOneWidget);
 
-    await tester.tap(find.text('Charts'));
+    await tester.tap(_ci('Charts'));
     await tester.pumpAndSettle();
-    expect(find.text('US TOP 100 SONGS'), findsOneWidget);
-    expect(find.text('LW'), findsOneWidget);
+    expect(_ci('US TOP 100 SONGS'), findsOneWidget);
+    expect(_ci('LW'), findsOneWidget);
 
     // A rival's song from the chart: its stats and week-by-week run, then
     // the artist's Streamify page.
     await tester.tap(find.byType(CoverArt).at(1));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(
-        find.text('Week by week on the charts'), 300,
+    await tester.scrollUntilVisible(_ci('Week by week on the charts'), 300,
         scrollable: find.byType(Scrollable).first);
-    expect(find.text('Week by week on the charts'), findsOneWidget);
+    expect(_ci('Week by week on the charts'), findsOneWidget);
     await tester.scrollUntilVisible(find.textContaining('Artist page'), -300,
         scrollable: find.byType(Scrollable).first);
     await Scrollable.ensureVisible(
@@ -86,28 +85,28 @@ void main() {
     await tester.tap(find.textContaining('Artist page'));
     await tester.pumpAndSettle();
     expect(find.textContaining('monthly listeners'), findsOneWidget);
-    expect(find.text('Popular'), findsOneWidget);
+    expect(_ci('Popular'), findsOneWidget);
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Career'));
+    await tester.tap(_ci('Career'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('By region'), 300,
+    await tester.scrollUntilVisible(_ci('By region'), 300,
         scrollable: find.byType(Scrollable).first);
-    expect(find.text('By region'), findsOneWidget);
+    expect(_ci('By region'), findsOneWidget);
 
     // Platforms live on Home, not in the tab bar.
-    await tester.tap(find.text('Home'));
+    await tester.tap(_ci('Home'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Streamify'), 300,
+    await tester.scrollUntilVisible(_ci('Streamify'), 300,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Streamify'));
+    await tester.tap(_ci('Streamify'));
     await tester.pumpAndSettle();
-    expect(find.text('Your artist profile'), findsOneWidget);
-    await tester.tap(find.text('Top 50 – Global'));
+    expect(_ci('Your artist profile'), findsOneWidget);
+    await tester.tap(_ci('Top 50 – Global'));
     await tester.pumpAndSettle();
     expect(find.textContaining('50 songs'), findsOneWidget);
     await tester.pageBack();
@@ -116,18 +115,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // Skip menu: four weeks, then a summary.
-    await tester.tap(find.text('Skip'));
+    await tester.tap(_ci('Skip'));
     await tester.pumpAndSettle();
-    expect(find.text('Until something happens'), findsOneWidget);
-    await tester.tap(find.text('4 weeks'));
+    expect(_ci('Until something happens'), findsOneWidget);
+    await tester.tap(_ci('4 weeks'));
     await tester.pumpAndSettle();
     expect(find.textContaining(RegExp(r'^(4 weeks played|Stopped after)')),
         findsOneWidget);
-    await tester.tap(find.text('OK'));
+    await tester.tap(_ci('OK'));
     await tester.pumpAndSettle();
 
     // A skill point every week, spent on the Career tab.
-    await tester.tap(find.text('Career'));
+    await tester.tap(_ci('Career'));
     await tester.pumpAndSettle();
     final left = RegExp(r'^(\d+) skill points to spend$');
     await tester.scrollUntilVisible(find.textContaining(left), -300,
@@ -146,9 +145,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(points(), before - 1);
     // All the rest at once, lowest skill first (F34).
-    await tester.ensureVisible(find.text('Spread all'));
+    await tester.ensureVisible(_ci('Spread all'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Spread all'));
+    await tester.tap(_ci('Spread all'));
     await tester.pumpAndSettle();
     expect(find.textContaining(left), findsNothing);
   });
@@ -159,14 +158,14 @@ void main() {
     addTearDown(app.dispose);
     await tester.pumpWidget(app.widget);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('New career'));
+    await tester.tap(_ci('New career'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Superstar'), 200,
+    await tester.scrollUntilVisible(_ci('Superstar'), 200,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Superstar'));
+    await tester.tap(_ci('Superstar'));
     await tester.pump();
-    expect(find.text('This start needs Premium.'), findsOneWidget);
+    expect(_ci('This start needs Premium.'), findsOneWidget);
   });
 
   testWidgets('own covers and artist photos replace the generated art',
@@ -180,59 +179,59 @@ void main() {
         const Color(0xFF3B5BDB)));
     await tester.pumpWidget(app.widget);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('New career'));
+    await tester.tap(_ci('New career'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Luna Vale');
-    await tester.tap(find.text('Start career'));
+    await tester.tap(_ci('Start career'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Studio'));
+    await tester.tap(_ci('Studio'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.textContaining('Write & record'));
     await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Write & record'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('OK'));
+    await tester.tap(_ci('OK'));
     await tester.pumpAndSettle();
     expect(find.byType(Image), findsNothing);
 
     // Releasing a single: the campaign sheet offers a cover first.
-    await tester.tap(find.text('Releases'));
+    await tester.tap(_ci('Releases'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Release a single'));
+    await tester.tap(_ci('Release a single'));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(ListTile).last);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Continue'));
+    await tester.tap(_ci('Continue'));
     await tester.pumpAndSettle();
-    expect(find.text('Generated cover'), findsOneWidget);
+    expect(_ci('Generated cover'), findsOneWidget);
     app.picker.next = photo;
-    await tester.tap(find.text('Add cover'));
+    await tester.tap(_ci('Add cover'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Choose from photos'));
+    await tester.tap(_ci('Choose from photos'));
     await tester.pumpAndSettle();
-    expect(find.text('Your own image'), findsOneWidget);
+    expect(_ci('Your own image'), findsOneWidget);
     expect(find.byType(Image), findsWidgets);
-    await tester.tap(find.text('No promotion'));
+    await tester.tap(_ci('No promotion'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('No radio push'));
+    await tester.tap(_ci('No radio push'));
     await tester.pumpAndSettle();
     // The single's tile in Releases shows the uploaded cover.
     expect(find.byType(Image), findsWidgets);
 
     // Artist photo: general one from the Career tab.
-    await tester.tap(find.text('Career'));
+    await tester.tap(_ci('Career'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Uses your profile photo'), 200,
+    await tester.scrollUntilVisible(_ci('Uses your profile photo'), 200,
         scrollable: find.byType(Scrollable).first);
-    expect(find.text('Uses your profile photo'), findsOneWidget);
+    expect(_ci('Uses your profile photo'), findsOneWidget);
     app.picker.next = photo;
-    await tester.ensureVisible(find.text('Profile photo'));
+    await tester.ensureVisible(_ci('Profile photo'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Profile photo'));
+    await tester.tap(_ci('Profile photo'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Choose from photos'));
+    await tester.tap(_ci('Choose from photos'));
     await tester.pumpAndSettle();
-    expect(find.text('Uses your profile photo'), findsOneWidget);
+    expect(_ci('Uses your profile photo'), findsOneWidget);
     // One cover and one artist photo, stored with the career.
     expect(
         Directory('${app.dir.path}/careers')
@@ -250,32 +249,32 @@ void main() {
     addTearDown(app.dispose);
     await tester.pumpWidget(app.widget);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('New career'));
+    await tester.tap(_ci('New career'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Luna Vale');
-    await tester.tap(find.text('Start career'));
+    await tester.tap(_ci('Start career'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Studio'));
+    await tester.tap(_ci('Studio'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.textContaining('Write & record'));
     await tester.pumpAndSettle();
     await tester.tap(find.textContaining('Write & record'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('OK'));
+    await tester.tap(_ci('OK'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Releases'));
+    await tester.tap(_ci('Releases'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Release a single'));
+    await tester.tap(_ci('Release a single'));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(ListTile).last);
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ChoiceChip, 'In 4 weeks'));
     await tester.pumpAndSettle();
-    expect(find.text('Out: January 2024, week 5'), findsOneWidget);
-    await tester.tap(find.text('2 weeks before'));
+    expect(_ci('Out: January 2024, week 5'), findsOneWidget);
+    await tester.tap(_ci('2 weeks before'));
     await tester.pumpAndSettle();
-    expect(find.text('Announcement: January 2024, week 3'), findsOneWidget);
+    expect(_ci('Announcement: January 2024, week 3'), findsOneWidget);
     // Longer than the wait: not possible.
     expect(
         tester
@@ -283,30 +282,30 @@ void main() {
                 find.widgetWithText(ChoiceChip, '6 weeks before'))
             .onSelected,
         isNull);
-    await tester.ensureVisible(find.text('Continue'));
+    await tester.ensureVisible(_ci('Continue'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Continue'));
+    await tester.tap(_ci('Continue'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('No promotion'));
+    await tester.tap(_ci('No promotion'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('No radio push'));
+    await tester.tap(_ci('No radio push'));
     await tester.pumpAndSettle();
     expect(
         find.textContaining('is set for January 2024, week 5'), findsOneWidget);
-    expect(find.text('Coming up'), findsOneWidget);
+    expect(_ci('Coming up'), findsOneWidget);
     final tile = find.textContaining('Announcement: January 2024, week 3');
     expect(tile, findsOneWidget);
 
     // Move it two weeks later, keeping the announcement plan.
     await tester.tap(tile);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Change date'));
+    await tester.tap(_ci('Change date'));
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ChoiceChip, 'In 6 weeks'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Save'));
+    await tester.ensureVisible(_ci('Save'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Save'));
+    await tester.tap(_ci('Save'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Announcement: January 2024, week 5'),
         findsOneWidget);
@@ -319,49 +318,54 @@ void main() {
     addTearDown(app.dispose);
     await tester.pumpWidget(app.widget);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('New career'));
+    await tester.tap(_ci('New career'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Luna Vale');
-    await tester.tap(find.text('Start career'));
+    await tester.tap(_ci('Start career'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Studio'));
+    await tester.tap(_ci('Studio'));
     await tester.pumpAndSettle();
     for (var i = 0; i < 3; i++) {
       await tester.ensureVisible(find.textContaining('Write & record'));
       await tester.pumpAndSettle();
       await tester.tap(find.textContaining('Write & record'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('OK'));
+      await tester.tap(_ci('OK'));
       await tester.pumpAndSettle();
     }
 
-    await tester.tap(find.text('Releases'));
+    await tester.tap(_ci('Releases'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('New album / EP'));
+    await tester.tap(_ci('New album / EP'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).first, 'Someday');
-    await tester.tap(find.text('EP'));
+    await tester.tap(_ci('EP'));
     await tester.pumpAndSettle();
     for (final box in find.byType(CheckboxListTile).evaluate().toList()) {
       await tester.tap(find.byWidget(box.widget));
       await tester.pumpAndSettle();
     }
-    await tester.tap(find.text('Keep in vault'));
+    await tester.tap(_ci('Keep in vault'));
     await tester.pumpAndSettle();
     expect(find.textContaining('is waiting in your vault'), findsOneWidget);
-    expect(find.text('Drafts in your vault'), findsOneWidget);
-    expect(find.text('Coming up'), findsNothing);
+    expect(_ci('Drafts in your vault'), findsOneWidget);
+    expect(_ci('Coming up'), findsNothing);
 
     // Weeks later it comes out.
-    await tester.tap(find.text('Next week'));
+    await tester.tap(_ci('Next week'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Someday'));
+    await tester.tap(_ci('Someday'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Release now'));
+    await tester.tap(_ci('Release now'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('No promotion'));
+    await tester.tap(_ci('No promotion'));
     await tester.pumpAndSettle();
-    expect(find.text('“Someday” is out!'), findsOneWidget);
-    expect(find.text('Drafts in your vault'), findsNothing);
+    expect(_ci('“Someday” is out!'), findsOneWidget);
+    expect(_ci('Drafts in your vault'), findsNothing);
   });
 }
+
+/// A text in any letter case (labels are set in capitals in the default
+/// style, docs K88).
+Finder _ci(String text) => find.byWidgetPredicate((w) =>
+    w is Text && w.data != null && w.data!.toLowerCase() == text.toLowerCase());

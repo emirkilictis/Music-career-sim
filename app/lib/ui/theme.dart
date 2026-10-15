@@ -60,10 +60,12 @@ ThemeData appTheme() {
       backgroundColor: AppColors.bg,
       surfaceTintColor: Colors.transparent,
       centerTitle: false,
+      // Titles set like a paper's section heads (docs K88).
       titleTextStyle: TextStyle(
-          fontFamily: AppFonts.ui,
-          fontSize: 20,
+          fontFamily: AppFonts.condensed,
+          fontSize: 25,
           fontWeight: FontWeight.w800,
+          letterSpacing: 0.3,
           color: AppColors.text),
     ),
     dividerTheme: DividerThemeData(color: AppColors.line, space: 1),
@@ -197,5 +199,5 @@ ThemeData appTheme() {
 
 /// Pill-shaped in the soft style, squared off in the sharp one (docs F1).
 OutlinedBorder _pill() => AppShape.sharp
-    ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
+    ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))
     : const StadiumBorder();

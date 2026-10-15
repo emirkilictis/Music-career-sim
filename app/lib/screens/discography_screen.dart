@@ -259,8 +259,8 @@ class _SalesChartCard extends StatelessWidget {
   final String mode, years;
   final double width, barWidth;
 
-  static const _ink = Color(0xFF15131C);
-  static const _muted = Color(0xFF5C5868);
+  static const _ink = Color(0xFF111111);
+  static const _muted = Color(0xFF57534C);
   static const _chartHeight = 300.0;
 
   /// A bar's width range and the gap between bars.
@@ -282,11 +282,7 @@ class _SalesChartCard extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppShape.r(18)),
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFF2F1F5), Color(0xFFD9D7E0)],
-        ),
+        color: const Color(0xFFF2EFE8),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [

@@ -330,8 +330,8 @@
     }
   },
   "themeTitle": "Theme",
-  "themeNavy": "Vivid navy",
-  "themeLight": "Light",
+  "themeNavy": "Ink (dark)",
+  "themeLight": "Paper (light)",
   "cornersTitle": "Corners",
   "cornersSoft": "Soft (rounded)",
   "cornersSharp": "Sharp",

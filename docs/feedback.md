@@ -113,6 +113,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F48 | **Her streaming platformunda kendi profilimiz, takipçi sayımız olmalı** (Emir). | ✅ K82: her platform ekranında profil kartı (fotoğraf, mavi tik, takipçi/abone, aylık dinleyici, haftalık rakam). |
 | F49 | **SZA'nın SOS'u 200 haftadır Billboard 200'de, hiç Top 25'ten çıkmadı — "bizim oyunu oynuyor"** (Emir) → "ölç", "yap". | ✅ K85: eski albümler listeyi tıkıyordu (%62–66, bir sanatçının 13 albümü); katalog artık hitlerde toplanıyor ve herkesinki sönüyor. Eski albüm payı %41–49, hitli albümler 100–257 hafta kesintisiz Top 25. |
 | F50 | **Groove Journey'deki gibi diskografi ve tüm kariyer satışını kapaklı çubuklarla gösteren, oyuncunun görsel olarak üretip paylaşabileceği grafik** (Emir: "en çok istediğim şey bu"). | ✅ K86: Kariyer → Diskografi; kapaklı satış grafiği + "Grafiği paylaş" (PNG), albüm/single listesi zirve, ilk hafta, toplam ve sertifikayla. |
+| F51 | **Her şey çok yumuşak, generic AI tasarımı gibi; daha keskin olsun ama aşırı değil** (Emir). | ✅ K88: mürekkep/kâğıt paleti, tek turuncu vurgu, renk geçişi yok, 6 px köşeler, dar başlıklar. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

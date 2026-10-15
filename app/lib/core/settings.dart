@@ -22,11 +22,11 @@ class AppSettings extends ChangeNotifier {
   /// Short animation between weeks (feedback B1); can be turned off.
   bool weekTransition = true;
 
-  /// App colors: vivid navy (default) or light (docs K41).
+  /// App colors: ink (default) or paper (docs K41, K88).
   bool lightTheme = false;
 
-  /// Corner style: soft (default) or sharp (docs F1).
-  bool sharpCorners = false;
+  /// Corner style: sharp (default since docs K88) or soft (docs F1).
+  bool sharpCorners = true;
 
   Locale? get locale => languageCode == null ? null : Locale(languageCode!);
 
@@ -39,12 +39,14 @@ class AppSettings extends ChangeNotifier {
         s.premium = m['premium'] as bool? ?? false;
         s.weekTransition = m['weekTransition'] as bool? ?? true;
         s.lightTheme = m['theme'] == 'light';
-        s.sharpCorners = m['corners'] == 'sharp';
+        // Stored under a new key in K88: the old one held the old
+        // default, so everyone starts sharp once.
+        s.sharpCorners = m['cornerStyle'] != 'soft';
       } on FormatException {
         // A broken settings file falls back to defaults.
       }
     }
-    AppColors.palette = s.lightTheme ? Palette.light : Palette.navy;
+    AppColors.palette = s.lightTheme ? Palette.light : Palette.ink;
     AppShape.sharp = s.sharpCorners;
     return s;
   }
@@ -61,7 +63,7 @@ class AppSettings extends ChangeNotifier {
 
   void setLightTheme(bool on) {
     lightTheme = on;
-    AppColors.palette = on ? Palette.light : Palette.navy;
+    AppColors.palette = on ? Palette.light : Palette.ink;
     _save();
   }
 
@@ -85,8 +87,8 @@ class AppSettings extends ChangeNotifier {
       'language': languageCode,
       'premium': premium,
       'weekTransition': weekTransition,
-      'theme': lightTheme ? 'light' : 'navy',
-      'corners': sharpCorners ? 'sharp' : 'soft',
+      'theme': lightTheme ? 'light' : 'ink',
+      'cornerStyle': sharpCorners ? 'sharp' : 'soft',
     }));
   }
 }

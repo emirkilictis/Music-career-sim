@@ -110,9 +110,9 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Velvet Avenue'));
+    await tester.tap(_ci('Velvet Avenue'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Next week'));
+    await tester.tap(_ci('Next week'));
     // Mid-way through the week transition card.
     for (var i = 0; i < 8; i++) {
       await tester.runAsync(() => Future.delayed(Duration(milliseconds: 50)));
@@ -127,14 +127,15 @@ void main() {
         .removeCurrentSnackBar();
     await shot(tester, '04_home');
     // What fame means and the numbers behind it (E7).
-    await tester.tap(find.text('Fame'));
+    await tester
+        .tap(find.textContaining(RegExp('^fame\$', caseSensitive: false)));
     await shot(tester, '04c_fame_info');
     await tester.tapAt(const Offset(200, 80));
     await tester.pumpAndSettle();
 
     await tab(tester, 'Studio');
     await shot(tester, '05_studio');
-    await tester.tap(find.text('Producer'));
+    await tester.tap(_ci('Producer'));
     await shot(tester, '05b_producer_picker');
     await tester.tapAt(const Offset(200, 60));
     await tester.pumpAndSettle();
@@ -142,46 +143,45 @@ void main() {
     await shot(tester, '06_releases');
     await tester.tap(find.textContaining('Announcement: '));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Change date'));
+    await tester.tap(_ci('Change date'));
     await shot(tester, '06b_release_timing');
     await tester.tapAt(const Offset(200, 60));
     await tester.pumpAndSettle();
     // Album builder: extra editions with their own format (K46).
-    await tester.tap(find.text('New album / EP'));
+    await tester.tap(_ci('New album / EP'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Edition 2'), 300,
+    await tester.scrollUntilVisible(_ci('Edition 2'), 300,
         scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('Edition 2'));
+    await tester.tap(_ci('Edition 2'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Edition 3'));
+    await tester.tap(_ci('Edition 3'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('Cassette').last);
+    await tester.ensureVisible(_ci('Cassette').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Cassette').last);
+    await tester.tap(_ci('Cassette').last);
     await tester.pumpAndSettle();
-    expect(find.text('Cassette · \$20,000'), findsOneWidget);
-    await tester.scrollUntilVisible(
-        find.text('Release extras in later weeks'), 200,
+    expect(_ci('Cassette · \$20,000'), findsOneWidget);
+    await tester.scrollUntilVisible(_ci('Release extras in later weeks'), 200,
         scrollable: find.byType(Scrollable).first);
     await shot(tester, '06c_album_editions');
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tab(tester, 'Charts');
     await shot(tester, '07_charts_songs');
-    await tester.tap(find.text('US ALBUMS'));
+    await tester.tap(_ci('US ALBUMS'));
     await shot(tester, '08_charts_albums');
 
     await tab(tester, 'Career');
     await shot(tester, '15_career');
-    await tester.scrollUntilVisible(find.text('See labels'), 300,
+    await tester.scrollUntilVisible(_ci('See labels'), 300,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('See labels'));
+    await tester.tap(_ci('See labels'));
     await shot(tester, '15c_labels');
     await tester.pageBack();
     await tester.pumpAndSettle();
     // Discography and the sales chart of covers (K86).
-    final disco = find.text('Discography & sales chart');
+    final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,
         scrollable: find.byType(Scrollable).first);
     await Scrollable.ensureVisible(tester.element(disco), alignment: 0.5);
@@ -192,67 +192,67 @@ void main() {
     await shot(tester, '15j_discography_list');
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Plan a tour'), -200,
+    await tester.scrollUntilVisible(_ci('Plan a tour'), -200,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Plan a tour'));
+    await tester.tap(_ci('Plan a tour'));
     await shot(tester, '15d_tour');
-    await tester.scrollUntilVisible(find.text('Expected'), 400,
+    await tester.scrollUntilVisible(_ci('Expected'), 400,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
     await shot(tester, '15e_tour_estimate');
-    await tester.scrollUntilVisible(find.text('Schedule'), 400,
+    await tester.scrollUntilVisible(_ci('Schedule'), 400,
         scrollable: find.byType(Scrollable).first);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -300));
     await shot(tester, '15f_tour_schedule');
     await tester.pageBack();
     await tester.pumpAndSettle();
     // Festivals and the box office (K77).
-    await tester.scrollUntilVisible(find.text('Festival season'), 200,
+    await tester.scrollUntilVisible(_ci('Festival season'), 200,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Festival season'));
+    await tester.tap(_ci('Festival season'));
     await shot(tester, '15g_festivals');
-    await tester.tap(find.text('Lineup').first);
+    await tester.tap(_ci('Lineup').first);
     await shot(tester, '15h_festival_lineup');
     await tester.tapAt(const Offset(200, 60));
     await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tab(tester, 'Charts');
-    await tester.drag(find.text('US ALBUMS'), const Offset(-600, 0));
+    await tester.drag(_ci('US ALBUMS'), const Offset(-600, 0));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('TOURS'));
+    await tester.tap(_ci('TOURS'));
     await shot(tester, '08b_top_tours');
     await tab(tester, 'Career');
-    await tester.scrollUntilVisible(find.text('Skills'), -300,
+    await tester.scrollUntilVisible(_ci('Skills'), -300,
         scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('Skip'));
+    await tester.tap(_ci('Skip'));
     await shot(tester, '15b_skip_menu');
     await tester.tapAt(const Offset(200, 80));
     await tester.pumpAndSettle();
     await tab(tester, 'Home');
-    await tester.scrollUntilVisible(find.text('Streamify'), 300,
+    await tester.scrollUntilVisible(_ci('Streamify'), 300,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
     await shot(tester, '04b_home_platforms');
-    await tester.tap(find.text('ViewTube'));
+    await tester.tap(_ci('ViewTube'));
     await shot(tester, '09c_viewtube');
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Streamify'));
+    await tester.tap(_ci('Streamify'));
     await shot(tester, '09_streamify');
-    await tester.tap(find.text('Velvet Avenue').last);
+    await tester.tap(_ci('Velvet Avenue').last);
     await shot(tester, '10_artist_page');
     await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
     await shot(tester, '11_artist_page_more');
-    await tester.tap(find.text('Neon Bloom').last);
+    await tester.tap(_ci('Neon Bloom').last);
     await shot(tester, '11b_streamify_album');
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Top 50 – Global'));
+    await tester.tap(_ci('Top 50 – Global'));
     await shot(tester, '12_top50');
     await tester.tap(find.byType(InkWell).at(2));
     await shot(tester, '13_rival_page');
@@ -265,10 +265,9 @@ void main() {
     await tester.pumpAndSettle();
 
     await tab(tester, 'Releases');
-    await tester.tap(find.text('Neon Bloom'));
+    await tester.tap(_ci('Neon Bloom'));
     await shot(tester, '14_album_detail');
-    await tester.scrollUntilVisible(
-        find.text('Week by week on the charts'), 300,
+    await tester.scrollUntilVisible(_ci('Week by week on the charts'), 300,
         scrollable: find.byType(Scrollable).first);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -180));
     await shot(tester, '14b_album_weekly');
@@ -284,9 +283,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(single.first);
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('More numbers'), 300,
+    await tester.scrollUntilVisible(_ci('More numbers'), 300,
         scrollable: find.byType(Scrollable).first);
-    await tester.tap(find.text('More numbers'));
+    await tester.tap(_ci('More numbers'));
     await tester.pumpAndSettle();
     await tester.drag(find.byType(Scrollable).first, const Offset(0, 330));
     await shot(tester, '14c_song_numbers');
@@ -317,7 +316,7 @@ void main() {
     }
     await shot(tester, '24_celebration_no1', settle: false);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Continue'));
+    await tester.tap(_ci('Continue'));
     await tester.pumpAndSettle();
     unawaited(showCelebration(
         ctx,
@@ -325,7 +324,7 @@ void main() {
             title: 'Kiss (Silent Hours)', songId: hit),
         state));
     await shot(tester, '25_celebration_first_chart');
-    await tester.tap(find.text('Continue'));
+    await tester.tap(_ci('Continue'));
     await tester.pumpAndSettle();
   });
 
@@ -362,7 +361,7 @@ void main() {
 
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('June Harper'));
+    await tester.tap(_ci('June Harper'));
     await tester.pumpAndSettle();
     await tab(tester, 'Career');
     await shot(tester, '18_career_2002');
@@ -374,7 +373,8 @@ void main() {
 
     // Energy, rest and day jobs on Home.
     await tab(tester, 'Home');
-    await tester.tap(find.text('Creativity'));
+    await tester.tap(
+        find.textContaining(RegExp('^creativity\$', caseSensitive: false)));
     await shot(tester, '20_energy_sheet');
     await tester.tapAt(const Offset(200, 80));
     await tester.pumpAndSettle();
@@ -392,8 +392,11 @@ void main() {
     app.settings.setLightTheme(false);
     await tester.pumpAndSettle();
 
-    // Corner styles side by side, same moment (docs F1).
+    // Corner styles side by side, same moment (docs F1); the firm style
+    // is the default (K88).
     await tab(tester, 'Home');
+    app.settings.setSharpCorners(false);
+    await tester.pumpAndSettle();
     await shot(tester, '26_home_soft');
     app.settings.setSharpCorners(true);
     await tester.pumpAndSettle();
@@ -403,6 +406,7 @@ void main() {
     app.settings.setSharpCorners(false);
     await tester.pumpAndSettle();
     await shot(tester, '29_studio_soft');
+    app.settings.setSharpCorners(true);
   });
   testWidgets('screenshots: a discography', skip: !enabled, (tester) async {
     await tester.runAsync(loadFonts);
@@ -430,10 +434,10 @@ void main() {
 
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Nova Reyes'));
+    await tester.tap(_ci('Nova Reyes'));
     await tester.pumpAndSettle();
     await tab(tester, 'Career');
-    final disco = find.text('Discography & sales chart');
+    final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,
         scrollable: find.byType(Scrollable).first);
     await Scrollable.ensureVisible(tester.element(disco), alignment: 0.5);
@@ -466,3 +470,8 @@ SessionCmd<void> _fiveAlbums() => (s) {
         s.advanceWeeks(40, stop: SkipStop.never);
       }
     };
+
+/// A text in any letter case (labels are set in capitals in the default
+/// style, docs K88).
+Finder _ci(String text) => find.byWidgetPredicate((w) =>
+    w is Text && w.data != null && w.data!.toLowerCase() == text.toLowerCase());
