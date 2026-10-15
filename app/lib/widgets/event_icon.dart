@@ -45,6 +45,14 @@ class EventIcon extends StatelessWidget {
         ),
       ReleaseAnnounced() => (Icons.campaign_rounded, AppColors.sky),
       RivalNumberOne() => (Icons.newspaper_rounded, AppColors.textMuted),
+      AwardNominated() => (Icons.workspace_premium_rounded, AppColors.gold),
+      AwardResults(:final won) => (
+          won.isEmpty
+              ? Icons.workspace_premium_outlined
+              : Icons.emoji_events_rounded,
+          won.isEmpty ? AppColors.textMuted : AppColors.gold
+        ),
+      AwardWinners() => (Icons.newspaper_rounded, AppColors.textMuted),
     };
     return IconBubble(icon, color: color, size: size);
   }

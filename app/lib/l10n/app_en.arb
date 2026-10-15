@@ -1652,10 +1652,13 @@
   "offerScandalTitle": "Scandal!",
   "offerScandalBody": "An old video of you is all over the gossip sites. How do you respond?",
   "offerAwardTitle": "Award nomination",
-  "offerAwardBody": "You are nominated at the Golden Record Awards for last year’s hits. Performing on the night ({energy} energy) gives you a better shot and a big moment.",
+  "offerAwardBody": "You are up for {count} Golden Record Awards. The show is at the end of this week: perform on the night ({energy} energy) to reach millions, or just be in the room. The votes are already in.",
   "@offerAwardBody": {
     "placeholders": {
       "energy": {
+        "type": "int"
+      },
+      "count": {
         "type": "int"
       }
     }
@@ -1727,15 +1730,8 @@
       }
     }
   },
-  "outcomeAwardWon": "You won at the Golden Record Awards! Fame and hype are up.",
-  "outcomeAwardLost": "No award this time, but the night got you noticed: +{fans} fans.",
-  "@outcomeAwardLost": {
-    "placeholders": {
-      "fans": {
-        "type": "String"
-      }
-    }
-  },
+  "outcomeAwardPerform": "You’ll perform at the show. The winners are announced at the end of the week.",
+  "outcomeAwardAttend": "You’ll be in the room. The winners are announced at the end of the week.",
   "outcomeAwardSkipped": "You skipped the awards.",
   "eventOfferCame": "{what}: answer on the Home screen.",
   "@eventOfferCame": {
@@ -2464,5 +2460,134 @@
         "type": "String"
       }
     }
-  }
+  },
+  "awardsTitle": "Golden Record Awards",
+  "awardsSection": "Awards",
+  "awardsHint": "The yearly Golden Record Awards: nominations in late November, the show in February. Records out from October to September count.",
+  "awardsTally": "{wins} wins · {noms} nominations",
+  "@awardsTally": {
+    "placeholders": {
+      "wins": {
+        "type": "int"
+      },
+      "noms": {
+        "type": "int"
+      }
+    }
+  },
+  "awardsButton": "See the awards",
+  "awardsEmpty": "No award shows yet. The first nominations come out in late November.",
+  "awardsEligible": "For records out {start} – {end}",
+  "@awardsEligible": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "awardsShowOn": "Show: {date}",
+  "@awardsShowOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "awardsHeld": "Held {date}",
+  "@awardsHeld": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "awardsYou": "You: {wins} of {noms}",
+  "@awardsYou": {
+    "placeholders": {
+      "wins": {
+        "type": "int"
+      },
+      "noms": {
+        "type": "int"
+      }
+    }
+  },
+  "awardWinner": "Winner",
+  "awardRecord": "Record of the Year",
+  "awardSong": "Song of the Year",
+  "awardAlbum": "Album of the Year",
+  "awardNewArtist": "Best New Artist",
+  "awardGenreAlbum": "Best {genre} Album",
+  "@awardGenreAlbum": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      }
+    }
+  },
+  "eventAwardNominated": "Golden Record Awards {year}: you are nominated for {what}.",
+  "@eventAwardNominated": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "eventAwardWon": "Golden Record Awards {year}: you won {what}!",
+  "@eventAwardWon": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "what": {
+        "type": "String"
+      }
+    }
+  },
+  "eventAwardNoWins": "Golden Record Awards {year}: no wins from {count} nominations this time.",
+  "@eventAwardNoWins": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventAwardPerformed": "Your performance on the night: +{fans} fans.",
+  "@eventAwardPerformed": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "eventAwardWinners": "Golden Record Awards {year}: Album of the Year to {albumArtist} for {album}, Record of the Year to {recordArtist} for {record}.",
+  "@eventAwardWinners": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "album": {
+        "type": "String"
+      },
+      "albumArtist": {
+        "type": "String"
+      },
+      "record": {
+        "type": "String"
+      },
+      "recordArtist": {
+        "type": "String"
+      }
+    }
+  },
+  "awardsStat": "Golden Record Awards"
 }

@@ -36,6 +36,16 @@ int worldHash(World w) {
 
   addInt(w.week);
   addInt(w.difficulty.index);
+  for (final show in w.awardShows) {
+    addInt(show.year);
+    addInt(show.attendance.index);
+    for (final race in show.races) {
+      addInt(race.winner);
+      for (final n in race.nominees) {
+        addInt(n.id);
+      }
+    }
+  }
   addAll(w.spaIndex);
   addAll(w.dpaIndex);
   addAll(w.retiredDormantAttention);

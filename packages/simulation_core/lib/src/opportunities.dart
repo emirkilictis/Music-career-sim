@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'config/charts.dart';
+import 'awards.dart';
 import 'model.dart';
 import 'rng.dart';
 import 'time.dart';
@@ -128,9 +128,6 @@ abstract final class Opportunities {
   /// Weeks the player has to answer.
   static const answerWeeks = 2;
 
-  /// Award show week (mid-February) and the first nominations' year.
-  static const awardWeek = 6;
-
   /// Energy each kind of appearance takes.
   static const interviewEnergy = 10.0,
       featureEnergy = 20.0,
@@ -145,8 +142,11 @@ abstract final class Opportunities {
     if (p.opportunity != null) return null;
     final r = RandomStream.keyed(w.seed, w.week, p.id, RngPurpose.opportunity);
     final weekOfYear = GameTime.weekOfYear(w.week);
-    // The award show: nominated after a year with a top-10 hit.
-    if (weekOfYear == awardWeek - 1 && _bestPeakLastYear(w, p) <= 10) {
+    // The award show (docs K91): invited when nominated.
+    final show = Awards.upcoming(w);
+    if (weekOfYear == Awards.ceremonyWeekOfYear - 1 &&
+        show != null &&
+        show.racesOf(p.id).isNotEmpty) {
       return Opportunity(kind: OpportunityKind.award, week: w.week);
     }
     final recent = p.lastReleaseWeek >= 0 && w.week - p.lastReleaseWeek <= 6;
@@ -268,21 +268,15 @@ abstract final class Opportunities {
         p.buzz += 0.5;
         fans = p.casual * 0.01;
         p.devotion = math.max(0.0, p.devotion - 0.06);
+      // The show itself happens at the end of the week (docs K91).
       case (
           OpportunityKind.award,
           OpportunityChoice.perform || OpportunityChoice.accept
         ):
         final perform = choice == OpportunityChoice.perform;
         if (perform) spendEnergy(performEnergy);
-        final peak = _bestPeakLastYear(w, p);
-        final odds = (peak == 1 ? 0.45 : 0.25) + (perform ? 0.1 : 0);
-        won = r.chance(odds);
-        hype = (perform ? 0.06 : 0.02) + (won ? 0.12 : 0);
-        fans = p.casual * ((perform ? 0.006 : 0.002) + (won ? 0.01 : 0));
-        if (won) {
-          p.fame = math.min(1.0, p.fame + 0.03);
-          p.devotion = math.min(1.0, p.devotion + 0.02);
-        }
+        Awards.upcoming(w)?.attendance =
+            perform ? AwardAttendance.perform : AwardAttendance.attend;
       // Backing a member's solo record: their audience finds the group, but
       // they are away from the studio for a while.
       case (OpportunityKind.memberSolo, OpportunityChoice.accept):
@@ -347,38 +341,5 @@ abstract final class Opportunities {
     ];
     if (pool.isEmpty) return null;
     return pool[r.nextInt(pool.length)];
-  }
-
-  /// Best US or global peak of the player's songs and albums out last year
-  /// (999 if none charted).
-  static int _bestPeakLastYear(World w, Artist p) {
-    final year = GameTime.yearOf(w.week) - 1;
-    var best = 999;
-    void check(Charted c) {
-      for (final ch in [
-        Charts.usSongs,
-        Charts.globalSongs,
-        Charts.usAlbums,
-        Charts.globalAlbums
-      ]) {
-        final peak = c.statsOrNull(ch)?.peak ?? 0;
-        if (peak > 0 && peak < best) best = peak;
-      }
-    }
-
-    for (final id in w.playerSongIds) {
-      final s = w.songs[id];
-      if (s.primaryArtistId == p.id &&
-          s.releasedWeek >= 0 &&
-          GameTime.yearOf(s.releasedWeek) == year) {
-        check(s);
-      }
-    }
-    for (final al in w.albums) {
-      if (al.artistId == p.id && GameTime.yearOf(al.releaseWeek) == year) {
-        check(al);
-      }
-    }
-    return best;
   }
 }

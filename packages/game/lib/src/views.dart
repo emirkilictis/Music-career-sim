@@ -124,6 +124,9 @@ class ArtistView {
                     !a.scheduled.any((sr) => sr.songIds.contains(id)))
                 .length
             : 0,
+        awardWins = w.awardShows.fold(0, (n, s) => n + s.winsOf(a.id).length),
+        awardNominations =
+            w.awardShows.fold(0, (n, s) => n + s.racesOf(a.id).length),
         restingThisWeek = a.restWeek == w.week,
         energyNextWeek = Actions.weeklyEnergy(w, a),
         isRetired = a.isRetired;
@@ -216,6 +219,10 @@ class ArtistView {
 
   /// Any of the player's releases has been on a chart.
   final bool everCharted;
+
+  /// Golden Record Awards won and nominations, all shows (docs K91).
+  final int awardWins;
+  final int awardNominations;
 
   /// The player took this week off.
   final bool restingThisWeek;
@@ -815,7 +822,13 @@ class OpportunityView {
   OpportunityView.of(World w, Opportunity o)
       : kind = o.kind,
         week = o.week,
-        weeksLeft = o.week + Opportunities.answerWeeks + 1 - w.week,
+        // The award show is at the end of its week (docs K91).
+        weeksLeft = o.kind == OpportunityKind.award
+            ? 1
+            : o.week + Opportunities.answerWeeks + 1 - w.week,
+        nominations = o.kind == OpportunityKind.award
+            ? Awards.upcoming(w)?.racesOf(w.playerArtistId).length ?? 0
+            : 0,
         partnerArtistId = o.partnerArtistId,
         partnerName =
             o.partnerArtistId >= 0 ? w.artists[o.partnerArtistId].name : '',
@@ -836,6 +849,9 @@ class OpportunityView {
   final int partnerArtistId;
   final String partnerName;
   final int feeCents;
+
+  /// Award show: how many awards the player is up for.
+  final int nominations;
   final List<OpportunityChoice> choices;
 }
 
@@ -1166,4 +1182,76 @@ class TourRankView {
 
   /// Still on the road: numbers so far.
   final bool onGoing;
+}
+
+/// One nominee at an award show (docs K91).
+class AwardNomineeView {
+  AwardNomineeView._(World w, AwardRace race, int i)
+      : entry = race.category.entry,
+        id = race.nominees[i].id,
+        artistId = race.nominees[i].artistId,
+        artistName = w.artists[race.nominees[i].artistId].name,
+        title = switch (race.category.entry) {
+          AwardEntry.song => w.songs[race.nominees[i].id].title,
+          AwardEntry.album => w.albums[race.nominees[i].id].title,
+          AwardEntry.artist => w.artists[race.nominees[i].id].name,
+        },
+        coverAlbumId = switch (race.category.entry) {
+          AwardEntry.song => coverAlbumOf(w, w.songs[race.nominees[i].id]),
+          AwardEntry.album => race.nominees[i].id,
+          AwardEntry.artist => -1,
+        },
+        isPlayer = race.nominees[i].artistId == w.playerArtistId,
+        isWinner = race.winner == i;
+
+  final AwardEntry entry;
+
+  /// Song, album or artist id (by [entry]).
+  final int id;
+  final int artistId;
+  final String artistName;
+  final String title;
+
+  /// The album whose cover it shows (-1: a song's own, or an artist).
+  final int coverAlbumId;
+  final bool isPlayer;
+  final bool isWinner;
+}
+
+class AwardRaceView {
+  AwardRaceView._(World w, AwardRace race)
+      : category = race.category,
+        genre = race.genre,
+        nominees = [
+          for (var i = 0; i < race.nominees.length; i++)
+            AwardNomineeView._(w, race, i)
+        ];
+  final AwardCategory category;
+
+  /// [genreNames] index for the genre album award.
+  final int genre;
+  final List<AwardNomineeView> nominees;
+}
+
+/// One year's Golden Record Awards.
+class AwardShowView {
+  AwardShowView.of(World w, AwardShow s)
+      : year = s.year,
+        held = s.held,
+        ceremonyWeek = s.ceremonyWeek,
+        eligibleFrom = Awards.window(s.year).$1,
+        eligibleTo = Awards.window(s.year).$2 - 1,
+        races = [for (final r in s.races) AwardRaceView._(w, r)],
+        playerNominations = s.racesOf(w.playerArtistId).length,
+        playerWins = s.winsOf(w.playerArtistId).length;
+  final int year;
+  final bool held;
+  final int ceremonyWeek;
+
+  /// First and last week of the records it honors.
+  final int eligibleFrom;
+  final int eligibleTo;
+  final List<AwardRaceView> races;
+  final int playerNominations;
+  final int playerWins;
 }

@@ -2,6 +2,7 @@
 library;
 
 export 'src/actions.dart';
+export 'src/awards.dart';
 export 'src/ai.dart' show AiPlanner;
 export 'src/bot.dart';
 export 'src/config/charts.dart';

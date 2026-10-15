@@ -191,6 +191,14 @@ abstract final class Cmd {
           int festival, int year) =>
       (s) => s.festivalLineup(festival, year);
 
+  /// Years with a Golden Record Awards show (newest first) and the show of
+  /// [year] (null: the newest; docs K91).
+  static SessionCmd<(List<int>, AwardShowView?)> awards(int? year) => (s) {
+        final years = s.awardYears;
+        final y = year ?? (years.isEmpty ? null : years.first);
+        return (years, y == null ? null : s.awardShow(y));
+      };
+
   /// The year's top tours (null: all time) and the first year on the books.
   static SessionCmd<(List<TourRankView>, int)> topTours(int? year) => (s) =>
       (year == null ? s.allTimeTours() : s.topTours(year), s.firstTourYear);

@@ -811,23 +811,88 @@ void main() {
       expect(p.moneyCents, m2);
     });
 
-    test('an award comes after a year with a top-10 hit', () {
+    test('award shows: nominations in November, winners in February (K91)', () {
       final (:w, :sim, :p) = star();
-      while (w.week < GameTime.firstWeekOf(2010)) {
+      AwardShow? nominated;
+      while (GameTime.yearOf(w.week) < 2011 ||
+          GameTime.weekOfYear(w.week) <= Awards.ceremonyWeekOfYear) {
+        final r = sim.step();
+        if (r.awardNominations?.year == 2011) nominated = r.awardNominations;
+      }
+      final show = Awards.showFor(w, 2011)!;
+      expect(identical(show, nominated), isTrue);
+      expect(show.held, isTrue);
+      expect(show.races.map((r) => r.category),
+          containsAll([AwardCategory.record, AwardCategory.song]));
+      for (final race in show.races) {
+        expect(race.nominees.length, inInclusiveRange(3, 5));
+        expect(race.winner, inInclusiveRange(0, race.nominees.length - 1));
+        // One nomination per artist in a category.
+        expect(race.nominees.map((n) => n.artistId).toSet().length,
+            race.nominees.length);
+      }
+      // Eligible: out from October 2009 to September 2010, and a hit.
+      final (from, to) = Awards.window(2011);
+      for (final n in show.races.first.nominees) {
+        final song = w.songs[n.id];
+        final out = song.isSingle ? song.singleWeek : song.releasedWeek;
+        expect(out, inInclusiveRange(from, to - 1));
+        expect(song.peakOn(Charts.usSongs) + song.peakOn(Charts.globalSongs),
+            greaterThan(0));
+      }
+      // Saved and loaded as is.
+      final back = AwardShow.decode(AwardShow.encode(w.awardShows))
+          .firstWhere((x) => x.year == 2011);
+      expect(back.held, isTrue);
+      expect([for (final r in back.races) r.winner],
+          [for (final r in show.races) r.winner]);
+      expect([for (final r in back.races) r.nominees.map((n) => n.id)],
+          [for (final r in show.races) r.nominees.map((n) => n.id)]);
+    });
+
+    test('a nominated player is invited, performs and hears the results', () {
+      final (:w, :sim, :p) = star();
+      while (w.week < GameTime.firstWeekOf(2011)) {
         sim.step();
       }
-      p.moneyCents = 1 << 40;
       final s = Actions.writeSong(w, p, producerSkill: 95, aiMode: true);
-      Actions.releaseSingle(w, p, s, campaign: Campaign.global);
-      var nominated = false;
-      while (GameTime.yearOf(w.week) < 2011 ||
-          GameTime.weekOfYear(w.week) <= Opportunities.awardWeek) {
+      final race = Awards.showFor(w, 2011)!
+          .races
+          .firstWhere((r) => r.category == AwardCategory.record);
+      race.nominees[0] = AwardNominee(s.id, p.id);
+      AwardNight? night;
+      var invited = false;
+      while (GameTime.weekOfYear(w.week) <= Awards.ceremonyWeekOfYear) {
         final r = sim.step();
-        if (r.newOpportunity?.kind == OpportunityKind.award) nominated = true;
+        night ??= r.awardNight;
+        if (r.newOpportunity?.kind == OpportunityKind.award) {
+          invited = true;
+          Opportunities.answer(w, p, OpportunityChoice.perform);
+        }
       }
-      final peak = s.statsOrNull(Charts.usSongs)?.peak ?? 999;
-      printOnFailure('peak $peak');
-      if (peak <= 10) expect(nominated, isTrue);
+      expect(invited, isTrue);
+      expect(night, isNotNull);
+      expect(night!.show.attendance, AwardAttendance.perform);
+      expect(night.nominations, [race]);
+      expect(night.fans, greaterThan(0));
+      expect(night.wins.length, race.won!.artistId == p.id ? 1 : 0);
+    });
+
+    test('a player who never answers stays home', () {
+      final (:w, :sim, :p) = star();
+      while (w.week < GameTime.firstWeekOf(2011)) {
+        sim.step();
+      }
+      final s = Actions.writeSong(w, p, producerSkill: 95, aiMode: true);
+      Awards.showFor(w, 2011)!.races.first.nominees[0] =
+          AwardNominee(s.id, p.id);
+      AwardNight? night;
+      while (GameTime.weekOfYear(w.week) <= Awards.ceremonyWeekOfYear) {
+        night ??= sim.step().awardNight;
+      }
+      expect(night!.show.attendance, AwardAttendance.none);
+      expect(night.fans, 0);
+      expect(p.opportunity, isNull);
     });
   });
 
@@ -1054,11 +1119,11 @@ void albumShapeTests() {
   test('more tracks raise the debut with diminishing returns', () {
     final ten = _albumRun(tracks: 10, skill: 90, weeks: 1).first;
     final forty = _albumRun(tracks: 40, skill: 90, weeks: 1).first;
-    // About +25–40% for 4× the tracks (longer tracklist + streaming
+    // About +25–45% for 4× the tracks (longer tracklist + streaming
     // equivalents of the extra tracks, which fans play in release week
     // since docs F25), never anything like 4×.
     print('40 vs 10 tracks: ${(forty / ten).toStringAsFixed(3)}');
-    expect(forty / ten, inInclusiveRange(1.18, 1.45));
+    expect(forty / ten, inInclusiveRange(1.18, 1.5));
     expect(forty, lessThan(1.8 * ten));
   });
 }

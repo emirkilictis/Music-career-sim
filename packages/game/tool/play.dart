@@ -219,6 +219,11 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       MilestoneReached() => 'milestone ${e.milestone.name}',
       TourFinished() => 'tour ${e.kind.name} done: net ${e.netCents ~/ 100}',
       PlatformOpened() => 'platform opened ${e.platform.displayName}',
+      AwardNominated() =>
+        'nominated at the ${e.year} awards: ${e.categories.map((c) => c.name).join(', ')}',
+      AwardResults() =>
+        'awards ${e.year}: won ${e.won.length} of ${e.nominations}',
+      AwardWinners() => 'awards ${e.year} winners',
       FestivalPlayed() =>
         'festival ${e.festival} (${e.slot.name}): ${_c(e.watched)} watched',
       ChartBattle() =>

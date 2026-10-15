@@ -4,7 +4,13 @@ import 'package:game/game.dart';
 /// the UI can build the sentence without another round trip.
 class EventLine {
   EventLine(this.event,
-      {this.title = '', this.artistName = '', this.songId, this.albumId = -1});
+      {this.title = '',
+      this.artistName = '',
+      this.songId,
+      this.albumId = -1,
+      this.title2 = '',
+      this.artistName2 = '',
+      this.genre = -1});
   final GameEvent event;
 
   /// The release the line is about, for its cover (song first, then album).
@@ -16,6 +22,13 @@ class EventLine {
 
   /// Rival artist name for industry headlines.
   final String artistName;
+
+  /// A second release and artist (the award winners' headline).
+  final String title2;
+  final String artistName2;
+
+  /// The player's genre, for the genre award's name (docs K91).
+  final int genre;
 }
 
 /// Runs on the game side (inside a command).
@@ -60,6 +73,16 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         RivalNumberOne() => EventLine(e,
             title: entity(e.kind, e.entityId),
             artistName: w.artists[e.artistId].name),
+        AwardNominated() => EventLine(e, genre: w.player!.genre),
+        AwardResults() => EventLine(e, genre: w.player!.genre),
+        AwardWinners() => EventLine(e,
+            title: e.albumId >= 0 ? album(e.albumId) : '–',
+            artistName:
+                e.albumArtistId >= 0 ? w.artists[e.albumArtistId].name : '–',
+            albumId: e.albumId,
+            title2: e.songId >= 0 ? song(e.songId) : '–',
+            artistName2:
+                e.recordArtistId >= 0 ? w.artists[e.recordArtistId].name : '–'),
       },
   ];
 }
@@ -120,6 +143,9 @@ List<EventLine> sortLines(List<EventLine> lines) {
         BurnoutOver() => 7,
         PlatformLaunched() => 8,
         RivalNumberOne() => 9,
+        AwardResults() => 0,
+        AwardNominated() => 1,
+        AwardWinners() => 9,
       };
   return [...lines]..sort((a, b) => rank(a).compareTo(rank(b)));
 }

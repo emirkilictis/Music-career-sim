@@ -99,6 +99,8 @@ class SaveStore {
     w.tourRecords.addAll(TourRecord.decode(meta['tourRecords'] as String?));
     w.festivalBookings
         .addAll(FestivalBooking.decode(meta['festivals'] as String?));
+    // Award shows (docs K91).
+    w.awardShows.addAll(AwardShow.decode(meta['awards'] as String?));
     for (final (key, arr) in _metaArrays(w)) {
       for (var i = 0; i < arr.length; i++) {
         arr[i] = _d(meta['$key$i']);
@@ -325,6 +327,7 @@ class SaveStore {
       'realNames': w.realNames ? 1 : 0,
       'tourRecords': TourRecord.encode(w.tourRecords),
       'festivals': FestivalBooking.encode(w.festivalBookings),
+      'awards': AwardShow.encode(w.awardShows),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

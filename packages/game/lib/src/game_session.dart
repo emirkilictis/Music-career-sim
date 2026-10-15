@@ -592,6 +592,17 @@ class GameSession {
           ],
       };
 
+  // --------------------------------------------------------------- awards
+
+  /// Years with a Golden Record Awards show, newest first (docs K91).
+  List<int> get awardYears =>
+      [for (final s in world.awardShows.reversed) s.year];
+
+  AwardShowView? awardShow(int year) {
+    final s = Awards.showFor(world, year);
+    return s == null ? null : AwardShowView.of(world, s);
+  }
+
   // ----------------------------------------------------------- box office
 
   /// The year's top-grossing tours so far (docs K77): rivals' tours by
@@ -794,7 +805,6 @@ class GameSession {
         out.choice == OpportunityChoice.accept) {
       Milestone.firstFestival.mark(world, _p);
     }
-    if (out.won) Milestone.awardWin.mark(world, _p);
     _saveNow();
     return out;
   }
@@ -1536,6 +1546,43 @@ class GameSession {
           fans: f.fans));
     }
     if (r.newOpportunity case final o?) events.add(OpportunityCame(o.kind));
+    // The Golden Record Awards (docs K91).
+    if (r.awardNominations case final show?) {
+      final mine = show.racesOf(p.id).toList();
+      if (mine.isNotEmpty) {
+        events
+            .add(AwardNominated(show.year, [for (final x in mine) x.category]));
+      }
+    }
+    if (r.awardNight case final n?) {
+      events.add(AwardResults(
+          year: n.show.year,
+          nominations: n.nominations.length,
+          won: [for (final x in n.wins) x.category],
+          attendance: n.show.attendance,
+          fans: n.fans));
+      if (n.wins.isNotEmpty) Milestone.awardWin.mark(w, p);
+    }
+    if (GameTime.weekOfYear(r.week) == Awards.ceremonyWeekOfYear) {
+      final show = Awards.showFor(w, GameTime.yearOf(r.week));
+      if (show != null && show.held) {
+        AwardNominee? winner(AwardCategory c) {
+          for (final x in show.races) {
+            if (x.category == c) return x.won;
+          }
+          return null;
+        }
+
+        final album = winner(AwardCategory.album);
+        final record = winner(AwardCategory.record);
+        events.add(AwardWinners(
+            year: show.year,
+            albumArtistId: album?.artistId ?? -1,
+            albumId: album?.id ?? -1,
+            recordArtistId: record?.artistId ?? -1,
+            songId: record?.id ?? -1));
+      }
+    }
     for (final al in w.albums.reversed) {
       if (al.releaseWeek < r.week) break;
       if (al.artistId == p.id &&

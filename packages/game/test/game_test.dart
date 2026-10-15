@@ -335,6 +335,52 @@ void main() {
       g.close();
     });
 
+    test('award shows: invitation, the night and the results (K91)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final id = g.slotId;
+      expect(g.awardYears.first, 2018);
+      final song = g.writeSong(budget: BudgetTier.high);
+      // Put the player on the 2018 ballot (nominated in November 2017).
+      final race = Awards.showFor(g.world, 2018)!.races.first;
+      race.nominees[1] = AwardNominee(song.id, g.world.playerArtistId);
+      expect(g.awardShow(2018)!.playerNominations, 1);
+      final events = <GameEvent>[];
+      while (GameTime.weekOfYear(g.week) <= Awards.ceremonyWeekOfYear) {
+        final week = g.advanceWeek().events;
+        events.addAll(week);
+        if (week.any((e) =>
+            e is OpportunityCame && e.kind == OpportunityKind.award)) {
+          expect(g.player.opportunity!.nominations, 1);
+          expect(g.player.opportunity!.weeksLeft, 1);
+          g.answerOpportunity(OpportunityChoice.perform);
+        }
+      }
+      final results = events.whereType<AwardResults>().single;
+      expect(results.year, 2018);
+      expect(results.nominations, 1);
+      expect(results.attendance, AwardAttendance.perform);
+      expect(results.fans, greaterThan(0));
+      expect(events.whereType<AwardWinners>(), hasLength(1));
+      final show = g.awardShow(2018)!;
+      expect(show.held, isTrue);
+      final mine = show.races.first.nominees.firstWhere((n) => n.isPlayer);
+      expect(mine.title, song.title);
+      expect(results.won.length, mine.isWinner ? 1 : 0);
+      expect(g.player.awardNominations, 1);
+      expect(g.player.awardWins, results.won.length);
+      // Kept across reopening.
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.awardShow(2018)!.held, isTrue);
+      expect(g.player.awardNominations, 1);
+      g.close();
+    });
+
     test('festivals are booked, played and kept across reopening (K77)', () {
       var g = GameSession.start(
           slots,

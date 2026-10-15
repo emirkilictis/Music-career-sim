@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'awards.dart';
 import 'config/charts.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
@@ -44,6 +45,9 @@ class World {
 
   /// The player's festival slots to come (docs K77).
   final List<FestivalBooking> festivalBookings = [];
+
+  /// Golden Record Awards, nominated and held (docs K91).
+  final List<AwardShow> awardShows = [];
 
   /// Non-retired artists, sorted by id. Weekly loops run over these only.
   final List<int> activeArtistIds = [];

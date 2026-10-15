@@ -267,6 +267,56 @@ class FestivalPlayed extends GameEvent {
   bool get isMajor => true;
 }
 
+/// The player is up for Golden Record Awards (docs K91).
+class AwardNominated extends GameEvent {
+  const AwardNominated(this.year, this.categories);
+
+  /// The show's year (held next February).
+  final int year;
+  final List<AwardCategory> categories;
+  @override
+  bool get isMajor => true;
+}
+
+/// The show the player was nominated at was held: what they won and what
+/// the night did.
+class AwardResults extends GameEvent {
+  const AwardResults(
+      {required this.year,
+      required this.nominations,
+      required this.won,
+      required this.attendance,
+      required this.fans});
+  final int year;
+  final int nominations;
+  final List<AwardCategory> won;
+  final AwardAttendance attendance;
+  final double fans;
+  @override
+  bool get isMajor => true;
+}
+
+/// Industry headline: the year's big winners (docs K91).
+class AwardWinners extends GameEvent {
+  const AwardWinners(
+      {required this.year,
+      required this.albumArtistId,
+      required this.albumId,
+      required this.recordArtistId,
+      required this.songId});
+  final int year;
+
+  /// -1 when the category was not held.
+  final int albumArtistId;
+  final int albumId;
+  final int recordArtistId;
+  final int songId;
+  @override
+  bool get isMajor => false;
+  @override
+  bool get isIndustry => true;
+}
+
 /// A new platform opened this year (docs K67).
 class PlatformOpened extends GameEvent {
   const PlatformOpened(this.platform);

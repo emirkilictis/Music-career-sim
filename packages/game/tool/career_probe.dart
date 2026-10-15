@@ -49,13 +49,15 @@ void main(List<String> args) {
     for (var y = 0; y < years; y++) {
       final money0 = s.player.moneyCents;
       final songRev0 = _songRevenue(s);
-      var spent = 0;
+      var spent = 0, noms = 0, wins = 0;
       for (var wk = 0; wk < GameTime.weeksPerYear; wk++) {
         spent += _week(s, (k) => lastSingle = k, () => lastSingle, (k) {
           lastAlbum = k;
         }, () => lastAlbum);
         final r = s.advanceWeek();
         for (final e in r.events) {
+          if (e is AwardNominated) noms += e.categories.length;
+          if (e is AwardResults) wins += e.won.length;
           if (e is LabelOffer && e.label.index > s.player.label.index) {
             try {
               s.signLabel(e.label);
@@ -121,6 +123,8 @@ void main(List<String> args) {
         p.fame * 100,
         p.label.index,
         no1,
+        noms,
+        wins,
       ]);
     }
     s.close();
@@ -137,6 +141,7 @@ void main(List<String> args) {
       return v[v.length ~/ 2];
     }
 
+    int sum(int i) => rows[y].fold(0, (t, r) => t + r[i].toInt());
     int lo(int i) =>
         rows[y].map((r) => r[i].toInt()).reduce((a, b) => a < b ? a : b);
     String peaks(int i) =>
@@ -146,6 +151,7 @@ void main(List<String> args) {
         '${_k(med(4)).padLeft(7)}  ${(lo(5) >= 999 ? '-' : '${lo(5)}').padLeft(4)} '
         '${med(6).toStringAsFixed(0).padLeft(4)} ${med(7).toStringAsFixed(0).padLeft(4)}'
         ' #1s ${med(11).toStringAsFixed(0)}'
+        ' awards ${sum(12)}/${sum(13)}'
         '  fame ${med(9).toStringAsFixed(0)}% label ${med(10).toStringAsFixed(0)}'
         '  US song peaks [${peaks(5)}] album [${peaks(8)}]');
   }

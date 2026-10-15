@@ -452,6 +452,20 @@ void main() {
     await shot(tester, '15k_sales_chart');
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -640));
     await shot(tester, '15l_discography_list');
+
+    // The Golden Record Awards of the last show (docs K91).
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    final awards = _ci('See the awards');
+    await tester.scrollUntilVisible(awards, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(awards), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await shot(tester, '15m_awards_section');
+    await tester.tap(awards);
+    await shot(tester, '15n_awards');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
+    await shot(tester, '15o_awards_more');
   });
 }
 

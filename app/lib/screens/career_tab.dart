@@ -10,6 +10,7 @@ import '../widgets/tour_section.dart';
 import '../widgets/milestones_section.dart';
 import '../widgets/common.dart';
 import '../widgets/image_pickers.dart';
+import 'awards_screen.dart';
 import 'discography_screen.dart';
 import 'labels_screen.dart';
 import 'song_detail_screen.dart';
@@ -184,6 +185,37 @@ class _CareerScreenState extends State<CareerScreen> {
                         builder: (_) => DiscographyScreen(state: career))),
                 icon: const Icon(Icons.library_music_outlined),
                 label: Text(l.discographyButton),
+              ),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 12),
+        Section(
+          title: l.awardsSection,
+          icon: Icons.emoji_events_outlined,
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(
+                p.awardNominations > 0
+                    ? l.awardsTally(p.awardWins, p.awardNominations)
+                    : l.awardsHint,
+                style: TextStyle(
+                    color: p.awardNominations > 0
+                        ? AppColors.text
+                        : AppColors.textMuted,
+                    fontWeight: p.awardNominations > 0
+                        ? FontWeight.w700
+                        : FontWeight.w400)),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => AwardsScreen(state: career))),
+                icon: const Icon(Icons.emoji_events_outlined),
+                label: Text(l.awardsButton),
               ),
             ),
           ]),

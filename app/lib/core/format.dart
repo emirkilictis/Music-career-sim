@@ -46,6 +46,22 @@ class Fmt {
     return l.weekLabel(monthName(month), inMonth, year);
   }
 
+  /// "October 2014" for an absolute game week.
+  String monthYear(int week) {
+    final (month, _) = monthWeek(GameTime.weekOfYear(week));
+    return '${monthName(month)} ${GameTime.yearOf(week)}';
+  }
+
+  /// A Golden Record Awards category (docs K91).
+  String awardCategory(AwardCategory c, [int genre = -1]) => switch (c) {
+        AwardCategory.record => l.awardRecord,
+        AwardCategory.song => l.awardSong,
+        AwardCategory.album => l.awardAlbum,
+        AwardCategory.newArtist => l.awardNewArtist,
+        AwardCategory.genreAlbum =>
+          l.awardGenreAlbum(genre >= 0 ? this.genre(genre) : ''),
+      };
+
   /// "January, week 2" (no year) for an absolute game week.
   String weekInMonth(int week) {
     final (month, inMonth) = monthWeek(GameTime.weekOfYear(week));
@@ -339,7 +355,7 @@ class Fmt {
         OpportunityKind.brandDeal => l.offerBrandBody(money(o.feeCents)),
         OpportunityKind.scandal => l.offerScandalBody,
         OpportunityKind.award =>
-          l.offerAwardBody(Opportunities.performEnergy.round()),
+          l.offerAwardBody(Opportunities.performEnergy.round(), o.nominations),
         OpportunityKind.memberSolo => l.offerMemberSoloBody(
             o.memberName, Opportunities.memberSoloEnergy.round()),
         OpportunityKind.memberRift => l.offerMemberRiftBody(
@@ -378,8 +394,9 @@ class Fmt {
       (OpportunityKind.scandal, _) => l.outcomeLeanIn(fans),
       (OpportunityKind.award, OpportunityChoice.decline) =>
         l.outcomeAwardSkipped,
-      (OpportunityKind.award, _) =>
-        o.won ? l.outcomeAwardWon : l.outcomeAwardLost(fans),
+      (OpportunityKind.award, OpportunityChoice.perform) =>
+        l.outcomeAwardPerform,
+      (OpportunityKind.award, _) => l.outcomeAwardAttend,
       (OpportunityKind.memberSolo, OpportunityChoice.accept) =>
         l.outcomeMemberSolo(fans),
       (OpportunityKind.memberSolo, _) => l.outcomeMemberWaits,
@@ -600,6 +617,17 @@ class Fmt {
           : l.eventPlatformArrived(platformName, l.regionNorthAmerica),
       RivalNumberOne() =>
         l.eventRivalNumberOne(line.artistName, t, chart(e.chartId)),
+      AwardNominated() => l.eventAwardNominated(e.year,
+          e.categories.map((c) => awardCategory(c, line.genre)).join(', ')),
+      AwardResults() => [
+          e.won.isEmpty
+              ? l.eventAwardNoWins(e.year, e.nominations)
+              : l.eventAwardWon(e.year,
+                  e.won.map((c) => awardCategory(c, line.genre)).join(', ')),
+          if (e.fans > 0) l.eventAwardPerformed(compact(e.fans)),
+        ].join(' '),
+      AwardWinners() => l.eventAwardWinners(
+          e.year, t, line.artistName, line.title2, line.artistName2),
     };
   }
 }

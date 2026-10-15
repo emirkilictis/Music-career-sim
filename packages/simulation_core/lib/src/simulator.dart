@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'actions.dart';
 import 'ai.dart';
+import 'awards.dart';
 import 'config/charts.dart';
 import 'config/era_table.dart';
 import 'config/regions.dart';
@@ -34,6 +35,8 @@ class WeekResult {
     this.lapsedOpportunity,
     this.tourFinished,
     this.festivalSet,
+    this.awardNominations,
+    this.awardNight,
   });
 
   final int week;
@@ -71,6 +74,12 @@ class WeekResult {
 
   /// The player's festival set this week (docs K77).
   final FestivalSet? festivalSet;
+
+  /// The awards' nominations, out this week (docs K91).
+  final AwardShow? awardNominations;
+
+  /// The award show held this week, if the player was nominated.
+  final AwardNight? awardNight;
 
   List<ChartEntry> get songChart => charts[Charts.usSongs];
   List<ChartEntry> get albumChart => charts[Charts.usAlbums];
@@ -792,6 +801,14 @@ class Simulator {
     Tour? toured;
     FestivalSet? festival;
     final me = w.player;
+    // The awards (docs K91): an unanswered invitation means staying home.
+    if (me?.opportunity?.kind == OpportunityKind.award &&
+        Awards.upcoming(w) != null &&
+        GameTime.weekOfYear(w.week) == Awards.ceremonyWeekOfYear) {
+      lapsed = Opportunities.answer(w, me!, OpportunityChoice.decline);
+    }
+    final nominations = Awards.nominate(w);
+    final night = Awards.hold(w);
     if (me != null) {
       toured = Tours.playWeek(w, me);
       if (toured != null) {
@@ -832,6 +849,8 @@ class Simulator {
       lapsedOpportunity: lapsed,
       tourFinished: toured,
       festivalSet: festival,
+      awardNominations: nominations,
+      awardNight: night,
     );
     w.week++;
     return result;
