@@ -238,6 +238,22 @@ void main() {
     await tester.tapAt(const Offset(200, 80));
     await tester.pumpAndSettle();
     await tab(tester, 'Home');
+    // Social media (docs K93): the card, then the feed after a post.
+    final feed = _ci('Open the feed');
+    await tester.scrollUntilVisible(feed, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(feed), alignment: 0.4);
+    await tester.pumpAndSettle();
+    await shot(tester, '04d_home_social');
+    await tester.tap(feed);
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Behind the scenes'));
+    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await shot(tester, '04e_social_feed');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
+    await shot(tester, '04f_social_feed_more');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(_ci('Streamify'), 300,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();

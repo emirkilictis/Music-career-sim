@@ -9,6 +9,7 @@ import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/platforms_list.dart';
+import 'social_screen.dart';
 import '../widgets/tour_section.dart';
 import '../widgets/opportunity_card.dart';
 import '../widgets/common.dart';
@@ -42,6 +43,8 @@ class DashboardTab extends StatelessWidget {
         _NextStepCard(onOpenTab: onOpenTab, onNextWeek: onNextWeek),
         const SizedBox(height: 12),
         const _StatusRow(),
+        const SizedBox(height: 12),
+        const _SocialCard(),
         const SizedBox(height: 22),
         const _MoreSection(),
       ],
@@ -584,6 +587,81 @@ class _EnergySheet extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Social media at a glance (docs K93): followers, posts left and the
+/// newest fan post; opens the feed.
+class _SocialCard extends StatefulWidget {
+  const _SocialCard();
+
+  @override
+  State<_SocialCard> createState() => _SocialCardState();
+}
+
+class _SocialCardState extends State<_SocialCard> {
+  SocialView? _view;
+  int _week = -1;
+
+  Future<void> _load(CareerState career) async {
+    _week = career.week;
+    final v = await career.read(Cmd.social());
+    if (mounted) setState(() => _view = v);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.career;
+    if (career.week != _week) _load(career);
+    final v = _view;
+    if (v == null) return const SizedBox.shrink();
+    final latest = v.items.where((i) => !i.isPlayer).firstOrNull;
+    return _Card(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          Icon(Icons.forum_rounded, color: AppColors.textMuted, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(caps(context, fmt.network(v.network)),
+                style: capsStyle(TextStyle(
+                    color: AppColors.textMuted,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13))),
+          ),
+          Text(l.followersValue(fmt.compact(v.followers)),
+              style: TextStyle(
+                  color: AppColors.text, fontWeight: FontWeight.w700)),
+        ]),
+        const SizedBox(height: 10),
+        if (latest != null)
+          FeedPost(item: latest, state: career)
+        else
+          Text(l.socialNoFans, style: TextStyle(color: AppColors.textMuted)),
+        const SizedBox(height: 10),
+        Row(children: [
+          if (v.canPost)
+            Expanded(
+              child: Text(l.socialPostsLeft(v.postsLeft),
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+            )
+          else
+            const Spacer(),
+          OutlinedButton.icon(
+            onPressed: () async {
+              await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => SocialScreen(state: career)));
+              if (mounted) _load(career);
+            },
+            icon: const Icon(Icons.chat_bubble_outline_rounded),
+            label: Text(l.socialOpen),
+          ),
+        ]),
+      ]),
     );
   }
 }

@@ -1262,3 +1262,76 @@ class AwardShowView {
   final int playerNominations;
   final int playerWins;
 }
+
+/// One post in the social feed (docs K93).
+class SocialItemView {
+  SocialItemView.of(World w, SocialItem i)
+      : week = i.week,
+        topic = i.topic,
+        variant = i.variant,
+        fan = i.fan,
+        title = i.songId >= 0
+            ? w.songs[i.songId].title
+            : i.albumId >= 0
+                ? w.albums[i.albumId].title
+                : '',
+        likes = i.likes,
+        number = i.number;
+  final int week;
+  final FanTopic topic;
+  final int variant;
+
+  /// The fan's handle seed (-1: the player).
+  final int fan;
+  bool get isPlayer => fan < 0;
+
+  /// The song or album it talks about ('' if none).
+  final String title;
+  final int likes;
+  final int number;
+}
+
+/// The player's social media page (docs K93).
+class SocialView {
+  SocialView.of(World w, Artist p)
+      : network = Social.networkIn(GameTime.yearOf(w.week)),
+        canPost = Social.canPostIn(GameTime.yearOf(w.week)),
+        followers = Social.followers(w, p),
+        postsLeft = Social.postsPerWeek - w.social.postsIn(w.week),
+        hasTeaser = Social.hasTeaser(w, p),
+        songs = [
+          for (final id in w.playerSongIds.reversed)
+            if (w.songs[id].releasedWeek >= 0 &&
+                w.songs[id].primaryArtistId == p.id)
+              (id, w.songs[id].title),
+        ].take(20).toList(),
+        // Newest week first; within a week in the order it happened (a
+        // post above the replies to it).
+        items = [
+          for (final i in _newestWeeksFirst(w.social.feed).take(60))
+            SocialItemView.of(w, i)
+        ];
+
+  static List<SocialItem> _newestWeeksFirst(List<SocialItem> feed) {
+    final order = List.generate(feed.length, (i) => i)
+      ..sort((a, b) {
+        final d = feed[b].week.compareTo(feed[a].week);
+        return d != 0 ? d : a.compareTo(b);
+      });
+    return [for (final i in order) feed[i]];
+  }
+
+  final SocialNetwork network;
+  final bool canPost;
+  final double followers;
+  final int postsLeft;
+
+  /// Something unreleased to tease.
+  final bool hasTeaser;
+
+  /// Released songs to promote, newest first: (id, title).
+  final List<(int, String)> songs;
+
+  /// Newest first.
+  final List<SocialItemView> items;
+}

@@ -2,6 +2,7 @@ import 'package:game/game.dart';
 import 'package:intl/intl.dart';
 
 import '../l10n/gen/app_localizations.dart';
+import 'social_text.dart';
 import 'event_lines.dart';
 
 /// Fictional streaming platform name (docs K15). One place to rename it.
@@ -51,6 +52,48 @@ class Fmt {
     final (month, _) = monthWeek(GameTime.weekOfYear(week));
     return '${monthName(month)} ${GameTime.yearOf(week)}';
   }
+
+  String network(SocialNetwork n) => switch (n) {
+        SocialNetwork.forum => l.networkForum,
+        SocialNetwork.myPlace => l.networkMyPlace,
+        SocialNetwork.chirper => l.networkChirper,
+      };
+
+  String postKind(PostKind k) => switch (k) {
+        PostKind.teaser => l.postTeaser,
+        PostKind.studio => l.postStudio,
+        PostKind.fans => l.postFans,
+        PostKind.hotTake => l.postHotTake,
+        PostKind.promote => l.postPromote,
+      };
+
+  String postKindHint(PostKind k) => switch (k) {
+        PostKind.teaser => l.postTeaserHint,
+        PostKind.studio => l.postStudioHint,
+        PostKind.fans => l.postFansHint,
+        PostKind.hotTake => l.postHotTakeHint,
+        PostKind.promote => l.postPromoteHint,
+      };
+
+  /// The words of a feed item (docs K93).
+  String social(SocialItemView i, String playerName) => socialText(
+        l,
+        i.topic,
+        i.variant,
+        title: i.title,
+        name: playerName,
+        n: switch (i.topic) {
+          FanTopic.bigWeek => compact(i.number.toDouble()),
+          FanTopic.criticHigh ||
+          FanTopic.criticLow =>
+            (i.number / 10).toStringAsFixed(1),
+          _ => '${i.number}',
+        },
+      );
+
+  /// "this week", "3 wk ago".
+  String feedAge(int week, int now) =>
+      week >= now ? l.feedThisWeek : l.feedWeeksAgo(now - week);
 
   String songVersion(SongVersion v) => switch (v) {
         SongVersion.remix => l.versionRemix,
@@ -554,6 +597,10 @@ class Fmt {
       'buyoutMoney' => l.errorBuyoutMoney,
       'radioLocked' => l.errorRadioLocked,
       'versionOut' => l.errorVersionOut,
+      'socialLocked' => l.errorSocialLocked,
+      'postLimit' => l.errorPostLimit,
+      'tooTired' => l.errorTooTired,
+      'nothingToTease' => l.errorNothingToTease,
       'variantOut' => l.errorEditionOut,
       'notSingle' => l.errorNotSingle,
       'labelRefused' => l.errorLabelRefused,

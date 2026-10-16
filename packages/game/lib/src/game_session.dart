@@ -5,6 +5,7 @@ import 'package:simulation_core/simulation_core.dart';
 
 import 'career_setup.dart';
 import 'events.dart';
+import 'social_feed.dart';
 import 'milestones.dart';
 import 'platforms.dart';
 import 'views.dart';
@@ -591,6 +592,32 @@ class GameSession {
                   id, world.artists[id].name, id == world.playerArtistId)
           ],
       };
+
+  // --------------------------------------------------------- social media
+
+  /// The player's social media: the feed, followers, posts left (docs K93).
+  SocialView get social => SocialView.of(world, _p);
+
+  /// Posts; fans answer in the feed.
+  PostOutcome post(PostKind kind, {int songId = -1}) {
+    final year = GameTime.yearOf(world.week);
+    if (!Social.canPostIn(year)) {
+      throw GameException('socialLocked', 'No social media yet');
+    }
+    if (world.social.postsIn(world.week) >= Social.postsPerWeek) {
+      throw GameException('postLimit', 'Posted enough this week');
+    }
+    if (_p.creativeEnergy < kind.energy) {
+      throw GameException('tooTired', 'Not enough energy');
+    }
+    if (kind == PostKind.teaser && !Social.hasTeaser(world, _p)) {
+      throw GameException('nothingToTease', 'Nothing unreleased');
+    }
+    if (kind == PostKind.promote) _ownSong(songId);
+    final out = Social.post(world, _p, kind, songId: songId);
+    _saveNow();
+    return out;
+  }
 
   // --------------------------------------------------------------- awards
 
@@ -1267,14 +1294,17 @@ class GameSession {
     final before = _Snapshot(world, p);
     final r = _sim.step();
     final milestones = Milestone.check(world, p);
+    final events = [
+      ..._events(r, before),
+      for (final m in milestones) MilestoneReached(m),
+    ];
+    // Fans talk about the week (docs K93).
+    SocialFeed.react(world, p, events, r.week);
     _store.commitWeek(world, r);
     slots.writeSummary(slotId, world);
     return WeekReport(
       week: r.week,
-      events: [
-        ..._events(r, before),
-        for (final m in milestones) MilestoneReached(m),
-      ],
+      events: events,
       moneyDeltaCents: p.moneyCents - before.money,
     );
   }

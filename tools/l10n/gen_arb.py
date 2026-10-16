@@ -910,6 +910,44 @@ k('errorVersionOut','That version is already out.','Bu sürüm zaten çıktı.')
 k('errorEditionOut','That edition is already out.','Bu baskı zaten çıktı.')
 k('errorNotSingle','Only released singles get physical editions.','Fiziksel baskı sadece çıkmış single’lara yapılır.')
 
+# social media (docs K93)
+import sys as _sys
+_sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from social_texts import TOPICS as _SOCIAL
+for _t, _vs in _SOCIAL.items():
+    for _i, (_en, _tr) in enumerate(_vs):
+        k('sm' + _t[0].upper() + _t[1:] + str(_i), _en, _tr,
+          **{_p: 'String' for _p in sorted(set(re.findall(r'\{(\w+)\}', _en)))})
+k('networkForum','Fan forum','Hayran forumu')
+k('networkMyPlace','MyPlace','MyPlace')
+k('networkChirper','Chirper','Chirper')
+k('socialCardTitle','Social media','Sosyal medya')
+k('socialOpen','Open the feed','Akışı aç')
+k('socialPostsLeft','{count} posts left this week','Bu hafta {count} paylaşım hakkın var', count='int')
+k('socialLocked','No social media yet: fans talk about you on forums. From 2004 you can post on MyPlace.','Henüz sosyal medya yok: hayranlar seni forumlarda konuşuyor. 2004’ten itibaren MyPlace’te paylaşım yapabilirsin.')
+k('socialEmpty','Nothing yet. Post something, or put out music and fans will talk.','Henüz bir şey yok. Bir şey paylaş ya da müzik çıkar, hayranlar konuşsun.')
+k('socialNoFans','No fan posts yet','Henüz hayran paylaşımı yok')
+k('postTeaser','Teaser','Teaser')
+k('postTeaserHint','Hype for what is coming','Gelecek işe hype')
+k('postStudio','Behind the scenes','Kamera arkası')
+k('postStudioHint','Fans feel closer, a few new ones find you','Hayranlar yakınlaşır, birkaç yenisi seni bulur')
+k('postFans','Q&A with fans','Hayranlarla soru-cevap')
+k('postFansHint','Devotion','Bağlılık')
+k('postHotTake','Hot take','İddialı çıkış')
+k('postHotTakeHint','Everyone talks about it, but it can backfire','Herkes konuşur ama geri tepebilir')
+k('postPromote','Share a song','Şarkı paylaş')
+k('postPromoteHint','A small wave of listening','Küçük bir dinlenme dalgası')
+k('postEnergy','{energy} energy','{energy} enerji', energy='int')
+k('postDone','Posted. Fans are answering.','Paylaşıldı. Hayranlar cevap veriyor.')
+k('postBacklash','That one backfired: some fans are upset.','Bu geri tepti: bazı hayranlar kızgın.')
+k('pickSongToShare','Which song?','Hangi şarkı?')
+k('feedThisWeek','this week','bu hafta')
+k('feedWeeksAgo','{count} wk ago','{count} hf önce', count='int')
+k('errorSocialLocked','There is no social media yet.','Henüz sosyal medya yok.')
+k('errorPostLimit','You have posted enough this week.','Bu hafta yeterince paylaşım yaptın.')
+k('errorTooTired','Not enough creative energy.','Yeterli yaratıcı enerji yok.')
+k('errorNothingToTease','Nothing unreleased to tease: write a song first.','Gösterecek çıkmamış bir şey yok: önce şarkı yaz.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

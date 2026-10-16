@@ -335,6 +335,55 @@ void main() {
       g.close();
     });
 
+    test('social media: posts, fan replies and reactions (K93)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final id = g.slotId;
+      expect(g.social.network, SocialNetwork.chirper);
+      expect(g.social.items, isEmpty);
+      expect(() => g.post(PostKind.teaser), _code('nothingToTease'));
+      final song = g.writeSong(budget: BudgetTier.high);
+      final hype = g.player.hype;
+      g.post(PostKind.teaser);
+      expect(g.player.hype, greaterThan(hype));
+      final feed = g.social.items;
+      // The post first, the replies under it.
+      expect(feed.first.isPlayer, isTrue);
+      expect(feed.first.topic, FanTopic.postTeaser);
+      expect(feed[1].topic, FanTopic.replyTeaser);
+      expect(feed.first.likes, greaterThan(0));
+      g.post(PostKind.fans);
+      g.post(PostKind.studio);
+      expect(g.social.postsLeft, 0);
+      expect(() => g.post(PostKind.studio), _code('postLimit'));
+      // Fans react to a release the week it comes out.
+      g.releaseSingle(song.id);
+      g.advanceWeek();
+      final reactions = g.social.items.where((i) =>
+          i.topic == FanTopic.releaseLove ||
+          i.topic == FanTopic.releaseMixed ||
+          i.topic == FanTopic.releaseHate);
+      expect(reactions, hasLength(2));
+      expect(reactions.first.title, song.title);
+      expect(g.social.postsLeft, Social.postsPerWeek);
+      g.post(PostKind.promote, songId: song.id);
+      final count = g.social.items.length;
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.social.items.length, count);
+      g.close();
+
+      // Before social media there is only the fan forum.
+      final old = GameSession.start(slots, _setup(startYear: 2002));
+      expect(old.social.network, SocialNetwork.forum);
+      expect(() => old.post(PostKind.fans), _code('socialLocked'));
+      old.close();
+    });
+
     test('award shows: invitation, the night and the results (K91)', () {
       var g = GameSession.start(
           slots,

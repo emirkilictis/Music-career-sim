@@ -101,6 +101,8 @@ class SaveStore {
         .addAll(FestivalBooking.decode(meta['festivals'] as String?));
     // Award shows (docs K91).
     w.awardShows.addAll(AwardShow.decode(meta['awards'] as String?));
+    // Social media (docs K93).
+    w.social.decode(meta['social'] as String?);
     for (final (key, arr) in _metaArrays(w)) {
       for (var i = 0; i < arr.length; i++) {
         arr[i] = _d(meta['$key$i']);
@@ -328,6 +330,7 @@ class SaveStore {
       'tourRecords': TourRecord.encode(w.tourRecords),
       'festivals': FestivalBooking.encode(w.festivalBookings),
       'awards': AwardShow.encode(w.awardShows),
+      'social': w.social.encode(),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

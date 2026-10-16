@@ -2635,5 +2635,508 @@
   },
   "errorVersionOut": "That version is already out.",
   "errorEditionOut": "That edition is already out.",
-  "errorNotSingle": "Only released singles get physical editions."
+  "errorNotSingle": "Only released singles get physical editions.",
+  "smReleaseLove0": "{title} is on repeat. I'm not okay 😭",
+  "@smReleaseLove0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReleaseLove1": "{name} did it again. {title} is perfect.",
+  "@smReleaseLove1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReleaseLove2": "Not me crying to {title} at 3am",
+  "@smReleaseLove2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReleaseMixed0": "{title} is growing on me… I think?",
+  "@smReleaseMixed0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReleaseMixed1": "Okay {title} is fine but we know {name} can do better",
+  "@smReleaseMixed1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReleaseMixed2": "Third listen of {title} and the chorus finally clicked",
+  "@smReleaseMixed2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReleaseHate0": "{title}… we need to talk, {name}",
+  "@smReleaseHate0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReleaseHate1": "Who approved {title}? Genuinely asking",
+  "@smReleaseHate1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReleaseHate2": "Skipping {title}. Waiting for the next one.",
+  "@smReleaseHate2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smNumberOne0": "{title} IS NUMBER ONE!!! WE DID IT",
+  "@smNumberOne0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smNumberOne1": "#1. {name} deserves this so much 🥹",
+  "@smNumberOne1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smNumberOne2": "Screenshotting the chart. Framing it.",
+  "smTopTen0": "{title} debuting at #{n}?? Top 10 baby",
+  "@smTopTen0": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smTopTen1": "Stream {title} so we climb from #{n}!",
+  "@smTopTen1": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smTopTen2": "Top 10 with {title}. Told you all.",
+  "@smTopTen2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smBigWeek0": "{n} units in week one?! {name} is unstoppable",
+  "@smBigWeek0": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smBigWeek1": "{title} first week numbers are insane",
+  "@smBigWeek1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smBigWeek2": "Bought every edition of {title}. No regrets.",
+  "@smBigWeek2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCriticHigh0": "Pitchwork gave {title} a {n}. Even the critics get it.",
+  "@smCriticHigh0": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCriticHigh1": "{n}/10 from Pitchwork?! Respect.",
+  "@smCriticHigh1": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "smCriticHigh2": "Critics finally catching up to {name}",
+  "@smCriticHigh2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smCriticLow0": "A {n} for {title}? Pitchwork doesn't know music.",
+  "@smCriticLow0": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCriticLow1": "Ignore the {n}, {title} is a grower",
+  "@smCriticLow1": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCriticLow2": "Pitchwork being Pitchwork again",
+  "smNominated0": "{name} is a Golden Record nominee!!",
+  "@smNominated0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smNominated1": "Nominated. Now let's win it.",
+  "smNominated2": "Planning a watch party for the awards",
+  "smAwardWon0": "WINNER!!! {name} you deserve it all",
+  "@smAwardWon0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smAwardWon1": "Crying at the speech. Golden Record winner {name}.",
+  "@smAwardWon1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smAwardWon2": "The trophy looks good on you",
+  "smAwardRobbed0": "{name} was ROBBED tonight",
+  "@smAwardRobbed0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smAwardRobbed1": "Awards are rigged anyway. We know who won.",
+  "smAwardRobbed2": "Next year. Next year it's ours.",
+  "smScandal0": "Waiting for {name} to explain this…",
+  "@smScandal0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smScandal1": "I'm not reading the comments today",
+  "smScandal2": "Still here, still a fan. Talk to us {name}.",
+  "@smScandal2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smTour0": "Best night of my life. Thank you {name}.",
+  "@smTour0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smTour1": "My voice is gone after that show",
+  "smTour2": "Already missing the tour. Do it again?",
+  "smViral0": "Everyone on my feed is using {title} 😂",
+  "@smViral0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smViral1": "The {title} trend is out of control",
+  "@smViral1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smViral2": "Day one fans watching {title} blow up 🥲",
+  "@smViral2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smFlopEra0": "This era was underrated and I'll die on that hill",
+  "smFlopEra1": "Numbers don't matter, the music was good",
+  "smFlopEra2": "Rest, {name}. Come back stronger.",
+  "@smFlopEra2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHiatus0": "{name} where is the new music 😐",
+  "@smHiatus0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHiatus1": "Day {n} of waiting for {name}",
+  "@smHiatus1": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHiatus2": "Any updates? Anything? A snippet?",
+  "smBattleLost0": "We lost the #1 race by this much. Stream {title}!",
+  "@smBattleLost0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smBattleLost1": "Their fans buy ten copies each, how do we compete",
+  "smBattleLost2": "{title} won in our hearts",
+  "@smBattleLost2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMilestone0": "Another milestone for {name}! So proud",
+  "@smMilestone0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smMilestone1": "Watching {name} grow since day one 🥹",
+  "@smMilestone1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smMilestone2": "History in the making",
+  "smReplyTeaser0": "WHAT IS THIS. drop it now",
+  "smReplyTeaser1": "The snippet is already on repeat",
+  "smReplyTeaser2": "Release date?? please??",
+  "smReplyStudio0": "Studio photos = new music soon 👀",
+  "smReplyStudio1": "Look how happy you look",
+  "smReplyStudio2": "Zooming into the lyrics sheet…",
+  "smReplyFans0": "{name} replied to me!!! I'm framing this",
+  "@smReplyFans0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyFans1": "This is why we love you",
+  "smReplyFans2": "Best Q&A ever",
+  "smReplyHotTake0": "Okay but you're not wrong 💀",
+  "smReplyHotTake1": "{name} chose chaos today",
+  "@smReplyHotTake1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyHotTake2": "Screenshotting before it gets deleted",
+  "smReplyBacklash0": "This was not it, {name}.",
+  "@smReplyBacklash0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyBacklash1": "Unfollowing. Sorry.",
+  "smReplyBacklash2": "Delete this please",
+  "smReplyPromote0": "Streaming {title} right now",
+  "@smReplyPromote0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyPromote1": "{title} deserves way more",
+  "@smReplyPromote1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyPromote2": "Added {title} to every playlist I have",
+  "@smReplyPromote2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smPostTeaser0": "Something's coming… 👀",
+  "smPostTeaser1": "Can't stop listening to this one. Soon.",
+  "smPostTeaser2": "15 seconds of what's next 🎧",
+  "smPostStudio0": "Late night in the studio. Worth it.",
+  "smPostStudio1": "Day 12 of making something special",
+  "smPostStudio2": "The team that makes it happen ❤️",
+  "smPostFans0": "Ask me anything. Go.",
+  "smPostFans1": "Reading your messages tonight. Thank you for everything.",
+  "smPostFans2": "Tell me your favorite song of mine 👇",
+  "smPostHotTake0": "Unpopular opinion: most hits this year are boring.",
+  "smPostHotTake1": "Some artists should stop pretending they write their songs.",
+  "smPostHotTake2": "Award shows don't matter. Never did.",
+  "smPostPromote0": "{title}. Go listen. Now.",
+  "@smPostPromote0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smPostPromote1": "If you haven't heard {title} yet, today's the day",
+  "@smPostPromote1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smPostPromote2": "Thank you for the love on {title} 🙏",
+  "@smPostPromote2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "networkForum": "Fan forum",
+  "networkMyPlace": "MyPlace",
+  "networkChirper": "Chirper",
+  "socialCardTitle": "Social media",
+  "socialOpen": "Open the feed",
+  "socialPostsLeft": "{count} posts left this week",
+  "@socialPostsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "socialLocked": "No social media yet: fans talk about you on forums. From 2004 you can post on MyPlace.",
+  "socialEmpty": "Nothing yet. Post something, or put out music and fans will talk.",
+  "socialNoFans": "No fan posts yet",
+  "postTeaser": "Teaser",
+  "postTeaserHint": "Hype for what is coming",
+  "postStudio": "Behind the scenes",
+  "postStudioHint": "Fans feel closer, a few new ones find you",
+  "postFans": "Q&A with fans",
+  "postFansHint": "Devotion",
+  "postHotTake": "Hot take",
+  "postHotTakeHint": "Everyone talks about it, but it can backfire",
+  "postPromote": "Share a song",
+  "postPromoteHint": "A small wave of listening",
+  "postEnergy": "{energy} energy",
+  "@postEnergy": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "postDone": "Posted. Fans are answering.",
+  "postBacklash": "That one backfired: some fans are upset.",
+  "pickSongToShare": "Which song?",
+  "feedThisWeek": "this week",
+  "feedWeeksAgo": "{count} wk ago",
+  "@feedWeeksAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorSocialLocked": "There is no social media yet.",
+  "errorPostLimit": "You have posted enough this week.",
+  "errorTooTired": "Not enough creative energy.",
+  "errorNothingToTease": "Nothing unreleased to tease: write a song first."
 }

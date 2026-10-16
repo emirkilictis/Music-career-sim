@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'actions.dart';
 import 'ai.dart';
 import 'awards.dart';
+import 'social.dart';
 import 'config/charts.dart';
 import 'config/era_table.dart';
 import 'config/regions.dart';
@@ -814,6 +815,7 @@ class Simulator {
     }
     final nominations = Awards.nominate(w);
     final night = Awards.hold(w);
+    Social.weekly(w);
     if (me != null) {
       toured = Tours.playWeek(w, me);
       if (toured != null) {

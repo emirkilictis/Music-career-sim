@@ -43,6 +43,10 @@ void _playerMoves(World w, int i) {
     Actions.releaseVersion(w, p, single, SongVersion.remix);
     Actions.releaseVariant(w, p, single, SingleFormat.cd);
   }
+  if (i % 7 == 0 && p.creativeEnergy >= 10) {
+    // A post a week now and then (docs K93).
+    Social.post(w, p, i % 14 == 0 ? PostKind.studio : PostKind.fans);
+  }
   if (i == 60) {
     final vault = [
       for (final s in w.songs)
