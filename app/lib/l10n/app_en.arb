@@ -3132,14 +3132,6 @@
   "postHotTakeHint": "Everyone talks about it, but it can backfire",
   "postPromote": "Share a song",
   "postPromoteHint": "A small wave of listening",
-  "postEnergy": "{energy} energy",
-  "@postEnergy": {
-    "placeholders": {
-      "energy": {
-        "type": "int"
-      }
-    }
-  },
   "postDone": "Posted. Fans are answering.",
   "postBacklash": "That one backfired: some fans are upset.",
   "pickSongToShare": "Which song?",
@@ -3154,7 +3146,6 @@
   },
   "errorSocialLocked": "There is no social media yet.",
   "errorPostLimit": "You have posted enough this week.",
-  "errorTooTired": "Not enough creative energy.",
   "errorNothingToTease": "Nothing unreleased to tease: write a song first.",
   "tabForYou": "For you",
   "tabYourPosts": "Your posts",

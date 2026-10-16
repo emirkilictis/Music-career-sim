@@ -607,9 +607,6 @@ class GameSession {
     if (world.social.postsIn(world.week) >= Social.postsPerWeek) {
       throw GameException('postLimit', 'Posted enough this week');
     }
-    if (_p.creativeEnergy < kind.energy) {
-      throw GameException('tooTired', 'Not enough energy');
-    }
     if (kind == PostKind.teaser && !Social.hasTeaser(world, _p)) {
       throw GameException('nothingToTease', 'Nothing unreleased');
     }

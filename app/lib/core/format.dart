@@ -602,7 +602,6 @@ class Fmt {
       'botsBusy' => l.errorBotsBusy,
       'cannotPitch' => l.errorCannotPitch,
       'postLimit' => l.errorPostLimit,
-      'tooTired' => l.errorTooTired,
       'nothingToTease' => l.errorNothingToTease,
       'variantOut' => l.errorEditionOut,
       'notSingle' => l.errorNotSingle,

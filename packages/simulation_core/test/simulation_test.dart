@@ -1773,15 +1773,13 @@ void versionTests() {
 void streamingToolTests() {
   test('bought streams count, and a caught song loses them (K95)', () {
     final base = _newcomerSingle(95, weeks: 1);
-    final bought = _newcomerSingle(95,
-        extra: (w, p, s) {
-          final money = p.moneyCents;
-          StreamingTools.buyBots(w, p, s, BotPackage.medium);
-          expect(money - p.moneyCents, BotPackage.medium.costCents);
-          expect(() => StreamingTools.buyBots(w, p, s, BotPackage.small),
-              throwsA(isA<ActionException>()));
-        },
-        weeks: 1);
+    final bought = _newcomerSingle(95, extra: (w, p, s) {
+      final money = p.moneyCents;
+      StreamingTools.buyBots(w, p, s, BotPackage.medium);
+      expect(money - p.moneyCents, BotPackage.medium.costCents);
+      expect(() => StreamingTools.buyBots(w, p, s, BotPackage.small),
+          throwsA(isA<ActionException>()));
+    }, weeks: 1);
     // 40% of the package in week one, a quarter filtered out.
     expect(bought.s.weekStreams - base.s.weekStreams,
         closeTo(5e6 * 0.4 * 0.75, 2e5));
@@ -1811,8 +1809,7 @@ void streamingToolTests() {
   test('autoplay: more listening, less royalty per stream (K96)', () {
     final off = _newcomerSingle(96, weeks: 3);
     final on = _newcomerSingle(96,
-        extra: (w, p, s) => StreamingTools.setAutoplay(w, s, true),
-        weeks: 3);
+        extra: (w, p, s) => StreamingTools.setAutoplay(w, s, true), weeks: 3);
     expect(on.s.weekStreams, greaterThan(off.s.weekStreams * 1.1));
     final perStreamOff = off.s.revenueCents / off.s.lifetimeStreams;
     final perStreamOn = on.s.revenueCents / on.s.lifetimeStreams;

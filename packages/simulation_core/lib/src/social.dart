@@ -12,27 +12,23 @@ import 'world.dart';
 /// (read only), then MyPlace, then Chirper.
 enum SocialNetwork { forum, myPlace, chirper }
 
-/// What the player can post (docs K93).
+/// What the player can post (docs K93). Posting costs no energy (docs
+/// K98: writing songs takes enough); three posts a week at most.
 enum PostKind {
   /// A snippet of something unreleased: hype for what is coming.
-  teaser(5),
+  teaser,
 
   /// Behind the scenes: fans feel closer, a few new ones find you.
-  studio(5),
+  studio,
 
   /// Answering fans: devotion.
-  fans(10),
+  fans,
 
   /// A bold opinion: everyone talks, but it can backfire.
-  hotTake(5),
+  hotTake,
 
   /// Pushing a released song: a small wave of listening.
-  promote(5);
-
-  const PostKind(this.energy);
-
-  /// Creative energy it takes.
-  final double energy;
+  promote,
 }
 
 /// What a feed item is about; each has [Social.variants] wordings. Index
@@ -211,7 +207,6 @@ abstract final class Social {
     if (st.postsIn(w.week) >= postsPerWeek) {
       throw ActionException('Posted enough this week');
     }
-    if (a.creativeEnergy < kind.energy) throw ActionException('Too tired');
     Song? song;
     if (kind == PostKind.teaser && !hasTeaser(w, a)) {
       throw ActionException('Nothing to tease');
@@ -230,7 +225,6 @@ abstract final class Social {
         RandomStream.keyed(w.seed, w.week, a.id * 8 + made, RngPurpose.social);
     final f = math.pow(0.7, made).toDouble();
     final charm = 0.5 + a.skills.charisma / 100;
-    a.creativeEnergy -= kind.energy;
     var hype = 0.0, fans = 0.0, devotion = 0.0;
     var backlash = false;
     switch (kind) {

@@ -450,8 +450,8 @@ void main() {
       while (GameTime.weekOfYear(g.week) <= Awards.ceremonyWeekOfYear) {
         final week = g.advanceWeek().events;
         events.addAll(week);
-        if (week.any((e) =>
-            e is OpportunityCame && e.kind == OpportunityKind.award)) {
+        if (week.any(
+            (e) => e is OpportunityCame && e.kind == OpportunityKind.award)) {
           expect(g.player.opportunity!.nominations, 1);
           expect(g.player.opportunity!.weeksLeft, 1);
           g.answerOpportunity(OpportunityChoice.perform);

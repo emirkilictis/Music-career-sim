@@ -125,6 +125,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F60 | (Oyuncu topluluğu) **Sözleşmeler, kampanyalar, müzikten kazanılan para, radyoya pushlama.** | Büyük kısmı var: şirket sözleşmeleri (K54/K78), kampanyalar (K57/K81), şarkı/albüm geliri (K60), paralı radyo tanıtımı (K84). Sözleşme pazarlığı derinleşebilir. |
 | F61 | (Oyuncu topluluğu) **Oyunu zorlaştır.** | Not alındı; F24 ile birlikte düşünülecek. |
 | F62 | (Oyuncu topluluğu) **Telefonda nasıl oynanır?** | Android: APK paylaşılabilir (docs). iPhone: TestFlight (Apple geliştirici hesabı) gerekir. |
+| F63 | **Chirper paylaşımları enerji yemesin; şarkı yazmak zaten yeterince yiyor** (Emir). | ✅ K98: paylaşımlar enerji harcamaz, haftada 3 sınırı kaldı. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

@@ -111,10 +111,7 @@ class _SocialScreenState extends State<SocialScreen> {
       isScrollControlled: true,
       backgroundColor: SocialSkin.of(v.network).bg,
       shape: const RoundedRectangleBorder(),
-      builder: (_) => _ComposeSheet(
-          view: v,
-          state: widget.state,
-          energy: widget.state.player.creativeEnergy),
+      builder: (_) => _ComposeSheet(view: v, state: widget.state),
     );
     if (kind != null) await _post(kind);
   }
@@ -592,11 +589,9 @@ class _PostButton extends StatelessWidget {
 
 /// Write a post: pick what to share; each shows what it does.
 class _ComposeSheet extends StatefulWidget {
-  const _ComposeSheet(
-      {required this.view, required this.state, required this.energy});
+  const _ComposeSheet({required this.view, required this.state});
   final SocialView view;
   final CareerState state;
-  final double energy;
 
   @override
   State<_ComposeSheet> createState() => _ComposeSheetState();
@@ -606,7 +601,6 @@ class _ComposeSheetState extends State<_ComposeSheet> {
   PostKind? _kind;
 
   bool _can(PostKind k) =>
-      widget.energy >= k.energy &&
       (k != PostKind.teaser || widget.view.hasTeaser) &&
       (k != PostKind.promote || widget.view.songs.isNotEmpty);
 
@@ -666,8 +660,7 @@ class _ComposeSheetState extends State<_ComposeSheet> {
                 shape: chirper
                     ? const StadiumBorder()
                     : const RoundedRectangleBorder(),
-                label: Text(
-                    '${fmt.postKind(kind)} · ${l.postEnergy(kind.energy.round())}',
+                label: Text(fmt.postKind(kind),
                     style: TextStyle(
                         color: k == kind
                             ? Colors.white
