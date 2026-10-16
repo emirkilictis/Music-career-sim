@@ -3106,6 +3106,30 @@
     }
   },
   "smBotsCaught2": "Real fans stream for real. Disappointed.",
+  "smRivalPurge0": "Streamify purged {title} lmao the numbers were never real",
+  "@smRivalPurge0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalPurge1": "Not {title} losing millions of streams overnight 💀",
+  "@smRivalPurge1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalPurge2": "And they said our streams were fake. Look at {title} now",
+  "@smRivalPurge2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "networkForum": "Fan forum",
   "networkMyPlace": "MyPlace",
   "networkChirper": "Chirper",
@@ -3262,5 +3286,32 @@
   "errorNoStreaming": "Not in this year yet.",
   "errorBotsBusy": "Not possible on this song now.",
   "errorCannotPitch": "This song can no longer be pitched.",
-  "totalUnits": "Total units"
+  "totalUnits": "Total units",
+  "removalTitle": "Streams removed",
+  "removalBody": "Streamify found bought streams on {title}.",
+  "@removalBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "removalRemoved": "−{count} streams",
+  "@removalRemoved": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "removalRefund": "Royalties paid back: {money}",
+  "@removalRefund": {
+    "placeholders": {
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "removalFilter": "The charts count it at half for 4 weeks",
+  "removalFans": "Fans are talking about it on social media"
 }

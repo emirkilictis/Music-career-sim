@@ -1770,7 +1770,8 @@ class GameSession {
     for (final id in r.botsCaught) {
       final s = w.songs[id];
       events.add(s.primaryArtistId == p.id
-          ? BotsCaught(id, s.botDelivered)
+          ? BotsCaught(id, s.botDelivered,
+              refundCents: (s.botDelivered * 0.35 * p.artistShare).round())
           : RivalBotsCaught(id, s.primaryArtistId, s.botDelivered));
     }
     for (final id in w.playerSongIds) {

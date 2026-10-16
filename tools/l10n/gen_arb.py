@@ -987,6 +987,14 @@ k('errorCannotPitch','This song can no longer be pitched.','Bu şarkı artık ö
 
 k('totalUnits','Total units','Toplam ünite')
 
+# stream removals alert (docs K95, F65)
+k('removalTitle','Streams removed','Stream’ler silindi')
+k('removalBody','Streamify found bought streams on {title}.','Streamify {title} için satın alınmış stream’leri buldu.', title='String')
+k('removalRemoved','−{count} streams','−{count} stream', count='String')
+k('removalRefund','Royalties paid back: {money}','Geri ödenen telif: {money}', money='String')
+k('removalFilter','The charts count it at half for 4 weeks','Listeler şarkıyı 4 hafta yarım sayacak')
+k('removalFans','Fans are talking about it on social media','Hayranlar sosyal medyada bunu konuşuyor')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

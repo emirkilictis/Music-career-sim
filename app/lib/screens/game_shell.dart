@@ -8,6 +8,7 @@ import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/celebration.dart';
+import '../widgets/removal_alert.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
 import '../widgets/week_transition.dart';
@@ -87,6 +88,11 @@ class _GameShellState extends State<GameShell> {
           lines.where((l) => isCelebration(l, state.before)).firstOrNull;
       if (big != null) {
         await showCelebration(context, big, state);
+        if (!mounted) return;
+      }
+      // Bought streams removed: its own alert (docs K95, F65).
+      for (final r in lines.where((l) => l.event is BotsCaught)) {
+        await showRemovalAlert(context, r);
         if (!mounted) return;
       }
       final major = lines.where((l) => l.event.isMajor && l != big).toList();

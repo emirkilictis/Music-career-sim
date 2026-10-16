@@ -985,6 +985,9 @@
   "smBotsCaught0": "Stream’ler mi silindi?? {name} açıkla",
   "smBotsCaught1": "Zaten {title} rakamları tuhaftı, biliyordum",
   "smBotsCaught2": "Gerçek hayranlar gerçekten dinler. Hayal kırıklığı.",
+  "smRivalPurge0": "Streamify {title} şarkısını temizledi, o rakamlar zaten hiç gerçek değildi",
+  "smRivalPurge1": "{title} bir gecede milyonlarca stream kaybetti 💀",
+  "smRivalPurge2": "Bizim stream'lere sahte diyorlardı. {title} haline bak",
   "networkForum": "Hayran forumu",
   "networkMyPlace": "MyPlace",
   "networkChirper": "Chirper",
@@ -1048,5 +1051,11 @@
   "errorNoStreaming": "Bu yılda henüz yok.",
   "errorBotsBusy": "Bu şarkıda şu an olmaz.",
   "errorCannotPitch": "Bu şarkı artık önerilemez.",
-  "totalUnits": "Toplam ünite"
+  "totalUnits": "Toplam ünite",
+  "removalTitle": "Stream’ler silindi",
+  "removalBody": "Streamify {title} için satın alınmış stream’leri buldu.",
+  "removalRemoved": "−{count} stream",
+  "removalRefund": "Geri ödenen telif: {money}",
+  "removalFilter": "Listeler şarkıyı 4 hafta yarım sayacak",
+  "removalFans": "Hayranlar sosyal medyada bunu konuşuyor"
 }

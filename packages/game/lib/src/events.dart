@@ -270,14 +270,18 @@ class FestivalPlayed extends GameEvent {
 /// The platform caught the player's bought streams (docs K95): removed,
 /// royalties paid back, the song filtered from the charts for a while.
 class BotsCaught extends GameEvent {
-  const BotsCaught(this.songId, this.removed);
+  const BotsCaught(this.songId, this.removed, {this.refundCents = 0});
   final int songId;
   final double removed;
+
+  /// Royalties paid back for the removed streams.
+  final int refundCents;
   @override
   bool get isMajor => true;
 }
 
-/// Industry headline: a rival's streams were removed for botting.
+/// A rival's streams were removed for botting: shown in the player's news
+/// too (docs K95, F65).
 class RivalBotsCaught extends GameEvent {
   const RivalBotsCaught(this.songId, this.artistId, this.removed);
   final int songId;
@@ -285,8 +289,6 @@ class RivalBotsCaught extends GameEvent {
   final double removed;
   @override
   bool get isMajor => false;
-  @override
-  bool get isIndustry => true;
 }
 
 /// The playlist editors passed on the player's pitch (docs K97).

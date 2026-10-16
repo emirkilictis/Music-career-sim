@@ -15,6 +15,7 @@ import 'package:music_career_sim/screens/charts_tab.dart';
 import 'package:music_career_sim/widgets/art.dart';
 import 'package:music_career_sim/widgets/celebration.dart';
 import 'package:music_career_sim/widgets/media_tile.dart';
+import 'package:music_career_sim/widgets/removal_alert.dart';
 
 import 'support.dart';
 
@@ -381,6 +382,14 @@ void main() {
             title: 'Kiss (Silent Hours)', songId: hit),
         state));
     await shot(tester, '25_celebration_first_chart');
+    await tester.tap(_ci('Continue'));
+    await tester.pumpAndSettle();
+    // Bought streams caught and removed (docs K95, F65).
+    unawaited(showRemovalAlert(
+        ctx,
+        EventLine(BotsCaught(hit, 4.2e6, refundCents: 1029000),
+            title: 'Kiss (Silent Hours)', songId: hit)));
+    await shot(tester, '25b_streams_removed');
     await tester.tap(_ci('Continue'));
     await tester.pumpAndSettle();
   });

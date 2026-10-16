@@ -98,5 +98,8 @@ String socialText(AppLocalizations l, FanTopic topic, int variant,
       (FanTopic.botsCaught, 0) => l.smBotsCaught0(name),
       (FanTopic.botsCaught, 1) => l.smBotsCaught1(title),
       (FanTopic.botsCaught, 2) => l.smBotsCaught2,
+      (FanTopic.rivalPurge, 0) => l.smRivalPurge0(title),
+      (FanTopic.rivalPurge, 1) => l.smRivalPurge1(title),
+      (FanTopic.rivalPurge, 2) => l.smRivalPurge2(title),
       _ => '',
     };

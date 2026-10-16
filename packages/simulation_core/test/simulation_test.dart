@@ -1796,7 +1796,9 @@ void streamingToolTests() {
         if (week.botsCaught.contains(r.s.id)) {
           wasCaught = true;
           expect(r.s.botStatus, BotStatus.caught);
-          expect(r.s.lifetimeStreams, lessThan(before));
+          // Everything bought that counted is gone again.
+          expect(r.s.lifetimeStreams,
+              lessThan(before + r.s.weekStreams - r.s.botDelivered * 0.99));
           expect(r.w.week < r.s.chartFilterUntil, isTrue);
         }
       }
@@ -1820,11 +1822,12 @@ void streamingToolTests() {
     var landed = 0;
     for (var seed = 11; seed < 23; seed++) {
       final r = _newcomerSingle(seed, extra: (w, p, s) {
-        expect(StreamingTools.canPitch(w, s), isTrue);
+        // A campaign may already have landed a playlist: no pitch then.
+        if (!StreamingTools.canPitch(w, s)) return;
         StreamingTools.pitch(w, s);
         expect(StreamingTools.canPitch(w, s), isFalse);
       }, weeks: 1);
-      if (r.s.playlistWeek == r.s.pitchWeek) landed++;
+      if (r.s.pitchWeek >= 0 && r.s.playlistWeek == r.s.pitchWeek) landed++;
     }
     printOnFailure('landed $landed of 12');
     expect(landed, inInclusiveRange(1, 10));

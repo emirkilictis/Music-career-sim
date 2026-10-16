@@ -69,7 +69,10 @@ abstract final class StreamingTools {
     final organic = math.max(0.0, s.weekStreams - delivered);
     final share = delivered / (organic + delivered + 1);
     final year = GameTime.yearOf(w.week);
-    final chance = (0.03 + 0.4 * share) * (year >= 2020 ? 1.3 : 1.0);
+    // Platforms are good at this (docs K95, F65): a quarter of the weeks
+    // even for a few bot streams on a hit, near certain for a fake hit.
+    final chance = math.min(
+        0.95, (0.25 + 0.6 * share) * (year >= 2020 ? 1.3 : 1.0));
     final r = RandomStream.keyed(w.seed, w.week, s.id, RngPurpose.bots);
     if (!r.chance(chance)) return false;
     _caught(w, s);

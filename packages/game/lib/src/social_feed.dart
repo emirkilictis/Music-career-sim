@@ -103,6 +103,8 @@ abstract final class SocialFeed {
         case BotsCaught(:final songId):
           fan(FanTopic.botsCaught, songId: songId);
           fan(FanTopic.botsCaught, songId: songId);
+        case RivalBotsCaught(:final songId):
+          fan(FanTopic.rivalPurge, songId: songId);
         case MilestoneReached():
           fan(FanTopic.milestone);
         default:

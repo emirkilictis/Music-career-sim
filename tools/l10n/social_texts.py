@@ -152,4 +152,9 @@ TOPICS = {
   ("I always knew those {title} numbers were weird", "Zaten {title} rakamları tuhaftı, biliyordum"),
   ("Real fans stream for real. Disappointed.", "Gerçek hayranlar gerçekten dinler. Hayal kırıklığı."),
  ],
+ 'rivalPurge': [
+  ("Streamify purged {title} lmao the numbers were never real", "Streamify {title} şarkısını temizledi, o rakamlar zaten hiç gerçek değildi"),
+  ("Not {title} losing millions of streams overnight 💀", "{title} bir gecede milyonlarca stream kaybetti 💀"),
+  ("And they said our streams were fake. Look at {title} now", "Bizim stream'lere sahte diyorlardı. {title} haline bak"),
+ ],
 }
