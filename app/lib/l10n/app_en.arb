@@ -3138,5 +3138,38 @@
   "errorSocialLocked": "There is no social media yet.",
   "errorPostLimit": "You have posted enough this week.",
   "errorTooTired": "Not enough creative energy.",
-  "errorNothingToTease": "Nothing unreleased to tease: write a song first."
+  "errorNothingToTease": "Nothing unreleased to tease: write a song first.",
+  "tabForYou": "For you",
+  "tabYourPosts": "Your posts",
+  "composeHint": "What’s happening?",
+  "postButton": "Post",
+  "followingLabel": "Following",
+  "followersLabel": "Followers",
+  "friendsCount": "{count} friends",
+  "@friendsCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "fanComments": "Fan comments",
+  "postBulletin": "Post a bulletin",
+  "forumTitle": "Official {name} fan forum",
+  "@forumTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "forumReplies": "{count} replies",
+  "@forumReplies": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chirperNoPosts": "You haven’t posted yet."
 }

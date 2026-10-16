@@ -340,7 +340,7 @@ class _ToursBoard extends StatelessWidget {
                       final top = r.rank == 1;
                       return Container(
                         color: r.isPlayer
-                            ? const Color(0xFFFFE9DE)
+                            ? const Color(0xFFE6EAFF)
                             : PaperColors.card,
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
                         child: Row(children: [
@@ -464,7 +464,7 @@ class _ChartLine extends StatelessWidget {
         fontSize: 17,
         color: PaperColors.ink);
     return Material(
-      color: r.isPlayer ? const Color(0xFFFFE9DE) : PaperColors.card,
+      color: r.isPlayer ? const Color(0xFFE6EAFF) : PaperColors.card,
       child: InkWell(
         onTap: onTap,
         child: Container(

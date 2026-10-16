@@ -353,15 +353,20 @@ class ArtistAvatar extends StatelessWidget {
       required this.seed,
       this.size = 44,
       this.artistId,
-      this.photo = ArtistPhoto.general});
+      this.photo = ArtistPhoto.general,
+      this.square = false});
   final String name;
   final int seed;
   final double size;
   final int? artistId;
   final ArtistPhoto photo;
 
+  /// A square picture (2000s profile pages) instead of a round one.
+  final bool square;
+
   String get _initials {
-    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
+    final parts = name.trim().split(RegExp(r'\s+')).where((p) =>
+        p.isNotEmpty && RegExp(r'^[\p{L}\d]', unicode: true).hasMatch(p));
     final letters = parts.take(2).map((p) => p.characters.first.toUpperCase());
     return letters.isEmpty ? '?' : letters.join();
   }
@@ -372,14 +377,16 @@ class ArtistAvatar extends StatelessWidget {
         ? null
         : _images(context)?.artistPhoto(artistId!, photo);
     if (path != null) {
-      return ClipOval(child: _Photo(path: path, size: size));
+      final photo = _Photo(path: path, size: size);
+      return square ? ClipRect(child: photo) : ClipOval(child: photo);
     }
     final (bg, fg, _) = _schemes[_hash(seed + 7) % _schemes.length];
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: bg),
+      decoration: BoxDecoration(
+          shape: square ? BoxShape.rectangle : BoxShape.circle, color: bg),
       child: Text(
         _initials,
         style: TextStyle(

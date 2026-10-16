@@ -1297,6 +1297,7 @@ class SocialView {
       : network = Social.networkIn(GameTime.yearOf(w.week)),
         canPost = Social.canPostIn(GameTime.yearOf(w.week)),
         followers = Social.followers(w, p),
+        verified = p.fame >= 0.1 || Social.followers(w, p) >= 1e5,
         postsLeft = Social.postsPerWeek - w.social.postsIn(w.week),
         hasTeaser = Social.hasTeaser(w, p),
         songs = [
@@ -1324,6 +1325,9 @@ class SocialView {
   final SocialNetwork network;
   final bool canPost;
   final double followers;
+
+  /// The blue tick: famous or big enough (as on the streaming profiles).
+  final bool verified;
   final int postsLeft;
 
   /// Something unreleased to tease.

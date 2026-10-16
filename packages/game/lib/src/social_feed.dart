@@ -12,12 +12,16 @@ abstract final class SocialFeed {
     final r = RandomStream.keyed(w.seed, week, p.id, RngPurpose.social + 1);
     final followers = Social.followers(w, p);
     final items = <SocialItem>[];
+    // The same topic twice in a week takes its next wording.
+    final base = r.nextInt(Social.variants);
+    final used = <FanTopic, int>{};
     void fan(FanTopic topic,
         {int songId = -1, int albumId = -1, int number = 0}) {
       items.add(SocialItem(
         week: week,
         topic: topic,
-        variant: r.nextInt(Social.variants),
+        variant:
+            (base + (used[topic] = (used[topic] ?? -1) + 1)) % Social.variants,
         fan: r.nextInt(1 << 20),
         songId: songId,
         albumId: albumId,

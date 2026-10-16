@@ -948,6 +948,19 @@ k('errorPostLimit','You have posted enough this week.','Bu hafta yeterince payla
 k('errorTooTired','Not enough creative energy.','Yeterli yaratıcı enerji yok.')
 k('errorNothingToTease','Nothing unreleased to tease: write a song first.','Gösterecek çıkmamış bir şey yok: önce şarkı yaz.')
 
+k('tabForYou','For you','Sana özel')
+k('tabYourPosts','Your posts','Gönderilerin')
+k('composeHint','What’s happening?','Neler oluyor?')
+k('postButton','Post','Gönder')
+k('followingLabel','Following','Takip edilen')
+k('followersLabel','Followers','Takipçi')
+k('friendsCount','{count} friends','{count} arkadaş', count='String')
+k('fanComments','Fan comments','Hayran yorumları')
+k('postBulletin','Post a bulletin','Duyuru yayınla')
+k('forumTitle','Official {name} fan forum','Resmi {name} hayran forumu', name='String')
+k('forumReplies','{count} replies','{count} cevap', count='int')
+k('chirperNoPosts','You haven’t posted yet.','Henüz bir şey paylaşmadın.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

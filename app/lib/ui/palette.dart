@@ -32,9 +32,10 @@ class Palette {
   final Color text, textMuted, textFaint;
   final Color lilac, pink, peach, mint, sky, butter, coral;
 
-  /// Ink (the default; docs K88): near-black paper, warm white type, one
-  /// signal-orange accent and flat, strong category colors. No tints of
-  /// blue or lilac: it should read like a music paper, not an app kit.
+  /// Ink (the default; docs K88, K94): near-black paper, warm white type,
+  /// one cobalt accent (picked over the first signal orange, which read
+  /// like a well-known site on black) and flat, strong category colors.
+  /// The neutrals stay untinted: a music paper, not an app kit.
   static const ink = Palette(
     isLight: false,
     bg: Color(0xFF0E0E0E),
@@ -43,12 +44,12 @@ class Palette {
     line: Color(0xFF2E2E2E),
     surfaceLow: Color(0xFF0A0A0A),
     surfaceHighest: Color(0xFF2A2A2A),
-    accentSoft: Color(0xFF3A1C0E),
-    onAccent: Color(0xFF0E0E0E),
+    accentSoft: Color(0xFF161C48),
+    onAccent: Color(0xFFFFFFFF),
     text: Color(0xFFF3F1EC),
     textMuted: Color(0xFFA9A59D),
     textFaint: Color(0xFF6F6B64),
-    lilac: Color(0xFFFF5A1F),
+    lilac: Color(0xFF4B63FF),
     pink: Color(0xFFFF3D6E),
     peach: Color(0xFFFFB020),
     mint: Color(0xFF2BD47D),
@@ -57,7 +58,7 @@ class Palette {
     coral: Color(0xFFFF4B3E),
   );
 
-  /// Paper: off-white newsprint, black type, the same signal accent.
+  /// Paper: off-white newsprint, black type, the same cobalt accent.
   static const light = Palette(
     isLight: true,
     bg: Color(0xFFF2EFE8),
@@ -66,12 +67,12 @@ class Palette {
     line: Color(0xFFD9D4C9),
     surfaceLow: Color(0xFFFFFFFF),
     surfaceHighest: Color(0xFFE1DCD1),
-    accentSoft: Color(0xFFFFE1D4),
+    accentSoft: Color(0xFFE1E6FF),
     onAccent: Color(0xFFFFFFFF),
     text: Color(0xFF111111),
     textMuted: Color(0xFF57534C),
     textFaint: Color(0xFF8C877E),
-    lilac: Color(0xFFE8480C),
+    lilac: Color(0xFF2F48E0),
     pink: Color(0xFFD92B5A),
     peach: Color(0xFFDB8A00),
     mint: Color(0xFF0E9F5B),

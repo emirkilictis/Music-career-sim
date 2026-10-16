@@ -1010,5 +1010,17 @@
   "errorSocialLocked": "Henüz sosyal medya yok.",
   "errorPostLimit": "Bu hafta yeterince paylaşım yaptın.",
   "errorTooTired": "Yeterli yaratıcı enerji yok.",
-  "errorNothingToTease": "Gösterecek çıkmamış bir şey yok: önce şarkı yaz."
+  "errorNothingToTease": "Gösterecek çıkmamış bir şey yok: önce şarkı yaz.",
+  "tabForYou": "Sana özel",
+  "tabYourPosts": "Gönderilerin",
+  "composeHint": "Neler oluyor?",
+  "postButton": "Gönder",
+  "followingLabel": "Takip edilen",
+  "followersLabel": "Takipçi",
+  "friendsCount": "{count} arkadaş",
+  "fanComments": "Hayran yorumları",
+  "postBulletin": "Duyuru yayınla",
+  "forumTitle": "Resmi {name} hayran forumu",
+  "forumReplies": "{count} cevap",
+  "chirperNoPosts": "Henüz bir şey paylaşmadın."
 }

@@ -619,49 +619,87 @@ class _SocialCardState extends State<_SocialCard> {
     final v = _view;
     if (v == null) return const SizedBox.shrink();
     final latest = v.items.where((i) => !i.isPlayer).firstOrNull;
-    return _Card(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(children: [
-          Icon(Icons.forum_rounded, color: AppColors.textMuted, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(caps(context, fmt.network(v.network)),
-                style: capsStyle(TextStyle(
-                    color: AppColors.textMuted,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13))),
+    // Dressed as the network itself (docs K94).
+    final skin = SocialSkin.of(v.network);
+    final chirper = skin == SocialSkin.chirper;
+    Future<void> open() async {
+      await Navigator.push(context,
+          MaterialPageRoute(builder: (_) => SocialScreen(state: career)));
+      if (mounted) _load(career);
+    }
+
+    return Material(
+      color: skin.bg,
+      shape: RoundedRectangleBorder(
+          side: BorderSide(color: skin.line),
+          borderRadius: BorderRadius.circular(chirper ? 16 : 0)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: open,
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Container(
+            color: skin.bar,
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+            child: Row(children: [
+              Expanded(
+                child: chirper
+                    ? const Align(
+                        alignment: Alignment.centerLeft,
+                        child: ChirperMark(size: 20))
+                    : Text(fmt.network(v.network),
+                        style: TextStyle(
+                            color: skin.barText,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16)),
+              ),
+              Text(
+                  chirper
+                      ? l.followersValue(fmt.compact(v.followers))
+                      : l.friendsCount(fmt.compact(v.followers)),
+                  style: TextStyle(
+                      color: skin.barText, fontWeight: FontWeight.w700)),
+            ]),
           ),
-          Text(l.followersValue(fmt.compact(v.followers)),
-              style: TextStyle(
-                  color: AppColors.text, fontWeight: FontWeight.w700)),
-        ]),
-        const SizedBox(height: 10),
-        if (latest != null)
-          FeedPost(item: latest, state: career)
-        else
-          Text(l.socialNoFans, style: TextStyle(color: AppColors.textMuted)),
-        const SizedBox(height: 10),
-        Row(children: [
-          if (v.canPost)
-            Expanded(
-              child: Text(l.socialPostsLeft(v.postsLeft),
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+          if (chirper) Container(height: 1, color: skin.line),
+          if (latest != null)
+            IgnorePointer(
+              child: FeedPost(
+                  item: latest,
+                  state: career,
+                  skin: skin,
+                  verified: v.verified),
             )
           else
-            const Spacer(),
-          OutlinedButton.icon(
-            onPressed: () async {
-              await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => SocialScreen(state: career)));
-              if (mounted) _load(career);
-            },
-            icon: const Icon(Icons.chat_bubble_outline_rounded),
-            label: Text(l.socialOpen),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Text(l.socialNoFans, style: TextStyle(color: skin.muted)),
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 8, 14, 12),
+            child: Row(children: [
+              if (v.canPost)
+                Expanded(
+                  child: Text(l.socialPostsLeft(v.postsLeft),
+                      style: TextStyle(color: skin.muted, fontSize: 13)),
+                )
+              else
+                const Spacer(),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: skin.accent,
+                  foregroundColor: Colors.white,
+                  shape: chirper
+                      ? const StadiumBorder()
+                      : const RoundedRectangleBorder(),
+                ),
+                onPressed: open,
+                child: Text(l.socialOpen),
+              ),
+            ]),
           ),
         ]),
-      ]),
+      ),
     );
   }
 }

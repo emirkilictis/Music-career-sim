@@ -247,7 +247,12 @@ void main() {
     await shot(tester, '04d_home_social');
     await tester.tap(feed);
     await tester.pumpAndSettle();
-    await tester.tap(_ci('Behind the scenes'));
+    await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Behind the scenes'));
+    await tester.pumpAndSettle();
+    await shot(tester, '04g_social_compose');
+    await tester.tap(find.text('Post'));
     await tester.pumpAndSettle(const Duration(seconds: 5));
     await shot(tester, '04e_social_feed');
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
@@ -421,6 +426,16 @@ void main() {
     await tester.tap(find.textContaining('Day job'));
     await shot(tester, '21_job_picker');
     await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
+    // Before social media: the fan forum (docs K94).
+    final forum = _ci('Open the feed');
+    await tester.scrollUntilVisible(forum, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(forum), alignment: 0.4);
+    await tester.pumpAndSettle();
+    await tester.tap(forum);
+    await shot(tester, '21b_fan_forum');
+    await tester.pageBack();
     await tester.pumpAndSettle();
 
     // Light theme from Settings: the open screen repaints in place.
