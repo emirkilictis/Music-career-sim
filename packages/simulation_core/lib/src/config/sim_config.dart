@@ -41,6 +41,9 @@ class SimConfig {
     this.collectorRate = 0.19,
     this.singleCollectorRate = 0.03,
     this.versionFade = 0.8,
+    this.botFiltered = 0.25,
+    this.autoplayLift = 0.3,
+    this.autoplayRoyalty = 0.7,
     this.variantDecay = 0.6,
     this.casualBuyRate = 0.012,
     this.albumSecondWeekRatio = 0.22,
@@ -273,6 +276,13 @@ class SimConfig {
   /// fast a version's wave of listening fades.
   final double singleCollectorRate;
   final double versionFade;
+
+  /// Bought streams the platform quietly filters out before they count
+  /// (docs K95); autoplay's extra exposure and the share of the usual
+  /// royalty it pays (docs K96).
+  final double botFiltered;
+  final double autoplayLift;
+  final double autoplayRoyalty;
   final double variantDecay;
   final double casualBuyRate;
   final double albumSecondWeekRatio;

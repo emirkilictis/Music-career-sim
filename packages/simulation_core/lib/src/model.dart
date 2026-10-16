@@ -219,6 +219,24 @@ enum SongVersion {
   bool get trendy => this == spedUp || this == slowed;
 }
 
+/// Bought streams for a song (docs K95): how many, and what they cost.
+/// Index order is stored in saves: only append.
+enum BotPackage {
+  small(1000000, 250000),
+  medium(5000000, 1100000),
+  large(20000000, 4000000);
+
+  const BotPackage(this.streams, this.costCents);
+  final double streams;
+  final int costCents;
+
+  /// Share of the streams that arrives in each of the next weeks.
+  static const schedule = [0.4, 0.3, 0.2, 0.1];
+}
+
+/// Where a song's bought streams stand. Index order is stored in saves.
+enum BotStatus { none, running, caught }
+
 /// Physical editions of a single (docs K92, F26): collectors buy them in
 /// the week they come out, and they count on the charts. Index order is
 /// stored in saves: only append.
@@ -599,6 +617,22 @@ class Song with Charted {
 
   /// Extra exposure from new versions; fades week by week.
   double versionBoost = 0;
+
+  /// Bought streams (docs K95): the package bought, weeks left,
+  /// streams delivered so far and [BotStatus]; while [chartFilterUntil]
+  /// is ahead the charts count the song at half weight.
+  double botTotal = 0;
+  int botWeeksLeft = 0;
+  double botDelivered = 0;
+  BotStatus botStatus = BotStatus.none;
+  int chartFilterUntil = -1;
+
+  /// In the streaming apps' autoplay programme (docs K96): more listening
+  /// from the algorithm for a smaller royalty.
+  bool autoplay = false;
+
+  /// Week the player pitched it to the playlist editors (docs K97), -1.
+  int pitchWeek = -1;
 
   /// Editorial playlist pickup: extra exposure that fades week by week.
   PlaylistAdd playlistAdd = PlaylistAdd.none;

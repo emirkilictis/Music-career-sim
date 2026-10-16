@@ -275,6 +275,16 @@ class SongView {
         isPlayer = s.primaryArtistId == w.playerArtistId,
         video = s.videoBudget < 0 ? null : VideoBudget.values[s.videoBudget],
         versions = List.unmodifiable(s.versions),
+        botStatus = s.botStatus,
+        botWeeksLeft = s.botWeeksLeft,
+        botRemoved = s.botStatus == BotStatus.caught ? s.botDelivered : 0,
+        chartFiltered = w.week < s.chartFilterUntil,
+        autoplay = s.autoplay,
+        canPitch = StreamingTools.canPitch(w, s),
+        pitchWeek = s.pitchWeek,
+        pitchLanded = s.pitchWeek >= 0 && s.playlistWeek == s.pitchWeek,
+        streamingOpen = StreamingTools.streamingOpen(w),
+        autoplayOpen = StreamingTools.autoplayOpen(w),
         variants = List.unmodifiable(s.variants),
         campaignCostCents = s.campaignCostCents,
         campaignReturnCents = s.campaignReturnCents.round(),
@@ -306,6 +316,25 @@ class SongView {
   /// Versions out and the single's physical editions, with their weeks
   /// (docs K92, F26).
   final List<(SongVersion, int)> versions;
+
+  /// Bought streams (docs K95): status, weeks still coming, and what the
+  /// platform removed if caught; filtered from the charts right now.
+  final BotStatus botStatus;
+  final int botWeeksLeft;
+  final double botRemoved;
+  final bool chartFiltered;
+
+  /// In the autoplay programme (docs K96).
+  final bool autoplay;
+
+  /// Pitch to the playlist editors (docs K97).
+  final bool canPitch;
+  final int pitchWeek;
+  final bool pitchLanded;
+
+  /// The streaming platform and its autoplay exist this year.
+  final bool streamingOpen;
+  final bool autoplayOpen;
   final List<(SingleFormat, int)> variants;
 
   /// The song's campaign, what the player paid and the income it brought

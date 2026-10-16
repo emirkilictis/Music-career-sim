@@ -335,6 +335,54 @@ void main() {
       g.close();
     });
 
+    test('streaming tools: pitch, autoplay, bought streams (K95-K97)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2021,
+              premium: true,
+              tier: StartTier.risingStar,
+              money: StartMoney.millionaire));
+      final song = g.writeSong(budget: BudgetTier.high);
+      expect(() => g.pitchSong(song.id), _code('cannotPitch'));
+      g.releaseSingle(song.id);
+      expect(g.song(song.id).canPitch, isTrue);
+      g.pitchSong(song.id);
+      expect(g.song(song.id).canPitch, isFalse);
+      g.setAutoplay(song.id, true);
+      expect(g.song(song.id).autoplay, isTrue);
+      final events = g.advanceWeek().events;
+      expect(
+          events.any((e) =>
+              (e is PlaylistAdded && e.songId == song.id) ||
+              (e is PitchDeclined && e.songId == song.id)),
+          isTrue);
+      g.buyBots(song.id, BotPackage.large);
+      expect(() => g.buyBots(song.id, BotPackage.small), _code('botsBusy'));
+      expect(g.song(song.id).botStatus, BotStatus.running);
+      final later = <GameEvent>[];
+      for (var i = 0; i < 4; i++) {
+        later.addAll(g.advanceWeek().events);
+      }
+      final view = g.song(song.id);
+      final caught = later.whereType<BotsCaught>().toList();
+      expect(view.botWeeksLeft, 0);
+      if (caught.isNotEmpty) {
+        expect(view.botStatus, BotStatus.caught);
+        expect(view.botRemoved, greaterThan(0));
+      } else {
+        expect(view.botStatus, BotStatus.running);
+      }
+      g.close();
+
+      final old = GameSession.start(slots, _setup(startYear: 2005));
+      final s2 = old.writeSong(budget: BudgetTier.low);
+      old.releaseSingle(s2.id);
+      expect(() => old.buyBots(s2.id, BotPackage.small), _code('noStreaming'));
+      expect(() => old.setAutoplay(s2.id, true), _code('noStreaming'));
+      old.close();
+    });
+
     test('social media: posts, fan replies and reactions (K93)', () {
       var g = GameSession.start(
           slots,

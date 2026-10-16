@@ -100,6 +100,9 @@ abstract final class SocialFeed {
           fan(FanTopic.battleLost,
               songId: kind == EntityKind.song ? playerEntityId : -1,
               albumId: kind == EntityKind.album ? playerEntityId : -1);
+        case BotsCaught(:final songId):
+          fan(FanTopic.botsCaught, songId: songId);
+          fan(FanTopic.botsCaught, songId: songId);
         case MilestoneReached():
           fan(FanTopic.milestone);
         default:

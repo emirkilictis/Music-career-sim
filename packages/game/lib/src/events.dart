@@ -267,6 +267,36 @@ class FestivalPlayed extends GameEvent {
   bool get isMajor => true;
 }
 
+/// The platform caught the player's bought streams (docs K95): removed,
+/// royalties paid back, the song filtered from the charts for a while.
+class BotsCaught extends GameEvent {
+  const BotsCaught(this.songId, this.removed);
+  final int songId;
+  final double removed;
+  @override
+  bool get isMajor => true;
+}
+
+/// Industry headline: a rival's streams were removed for botting.
+class RivalBotsCaught extends GameEvent {
+  const RivalBotsCaught(this.songId, this.artistId, this.removed);
+  final int songId;
+  final int artistId;
+  final double removed;
+  @override
+  bool get isMajor => false;
+  @override
+  bool get isIndustry => true;
+}
+
+/// The playlist editors passed on the player's pitch (docs K97).
+class PitchDeclined extends GameEvent {
+  const PitchDeclined(this.songId);
+  final int songId;
+  @override
+  bool get isMajor => false;
+}
+
 /// The player is up for Golden Record Awards (docs K91).
 class AwardNominated extends GameEvent {
   const AwardNominated(this.year, this.categories);

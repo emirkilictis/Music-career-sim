@@ -157,6 +157,70 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
+  /// Buys streams after a warning and a package pick (docs K95).
+  Future<void> _buyStreams(SongView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final money = widget.state.player.moneyCents;
+    String risk(BotPackage p) {
+      final week = p.streams * 0.4 * 0.75;
+      final share = week / (s.weekStreams + week);
+      return share < 0.2
+          ? l.riskLow
+          : share < 0.5
+              ? l.riskMid
+              : l.riskHigh;
+    }
+
+    final pkg = await showModalBottomSheet<BotPackage>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: Text(l.buyStreams, style: Theme.of(c).textTheme.titleLarge),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child:
+                Text(l.buyStreamsHint, style: Theme.of(c).textTheme.bodySmall),
+          ),
+          for (final p in BotPackage.values)
+            ListTile(
+              enabled: p.costCents <= money,
+              leading: const Icon(Icons.smart_toy_outlined),
+              title: Text(l.botPackage(fmt.compact(p.streams))),
+              subtitle: Text(risk(p)),
+              trailing: Text(fmt.money(p.costCents)),
+              onTap: () => Navigator.pop(c, p),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (pkg == null || !mounted) return;
+    try {
+      await widget.state.act(Cmd.buyBots(s.id, pkg));
+      if (mounted) {
+        showInfo(context, l.botsBought(s.title),
+            icon: Icons.smart_toy_outlined);
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  Future<void> _tool(SessionCmd<void> cmd) async {
+    try {
+      await widget.state.act(cmd);
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   /// Picks a physical edition of the single to put out (docs K92, F26).
   Future<void> _newEdition(SongView s) async {
     final l = context.l10n;
@@ -386,6 +450,81 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           label: Text(l.newEdition),
                         ),
                     ]),
+                  ]),
+            ),
+          ],
+          if (s.isPlayer &&
+              s.releasedWeek >= 0 &&
+              (s.streamingOpen || s.autoplayOpen)) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.streamingSection,
+              icon: Icons.graphic_eq_rounded,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Wrap(spacing: 8, runSpacing: 8, children: [
+                      if (s.botStatus == BotStatus.running &&
+                          s.botWeeksLeft > 0)
+                        Tag(l.botsRunning(s.botWeeksLeft),
+                            icon: Icons.smart_toy_outlined,
+                            color: AppColors.peach),
+                      if (s.botStatus == BotStatus.caught)
+                        Tag(l.botsCaughtTag(fmt.compact(s.botRemoved)),
+                            icon: Icons.gpp_bad_rounded,
+                            color: AppColors.coral),
+                      if (s.chartFiltered)
+                        Tag(l.chartFilteredTag,
+                            icon: Icons.filter_alt_rounded,
+                            color: AppColors.coral),
+                      if (s.pitchWeek >= 0 && s.pitchLanded)
+                        Tag(l.pitchLandedTag,
+                            icon: Icons.playlist_add_check_rounded,
+                            color: AppColors.mint)
+                      else if (s.pitchWeek >= widget.state.week)
+                        Tag(l.pitchPending, icon: Icons.schedule_rounded)
+                      else if (s.pitchWeek >= 0)
+                        Tag(l.pitchDeclinedTag,
+                            icon: Icons.playlist_remove_rounded),
+                    ]),
+                    if (s.canPitch) ...[
+                      const SizedBox(height: 8),
+                      Text(l.pitchHint,
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 13)),
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _tool(Cmd.pitchSong(s.id)),
+                          icon: const Icon(Icons.playlist_add_rounded),
+                          label: Text(l.pitchSong),
+                        ),
+                      ),
+                    ],
+                    if (s.autoplayOpen)
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: s.autoplay,
+                        onChanged: (on) => _tool(Cmd.setAutoplay(s.id, on)),
+                        title: Text(l.autoplayLabel,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w700)),
+                        subtitle: Text(l.autoplayHint),
+                      ),
+                    if (s.streamingOpen &&
+                        s.botStatus != BotStatus.caught &&
+                        s.botWeeksLeft == 0)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          style: TextButton.styleFrom(
+                              foregroundColor: AppColors.coral),
+                          onPressed: () => _buyStreams(s),
+                          icon: const Icon(Icons.smart_toy_outlined),
+                          label: Text(l.buyStreams),
+                        ),
+                      ),
                   ]),
             ),
           ],

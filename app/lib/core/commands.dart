@@ -212,6 +212,11 @@ abstract final class Cmd {
   static SessionCmd<void> shootVideo(int id, VideoBudget budget) =>
       (s) => s.shootVideo(id, budget);
   static SessionCmd<SocialView> social() => (s) => s.social;
+  static SessionCmd<void> buyBots(int id, BotPackage pkg) =>
+      (s) => s.buyBots(id, pkg);
+  static SessionCmd<void> setAutoplay(int id, bool on) =>
+      (s) => s.setAutoplay(id, on);
+  static SessionCmd<void> pitchSong(int id) => (s) => s.pitchSong(id);
   static SessionCmd<PostOutcome> post(PostKind kind, {int songId = -1}) =>
       (s) => s.post(kind, songId: songId);
   static SessionCmd<void> releaseVersion(int id, SongVersion v) =>

@@ -5,6 +5,7 @@ import 'actions.dart';
 import 'ai.dart';
 import 'awards.dart';
 import 'social.dart';
+import 'streaming_tools.dart';
 import 'config/charts.dart';
 import 'config/era_table.dart';
 import 'config/regions.dart';
@@ -28,6 +29,7 @@ class WeekResult {
     required this.newNumberOnes,
     required this.viralSongs,
     required this.playlistAdds,
+    this.botsCaught = const [],
     required this.activeSongs,
     required this.activeAlbums,
     required this.dormantSongs,
@@ -60,6 +62,9 @@ class WeekResult {
 
   /// Songs added to an editorial playlist this week (see [Song.playlistAdd]).
   final List<int> playlistAdds;
+
+  /// Songs whose bought streams the platform caught this week (docs K95).
+  final List<int> botsCaught;
   final int activeSongs;
   final int activeAlbums;
   final int dormantSongs;
@@ -114,6 +119,8 @@ class Simulator {
     final scheduledOut = player == null
         ? const <ScheduledOut>[]
         : Actions.releaseScheduled(w, player);
+    // Playlist editors answer this week's pitches (docs K97).
+    StreamingTools.answerPitches(w);
 
     // 1–2. Scheduled AI activity.
     AiPlanner.step(w);
@@ -293,6 +300,7 @@ class Simulator {
               : w.difficulty.aiExposure) *
           campExp *
           (1 + s.playlistBoost + s.versionBoost) *
+          (s.autoplay ? 1 + c.autoplayLift : 1.0) *
           (1 + s.videoPower * videoEra);
       if (s.playlistWeek == w.week) playlistAdds.add(s.id);
       s.playlistBoost *= c.playlistFade;
@@ -463,14 +471,17 @@ class Simulator {
     final st = Float64List(_r), dw = Float64List(_r);
     final rd = Float64List(_r), ph = Float64List(_r);
     final variantSales = Float64List(_r);
+    final botsCaught = <int>[];
     for (var i = 0; i < n; i++) {
       final s = w.songs[ids[i]];
       final p = w.artists[s.primaryArtistId];
       var tS = 0.0, tD = 0.0, tR = 0.0, tP = 0.0;
       _variantSales(s, p, eras, variantSales);
+      // Bought streams land where the artist's audience is (docs K95).
+      final bots = StreamingTools.botStreamsThisWeek(w, s);
       for (var k = 0; k < _r; k++) {
         final j = i * _r + k;
-        st[k] = att[j] * spa[k];
+        st[k] = att[j] * spa[k] + bots * p.regionShare[k];
         dw[k] = dl[j] * dpa[k];
         rd[k] = radio[j] * rpr[k];
         ph[k] = s.isSingle ? att[j] * ppa[k] + variantSales[k] : 0;
@@ -491,6 +502,9 @@ class Simulator {
         wr[_r + k] = dw[k];
       }
       s.weekStreams = tS;
+      if (bots > 0 && StreamingTools.settleBots(w, s, bots)) {
+        botsCaught.add(s.id);
+      }
       s.weekDownloads = tD;
       s.weekRadio = tR;
       s.weekPhysical = tP;
@@ -518,6 +532,14 @@ class Simulator {
       songPts[Charts.platformGlobal][i] = tS;
       songPts[Charts.platformNorthAmerica][i] = st[na];
       songPts[Charts.platformEurope][i] = st[eu];
+      // A song caught with bought streams counts half for a while.
+      final weight = StreamingTools.chartWeight(w, s);
+      if (weight < 1) {
+        for (final ch in songPts) {
+          ch[i] *= weight;
+        }
+        s.weekPtsUs *= weight;
+      }
       s.weekPoints = songPts[Charts.globalSongs][i];
 
       if (!p.isRetired) {
@@ -848,6 +870,7 @@ class Simulator {
       newNumberOnes: newNo1,
       viralSongs: virals,
       playlistAdds: playlistAdds,
+      botsCaught: botsCaught,
       activeSongs: w.activeSongIds.length,
       activeAlbums: w.activeAlbumIds.length,
       dormantSongs: w.dormantSongCount,
@@ -1289,8 +1312,11 @@ class Simulator {
     for (final id in world.activeSongIds) {
       final s = world.songs[id];
       if (s.primaryArtistId != p.id) continue;
-      final songCents =
-          s.weekStreams * 0.35 + s.weekDownloads * 70 + s.weekPhysical * 100;
+      final songCents = s.weekStreams *
+              0.35 *
+              (s.autoplay ? world.config.autoplayRoyalty : 1.0) +
+          s.weekDownloads * 70 +
+          s.weekPhysical * 100;
       cents += songCents;
       s.revenueCents += songCents * p.artistShare;
       // Campaign profit/loss (docs K57): album cuts earn for the album's
@@ -1310,7 +1336,9 @@ class Simulator {
       if (s.status != SongStatus.dormant) continue;
       var songCents = 0.0;
       for (var r = 0; r < regionCount; r++) {
-        songCents += world.songWeekStreamsRegion(s, r) * 0.35;
+        songCents += world.songWeekStreamsRegion(s, r) *
+            0.35 *
+            (s.autoplay ? world.config.autoplayRoyalty : 1.0);
       }
       cents += songCents;
       s.revenueCents += songCents * p.artistShare;

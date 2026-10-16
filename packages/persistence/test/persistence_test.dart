@@ -36,6 +36,20 @@ void _playerMoves(World w, int i) {
     Actions.releaseSingle(w, p, w.songs[vault.first],
         campaign: Campaign.intensive);
   }
+  if (i == 31 || i == 33) {
+    // A pitch, bought streams and autoplay (docs K95-K97).
+    final single =
+        w.songs.firstWhere((s) => s.primaryArtistId == p.id && s.isSingle);
+    if (i == 31 && StreamingTools.canPitch(w, single)) {
+      StreamingTools.pitch(w, single);
+    }
+    if (i == 33) {
+      StreamingTools.buyBots(w, p, single, BotPackage.large);
+      if (StreamingTools.autoplayOpen(w)) {
+        StreamingTools.setAutoplay(w, single, true);
+      }
+    }
+  }
   if (i == 34) {
     // A remix and a CD single (docs K92).
     final single =

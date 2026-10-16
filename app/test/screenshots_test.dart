@@ -334,6 +334,18 @@ void main() {
     await Scrollable.ensureVisible(tester.element(_ci('Versions & editions')),
         alignment: 0.2);
     await shot(tester, '14e_versions');
+    // Pitch, autoplay and bought streams (docs K95-K97).
+    final tools = _ci('Streaming tools');
+    await tester.scrollUntilVisible(tools, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(tools), alignment: 0.15);
+    await tester.pumpAndSettle();
+    await shot(tester, '14f_streaming_tools');
+    await tester.tap(_ci('Buy streams'));
+    await tester.pumpAndSettle();
+    await shot(tester, '14g_buy_streams');
+    await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
 

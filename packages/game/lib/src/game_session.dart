@@ -1217,6 +1217,47 @@ class GameSession {
     _saveNow();
   }
 
+  /// Buys streams for a released song (docs K95). Risky: the platform may
+  /// catch and remove them.
+  void buyBots(int songId, BotPackage pkg) {
+    final s = _ownSong(songId);
+    if (!StreamingTools.streamingOpen(world)) {
+      throw GameException('noStreaming', 'No streaming platform yet');
+    }
+    if (s.releasedWeek < 0) {
+      throw GameException('notReleased', 'Only released songs');
+    }
+    if (s.botStatus == BotStatus.caught || s.botWeeksLeft > 0) {
+      throw GameException('botsBusy', 'Not on this song');
+    }
+    _requireMoney(pkg.costCents);
+    StreamingTools.buyBots(world, _p, s, pkg);
+    _saveNow();
+  }
+
+  /// Puts a released song in or out of the autoplay programme (docs K96).
+  void setAutoplay(int songId, bool on) {
+    final s = _ownSong(songId);
+    if (on && !StreamingTools.autoplayOpen(world)) {
+      throw GameException('noStreaming', 'No autoplay yet');
+    }
+    if (s.releasedWeek < 0) {
+      throw GameException('notReleased', 'Only released songs');
+    }
+    StreamingTools.setAutoplay(world, s, on);
+    _saveNow();
+  }
+
+  /// Pitches a fresh release to the playlist editors (docs K97).
+  void pitchSong(int songId) {
+    final s = _ownSong(songId);
+    if (!StreamingTools.canPitch(world, s)) {
+      throw GameException('cannotPitch', 'Cannot pitch this song');
+    }
+    StreamingTools.pitch(world, s);
+    _saveNow();
+  }
+
   /// Puts out another version of a released song (docs K92, F26).
   void releaseVersion(int songId, SongVersion v) {
     final s = _ownSong(songId);
@@ -1727,6 +1768,19 @@ class GameSession {
       final s = w.songs[id];
       if (s.primaryArtistId == p.id)
         events.add(PlaylistAdded(id, s.playlistAdd));
+    }
+    // Bought streams caught, and pitches the editors passed on (K95, K97).
+    for (final id in r.botsCaught) {
+      final s = w.songs[id];
+      events.add(s.primaryArtistId == p.id
+          ? BotsCaught(id, s.botDelivered)
+          : RivalBotsCaught(id, s.primaryArtistId, s.botDelivered));
+    }
+    for (final id in w.playerSongIds) {
+      final s = w.songs[id];
+      if (s.pitchWeek == r.week && s.playlistWeek != r.week) {
+        events.add(PitchDeclined(id));
+      }
     }
     if (before.eraOpen && !p.eraOpen && p.lastEraResult != null) {
       events.add(EraClosed(p.lastEraResult!, p.lastEraUnits, p.eraExpected));

@@ -102,6 +102,13 @@ int worldHash(World w) {
     addInt(s.playlistAdd.index);
     addDouble(s.playlistBoost);
     addDouble(s.versionBoost);
+    addDouble(s.botTotal);
+    addInt(s.botWeeksLeft);
+    addDouble(s.botDelivered);
+    addInt(s.botStatus.index);
+    addInt(s.chartFilterUntil);
+    addInt(s.autoplay ? 1 : 0);
+    addInt(s.pitchWeek);
     for (final (v, wk) in s.versions) {
       addInt(v.index * 100000 + wk);
     }

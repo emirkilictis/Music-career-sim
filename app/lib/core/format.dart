@@ -598,6 +598,9 @@ class Fmt {
       'radioLocked' => l.errorRadioLocked,
       'versionOut' => l.errorVersionOut,
       'socialLocked' => l.errorSocialLocked,
+      'noStreaming' => l.errorNoStreaming,
+      'botsBusy' => l.errorBotsBusy,
+      'cannotPitch' => l.errorCannotPitch,
       'postLimit' => l.errorPostLimit,
       'tooTired' => l.errorTooTired,
       'nothingToTease' => l.errorNothingToTease,
@@ -691,6 +694,10 @@ class Fmt {
                   e.won.map((c) => awardCategory(c, line.genre)).join(', ')),
           if (e.fans > 0) l.eventAwardPerformed(compact(e.fans)),
         ].join(' '),
+      BotsCaught() => l.eventBotsCaught(t, compact(e.removed)),
+      RivalBotsCaught() =>
+        l.eventRivalBotsCaught(line.artistName, t, compact(e.removed)),
+      PitchDeclined() => l.eventPitchDeclined(t),
       AwardWinners() => l.eventAwardWinners(
           e.year, t, line.artistName, line.title2, line.artistName2),
     };

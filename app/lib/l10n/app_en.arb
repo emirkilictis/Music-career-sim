@@ -3089,6 +3089,23 @@
       }
     }
   },
+  "smBotsCaught0": "Streams got removed?? {name} explain",
+  "@smBotsCaught0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smBotsCaught1": "I always knew those {title} numbers were weird",
+  "@smBotsCaught1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smBotsCaught2": "Real fans stream for real. Disappointed.",
   "networkForum": "Fan forum",
   "networkMyPlace": "MyPlace",
   "networkChirper": "Chirper",
@@ -3171,5 +3188,87 @@
       }
     }
   },
-  "chirperNoPosts": "You haven’t posted yet."
+  "chirperNoPosts": "You haven’t posted yet.",
+  "streamingSection": "Streaming tools",
+  "pitchSong": "Pitch to the playlist editors",
+  "pitchHint": "Free, once per song, for releases out up to 12 weeks. The editors answer at the end of the week.",
+  "pitchPending": "Pitched: the editors answer at the end of the week",
+  "pitchLandedTag": "Pitch landed a playlist",
+  "pitchDeclinedTag": "The editors passed",
+  "autoplayLabel": "Autoplay boost",
+  "autoplayHint": "The algorithm plays it more (+30% listening), for a 30% smaller royalty on its streams.",
+  "buyStreams": "Buy streams",
+  "buyStreamsHint": "A bot farm adds streams over four weeks; a quarter is filtered out on the way. If the platform notices, every bought stream is removed, you pay the royalties back, the charts count the song at half for a month and fans find out. The bigger the share of fake streams, the likelier.",
+  "botPackage": "{count} streams",
+  "@botPackage": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "riskLow": "Low risk",
+  "riskMid": "Medium risk",
+  "riskHigh": "High risk",
+  "botsRunning": "Bots running · {weeks} wk left",
+  "@botsRunning": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "botsCaughtTag": "Caught: {count} streams removed",
+  "@botsCaughtTag": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "chartFilteredTag": "Filtered from the charts",
+  "botsBought": "Bots bought for {title}.",
+  "@botsBought": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBotsCaught": "Streamify caught bought streams on {title}: {count} removed, royalties paid back, and the charts count it at half for a month.",
+  "@eventBotsCaught": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "eventRivalBotsCaught": "Streamify purge: {artist} lost {count} streams on {title}.",
+  "@eventRivalBotsCaught": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "eventPitchDeclined": "The playlist editors passed on {title}.",
+  "@eventPitchDeclined": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoStreaming": "Not in this year yet.",
+  "errorBotsBusy": "Not possible on this song now.",
+  "errorCannotPitch": "This song can no longer be pitched."
 }

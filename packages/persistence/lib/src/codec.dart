@@ -216,6 +216,8 @@ abstract final class Codec {
     // Added in schema v13, v17, v18, v19.
     'revenue', 'productionCost', 'gradeSpread', 'radioPush',
     'versions', 'variants', 'versionBoost',
+    // Added in schema v20.
+    'bots', 'autoplay', 'pitchWeek',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -245,6 +247,17 @@ abstract final class Codec {
         _pairs([for (final (v, wk) in s.versions) (v.index, wk)]),
         _pairs([for (final (f, wk) in s.variants) (f.index, wk)]),
         s.versionBoost,
+        s.botStatus == BotStatus.none && s.chartFilterUntil < 0
+            ? null
+            : jsonEncode([
+                s.botTotal,
+                s.botWeeksLeft,
+                s.botDelivered,
+                s.botStatus.index,
+                s.chartFilterUntil,
+              ]),
+        s.autoplay ? 1 : 0,
+        s.pitchWeek,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -275,6 +288,18 @@ abstract final class Codec {
       s.variants.add((SingleFormat.values[i], wk));
     }
     s.versionBoost = (r['versionBoost'] as num?)?.toDouble() ?? 0;
+    // Bought streams, autoplay, pitch (v20, docs K95–K97).
+    if (r['bots'] case final String b when b.isNotEmpty) {
+      final j = jsonDecode(b) as List;
+      s
+        ..botTotal = (j[0] as num).toDouble()
+        ..botWeeksLeft = j[1] as int
+        ..botDelivered = (j[2] as num).toDouble()
+        ..botStatus = BotStatus.values[j[3] as int]
+        ..chartFilterUntil = j[4] as int;
+    }
+    s.autoplay = r['autoplay'] == 1;
+    s.pitchWeek = r['pitchWeek'] as int? ?? -1;
     s
       ..status = SongStatus.values[r['status'] as int]
       ..releasedWeek = r['releasedWeek'] as int

@@ -147,4 +147,9 @@ TOPICS = {
   ("If you haven't heard {title} yet, today's the day", "{title} hâlâ dinlemediysen bugün tam günü"),
   ("Thank you for the love on {title} 🙏", "{title} için gösterdiğiniz sevgiye teşekkürler 🙏"),
  ],
+ 'botsCaught': [
+  ("Streams got removed?? {name} explain", "Stream’ler mi silindi?? {name} açıkla"),
+  ("I always knew those {title} numbers were weird", "Zaten {title} rakamları tuhaftı, biliyordum"),
+  ("Real fans stream for real. Disappointed.", "Gerçek hayranlar gerçekten dinler. Hayal kırıklığı."),
+ ],
 }

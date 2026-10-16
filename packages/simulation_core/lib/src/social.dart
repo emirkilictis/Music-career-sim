@@ -67,6 +67,7 @@ enum FanTopic {
   postFans,
   postHotTake,
   postPromote,
+  botsCaught,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.

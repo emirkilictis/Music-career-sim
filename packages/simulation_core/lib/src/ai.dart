@@ -3,6 +3,7 @@ import 'model.dart';
 import 'names.dart';
 import 'real_artists.dart';
 import 'rng.dart';
+import 'streaming_tools.dart';
 import 'time.dart';
 import 'tours.dart';
 import 'world.dart';
@@ -34,6 +35,10 @@ abstract final class AiPlanner {
               radio: star && p.kind == PlannedKind.leadSingle
                   ? RadioPush.heavy
                   : RadioPush.standard);
+          // Their fans stream in parties; some teams buy streams (K95).
+          if (star && p.kind == PlannedKind.leadSingle) {
+            StreamingTools.starRelease(w, a, w.songs[p.songId]);
+          }
           // Stars sell a CD single of the lead to fans again (docs K92).
           if (star &&
               p.kind == PlannedKind.leadSingle &&

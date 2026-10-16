@@ -224,6 +224,9 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       AwardResults() =>
         'awards ${e.year}: won ${e.won.length} of ${e.nominations}',
       AwardWinners() => 'awards ${e.year} winners',
+      BotsCaught() => 'bots caught: ${e.removed.round()} removed',
+      RivalBotsCaught() => 'rival bots caught',
+      PitchDeclined() => 'pitch declined',
       FestivalPlayed() =>
         'festival ${e.festival} (${e.slot.name}): ${_c(e.watched)} watched',
       ChartBattle() =>

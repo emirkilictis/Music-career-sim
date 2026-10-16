@@ -961,6 +961,32 @@ k('forumTitle','Official {name} fan forum','Resmi {name} hayran forumu', name='S
 k('forumReplies','{count} replies','{count} cevap', count='int')
 k('chirperNoPosts','You haven’t posted yet.','Henüz bir şey paylaşmadın.')
 
+# streaming tools (docs K95-K97)
+k('streamingSection','Streaming tools','Streaming araçları')
+k('pitchSong','Pitch to the playlist editors','Playlist editörlerine öner')
+k('pitchHint','Free, once per song, for releases out up to 12 weeks. The editors answer at the end of the week.','Ücretsiz, şarkı başına bir kez, son 12 haftada çıkanlar için. Editörler hafta sonunda cevap verir.')
+k('pitchPending','Pitched: the editors answer at the end of the week','Önerildi: editörler hafta sonunda cevap verecek')
+k('pitchLandedTag','Pitch landed a playlist','Öneri playlist’e girdi')
+k('pitchDeclinedTag','The editors passed','Editörler geçti')
+k('autoplayLabel','Autoplay boost','Autoplay desteği')
+k('autoplayHint','The algorithm plays it more (+30% listening), for a 30% smaller royalty on its streams.','Algoritma daha çok çalar (+%30 dinlenme), karşılığında stream telifi %30 düşer.')
+k('buyStreams','Buy streams','Stream satın al')
+k('buyStreamsHint','A bot farm adds streams over four weeks; a quarter is filtered out on the way. If the platform notices, every bought stream is removed, you pay the royalties back, the charts count the song at half for a month and fans find out. The bigger the share of fake streams, the likelier.','Bot çiftliği dört hafta boyunca stream ekler; dörtte biri yolda filtrelenir. Platform fark ederse satın alınan her stream silinir, telifi geri ödersin, listeler şarkıyı bir ay yarım sayar ve hayranlar öğrenir. Sahte stream payı büyüdükçe yakalanma şansı artar.')
+k('botPackage','{count} streams','{count} stream', count='String')
+k('riskLow','Low risk','Düşük risk')
+k('riskMid','Medium risk','Orta risk')
+k('riskHigh','High risk','Yüksek risk')
+k('botsRunning','Bots running · {weeks} wk left','Botlar çalışıyor · {weeks} hf kaldı', weeks='int')
+k('botsCaughtTag','Caught: {count} streams removed','Yakalandı: {count} stream silindi', count='String')
+k('chartFilteredTag','Filtered from the charts','Listelerden filtreli')
+k('botsBought','Bots bought for {title}.','{title} için bot alındı.', title='String')
+k('eventBotsCaught','Streamify caught bought streams on {title}: {count} removed, royalties paid back, and the charts count it at half for a month.','Streamify {title} için satın alınmış stream’leri yakaladı: {count} silindi, telif geri ödendi ve listeler şarkıyı bir ay yarım sayacak.', title='String', count='String')
+k('eventRivalBotsCaught','Streamify purge: {artist} lost {count} streams on {title}.','Streamify temizliği: {artist}, {title} şarkısında {count} stream kaybetti.', artist='String', title='String', count='String')
+k('eventPitchDeclined','The playlist editors passed on {title}.','Playlist editörleri {title} için geçti.', title='String')
+k('errorNoStreaming','Not in this year yet.','Bu yılda henüz yok.')
+k('errorBotsBusy','Not possible on this song now.','Bu şarkıda şu an olmaz.')
+k('errorCannotPitch','This song can no longer be pitched.','Bu şarkı artık önerilemez.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

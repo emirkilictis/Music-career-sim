@@ -189,6 +189,7 @@ void main() {
   group('mega debuts', megaDebutTests);
   group('album shape', albumShapeTests);
   group('versions and editions', versionTests);
+  group('streaming tools', streamingToolTests);
   group('viral', viralTests);
   group('novice', noviceTests);
 
@@ -1747,5 +1748,88 @@ void versionTests() {
     final track = Actions.writeSong(w, p, producerSkill: 50, aiMode: true);
     expect(() => Actions.releaseVariant(w, p, track, SingleFormat.vinyl),
         throwsA(isA<ActionException>()));
+  });
+}
+
+/// A newcomer's single in 2021, played for [weeks] after [extra].
+({World w, Simulator sim, Artist p, Song s}) _newcomerSingle(int seed,
+    {void Function(World, Artist, Song)? extra, int weeks = 0}) {
+  final w = WorldGen.create(seed: seed, startYear: 2021);
+  final sim = Simulator(w);
+  while (w.week < GameTime.firstWeekOf(2021)) {
+    sim.step();
+  }
+  final p = WorldGen.addPlayer(w,
+      name: 'New', genre: 0, money: StartMoney.millionaire);
+  final s = Actions.writeSong(w, p, producerSkill: 60, aiMode: true);
+  Actions.releaseSingle(w, p, s);
+  extra?.call(w, p, s);
+  for (var i = 0; i < weeks; i++) {
+    sim.step();
+  }
+  return (w: w, sim: sim, p: p, s: s);
+}
+
+void streamingToolTests() {
+  test('bought streams count, and a caught song loses them (K95)', () {
+    final base = _newcomerSingle(95, weeks: 1);
+    final bought = _newcomerSingle(95,
+        extra: (w, p, s) {
+          final money = p.moneyCents;
+          StreamingTools.buyBots(w, p, s, BotPackage.medium);
+          expect(money - p.moneyCents, BotPackage.medium.costCents);
+          expect(() => StreamingTools.buyBots(w, p, s, BotPackage.small),
+              throwsA(isA<ActionException>()));
+        },
+        weeks: 1);
+    // 40% of the package in week one, a quarter filtered out.
+    expect(bought.s.weekStreams - base.s.weekStreams,
+        closeTo(5e6 * 0.4 * 0.75, 2e5));
+    // A big package on a small song gets caught sooner or later.
+    var caught = 0;
+    for (final seed in [1, 2, 3, 4, 5, 6]) {
+      final r = _newcomerSingle(seed,
+          extra: (w, p, s) =>
+              StreamingTools.buyBots(w, p, s, BotPackage.large));
+      var wasCaught = false;
+      for (var i = 0; i < 4 && !wasCaught; i++) {
+        final before = r.s.lifetimeStreams;
+        final week = r.sim.step();
+        if (week.botsCaught.contains(r.s.id)) {
+          wasCaught = true;
+          expect(r.s.botStatus, BotStatus.caught);
+          expect(r.s.lifetimeStreams, lessThan(before));
+          expect(r.w.week < r.s.chartFilterUntil, isTrue);
+        }
+      }
+      if (wasCaught) caught++;
+    }
+    printOnFailure('caught $caught of 6');
+    expect(caught, greaterThanOrEqualTo(3));
+  });
+
+  test('autoplay: more listening, less royalty per stream (K96)', () {
+    final off = _newcomerSingle(96, weeks: 3);
+    final on = _newcomerSingle(96,
+        extra: (w, p, s) => StreamingTools.setAutoplay(w, s, true),
+        weeks: 3);
+    expect(on.s.weekStreams, greaterThan(off.s.weekStreams * 1.1));
+    final perStreamOff = off.s.revenueCents / off.s.lifetimeStreams;
+    final perStreamOn = on.s.revenueCents / on.s.lifetimeStreams;
+    expect(perStreamOn, lessThan(perStreamOff * 0.85));
+  });
+
+  test('a pitch can land an editorial playlist, once per song (K97)', () {
+    var landed = 0;
+    for (var seed = 11; seed < 23; seed++) {
+      final r = _newcomerSingle(seed, extra: (w, p, s) {
+        expect(StreamingTools.canPitch(w, s), isTrue);
+        StreamingTools.pitch(w, s);
+        expect(StreamingTools.canPitch(w, s), isFalse);
+      }, weeks: 1);
+      if (r.s.playlistWeek == r.s.pitchWeek) landed++;
+    }
+    printOnFailure('landed $landed of 12');
+    expect(landed, inInclusiveRange(1, 10));
   });
 }
