@@ -335,6 +335,29 @@ void main() {
       g.close();
     });
 
+    test('songs on no album count in the career units (K99)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2017,
+              premium: true,
+              tier: StartTier.risingStar,
+              money: StartMoney.millionaire));
+      final song = g.writeSong(budget: BudgetTier.high);
+      g.releaseSingle(song.id);
+      for (var i = 0; i < 3; i++) {
+        g.advanceWeek();
+      }
+      final p = g.player;
+      expect(p.lifetimeUnits.total, 0);
+      final s = g.song(song.id);
+      final expected = s.lifetimeStreams.total / 1500 +
+          (s.lifetimeDownloads + s.lifetimePhysical) / 10;
+      expect(p.lifetimeTotalUnits.total, closeTo(expected, expected * 0.01));
+      expect(p.lifetimeTotalUnits.total, greaterThan(0));
+      g.close();
+    });
+
     test('streaming tools: pitch, autoplay, bought streams (K95-K97)', () {
       final g = GameSession.start(
           slots,

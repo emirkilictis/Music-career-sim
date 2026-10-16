@@ -1047,5 +1047,6 @@
   "eventPitchDeclined": "Playlist editörleri {title} için geçti.",
   "errorNoStreaming": "Bu yılda henüz yok.",
   "errorBotsBusy": "Bu şarkıda şu an olmaz.",
-  "errorCannotPitch": "Bu şarkı artık önerilemez."
+  "errorCannotPitch": "Bu şarkı artık önerilemez.",
+  "totalUnits": "Toplam ünite"
 }

@@ -985,6 +985,8 @@ k('errorNoStreaming','Not in this year yet.','Bu yılda henüz yok.')
 k('errorBotsBusy','Not possible on this song now.','Bu şarkıda şu an olmaz.')
 k('errorCannotPitch','This song can no longer be pitched.','Bu şarkı artık önerilemez.')
 
+k('totalUnits','Total units','Toplam ünite')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

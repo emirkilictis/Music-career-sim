@@ -63,6 +63,8 @@ class ArtistView {
         lifetimePure =
             _regional((r) => a.reg[ArtistReg.lifePure + r].toDouble()),
         lifetimeUnits = _regional((r) => w.artistLifetimeUnits(a, r)),
+        lifetimeTotalUnits = _regional((r) =>
+            w.artistLifetimeUnits(a, r) + _singleUnitsOffAlbums(w, a, r)),
         lifetimeSingleSales = a.tier == ArtistTier.player
             ? w.playerSongIds.fold(
                 0.0,
@@ -151,6 +153,11 @@ class ArtistView {
   final RegionalNumbers lifetimeStreams;
   final RegionalNumbers lifetimePure;
   final RegionalNumbers lifetimeUnits;
+
+  /// Album units plus the units of songs on no album (docs K99): their
+  /// streams (1,500 = 1 unit, once streams count as units) and their
+  /// downloads and CD singles (10 = 1 unit).
+  final RegionalNumbers lifetimeTotalUnits;
 
   /// Downloads + CD singles (CD singles counted for the player only).
   final double lifetimeSingleSales;
@@ -1367,4 +1374,31 @@ class SocialView {
 
   /// Newest first.
   final List<SocialItemView> items;
+}
+
+/// Units of [a]'s songs that are on no album, in region [r] (docs K99).
+double _singleUnitsOffAlbums(World w, Artist a, int r) {
+  final c = w.config;
+  final streams = Charts.songRules(ChartMarket.global, w.week).albumUsesUnits;
+  var t = 0.0;
+  void add(Song s) {
+    if (s.primaryArtistId != a.id || s.albumId >= 0 || s.releasedWeek < 0) {
+      return;
+    }
+    if (streams) t += w.songLifetimeStreams(s, r) / c.streamEquivalentAlbum;
+    t += (w.songLifetimeDownloads(s, r) +
+            s.lifetimePhysical * a.regionShare[r]) /
+        c.trackEquivalentAlbum;
+  }
+
+  if (a.tier == ArtistTier.player) {
+    for (final id in w.playerSongIds) {
+      add(w.songs[id]);
+    }
+  } else {
+    for (final s in w.songs) {
+      add(s);
+    }
+  }
+  return t;
 }

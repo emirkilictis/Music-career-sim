@@ -3261,5 +3261,6 @@
   },
   "errorNoStreaming": "Not in this year yet.",
   "errorBotsBusy": "Not possible on this song now.",
-  "errorCannotPitch": "This song can no longer be pitched."
+  "errorCannotPitch": "This song can no longer be pitched.",
+  "totalUnits": "Total units"
 }

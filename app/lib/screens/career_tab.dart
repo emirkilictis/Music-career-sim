@@ -133,8 +133,8 @@ class _CareerScreenState extends State<CareerScreen> {
                     value: fmt.compact(
                         p.lifetimeSingleSales + p.lifetimeStreams.total / 150)),
               StatTile(
-                  label: l.albumUnits,
-                  value: fmt.compact(p.lifetimeUnits.total)),
+                  label: l.totalUnits,
+                  value: fmt.compact(p.lifetimeTotalUnits.total)),
               StatTile(
                   label: l.pureSales, value: fmt.compact(p.lifetimePure.total)),
               if (era == SalesEra.physical || !hasStreams)
@@ -152,7 +152,7 @@ class _CareerScreenState extends State<CareerScreen> {
                 TableRow(children: [
                   const SizedBox(),
                   if (hasStreams) Text(l.streams, style: t.labelSmall),
-                  Text(l.albumUnits, style: t.labelSmall),
+                  Text(l.totalUnits, style: t.labelSmall),
                 ]),
                 for (final r in Region.values)
                   TableRow(children: [
@@ -161,7 +161,7 @@ class _CareerScreenState extends State<CareerScreen> {
                       child: Text(fmt.region(r)),
                     ),
                     if (hasStreams) Text(fmt.compact(p.lifetimeStreams[r])),
-                    Text(fmt.compact(p.lifetimeUnits[r])),
+                    Text(fmt.compact(p.lifetimeTotalUnits[r])),
                   ]),
               ],
             ),
