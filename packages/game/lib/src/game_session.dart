@@ -1238,9 +1238,6 @@ class GameSession {
     if (on && !StreamingTools.autoplayOpen(world)) {
       throw GameException('noStreaming', 'No autoplay yet');
     }
-    if (s.releasedWeek < 0) {
-      throw GameException('notReleased', 'Only released songs');
-    }
     StreamingTools.setAutoplay(world, s, on);
     _saveNow();
   }
@@ -1776,7 +1773,8 @@ class GameSession {
     }
     for (final id in w.playerSongIds) {
       final s = w.songs[id];
-      if (s.pitchWeek == r.week && s.playlistWeek != r.week) {
+      if (StreamingTools.pitchAnswerWeek(s) == r.week &&
+          s.playlistWeek != r.week) {
         events.add(PitchDeclined(id));
       }
     }

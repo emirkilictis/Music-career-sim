@@ -1029,7 +1029,7 @@
   "chirperNoPosts": "Henüz bir şey paylaşmadın.",
   "streamingSection": "Streaming araçları",
   "pitchSong": "Playlist editörlerine öner",
-  "pitchHint": "Ücretsiz, şarkı başına bir kez, son 12 haftada çıkanlar için. Editörler hafta sonunda cevap verir.",
+  "pitchHint": "Ücretsiz, şarkı başına bir kez: çıkmadan önce (editörler çıktığı hafta cevap verir) ya da çıktıktan sonra 12 hafta içinde (hafta sonunda cevap verir).",
   "pitchPending": "Önerildi: editörler hafta sonunda cevap verecek",
   "pitchLandedTag": "Öneri playlist’e girdi",
   "pitchDeclinedTag": "Editörler geçti",
@@ -1057,5 +1057,7 @@
   "removalRemoved": "−{count} stream",
   "removalRefund": "Geri ödenen telif: {money}",
   "removalFilter": "Listeler şarkıyı 4 hafta yarım sayacak",
-  "removalFans": "Hayranlar sosyal medyada bunu konuşuyor"
+  "removalFans": "Hayranlar sosyal medyada bunu konuşuyor",
+  "streamingStepHint": "Çıkmadan önce playlist editörlerine öner ve autoplay’i seç.",
+  "pitchPendingRelease": "Önerildi: editörler çıktığında cevap verecek"
 }

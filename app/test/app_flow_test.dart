@@ -62,6 +62,11 @@ void main() {
     expect(_ci('Radio push'), findsWidgets);
     await tester.tap(_ci('No radio push'));
     await tester.pumpAndSettle();
+    // Then pitch and autoplay, in the streaming era (K101).
+    if (_ci('Streaming tools').evaluate().isNotEmpty) {
+      await tester.tap(_ci('Continue').last);
+      await tester.pumpAndSettle();
+    }
     expect(find.textContaining('is out!'), findsOneWidget);
 
     await tester.tap(_ci('Charts'));
@@ -219,6 +224,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('No radio push'));
     await tester.pumpAndSettle();
+    // Then pitch and autoplay, in the streaming era (K101).
+    if (_ci('Streaming tools').evaluate().isNotEmpty) {
+      await tester.tap(_ci('Continue').last);
+      await tester.pumpAndSettle();
+    }
     // The single's tile in Releases shows the uploaded cover.
     expect(find.byType(Image), findsWidgets);
 
@@ -294,6 +304,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('No radio push'));
     await tester.pumpAndSettle();
+    // Then pitch and autoplay, in the streaming era (K101).
+    if (_ci('Streaming tools').evaluate().isNotEmpty) {
+      await tester.tap(_ci('Continue').last);
+      await tester.pumpAndSettle();
+    }
     expect(
         find.textContaining('is set for January 2024, week 5'), findsOneWidget);
     expect(_ci('Coming up'), findsOneWidget);

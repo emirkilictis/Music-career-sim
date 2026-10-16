@@ -3206,7 +3206,7 @@
   "chirperNoPosts": "You haven’t posted yet.",
   "streamingSection": "Streaming tools",
   "pitchSong": "Pitch to the playlist editors",
-  "pitchHint": "Free, once per song, for releases out up to 12 weeks. The editors answer at the end of the week.",
+  "pitchHint": "Free, once per song: before it comes out (the editors answer in its release week) or up to 12 weeks after (they answer at the end of the week).",
   "pitchPending": "Pitched: the editors answer at the end of the week",
   "pitchLandedTag": "Pitch landed a playlist",
   "pitchDeclinedTag": "The editors passed",
@@ -3313,5 +3313,7 @@
     }
   },
   "removalFilter": "The charts count it at half for 4 weeks",
-  "removalFans": "Fans are talking about it on social media"
+  "removalFans": "Fans are talking about it on social media",
+  "streamingStepHint": "Pitch it to the playlist editors and choose autoplay before it comes out.",
+  "pitchPendingRelease": "Pitched: the editors answer when it comes out"
 }

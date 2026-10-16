@@ -962,7 +962,7 @@ k('chirperNoPosts','You haven’t posted yet.','Henüz bir şey paylaşmadın.')
 # streaming tools (docs K95-K97)
 k('streamingSection','Streaming tools','Streaming araçları')
 k('pitchSong','Pitch to the playlist editors','Playlist editörlerine öner')
-k('pitchHint','Free, once per song, for releases out up to 12 weeks. The editors answer at the end of the week.','Ücretsiz, şarkı başına bir kez, son 12 haftada çıkanlar için. Editörler hafta sonunda cevap verir.')
+k('pitchHint','Free, once per song: before it comes out (the editors answer in its release week) or up to 12 weeks after (they answer at the end of the week).','Ücretsiz, şarkı başına bir kez: çıkmadan önce (editörler çıktığı hafta cevap verir) ya da çıktıktan sonra 12 hafta içinde (hafta sonunda cevap verir).')
 k('pitchPending','Pitched: the editors answer at the end of the week','Önerildi: editörler hafta sonunda cevap verecek')
 k('pitchLandedTag','Pitch landed a playlist','Öneri playlist’e girdi')
 k('pitchDeclinedTag','The editors passed','Editörler geçti')
@@ -994,6 +994,9 @@ k('removalRemoved','−{count} streams','−{count} stream', count='String')
 k('removalRefund','Royalties paid back: {money}','Geri ödenen telif: {money}', money='String')
 k('removalFilter','The charts count it at half for 4 weeks','Listeler şarkıyı 4 hafta yarım sayacak')
 k('removalFans','Fans are talking about it on social media','Hayranlar sosyal medyada bunu konuşuyor')
+
+k('streamingStepHint','Pitch it to the playlist editors and choose autoplay before it comes out.','Çıkmadan önce playlist editörlerine öner ve autoplay’i seç.')
+k('pitchPendingRelease','Pitched: the editors answer when it comes out','Önerildi: editörler çıktığında cevap verecek')
 
 def write(lang, idx):
     out = {'@@locale': lang}

@@ -366,14 +366,18 @@ void main() {
               premium: true,
               tier: StartTier.risingStar,
               money: StartMoney.millionaire));
+      // Pitched and in autoplay before it comes out (docs K101).
       final song = g.writeSong(budget: BudgetTier.high);
-      expect(() => g.pitchSong(song.id), _code('cannotPitch'));
-      g.releaseSingle(song.id);
       expect(g.song(song.id).canPitch, isTrue);
       g.pitchSong(song.id);
       expect(g.song(song.id).canPitch, isFalse);
+      expect(() => g.pitchSong(song.id), _code('cannotPitch'));
       g.setAutoplay(song.id, true);
       expect(g.song(song.id).autoplay, isTrue);
+      expect(g.song(song.id).pitchAnswerWeek, -1);
+      g.advanceWeek();
+      g.releaseSingle(song.id);
+      expect(g.song(song.id).pitchAnswerWeek, g.week);
       final events = g.advanceWeek().events;
       expect(
           events.any((e) =>

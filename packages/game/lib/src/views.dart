@@ -289,7 +289,9 @@ class SongView {
         autoplay = s.autoplay,
         canPitch = StreamingTools.canPitch(w, s),
         pitchWeek = s.pitchWeek,
-        pitchLanded = s.pitchWeek >= 0 && s.playlistWeek == s.pitchWeek,
+        pitchAnswerWeek = StreamingTools.pitchAnswerWeek(s),
+        pitchLanded = StreamingTools.pitchAnswerWeek(s) >= 0 &&
+            s.playlistWeek == StreamingTools.pitchAnswerWeek(s),
         streamingOpen = StreamingTools.streamingOpen(w),
         autoplayOpen = StreamingTools.autoplayOpen(w),
         variants = List.unmodifiable(s.variants),
@@ -337,6 +339,9 @@ class SongView {
   /// Pitch to the playlist editors (docs K97).
   final bool canPitch;
   final int pitchWeek;
+
+  /// Week the editors answer (-1 while the song is unreleased).
+  final int pitchAnswerWeek;
   final bool pitchLanded;
 
   /// The streaming platform and its autoplay exist this year.

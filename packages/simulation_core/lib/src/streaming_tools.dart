@@ -71,8 +71,8 @@ abstract final class StreamingTools {
     final year = GameTime.yearOf(w.week);
     // Platforms are good at this (docs K95, F65): a quarter of the weeks
     // even for a few bot streams on a hit, near certain for a fake hit.
-    final chance = math.min(
-        0.95, (0.25 + 0.6 * share) * (year >= 2020 ? 1.3 : 1.0));
+    final chance =
+        math.min(0.95, (0.25 + 0.6 * share) * (year >= 2020 ? 1.3 : 1.0));
     final r = RandomStream.keyed(w.seed, w.week, s.id, RngPurpose.bots);
     if (!r.chance(chance)) return false;
     _caught(w, s);
@@ -115,10 +115,11 @@ abstract final class StreamingTools {
 
   static bool autoplayOpen(World w) => GameTime.yearOf(w.week) >= autoplayYear;
 
-  /// Puts [s] in (or takes it out of) the autoplay programme.
+  /// Puts [s] in (or takes it out of) the autoplay programme; an
+  /// unreleased song starts in it on release (docs K101).
   static void setAutoplay(World w, Song s, bool on) {
     if (on && !autoplayOpen(w)) throw ActionException('No autoplay yet');
-    if (s.releasedWeek < 0) throw ActionException('Not released');
+    if (s.status == SongStatus.scrapped) throw ActionException('Scrapped');
     s.autoplay = on;
     if (on && s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
     w.dirtySongs.add(s.id);
@@ -126,15 +127,24 @@ abstract final class StreamingTools {
 
   // ----------------------------------------------------------------- pitch
 
-  /// Whether [s] can still be pitched.
+  /// Whether [s] can still be pitched: unreleased (the usual way, docs
+  /// K101) or out for up to [pitchWindowWeeks].
   static bool canPitch(World w, Song s) =>
       streamingOpen(w) &&
-      s.releasedWeek >= 0 &&
+      s.status != SongStatus.scrapped &&
       s.pitchWeek < 0 &&
       s.playlistBoost < 0.05 &&
-      w.week - math.max(s.releasedWeek, s.singleWeek) <= pitchWindowWeeks;
+      (s.releasedWeek < 0 ||
+          w.week - math.max(s.releasedWeek, s.singleWeek) <= pitchWindowWeeks);
 
-  /// Pitches [s] to the editors; they answer at the end of the week.
+  /// The week the editors answer [s]'s pitch: the pitch week, or the
+  /// release week for a song pitched before it came out (-1: not yet).
+  static int pitchAnswerWeek(Song s) => s.pitchWeek < 0 || s.releasedWeek < 0
+      ? -1
+      : math.max(s.pitchWeek, s.releasedWeek);
+
+  /// Pitches [s] to the editors; they answer at the end of the week (or
+  /// the week it comes out).
   static void pitch(World w, Song s) {
     if (!canPitch(w, s)) throw ActionException('Cannot pitch');
     s.pitchWeek = w.week;
@@ -160,7 +170,9 @@ abstract final class StreamingTools {
     if (p == null) return;
     for (final id in w.playerSongIds) {
       final s = w.songs[id];
-      if (s.pitchWeek != w.week) continue;
+      if (pitchAnswerWeek(s) != w.week) continue;
+      // The campaign already landed it on a list this week.
+      if (s.playlistWeek == w.week) continue;
       final r = RandomStream.keyed(w.seed, w.week, s.id, RngPurpose.pitch);
       if (!r.chance(pitchChance(w, s))) continue;
       final big = r.chance(0.15 + 0.35 * s.quality / 100);

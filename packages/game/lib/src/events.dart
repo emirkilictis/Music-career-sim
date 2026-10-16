@@ -26,8 +26,11 @@ class ChartDebut extends GameEvent {
   final EntityKind kind;
   final int entityId;
   final int position;
+
+  /// Every entry on a main chart is news the player hears about (F67: a
+  /// #45 debut on the global chart went by unnoticed).
   @override
-  bool get isMajor => position <= 10;
+  bool get isMajor => true;
 }
 
 /// A player release reached #1 ([weeksAtNo1] counts this week).

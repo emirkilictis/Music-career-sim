@@ -454,7 +454,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             ),
           ],
           if (s.isPlayer &&
-              s.releasedWeek >= 0 &&
+              (s.releasedWeek >= 0 || s.inVault) &&
               (s.streamingOpen || s.autoplayOpen)) ...[
             const SizedBox(height: 12),
             Section(
@@ -481,8 +481,14 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         Tag(l.pitchLandedTag,
                             icon: Icons.playlist_add_check_rounded,
                             color: AppColors.mint)
-                      else if (s.pitchWeek >= widget.state.week)
-                        Tag(l.pitchPending, icon: Icons.schedule_rounded)
+                      else if (s.pitchWeek >= 0 &&
+                          (s.pitchAnswerWeek < 0 ||
+                              s.pitchAnswerWeek >= widget.state.week))
+                        Tag(
+                            s.pitchAnswerWeek < 0
+                                ? l.pitchPendingRelease
+                                : l.pitchPending,
+                            icon: Icons.schedule_rounded)
                       else if (s.pitchWeek >= 0)
                         Tag(l.pitchDeclinedTag,
                             icon: Icons.playlist_remove_rounded),
@@ -513,6 +519,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         subtitle: Text(l.autoplayHint),
                       ),
                     if (s.streamingOpen &&
+                        s.releasedWeek >= 0 &&
                         s.botStatus != BotStatus.caught &&
                         s.botWeeksLeft == 0)
                       Align(

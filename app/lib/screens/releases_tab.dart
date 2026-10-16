@@ -474,7 +474,18 @@ Future<bool> releaseSingleFlow(
   final radio = await pickRadioPush(context, career,
       extraCents: career.player.campaignCosts[campaign.index]);
   if (radio == null || !context.mounted) return false;
+  // Playlist pitch and autoplay before it comes out (docs K101).
+  var pitch = false, autoplay = song.autoplay;
+  if (song.canPitch || song.autoplayOpen) {
+    final picked = await pickStreamingOptions(context, song);
+    if (picked == null || !context.mounted) return false;
+    (pitch, autoplay) = picked;
+  }
   try {
+    if (pitch) await career.act(Cmd.pitchSong(song.id));
+    if (autoplay != song.autoplay) {
+      await career.act(Cmd.setAutoplay(song.id, autoplay));
+    }
     if (when.releaseWeek == career.week) {
       await career.act(Cmd.releaseSingle(song.id, campaign, radio));
       if (context.mounted) showInfo(context, l.singleReleased(song.title));
@@ -491,6 +502,59 @@ Future<bool> releaseSingleFlow(
     if (context.mounted) showError(context, e);
     return false;
   }
+}
+
+/// Pitch to the playlist editors and autoplay, chosen while putting a song
+/// out (docs K101). Null when cancelled.
+Future<(bool, bool)?> pickStreamingOptions(
+    BuildContext context, SongView song) {
+  final l = context.l10n;
+  var pitch = song.canPitch, autoplay = song.autoplay || song.autoplayOpen;
+  return showModalBottomSheet<(bool, bool)>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (c) => StatefulBuilder(
+      builder: (c, set) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(l.streamingSection,
+                    style: Theme.of(c).textTheme.titleLarge),
+                const SizedBox(height: 4),
+                Text(l.streamingStepHint,
+                    style: Theme.of(c).textTheme.bodySmall),
+                if (song.canPitch)
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: pitch,
+                    onChanged: (v) => set(() => pitch = v),
+                    title: Text(l.pitchSong,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    subtitle: Text(l.pitchHint),
+                  ),
+                if (song.autoplayOpen)
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: autoplay,
+                    onChanged: (v) => set(() => autoplay = v),
+                    title: Text(l.autoplayLabel,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    subtitle: Text(l.autoplayHint),
+                  ),
+                const SizedBox(height: 8),
+                FilledButton(
+                  onPressed: () => Navigator.pop(c, (pitch, autoplay)),
+                  child: Text(l.continueLabel),
+                ),
+              ]),
+        ),
+      ),
+    ),
+  );
 }
 
 /// Campaign choice with prices (docs/game-design.md §9).
