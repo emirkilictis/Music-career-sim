@@ -119,6 +119,12 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F54 | (Claude) Ödül sadece "aday oldun / kazandın mı" kartı; tören, kategori, rakip yok. Sıradaki işler listesinde 2. madde. | ✅ K91: Altın Plak Ödülleri: Kasım adayları, Şubat töreni, 5 kategori, rakipler, davet, ödüller ekranı. |
 | F55 | **Sosyal medya: paylaşım aksiyonları ve hayran tepkileri akışı, ikisi birlikte** (Emir: "ikisini birleştir"). | ✅ K93: forum / MyPlace / Chirper; 5 paylaşım türü; hayranlar paylaşımlara ve haftanın olaylarına cevap verir; ana sayfa kartı ve akış ekranı. |
 | F56 | **Chirper Twitter'a benzesin; yine yumuşak generic AI tasarımı olmuş. Renk paleti (siyah + turuncu) Pornhub'a benziyor, değiştir** (Emir). | ✅ K94: 4 palet gösterildi, Emir kobaltı seçti; Chirper X görünümünde, MyPlace 2006 profil sayfası, forum eski mesaj panosu. |
+| F57 | (Oyuncu topluluğu) **Playlist'e sokmak (pitch)**: şarkıyı editoryal listelere önermek. | Not alındı. Şu an playlist alımı kampanyaya bağlı ve rastgele (K31); pitch aksiyonuna dönüşebilir. |
+| F58 | (Oyuncu topluluğu) **Bot (sahte stream) + Spotify silmeleri / liste filtresi**; büyük rakiplerin (TS, BE) fanları/ekipleri de botlasın. | Not alındı. Risk/ödül: yakalanınca stream silinir, listeden filtrelenir, skandal. |
+| F59 | (Oyuncu topluluğu) **Autoplay**: algoritmanın şarkıyı otomatik çalması (Spotify Discovery Mode gibi telif karşılığı erişim). | Not alındı. |
+| F60 | (Oyuncu topluluğu) **Sözleşmeler, kampanyalar, müzikten kazanılan para, radyoya pushlama.** | Büyük kısmı var: şirket sözleşmeleri (K54/K78), kampanyalar (K57/K81), şarkı/albüm geliri (K60), paralı radyo tanıtımı (K84). Sözleşme pazarlığı derinleşebilir. |
+| F61 | (Oyuncu topluluğu) **Oyunu zorlaştır.** | Not alındı; F24 ile birlikte düşünülecek. |
+| F62 | (Oyuncu topluluğu) **Telefonda nasıl oynanır?** | Android: APK paylaşılabilir (docs). iPhone: TestFlight (Apple geliştirici hesabı) gerekir. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 
