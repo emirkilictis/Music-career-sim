@@ -3,3 +3,4 @@ build/
 *.exe
 /out/
 app/lib/l10n/gen/
+__pycache__/
