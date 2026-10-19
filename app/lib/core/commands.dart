@@ -200,6 +200,9 @@ abstract final class Cmd {
       };
 
   /// The year's top tours (null: all time) and the first year on the books.
+  /// The K-pop music show's recent weeks (docs K114).
+  static SessionCmd<List<MusicShowRow>> musicShow() => (s) => s.musicShow;
+
   /// This week's top artists (docs K113).
   static SessionCmd<List<ArtistChartRow>> artistChart() => (s) => s.artistChart;
 

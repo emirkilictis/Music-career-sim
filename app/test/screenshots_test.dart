@@ -600,6 +600,56 @@ void main() {
     await tester.tap(sign);
     await shot(tester, '15p_record_deal');
   });
+  testWidgets('screenshots: a K-pop music show', skip: !enabled,
+      (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+
+    // A K-pop group with two singles out (docs K114).
+    final c = app.controller;
+    final port = ReceivePort();
+    await c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Starlight',
+          genre: MusicShow.genre,
+          kind: ArtistKind.vocalGroup,
+          members: const ['Yuna', 'Mira', 'Jin', 'Sora'],
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 114,
+        ),
+        port.sendPort));
+    port.close();
+    await c.run((s) {
+      for (final t in ['Moonrise', 'Paper Hearts']) {
+        s.world.player!
+          ..creativeEnergy = 100
+          ..moneyCents = 1 << 40;
+        final id = s.writeSong(budget: BudgetTier.high, title: t).id;
+        s.releaseSingle(id);
+        s.advanceWeeks(3, stop: SkipStop.never);
+      }
+    });
+    await c.exec(Cmd.closeCareer());
+
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Starlight'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Charts');
+    await tester.scrollUntilVisible(_ci('Music Peak'), 200,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .first);
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Music Peak'));
+    await shot(tester, '08g_music_show');
+  });
 }
 
 /// Five albums of ten songs, about forty weeks apart (screenshots, K86).

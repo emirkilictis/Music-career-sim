@@ -764,6 +764,39 @@ class YearEndRow {
   final int weeksOn;
 }
 
+/// One week of the K-pop music show (docs K114).
+class MusicShowRow {
+  MusicShowRow.of(World w, MusicShowWeek x)
+      : week = x.week,
+        songId = x.songId,
+        title = w.songs[x.songId].title,
+        artistName = w.artists[w.songs[x.songId].primaryArtistId].name,
+        albumId = coverAlbumOf(w, w.songs[x.songId]),
+        score = x.score,
+        runnerUpTitle = x.runnerUpId < 0 ? '' : w.songs[x.runnerUpId].title,
+        runnerUpArtist = x.runnerUpId < 0
+            ? ''
+            : w.artists[w.songs[x.runnerUpId].primaryArtistId].name,
+        runnerUpScore = x.runnerUpScore,
+        tripleCrown = x.tripleCrown,
+        wins = w.musicShow.wins[x.songId] ?? 0,
+        isPlayer = w.songs[x.songId].primaryArtistId == w.playerArtistId;
+  final int week;
+  final int songId;
+  final String title;
+  final String artistName;
+  final int albumId;
+  final int score;
+  final String runnerUpTitle;
+  final String runnerUpArtist;
+  final int runnerUpScore;
+  final bool tripleCrown;
+
+  /// The song's wins so far.
+  final int wins;
+  final bool isPlayer;
+}
+
 /// One artist on the top artists chart (docs K113).
 class ArtistChartRow {
   ArtistChartRow.of(World w, this.rank, int id, this.weekStreams)

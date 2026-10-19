@@ -9,6 +9,7 @@ import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'model.dart';
+import 'music_show.dart';
 import 'tours.dart';
 
 /// The hot, in-memory simulation state ("current world").
@@ -56,6 +57,9 @@ class World {
 
   /// The player's brand deals, running and past (docs K102).
   final List<BrandDeal> brandDeals = [];
+
+  /// The K-pop music show's record (docs K114).
+  final MusicShowState musicShow = MusicShowState();
 
   /// The week's top artists by chart points, best first, and last week's
   /// (docs K113; ids).

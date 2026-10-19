@@ -3724,5 +3724,72 @@
         "type": "int"
       }
     }
+  },
+  "chartMusicShow": "Music Peak",
+  "musicShowHint": "Every week the K-pop singles of the last two months compete: digital 50%, album and CD sales 25%, broadcast 15%, fan votes 10%. Three wins in a row is a Triple Crown.",
+  "musicShowEmpty": "No show yet: it needs two K-pop singles out in the last two months.",
+  "musicShowVs": "beat “{title}” ({artist}) {score}",
+  "@musicShowVs": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "musicShowWins": "{count} wins",
+  "@musicShowWins": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tripleCrown": "Triple Crown",
+  "eventMusicShowFirstWin": "First win! “{title}” won Music Peak, beating “{other}”. Your fans are in tears.",
+  "@eventMusicShowFirstWin": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      }
+    }
+  },
+  "eventMusicShowWin": "“{title}” won Music Peak again: win #{wins}.",
+  "@eventMusicShowWin": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "wins": {
+        "type": "int"
+      }
+    }
+  },
+  "eventMusicShowCrown": "Triple Crown! “{title}” won Music Peak three weeks in a row and leaves the show on top.",
+  "@eventMusicShowCrown": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventMusicShowSecond": "“{title}” came second on Music Peak, behind “{other}”.",
+  "@eventMusicShowSecond": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      }
+    }
   }
 }

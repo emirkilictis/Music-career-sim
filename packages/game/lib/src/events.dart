@@ -138,6 +138,25 @@ class RivalNumberOne extends GameEvent {
   bool get isIndustry => true;
 }
 
+/// The player's song on the K-pop music show (docs K114): won (its
+/// [wins]th time, a Triple Crown at three in a row) or came second.
+class MusicShowResult extends GameEvent {
+  const MusicShowResult(this.songId,
+      {required this.won,
+      required this.wins,
+      this.tripleCrown = false,
+      this.otherSongId = -1});
+  final int songId;
+  final bool won;
+  final int wins;
+  final bool tripleCrown;
+
+  /// The song it lost to (or beat).
+  final int otherSongId;
+  @override
+  bool get isMajor => won && (wins == 1 || tripleCrown);
+}
+
 /// The player made the top 10 of the top artists chart, or #1 (docs
 /// K113).
 class TopArtist extends GameEvent {

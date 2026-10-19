@@ -1579,6 +1579,12 @@ class GameSession {
     return out;
   }
 
+  /// The K-pop music show's recent weeks, newest first (docs K114).
+  List<MusicShowRow> get musicShow => [
+        for (final x in world.musicShow.weeks.reversed)
+          MusicShowRow.of(world, x)
+      ];
+
   /// This week's top artists (docs K113).
   List<ArtistChartRow> get artistChart {
     final streams = Platforms.weekStreamsByArtist(world);
@@ -2047,6 +2053,22 @@ class GameSession {
       events.add(RivalAlbumClash(c));
     }
     events.addAll(_recordsBroken(r));
+    // The K-pop music show (docs K114).
+    if (r.musicShow case final show?) {
+      if (w.songs[show.songId].primaryArtistId == p.id) {
+        events.add(MusicShowResult(show.songId,
+            won: true,
+            wins: w.musicShow.wins[show.songId] ?? 1,
+            tripleCrown: show.tripleCrown,
+            otherSongId: show.runnerUpId));
+      } else if (show.runnerUpId >= 0 &&
+          w.songs[show.runnerUpId].primaryArtistId == p.id) {
+        events.add(MusicShowResult(show.runnerUpId,
+            won: false,
+            wins: w.musicShow.wins[show.runnerUpId] ?? 0,
+            otherSongId: show.songId));
+      }
+    }
     // The top artists chart (docs K113): into the top 10, or to #1.
     final rankNow = w.artistChart.indexOf(p.id) + 1;
     final rankBefore = w.artistChartPrev.indexOf(p.id) + 1;

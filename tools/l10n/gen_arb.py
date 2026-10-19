@@ -1101,6 +1101,18 @@ k('worldRank','#{rank} in the world','Dünyada #{rank}', rank='int')
 k('eventTopArtistNo1','You are the #1 artist in the world this week.','Bu hafta dünyanın #1 sanatçısısın.')
 k('eventTopArtist','You are #{rank} on the top artists chart this week.','Bu hafta en iyi sanatçılar listesinde #{rank} sıradasın.', rank='int')
 
+# K-pop music show (docs K114)
+k('chartMusicShow','Music Peak','Music Peak')
+k('musicShowHint','Every week the K-pop singles of the last two months compete: digital 50%, album and CD sales 25%, broadcast 15%, fan votes 10%. Three wins in a row is a Triple Crown.','Her hafta son iki ayın K-pop single’ları yarışıyor: dijital %50, albüm ve CD satışı %25, yayın %15, hayran oyu %10. Üst üste üç galibiyet Triple Crown demek.')
+k('musicShowEmpty','No show yet: it needs two K-pop singles out in the last two months.','Henüz program yok: son iki ayda çıkmış iki K-pop single’ı gerekiyor.')
+k('musicShowVs','beat “{title}” ({artist}) {score}','“{title}” ({artist}) şarkısını geçti: {score}', title='String', artist='String', score='int')
+k('musicShowWins','{count} wins','{count} galibiyet', count='int')
+k('tripleCrown','Triple Crown','Triple Crown')
+k('eventMusicShowFirstWin','First win! “{title}” won Music Peak, beating “{other}”. Your fans are in tears.','İlk galibiyet! “{title}” Music Peak’te “{other}” şarkısını geçerek kazandı. Hayranların gözyaşları içinde.', title='String', other='String')
+k('eventMusicShowWin','“{title}” won Music Peak again: win #{wins}.','“{title}” Music Peak’te yine kazandı: {wins}. galibiyet.', title='String', wins='int')
+k('eventMusicShowCrown','Triple Crown! “{title}” won Music Peak three weeks in a row and leaves the show on top.','Triple Crown! “{title}” Music Peak’i üç hafta üst üste kazandı ve programdan zirvede ayrılıyor.', title='String')
+k('eventMusicShowSecond','“{title}” came second on Music Peak, behind “{other}”.','“{title}” Music Peak’te “{other}” şarkısının ardından ikinci oldu.', title='String', other='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

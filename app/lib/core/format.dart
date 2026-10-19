@@ -713,6 +713,13 @@ class Fmt {
           ? l.eventPlaylistBig(t, platformName)
           : l.eventPlaylistMid(t, platformName),
       CatchingOn() => l.eventCatchingOn(t),
+      MusicShowResult(:final won, :final wins, :final tripleCrown) => !won
+          ? l.eventMusicShowSecond(t, line.title2)
+          : tripleCrown
+              ? l.eventMusicShowCrown(t)
+              : wins == 1
+                  ? l.eventMusicShowFirstWin(t, line.title2)
+                  : l.eventMusicShowWin(t, wins),
       TopArtist(:final rank) =>
         rank == 1 ? l.eventTopArtistNo1 : l.eventTopArtist(rank),
       RecordBroken(:final kind, :final value) => switch (kind) {

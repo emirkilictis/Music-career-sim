@@ -17,6 +17,7 @@ export 'src/config/sim_config.dart';
 export 'src/festivals.dart';
 export 'src/lifecycle.dart';
 export 'src/model.dart';
+export 'src/music_show.dart';
 export 'src/names.dart';
 export 'src/opportunities.dart';
 export 'src/real_artists.dart';

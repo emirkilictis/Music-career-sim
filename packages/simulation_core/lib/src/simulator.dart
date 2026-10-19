@@ -16,6 +16,7 @@ import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'lifecycle.dart';
 import 'model.dart';
+import 'music_show.dart';
 import 'opportunities.dart';
 import 'tours.dart';
 import 'word_of_mouth.dart';
@@ -46,6 +47,7 @@ class WeekResult {
     this.awardNight,
     this.brandDealsBroken = const [],
     this.rivalClashes = const [],
+    this.musicShow,
   });
 
   final int week;
@@ -98,6 +100,9 @@ class WeekResult {
 
   /// Rivals' answers to the player's announced albums (docs K109).
   final List<RivalClash> rivalClashes;
+
+  /// The K-pop music show's week, if one was held (docs K114).
+  final MusicShowWeek? musicShow;
 
   List<ChartEntry> get songChart => charts[Charts.usSongs];
   List<ChartEntry> get albumChart => charts[Charts.usAlbums];
@@ -891,6 +896,7 @@ class Simulator {
       a.updateRegionShare();
     }
     _rankArtists();
+    final show = MusicShow.weekly(w, GameTime.yearOf(w.week));
     _playerIncome();
     _fadeCatalogs();
     // Offers between releases (docs K59).
@@ -954,6 +960,7 @@ class Simulator {
       awardNight: night,
       brandDealsBroken: dealsBroken,
       rivalClashes: clashes,
+      musicShow: show,
     );
     w.week++;
     return result;

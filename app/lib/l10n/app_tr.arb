@@ -1155,5 +1155,15 @@
   "artistChartLine": "Bu hafta {streams} stream",
   "worldRank": "Dünyada #{rank}",
   "eventTopArtistNo1": "Bu hafta dünyanın #1 sanatçısısın.",
-  "eventTopArtist": "Bu hafta en iyi sanatçılar listesinde #{rank} sıradasın."
+  "eventTopArtist": "Bu hafta en iyi sanatçılar listesinde #{rank} sıradasın.",
+  "chartMusicShow": "Music Peak",
+  "musicShowHint": "Her hafta son iki ayın K-pop single’ları yarışıyor: dijital %50, albüm ve CD satışı %25, yayın %15, hayran oyu %10. Üst üste üç galibiyet Triple Crown demek.",
+  "musicShowEmpty": "Henüz program yok: son iki ayda çıkmış iki K-pop single’ı gerekiyor.",
+  "musicShowVs": "“{title}” ({artist}) şarkısını geçti: {score}",
+  "musicShowWins": "{count} galibiyet",
+  "tripleCrown": "Triple Crown",
+  "eventMusicShowFirstWin": "İlk galibiyet! “{title}” Music Peak’te “{other}” şarkısını geçerek kazandı. Hayranların gözyaşları içinde.",
+  "eventMusicShowWin": "“{title}” Music Peak’te yine kazandı: {wins}. galibiyet.",
+  "eventMusicShowCrown": "Triple Crown! “{title}” Music Peak’i üç hafta üst üste kazandı ve programdan zirvede ayrılıyor.",
+  "eventMusicShowSecond": "“{title}” Music Peak’te “{other}” şarkısının ardından ikinci oldu."
 }

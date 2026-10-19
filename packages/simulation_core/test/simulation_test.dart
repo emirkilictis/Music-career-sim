@@ -199,6 +199,7 @@ void main() {
   group('album clashes (K109)', albumClashTests);
   group('critics (K112)', criticTests);
   group('top artists (K113)', topArtistTests);
+  group('music show (K114)', musicShowTests);
   group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
@@ -2209,5 +2210,51 @@ void topArtistTests() {
         expect(w.artists[id].weekPoints, lessThanOrEqualTo(floor));
       }
     }
+  });
+}
+
+void musicShowTests() {
+  test('K-pop singles compete weekly; three in a row is a Triple Crown', () {
+    final w = WorldGen.create(seed: 114, startYear: 2018);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2018)) {
+      sim.step();
+    }
+    final p = WorldGen.addPlayer(w,
+        name: 'Idol',
+        genre: MusicShow.genre,
+        kind: ArtistKind.vocalGroup,
+        members: const ['A', 'B', 'C', 'D'],
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    p.creativeEnergy = 100;
+    final hit = Actions.writeSong(w, p, producerSkill: 95, aiMode: true);
+    p.moneyCents += 1000000000;
+    Actions.releaseSingle(w, p, hit, campaign: Campaign.intensive);
+    final shows = <MusicShowWeek>[];
+    for (var i = 0; i < MusicShow.eligibleWeeks + 2; i++) {
+      final r = sim.step();
+      if (r.musicShow != null) shows.add(r.musicShow!);
+    }
+    expect(shows, isNotEmpty);
+    for (final s in shows) {
+      expect(s.score, inInclusiveRange(0, 10000));
+      expect(s.runnerUpScore, lessThanOrEqualTo(s.score));
+      expect(w.artists[w.songs[s.songId].primaryArtistId].genre,
+          MusicShow.genre);
+    }
+    // A superstar's single wins, and after three in a row it is crowned
+    // and leaves the show.
+    final mine = shows.where((s) => s.songId == hit.id).toList();
+    expect(mine.length, greaterThanOrEqualTo(3));
+    expect(mine[2].tripleCrown, isTrue);
+    expect(w.musicShow.crowned, contains(hit.id));
+    expect(mine.length, 3);
+    expect(w.musicShow.wins[hit.id], 3);
+    // The record survives a save.
+    final copy = MusicShowState()..decode(w.musicShow.encode());
+    expect(copy.wins, w.musicShow.wins);
+    expect(copy.crowned, w.musicShow.crowned);
+    expect(copy.weeks.length, w.musicShow.weeks.length);
   });
 }
