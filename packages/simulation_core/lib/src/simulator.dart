@@ -18,6 +18,7 @@ import 'lifecycle.dart';
 import 'model.dart';
 import 'opportunities.dart';
 import 'tours.dart';
+import 'word_of_mouth.dart';
 import 'rng.dart';
 import 'time.dart';
 import 'world.dart';
@@ -44,6 +45,7 @@ class WeekResult {
     this.awardNominations,
     this.awardNight,
     this.brandDealsBroken = const [],
+    this.rivalClashes = const [],
   });
 
   final int week;
@@ -94,6 +96,9 @@ class WeekResult {
   /// The player's brand deals broken this week for a missed task (K102).
   final List<DealOutcome> brandDealsBroken;
 
+  /// Rivals' answers to the player's announced albums (docs K109).
+  final List<RivalClash> rivalClashes;
+
   List<ChartEntry> get songChart => charts[Charts.usSongs];
   List<ChartEntry> get albumChart => charts[Charts.usAlbums];
 }
@@ -138,7 +143,7 @@ class Simulator {
     StreamingTools.answerPitches(w);
 
     // 1–2. Scheduled AI activity.
-    AiPlanner.step(w);
+    final clashes = AiPlanner.step(w);
 
     // 3. Short-video virality can revive old catalog songs (event based).
     final virals = _viralRevivals();
@@ -315,9 +320,11 @@ class Simulator {
               ? w.difficulty.exposure
               : w.difficulty.aiExposure) *
           campExp *
-          // Hype, playlists, a new version, autoplay and the video add up
-          // with diminishing returns instead of multiplying (docs K105).
+          // Hype, word of mouth, playlists, a new version, autoplay and the
+          // video add up with diminishing returns instead of multiplying
+          // (docs K105, K108).
           c.stackedLift(0.5 * p.hype +
+              WordOfMouth.lift(w, s, promoAge) +
               s.playlistBoost +
               s.versionBoost +
               (s.autoplay ? c.autoplayLift : 0.0) +
@@ -945,6 +952,7 @@ class Simulator {
       awardNominations: nominations,
       awardNight: night,
       brandDealsBroken: dealsBroken,
+      rivalClashes: clashes,
     );
     w.week++;
     return result;

@@ -1044,6 +1044,14 @@ k('dealNet','In hand after the buyout: {net}','Sözleşme bedelinden sonra elde:
 k('labelUnrecouped','Advance still to pay back: {amount}. Your royalties go to it first.','Geri ödenecek avans: {amount}. Telif gelirin önce buna gidiyor.', amount='String')
 k('labelRecouped','Advance paid back: your royalties are all yours.','Avans geri ödendi: telif gelirinin tamamı senin.')
 
+# Word of mouth (docs K108)
+k('eventCatchingOn','“{title}” is catching on by word of mouth: more people find it every week.','“{title}” kulaktan kulağa yayılıyor: her hafta daha çok kişi keşfediyor.', title='String')
+k('tagWordOfMouth','Word of mouth','Kulaktan kulağa')
+
+# Rivals and the player's album dates (docs K109)
+k('eventRivalMoved','{artist} moved “{title}” to {week} to stay out of your album’s way.','{artist}, “{title}” albümünü senin albümünün yolundan çekilmek için {week} tarihine kaydırdı.', artist='String', title='String', week='String')
+k('eventRivalStays','{artist} is not backing down: “{title}” comes out the same week as your album ({week}). A chart battle is coming; you can still move your date.','{artist} geri adım atmıyor: “{title}” senin albümünle aynı hafta ({week}) çıkıyor. Liste savaşı geliyor; tarihini hâlâ değiştirebilirsin.', artist='String', title='String', week='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

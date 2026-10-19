@@ -1796,8 +1796,18 @@ class GameSession {
       if (s.primaryArtistId == p.id)
         events.add(PlaylistAdded(id, s.playlistAdd));
     }
+    // A sleeper hit in the making (docs K108).
+    for (final id in w.playerSongIds) {
+      final s = w.songs[id];
+      if (s.status != SongStatus.active || s.releasedWeek < 0) continue;
+      final age = r.week - (s.isSingle ? s.singleWeek : s.releasedWeek);
+      if (WordOfMouth.catchingOn(w, s, age)) events.add(CatchingOn(id));
+    }
     for (final d in r.brandDealsBroken) {
       events.add(BrandDealBroken(d.deal.info, d.cents));
+    }
+    for (final c in r.rivalClashes) {
+      events.add(RivalAlbumClash(c));
     }
     // Bought streams caught, and pitches the editors passed on (K95, K97).
     for (final id in r.botsCaught) {

@@ -680,6 +680,10 @@ class Fmt {
       PlaylistAdded() => e.size == PlaylistAdd.big
           ? l.eventPlaylistBig(t, platformName)
           : l.eventPlaylistMid(t, platformName),
+      CatchingOn() => l.eventCatchingOn(t),
+      RivalAlbumClash() => e.clash.moved
+          ? l.eventRivalMoved(line.artistName, t, week(e.clash.toWeek))
+          : l.eventRivalStays(line.artistName, t, week(e.clash.playerWeek)),
       EraClosed() => l.eventEraClosed(eraResult(e.result)),
       BurnoutOver() => l.eventBurnoutOver,
       ReleaseOut() => l.eventReleaseOut(t),

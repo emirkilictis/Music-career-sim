@@ -195,6 +195,8 @@ void main() {
   group('viral', viralTests);
   group('audience limits (K105)', audienceLimitTests);
   group('record deals (K107)', recordDealTests);
+  group('word of mouth (K108)', wordOfMouthTests);
+  group('album clashes (K109)', albumClashTests);
   group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
@@ -2045,5 +2047,103 @@ void recordDealTests() {
     sim.step();
     expect(p.unrecoupedCents, lessThan(1 << 40));
     expect(p.moneyCents - bank, lessThanOrEqualTo(p.job.wageCents));
+  });
+}
+
+void wordOfMouthTests() {
+  test('a few good songs catch on slowly, peaking months later', () {
+    final w = WorldGen.create(seed: 108, startYear: 2012);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2012)) {
+      sim.step();
+    }
+    final good = w.songs.where((s) => s.quality >= 75).toList();
+    final weak = w.songs.where((s) => s.quality < 50).toList();
+    double share(List<Song> songs) =>
+        songs.where((s) => WordOfMouth.potential(w, s) > 0).length /
+        songs.length;
+    printOnFailure('good ${good.length} ${share(good)}, '
+        'weak ${weak.length} ${share(weak)}');
+    expect(good.length, greaterThan(100));
+    expect(share(good), inInclusiveRange(0.03, 0.15));
+    expect(share(weak), lessThan(share(good)));
+    final s = good.firstWhere((s) => WordOfMouth.potential(w, s) > 0);
+    expect(WordOfMouth.lift(w, s, 0), 0);
+    var peak = 0;
+    for (var age = 1; age < 80; age++) {
+      if (WordOfMouth.lift(w, s, age) > WordOfMouth.lift(w, s, peak)) {
+        peak = age;
+      }
+    }
+    expect(peak, inInclusiveRange(15, 30));
+    expect(WordOfMouth.lift(w, s, peak), lessThan(1.4));
+    final noticed = [
+      for (var age = 0; age < 200; age++)
+        if (WordOfMouth.catchingOn(w, s, age)) age
+    ];
+    expect(noticed.length, lessThanOrEqualTo(1));
+  });
+}
+
+void albumClashTests() {
+  ({World w, Simulator sim, Artist me, Artist rival}) setup(double fame) {
+    final w = WorldGen.create(seed: 109, startYear: 2015);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2015)) {
+      sim.step();
+    }
+    final me = WorldGen.addPlayer(w,
+        name: 'Me',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    // The player's album, announced, four weeks out.
+    me.scheduled.add(ScheduledRelease(
+        id: 1,
+        type: AlbumType.album,
+        songIds: const [],
+        releaseWeek: w.week + 4,
+        announceWeek: w.week,
+        createdWeek: w.week,
+        title: 'Mine'));
+    final rival = w.artists.firstWhere((a) =>
+        a.tier == ArtistTier.a && !a.isRetired && a.id != me.id);
+    rival
+      ..fame = fame
+      ..nextEraWeek = 1 << 30
+      ..pendingAlbumTitle = 'Theirs'
+      ..plan.clear()
+      ..plan.addAll([
+        PlannedRelease(week: w.week + 4, kind: PlannedKind.album),
+        PlannedRelease(week: w.week + 10, kind: PlannedKind.single),
+      ]);
+    return (w: w, sim: sim, me: me, rival: rival);
+  }
+
+  test('a smaller star moves their album out of the way', () {
+    final (:w, :sim, :me, :rival) = setup(0.4);
+    final week = w.week + 4;
+    // Too early to look: nothing yet.
+    expect(sim.step().rivalClashes, isEmpty);
+    final clash = sim.step().rivalClashes.single;
+    expect(clash.artistId, rival.id);
+    expect(clash.moved, isTrue);
+    expect(clash.title, 'Theirs');
+    expect(clash.toWeek, inInclusiveRange(week + 2, week + 3));
+    final album = rival.plan.firstWhere((p) => p.kind == PlannedKind.album);
+    expect(album.week, clash.toWeek);
+    // Later releases move with it, in order.
+    expect(rival.plan.last.week, week + 6 + (clash.toWeek - week));
+    expect(me.scheduled.single.releaseWeek, week);
+  });
+
+  test('a star as big stays for a head-to-head', () {
+    final (:w, :sim, :me, :rival) = setup(0.95);
+    final week = w.week + 4;
+    sim.step();
+    final clash = sim.step().rivalClashes.single;
+    expect(clash.moved, isFalse);
+    expect(clash.playerWeek, week);
+    expect(rival.plan.first.week, week);
   });
 }

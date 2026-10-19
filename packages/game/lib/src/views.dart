@@ -303,6 +303,13 @@ class SongView {
             s.playlistWeek == StreamingTools.pitchAnswerWeek(s),
         streamingOpen = StreamingTools.streamingOpen(w),
         autoplayOpen = StreamingTools.autoplayOpen(w),
+        catchingOn = s.releasedWeek >= 0 &&
+            WordOfMouth.lift(
+                    w,
+                    s,
+                    w.week -
+                        (s.isSingle ? s.singleWeek : s.releasedWeek)) >=
+                0.1,
         variants = List.unmodifiable(s.variants),
         campaignCostCents = s.campaignCostCents,
         campaignReturnCents = s.campaignReturnCents.round(),
@@ -356,6 +363,9 @@ class SongView {
   /// The streaming platform and its autoplay exist this year.
   final bool streamingOpen;
   final bool autoplayOpen;
+
+  /// More people find it every week by word of mouth (docs K108).
+  final bool catchingOn;
   final List<(SingleFormat, int)> variants;
 
   /// The song's campaign, what the player paid and the income it brought

@@ -207,6 +207,10 @@ String _event(GameSession s, GameEvent e) => switch (e) {
         'album first week US ${_c(e.usUnits)} (#${e.usPosition}) global ${_c(e.globalUnits)}',
       ViralTrend() => 'VIRAL song ${e.songId}',
       PlaylistAdded() => 'playlist ${e.size.name} song ${e.songId}',
+      CatchingOn() => 'word of mouth: song ${e.songId}',
+      RivalAlbumClash() => e.clash.moved
+          ? 'rival ${e.clash.artistId} moved album to week ${e.clash.toWeek}'
+          : 'rival ${e.clash.artistId} stays: same week as your album',
       EraClosed() =>
         'era closed: ${e.result.name} (${_c(e.units)} vs exp ${_c(e.expected)})',
       BurnoutOver() => 'burnout over',

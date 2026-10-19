@@ -98,6 +98,15 @@ class PlaylistAdded extends GameEvent {
   bool get isMajor => false;
 }
 
+/// A player song is catching on by word of mouth (docs K108): more
+/// people find it every week, for months.
+class CatchingOn extends GameEvent {
+  const CatchingOn(this.songId);
+  final int songId;
+  @override
+  bool get isMajor => true;
+}
+
 /// The player's album era ended and was scored against expectations.
 class EraClosed extends GameEvent {
   const EraClosed(this.result, this.units, this.expected);
@@ -126,6 +135,15 @@ class RivalNumberOne extends GameEvent {
   bool get isMajor => false;
   @override
   bool get isIndustry => true;
+}
+
+/// A rival's answer to the player's announced album (docs K109): moved
+/// out of its way, or the same week for a head-to-head.
+class RivalAlbumClash extends GameEvent {
+  const RivalAlbumClash(this.clash);
+  final RivalClash clash;
+  @override
+  bool get isMajor => !clash.moved;
 }
 
 /// A streaming platform opened in a region this week (docs K38): its Top 50

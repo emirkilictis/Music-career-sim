@@ -9,17 +9,92 @@ import 'tours.dart';
 import 'world.dart';
 import 'world_gen.dart';
 
+/// A rival's album that met the player's announced album in the same
+/// week (docs K109): moved out of the way ([toWeek] later), or kept for a
+/// head-to-head ([moved] false).
+class RivalClash {
+  const RivalClash(
+      {required this.artistId,
+      required this.title,
+      required this.fromWeek,
+      required this.toWeek,
+      required this.playerWeek});
+  final int artistId;
+  final String title;
+  final int fromWeek;
+  final int toWeek;
+  final int playerWeek;
+  bool get moved => toWeek != fromWeek;
+}
+
 /// AI artist behaviour: era planning and release execution (Tier A/B), plus
 /// yearly world upkeep (retirements, newcomers, tier re-ranking).
 abstract final class AiPlanner {
-  static void step(World w) {
+  /// Weeks before its album a rival looks at the player's calendar.
+  static const clashLookahead = 3;
+
+  /// Runs the rivals' week; returns their answers to the player's
+  /// announced albums.
+  static List<RivalClash> step(World w) {
     if (GameTime.weekOfYear(w.week) == 1) _yearlyUpkeep(w);
+    final clashes = <RivalClash>[];
     for (final id in w.activeArtistIds) {
       final a = w.artists[id];
       if (a.tier == ArtistTier.player) continue;
       if (a.plan.isEmpty && w.week >= a.nextEraWeek) _planEra(w, a);
+      final clash = _avoidClash(w, a);
+      if (clash != null) clashes.add(clash);
       _executeDue(w, a);
     }
+    return clashes;
+  }
+
+  /// Three weeks before a rival's album, a clash with the player's
+  /// announced album is settled (docs K109): a less famous rival moves two
+  /// or three weeks past it; a star as big or bigger keeps the date.
+  static RivalClash? _avoidClash(World w, Artist a) {
+    final me = w.player;
+    if (me == null) return null;
+    final i = a.plan.indexWhere((p) => p.kind == PlannedKind.album);
+    if (i < 0 || a.plan[i].week - w.week != clashLookahead) return null;
+    final week = a.plan[i].week;
+    ScheduledRelease? mine;
+    for (final sr in me.scheduled) {
+      if (sr.isAlbum &&
+          sr.announcedBy(w.week) &&
+          (sr.releaseWeek - week).abs() <= 1) {
+        mine = sr;
+        break;
+      }
+    }
+    if (mine == null) return null;
+    // Only the charts' contenders care.
+    if (a.tier != ArtistTier.a && a.fame < 0.3) return null;
+    if (a.fame >= me.fame - 0.1) {
+      return RivalClash(
+          artistId: a.id,
+          title: a.pendingAlbumTitle,
+          fromWeek: week,
+          toWeek: week,
+          playerWeek: mine.releaseWeek);
+    }
+    final r =
+        RandomStream.keyed(w.seed, w.week, a.id, RngPurpose.aiPlanning + 41);
+    final shift = mine.releaseWeek - week + 2 + r.nextInt(2);
+    for (var j = 0; j < a.plan.length; j++) {
+      final p = a.plan[j];
+      if (p.week >= week) {
+        a.plan[j] = PlannedRelease(
+            week: p.week + shift, kind: p.kind, songId: p.songId);
+      }
+    }
+    w.dirtyArtists.add(a.id);
+    return RivalClash(
+        artistId: a.id,
+        title: a.pendingAlbumTitle,
+        fromWeek: week,
+        toWeek: week + shift,
+        playerWeek: mine.releaseWeek);
   }
 
   static void _executeDue(World w, Artist a) {

@@ -3512,5 +3512,42 @@
       }
     }
   },
-  "labelRecouped": "Advance paid back: your royalties are all yours."
+  "labelRecouped": "Advance paid back: your royalties are all yours.",
+  "eventCatchingOn": "“{title}” is catching on by word of mouth: more people find it every week.",
+  "@eventCatchingOn": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "tagWordOfMouth": "Word of mouth",
+  "eventRivalMoved": "{artist} moved “{title}” to {week} to stay out of your album’s way.",
+  "@eventRivalMoved": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "eventRivalStays": "{artist} is not backing down: “{title}” comes out the same week as your album ({week}). A chart battle is coming; you can still move your date.",
+  "@eventRivalStays": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "week": {
+        "type": "String"
+      }
+    }
+  }
 }

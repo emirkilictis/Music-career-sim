@@ -403,6 +403,13 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     Tag(l.hasVideo(fmt.videoBudget(s.video!)),
                         icon: Icons.videocam_rounded),
                   ],
+                  // A sleeper hit in the making (docs K108).
+                  if (s.catchingOn) ...[
+                    const SizedBox(height: 8),
+                    Tag(l.tagWordOfMouth,
+                        icon: Icons.trending_up_rounded,
+                        color: AppColors.mint),
+                  ],
                   if (s.isPlayer &&
                       s.inVault &&
                       s.scheduledSingleWeek < 0 &&

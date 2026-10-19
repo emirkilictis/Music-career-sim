@@ -20,6 +20,10 @@ class EventIcon extends StatelessWidget {
       AlbumFirstWeek() => (Icons.album_rounded, AppColors.lilac),
       ViralTrend() => (Icons.local_fire_department_rounded, AppColors.peach),
       PlaylistAdded() => (Icons.headphones_rounded, AppColors.mint),
+      CatchingOn() => (Icons.trending_up_rounded, AppColors.mint),
+      RivalAlbumClash(:final clash) => clash.moved
+          ? (Icons.event_repeat_rounded, AppColors.mint)
+          : (Icons.sports_mma_rounded, AppColors.coral),
       EraClosed() => (Icons.insights_rounded, AppColors.pink),
       BurnoutOver() => (Icons.edit_note_rounded, AppColors.butter),
       PlatformLaunched() => (Icons.graphic_eq_rounded, AppColors.mint),
