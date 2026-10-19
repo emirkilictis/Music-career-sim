@@ -704,7 +704,9 @@ class AlbumBuilderScreen extends StatefulWidget {
 
 class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
   final _title = TextEditingController();
-  final Set<int> _picked = {};
+
+  /// Picked songs in tracklist order (docs K133).
+  final List<int> _picked = [];
   AlbumType _type = AlbumType.album;
 
   /// Extra editions after the standard one (docs K46).
@@ -740,10 +742,12 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
     }
   }
 
-  List<int> get _ordered => [
-        for (final s in widget.songs)
-          if (_picked.contains(s.id)) s.id
-      ];
+  List<int> get _ordered => List.of(_picked);
+
+  void _move(int i, int by) => setState(() {
+        final id = _picked.removeAt(i);
+        _picked.insert(i + by, id);
+      });
 
   /// Keeps the album in the vault with no date (docs F31).
   Future<void> _saveDraft() async {
@@ -880,6 +884,54 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
                       ),
                   ]),
           ),
+          // The order the songs play in (docs K133).
+          if (_picked.length > 1) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.tracklistTitle,
+              icon: Icons.format_list_numbered_rounded,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(l.tracklistHint,
+                        style: Theme.of(context).textTheme.bodySmall),
+                    const SizedBox(height: 6),
+                    for (final (i, id) in _picked.indexed)
+                      Row(children: [
+                        SizedBox(
+                          width: 28,
+                          child: Text('${i + 1}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w800)),
+                        ),
+                        Expanded(
+                          child: Text(
+                              widget.songs.firstWhere((s) => s.id == id).title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
+                        ),
+                        Text(
+                            '${(Simulator.trackPositionFactor(i, _picked.length) * 100).round()}%',
+                            style: TextStyle(
+                                color: AppColors.textMuted, fontSize: 12.5)),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          tooltip: l.moveUp,
+                          onPressed: i == 0 ? null : () => _move(i, -1),
+                          icon: const Icon(Icons.arrow_upward_rounded),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          tooltip: l.moveDown,
+                          onPressed: i == _picked.length - 1
+                              ? null
+                              : () => _move(i, 1),
+                          icon: const Icon(Icons.arrow_downward_rounded),
+                        ),
+                      ]),
+                  ]),
+            ),
+          ],
           if (_type != AlbumType.mixtape) ...[
             const SizedBox(height: 12),
             Section(

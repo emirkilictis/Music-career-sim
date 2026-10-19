@@ -1268,6 +1268,12 @@ k('billionsClubTitle','Billions Club','Milyarlar Kulübü')
 k('billionsClubDesc','Every song with a billion plays on Streamify.','Streamify’da bir milyar dinlenmeyi geçen her şarkı.')
 k('billionsClubEmpty','No song has a billion plays yet.','Henüz bir milyar dinlenmeye ulaşan şarkı yok.')
 
+# Tracklist order (K133)
+k('tracklistTitle','Tracklist','Şarkı sırası')
+k('tracklistHint','Listeners start at the top and drift off: the opener gets about 30% more plays than the album average, the closer 30% less. Put the songs you want heard early.','Dinleyiciler baştan başlar ve yavaş yavaş bırakır: açılış şarkısı albüm ortalamasından yaklaşık %30 fazla, kapanış %30 az dinlenir. Duyulmasını istediğin şarkıları başa koy.')
+k('moveUp','Move up','Yukarı taşı')
+k('moveDown','Move down','Aşağı taşı')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

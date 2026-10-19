@@ -262,9 +262,24 @@ class Simulator {
       // each gets full attention; beyond that each track gets less, so 40
       // tracks add streams but nowhere near 4× (docs/game-design.md §10.2).
       var trackShare = 1.0;
+      // Fans playing the album start at the top and drift off (docs K133);
+      // others find a track through playlists and radio, in any order.
+      var position = 1.0;
       if (!s.isSingle && s.albumId >= 0) {
-        final tracks = w.albums[s.albumId].songIds.length;
+        final ids = w.albums[s.albumId].songIds;
+        final tracks = ids.length;
         if (tracks > 10) trackShare = math.pow(10 / tracks, 0.6).toDouble();
+        // Singles out before are played on their own: the rest share
+        // the album's plays, the average kept.
+        var sum = 0.0, count = 0;
+        for (var j = 0; j < tracks; j++) {
+          if (w.songs[ids[j]].isSingle) continue;
+          sum += trackPositionFactor(j, tracks);
+          count++;
+        }
+        position = sum <= 0
+            ? 1.0
+            : trackPositionFactor(ids.indexOf(s.id), tracks) * count / sum;
       }
 
       var fans = p.coreFans, cas = p.casual;
@@ -380,6 +395,7 @@ class Simulator {
           s.fanAppeal *
           fanCurve *
           fanShare *
+          position *
           (1 + p.hype) *
           (s.isSingle
               ? 1.0
@@ -1600,6 +1616,14 @@ class Simulator {
     }
     // (u − 0.5) has a deviation of 0.29; the echoes add up to about 1.5×.
     return math.exp(w.config.momentumSigma / 0.29 / 1.47 * m);
+  }
+
+  /// How much more (or less) the track at [index] of [tracks] is played
+  /// than the album's average (docs K133): the opener most, the closer
+  /// least, the album's total unchanged.
+  static double trackPositionFactor(int index, int tracks) {
+    if (tracks <= 1 || index < 0) return 1;
+    return 1.3 - 0.6 * index / (tracks - 1);
   }
 
   /// How much [s] connects with listeners beyond its fans (docs K127):

@@ -4532,5 +4532,9 @@
   },
   "billionsClubTitle": "Billions Club",
   "billionsClubDesc": "Every song with a billion plays on Streamify.",
-  "billionsClubEmpty": "No song has a billion plays yet."
+  "billionsClubEmpty": "No song has a billion plays yet.",
+  "tracklistTitle": "Tracklist",
+  "tracklistHint": "Listeners start at the top and drift off: the opener gets about 30% more plays than the album average, the closer 30% less. Put the songs you want heard early.",
+  "moveUp": "Move up",
+  "moveDown": "Move down"
 }

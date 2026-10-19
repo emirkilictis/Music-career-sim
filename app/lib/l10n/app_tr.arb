@@ -1314,5 +1314,9 @@
   "eventStreamPlays": "“{title}” Streamify’da {plays} dinlenmeyi geçti.",
   "billionsClubTitle": "Milyarlar Kulübü",
   "billionsClubDesc": "Streamify’da bir milyar dinlenmeyi geçen her şarkı.",
-  "billionsClubEmpty": "Henüz bir milyar dinlenmeye ulaşan şarkı yok."
+  "billionsClubEmpty": "Henüz bir milyar dinlenmeye ulaşan şarkı yok.",
+  "tracklistTitle": "Şarkı sırası",
+  "tracklistHint": "Dinleyiciler baştan başlar ve yavaş yavaş bırakır: açılış şarkısı albüm ortalamasından yaklaşık %30 fazla, kapanış %30 az dinlenir. Duyulmasını istediğin şarkıları başa koy.",
+  "moveUp": "Yukarı taşı",
+  "moveDown": "Aşağı taşı"
 }
