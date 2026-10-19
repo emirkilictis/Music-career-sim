@@ -4441,5 +4441,23 @@
         "type": "String"
       }
     }
+  },
+  "listenersHistory": "Monthly listeners",
+  "weeksAgo": "{weeks} weeks ago",
+  "@weeksAgo": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "topCities": "Top cities",
+  "cityListeners": "{count} listeners",
+  "@cityListeners": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }

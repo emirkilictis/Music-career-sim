@@ -1241,6 +1241,38 @@ void main() {
       g.close();
     });
 
+    test('the artist page shows listeners over time and top cities (K130)',
+        () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      g.world.player!.creativeEnergy = 100;
+      g.releaseSingle(g.writeSong(budget: BudgetTier.high).id);
+      g.advanceWeeks(6, stop: SkipStop.never);
+      final page = g.artistPage(g.player.id);
+      expect(page.listenerHistory.length, inInclusiveRange(3, 26));
+      expect(page.listenerHistory.last, greaterThan(0));
+      final cities = page.topCities;
+      expect(cities.length, 5);
+      for (var i = 1; i < cities.length; i++) {
+        expect(cities[i].listeners, lessThanOrEqualTo(cities[i - 1].listeners));
+      }
+      expect(cities.fold(0.0, (t, c) => t + c.listeners),
+          lessThan(page.monthlyListeners));
+      // A K-pop act is big in Seoul.
+      final kpop = Streamify.topCities(
+          const [0.2, 0.2, 0.6], HomeCountry.other, 18, 1e6);
+      expect(kpop.map((c) => c.name), contains('Seoul'));
+      // Rivals' pages have no history.
+      final rival = g.world.artists
+          .firstWhere((a) => a.tier == ArtistTier.a && !a.isRetired);
+      expect(g.artistPage(rival.id).listenerHistory, isEmpty);
+      g.close();
+    });
+
     test('the radio chart ranks US airplay (K129)', () {
       final g = GameSession.start(slots, _setup());
       g.advanceWeeks(3, stop: SkipStop.never);

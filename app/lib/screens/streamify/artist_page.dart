@@ -8,6 +8,7 @@ import '../../core/scope.dart';
 import '../../ui/palette.dart';
 import '../../widgets/art.dart';
 import '../../widgets/common.dart';
+import '../../widgets/line_chart.dart';
 import '../song_detail_screen.dart';
 import 'album_page.dart';
 import '../game_shell.dart';
@@ -385,6 +386,45 @@ class _ArtistPageState extends State<ArtistPage> {
               const SizedBox(height: 14),
               Text(l.followersValue(fmt.compact(page.followers)),
                   style: const TextStyle(fontWeight: FontWeight.w700)),
+              // Monthly listeners over half a year (docs K130).
+              if (page.listenerHistory.length > 2) ...[
+                const SizedBox(height: 14),
+                Text(l.listenersHistory,
+                    style: const TextStyle(
+                        color: StreamifyColors.muted,
+                        fontWeight: FontWeight.w700)),
+                const SizedBox(height: 8),
+                LineChart(
+                  values: page.listenerHistory,
+                  height: 110,
+                  color: StreamifyColors.accent,
+                  topLabel: fmt.compact(
+                      page.listenerHistory.reduce((a, b) => a > b ? a : b)),
+                  bottomLabel: l.weeksAgo(page.listenerHistory.length),
+                ),
+              ],
+              // The cities with the most listeners (docs K130).
+              if (page.topCities.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Text(l.topCities,
+                    style: const TextStyle(
+                        color: StreamifyColors.muted,
+                        fontWeight: FontWeight.w700)),
+                const SizedBox(height: 6),
+                for (final c in page.topCities)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(children: [
+                      Expanded(
+                          child: Text(c.name,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700))),
+                      Text(l.cityListeners(plays.format(c.listeners.round())),
+                          style:
+                              const TextStyle(color: StreamifyColors.muted)),
+                    ]),
+                  ),
+              ],
               const SizedBox(height: 14),
               Text(l.whereListen,
                   style: const TextStyle(

@@ -1246,6 +1246,12 @@ k('chartUsRadio','US Radio Songs','ABD Radyo Şarkıları')
 k('chartShortUsRadio','US Radio','ABD Radyo')
 k('radioChartLine','{audience} listeners on the radio','Radyoda {audience} dinleyici', audience='String')
 
+# Streamify audience (K130)
+k('listenersHistory','Monthly listeners','Aylık dinleyiciler')
+k('weeksAgo','{weeks} weeks ago','{weeks} hafta önce', weeks='int')
+k('topCities','Top cities','En çok dinlenen şehirler')
+k('cityListeners','{count} listeners','{count} dinleyici', count='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -562,6 +562,17 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
     await tester.pumpAndSettle();
+    // The player's own page: listeners over time, top cities (docs K130).
+    await tester.tap(find.text('Nova Reyes').first);
+    await tester.pumpAndSettle();
+    final cities = _ci('Top cities');
+    await tester.scrollUntilVisible(cities, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(cities), alignment: 0.4);
+    await tester.pumpAndSettle();
+    await shot(tester, '10c_my_audience');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
     // The year-end charts (docs K110).

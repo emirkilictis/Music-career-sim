@@ -300,6 +300,28 @@ class GameSession {
   /// The player's average weekly streams over the last four weeks (monthly
   /// listeners count a 28-day window, so a release week does not make them
   /// jump; docs F20).
+  /// The player's monthly listeners on the streaming app, week by week,
+  /// oldest first (docs K130): a four-week average like the app's.
+  List<double> _listenerHistory({int weeks = 26}) {
+    final rows = _store.db.select(
+        'SELECT week, lifetimeStreams FROM playerWeek ORDER BY week DESC '
+        'LIMIT ?',
+        [weeks + 4]);
+    final life = [
+      for (final r in rows.reversed) (r['lifetimeStreams'] as num).toDouble()
+    ];
+    final weekly = [
+      for (var i = 1; i < life.length; i++) math.max(0.0, life[i] - life[i - 1])
+    ];
+    return [
+      for (var i = math.max(0, weekly.length - weeks); i < weekly.length; i++)
+        Streamify.monthlyListeners([
+              for (var j = math.max(0, i - 3); j <= i; j++) weekly[j]
+            ].reduce((a, b) => a + b) /
+            (i - math.max(0, i - 3) + 1)),
+    ];
+  }
+
   double _fourWeekStreams() {
     final now = world.artistLifetimeStreams(_p);
     final rows = _store.db.select(
@@ -342,6 +364,7 @@ class GameSession {
               w, a, MusicPlatform.streamify, GameTime.yearOf(w.week)) ??
           0,
       worldRank: Platforms.worldRank(w, a),
+      listenerHistory: artistId == _p.id ? _listenerHistory() : const [],
       popular: [for (final s in popular.take(10)) SongView.of(w, s)],
       albums: [
         for (final al in w.albums.reversed)

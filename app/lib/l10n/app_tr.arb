@@ -1295,5 +1295,9 @@
   "radioUpgradeHint": "İstasyonlar hâlâ karar verirken radyo tanıtımını yükselt (ilk 8 hafta; farkı ödersin):",
   "chartUsRadio": "ABD Radyo Şarkıları",
   "chartShortUsRadio": "ABD Radyo",
-  "radioChartLine": "Radyoda {audience} dinleyici"
+  "radioChartLine": "Radyoda {audience} dinleyici",
+  "listenersHistory": "Aylık dinleyiciler",
+  "weeksAgo": "{weeks} hafta önce",
+  "topCities": "En çok dinlenen şehirler",
+  "cityListeners": "{count} dinleyici"
 }

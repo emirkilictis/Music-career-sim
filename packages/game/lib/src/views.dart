@@ -44,7 +44,8 @@ RegionalNumbers _regional(double Function(int r) f) =>
 
 class ArtistView {
   ArtistView._(World w, Artist a)
-      : id = a.id,
+      :
+        regionShare = List.unmodifiable(a.regionShare), id = a.id,
         name = a.name,
         kind = a.kind,
         members = List.unmodifiable(a.members),
@@ -137,6 +138,9 @@ class ArtistView {
         isRetired = a.isRetired;
 
   factory ArtistView.of(World w, Artist a) => ArtistView._(w, a);
+
+  /// Where the audience is, by [Region] (docs K130).
+  final List<double> regionShare;
 
   final int id;
   final String name;
@@ -1175,6 +1179,93 @@ abstract final class Streamify {
   /// month on the platform).
   static double monthlyListeners(double weeklyStreams) =>
       weeklyStreams * share * 4.3 / 12;
+
+  /// Share of a region's listeners in its big cities together.
+  static const _cityShare = 0.4;
+
+  /// The five cities with the most of [monthly] listeners (docs K130):
+  /// each region's listeners spread over its big cities by size, more at
+  /// home and where the genre is big.
+  static List<CityListeners> topCities(List<double> regionShare,
+      HomeCountry home, int genre, double monthly) {
+    if (monthly <= 0) return const [];
+    double weight(_City c) {
+      var x = c.size;
+      if (c.genres.contains(genre)) x *= c.genreBoost;
+      if (c.home == home) x *= 2.5;
+      return x;
+    }
+
+    final out = <CityListeners>[];
+    for (final r in Region.values) {
+      final cities = [
+        for (final c in _cities)
+          if (c.region == r) c
+      ];
+      final sum = cities.fold(0.0, (t, c) => t + weight(c));
+      for (final c in cities) {
+        out.add(CityListeners(c.name,
+            monthly * regionShare[r.index] * _cityShare * weight(c) / sum));
+      }
+    }
+    out.sort((a, b) => b.listeners.compareTo(a.listeners));
+    return out.take(5).toList();
+  }
+
+  static const _latin = [6, 16];
+  static const _cities = [
+    _City('New York', Region.northAmerica, 1.0, home: HomeCountry.us),
+    _City('Los Angeles', Region.northAmerica, 0.95, home: HomeCountry.us),
+    _City('Chicago', Region.northAmerica, 0.6),
+    _City('Houston', Region.northAmerica, 0.55, genres: _latin),
+    _City('Dallas', Region.northAmerica, 0.5, genres: [4]),
+    _City('Atlanta', Region.northAmerica, 0.5, genres: [1, 2]),
+    _City('Toronto', Region.northAmerica, 0.45, home: HomeCountry.canada),
+    _City('Mexico City', Region.northAmerica, 0.8,
+        genres: _latin, genreBoost: 3),
+    _City('Miami', Region.northAmerica, 0.4, genres: _latin, genreBoost: 2),
+    _City('Nashville', Region.northAmerica, 0.2, genres: [4], genreBoost: 5),
+    _City('London', Region.europe, 1.0,
+        home: HomeCountry.uk, genres: [17], genreBoost: 1.5),
+    _City('Paris', Region.europe, 0.7, home: HomeCountry.europe),
+    _City('Berlin', Region.europe, 0.6, genres: [5], genreBoost: 1.5),
+    _City('Madrid', Region.europe, 0.5, genres: _latin, genreBoost: 1.5),
+    _City('Amsterdam', Region.europe, 0.45, genres: [5], genreBoost: 1.5),
+    _City('Stockholm', Region.europe, 0.4),
+    _City('Istanbul', Region.europe, 0.5),
+    _City('Milan', Region.europe, 0.4),
+    _City('Warsaw', Region.europe, 0.35),
+    _City('São Paulo', Region.other, 1.0, genres: _latin, genreBoost: 1.5),
+    _City('Jakarta', Region.other, 0.9, genres: [18], genreBoost: 2),
+    _City('Manila', Region.other, 0.7, genres: [18], genreBoost: 2),
+    _City('Sydney', Region.other, 0.6),
+    _City('Santiago', Region.other, 0.6, genres: _latin, genreBoost: 2),
+    _City('Bogotá', Region.other, 0.55, genres: _latin, genreBoost: 2),
+    _City('Buenos Aires', Region.other, 0.5, genres: _latin, genreBoost: 2),
+    _City('Lagos', Region.other, 0.5, genres: [17], genreBoost: 4),
+    _City('Seoul', Region.other, 0.5, genres: [18], genreBoost: 4),
+    _City('Tokyo', Region.other, 0.45, genres: [18], genreBoost: 1.5),
+    _City('Bangkok', Region.other, 0.45, genres: [18], genreBoost: 1.5),
+    _City('Johannesburg', Region.other, 0.35, genres: [17], genreBoost: 2),
+  ];
+}
+
+class _City {
+  const _City(this.name, this.region, this.size,
+      {this.home, this.genres = const [], this.genreBoost = 1});
+  final String name;
+  final Region region;
+  final double size;
+  final HomeCountry? home;
+  final List<int> genres;
+  final double genreBoost;
+}
+
+/// A city and its monthly listeners (docs K130).
+class CityListeners {
+  const CityListeners(this.name, this.listeners);
+  final String name;
+  final double listeners;
 }
 
 class ArtistPageView {
@@ -1187,7 +1278,16 @@ class ArtistPageView {
     required this.singles,
     this.followers = 0,
     this.worldRank = 0,
+    this.listenerHistory = const [],
   }) : listenerStreams = listenerStreams ?? weeklyStreams;
+
+  /// The player's monthly listeners over the last half year, oldest first
+  /// (docs K130; empty for other artists).
+  final List<double> listenerHistory;
+
+  /// Where the listeners are: the five biggest cities (docs K130).
+  List<CityListeners> get topCities => Streamify.topCities(
+      artist.regionShare, artist.home, artist.genre, monthlyListeners);
 
   /// Place in the world by listeners (docs K113; 0: below the top 500).
   final int worldRank;
