@@ -1503,6 +1503,193 @@ class GameSession {
     ];
   }
 
+  /// All-time records the player set this week (docs K111). The history
+  /// holds the weeks before this one; after two years of it, so a record
+  /// means something.
+  List<RecordBroken> _recordsBroken(WeekResult r) {
+    final w = world;
+    final start = historyStartWeek;
+    if (r.week - start < 2 * GameTime.weeksPerYear) return const [];
+    double scalar(String sql, List<Object> args) {
+      final rows = _store.db.select(sql, args);
+      return rows.isEmpty ? 0 : ((rows.first['v'] as num?) ?? 0).toDouble();
+    }
+
+    bool mine(EntityKind k, int id) =>
+        (k == EntityKind.song
+            ? w.songs[id].primaryArtistId
+            : w.albums[id].artistId) ==
+        w.playerArtistId;
+    final out = <RecordBroken>[];
+    // Weeks at #1: the week the player's #1 passes everyone's best.
+    for (final (chart, kind, record) in const [
+      (Charts.usSongs, EntityKind.song, RecordKind.weeksAtNo1Song),
+      (Charts.usAlbums, EntityKind.album, RecordKind.weeksAtNo1Album),
+    ]) {
+      final c = r.charts[chart];
+      if (c.isEmpty || !mine(kind, c.first.entityId)) continue;
+      final id = c.first.entityId;
+      final weeks = scalar(
+              'SELECT COUNT(*) AS v FROM chartEntry '
+              'WHERE chartId = ? AND position = 1 AND entityId = ?',
+              [chart, id]) +
+          1;
+      final best = scalar(
+          'SELECT MAX(n) AS v FROM (SELECT COUNT(*) AS n FROM chartEntry '
+          'WHERE chartId = ? AND position = 1 AND entityId <> ? '
+          'GROUP BY entityId)',
+          [chart, id]);
+      if (best >= 4 && weeks == best + 1)
+        out.add(RecordBroken(record, id, weeks));
+    }
+    // The biggest streaming week ever, the first time a song passes it.
+    final st = r.charts[Charts.platformGlobal];
+    if (st.isNotEmpty && mine(EntityKind.song, st.first.entityId)) {
+      final id = st.first.entityId;
+      final best = scalar(
+          'SELECT MAX(points) AS v FROM chartEntry '
+          'WHERE chartId = ? AND entityId <> ?',
+          [Charts.platformGlobal, id]);
+      final own = scalar(
+          'SELECT MAX(points) AS v FROM chartEntry '
+          'WHERE chartId = ? AND entityId = ?',
+          [Charts.platformGlobal, id]);
+      if (best > 0 && st.first.points > best && own <= best) {
+        out.add(RecordBroken(RecordKind.streamWeek, id, st.first.points));
+      }
+    }
+    // The biggest US album debut.
+    for (final id in r.albumDebuts) {
+      final al = w.albums[id];
+      if (al.artistId != w.playerArtistId) continue;
+      final units = w.albumFirstWeekIn(al, ChartMarket.us);
+      var best = 0.0;
+      for (final x in w.albums) {
+        if (x.id == id || x.releaseWeek < start || x.releaseWeek >= r.week) {
+          continue;
+        }
+        final u = w.albumFirstWeekIn(x, ChartMarket.us);
+        if (u > best) best = u;
+      }
+      if (best > 0 && units > best) {
+        out.add(RecordBroken(RecordKind.albumDebut, id, units));
+      }
+    }
+    return out;
+  }
+
+  /// First week of this save's chart history (records count from it).
+  int get historyStartWeek {
+    final r = _store.db.select('SELECT MIN(week) AS w FROM chartEntry');
+    return r.isEmpty ? world.week : (r.first['w'] as int?) ?? world.week;
+  }
+
+  /// The top 10 of every record (docs K111).
+  Map<RecordKind, List<RecordEntry>> get records => {
+        for (final k in RecordKind.values) k: recordBoard(k),
+      };
+
+  /// The top [limit] holders of record [kind] since the history began.
+  List<RecordEntry> recordBoard(RecordKind kind, {int limit = 10}) {
+    final w = world;
+    RecordEntry song(int rank, int id, double v) {
+      final s = w.songs[id];
+      return RecordEntry(
+          rank: rank,
+          entityId: id,
+          title: s.title,
+          artistName: w.artists[s.primaryArtistId].name,
+          albumId: coverAlbumOf(w, s),
+          isPlayer: s.primaryArtistId == w.playerArtistId,
+          value: v);
+    }
+
+    RecordEntry album(int rank, int id, double v) {
+      final al = w.albums[id];
+      return RecordEntry(
+          rank: rank,
+          entityId: id,
+          title: al.title,
+          artistName: w.artists[al.artistId].name,
+          albumId: id,
+          isPlayer: al.artistId == w.playerArtistId,
+          value: v);
+    }
+
+    List<(int, double)> top(String sql, List<Object> args) => [
+          for (final r in _store.db.select(sql, args))
+            (r['id'] as int, (r['v'] as num).toDouble())
+        ];
+    var rank = 0;
+    switch (kind) {
+      case RecordKind.weeksAtNo1Song || RecordKind.weeksAtNo1Album:
+        final chart = kind == RecordKind.weeksAtNo1Song
+            ? Charts.usSongs
+            : Charts.usAlbums;
+        return [
+          for (final (id, v) in top(
+              'SELECT entityId AS id, COUNT(*) AS v FROM chartEntry '
+              'WHERE chartId = ? AND position = 1 GROUP BY entityId '
+              'ORDER BY v DESC, MIN(week) ASC LIMIT ?',
+              [chart, limit]))
+            kind == RecordKind.weeksAtNo1Song
+                ? song(++rank, id, v)
+                : album(++rank, id, v)
+        ];
+      case RecordKind.weeksOnChart:
+        return [
+          for (final (id, v) in top(
+              'SELECT entityId AS id, COUNT(*) AS v FROM chartEntry '
+              'WHERE chartId = ? GROUP BY entityId '
+              'ORDER BY v DESC, MIN(week) ASC LIMIT ?',
+              [Charts.usSongs, limit]))
+            song(++rank, id, v)
+        ];
+      case RecordKind.streamWeek:
+        return [
+          for (final (id, v) in top(
+              'SELECT entityId AS id, MAX(points) AS v FROM chartEntry '
+              'WHERE chartId = ? GROUP BY entityId '
+              'ORDER BY v DESC, MIN(week) ASC LIMIT ?',
+              [Charts.platformGlobal, limit]))
+            song(++rank, id, v)
+        ];
+      case RecordKind.albumDebut:
+        final start = historyStartWeek;
+        final debuts = [
+          for (final al in w.albums)
+            if (al.releaseWeek >= start && al.releaseWeek < w.week)
+              (al.id, w.albumFirstWeekIn(al, ChartMarket.us))
+        ]..sort((a, b) => b.$2.compareTo(a.$2));
+        return [for (final (id, v) in debuts.take(limit)) album(++rank, id, v)];
+      case RecordKind.mostNo1s:
+        final count = <int, int>{};
+        for (final r in _store.db.select(
+            'SELECT DISTINCT entityId AS id FROM chartEntry '
+            'WHERE chartId = ? AND position = 1',
+            [Charts.usSongs])) {
+          final a = w.songs[r['id'] as int].primaryArtistId;
+          count[a] = (count[a] ?? 0) + 1;
+        }
+        final artists = count.entries.toList()
+          ..sort((a, b) {
+            final c = b.value.compareTo(a.value);
+            return c != 0 ? c : a.key.compareTo(b.key);
+          });
+        return [
+          for (final e in artists.take(limit))
+            RecordEntry(
+                rank: ++rank,
+                entityId: e.key,
+                title: '',
+                artistName: w.artists[e.key].name,
+                albumId: -1,
+                isPlayer: e.key == w.playerArtistId,
+                value: e.value.toDouble())
+        ];
+    }
+  }
+
   /// Years with year-end charts, newest first: out already, and with at
   /// least half of their tracking year in this save's history.
   List<int> get yearEndYears {
@@ -1848,6 +2035,7 @@ class GameSession {
     for (final c in r.rivalClashes) {
       events.add(RivalAlbumClash(c));
     }
+    events.addAll(_recordsBroken(r));
     // The year-end charts come out in early December (docs K110).
     if (GameTime.weekOfYear(r.week) == YearEnd.publishWeekOfYear) {
       final y = GameTime.yearOf(r.week);

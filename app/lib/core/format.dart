@@ -681,6 +681,18 @@ class Fmt {
           ? l.eventPlaylistBig(t, platformName)
           : l.eventPlaylistMid(t, platformName),
       CatchingOn() => l.eventCatchingOn(t),
+      RecordBroken(:final kind, :final value) => switch (kind) {
+          RecordKind.weeksAtNo1Song ||
+          RecordKind.weeksAtNo1Album =>
+            l.eventRecordWeeksAtNo1(
+                t,
+                value.round(),
+                kind == RecordKind.weeksAtNo1Song
+                    ? l.recordKindSong
+                    : l.recordKindAlbum),
+          RecordKind.streamWeek => l.eventRecordStreamWeek(t, compact(value)),
+          _ => l.eventRecordAlbumDebut(t, compact(value)),
+        },
       YearEndCharts() => e.hasPlayer
           ? [
               if (e.songs.isNotEmpty) l.eventYearEndSongs(e.year, t),

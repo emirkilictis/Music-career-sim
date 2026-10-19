@@ -304,11 +304,8 @@ class SongView {
         streamingOpen = StreamingTools.streamingOpen(w),
         autoplayOpen = StreamingTools.autoplayOpen(w),
         catchingOn = s.releasedWeek >= 0 &&
-            WordOfMouth.lift(
-                    w,
-                    s,
-                    w.week -
-                        (s.isSingle ? s.singleWeek : s.releasedWeek)) >=
+            WordOfMouth.lift(w, s,
+                    w.week - (s.isSingle ? s.singleWeek : s.releasedWeek)) >=
                 0.1,
         variants = List.unmodifiable(s.variants),
         campaignCostCents = s.campaignCostCents,
@@ -734,7 +731,8 @@ class YearEndRow {
         albumId = kind == EntityKind.song
             ? coverAlbumOf(w, w.songs[entityId])
             : entityId,
-        artistName = w.artists[kind == EntityKind.song
+        artistName = w
+            .artists[kind == EntityKind.song
                 ? w.songs[entityId].primaryArtistId
                 : w.albums[entityId].artistId]
             .name,
@@ -757,6 +755,57 @@ class YearEndRow {
   final int points;
   final int peak;
   final int weeksOn;
+}
+
+/// All-time records of a save (docs K111). Index order is UI order.
+enum RecordKind {
+  /// Most weeks at #1 on the US songs chart (a song).
+  weeksAtNo1Song,
+
+  /// Most weeks at #1 on the US albums chart (an album).
+  weeksAtNo1Album,
+
+  /// Most weeks on the US songs chart (a song).
+  weeksOnChart,
+
+  /// Biggest US first week of an album (units).
+  albumDebut,
+
+  /// Most streams of a song in one week, worldwide.
+  streamWeek,
+
+  /// Most US #1 songs (an artist).
+  mostNo1s;
+
+  bool get isAlbum => this == weeksAtNo1Album || this == albumDebut;
+  bool get isArtist => this == mostNo1s;
+}
+
+/// One holder of a record.
+class RecordEntry {
+  RecordEntry(
+      {required this.rank,
+      required this.entityId,
+      required this.title,
+      required this.artistName,
+      required this.albumId,
+      required this.isPlayer,
+      required this.value});
+  final int rank;
+
+  /// Song, album or artist id (see [RecordKind]).
+  final int entityId;
+
+  /// Song or album title (empty for an artist).
+  final String title;
+  final String artistName;
+
+  /// Album for the cover (-1: none).
+  final int albumId;
+  final bool isPlayer;
+
+  /// Weeks, units, streams or #1s.
+  final double value;
 }
 
 /// One collaborator the player can hire (fame permitting).

@@ -3602,5 +3602,75 @@
         "type": "int"
       }
     }
+  },
+  "chartRecords": "Records",
+  "recordsSince": "All-time records since {year}",
+  "@recordsSince": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "recordWeeksAtNo1Song": "Most weeks at #1 · US songs",
+  "recordWeeksAtNo1Album": "Most weeks at #1 · US albums",
+  "recordWeeksOnChart": "Most weeks on the US songs chart",
+  "recordAlbumDebut": "Biggest US album debut",
+  "recordStreamWeek": "Most streams in a week",
+  "recordMostNo1s": "Most US #1 songs",
+  "recordWeeks": "{count} wks",
+  "@recordWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recordNo1s": "{count} #1s",
+  "@recordNo1s": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recordsEmpty": "No records yet: they start with the first charts.",
+  "eventRecordWeeksAtNo1": "Record! “{title}” has spent {weeks} weeks at #1, more than any {kind} before it.",
+  "@eventRecordWeeksAtNo1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "recordKindSong": "song",
+  "recordKindAlbum": "album",
+  "eventRecordStreamWeek": "Record! “{title}” was streamed {streams} times this week, the most ever.",
+  "@eventRecordStreamWeek": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "streams": {
+        "type": "String"
+      }
+    }
+  },
+  "eventRecordAlbumDebut": "Record! “{title}” opened with {units} units in the US, the biggest debut ever.",
+  "@eventRecordAlbumDebut": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
   }
 }

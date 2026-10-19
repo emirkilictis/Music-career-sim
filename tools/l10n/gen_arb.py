@@ -1064,6 +1064,24 @@ k('yearEndGlobal','Global','Global')
 k('yearEndEmpty','The first year-end charts come out in December.','İlk yıl sonu listeleri Aralık’ta açıklanır.')
 k('yearEndLine','Peak #{peak} · {weeks} wks','Zirve #{peak} · {weeks} hf', peak='int', weeks='int')
 
+# Records (docs K111)
+k('chartRecords','Records','Rekorlar')
+k('recordsSince','All-time records since {year}','{year}’dan beri tüm zamanların rekorları', year='int')
+k('recordWeeksAtNo1Song','Most weeks at #1 · US songs','En çok hafta #1 · ABD şarkılar')
+k('recordWeeksAtNo1Album','Most weeks at #1 · US albums','En çok hafta #1 · ABD albümler')
+k('recordWeeksOnChart','Most weeks on the US songs chart','ABD şarkı listesinde en çok hafta')
+k('recordAlbumDebut','Biggest US album debut','ABD’de en büyük albüm çıkışı')
+k('recordStreamWeek','Most streams in a week','Bir haftada en çok stream')
+k('recordMostNo1s','Most US #1 songs','En çok ABD #1 şarkısı')
+k('recordWeeks','{count} wks','{count} hf', count='int')
+k('recordNo1s','{count} #1s','{count} #1', count='int')
+k('recordsEmpty','No records yet: they start with the first charts.','Henüz rekor yok: ilk listelerle başlıyor.')
+k('eventRecordWeeksAtNo1','Record! “{title}” has spent {weeks} weeks at #1, more than any {kind} before it.','Rekor! “{title}” {weeks} haftadır #1: daha önce hiçbir {kind} bu kadar kalmadı.', title='String', weeks='int', kind='String')
+k('recordKindSong','song','şarkı')
+k('recordKindAlbum','album','albüm')
+k('eventRecordStreamWeek','Record! “{title}” was streamed {streams} times this week, the most ever.','Rekor! “{title}” bu hafta {streams} kez dinlendi, tüm zamanların en çoğu.', title='String', streams='String')
+k('eventRecordAlbumDebut','Record! “{title}” opened with {units} units in the US, the biggest debut ever.','Rekor! “{title}” ABD’de {units} birimle açıldı, tüm zamanların en büyük çıkışı.', title='String', units='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

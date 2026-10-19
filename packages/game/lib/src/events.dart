@@ -2,6 +2,7 @@ import 'package:simulation_core/simulation_core.dart';
 
 import 'milestones.dart';
 import 'platforms.dart';
+import 'views.dart' show RecordKind;
 
 /// Something worth telling the player after a week (docs/game-design.md §15).
 /// Events carry ids and numbers only; the UI builds the localized text.
@@ -135,6 +136,17 @@ class RivalNumberOne extends GameEvent {
   bool get isMajor => false;
   @override
   bool get isIndustry => true;
+}
+
+/// The player set an all-time record (docs K111): [value] is weeks,
+/// units or streams, by [kind].
+class RecordBroken extends GameEvent {
+  const RecordBroken(this.kind, this.entityId, this.value);
+  final RecordKind kind;
+  final int entityId;
+  final double value;
+  @override
+  bool get isMajor => true;
 }
 
 /// The year-end charts are out (docs K110): the player's songs and albums

@@ -1124,5 +1124,21 @@
   "yearEndUs": "ABD",
   "yearEndGlobal": "Global",
   "yearEndEmpty": "İlk yıl sonu listeleri Aralık’ta açıklanır.",
-  "yearEndLine": "Zirve #{peak} · {weeks} hf"
+  "yearEndLine": "Zirve #{peak} · {weeks} hf",
+  "chartRecords": "Rekorlar",
+  "recordsSince": "{year}’dan beri tüm zamanların rekorları",
+  "recordWeeksAtNo1Song": "En çok hafta #1 · ABD şarkılar",
+  "recordWeeksAtNo1Album": "En çok hafta #1 · ABD albümler",
+  "recordWeeksOnChart": "ABD şarkı listesinde en çok hafta",
+  "recordAlbumDebut": "ABD’de en büyük albüm çıkışı",
+  "recordStreamWeek": "Bir haftada en çok stream",
+  "recordMostNo1s": "En çok ABD #1 şarkısı",
+  "recordWeeks": "{count} hf",
+  "recordNo1s": "{count} #1",
+  "recordsEmpty": "Henüz rekor yok: ilk listelerle başlıyor.",
+  "eventRecordWeeksAtNo1": "Rekor! “{title}” {weeks} haftadır #1: daha önce hiçbir {kind} bu kadar kalmadı.",
+  "recordKindSong": "şarkı",
+  "recordKindAlbum": "albüm",
+  "eventRecordStreamWeek": "Rekor! “{title}” bu hafta {streams} kez dinlendi, tüm zamanların en çoğu.",
+  "eventRecordAlbumDebut": "Rekor! “{title}” ABD’de {units} birimle açıldı, tüm zamanların en büyük çıkışı."
 }

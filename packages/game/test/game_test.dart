@@ -1101,7 +1101,7 @@ void main() {
       g.close();
     });
 
-    test('year-end charts come out in December (K110)', () {
+    test('year-end charts come out in December (K110), records (K111)', () {
       final g = GameSession.start(
           slots, _setup(tier: StartTier.superstar, premium: true));
       expect(g.yearEndYears, isEmpty);
@@ -1127,6 +1127,22 @@ void main() {
       expect([for (final r in songs) if (r.isPlayer) (r.rank, r.entityId)],
           news.songs);
       expect(g.yearEnd(Charts.usAlbums, 2018), isNotEmpty);
+
+      // All-time records from the same history (K111).
+      final records = g.records;
+      for (final k in RecordKind.values) {
+        final board = records[k]!;
+        expect(board, isNotEmpty, reason: k.name);
+        expect(board.length, lessThanOrEqualTo(10));
+        for (var i = 1; i < board.length; i++) {
+          expect(board[i].value, lessThanOrEqualTo(board[i - 1].value));
+        }
+      }
+      // Weeks at #1: the year-end #1 song's run counts.
+      final no1 = records[RecordKind.weeksAtNo1Song]!.first;
+      final runs = g.chartRun(EntityKind.song, no1.entityId).where((w) =>
+          w.entries[Charts.usSongs]?.position == 1);
+      expect(no1.value, runs.length);
       g.close();
     });
 

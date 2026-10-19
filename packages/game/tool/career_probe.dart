@@ -89,7 +89,9 @@ void main(List<String> args) {
                 'casual ${_k(a.casual)} fame ${a.fame.toStringAsFixed(2)} '
                 'hypeAtRel ${al.hypeAtRelease.toStringAsFixed(2)} '
                 'devotion ${a.devotion.toStringAsFixed(2)} '
-                'share ${[for (final x in a.regionShare) x.toStringAsFixed(2)]}');
+                'share ${[
+              for (final x in a.regionShare) x.toStringAsFixed(2)
+            ]}');
           }
           if (e is AlbumFirstWeek) {
             if (e.usUnits > maxUs) maxUs = e.usUnits;
@@ -166,8 +168,7 @@ void main(List<String> args) {
         maxUs,
         maxGlobal,
         maxWeekStreams,
-        for (var k = 0; k < regionCount; k++)
-          p.lifetimeStreams.byRegion[k],
+        for (var k = 0; k < regionCount; k++) p.lifetimeStreams.byRegion[k],
         maxRival,
       ]);
     }
@@ -320,7 +321,16 @@ int _week(GameSession s, void Function(int) setSingle, int Function() single,
         // Eight collector editions, one a week (docs K105 probe).
         s.releaseAlbum('Album ${s.year}', tracks,
             campaign: c,
-            variantWeeks: const [0, 0, 1, 2, 3, 4, 5, 6],
+            variantWeeks: const [
+              0,
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
             variantFormats: const [
               null,
               EditionFormat.signed,

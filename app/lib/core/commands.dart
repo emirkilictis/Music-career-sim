@@ -200,6 +200,10 @@ abstract final class Cmd {
       };
 
   /// The year's top tours (null: all time) and the first year on the books.
+  /// Every all-time record's top 10 and the year they count from (K111).
+  static SessionCmd<(Map<RecordKind, List<RecordEntry>>, int)> records() =>
+      (s) => (s.records, GameTime.yearOf(s.historyStartWeek));
+
   /// A year-end chart and the years there are (docs K110); [year] null
   /// is the latest.
   static SessionCmd<(List<YearEndRow>, List<int>)> yearEnd(

@@ -34,6 +34,9 @@ const _toursChart = -1;
 /// The year-end charts in the chart tabs (docs K110).
 const _yearEndChart = -2;
 
+/// The all-time records in the chart tabs (docs K111).
+const _recordsChart = -3;
+
 /// Saturday of a game week, for "Week of …" dates.
 DateTime chartDate(int week) {
   final first = DateTime(GameTime.yearOf(week));
@@ -61,6 +64,10 @@ class _ChartsTabState extends State<ChartsTab> {
   List<YearEndRow>? _yearEnd;
   List<int> _yearEndYears = const [];
 
+  /// Records: every board and the year they count from.
+  Map<RecordKind, List<RecordEntry>>? _records;
+  int _recordsSince = 0;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -73,6 +80,16 @@ class _ChartsTabState extends State<ChartsTab> {
 
   Future<void> _load() async {
     final career = context.careerRead;
+    if (_chart == _recordsChart) {
+      final (boards, since) = await career.read(Cmd.records());
+      if (mounted) {
+        setState(() {
+          _records = boards;
+          _recordsSince = since;
+        });
+      }
+      return;
+    }
     if (_chart == _yearEndChart) {
       final (rows, years) =
           await career.read(Cmd.yearEnd(_yearEndOf, _yearEndYear));
@@ -107,6 +124,7 @@ class _ChartsTabState extends State<ChartsTab> {
   void _select(int chart) {
     setState(() {
       if (chart == _yearEndChart && _chart != _yearEndChart) _yearEnd = null;
+      if (chart == _recordsChart && _chart != _recordsChart) _records = null;
       if (chart == _toursChart && _chart != _toursChart) {
         _tourYear = context.careerRead.year;
         _tours = null;
@@ -159,7 +177,9 @@ class _ChartsTabState extends State<ChartsTab> {
                           ? l.chartTopTours
                           : _chart == _yearEndChart
                               ? '${l.chartYearEnd} · ${fmt.chartShort(_yearEndOf)}'
-                              : fmt.chart(_chart))
+                              : _chart == _recordsChart
+                                  ? l.chartRecords
+                                  : fmt.chart(_chart))
                       .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
@@ -172,7 +192,11 @@ class _ChartsTabState extends State<ChartsTab> {
                           ? (_tourYear == null ? l.toursAllTime : '$_tourYear')
                           : _chart == _yearEndChart
                               ? (_yearEndYear == null ? '' : '$_yearEndYear')
-                              : l.weekOf(date))
+                              : _chart == _recordsChart
+                                  ? (_records == null
+                                      ? ''
+                                      : l.recordsSince(_recordsSince))
+                                  : l.weekOf(date))
                       .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
@@ -198,6 +222,11 @@ class _ChartsTabState extends State<ChartsTab> {
                       onTap: () => _select(_yearEndChart),
                     ),
                     _ChartTab(
+                      label: l.chartRecords,
+                      selected: _chart == _recordsChart,
+                      onTap: () => _select(_recordsChart),
+                    ),
+                    _ChartTab(
                       label: l.chartShortTours,
                       selected: _chart == _toursChart,
                       onTap: () => _select(_toursChart),
@@ -208,7 +237,24 @@ class _ChartsTabState extends State<ChartsTab> {
             ],
           ),
         ),
-        if (_chart == _yearEndChart)
+        if (_chart == _recordsChart)
+          Expanded(
+            child: _RecordsBoard(
+              boards: _records,
+              onOpen: (kind, r) {
+                final career = context.careerRead;
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => kind.isAlbum
+                            ? AlbumDetailScreen(
+                                albumId: r.entityId, state: career)
+                            : SongDetailScreen(
+                                songId: r.entityId, state: career)));
+              },
+            ),
+          )
+        else if (_chart == _yearEndChart)
           Expanded(
             child: _YearEndBoard(
               rows: _yearEnd,
@@ -356,6 +402,116 @@ class _ChartTab extends StatelessWidget {
 }
 
 /// Top-grossing tours, magazine style: rank, artist, tour, gross.
+/// All-time records (docs K111): each record's top 5, the holder first.
+class _RecordsBoard extends StatelessWidget {
+  const _RecordsBoard({required this.boards, required this.onOpen});
+  final Map<RecordKind, List<RecordEntry>>? boards;
+  final void Function(RecordKind, RecordEntry) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final all = boards;
+    if (all == null) {
+      return const Center(
+          child: CircularProgressIndicator(color: PaperColors.ink));
+    }
+    if (all.values.every((b) => b.isEmpty)) {
+      return Center(
+          child: Text(l.recordsEmpty,
+              style: const TextStyle(color: PaperColors.muted)));
+    }
+    String title(RecordKind k) => switch (k) {
+          RecordKind.weeksAtNo1Song => l.recordWeeksAtNo1Song,
+          RecordKind.weeksAtNo1Album => l.recordWeeksAtNo1Album,
+          RecordKind.weeksOnChart => l.recordWeeksOnChart,
+          RecordKind.albumDebut => l.recordAlbumDebut,
+          RecordKind.streamWeek => l.recordStreamWeek,
+          RecordKind.mostNo1s => l.recordMostNo1s,
+        };
+    String value(RecordKind k, double v) => switch (k) {
+          RecordKind.weeksAtNo1Song ||
+          RecordKind.weeksAtNo1Album ||
+          RecordKind.weeksOnChart =>
+            l.recordWeeks(v.round()),
+          RecordKind.mostNo1s => l.recordNo1s(v.round()),
+          _ => fmt.compact(v),
+        };
+    return ListView(padding: const EdgeInsets.only(bottom: 16), children: [
+      for (final k in RecordKind.values)
+        if (all[k]!.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
+            child: Text(title(k).toUpperCase(),
+                style: const TextStyle(
+                    fontFamily: AppFonts.condensed,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    letterSpacing: 1,
+                    color: PaperColors.ink)),
+          ),
+          for (final r in all[k]!.take(5))
+            InkWell(
+              onTap: k.isArtist ? null : () => onOpen(k, r),
+              child: Container(
+                color: r.isPlayer ? const Color(0xFFE6EAFF) : PaperColors.card,
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Row(children: [
+                  SizedBox(
+                    width: 36,
+                    child: Text('${r.rank}',
+                        style: TextStyle(
+                            fontFamily: AppFonts.condensed,
+                            fontWeight: FontWeight.w800,
+                            fontSize: r.rank == 1 ? 28 : 22,
+                            height: 1,
+                            color: PaperColors.ink)),
+                  ),
+                  if (k.isArtist)
+                    ArtistAvatar(name: r.artistName, seed: r.entityId, size: 40)
+                  else
+                    CoverArt(
+                        seed: k.isAlbum
+                            ? albumCoverSeed(r.entityId)
+                            : songCoverSeed(r.entityId, r.albumId),
+                        size: 40,
+                        radius: 4,
+                        songId: k.isAlbum ? null : r.entityId,
+                        albumId: k.isAlbum ? r.entityId : r.albumId),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(k.isArtist ? r.artistName : r.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: PaperColors.ink)),
+                          if (!k.isArtist)
+                            Text(r.artistName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                    fontSize: 13, color: PaperColors.muted)),
+                        ]),
+                  ),
+                  Text(value(k, r.value),
+                      style: const TextStyle(
+                          fontFamily: AppFonts.condensed,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
+                          color: PaperColors.ink)),
+                ]),
+              ),
+            ),
+        ],
+    ]);
+  }
+}
+
 /// Year-end charts (docs K110): year chips, the chart, ranked rows.
 class _YearEndBoard extends StatelessWidget {
   const _YearEndBoard(
