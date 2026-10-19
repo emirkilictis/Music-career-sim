@@ -199,6 +199,21 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   ?.peak,
             ),
           ],
+          // Pre-orders shipped in week one (docs K126).
+          if (a.isPlayer && a.preOrders >= 1) ...[
+            const SizedBox(height: 10),
+            Row(children: [
+              Icon(Icons.local_shipping_outlined,
+                  size: 18, color: AppColors.textMuted),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                    l.preOrdersShipped(fmt.compact(a.preOrders),
+                        fmt.compact(a.firstWeekPure)),
+                    style: TextStyle(color: AppColors.textMuted)),
+              ),
+            ]),
+          ],
           if (lastWeeks.length > 1) ...[
             const SizedBox(height: 12),
             Section(

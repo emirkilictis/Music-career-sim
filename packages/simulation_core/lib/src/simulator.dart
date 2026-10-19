@@ -800,7 +800,13 @@ class Simulator {
             (age == 0 ? 1.5 : 1.0) /
             (1 + age / c.albumReachFatigueWeeks);
         // A mixtape is given away: nothing sold (docs K62).
-        final pure = al.isMixtape ? 0.0 : bought * noise * tracklist * demand;
+        // Pre-orders ship in week one (docs K126).
+        final pure = al.isMixtape
+            ? 0.0
+            : bought * noise * tracklist * demand +
+                (age == 0
+                    ? al.preOrders * share * Actions.preOrderExtra
+                    : 0.0);
         final streams = sea[k] +
             al.sumDormantRate *
                 p.catalogFactor *

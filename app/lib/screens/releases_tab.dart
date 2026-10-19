@@ -337,7 +337,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
                   subtitleLines: 2,
                   subtitle: '${fmt.albumType(s.type)} · '
                       '${l.releaseDate(fmt.week(s.releaseWeek))}\n'
-                      '${s.isSurprise ? l.announceSurprise : s.announced ? '${l.statusAnnounced} · ${l.buzzLabel} ${(100 * s.buzz / s.buzzCap).round()}%${s.preSaves >= 1 ? ' · ${l.preSavesValue(fmt.compact(s.preSaves))}' : ''}' : l.announceDate(fmt.week(s.announceWeek))}',
+                      '${s.isSurprise ? l.announceSurprise : s.announced ? '${l.statusAnnounced} · ${l.buzzLabel} ${(100 * s.buzz / s.buzzCap).round()}%${s.preSaves >= 1 ? ' · ${l.preSavesValue(fmt.compact(s.preSaves))}' : ''}${s.preOrders >= 1 ? ' · ${l.preOrdersValue(fmt.compact(s.preOrders))}' : ''}' : l.announceDate(fmt.week(s.announceWeek))}',
                   onTap: career.busy ? null : () => _editScheduled(s),
                 ),
             ]),

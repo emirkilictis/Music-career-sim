@@ -842,6 +842,48 @@ void main() {
       expect(announced, greaterThan(surprise * 1.1));
     });
 
+    test('a long campaign takes pre-orders that ship in week one (K126)', () {
+      (double, double, AlbumView) run(int leadWeeks) {
+        var g = GameSession.start(
+            slots,
+            _setup(
+                premium: true,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire));
+        final slot = g.slotId;
+        g.world.player!.moneyCents = 1 << 40;
+        final songs = <int>[];
+        for (var i = 0; i < 8; i++) {
+          g.world.player!.creativeEnergy = 100;
+          songs.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        final release = g.week + 24;
+        g.scheduleAlbum('Big', songs,
+            releaseWeek: release, announceWeek: release - leadWeeks);
+        g.advanceWeeks(20, stop: SkipStop.never);
+        final ordered = g.scheduled.single.preOrders;
+        // Kept through a save.
+        g.close();
+        g = GameSession.resume(slots, slot);
+        expect(g.scheduled.single.preOrders, ordered);
+        AlbumFirstWeek? fw;
+        while (fw == null) {
+          fw = g.advanceWeek().events.whereType<AlbumFirstWeek>().firstOrNull;
+        }
+        final al = g.albums.single;
+        g.close();
+        return (ordered, al.firstWeekPure, al);
+      }
+
+      final (shortOrders, shortWeek, short) = run(6);
+      final (longOrders, longWeek, long) = run(24);
+      expect(longOrders, greaterThan(shortOrders * 1.5));
+      expect(long.preOrders, greaterThanOrEqualTo(longOrders));
+      expect(long.firstWeekPure, greaterThan(long.preOrders));
+      expect(longWeek, greaterThan(shortWeek));
+      expect(short.preOrders, greaterThan(0));
+    });
+
     test('edition formats: vinyl beats cassette in the 2020s, costs differ',
         () {
       (double, int) firstWeek(EditionFormat f) {

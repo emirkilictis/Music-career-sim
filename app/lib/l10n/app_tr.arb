@@ -268,7 +268,7 @@
   "announceOneWeek": "1 hafta önce",
   "announceSurprise": "Sürpriz çıkış",
   "announceDate": "Duyuru: {date}",
-  "announceHint": "Duyurudan çıkışa kadar hayranlar heyecanlanır, ilk hafta büyür. 4–6 hafta yeterli; sürpriz çıkışta heyecan birikmez.",
+  "announceHint": "Duyurudan çıkışa kadar hayranlar heyecanlanır, ilk hafta büyür; heyecan altı aya kadar birikmeye devam eder. Albüm ya da EP bu süre boyunca ön sipariş de toplar ve hepsi ilk hafta kargolanır: kampanya ne kadar uzunsa o kadar çok.",
   "announceLocked": "Zaten duyuruldu. Tarihi yine değiştirebilirsin ama ertelemek heyecanın bir kısmını götürür.",
   "continueAction": "Devam",
   "save": "Kaydet",
@@ -1278,5 +1278,7 @@
   "edFollowers": "{count} takipçi",
   "edEmpty": "Bu hafta burada bir şey yok.",
   "edPick": "Editör seçimi",
-  "edOnPlaylists": "Çalma listelerinde"
+  "edOnPlaylists": "Çalma listelerinde",
+  "preOrdersValue": "{count} ön sipariş",
+  "preOrdersShipped": "{count} ön sipariş ilk hafta kargolandı (o hafta {total} satış)."
 }

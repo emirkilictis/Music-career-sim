@@ -505,6 +505,7 @@ class AlbumView {
         firstWeekUkUnits = w.albumFirstWeekIn(al, ChartMarket.uk),
         firstWeekUnits = al.firstWeekUnits,
         firstWeekPure = al.firstWeekPure,
+        preOrders = al.preOrders,
         weekUnits = al.status == AlbumStatus.active ? al.weekUnits : 0,
         weekPure = al.status == AlbumStatus.active ? al.weekPure : 0,
         weekUsUnits = al.status == AlbumStatus.active
@@ -562,6 +563,9 @@ class AlbumView {
   final double firstWeekUkUnits;
   final double firstWeekUnits;
   final double firstWeekPure;
+
+  /// Copies ordered ahead that shipped in the first week (docs K126).
+  final double preOrders;
 
   /// Last played week (0 once the album is in the catalog).
   final double weekUnits;
@@ -1196,7 +1200,9 @@ class ScheduledView {
         paidCents = sr.paidCents,
         buzz = sr.buzz,
         preSaves = sr.preSaves,
-        buzzCap = w.config.announceBuzzCap(sr.type, w.player!.fame);
+        preOrders = sr.preOrders,
+        buzzCap = Actions.announceCap(
+            w, w.player!, sr.type, w.week - 1 - sr.announceWeek);
 
   final int id;
   final AlbumType type;
@@ -1228,6 +1234,9 @@ class ScheduledView {
 
   /// Pre-saves on the streaming apps so far (docs K121).
   final double preSaves;
+
+  /// Copies of an album or EP ordered so far (docs K126).
+  final double preOrders;
   final double buzzCap;
   bool get isAlbum => type != AlbumType.single;
 }

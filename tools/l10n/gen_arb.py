@@ -280,7 +280,7 @@ k('announceBefore','{count} weeks before','{count} hafta önce', count='int')
 k('announceOneWeek','1 week before','1 hafta önce')
 k('announceSurprise','Surprise drop','Sürpriz çıkış')
 k('announceDate','Announcement: {date}','Duyuru: {date}', date='String')
-k('announceHint','From the announcement to the release, fans get excited and the first week grows. About 4–6 weeks is enough; a surprise drop builds nothing.','Duyurudan çıkışa kadar hayranlar heyecanlanır, ilk hafta büyür. 4–6 hafta yeterli; sürpriz çıkışta heyecan birikmez.')
+k('announceHint','From the announcement to the release, fans get excited and the first week grows; the excitement keeps building for up to six months. An album or EP also takes pre-orders the whole time, and they all ship in its first week: the longer the campaign, the more.','Duyurudan çıkışa kadar hayranlar heyecanlanır, ilk hafta büyür; heyecan altı aya kadar birikmeye devam eder. Albüm ya da EP bu süre boyunca ön sipariş de toplar ve hepsi ilk hafta kargolanır: kampanya ne kadar uzunsa o kadar çok.')
 k('announceLocked','Already announced. You can still move the date, but pushing it back costs some of the excitement.','Zaten duyuruldu. Tarihi yine değiştirebilirsin ama ertelemek heyecanın bir kısmını götürür.')
 k('continueAction','Continue','Devam')
 k('save','Save','Kaydet')
@@ -1222,6 +1222,10 @@ k('edFollowers','{count} followers','{count} takipçi', count='String')
 k('edEmpty','Nothing here this week.','Bu hafta burada bir şey yok.')
 k('edPick','Editors\' pick','Editör seçimi')
 k('edOnPlaylists','On the playlists','Çalma listelerinde')
+
+# Album pre-orders (K126, F75)
+k('preOrdersValue','{count} pre-orders','{count} ön sipariş', count='String')
+k('preOrdersShipped','{count} pre-orders shipped in the first week ({total} sold that week).','{count} ön sipariş ilk hafta kargolandı (o hafta {total} satış).', count='String', total='String')
 
 def write(lang, idx):
     out = {'@@locale': lang}

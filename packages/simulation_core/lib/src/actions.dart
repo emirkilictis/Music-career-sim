@@ -893,7 +893,8 @@ abstract final class Actions {
             paidCents: sr.paidCents -
                 editionsCostCents(sr.variantWeeks.length, sr.variantFormats),
             buzz: sr.buzz,
-            announced: !sr.isSurprise);
+            announced: !sr.isSurprise)
+          ..preOrders = sr.preOrders;
         out.add((scheduleId: sr.id, isAlbum: true, id: al.id));
       } else {
         final s = w.songs[sr.songIds.single];
@@ -935,15 +936,68 @@ abstract final class Actions {
   /// Pre-saves start on the streaming apps (docs K121).
   static const preSaveYear = 2017;
 
+  /// A long campaign keeps building: the buzz ceiling rises by up to
+  /// this much over [longLeadWeeks] of announcement (docs K126).
+  static const longLeadBonus = 0.3;
+  static const longLeadWeeks = 26;
+
+  /// The ceiling of an announced release's buzz [weeks] after the
+  /// announcement.
+  static double announceCap(World w, Artist a, AlbumType type, int weeks) =>
+      w.config.announceBuzzCap(type, a.fame) *
+      (1 + longLeadBonus * math.min(1.0, math.max(0, weeks) / longLeadWeeks));
+
+  /// Fans' copies of an album out of [songIds] expected in its first
+  /// week before hype (the superfan part of the album sales).
+  static double expectedFanCopies(World w, Artist a, List<int> songIds) {
+    if (songIds.isEmpty) return 0;
+    var q = 0.0;
+    for (final id in songIds) {
+      q += w.songs[id].quality;
+    }
+    final q01 = q / songIds.length / 100;
+    final eras = w.regionalEra.forWeek(w.week);
+    final c = w.config;
+    var sum = 0.0;
+    for (var k = 0; k < eras.length; k++) {
+      sum += a.coreFans * a.regionShare[k] * eras[k].superfanFactor;
+    }
+    return sum *
+        c.superfanBuyRate *
+        a.devotionBuyFactor *
+        a.kind.albumAffinity *
+        (0.5 + q01) *
+        w.difficulty.albumDemand;
+  }
+
+  /// Pre-orders reach at most this share of the fans' expected copies;
+  /// each week of announcement takes [preOrderRate] (more with buzz) of
+  /// what is left. Every pre-order adds [preOrderExtra] of a copy to the
+  /// first week: fans who commit early buy who might not have (docs K126).
+  static const preOrderCeiling = 0.75;
+  static const preOrderRate = 0.07;
+  static const preOrderExtra = 0.6;
+
   /// Announced releases build buzz until they come out; fans already feel
   /// it (half of it lifts the artist's hype in the meantime).
   static void buildAnnouncedBuzz(World w, Artist a) {
     final c = w.config;
     for (final sr in a.scheduled) {
       if (!sr.announcedBy(w.week) || w.week >= sr.releaseWeek) continue;
-      final cap = c.announceBuzzCap(sr.type, a.fame);
+      final cap = announceCap(w, a, sr.type, w.week - sr.announceWeek);
       if (sr.buzz < cap) sr.buzz += (cap - sr.buzz) * c.announceBuildRate;
       a.hype = math.max(a.hype, 0.5 * sr.buzz);
+      // Album pre-orders (docs K126): fans order the record ahead, a few
+      // more every week the campaign runs.
+      if (sr.type == AlbumType.album || sr.type == AlbumType.ep) {
+        final most =
+            preOrderCeiling * expectedFanCopies(w, a, sr.songIds);
+        if (sr.preOrders < most) {
+          sr.preOrders += (most - sr.preOrders) *
+              preOrderRate *
+              (0.5 + math.min(1.0, sr.buzz / cap));
+        }
+      }
       // Pre-saves on the streaming apps (docs K121): fans first, more as
       // the buzz grows, up to most of the fans and some listeners.
       if (GameTime.yearOf(w.week) >= preSaveYear) {

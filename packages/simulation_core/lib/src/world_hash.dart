@@ -79,6 +79,7 @@ int worldHash(World w) {
       addInt(sr.announceWeek);
       addDouble(sr.buzz);
       addDouble(sr.preSaves);
+      addDouble(sr.preOrders);
     }
     addDouble(a.creativeEnergy);
     addInt(a.kind.index);
@@ -125,6 +126,7 @@ int worldHash(World w) {
     addAll(al.reg);
     addInt(al.campaign.index);
     addDouble(al.campaignReturnCents);
+    addDouble(al.preOrders);
     addCharts(al);
   }
   for (final chart in w.charts) {

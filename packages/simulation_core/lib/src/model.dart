@@ -783,6 +783,10 @@ class Album with Charted {
   /// lifetime total, never of a week's sales or the chart.
   double preSingleUnits = 0;
 
+  /// Copies ordered before it came out, shipped in its first week (docs
+  /// K126).
+  double preOrders = 0;
+
   /// What the player paid for the album campaign and the income it brought
   /// in through the album's own tracks and sales (estimated; docs K57).
   int campaignCostCents = 0;
@@ -1029,6 +1033,10 @@ class ScheduledRelease {
   /// Listeners who saved it on the streaming apps before it came out
   /// (docs K121).
   double preSaves = 0;
+
+  /// Copies of an album or EP ordered ahead (docs K126); they ship and
+  /// count in its first week.
+  double preOrders = 0;
 
   bool get isAlbum => type != AlbumType.single;
   bool get isSurprise => announceWeek >= releaseWeek;

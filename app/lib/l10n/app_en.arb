@@ -677,7 +677,7 @@
       }
     }
   },
-  "announceHint": "From the announcement to the release, fans get excited and the first week grows. About 4–6 weeks is enough; a surprise drop builds nothing.",
+  "announceHint": "From the announcement to the release, fans get excited and the first week grows; the excitement keeps building for up to six months. An album or EP also takes pre-orders the whole time, and they all ship in its first week: the longer the campaign, the more.",
   "announceLocked": "Already announced. You can still move the date, but pushing it back costs some of the excitement.",
   "continueAction": "Continue",
   "save": "Save",
@@ -4380,5 +4380,24 @@
   },
   "edEmpty": "Nothing here this week.",
   "edPick": "Editors' pick",
-  "edOnPlaylists": "On the playlists"
+  "edOnPlaylists": "On the playlists",
+  "preOrdersValue": "{count} pre-orders",
+  "@preOrdersValue": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "preOrdersShipped": "{count} pre-orders shipped in the first week ({total} sold that week).",
+  "@preOrdersShipped": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }
