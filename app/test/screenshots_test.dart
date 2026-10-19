@@ -549,6 +549,25 @@ void main() {
     await shot(tester, '15n_awards');
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
     await shot(tester, '15o_awards_more');
+
+    // A record deal: three shapes with their terms (docs K107).
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    final labels = _ci('See labels');
+    // Above the awards: scroll back up.
+    await tester.scrollUntilVisible(labels, -300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(labels), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(labels);
+    await tester.pumpAndSettle();
+    final sign = _ci('Sign').first;
+    await tester.scrollUntilVisible(sign, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(sign), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(sign);
+    await shot(tester, '15p_record_deal');
   });
 }
 

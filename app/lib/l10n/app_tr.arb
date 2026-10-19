@@ -1097,5 +1097,18 @@
   "taskDoneInfo": "{brand} için yapıldı.",
   "eventBrandDealBroken": "{brand} yapılmayan iş yüzünden anlaşmayı bitirdi: {money} kaybedildi.",
   "errorNoEnergy": "Yeterli yaratıcı enerji yok.",
-  "errorDealOver": "Bu anlaşma bitti."
+  "errorDealOver": "Bu anlaşma bitti.",
+  "dealTitle": "Sözleşmeni seç",
+  "dealHint": "Avans önce telif gelirinden geri ödenir: kapanana kadar şarkı ve albümlerden para gelmez.",
+  "dealLeverage": "Pazarlık gücün: %{pct}. Şirketin istediğinden fazla hayranın varsa avans ve pay büyür.",
+  "dealStandard": "Standart sözleşme",
+  "dealStandardHint": "Şirketin olağan şartları.",
+  "dealBigAdvance": "Büyük avans",
+  "dealBigAdvanceHint": "Şimdi iki kat para; daha küçük pay ve bir albüm fazla borç.",
+  "dealBetterSplit": "Yüksek pay",
+  "dealBetterSplitHint": "Her satış ve stream’den daha büyük pay, küçük bir avansa.",
+  "dealTerms": "{advance} avans · %{share} pay · {albums} albüm",
+  "dealNet": "Sözleşme bedelinden sonra elde: {net}",
+  "labelUnrecouped": "Geri ödenecek avans: {amount}. Telif gelirin önce buna gidiyor.",
+  "labelRecouped": "Avans geri ödendi: telif gelirinin tamamı senin."
 }

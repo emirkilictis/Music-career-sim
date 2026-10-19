@@ -9,6 +9,7 @@ import 'brands.dart';
 import 'social.dart';
 import 'streaming_tools.dart';
 import 'config/charts.dart';
+import 'contracts.dart';
 import 'config/era_table.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
@@ -1532,7 +1533,9 @@ class Simulator {
           al.weekPure * 600 * p.artistShare * al.campaignShareOfSales;
     }
     // The manager takes a cut of everything (docs K68).
-    p.moneyCents += p.manager.net(cents * p.artistShare).round();
+    // The advance is paid back first (docs K107).
+    p.moneyCents +=
+        p.manager.net(Contracts.recoup(p, cents * p.artistShare)).round();
     // The label takes no cut of the day job.
     p.moneyCents += p.job.wageCents;
     Actions.grantSkillPoints(p, Actions.skillPointsPerWeek);

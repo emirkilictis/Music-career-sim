@@ -33,13 +33,83 @@ class _LabelsScreenState extends State<LabelsScreen> {
   Future<void> _sign(LabelView v) async {
     final l = context.l10n;
     final fmt = context.fmt;
+    // Going independent needs no deal; a label asks which shape (K107).
+    final deal = v.label == Label.independent
+        ? ContractDeal.standard
+        : await _pickDeal(v);
+    if (deal == null || !mounted) return;
     try {
-      await widget.state.act(Cmd.signLabel(v.label));
+      await widget.state.act(Cmd.signLabel(v.label, deal: deal));
       if (mounted) showInfo(context, l.labelSigned(fmt.labelName(v.label)));
       _load();
     } catch (e) {
       if (mounted) showError(context, e);
     }
+  }
+
+  /// The three deal shapes with [v.label] and their terms (docs K107).
+  Future<ContractDeal?> _pickDeal(LabelView v) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    return showModalBottomSheet<ContractDeal>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: Text(l.dealTitle, style: Theme.of(c).textTheme.titleLarge),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: Text(l.dealHint, style: Theme.of(c).textTheme.bodySmall),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(l.dealLeverage((v.leverage * 100).round()),
+                  style: TextStyle(
+                      color: AppColors.gold,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13)),
+            ),
+            for (final d in ContractDeal.values)
+              ListTile(
+                enabled: v.canAffordDeal(d),
+                leading: Icon(switch (d) {
+                  ContractDeal.standard => Icons.description_outlined,
+                  ContractDeal.bigAdvance => Icons.payments_outlined,
+                  ContractDeal.betterSplit => Icons.pie_chart_outline_rounded,
+                }),
+                title: Text(switch (d) {
+                  ContractDeal.standard => l.dealStandard,
+                  ContractDeal.bigAdvance => l.dealBigAdvance,
+                  ContractDeal.betterSplit => l.dealBetterSplit,
+                }),
+                subtitle: Text([
+                  switch (d) {
+                    ContractDeal.standard => l.dealStandardHint,
+                    ContractDeal.bigAdvance => l.dealBigAdvanceHint,
+                    ContractDeal.betterSplit => l.dealBetterSplitHint,
+                  },
+                  l.dealTerms(
+                      fmt.money(v.deals[d]!.advanceCents),
+                      (v.deals[d]!.artistShare * 100).round(),
+                      v.deals[d]!.albums),
+                  if (v.buyoutCents > 0)
+                    l.dealNet(v.netFor(d) < 0
+                        ? '−${fmt.money(-v.netFor(d))}'
+                        : fmt.money(v.netFor(d))),
+                ].join('\n')),
+                isThreeLine: true,
+                onTap: () => Navigator.pop(c, d),
+              ),
+            const SizedBox(height: 8),
+          ]),
+        ),
+      ),
+    );
   }
 
   @override
@@ -61,6 +131,18 @@ class _LabelsScreenState extends State<LabelsScreen> {
                     fmt.labelName(current.label), current.contractAlbumsLeft),
                 style: TextStyle(
                     color: AppColors.gold, fontWeight: FontWeight.w600)),
+          ],
+          if (current != null && current.label != Label.independent) ...[
+            const SizedBox(height: 6),
+            Text(
+                current.unrecoupedCents > 0
+                    ? l.labelUnrecouped(fmt.money(current.unrecoupedCents))
+                    : l.labelRecouped,
+                style: TextStyle(
+                    color: current.unrecoupedCents > 0
+                        ? AppColors.coral
+                        : AppColors.mint,
+                    fontWeight: FontWeight.w600)),
           ],
           if (legend) ...[
             const SizedBox(height: 6),
@@ -128,10 +210,13 @@ class _LabelCard extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         MeterRow(
             label: l.labelReach, value: x.reach / 1.4, text: '×${x.reach}'),
-        term(l.labelYourShare, '${(x.artistShare * 100).round()}%'),
+        term(l.labelYourShare,
+            '${((view.isCurrent ? view.currentShare : view.deals[ContractDeal.standard]!.artistShare) * 100).round()}%'),
         term(l.labelMaxCampaign, fmt.campaign(x.maxCampaign)),
         term(l.labelCampaignShare, '${(x.campaignShare * 100).round()}%'),
-        if (x.advanceCents > 0) term(l.labelAdvance, fmt.money(x.advanceCents)),
+        if (x.advanceCents > 0 && !view.isCurrent)
+          term(l.labelAdvance,
+              fmt.money(view.deals[ContractDeal.standard]!.advanceCents)),
         if (!view.isCurrent && view.buyoutCents > 0) ...[
           term(l.labelBuyout, '−${fmt.money(view.buyoutCents)}'),
           term(

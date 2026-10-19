@@ -1029,6 +1029,21 @@ k('eventBrandDealBroken','{brand} ended the deal over missed work: {money} lost.
 k('errorNoEnergy','Not enough creative energy.','Yeterli yaratıcı enerji yok.')
 k('errorDealOver','That deal is over.','Bu anlaşma bitti.')
 
+# Record deals (docs K107)
+k('dealTitle','Choose your deal','Sözleşmeni seç')
+k('dealHint','The advance is paid back from your royalties first: until it is, your songs and albums pay you nothing.','Avans önce telif gelirinden geri ödenir: kapanana kadar şarkı ve albümlerden para gelmez.')
+k('dealLeverage','Your leverage: {pct}%. More fans than the label asks for get bigger advances and better splits.','Pazarlık gücün: %{pct}. Şirketin istediğinden fazla hayranın varsa avans ve pay büyür.', pct='int')
+k('dealStandard','Standard deal','Standart sözleşme')
+k('dealStandardHint','The label’s usual terms.','Şirketin olağan şartları.')
+k('dealBigAdvance','Big advance','Büyük avans')
+k('dealBigAdvanceHint','Twice the money now; a smaller split and one more album owed.','Şimdi iki kat para; daha küçük pay ve bir albüm fazla borç.')
+k('dealBetterSplit','Better split','Yüksek pay')
+k('dealBetterSplitHint','A bigger share of every sale and stream, for a small advance.','Her satış ve stream’den daha büyük pay, küçük bir avansa.')
+k('dealTerms','{advance} advance · {share}% split · {albums} albums','{advance} avans · %{share} pay · {albums} albüm', advance='String', share='int', albums='int')
+k('dealNet','In hand after the buyout: {net}','Sözleşme bedelinden sonra elde: {net}', net='String')
+k('labelUnrecouped','Advance still to pay back: {amount}. Your royalties go to it first.','Geri ödenecek avans: {amount}. Telif gelirin önce buna gidiyor.', amount='String')
+k('labelRecouped','Advance paid back: your royalties are all yours.','Avans geri ödendi: telif gelirinin tamamı senin.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

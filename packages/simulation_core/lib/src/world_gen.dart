@@ -345,6 +345,9 @@ abstract final class WorldGen {
     if (isLabel) {
       a.label = Label.small;
       a.contractAlbumsLeft = Label.small.contractAlbums;
+      a.contractAlbums = Label.small.contractAlbums;
+      a.contractAdvanceCents = Label.small.advanceCents;
+      a.unrecoupedCents = Label.small.advanceCents;
     }
     a.devotion = switch (tier) {
       StartTier.unknown => 0.1,

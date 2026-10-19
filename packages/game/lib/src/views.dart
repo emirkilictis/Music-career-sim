@@ -102,6 +102,9 @@ class ArtistView {
         skillPoints = a.skillPoints,
         label = a.label,
         contractAlbumsLeft = a.contractAlbumsLeft,
+        unrecoupedCents = a.unrecoupedCents,
+        contractAdvanceCents = a.contractAdvanceCents,
+        artistShare = a.artistShare,
         campaignCosts = [
           for (final k in Campaign.values) Actions.campaignCostFor(a, k)
         ],
@@ -195,6 +198,12 @@ class ArtistView {
   /// The player's record label and albums still owed to it (docs K54).
   final Label label;
   final int contractAlbumsLeft;
+
+  /// The advance of the deal signed and what of it royalties have not
+  /// paid back yet (docs K107); the player's split of the money.
+  final int unrecoupedCents;
+  final int contractAdvanceCents;
+  final double artistShare;
 
   /// What each campaign costs the artist now (by [Campaign.index]): the
   /// price grows with the audience, the label pays part (docs K57).
@@ -814,9 +823,26 @@ class LabelView {
         contractAlbumsLeft = p.contractAlbumsLeft,
         buyoutCents = Actions.buyoutCents(w, p),
         moneyCents = p.moneyCents,
-        legend = w.difficulty == Difficulty.legend;
+        legend = w.difficulty == Difficulty.legend,
+        leverage = Contracts.leverage(w, p, label),
+        deals = {
+          for (final d in ContractDeal.values)
+            d: Contracts.terms(w, p, label, d)
+        },
+        currentShare = p.artistShare,
+        unrecoupedCents = p.label == label ? p.unrecoupedCents : 0;
 
   final Label label;
+
+  /// How much the label wants the player (0–1; docs K107), and what each
+  /// deal shape would give.
+  final double leverage;
+  final Map<ContractDeal, ContractTerms> deals;
+
+  /// The player's split now, and what of the current label's advance is
+  /// still to be paid back (this label only).
+  final double currentShare;
+  final int unrecoupedCents;
 
   /// What the player still lacks for this label to sign them.
   final List<LabelRequirement> missing;
@@ -830,9 +856,12 @@ class LabelView {
 
   bool get wouldSign => missing.isEmpty;
 
-  /// Money in hand after signing: the advance less the buyout.
-  int get netCents => label.advanceCents - buyoutCents;
-  bool get canAfford => moneyCents + netCents >= 0;
+  /// Money in hand after signing [deal]: the advance less the buyout.
+  int netFor(ContractDeal deal) => deals[deal]!.advanceCents - buyoutCents;
+  int get netCents => netFor(ContractDeal.standard);
+  bool canAffordDeal(ContractDeal deal) => moneyCents + netFor(deal) >= 0;
+  bool get canAfford =>
+      ContractDeal.values.any((d) => moneyCents + netFor(d) >= 0);
   bool get canSign => wouldSign && !isCurrent && canAfford;
 
   /// Requirements as they apply in this game mode.

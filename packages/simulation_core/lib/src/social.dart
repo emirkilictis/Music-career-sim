@@ -258,8 +258,7 @@ abstract final class Social {
       case PostKind.hotTake:
         hype = 0.04 * f * room;
         // People talk, less with every take (a weekly one is noise).
-        a.buzz +=
-            0.08 * f * math.max(0.0, 1 - a.buzz / postBuzzCeiling);
+        a.buzz += 0.08 * f * math.max(0.0, 1 - a.buzz / postBuzzCeiling);
         Audience.addCasual(w, a, a.casual * 0.004 * f);
         backlash = r.chance(0.3);
         if (backlash) {

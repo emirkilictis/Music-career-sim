@@ -422,6 +422,12 @@ class Artist {
   Label label = Label.independent;
   int contractAlbumsLeft = 0;
 
+  /// The deal signed (docs K107): its advance and albums, and the part of
+  /// the advance the artist's royalties have not paid back yet.
+  int contractAdvanceCents = 0;
+  int contractAlbums = 0;
+  int unrecoupedCents = 0;
+
   /// No longer used: campaign fatigue (K57) was removed. Kept so saves keep
   /// their layout.
   double campaignFatigue = 0;

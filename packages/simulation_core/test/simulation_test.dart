@@ -194,6 +194,7 @@ void main() {
   group('streaming tools', streamingToolTests);
   group('viral', viralTests);
   group('audience limits (K105)', audienceLimitTests);
+  group('record deals (K107)', recordDealTests);
   group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
@@ -1975,5 +1976,74 @@ void audienceLimitTests() {
     expect(c.holidaySales(51, 2020), greaterThan(1.3));
     expect(c.holidaySales(2, 2005), lessThan(1));
     expect(c.holidaySales(20, 2005), 1);
+  });
+}
+
+void recordDealTests() {
+  test('deal shapes trade money now for the split; fans give leverage', () {
+    final w = WorldGen.create(seed: 107, startYear: 2015);
+    final p = WorldGen.addPlayer(w, name: 'Deal', genre: 0);
+    p.coreFans = Label.major.minFans.toDouble();
+    expect(Contracts.leverage(w, p, Label.major), 0);
+    final std = Contracts.terms(w, p, Label.major, ContractDeal.standard);
+    final big = Contracts.terms(w, p, Label.major, ContractDeal.bigAdvance);
+    final split = Contracts.terms(w, p, Label.major, ContractDeal.betterSplit);
+    expect(std.advanceCents, Label.major.advanceCents);
+    expect(std.artistShare, Label.major.artistShare);
+    expect(big.advanceCents, 2 * std.advanceCents);
+    expect(big.artistShare, lessThan(std.artistShare));
+    expect(big.albums, std.albums + 1);
+    expect(split.advanceCents, lessThan(std.advanceCents));
+    expect(split.artistShare, greaterThan(std.artistShare));
+    // Four times what the label asks for: the best terms it gives.
+    p.coreFans = 4.0 * Label.major.minFans;
+    expect(Contracts.leverage(w, p, Label.major), 1);
+    final proven = Contracts.terms(w, p, Label.major, ContractDeal.standard);
+    expect(proven.advanceCents, 2 * std.advanceCents);
+    expect(proven.artistShare, greaterThan(std.artistShare));
+    // Going independent is no deal at all.
+    final own =
+        Contracts.terms(w, p, Label.independent, ContractDeal.bigAdvance);
+    expect(own.advanceCents, 0);
+    expect(own.artistShare, 1);
+  });
+
+  test('the advance is paid back from royalties first', () {
+    final w = WorldGen.create(seed: 107, startYear: 2015);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2015)) {
+      sim.step();
+    }
+    final p = WorldGen.addPlayer(w,
+        name: 'Recoup',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    final money = p.moneyCents;
+    Actions.signLabel(w, p, Label.giant, deal: ContractDeal.bigAdvance);
+    final t = Contracts.terms(w, p, Label.giant, ContractDeal.bigAdvance);
+    expect(p.moneyCents - money, p.contractAdvanceCents);
+    expect(p.unrecoupedCents, p.contractAdvanceCents);
+    expect(p.contractAlbumsLeft, Label.giant.contractAlbums + 1);
+    expect(p.artistShare, closeTo(t.artistShare, 1e-9));
+    // Royalties go to the advance until it is paid back.
+    p.unrecoupedCents = 1000;
+    expect(Contracts.recoup(p, 600), 0);
+    expect(p.unrecoupedCents, 400);
+    expect(Contracts.recoup(p, 600), closeTo(200, 1e-9));
+    expect(p.unrecoupedCents, 0);
+    expect(Contracts.recoup(p, 600), 600);
+    // A week of a superstar's songs pays some of a big advance back and
+    // nothing into the bank.
+    p.unrecoupedCents = 1 << 40;
+    for (var i = 0; i < 3; i++) {
+      p.creativeEnergy = 100;
+      Actions.releaseSingle(
+          w, p, Actions.writeSong(w, p, producerSkill: 90, aiMode: true));
+    }
+    final bank = p.moneyCents;
+    sim.step();
+    expect(p.unrecoupedCents, lessThan(1 << 40));
+    expect(p.moneyCents - bank, lessThanOrEqualTo(p.job.wageCents));
   });
 }

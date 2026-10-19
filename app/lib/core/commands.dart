@@ -203,7 +203,9 @@ abstract final class Cmd {
   static SessionCmd<(List<TourRankView>, int)> topTours(int? year) => (s) =>
       (year == null ? s.allTimeTours() : s.topTours(year), s.firstTourYear);
 
-  static SessionCmd<void> signLabel(Label label) => (s) => s.signLabel(label);
+  static SessionCmd<void> signLabel(Label label,
+          {ContractDeal deal = ContractDeal.standard}) =>
+      (s) => s.signLabel(label, deal: deal);
 
   static SessionCmd<OpportunityOutcome> answerOpportunity(
           OpportunityChoice choice) =>

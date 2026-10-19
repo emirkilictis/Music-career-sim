@@ -122,7 +122,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F57 | (Oyuncu topluluğu) **Playlist'e sokmak (pitch)**: şarkıyı editoryal listelere önermek. | ✅ K97: playlist editörlerine öneri (ücretsiz, şarkı başına bir kez, hafta sonunda cevap). |
 | F58 | (Oyuncu topluluğu) **Bot (sahte stream) + Spotify silmeleri / liste filtresi**; büyük rakiplerin (TS, BE) fanları/ekipleri de botlasın. | ✅ K95: bot paketleri, haftalık yakalanma şansı, silme + telif iadesi + 4 hafta liste filtresi + skandal; rakip yıldızların fan stream partileri ve botları. |
 | F59 | (Oyuncu topluluğu) **Autoplay**: algoritmanın şarkıyı otomatik çalması (Spotify Discovery Mode gibi telif karşılığı erişim). | ✅ K96: autoplay anahtarı (+%30 dinlenme, −%30 telif). |
-| F60 | (Oyuncu topluluğu) **Sözleşmeler, kampanyalar, müzikten kazanılan para, radyoya pushlama.** | Büyük kısmı var: şirket sözleşmeleri (K54/K78), kampanyalar (K57/K81), şarkı/albüm geliri (K60), paralı radyo tanıtımı (K84). Sözleşme pazarlığı derinleşebilir. |
+| F60 | (Oyuncu topluluğu) **Sözleşmeler, kampanyalar, müzikten kazanılan para, radyoya pushlama.** | Büyük kısmı var: şirket sözleşmeleri (K54/K78), kampanyalar (K57/K81), şarkı/albüm geliri (K60), paralı radyo tanıtımı (K84). Sözleşme pazarlığı derinleştirildi: üç sözleşme biçimi, pazarlık gücü, avans geri ödemesi (K107). |
 | F61 | (Oyuncu topluluğu) **Oyunu zorlaştır.** | Not alındı; F24 ile birlikte düşünülecek. |
 | F62 | (Oyuncu topluluğu) **Telefonda nasıl oynanır?** | Android: APK paylaşılabilir (docs). iPhone: TestFlight (Apple geliştirici hesabı) gerekir. |
 | F63 | **Chirper paylaşımları enerji yemesin; şarkı yazmak zaten yeterince yiyor** (Emir). | ✅ K98: paylaşımlar enerji harcamaz, haftada 3 sınırı kaldı. |

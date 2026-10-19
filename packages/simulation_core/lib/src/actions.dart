@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'audience.dart';
 import 'config/charts.dart';
+import 'contracts.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
 import 'lifecycle.dart';
@@ -548,23 +549,33 @@ abstract final class Actions {
   static int buyoutCents(World w, Artist a) {
     final l = a.label;
     if (a.contractAlbumsLeft <= 0 || l.contractAlbums == 0) return 0;
-    final perAlbum = l.advanceCents / l.contractAlbums +
-        (1 - l.artistShare) * a.coreFans * 50;
+    // The deal signed (docs K107); saves before it hold the label's terms.
+    final albums = a.contractAlbums > 0 ? a.contractAlbums : l.contractAlbums;
+    final advance =
+        a.contractAlbums > 0 ? a.contractAdvanceCents : l.advanceCents;
+    final perAlbum = advance / albums + (1 - a.artistShare) * a.coreFans * 50;
     final scale = w.difficulty == Difficulty.legend ? 0.5 : 1.0;
     return (a.contractAlbumsLeft * perAlbum * scale).round();
   }
 
-  /// Signs with [label] (or leaves to go independent): its reach and
-  /// money split apply from now on, the advance is paid at once. Leaving
-  /// before the albums owed are delivered pays [buyoutCents] (the new
-  /// label's advance goes towards it).
-  static void signLabel(World w, Artist a, Label label, {bool buyout = false}) {
+  /// Signs with [label] (or leaves to go independent) on [deal]'s terms
+  /// (docs K107): its reach and money split apply from now on, the
+  /// advance is paid at once and paid back from royalties. Leaving before
+  /// the albums owed are delivered pays [buyoutCents] (the new label's
+  /// advance goes towards it); what the old label never recouped is its
+  /// loss.
+  static void signLabel(World w, Artist a, Label label,
+      {bool buyout = false, ContractDeal deal = ContractDeal.standard}) {
+    final t = Contracts.terms(w, a, label, deal);
     if (buyout) a.moneyCents -= buyoutCents(w, a);
     a.label = label;
     a.labelReach = label.reach;
-    a.artistShare = label.artistShare;
-    a.contractAlbumsLeft = label.contractAlbums;
-    a.moneyCents += label.advanceCents;
+    a.artistShare = t.artistShare;
+    a.contractAlbumsLeft = t.albums;
+    a.contractAlbums = t.albums;
+    a.contractAdvanceCents = t.advanceCents;
+    a.unrecoupedCents = t.advanceCents;
+    a.moneyCents += t.advanceCents;
     w.dirtyArtists.add(a.id);
   }
 

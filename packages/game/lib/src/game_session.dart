@@ -872,10 +872,11 @@ class GameSession {
           LabelView.of(world, _p, l, Actions.labelMissing(world, _p, l)),
       ];
 
-  /// Signs with [label] (or goes independent with [Label.independent]).
-  /// While albums are still owed, the contract is bought out (docs K78):
-  /// the new advance goes towards it, the player pays the rest.
-  void signLabel(Label label) {
+  /// Signs with [label] (or goes independent with [Label.independent]) on
+  /// [deal]'s terms (docs K107). While albums are still owed, the contract
+  /// is bought out (docs K78): the new advance goes towards it, the player
+  /// pays the rest.
+  void signLabel(Label label, {ContractDeal deal = ContractDeal.standard}) {
     if (label == _p.label) {
       throw GameException('sameLabel', 'Already with this label');
     }
@@ -883,10 +884,11 @@ class GameSession {
       throw GameException('labelRefused', 'The label turned you down');
     }
     final buyout = Actions.buyoutCents(world, _p);
-    if (buyout > _p.moneyCents + label.advanceCents) {
+    final advance = Contracts.terms(world, _p, label, deal).advanceCents;
+    if (buyout > _p.moneyCents + advance) {
       throw GameException('buyoutMoney', 'Not enough money for the buyout');
     }
-    Actions.signLabel(world, _p, label, buyout: buyout > 0);
+    Actions.signLabel(world, _p, label, buyout: buyout > 0, deal: deal);
     _saveNow();
   }
 

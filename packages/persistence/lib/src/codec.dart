@@ -54,8 +54,9 @@ abstract final class Codec {
     'label', 'contractAlbums', 'campaignFatigue',
     // Added in schema v12, v14, v15.
     'opportunity', 'milestones', 'tour',
-    // Added in schema v16.
+    // Added in schema v16, v21.
     'manager',
+    'dealAdvance', 'dealAlbums', 'unrecouped',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -94,6 +95,9 @@ abstract final class Codec {
                 {for (final e in a.milestones.entries) '${e.key}': e.value}),
         Tour.encode(a.tour),
         a.manager.index,
+        a.contractAdvanceCents,
+        a.contractAlbums,
+        a.unrecoupedCents,
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -167,6 +171,9 @@ abstract final class Codec {
     a.opportunity = Opportunity.decode(r['opportunity'] as String?);
     a.tour = Tour.decode(r['tour'] as String?);
     a.manager = Manager.values[r['manager'] as int? ?? 0];
+    a.contractAdvanceCents = r['dealAdvance'] as int? ?? 0;
+    a.contractAlbums = r['dealAlbums'] as int? ?? 0;
+    a.unrecoupedCents = r['unrecouped'] as int? ?? 0;
     if (r['milestones'] case final String m when m.isNotEmpty) {
       for (final e in (jsonDecode(m) as Map<String, Object?>).entries) {
         a.milestones[int.parse(e.key)] = e.value! as int;
