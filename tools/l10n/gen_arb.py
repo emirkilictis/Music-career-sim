@@ -1213,6 +1213,16 @@ k('eventWrapped','Your {year} Wrapped is out: {plays} plays on Streamify, “{ti
 k('eventSurpriseDrop','Surprise! “{title}” is out with no warning and it is all anyone is talking about.','Sürpriz! “{title}” hiç haber verilmeden çıktı ve herkes ondan bahsediyor.', title='String')
 k('surpriseHint','No announcement: a surprise drop. An album or EP with nothing out from it yet makes headlines for a big name (a burst of hype at once, less if you did one in the last three years). Nobody notices an unknown\'s, and there are no pre-saves.','Duyuru yok: sürpriz çıkış. Henüz hiçbir şarkısı çıkmamış bir albüm ya da EP, tanınmış bir isimse manşet olur (anında bir hype patlaması; son üç yılda bunu yaptıysan daha az). Tanınmayan birininkini kimse fark etmez ve pre-save toplanmaz.')
 
+# Editorial playlists (K125)
+k('edTitle','Editorial playlists','Editoryal çalma listeleri')
+k('edHotRightNow','The biggest songs right now, picked by our editors.','Şu an en büyük şarkılar, editörlerimizin seçimiyle.')
+k('edFreshFriday','The best new releases of the week.','Haftanın en iyi yeni çıkışları.')
+k('edGenre','The best of {genres} right now.','Şu an en iyi {genres}.', genres='String')
+k('edFollowers','{count} followers','{count} takipçi', count='String')
+k('edEmpty','Nothing here this week.','Bu hafta burada bir şey yok.')
+k('edPick','Editors\' pick','Editör seçimi')
+k('edOnPlaylists','On the playlists','Çalma listelerinde')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

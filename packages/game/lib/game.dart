@@ -7,6 +7,7 @@ export 'package:simulation_core/simulation_core.dart';
 export 'package:persistence/persistence.dart' show SaveSlots;
 
 export 'src/career_setup.dart';
+export 'src/editorial.dart';
 export 'src/events.dart';
 export 'src/game_session.dart';
 export 'src/milestones.dart';

@@ -1270,5 +1270,13 @@
   "wrappedStorySteady": "İstikrarlı yıl",
   "eventWrapped": "{year} Wrapped'in çıktı: Streamify'da {plays} dinlenme, zirvede “{title}”. {story}.",
   "eventSurpriseDrop": "Sürpriz! “{title}” hiç haber verilmeden çıktı ve herkes ondan bahsediyor.",
-  "surpriseHint": "Duyuru yok: sürpriz çıkış. Henüz hiçbir şarkısı çıkmamış bir albüm ya da EP, tanınmış bir isimse manşet olur (anında bir hype patlaması; son üç yılda bunu yaptıysan daha az). Tanınmayan birininkini kimse fark etmez ve pre-save toplanmaz."
+  "surpriseHint": "Duyuru yok: sürpriz çıkış. Henüz hiçbir şarkısı çıkmamış bir albüm ya da EP, tanınmış bir isimse manşet olur (anında bir hype patlaması; son üç yılda bunu yaptıysan daha az). Tanınmayan birininkini kimse fark etmez ve pre-save toplanmaz.",
+  "edTitle": "Editoryal çalma listeleri",
+  "edHotRightNow": "Şu an en büyük şarkılar, editörlerimizin seçimiyle.",
+  "edFreshFriday": "Haftanın en iyi yeni çıkışları.",
+  "edGenre": "Şu an en iyi {genres}.",
+  "edFollowers": "{count} takipçi",
+  "edEmpty": "Bu hafta burada bir şey yok.",
+  "edPick": "Editör seçimi",
+  "edOnPlaylists": "Çalma listelerinde"
 }

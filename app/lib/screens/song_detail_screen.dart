@@ -14,7 +14,9 @@ import '../widgets/common.dart';
 import '../widgets/artist_link.dart';
 import '../widgets/history_tables.dart';
 import '../widgets/line_chart.dart';
+import 'game_shell.dart';
 import 'releases_tab.dart';
+import 'streamify/editorial_page.dart';
 
 /// One song: numbers, chart records, weekly history.
 class SongDetailScreen extends StatefulWidget {
@@ -31,6 +33,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   SongView? _song;
   List<HistoryPoint> _history = const [];
   List<ChartWeek> _run = const [];
+  List<EditorialPlacement> _playlists = const [];
 
   @override
   void initState() {
@@ -43,11 +46,13 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     final history = await widget.state.read(Cmd.songHistory(widget.songId));
     final run =
         await widget.state.read(Cmd.chartRun(EntityKind.song, widget.songId));
+    final playlists = await widget.state.read(Cmd.placements(widget.songId));
     if (mounted) {
       setState(() {
         _song = song;
         _history = history;
         _run = run;
+        _playlists = playlists;
       });
     }
   }
@@ -579,6 +584,26 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         Tag(l.tagReleaseRadar,
                             icon: Icons.radar_rounded, color: AppColors.mint),
                     ]),
+                    // On the editorial playlists (docs K125).
+                    if (_playlists.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(l.edOnPlaylists,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 6),
+                      Wrap(spacing: 8, runSpacing: 8, children: [
+                        for (final pl in _playlists)
+                          ActionChip(
+                            avatar: Container(
+                                width: 14,
+                                height: 14,
+                                color: editorialColor(pl.playlist)),
+                            label: Text(
+                                '${pl.playlist.displayName} #${pl.position}'),
+                            onPressed: () => pushInCareer(
+                                context, EditorialPage(playlist: pl.playlist)),
+                          ),
+                      ]),
+                    ],
                     if (s.canPitch) ...[
                       const SizedBox(height: 8),
                       Text(l.pitchHint,

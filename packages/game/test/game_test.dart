@@ -1151,6 +1151,51 @@ void main() {
       g.close();
     });
 
+    test('editorial playlists rank last week, editors\' picks first (K125)',
+        () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final w = g.world;
+      w.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id);
+      g.advanceWeek();
+      expect(Editorial.playlists(w), EditorialPlaylist.values);
+      final hot = Editorial.view(w, EditorialPlaylist.hotRightNow);
+      expect(hot.rows.length, Editorial.size);
+      expect(hot.followers, greaterThan(0));
+      expect([for (final r in hot.rows) r.position],
+          [for (var i = 1; i <= Editorial.size; i++) i]);
+      // New releases only: out last week.
+      final fresh = Editorial.view(w, EditorialPlaylist.freshFriday);
+      expect(fresh.rows, isNotEmpty);
+      for (final r in fresh.rows) {
+        final s = w.songs[r.songId];
+        expect(s.releasedWeek == w.week - 1 || s.singleWeek == w.week - 1,
+            isTrue);
+      }
+      expect(fresh.rows.any((r) => r.songId == id), isTrue);
+      // Genre playlists play their genres.
+      final pop = Editorial.view(w, EditorialPlaylist.popRising);
+      for (final r in pop.rows) {
+        expect(w.songs[r.songId].genres, contains(0));
+      }
+      // The song page lists the same places.
+      for (final pl in Editorial.placements(w, id)) {
+        final rows = Editorial.view(w, pl.playlist).rows;
+        expect(rows[pl.position - 1].songId, id);
+      }
+      expect(
+          Editorial.placements(w, id)
+              .any((pl) => pl.playlist == EditorialPlaylist.freshFriday),
+          isTrue);
+      g.close();
+    });
+
     test('a surprise drop makes headlines for a known name (K124)', () {
       final g = GameSession.start(
           slots,

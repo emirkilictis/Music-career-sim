@@ -12,6 +12,7 @@ import '../../widgets/common.dart';
 import '../game_shell.dart';
 import '../song_detail_screen.dart';
 import 'artist_page.dart';
+import 'editorial_page.dart';
 import 'playlist_page.dart';
 import 'wrapped_screen.dart';
 
@@ -34,6 +35,7 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
   ArtistPageView? _me;
   List<int> _active = const [];
   int? _wrapped;
+  List<EditorialPlaylist> _editorial = const [];
   int _loadedRevision = -1;
 
   @override
@@ -51,11 +53,13 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
     final me = await career.read(Cmd.artistPage(career.player.id));
     final active = await career.read(Cmd.activeCharts());
     final wrapped = await career.read(Cmd.latestWrapped());
+    final editorial = await career.read(Cmd.editorialPlaylists());
     if (mounted) {
       setState(() {
         _me = me;
         _active = active;
         _wrapped = wrapped;
+        _editorial = editorial;
       });
     }
   }
@@ -150,8 +154,8 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
                 const SizedBox(height: 14),
                 _WrappedBanner(
                     year: _wrapped!,
-                    onTap: () => pushInCareer(
-                        context, WrappedScreen(year: _wrapped))),
+                    onTap: () =>
+                        pushInCareer(context, WrappedScreen(year: _wrapped))),
               ],
               if (charts.isNotEmpty) ...[
                 const SizedBox(height: 26),
@@ -182,6 +186,25 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
                                       fontSize: 13)),
                             ]),
                       ),
+                    ),
+                  ),
+                ),
+              ],
+              // The editors' playlists (docs K125).
+              if (_editorial.isNotEmpty) ...[
+                const SizedBox(height: 26),
+                Text(l.edTitle, style: h),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 150,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _editorial.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, i) => InkWell(
+                      onTap: () => pushInCareer(
+                          context, EditorialPage(playlist: _editorial[i])),
+                      child: EditorialCover(playlist: _editorial[i], size: 140),
                     ),
                   ),
                 ),
@@ -271,17 +294,14 @@ class _WrappedBanner extends StatelessWidget {
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l.wrappedBanner(year),
-                      style: const TextStyle(
-                          color: ink,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900)),
-                  Text(l.wrappedBannerSub,
-                      style: const TextStyle(color: ink, fontSize: 13)),
-                ]),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(l.wrappedBanner(year),
+                  style: const TextStyle(
+                      color: ink, fontSize: 16, fontWeight: FontWeight.w900)),
+              Text(l.wrappedBannerSub,
+                  style: const TextStyle(color: ink, fontSize: 13)),
+            ]),
           ),
           const Icon(Icons.chevron_right_rounded, color: ink),
           const SizedBox(width: 8),

@@ -4358,5 +4358,27 @@
       }
     }
   },
-  "surpriseHint": "No announcement: a surprise drop. An album or EP with nothing out from it yet makes headlines for a big name (a burst of hype at once, less if you did one in the last three years). Nobody notices an unknown's, and there are no pre-saves."
+  "surpriseHint": "No announcement: a surprise drop. An album or EP with nothing out from it yet makes headlines for a big name (a burst of hype at once, less if you did one in the last three years). Nobody notices an unknown's, and there are no pre-saves.",
+  "edTitle": "Editorial playlists",
+  "edHotRightNow": "The biggest songs right now, picked by our editors.",
+  "edFreshFriday": "The best new releases of the week.",
+  "edGenre": "The best of {genres} right now.",
+  "@edGenre": {
+    "placeholders": {
+      "genres": {
+        "type": "String"
+      }
+    }
+  },
+  "edFollowers": "{count} followers",
+  "@edFollowers": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "edEmpty": "Nothing here this week.",
+  "edPick": "Editors' pick",
+  "edOnPlaylists": "On the playlists"
 }

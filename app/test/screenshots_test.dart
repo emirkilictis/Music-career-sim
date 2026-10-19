@@ -548,6 +548,20 @@ void main() {
     await shot(tester, '09g_wrapped_more');
     await tester.pageBack();
     await tester.pumpAndSettle();
+    // The editors' playlists (docs K125).
+    final editorial = _ci('Editorial playlists');
+    await tester.scrollUntilVisible(editorial, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(editorial), alignment: 0.2);
+    await tester.pumpAndSettle();
+    await shot(tester, '09h_editorial');
+    await tester.tap(find.text('Hot Right Now').first);
+    await tester.pumpAndSettle();
+    await shot(tester, '09i_editorial_playlist');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
     // The year-end charts (docs K110).

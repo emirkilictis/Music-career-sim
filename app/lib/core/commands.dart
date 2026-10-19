@@ -252,6 +252,17 @@ abstract final class Cmd {
         );
       };
 
+  /// The streaming app's editorial playlists open last week (docs K125).
+  static SessionCmd<List<EditorialPlaylist>> editorialPlaylists() =>
+      (s) => Editorial.playlists(s.world);
+
+  static SessionCmd<EditorialView> editorial(EditorialPlaylist p) =>
+      (s) => Editorial.view(s.world, p);
+
+  /// Where a song is on the editorial playlists.
+  static SessionCmd<List<EditorialPlacement>> placements(int songId) =>
+      (s) => Editorial.placements(s.world, songId);
+
   /// The player's year on the streaming app and the years there are (docs
   /// K123); [year] null is the latest.
   static SessionCmd<(WrappedView?, List<int>)> wrapped(int? year) => (s) {
