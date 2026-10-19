@@ -1314,6 +1314,34 @@ class GameSession {
     _saveNow();
   }
 
+  /// Re-releases album [albumId] as a deluxe edition with unreleased
+  /// [songIds] as bonus tracks (docs K115).
+  void releaseDeluxe(int albumId, List<int> songIds) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    if (al.artistId != _p.id) throw GameException('notYours', 'Not yours');
+    if (Actions.hasDeluxe(al)) {
+      throw GameException('deluxeOut', 'Already re-released');
+    }
+    if (songIds.isEmpty || songIds.length > Actions.maxDeluxeTracks) {
+      throw GameException('deluxeTracks', 'Pick 1–6 bonus tracks');
+    }
+    for (final id in songIds) {
+      final s = _ownSong(id);
+      if (s.status != SongStatus.vault) {
+        throw GameException('notInVault', 'Only unreleased songs');
+      }
+      if (_p.scheduled.any((sr) => sr.songIds.contains(id))) {
+        throw GameException('songScheduled', 'Song is on a scheduled release');
+      }
+    }
+    _requireMoney(EditionFormat.deluxe.costCents);
+    Actions.releaseDeluxe(world, _p, al, songIds);
+    _saveNow();
+  }
+
   /// Throws away an unreleased song from the vault (docs K48).
   void scrapSong(int songId) {
     final s = _ownSong(songId);

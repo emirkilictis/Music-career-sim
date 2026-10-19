@@ -1165,5 +1165,14 @@
   "eventMusicShowFirstWin": "İlk galibiyet! “{title}” Music Peak’te “{other}” şarkısını geçerek kazandı. Hayranların gözyaşları içinde.",
   "eventMusicShowWin": "“{title}” Music Peak’te yine kazandı: {wins}. galibiyet.",
   "eventMusicShowCrown": "Triple Crown! “{title}” Music Peak’i üç hafta üst üste kazandı ve programdan zirvede ayrılıyor.",
-  "eventMusicShowSecond": "“{title}” Music Peak’te “{other}” şarkısının ardından ikinci oldu."
+  "eventMusicShowSecond": "“{title}” Music Peak’te “{other}” şarkısının ardından ikinci oldu.",
+  "deluxeButton": "Deluxe sürüm",
+  "deluxeTag": "Deluxe",
+  "deluxeTitle": "Deluxe sürüm",
+  "deluxeHint": "Kasadan en fazla 6 şarkıyı bonus parça olarak ekle. Hayranlar bu hafta deluxe baskıyı alır, albüm yeniden konuşulur. Albüm başına bir kez; maliyeti {cost}.",
+  "deluxeRelease": "Deluxe’i yayınla ({count})",
+  "deluxeEmpty": "Kasada yayınlanmamış şarkı yok.",
+  "deluxeOut": "“{title}” albümünün deluxe sürümü çıktı!",
+  "errorDeluxeOut": "Bu albümün deluxe sürümü zaten çıktı.",
+  "errorDeluxeTracks": "1–6 bonus parça seç."
 }

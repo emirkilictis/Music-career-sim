@@ -1113,6 +1113,17 @@ k('eventMusicShowWin','“{title}” won Music Peak again: win #{wins}.','“{ti
 k('eventMusicShowCrown','Triple Crown! “{title}” won Music Peak three weeks in a row and leaves the show on top.','Triple Crown! “{title}” Music Peak’i üç hafta üst üste kazandı ve programdan zirvede ayrılıyor.', title='String')
 k('eventMusicShowSecond','“{title}” came second on Music Peak, behind “{other}”.','“{title}” Music Peak’te “{other}” şarkısının ardından ikinci oldu.', title='String', other='String')
 
+# Deluxe re-release (docs K115)
+k('deluxeButton','Deluxe edition','Deluxe sürüm')
+k('deluxeTag','Deluxe','Deluxe')
+k('deluxeTitle','Deluxe edition','Deluxe sürüm')
+k('deluxeHint','Add up to 6 unreleased songs as bonus tracks. Fans buy the deluxe edition this week and the album is talked about again. Once per album; costs {cost}.','Kasadan en fazla 6 şarkıyı bonus parça olarak ekle. Hayranlar bu hafta deluxe baskıyı alır, albüm yeniden konuşulur. Albüm başına bir kez; maliyeti {cost}.', cost='String')
+k('deluxeRelease','Release deluxe ({count})','Deluxe’i yayınla ({count})', count='int')
+k('deluxeEmpty','No unreleased songs in the vault.','Kasada yayınlanmamış şarkı yok.')
+k('deluxeOut','The deluxe edition of “{title}” is out!','“{title}” albümünün deluxe sürümü çıktı!', title='String')
+k('errorDeluxeOut','This album already had its deluxe edition.','Bu albümün deluxe sürümü zaten çıktı.')
+k('errorDeluxeTracks','Pick 1–6 bonus tracks.','1–6 bonus parça seç.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

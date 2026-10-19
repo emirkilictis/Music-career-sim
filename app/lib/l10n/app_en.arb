@@ -3791,5 +3791,35 @@
         "type": "String"
       }
     }
-  }
+  },
+  "deluxeButton": "Deluxe edition",
+  "deluxeTag": "Deluxe",
+  "deluxeTitle": "Deluxe edition",
+  "deluxeHint": "Add up to 6 unreleased songs as bonus tracks. Fans buy the deluxe edition this week and the album is talked about again. Once per album; costs {cost}.",
+  "@deluxeHint": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "deluxeRelease": "Release deluxe ({count})",
+  "@deluxeRelease": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deluxeEmpty": "No unreleased songs in the vault.",
+  "deluxeOut": "The deluxe edition of “{title}” is out!",
+  "@deluxeOut": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "errorDeluxeOut": "This album already had its deluxe edition.",
+  "errorDeluxeTracks": "Pick 1–6 bonus tracks."
 }

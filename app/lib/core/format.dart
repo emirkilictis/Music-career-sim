@@ -670,6 +670,8 @@ class Fmt {
       'postLimit' => l.errorPostLimit,
       'nothingToTease' => l.errorNothingToTease,
       'variantOut' => l.errorEditionOut,
+      'deluxeOut' => l.errorDeluxeOut,
+      'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,
       'labelRefused' => l.errorLabelRefused,
       'alreadyScheduled' => l.errorAlreadyScheduled,

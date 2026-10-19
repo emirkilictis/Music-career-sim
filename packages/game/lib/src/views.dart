@@ -471,6 +471,11 @@ class AlbumView {
             ? albumWeekUnitsIn(w, al, ChartMarket.us)
             : 0,
         isPlayer = al.artistId == w.playerArtistId,
+        isDeluxe = Actions.hasDeluxe(al),
+        canDeluxe = al.artistId == w.playerArtistId &&
+            al.type != AlbumType.mixtape &&
+            w.week > al.releaseWeek &&
+            !Actions.hasDeluxe(al),
         scheduleId = al.scheduleId,
         criticScore = al.criticScore,
         reviews = Critics.reviews(w, al),
@@ -523,6 +528,11 @@ class AlbumView {
   final double weekPure;
   final double weekUsUnits;
   final bool isPlayer;
+
+  /// Re-released as a deluxe edition with bonus tracks, or could be
+  /// (docs K115).
+  final bool isDeluxe;
+  final bool canDeluxe;
 
   /// The schedule it came out of, or -1.
   final int scheduleId;

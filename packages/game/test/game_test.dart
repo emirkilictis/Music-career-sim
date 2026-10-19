@@ -1146,6 +1146,47 @@ void main() {
       g.close();
     });
 
+    test('a deluxe edition adds bonus tracks once and survives a save (K115)',
+        () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final id = g.slotId;
+      final tracks = <int>[];
+      for (var i = 0; i < 8; i++) {
+        g.world.player!.creativeEnergy = 100;
+        tracks.add(g.writeSong(budget: BudgetTier.low).id);
+      }
+      final album = g.releaseAlbum('Base', tracks).id;
+      g.advanceWeeks(3, stop: SkipStop.never);
+      final bonus = <int>[];
+      for (var i = 0; i < 2; i++) {
+        g.world.player!.creativeEnergy = 100;
+        bonus.add(g.writeSong(budget: BudgetTier.low).id);
+      }
+      expect(g.album(album).canDeluxe, isTrue);
+      final money = g.player.moneyCents;
+      g.releaseDeluxe(album, bonus);
+      expect(money - g.player.moneyCents, EditionFormat.deluxe.costCents);
+      final v = g.album(album);
+      expect(v.trackIds, [...tracks, ...bonus]);
+      expect(v.isDeluxe, isTrue);
+      expect(v.canDeluxe, isFalse);
+      for (final s in bonus) {
+        expect(g.song(s).inVault, isFalse);
+      }
+      expect(() => g.releaseDeluxe(album, bonus), _code('deluxeOut'));
+      g.advanceWeek();
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.album(album).trackIds, [...tracks, ...bonus]);
+      expect(g.album(album).isDeluxe, isTrue);
+      g.close();
+    });
+
     test('labels: what they ask for, contracts, campaigns, drops', () {
       final g = GameSession.start(slots, _setup(path: CareerPath.smallLabel));
       expect(g.player.label, Label.small);

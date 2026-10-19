@@ -200,6 +200,7 @@ void main() {
   group('critics (K112)', criticTests);
   group('top artists (K113)', topArtistTests);
   group('music show (K114)', musicShowTests);
+  group('deluxe (K115)', deluxeTests);
   group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
@@ -2256,5 +2257,46 @@ void musicShowTests() {
     expect(copy.wins, w.musicShow.wins);
     expect(copy.crowned, w.musicShow.crowned);
     expect(copy.weeks.length, w.musicShow.weeks.length);
+  });
+}
+
+void deluxeTests() {
+  test('a deluxe re-release sells to fans and brings the album back', () {
+    final w = WorldGen.create(seed: 115, startYear: 2016);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2016)) {
+      sim.step();
+    }
+    final p = WorldGen.addPlayer(w,
+        name: 'Deluxe',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    final ids = [
+      for (var i = 0; i < 10; i++)
+        Actions.writeSong(w, p, producerSkill: 85, aiMode: true).id
+    ];
+    final al = Actions.releaseAlbum(w, p, 'Base', ids);
+    for (var i = 0; i < 6; i++) {
+      sim.step();
+    }
+    final before = al.weekPure;
+    final bonus = [
+      for (var i = 0; i < 3; i++)
+        Actions.writeSong(w, p, producerSkill: 85, aiMode: true).id
+    ];
+    Actions.releaseDeluxe(w, p, al, bonus);
+    expect(Actions.hasDeluxe(al), isTrue);
+    expect(al.songIds.length, 13);
+    expect(al.variantWeeks.first, 0);
+    expect(() => Actions.releaseDeluxe(w, p, al, bonus),
+        throwsA(isA<ActionException>()));
+    sim.step();
+    printOnFailure('before ${before.round()} after ${al.weekPure.round()}');
+    expect(al.weekPure, greaterThan(before * 1.3));
+    for (final id in bonus) {
+      expect(w.songs[id].status, SongStatus.active);
+      expect(w.songs[id].weekStreams, greaterThan(0));
+    }
   });
 }

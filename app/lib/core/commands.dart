@@ -200,6 +200,10 @@ abstract final class Cmd {
       };
 
   /// The year's top tours (null: all time) and the first year on the books.
+  /// Re-releases an album as a deluxe edition (docs K115).
+  static SessionCmd<void> releaseDeluxe(int albumId, List<int> songIds) =>
+      (s) => s.releaseDeluxe(albumId, songIds);
+
   /// The K-pop music show's recent weeks (docs K114).
   static SessionCmd<List<MusicShowRow>> musicShow() => (s) => s.musicShow;
 

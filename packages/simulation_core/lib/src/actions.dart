@@ -738,6 +738,78 @@ abstract final class Actions {
     return album;
   }
 
+  /// Bonus tracks a deluxe edition can add (docs K115).
+  static const maxDeluxeTracks = 6;
+
+  /// Whether [al] already had its deluxe re-release.
+  static bool hasDeluxe(Album al) {
+    for (var k = 0; k < al.variantWeeks.length; k++) {
+      if (al.variantWeeks[k] > 0 &&
+          k < al.variantFormats.length &&
+          al.variantFormats[k] == EditionFormat.deluxe.index) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Re-releases [al] as a deluxe edition with unreleased [songIds] as
+  /// bonus tracks (docs K115): the new tracks come out today, fans buy
+  /// the deluxe edition (an extra edition this week) and the album is
+  /// talked about again. Once per album.
+  static void releaseDeluxe(World w, Artist a, Album al, List<int> songIds) {
+    if (al.artistId != a.id) throw ActionException('Not your album');
+    if (al.type == AlbumType.mixtape) throw ActionException('A mixtape');
+    if (w.week <= al.releaseWeek) throw ActionException('Not out yet');
+    if (hasDeluxe(al)) throw ActionException('Already deluxe');
+    if (songIds.isEmpty || songIds.length > maxDeluxeTracks) {
+      throw ActionException('1–$maxDeluxeTracks bonus tracks');
+    }
+    for (final id in songIds) {
+      final s = w.songs[id];
+      if (s.primaryArtistId != a.id || s.status != SongStatus.vault) {
+        throw ActionException('Only unreleased songs');
+      }
+    }
+    final cost = EditionFormat.deluxe.costCents;
+    if (a.tier == ArtistTier.player) {
+      if (a.moneyCents < cost) throw ActionException('Not enough money');
+      a.moneyCents -= cost;
+    }
+    if (al.status == AlbumStatus.dormant) Lifecycle.reactivateAlbum(w, al);
+    al.weeksBelowCutoff = 0;
+    for (final id in songIds) {
+      final s = w.songs[id];
+      s.albumId = al.id;
+      s.releasedWeek = w.week;
+      s.campaignPower = 1;
+      Lifecycle.activateSong(w, s);
+      _promote(w, s, Campaign.standard);
+      al.songIds.add(id);
+    }
+    // The deluxe edition sells to collectors this week, in order with the
+    // other editions.
+    final formats = [
+      for (var k = 0; k < al.variantWeeks.length; k++)
+        k < al.variantFormats.length ? al.variantFormats[k] : -1
+    ];
+    final editions = [
+      for (var k = 0; k < al.variantWeeks.length; k++)
+        (al.variantWeeks[k], formats[k], k),
+      (w.week - al.releaseWeek, EditionFormat.deluxe.index, formats.length),
+    ]..sort((x, y) {
+        final d = x.$1.compareTo(y.$1);
+        return d != 0 ? d : x.$3.compareTo(y.$3);
+      });
+    al.variantWeeks = [for (final e in editions) e.$1];
+    al.variantFormats = [for (final e in editions) e.$2];
+    a.hype += 0.1;
+    a.devotion = math.min(1.0, a.devotion + 0.01);
+    a.lastReleaseWeek = w.week;
+    w.dirtyAlbums.add(al.id);
+    w.dirtyArtists.add(a.id);
+  }
+
   /// Singles out before the album bring it their sales so far (10 track
   /// sales = 1 unit; streams from the units era): lifetime units only, kept
   /// apart from its weeks (docs K56). Their later weeks come in the weekly

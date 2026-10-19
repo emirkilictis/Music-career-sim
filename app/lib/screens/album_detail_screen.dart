@@ -62,6 +62,86 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     }
   }
 
+  /// Picks bonus tracks from the vault and re-releases the album as a
+  /// deluxe edition (docs K115).
+  Future<void> _deluxe(AlbumView a) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final vault = await widget.state.read(Cmd.vault());
+    if (!mounted) return;
+    final picked = await showModalBottomSheet<List<int>>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) {
+        final chosen = <int>{};
+        return StatefulBuilder(
+          builder: (c, set) => SafeArea(
+            child: ConstrainedBox(
+              constraints:
+                  BoxConstraints(maxHeight: MediaQuery.of(c).size.height * 0.8),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                  child: Text(l.deluxeTitle,
+                      style: Theme.of(c).textTheme.titleLarge),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                      l.deluxeHint(fmt.money(EditionFormat.deluxe.costCents)),
+                      style: Theme.of(c).textTheme.bodySmall),
+                ),
+                if (vault.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(l.deluxeEmpty),
+                  )
+                else
+                  Flexible(
+                    child: ListView(shrinkWrap: true, children: [
+                      for (final s in vault)
+                        CheckboxListTile(
+                          value: chosen.contains(s.id),
+                          onChanged:
+                              !chosen.contains(s.id) && chosen.length >= 6
+                                  ? null
+                                  : (v) => set(() => v == true
+                                      ? chosen.add(s.id)
+                                      : chosen.remove(s.id)),
+                          title: Text(s.title),
+                          subtitle: Text(fmt.songGrade(s)),
+                        ),
+                    ]),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: FilledButton(
+                    onPressed: chosen.isEmpty
+                        ? null
+                        : () => Navigator.pop(c, chosen.toList()),
+                    child: Text(l.deluxeRelease(chosen.length)),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        );
+      },
+    );
+    if (picked == null || !mounted) return;
+    try {
+      await widget.state.act(Cmd.releaseDeluxe(a.id, picked));
+      if (mounted) {
+        showInfo(context, l.deluxeOut(a.title),
+            icon: Icons.library_add_check_rounded);
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -89,8 +169,17 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 ? () => editImage(context, ImageStore.albumKey(a.id))
                 : null,
             title: a.title,
-            subtitle: '${a.artistName} · ${fmt.albumType(a.type)}',
+            subtitle: '${a.artistName} · ${fmt.albumType(a.type)}'
+                '${a.isDeluxe ? ' · ${l.deluxeTag}' : ''}',
           ),
+          if (a.canDeluxe) ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => _deluxe(a),
+              icon: const Icon(Icons.library_add_rounded),
+              label: Text(l.deluxeButton),
+            ),
+          ],
           if (!a.isPlayer)
             ArtistLink(
                 artistId: a.artistId, name: a.artistName, state: widget.state),
