@@ -103,6 +103,8 @@ class SaveStore {
     w.awardShows.addAll(AwardShow.decode(meta['awards'] as String?));
     // Social media (docs K93).
     w.social.decode(meta['social'] as String?);
+    // Brand deals (docs K102).
+    w.brandDeals.addAll(BrandDeal.decode(meta['brandDeals'] as String?));
     for (final (key, arr) in _metaArrays(w)) {
       for (var i = 0; i < arr.length; i++) {
         arr[i] = _d(meta['$key$i']);
@@ -331,6 +333,7 @@ class SaveStore {
       'festivals': FestivalBooking.encode(w.festivalBookings),
       'awards': AwardShow.encode(w.awardShows),
       'social': w.social.encode(),
+      'brandDeals': BrandDeal.encode(w.brandDeals),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

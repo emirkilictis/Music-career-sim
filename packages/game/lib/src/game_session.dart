@@ -593,6 +593,37 @@ class GameSession {
           ],
       };
 
+  // ----------------------------------------------------------- brand deals
+
+  /// The player's brand deals, newest first (docs K102).
+  List<BrandDealView> get brandDeals => [
+        for (var i = world.brandDeals.length - 1; i >= 0; i--)
+          BrandDealView.of(world, _p, i, world.brandDeals[i])
+      ];
+
+  /// Does a task of a deal; returns what the last task paid (0 before).
+  int doDealTask(int deal, int task) {
+    if (deal < 0 || deal >= world.brandDeals.length) {
+      throw GameException('dealOver', 'No such deal');
+    }
+    final d = world.brandDeals[deal];
+    if (d.status != DealStatus.active) {
+      throw GameException('dealOver', 'The deal is over');
+    }
+    final (kind, _, done) = d.tasks[task];
+    if (done >= 0) throw GameException('taskDone', 'Already done');
+    if (_p.creativeEnergy < kind.energy) {
+      throw GameException('noEnergy', 'Not enough energy');
+    }
+    if (kind == DealTask.sponsoredPost &&
+        world.social.postsIn(world.week) >= Social.postsPerWeek) {
+      throw GameException('postLimit', 'Posted enough this week');
+    }
+    final out = Brands.doTask(world, _p, deal, task);
+    _saveNow();
+    return out?.cents ?? 0;
+  }
+
   // --------------------------------------------------------- social media
 
   /// The player's social media: the feed, followers, posts left (docs K93).
@@ -1762,6 +1793,9 @@ class GameSession {
       final s = w.songs[id];
       if (s.primaryArtistId == p.id)
         events.add(PlaylistAdded(id, s.playlistAdd));
+    }
+    for (final d in r.brandDealsBroken) {
+      events.add(BrandDealBroken(d.deal.info, d.cents));
     }
     // Bought streams caught, and pitches the editors passed on (K95, K97).
     for (final id in r.botsCaught) {

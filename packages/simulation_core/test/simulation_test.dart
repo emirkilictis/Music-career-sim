@@ -769,6 +769,57 @@ void main() {
       return (w: w, sim: sim, p: p);
     }
 
+    test('brand deals: fit, tasks, half up front, rest on time (K102)', () {
+      final (:w, :sim, :p) = star();
+      while (w.week < GameTime.firstWeekOf(2010)) {
+        sim.step();
+      }
+      p.opportunity = null;
+      w.brandDeals.clear();
+      // A superstar fits a luxury house, not a burger chain.
+      final lux = Brands.all.indexWhere((b) => b.name == 'Maison Lumière');
+      final burger = Brands.all.indexWhere((b) => b.name == 'Crunch King');
+      expect(Brands.fit(Brands.all[lux], p),
+          greaterThan(Brands.fit(Brands.all[burger], p)));
+      p.opportunity = Opportunity(
+          kind: OpportunityKind.brandDeal,
+          week: w.week,
+          brand: lux,
+          feeCents: 10000000);
+      final money = p.moneyCents, devotion = p.devotion;
+      Opportunities.answer(w, p, OpportunityChoice.accept);
+      expect(p.moneyCents - money, 5000000);
+      expect(p.devotion, greaterThan(devotion));
+      final deal = w.brandDeals.single;
+      expect(deal.tasks.map((t) => t.$1),
+          [DealTask.sponsoredPost, DealTask.adShoot, DealTask.launchEvent]);
+      p.creativeEnergy = 100;
+      expect(Brands.doTask(w, p, 0, 0), isNull);
+      expect(w.social.feed.first.topic, FanTopic.postSponsored);
+      expect(w.social.feed.first.brand, lux);
+      expect(() => Brands.doTask(w, p, 0, 0), throwsA(isA<ActionException>()));
+      expect(Brands.doTask(w, p, 0, 1), isNull);
+      final done = Brands.doTask(w, p, 0, 2)!;
+      expect(done.cents, 5000000);
+      expect(deal.status, DealStatus.completed);
+      expect(p.moneyCents - money, 10000000);
+
+      // A deal left undone breaks after its first task's due week.
+      final money2 = p.moneyCents;
+      Brands.sign(w, p, burger, 2000000);
+      final broken = <DealOutcome>[];
+      for (var i = 0; i < 4; i++) {
+        broken.addAll(sim.step().brandDealsBroken);
+      }
+      expect(broken.single.deal.brand, burger);
+      expect(w.brandDeals.last.status, DealStatus.broken);
+      expect(p.moneyCents, greaterThanOrEqualTo(money2 + 1000000 - 1));
+      // Saved and loaded as is.
+      final back = BrandDeal.decode(BrandDeal.encode(w.brandDeals));
+      expect(back.map((d) => d.status), w.brandDeals.map((d) => d.status));
+      expect(back.first.tasks.last.$3, deal.tasks.last.$3);
+    });
+
     test('offers come up for a star, one at a time, and lapse', () {
       final (:w, :sim, :p) = star();
       final kinds = <OpportunityKind>{};

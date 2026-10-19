@@ -128,7 +128,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F63 | **Chirper paylaşımları enerji yemesin; şarkı yazmak zaten yeterince yiyor** (Emir). | ✅ K98: paylaşımlar enerji harcamaz, haftada 3 sınırı kaldı. |
 | F64 | **Albümde olmayan şarkıların stream'leri de kariyerdeki albüm ünitesinde görünsün; albüm yokken 0 olmasın** (Emir). | ✅ K99: "Toplam ünite" = albüm ünitesi + albümsüz şarkıların stream/indirme ünitesi. |
 | F65 | **Stream silinince bildirim gelsin, haberlere çıksın, bir yerlerde görünsün; silinme ihtimali çok yüksek olsun** (Emir). | ✅ K100: tam ekran uyarı, haber, Chirper; rakip silmeleri de haberde; yakalanma çok daha olası. |
-| F66 | **Marka anlaşmaları ve kampanyalar daha detaylı olsun** (Emir). | Not alındı; tasarım soruldu. |
+| F66 | **Marka anlaşmaları ve kampanyalar daha detaylı olsun** (Emir). | Marka anlaşmaları yapıldı (K102). Kendi marka ve kanal kanal kampanya bütçesi bekletiliyor (cilalama dönemi). |
 | F67 | **Yeni şarkımın global listeye girişi için bildirim gelmedi** (Emir). | ✅ K101: ana listelere her giriş büyük haber. |
 | F68 | **Autoplay ve playlist önerisi şarkı yayınlanmadan önce yapılabilsin** (Emir). | ✅ K101: çıkmamış şarkıda öneri ve autoplay; single akışında Streaming adımı. |
 

@@ -65,6 +65,9 @@ enum FanTopic {
   postPromote,
   botsCaught,
   rivalPurge,
+  postSponsored,
+  replySponsored,
+  replySellout,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.
@@ -78,6 +81,7 @@ class SocialItem {
     this.albumId = -1,
     this.likes = 0,
     this.number = 0,
+    this.brand = -1,
   });
   final int week;
   final FanTopic topic;
@@ -92,10 +96,13 @@ class SocialItem {
   /// A number the text uses (a chart position, units, a score ×10, days).
   final int number;
 
+  /// The brand of a sponsored post ([Brands.all] index; docs K102).
+  final int brand;
+
   bool get byPlayer => fan < 0;
 
   List<int> toJson() =>
-      [week, topic.index, variant, fan, songId, albumId, likes, number];
+      [week, topic.index, variant, fan, songId, albumId, likes, number, brand];
 
   static SocialItem fromJson(List<dynamic> j) => SocialItem(
         week: j[0] as int,
@@ -106,6 +113,7 @@ class SocialItem {
         albumId: j[5] as int,
         likes: j[6] as int,
         number: j[7] as int,
+        brand: j.length > 8 ? j[8] as int : -1,
       );
 }
 
@@ -303,6 +311,43 @@ abstract final class Social {
         fans: fans,
         devotion: devotion,
         backlash: backlash);
+  }
+
+  /// A brand deal's sponsored post (docs K102): it takes one of the week's
+  /// posts; fans like it when the brand suits the artist and call it
+  /// selling out when it does not.
+  static void sponsoredPost(World w, Artist a, int deal, double fit) {
+    final st = w.social;
+    final made = st.postsIn(w.week);
+    final brand = w.brandDeals[deal].brand;
+    final r = RandomStream.keyed(
+        w.seed, w.week, a.id * 8 + made, RngPurpose.social + 2);
+    st.postWeek = w.week;
+    st.postsThisWeek = made + 1;
+    st.engagement = math.min(1.0, st.engagement + 0.01);
+    final likes = (followers(w, a) * r.range(0.02, 0.06) * (0.5 + fit)).round();
+    add(
+        w,
+        SocialItem(
+            week: w.week,
+            topic: FanTopic.postSponsored,
+            variant: r.nextInt(variants),
+            likes: likes,
+            brand: brand));
+    final good = fit >= 0.5;
+    for (var i = 0; i < 2; i++) {
+      add(
+          w,
+          SocialItem(
+              week: w.week,
+              topic: good || i == 0 && r.chance(0.3)
+                  ? FanTopic.replySponsored
+                  : FanTopic.replySellout,
+              variant: (r.nextInt(variants) + i) % variants,
+              fan: r.nextInt(1 << 20),
+              likes: (likes * r.range(0.005, 0.04)).round(),
+              brand: brand));
+    }
   }
 
   /// Adds to the feed, dropping the oldest.

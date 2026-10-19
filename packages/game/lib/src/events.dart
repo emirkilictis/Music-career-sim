@@ -294,6 +294,16 @@ class RivalBotsCaught extends GameEvent {
   bool get isMajor => false;
 }
 
+/// A brand deal broke over a missed task (docs K102): the second half of
+/// the fee is lost.
+class BrandDealBroken extends GameEvent {
+  const BrandDealBroken(this.brand, this.lostCents);
+  final BrandInfo brand;
+  final int lostCents;
+  @override
+  bool get isMajor => true;
+}
+
 /// The playlist editors passed on the player's pitch (docs K97).
 class PitchDeclined extends GameEvent {
   const PitchDeclined(this.songId);

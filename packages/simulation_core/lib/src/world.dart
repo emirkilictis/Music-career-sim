@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'awards.dart';
+import 'brands.dart';
 import 'social.dart';
 import 'config/charts.dart';
 import 'config/difficulty.dart';
@@ -52,6 +53,9 @@ class World {
 
   /// The player's social media (docs K93).
   final SocialState social = SocialState();
+
+  /// The player's brand deals, running and past (docs K102).
+  final List<BrandDeal> brandDeals = [];
 
   /// Non-retired artists, sorted by id. Weekly loops run over these only.
   final List<int> activeArtistIds = [];

@@ -506,12 +506,25 @@ void main() {
         port.sendPort));
     port.close();
     await c.run(_fiveAlbums());
+    // Two brand deals running, one task done (docs K102).
+    await c.run((s) {
+      final w = s.world, p = w.player!;
+      Brands.sign(w, p, 3, 1800000000);
+      Brands.sign(w, p, 7, 900000000);
+      s.doDealTask(1, 0);
+    });
     await c.exec(Cmd.closeCareer());
 
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
     await tester.pumpAndSettle();
     await tester.tap(_ci('Nova Reyes'));
     await tester.pumpAndSettle();
+    final deals = find.byIcon(Icons.handshake_outlined);
+    await tester.scrollUntilVisible(deals, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(deals), alignment: 0.1);
+    await tester.pumpAndSettle();
+    await shot(tester, '04h_brand_deals');
     await tab(tester, 'Career');
     final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,

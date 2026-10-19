@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'actions.dart';
 import 'ai.dart';
 import 'awards.dart';
+import 'brands.dart';
 import 'social.dart';
 import 'streaming_tools.dart';
 import 'config/charts.dart';
@@ -40,6 +41,7 @@ class WeekResult {
     this.festivalSet,
     this.awardNominations,
     this.awardNight,
+    this.brandDealsBroken = const [],
   });
 
   final int week;
@@ -86,6 +88,9 @@ class WeekResult {
 
   /// The award show held this week, if the player was nominated.
   final AwardNight? awardNight;
+
+  /// The player's brand deals broken this week for a missed task (K102).
+  final List<DealOutcome> brandDealsBroken;
 
   List<ChartEntry> get songChart => charts[Charts.usSongs];
   List<ChartEntry> get albumChart => charts[Charts.usAlbums];
@@ -838,6 +843,7 @@ class Simulator {
     final nominations = Awards.nominate(w);
     final night = Awards.hold(w);
     Social.weekly(w);
+    final dealsBroken = Brands.weekly(w);
     if (me != null) {
       toured = Tours.playWeek(w, me);
       if (toured != null) {
@@ -881,6 +887,7 @@ class Simulator {
       festivalSet: festival,
       awardNominations: nominations,
       awardNight: night,
+      brandDealsBroken: dealsBroken,
     );
     w.week++;
     return result;

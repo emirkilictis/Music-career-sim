@@ -881,6 +881,18 @@ class OpportunityView {
         partnerName =
             o.partnerArtistId >= 0 ? w.artists[o.partnerArtistId].name : '',
         feeCents = o.feeCents,
+        brand = o.kind == OpportunityKind.brandDeal && o.brand >= 0
+            ? Brands.all[o.brand]
+            : null,
+        brandFit = o.kind == OpportunityKind.brandDeal && o.brand >= 0
+            ? Brands.fit(Brands.all[o.brand], w.player!)
+            : 0,
+        brandTasks = o.kind == OpportunityKind.brandDeal && o.brand >= 0
+            ? [
+                for (final t in Brands.tasksFor(Brands.all[o.brand], w.week))
+                  t.$1
+              ]
+            : const [],
         memberName = o.member >= 0 && o.member < w.player!.members.length
             ? w.player!.members[o.member]
             : '',
@@ -900,6 +912,12 @@ class OpportunityView {
 
   /// Award show: how many awards the player is up for.
   final int nominations;
+
+  /// Brand deal (docs K102): the brand, how well it suits the artist
+  /// (0..1) and the work it asks for.
+  final BrandInfo? brand;
+  final double brandFit;
+  final List<DealTask> brandTasks;
   final List<OpportunityChoice> choices;
 }
 
@@ -1311,11 +1329,13 @@ class SocialItemView {
         topic = i.topic,
         variant = i.variant,
         fan = i.fan,
-        title = i.songId >= 0
-            ? w.songs[i.songId].title
-            : i.albumId >= 0
-                ? w.albums[i.albumId].title
-                : '',
+        title = i.brand >= 0
+            ? Brands.all[i.brand].name
+            : i.songId >= 0
+                ? w.songs[i.songId].title
+                : i.albumId >= 0
+                    ? w.albums[i.albumId].title
+                    : '',
         likes = i.likes,
         number = i.number;
   final int week;
@@ -1406,4 +1426,29 @@ double _singleUnitsOffAlbums(World w, Artist a, int r) {
     }
   }
   return t;
+}
+
+/// One of the player's brand deals (docs K102).
+class BrandDealView {
+  BrandDealView.of(World w, Artist p, this.index, BrandDeal d)
+      : brand = d.info,
+        fit = Brands.fit(d.info, p),
+        feeCents = d.feeCents,
+        paidCents = d.paidCents,
+        status = d.status,
+        startWeek = d.startWeek,
+        tasks = [
+          for (final (t, due, done) in d.tasks)
+            (task: t, dueWeek: due, doneWeek: done)
+        ];
+
+  /// Position in the deal list (for doing its tasks).
+  final int index;
+  final BrandInfo brand;
+  final double fit;
+  final int feeCents;
+  final int paidCents;
+  final DealStatus status;
+  final int startWeek;
+  final List<({DealTask task, int dueWeek, int doneWeek})> tasks;
 }

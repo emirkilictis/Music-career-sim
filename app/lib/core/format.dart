@@ -53,6 +53,31 @@ class Fmt {
     return '${monthName(month)} ${GameTime.yearOf(week)}';
   }
 
+  String brandCategory(BrandCategory c) => switch (c) {
+        BrandCategory.fashion => l.brandFashion,
+        BrandCategory.beverage => l.brandBeverage,
+        BrandCategory.tech => l.brandTech,
+        BrandCategory.beauty => l.brandBeauty,
+        BrandCategory.luxury => l.brandLuxury,
+        BrandCategory.sportswear => l.brandSportswear,
+        BrandCategory.fastFood => l.brandFastFood,
+        BrandCategory.gaming => l.brandGaming,
+        BrandCategory.auto => l.brandAuto,
+      };
+
+  String dealTask(DealTask t) => switch (t) {
+        DealTask.sponsoredPost => l.taskSponsoredPost,
+        DealTask.adShoot => l.taskAdShoot,
+        DealTask.launchEvent => l.taskLaunchEvent,
+      };
+
+  /// How fans will take a brand that fits this well (docs K102).
+  String brandFit(double fit) => fit >= 0.75
+      ? l.fitGreat
+      : fit >= 0.5
+          ? l.fitOk
+          : l.fitPoor;
+
   String network(SocialNetwork n) => switch (n) {
         SocialNetwork.forum => l.networkForum,
         SocialNetwork.myPlace => l.networkMyPlace,
@@ -410,7 +435,14 @@ class Fmt {
             money(o.feeCents), Opportunities.featureEnergy.round()),
         OpportunityKind.festival => l.offerFestivalBody(
             money(o.feeCents), Opportunities.festivalEnergy.round()),
-        OpportunityKind.brandDeal => l.offerBrandBody(money(o.feeCents)),
+        OpportunityKind.brandDeal => o.brand == null
+            ? l.offerBrandBody(money(o.feeCents))
+            : l.offerBrandDealBody(
+                o.brand!.name,
+                brandCategory(o.brand!.category),
+                money(o.feeCents),
+                brandFit(o.brandFit),
+                o.brandTasks.map(dealTask).join(', ')),
         OpportunityKind.scandal => l.offerScandalBody,
         OpportunityKind.award =>
           l.offerAwardBody(Opportunities.performEnergy.round(), o.nominations),
@@ -599,6 +631,8 @@ class Fmt {
       'versionOut' => l.errorVersionOut,
       'socialLocked' => l.errorSocialLocked,
       'noStreaming' => l.errorNoStreaming,
+      'noEnergy' => l.errorNoEnergy,
+      'dealOver' => l.errorDealOver,
       'botsBusy' => l.errorBotsBusy,
       'cannotPitch' => l.errorCannotPitch,
       'postLimit' => l.errorPostLimit,
@@ -697,6 +731,8 @@ class Fmt {
       RivalBotsCaught() =>
         l.eventRivalBotsCaught(line.artistName, t, compact(e.removed)),
       PitchDeclined() => l.eventPitchDeclined(t),
+      BrandDealBroken() =>
+        l.eventBrandDealBroken(e.brand.name, money(e.lostCents)),
       AwardWinners() => l.eventAwardWinners(
           e.year, t, line.artistName, line.title2, line.artistName2),
     };

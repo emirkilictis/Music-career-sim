@@ -45,6 +45,7 @@ class DashboardTab extends StatelessWidget {
         const _StatusRow(),
         const SizedBox(height: 12),
         const _SocialCard(),
+        const _BrandDealsCard(),
         const SizedBox(height: 22),
         const _MoreSection(),
       ],
@@ -698,6 +699,103 @@ class _SocialCardState extends State<_SocialCard> {
               ),
             ]),
           ),
+        ]),
+      ),
+    );
+  }
+}
+
+/// Running brand deals and their tasks (docs K102): shown only while a
+/// deal is active.
+class _BrandDealsCard extends StatefulWidget {
+  const _BrandDealsCard();
+
+  @override
+  State<_BrandDealsCard> createState() => _BrandDealsCardState();
+}
+
+class _BrandDealsCardState extends State<_BrandDealsCard> {
+  List<BrandDealView> _deals = const [];
+  int _week = -1;
+
+  Future<void> _load(CareerState career) async {
+    _week = career.week;
+    final d = await career.read(Cmd.brandDeals());
+    if (mounted) setState(() => _deals = d);
+  }
+
+  Future<void> _do(CareerState career, BrandDealView d, int task) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    try {
+      final paid = await career.act(Cmd.doDealTask(d.index, task));
+      if (!mounted) return;
+      showInfo(
+          context,
+          paid > 0
+              ? l.dealCompleted(d.brand.name, fmt.money(paid))
+              : l.taskDoneInfo(d.brand.name),
+          icon: Icons.handshake_rounded);
+      _load(career);
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.career;
+    if (career.week != _week) _load(career);
+    final active = _deals.where((d) => d.status == DealStatus.active).toList();
+    if (active.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Section(
+        title: l.brandDealsTitle,
+        icon: Icons.handshake_outlined,
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          for (final d in active) ...[
+            Text('${d.brand.name} · ${fmt.brandCategory(d.brand.category)}',
+                style: TextStyle(
+                    fontWeight: FontWeight.w800, color: AppColors.text)),
+            Text(
+                '${l.dealPaid(fmt.money(d.paidCents), fmt.money(d.feeCents))} · ${fmt.brandFit(d.fit)}',
+                style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+            for (final (i, t) in d.tasks.indexed)
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(
+                    t.doneWeek >= 0
+                        ? Icons.check_circle_rounded
+                        : switch (t.task) {
+                            DealTask.sponsoredPost => Icons.campaign_rounded,
+                            DealTask.adShoot => Icons.videocam_rounded,
+                            DealTask.launchEvent => Icons.celebration_rounded,
+                          },
+                    color:
+                        t.doneWeek >= 0 ? AppColors.mint : AppColors.textMuted),
+                title: Text(fmt.dealTask(t.task)),
+                subtitle: Text(t.doneWeek >= 0
+                    ? l.taskDone
+                    : [
+                        t.dueWeek - career.week <= 0
+                            ? l.taskDueNow
+                            : l.taskDue(t.dueWeek - career.week),
+                        if (t.task.energy > 0)
+                          l.taskEnergy(t.task.energy.round()),
+                      ].join(' · ')),
+                trailing: t.doneWeek >= 0
+                    ? null
+                    : FilledButton(
+                        onPressed: career.busy ? null : () => _do(career, d, i),
+                        child: Text(l.taskDo)),
+              ),
+            const SizedBox(height: 8),
+          ],
         ]),
       ),
     );

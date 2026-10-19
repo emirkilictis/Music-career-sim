@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'awards.dart';
+import 'brands.dart';
 import 'model.dart';
 import 'rng.dart';
 import 'time.dart';
@@ -37,6 +38,7 @@ class Opportunity {
     this.partnerArtistId = -1,
     this.feeCents = 0,
     this.member = -1,
+    this.brand = -1,
   });
 
   final OpportunityKind kind;
@@ -52,6 +54,9 @@ class Opportunity {
 
   /// The group member it is about (index in [Artist.members]).
   final int member;
+
+  /// The brand of a brand deal ([Brands.all] index; docs K102).
+  final int brand;
 
   List<OpportunityChoice> get choices => switch (kind) {
         OpportunityKind.scandal || OpportunityKind.memberRift => const [
@@ -79,6 +84,7 @@ class Opportunity {
         'p': partnerArtistId,
         'f': feeCents,
         'm': member,
+        'b': brand,
       };
 
   static Opportunity fromJson(Map<String, Object?> j) => Opportunity(
@@ -87,6 +93,7 @@ class Opportunity {
         partnerArtistId: j['p'] as int? ?? -1,
         feeCents: j['f'] as int? ?? 0,
         member: j['m'] as int? ?? -1,
+        brand: j['b'] as int? ?? -1,
       );
 
   static String? encode(Opportunity? o) =>
@@ -187,11 +194,18 @@ abstract final class Opportunities {
           week: w.week,
           feeCents: (_fee(2e6, 2e8, fame, r) * p.manager.feeBoost).round());
     }
-    if (fame > 0.3 && hit(0.025)) {
+    // Brands knock once the artist is somebody (docs K102), never with
+    // three deals already running.
+    if (fame > 0.15 && Brands.activeCount(w) < Brands.maxActive && hit(0.03)) {
+      final brand = Brands.pick(p, r);
       return Opportunity(
           kind: OpportunityKind.brandDeal,
           week: w.week,
-          feeCents: (_fee(1e7, 1e9, fame, r) * p.manager.feeBoost).round());
+          brand: brand,
+          feeCents: (_fee(1e7, 1e9, fame, r) *
+                  Brands.feeFactor(Brands.all[brand]) *
+                  p.manager.feeBoost)
+              .round());
     }
     if (fame > 0.15 && hit(0.03)) {
       final partner = _partner(w, p, r);
@@ -248,11 +262,10 @@ abstract final class Opportunities {
         money = o.feeCents;
         fans = p.casual * (0.005 + 0.015 * stage);
         p.devotion = math.min(1.0, p.devotion + 0.01 + 0.02 * stage);
+      // Half now, half when the work is done (docs K102). Older offers
+      // without a brand become a beverage deal.
       case (OpportunityKind.brandDeal, OpportunityChoice.accept):
-        money = o.feeCents;
-        hype = 0.02;
-        // Some fans see it as selling out.
-        p.devotion = math.max(0.0, p.devotion - 0.03);
+        Brands.sign(w, p, o.brand >= 0 ? o.brand : 0, o.feeCents);
       case (OpportunityKind.scandal, OpportunityChoice.apologize):
         p.popularity = math.max(0.0, p.popularity - 0.03);
         hype = -0.05;

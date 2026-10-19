@@ -3130,6 +3130,57 @@
       }
     }
   },
+  "smPostSponsored0": "Proud to work with {title} ✨ #ad",
+  "@smPostSponsored0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smPostSponsored1": "A day in my life, powered by {title} #ad",
+  "@smPostSponsored1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smPostSponsored2": "Big news: I'm the new face of {title} #ad",
+  "@smPostSponsored2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplySponsored0": "{title} really picked the right person",
+  "@smReplySponsored0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplySponsored1": "Buying {title} just because of this",
+  "@smReplySponsored1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplySponsored2": "Ok this collab makes sense",
+  "smReplySellout0": "{title}?? Really?",
+  "@smReplySellout0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplySellout1": "The sellout era has begun",
+  "smReplySellout2": "Unfollowing until the next album",
   "networkForum": "Fan forum",
   "networkMyPlace": "MyPlace",
   "networkChirper": "Chirper",
@@ -3315,5 +3366,103 @@
   "removalFilter": "The charts count it at half for 4 weeks",
   "removalFans": "Fans are talking about it on social media",
   "streamingStepHint": "Pitch it to the playlist editors and choose autoplay before it comes out.",
-  "pitchPendingRelease": "Pitched: the editors answer when it comes out"
+  "pitchPendingRelease": "Pitched: the editors answer when it comes out",
+  "brandFashion": "Fashion",
+  "brandBeverage": "Drinks",
+  "brandTech": "Tech",
+  "brandBeauty": "Beauty",
+  "brandLuxury": "Luxury",
+  "brandSportswear": "Sportswear",
+  "brandFastFood": "Fast food",
+  "brandGaming": "Gaming",
+  "brandAuto": "Cars",
+  "taskSponsoredPost": "Sponsored post",
+  "taskAdShoot": "Ad shoot",
+  "taskLaunchEvent": "Launch event",
+  "fitGreat": "Fans will love it",
+  "fitOk": "Fans won't mind",
+  "fitPoor": "Some fans will call it selling out",
+  "offerBrandDealBody": "{brand} ({category}) wants you: {fee} in all, half now and half when the work is done. {fit}. Work: {tasks}.",
+  "@offerBrandDealBody": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      },
+      "fit": {
+        "type": "String"
+      },
+      "tasks": {
+        "type": "String"
+      }
+    }
+  },
+  "brandDealsTitle": "Brand deals",
+  "dealPaid": "{paid} of {fee} paid",
+  "@dealPaid": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "taskDue": "{weeks} wk left",
+  "@taskDue": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "taskDueNow": "Last week",
+  "taskDo": "Do it",
+  "taskDone": "Done",
+  "taskEnergy": "{energy} energy",
+  "@taskEnergy": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "dealCompleted": "{brand} deal done: +{money}",
+  "@dealCompleted": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "taskDoneInfo": "Done for {brand}.",
+  "@taskDoneInfo": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBrandDealBroken": "{brand} ended the deal over missed work: {money} lost.",
+  "@eventBrandDealBroken": {
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoEnergy": "Not enough creative energy.",
+  "errorDealOver": "That deal is over."
 }

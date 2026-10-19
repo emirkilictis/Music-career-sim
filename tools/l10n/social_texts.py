@@ -157,4 +157,19 @@ TOPICS = {
   ("Not {title} losing millions of streams overnight 💀", "{title} bir gecede milyonlarca stream kaybetti 💀"),
   ("And they said our streams were fake. Look at {title} now", "Bizim stream'lere sahte diyorlardı. {title} haline bak"),
  ],
+ 'postSponsored': [
+  ("Proud to work with {title} ✨ #ad", "{title} ile çalışmaktan gurur duyuyorum ✨ #reklam"),
+  ("A day in my life, powered by {title} #ad", "Bir günüm, {title} ile #reklam"),
+  ("Big news: I'm the new face of {title} #ad", "Büyük haber: {title} markasının yeni yüzüyüm #reklam"),
+ ],
+ 'replySponsored': [
+  ("{title} really picked the right person", "{title} gerçekten doğru kişiyi seçmiş"),
+  ("Buying {title} just because of this", "Sırf bunun için {title} alıyorum"),
+  ("Ok this collab makes sense", "Tamam bu iş birliği çok mantıklı"),
+ ],
+ 'replySellout': [
+  ("{title}?? Really?", "{title} mı?? Cidden mi?"),
+  ("The sellout era has begun", "Satılmışlık dönemi başladı"),
+  ("Unfollowing until the next album", "Bir sonraki albüme kadar takipten çıkıyorum"),
+ ],
 }
