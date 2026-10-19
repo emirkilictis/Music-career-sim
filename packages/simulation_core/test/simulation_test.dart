@@ -201,6 +201,7 @@ void main() {
   group('top artists (K113)', topArtistTests);
   group('music show (K114)', musicShowTests);
   group('deluxe (K115)', deluxeTests);
+  group('features (K117)', featureTests);
   group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
@@ -2298,5 +2299,37 @@ void deluxeTests() {
       expect(w.songs[id].status, SongStatus.active);
       expect(w.songs[id].weekStreams, greaterThan(0));
     }
+  });
+}
+
+void featureTests() {
+  test('a rival features for a fee; stars refuse unknowns', () {
+    final w = WorldGen.create(seed: 117, startYear: 2016);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2016)) {
+      sim.step();
+    }
+    final p = WorldGen.addPlayer(w,
+        name: 'Newbie', genre: 0, money: StartMoney.millionaire);
+    final s = Actions.writeSong(w, p, aiMode: true);
+    final list = Features.candidates(w, p, s);
+    expect(list, isNotEmpty);
+    final star = w.artists
+        .where((a) => !a.isRetired && a.tier != ArtistTier.player)
+        .reduce((x, y) => x.fame >= y.fame ? x : y);
+    expect(Features.willing(star, p), isFalse);
+    expect(() => Features.request(w, p, s, star),
+        throwsA(isA<ActionException>()));
+    // Willing ones come first.
+    final ok = list.firstWhere((a) => Features.willing(a, p));
+    expect(Features.willing(list.first, p), isTrue);
+    final money = p.moneyCents;
+    Features.request(w, p, s, ok);
+    expect(money - p.moneyCents, Features.feeCents(ok));
+    expect(s.featuredArtistIds, [ok.id]);
+    expect(Features.feeCents(star), greaterThan(Features.feeCents(ok)));
+    // Their fans hear it: more listening than the same song alone.
+    expect(() => Features.request(w, p, s, ok),
+        throwsA(isA<ActionException>()));
   });
 }

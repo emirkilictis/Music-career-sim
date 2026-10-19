@@ -1202,5 +1202,13 @@
   "honorsYearEndSong": "En iyi yıl sonu şarkısı: {year} yılında #{rank} (“{title}”)",
   "honorsYearEndAlbum": "En iyi yıl sonu albümü: {year} yılında #{rank} (“{title}”)",
   "honorsMusicShow": "Music Peak: {wins} galibiyet, {crowns} Triple Crown",
-  "honorsArtistRank": "En iyi sanatçılar: en iyi #{rank}, #1’de {weeks} hafta"
+  "honorsArtistRank": "En iyi sanatçılar: en iyi #{rank}, #1’de {weeks} hafta",
+  "featureButton": "Feat. ekle",
+  "featureTitle": "Kim düet yapsın?",
+  "featureHint": "Onların hayranları ve dinleyicileri de şarkıyı duyar. Yıldızlar sadece kendi seviyesine yakın sanatçılara evet der; aynı tür işe yarar. En fazla iki feat.",
+  "featureLine": "{genre} · %{fame} şöhret",
+  "featureLocked": "Senin liginin dışında",
+  "featureDone": "{name} “{title}” şarkısında!",
+  "errorFeatureRefused": "Hayır dediler: şimdilik senin liginin dışında.",
+  "errorFeaturesFull": "Bir şarkıda en fazla iki feat. olabilir."
 }

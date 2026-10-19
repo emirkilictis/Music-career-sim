@@ -681,6 +681,8 @@ class Fmt {
       'nothingToTease' => l.errorNothingToTease,
       'variantOut' => l.errorEditionOut,
       'deluxeOut' => l.errorDeluxeOut,
+      'featureRefused' => l.errorFeatureRefused,
+      'featuresFull' => l.errorFeaturesFull,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,
       'labelRefused' => l.errorLabelRefused,

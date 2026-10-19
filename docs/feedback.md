@@ -133,6 +133,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F68 | **Autoplay ve playlist önerisi şarkı yayınlanmadan önce yapılabilsin** (Emir). | ✅ K101: çıkmamış şarkıda öneri ve autoplay; single akışında Streaming adımı. |
 | F69 | **Oyun aşırı kolay: normal modda K-pop vokal grubuyla astronomik, imkânsız sayılar** (Emir: 1 milyar aylık dinleyici, tek albümde 117M saf satış, 1,1 trilyon stream). | ✅ K105: kök neden hayran ve dinleyicinin sınırsız şişmesi (ödül, post, festival, turne, fırsatlar mevcut kitlenin yüzdesini doygunluk olmadan ekliyordu) ve pazar payının tavansız olması. Kitle tavanları en büyük gerçek yıldızlara çekildi; sanatçı başına pazar payı tavanı eklendi. |
 | F70 | **Streamler ve satışlar fazla stabil gidiyor, bazı şeylerden fazla boost alıyorlar; yeni özellik yerine mevcutları derinleştir** (Emir). | ✅ K105: playlist, autoplay, klip, versiyon ve hype artık çarpılmıyor, azalan getiriyle toplanıyor; post hype'ı tavanlı. K106: şarkı ve albümlerde haftalar süren şans dalgaları, albüm başına dayanıklılık (legs), tatil sezonu satışları. |
+| F71 | **K-pop'a çok yüklenme; YouTube'a ve Spotify autoplay gibi özelliklere önem ver** (Emir). | Not alındı; sıradaki derinleştirmeler ViewTube ve autoplay. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

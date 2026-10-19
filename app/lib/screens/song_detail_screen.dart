@@ -52,6 +52,67 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
+  /// Asks a rival to feature on the song for their fee (docs K117).
+  Future<void> _feature(SongView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final money = widget.state.player.moneyCents;
+    final list = await widget.state.read(Cmd.featureCandidates(s.id));
+    if (!mounted) return;
+    final pick = await showModalBottomSheet<FeatureCandidateView>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.of(c).size.height * 0.8),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child:
+                  Text(l.featureTitle, style: Theme.of(c).textTheme.titleLarge),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child:
+                  Text(l.featureHint, style: Theme.of(c).textTheme.bodySmall),
+            ),
+            Flexible(
+              child: ListView(shrinkWrap: true, children: [
+                for (final a in list)
+                  ListTile(
+                    enabled: a.willing && a.feeCents <= money,
+                    leading: ArtistAvatar(
+                        name: a.name, seed: a.artistId, artistId: a.artistId),
+                    title: Text(a.name),
+                    subtitle: Text(a.willing
+                        ? l.featureLine(
+                            fmt.genre(a.genre), (a.fame * 100).round())
+                        : l.featureLocked),
+                    trailing: Text(fmt.money(a.feeCents)),
+                    onTap: () => Navigator.pop(c, a),
+                  ),
+              ]),
+            ),
+            const SizedBox(height: 8),
+          ]),
+        ),
+      ),
+    );
+    if (pick == null || !mounted) return;
+    try {
+      await widget.state.act(Cmd.requestFeature(s.id, pick.artistId));
+      if (mounted) {
+        showInfo(context, l.featureDone(pick.name, s.title),
+            icon: Icons.group_add_rounded);
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _shootVideo(SongView s) async {
     final l = context.l10n;
     final fmt = context.fmt;
@@ -408,6 +469,17 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     const SizedBox(height: 8),
                     Tag(l.tagWordOfMouth,
                         icon: Icons.trending_up_rounded, color: AppColors.mint),
+                  ],
+                  // A rival on the song (docs K117).
+                  if (s.isPlayer &&
+                      s.inVault &&
+                      s.featuredArtistIds.length < 2) ...[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => _feature(s),
+                      icon: const Icon(Icons.group_add_rounded),
+                      label: Text(l.featureButton),
+                    ),
                   ],
                   if (s.isPlayer &&
                       s.inVault &&

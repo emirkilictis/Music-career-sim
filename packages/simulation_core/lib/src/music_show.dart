@@ -152,7 +152,6 @@ abstract final class MusicShow {
       });
     final (win, score) = scored[0];
     final st = w.musicShow;
-    final last = st.weeks.isEmpty ? null : st.weeks.last;
     // Three in a row: this win and the two weeks before it.
     var streak = 1;
     for (var i = st.weeks.length - 1;
@@ -174,11 +173,12 @@ abstract final class MusicShow {
     );
     st.weeks.add(result);
     if (st.weeks.length > kept) st.weeks.removeRange(0, st.weeks.length - kept);
-    // The fandom celebrates (less for the same song again).
+    // The fandom celebrates, mostly the first time: a win every week
+    // must not become a hype machine (docs K105).
     final a = w.artists[win.primaryArtistId];
-    final again = last != null && last.songId == win.id;
-    a.hype += again ? 0.01 : 0.03;
-    a.devotion = math.min(1.0, a.devotion + (again ? 0.002 : 0.006));
+    final first = (st.wins[win.id] ?? 0) == 1;
+    a.hype += first ? 0.02 : 0.005;
+    a.devotion = math.min(1.0, a.devotion + (first ? 0.004 : 0.001));
     w.dirtyArtists.add(a.id);
     return result;
   }

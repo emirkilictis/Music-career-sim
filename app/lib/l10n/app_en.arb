@@ -4054,5 +4054,33 @@
         "type": "int"
       }
     }
-  }
+  },
+  "featureButton": "Add a feature",
+  "featureTitle": "Who should feature?",
+  "featureHint": "Their fans and listeners hear the song too. Stars only say yes to artists close to their level; a shared genre helps. Two features at most.",
+  "featureLine": "{genre} · {fame}% fame",
+  "@featureLine": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      },
+      "fame": {
+        "type": "int"
+      }
+    }
+  },
+  "featureLocked": "Out of your league",
+  "featureDone": "{name} is on “{title}”!",
+  "@featureDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "errorFeatureRefused": "They said no: out of your league for now.",
+  "errorFeaturesFull": "A song can have two features at most."
 }

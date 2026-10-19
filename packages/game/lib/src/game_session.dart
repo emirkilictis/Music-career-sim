@@ -1314,6 +1314,37 @@ class GameSession {
     _saveNow();
   }
 
+  /// Rivals the player could ask to feature on vault song [songId]
+  /// (docs K117).
+  List<FeatureCandidateView> featureCandidates(int songId) {
+    final s = _ownSong(songId);
+    return [
+      for (final a in Features.candidates(world, _p, s))
+        FeatureCandidateView.of(world, a, _p)
+    ];
+  }
+
+  /// Gets rival [artistId] on vault song [songId] for their fee.
+  void requestFeature(int songId, int artistId) {
+    final s = _ownSong(songId);
+    if (s.status != SongStatus.vault) {
+      throw GameException('notInVault', 'Only unreleased songs');
+    }
+    if (s.featuredArtistIds.length >= Features.maxPerSong) {
+      throw GameException('featuresFull', 'Two features at most');
+    }
+    if (artistId < 0 || artistId >= world.artists.length) {
+      throw GameException('noArtist', 'No such artist');
+    }
+    final rival = world.artists[artistId];
+    if (!Features.willing(rival, _p)) {
+      throw GameException('featureRefused', 'Out of your league');
+    }
+    _requireMoney(Features.feeCents(rival));
+    Features.request(world, _p, s, rival);
+    _saveNow();
+  }
+
   /// Re-releases album [albumId] as a deluxe edition with unreleased
   /// [songIds] as bonus tracks (docs K115).
   void releaseDeluxe(int albumId, List<int> songIds) {

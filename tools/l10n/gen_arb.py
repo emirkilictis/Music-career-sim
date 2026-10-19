@@ -1133,6 +1133,16 @@ k('honorsYearEndAlbum','Best year-end album: #{rank} in {year} (“{title}”)',
 k('honorsMusicShow','Music Peak: {wins} wins, {crowns} Triple Crowns','Music Peak: {wins} galibiyet, {crowns} Triple Crown', wins='int', crowns='int')
 k('honorsArtistRank','Top artists: best #{rank}, {weeks} weeks at #1','En iyi sanatçılar: en iyi #{rank}, #1’de {weeks} hafta', rank='int', weeks='int')
 
+# Feature requests (docs K117)
+k('featureButton','Add a feature','Feat. ekle')
+k('featureTitle','Who should feature?','Kim düet yapsın?')
+k('featureHint','Their fans and listeners hear the song too. Stars only say yes to artists close to their level; a shared genre helps. Two features at most.','Onların hayranları ve dinleyicileri de şarkıyı duyar. Yıldızlar sadece kendi seviyesine yakın sanatçılara evet der; aynı tür işe yarar. En fazla iki feat.')
+k('featureLine','{genre} · {fame}% fame','{genre} · %{fame} şöhret', genre='String', fame='int')
+k('featureLocked','Out of your league','Senin liginin dışında')
+k('featureDone','{name} is on “{title}”!','{name} “{title}” şarkısında!', name='String', title='String')
+k('errorFeatureRefused','They said no: out of your league for now.','Hayır dediler: şimdilik senin liginin dışında.')
+k('errorFeaturesFull','A song can have two features at most.','Bir şarkıda en fazla iki feat. olabilir.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

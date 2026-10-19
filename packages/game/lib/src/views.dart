@@ -774,6 +774,27 @@ class YearEndRow {
   final int weeksOn;
 }
 
+/// A rival the player could ask to feature on a song (docs K117).
+class FeatureCandidateView {
+  FeatureCandidateView.of(World w, Artist rival, Artist p)
+      : artistId = rival.id,
+        name = rival.name,
+        genre = rival.genre,
+        fame = rival.fame,
+        feeCents = Features.feeCents(rival),
+        willing = Features.willing(rival, p),
+        sameGenre = rival.genre == p.genre;
+  final int artistId;
+  final String name;
+  final int genre;
+  final double fame;
+  final int feeCents;
+
+  /// Would say yes (a star does not feature on an unknown's song).
+  final bool willing;
+  final bool sameGenre;
+}
+
 /// What the player has to show for a career beyond awards (docs K116):
 /// records held, best year-end places, music show wins, the top artists
 /// chart.
