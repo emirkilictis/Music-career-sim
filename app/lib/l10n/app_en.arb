@@ -4431,5 +4431,15 @@
       }
     }
   },
-  "radioUpgradeHint": "Raise the radio push while stations are still deciding (first 8 weeks; you pay the difference):"
+  "radioUpgradeHint": "Raise the radio push while stations are still deciding (first 8 weeks; you pay the difference):",
+  "chartUsRadio": "US Radio Songs",
+  "chartShortUsRadio": "US Radio",
+  "radioChartLine": "{audience} listeners on the radio",
+  "@radioChartLine": {
+    "placeholders": {
+      "audience": {
+        "type": "String"
+      }
+    }
+  }
 }

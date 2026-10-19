@@ -591,6 +591,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('Artists'));
     await shot(tester, '08f_top_artists');
+    // US radio airplay (docs K129).
+    await tester.scrollUntilVisible(_ci('US Radio'), -200,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .first);
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('US Radio'));
+    await shot(tester, '08i_radio_chart');
     await tab(tester, 'Career');
     final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,

@@ -211,6 +211,7 @@ class Fmt {
         Charts.platformNorthAmerica =>
           l.chartPlatform(platformName, l.regionNorthAmerica),
         Charts.platformEurope => l.chartPlatform(platformName, l.regionEurope),
+        Charts.usRadio => l.chartUsRadio,
         _ => '?',
       };
 
@@ -228,6 +229,7 @@ class Fmt {
         Charts.usAlbums => l.chartShortUsAlbums,
         Charts.ukAlbums => l.chartShortUkAlbums,
         Charts.globalAlbums => l.chartShortGlobalAlbums,
+        Charts.usRadio => l.chartShortUsRadio,
         _ => chart(id),
       };
 

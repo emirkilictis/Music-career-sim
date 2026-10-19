@@ -1241,6 +1241,20 @@ void main() {
       g.close();
     });
 
+    test('the radio chart ranks US airplay (K129)', () {
+      final g = GameSession.start(slots, _setup());
+      g.advanceWeeks(3, stop: SkipStop.never);
+      final radio = g.chart(Charts.usRadio);
+      expect(radio.rows.length, 50);
+      for (var i = 1; i < radio.rows.length; i++) {
+        expect(radio.rows[i].points, lessThanOrEqualTo(radio.rows[i - 1].points));
+      }
+      // The audience it counts is the song's US radio.
+      final top = g.world.songs[radio.rows.first.entityId];
+      expect(top.weekRadio, greaterThan(0));
+      g.close();
+    });
+
     test('autoplay levels and a radio push raised after release (K128)', () {
       var g = GameSession.start(
           slots,

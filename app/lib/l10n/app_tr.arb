@@ -1292,5 +1292,8 @@
   "autoplayOffHint": "Algoritma onu diğer şarkılar gibi çalar, telifin tamamı sende.",
   "autoplayTerms": "Autoplay'den +%{lift}'e kadar dinlenme, karşılığında stream telifi %{cut} düşer.",
   "radioWeekLine": "Geçen hafta {stations} istasyonda {spins} radyo çalınması.",
-  "radioUpgradeHint": "İstasyonlar hâlâ karar verirken radyo tanıtımını yükselt (ilk 8 hafta; farkı ödersin):"
+  "radioUpgradeHint": "İstasyonlar hâlâ karar verirken radyo tanıtımını yükselt (ilk 8 hafta; farkı ödersin):",
+  "chartUsRadio": "ABD Radyo Şarkıları",
+  "chartShortUsRadio": "ABD Radyo",
+  "radioChartLine": "Radyoda {audience} dinleyici"
 }

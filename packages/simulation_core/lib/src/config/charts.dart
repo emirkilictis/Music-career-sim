@@ -10,7 +10,10 @@ enum ChartMarket {
   global,
   platformGlobal,
   platformNorthAmerica,
-  platformEurope
+  platformEurope,
+
+  /// US radio airplay audience (docs K129).
+  usRadio
 }
 
 /// A chart definition. Names are fictional (no real chart or platform
@@ -57,6 +60,9 @@ abstract final class Charts {
   static const platformGlobal = 6;
   static const platformNorthAmerica = 7;
   static const platformEurope = 8;
+
+  /// US radio airplay (docs K129).
+  static const usRadio = 9;
 
   static const all = <ChartDef>[
     ChartDef(
@@ -118,9 +124,15 @@ abstract final class Charts {
         market: ChartMarket.platformEurope,
         size: 50,
         startYear: 2009),
+    ChartDef(
+        id: usRadio,
+        key: 'chart.us.radio',
+        kind: ChartKind.songs,
+        market: ChartMarket.usRadio,
+        size: 50),
   ];
 
-  static const count = 9;
+  static const count = 10;
 
   /// Song charts whose positions feed back into exposure and dormancy.
   static const mainSongCharts = [usSongs, ukSongs, globalSongs];

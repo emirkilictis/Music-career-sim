@@ -2136,7 +2136,8 @@ class GameSession {
   static const _songCharts = [
     Charts.usSongs,
     Charts.ukSongs,
-    Charts.globalSongs
+    Charts.globalSongs,
+    Charts.usRadio,
   ];
   static const _albumCharts = [
     Charts.usAlbums,

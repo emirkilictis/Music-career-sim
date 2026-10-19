@@ -1241,6 +1241,11 @@ k('autoplayTerms','Up to +{lift}% listening from autoplay, for a {cut}% smaller 
 k('radioWeekLine','{spins} radio plays last week on {stations} stations.','Geçen hafta {stations} istasyonda {spins} radyo çalınması.', spins='String', stations='int')
 k('radioUpgradeHint','Raise the radio push while stations are still deciding (first 8 weeks; you pay the difference):','İstasyonlar hâlâ karar verirken radyo tanıtımını yükselt (ilk 8 hafta; farkı ödersin):')
 
+# US radio chart (K129)
+k('chartUsRadio','US Radio Songs','ABD Radyo Şarkıları')
+k('chartShortUsRadio','US Radio','ABD Radyo')
+k('radioChartLine','{audience} listeners on the radio','Radyoda {audience} dinleyici', audience='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

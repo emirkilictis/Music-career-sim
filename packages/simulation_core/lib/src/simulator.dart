@@ -619,6 +619,8 @@ class Simulator {
       songPts[Charts.platformGlobal][i] = tS;
       songPts[Charts.platformNorthAmerica][i] = st[na];
       songPts[Charts.platformEurope][i] = st[eu];
+      // Radio airplay: the US audience of its plays (docs K129).
+      songPts[Charts.usRadio][i] = us * rd[na];
       // A song caught with bought streams counts half for a while.
       final weight = StreamingTools.chartWeight(w, s);
       if (weight < 1) {

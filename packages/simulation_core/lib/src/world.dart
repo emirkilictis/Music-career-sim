@@ -302,8 +302,11 @@ class World {
     final home = primaryOf(s).homeCountry;
     return switch (market) {
       ChartMarket.us ||
+      ChartMarket.usRadio ||
       ChartMarket.platformNorthAmerica =>
-        (market == ChartMarket.us ? CountryShares.usOfNorthAmerica(home) : 1) *
+        (market != ChartMarket.platformNorthAmerica
+                ? CountryShares.usOfNorthAmerica(home)
+                : 1) *
             wr[Region.northAmerica.index],
       ChartMarket.uk ||
       ChartMarket.platformEurope =>

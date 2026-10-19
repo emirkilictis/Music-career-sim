@@ -710,8 +710,10 @@ class ChartView {
     final artist = w.artists[artistId];
     // A by-region number as the chart's market sees it.
     double inMarket(double Function(int r) byRegion) => switch (market) {
-          ChartMarket.us => CountryShares.usOfNorthAmerica(artist.homeCountry) *
-              byRegion(Region.northAmerica.index),
+          ChartMarket.us ||
+          ChartMarket.usRadio =>
+            CountryShares.usOfNorthAmerica(artist.homeCountry) *
+                byRegion(Region.northAmerica.index),
           ChartMarket.uk => CountryShares.ukOfEurope(artist.homeCountry) *
               byRegion(Region.europe.index),
           _ => byRegion(0) + byRegion(1) + byRegion(2),
