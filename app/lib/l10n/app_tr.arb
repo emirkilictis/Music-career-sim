@@ -1114,5 +1114,15 @@
   "eventCatchingOn": "“{title}” kulaktan kulağa yayılıyor: her hafta daha çok kişi keşfediyor.",
   "tagWordOfMouth": "Kulaktan kulağa",
   "eventRivalMoved": "{artist}, “{title}” albümünü senin albümünün yolundan çekilmek için {week} tarihine kaydırdı.",
-  "eventRivalStays": "{artist} geri adım atmıyor: “{title}” senin albümünle aynı hafta ({week}) çıkıyor. Liste savaşı geliyor; tarihini hâlâ değiştirebilirsin."
+  "eventRivalStays": "{artist} geri adım atmıyor: “{title}” senin albümünle aynı hafta ({week}) çıkıyor. Liste savaşı geliyor; tarihini hâlâ değiştirebilirsin.",
+  "eventYearEndSongs": "{year} yıl sonu listesi: yılın şarkıları arasında {list}.",
+  "eventYearEndAlbums": "{year} yıl sonu listesi: yılın albümleri arasında {list}.",
+  "eventYearEndTop": "{year} yıl sonu listeleri açıklandı: yılın şarkısı {artist} – “{title}”.",
+  "chartYearEnd": "Yıl sonu",
+  "yearEndSongs": "Şarkılar",
+  "yearEndAlbums": "Albümler",
+  "yearEndUs": "ABD",
+  "yearEndGlobal": "Global",
+  "yearEndEmpty": "İlk yıl sonu listeleri Aralık’ta açıklanır.",
+  "yearEndLine": "Zirve #{peak} · {weeks} hf"
 }

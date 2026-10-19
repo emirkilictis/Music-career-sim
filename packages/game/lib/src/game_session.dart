@@ -1478,6 +1478,45 @@ class GameSession {
     ];
   }
 
+  /// [year]'s year-end chart of [chartId] (docs K110): points over the
+  /// tracking year, best position and weeks on.
+  List<YearEndRow> yearEnd(int chartId, int year, {int limit = YearEnd.size}) {
+    final def = Charts.all[chartId];
+    final (from, to) = YearEnd.tracking(year);
+    final kind =
+        def.kind == ChartKind.songs ? EntityKind.song : EntityKind.album;
+    var rank = 0;
+    return [
+      for (final r in _store.db.select(
+          'SELECT entityId, SUM(? - position) AS pts, MIN(position) AS peak, '
+          'COUNT(*) AS weeks FROM chartEntry '
+          'WHERE chartId = ? AND week BETWEEN ? AND ? '
+          'GROUP BY entityId ORDER BY pts DESC, peak ASC, entityId ASC '
+          'LIMIT ?',
+          [def.size + 1, chartId, from, to, limit]))
+        YearEndRow.of(world, kind,
+            rank: ++rank,
+            entityId: r['entityId'] as int,
+            points: r['pts'] as int,
+            peak: r['peak'] as int,
+            weeksOn: r['weeks'] as int),
+    ];
+  }
+
+  /// Years with year-end charts, newest first: out already, and with at
+  /// least half of their tracking year in this save's history.
+  List<int> get yearEndYears {
+    final first = _store.db.select('SELECT MIN(week) AS w FROM chartEntry');
+    final start = first.isEmpty ? null : first.first['w'] as int?;
+    if (start == null) return const [];
+    return [
+      for (var y = year; y >= GameTime.yearOf(start); y--)
+        if (YearEnd.publishedBy(y, world.week - 1) &&
+            YearEnd.tracking(y).$2 - start >= 26)
+          y
+    ];
+  }
+
   /// Every chart week of a song or album, any artist's (docs K47).
   List<ChartWeek> chartRun(EntityKind kind, int id) {
     final ids = [
@@ -1808,6 +1847,23 @@ class GameSession {
     }
     for (final c in r.rivalClashes) {
       events.add(RivalAlbumClash(c));
+    }
+    // The year-end charts come out in early December (docs K110).
+    if (GameTime.weekOfYear(r.week) == YearEnd.publishWeekOfYear) {
+      final y = GameTime.yearOf(r.week);
+      if (yearEndYears.contains(y)) {
+        final songs = yearEnd(Charts.usSongs, y);
+        events.add(YearEndCharts(y,
+            songs: [
+              for (final e in songs)
+                if (e.isPlayer) (e.rank, e.entityId)
+            ],
+            albums: [
+              for (final e in yearEnd(Charts.usAlbums, y))
+                if (e.isPlayer) (e.rank, e.entityId)
+            ],
+            topSongId: songs.isEmpty ? -1 : songs.first.entityId));
+      }
     }
     // Bought streams caught, and pitches the editors passed on (K95, K97).
     for (final id in r.botsCaught) {

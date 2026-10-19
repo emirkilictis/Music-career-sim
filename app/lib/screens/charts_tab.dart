@@ -31,6 +31,9 @@ const _magazineCharts = [
 /// The box-office board in the chart tabs (docs K77).
 const _toursChart = -1;
 
+/// The year-end charts in the chart tabs (docs K110).
+const _yearEndChart = -2;
+
 /// Saturday of a game week, for "Week of …" dates.
 DateTime chartDate(int week) {
   final first = DateTime(GameTime.yearOf(week));
@@ -51,6 +54,13 @@ class _ChartsTabState extends State<ChartsTab> {
   List<TourRankView>? _tours;
   int _firstTourYear = 0;
 
+  /// Year-end: the chart and year shown (null = the latest), its rows and
+  /// the years there are.
+  int _yearEndOf = Charts.usSongs;
+  int? _yearEndYear;
+  List<YearEndRow>? _yearEnd;
+  List<int> _yearEndYears = const [];
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -63,6 +73,18 @@ class _ChartsTabState extends State<ChartsTab> {
 
   Future<void> _load() async {
     final career = context.careerRead;
+    if (_chart == _yearEndChart) {
+      final (rows, years) =
+          await career.read(Cmd.yearEnd(_yearEndOf, _yearEndYear));
+      if (mounted) {
+        setState(() {
+          _yearEnd = rows;
+          _yearEndYears = years;
+          _yearEndYear ??= years.isEmpty ? null : years.first;
+        });
+      }
+      return;
+    }
     if (_chart == _toursChart) {
       final (rows, first) = await career.read(Cmd.topTours(_tourYear));
       if (mounted) {
@@ -84,6 +106,7 @@ class _ChartsTabState extends State<ChartsTab> {
 
   void _select(int chart) {
     setState(() {
+      if (chart == _yearEndChart && _chart != _yearEndChart) _yearEnd = null;
       if (chart == _toursChart && _chart != _toursChart) {
         _tourYear = context.careerRead.year;
         _tours = null;
@@ -132,7 +155,11 @@ class _ChartsTabState extends State<ChartsTab> {
                       color: Colors.white70)),
               const SizedBox(height: 4),
               Text(
-                  (_chart == _toursChart ? l.chartTopTours : fmt.chart(_chart))
+                  (_chart == _toursChart
+                          ? l.chartTopTours
+                          : _chart == _yearEndChart
+                              ? '${l.chartYearEnd} · ${fmt.chartShort(_yearEndOf)}'
+                              : fmt.chart(_chart))
                       .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
@@ -143,7 +170,9 @@ class _ChartsTabState extends State<ChartsTab> {
               Text(
                   (_chart == _toursChart
                           ? (_tourYear == null ? l.toursAllTime : '$_tourYear')
-                          : l.weekOf(date))
+                          : _chart == _yearEndChart
+                              ? (_yearEndYear == null ? '' : '$_yearEndYear')
+                              : l.weekOf(date))
                       .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
@@ -164,6 +193,11 @@ class _ChartsTabState extends State<ChartsTab> {
                         onTap: () => _select(id),
                       ),
                     _ChartTab(
+                      label: l.chartYearEnd,
+                      selected: _chart == _yearEndChart,
+                      onTap: () => _select(_yearEndChart),
+                    ),
+                    _ChartTab(
                       label: l.chartShortTours,
                       selected: _chart == _toursChart,
                       onTap: () => _select(_toursChart),
@@ -174,7 +208,42 @@ class _ChartsTabState extends State<ChartsTab> {
             ],
           ),
         ),
-        if (_chart == _toursChart)
+        if (_chart == _yearEndChart)
+          Expanded(
+            child: _YearEndBoard(
+              rows: _yearEnd,
+              chart: _yearEndOf,
+              year: _yearEndYear,
+              years: _yearEndYears,
+              onChart: (c) {
+                setState(() {
+                  _yearEndOf = c;
+                  _yearEnd = null;
+                });
+                _load();
+              },
+              onYear: (y) {
+                setState(() {
+                  _yearEndYear = y;
+                  _yearEnd = null;
+                });
+                _load();
+              },
+              onOpen: (r) {
+                final career = context.careerRead;
+                final songs = Charts.all[_yearEndOf].kind == ChartKind.songs;
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => songs
+                            ? SongDetailScreen(
+                                songId: r.entityId, state: career)
+                            : AlbumDetailScreen(
+                                albumId: r.entityId, state: career)));
+              },
+            ),
+          )
+        else if (_chart == _toursChart)
           Expanded(
             child: _ToursBoard(
               rows: _tours,
@@ -287,6 +356,150 @@ class _ChartTab extends StatelessWidget {
 }
 
 /// Top-grossing tours, magazine style: rank, artist, tour, gross.
+/// Year-end charts (docs K110): year chips, the chart, ranked rows.
+class _YearEndBoard extends StatelessWidget {
+  const _YearEndBoard(
+      {required this.rows,
+      required this.chart,
+      required this.year,
+      required this.years,
+      required this.onChart,
+      required this.onYear,
+      required this.onOpen});
+  final List<YearEndRow>? rows;
+  final int chart;
+  final int? year;
+  final List<int> years;
+  final ValueChanged<int> onChart;
+  final ValueChanged<int> onYear;
+  final ValueChanged<YearEndRow> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final list = rows;
+    final albums = Charts.all[chart].kind == ChartKind.albums;
+    return Column(children: [
+      SizedBox(
+        height: 48,
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          children: [
+            for (final c in YearEnd.charts)
+              Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: ChoiceChip(
+                  label: Text(fmt.chartShort(c)),
+                  selected: chart == c,
+                  onSelected: (_) => onChart(c),
+                ),
+              ),
+          ],
+        ),
+      ),
+      if (years.isNotEmpty)
+        SizedBox(
+          height: 44,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            children: [
+              for (final y in years)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: ChoiceChip(
+                    label: Text('$y'),
+                    selected: year == y,
+                    onSelected: (_) => onYear(y),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      Expanded(
+        child: list == null
+            ? const Center(
+                child: CircularProgressIndicator(color: PaperColors.ink))
+            : list.isEmpty
+                ? Center(
+                    child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(l.yearEndEmpty,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: PaperColors.muted)),
+                  ))
+                : ListView.separated(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    itemCount: list.length,
+                    separatorBuilder: (_, __) => const Divider(
+                        color: PaperColors.line, height: 1, indent: 16),
+                    itemBuilder: (context, i) {
+                      final r = list[i];
+                      final top = r.rank == 1;
+                      return InkWell(
+                        onTap: () => onOpen(r),
+                        child: Container(
+                          color: r.isPlayer
+                              ? const Color(0xFFE6EAFF)
+                              : PaperColors.card,
+                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                          child: Row(children: [
+                            SizedBox(
+                              width: 50,
+                              child: Text('${r.rank}',
+                                  style: TextStyle(
+                                      fontFamily: AppFonts.condensed,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: top ? 40 : 30,
+                                      height: 1,
+                                      color: PaperColors.ink)),
+                            ),
+                            CoverArt(
+                                seed: albums
+                                    ? albumCoverSeed(r.entityId)
+                                    : songCoverSeed(r.entityId, r.albumId),
+                                size: 48,
+                                radius: 4,
+                                songId: albums ? null : r.entityId,
+                                albumId: albums ? r.entityId : r.albumId),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(r.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: top ? 17 : 15,
+                                            color: PaperColors.ink)),
+                                    Text(r.artistName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: PaperColors.ink)),
+                                    Text(l.yearEndLine(r.peak, r.weeksOn),
+                                        style: const TextStyle(
+                                            fontSize: 12.5,
+                                            color: PaperColors.muted)),
+                                  ]),
+                            ),
+                            if (r.isPlayer)
+                              _Badge(l.you, AppColors.lilac,
+                                  const Color(0xFF241A45)),
+                          ]),
+                        ),
+                      );
+                    },
+                  ),
+      ),
+    ]);
+  }
+}
+
 class _ToursBoard extends StatelessWidget {
   const _ToursBoard(
       {required this.rows,

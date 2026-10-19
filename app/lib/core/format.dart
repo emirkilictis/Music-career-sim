@@ -681,6 +681,13 @@ class Fmt {
           ? l.eventPlaylistBig(t, platformName)
           : l.eventPlaylistMid(t, platformName),
       CatchingOn() => l.eventCatchingOn(t),
+      YearEndCharts() => e.hasPlayer
+          ? [
+              if (e.songs.isNotEmpty) l.eventYearEndSongs(e.year, t),
+              if (e.albums.isNotEmpty)
+                l.eventYearEndAlbums(e.year, line.title2),
+            ].join(' ')
+          : l.eventYearEndTop(e.year, t, line.artistName),
       RivalAlbumClash() => e.clash.moved
           ? l.eventRivalMoved(line.artistName, t, week(e.clash.toWeek))
           : l.eventRivalStays(line.artistName, t, week(e.clash.playerWeek)),

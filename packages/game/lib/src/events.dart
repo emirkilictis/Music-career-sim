@@ -137,6 +137,24 @@ class RivalNumberOne extends GameEvent {
   bool get isIndustry => true;
 }
 
+/// The year-end charts are out (docs K110): the player's songs and albums
+/// in the US top 100 with their ranks, and the song of the year.
+class YearEndCharts extends GameEvent {
+  const YearEndCharts(this.year,
+      {required this.songs, required this.albums, required this.topSongId});
+  final int year;
+  final List<(int rank, int songId)> songs;
+  final List<(int rank, int albumId)> albums;
+
+  /// The year's #1 song on the US chart (-1: none).
+  final int topSongId;
+  bool get hasPlayer => songs.isNotEmpty || albums.isNotEmpty;
+  @override
+  bool get isMajor => hasPlayer;
+  @override
+  bool get isIndustry => !hasPlayer;
+}
+
 /// A rival's answer to the player's announced album (docs K109): moved
 /// out of its way, or the same week for a head-to-head.
 class RivalAlbumClash extends GameEvent {

@@ -1052,6 +1052,18 @@ k('tagWordOfMouth','Word of mouth','Kulaktan kulağa')
 k('eventRivalMoved','{artist} moved “{title}” to {week} to stay out of your album’s way.','{artist}, “{title}” albümünü senin albümünün yolundan çekilmek için {week} tarihine kaydırdı.', artist='String', title='String', week='String')
 k('eventRivalStays','{artist} is not backing down: “{title}” comes out the same week as your album ({week}). A chart battle is coming; you can still move your date.','{artist} geri adım atmıyor: “{title}” senin albümünle aynı hafta ({week}) çıkıyor. Liste savaşı geliyor; tarihini hâlâ değiştirebilirsin.', artist='String', title='String', week='String')
 
+# Year-end charts (docs K110)
+k('eventYearEndSongs','{year} year-end chart: {list} among the songs of the year.','{year} yıl sonu listesi: yılın şarkıları arasında {list}.', year='int', list='String')
+k('eventYearEndAlbums','{year} year-end chart: {list} among the albums of the year.','{year} yıl sonu listesi: yılın albümleri arasında {list}.', year='int', list='String')
+k('eventYearEndTop','The {year} year-end charts are out: the song of the year is “{title}” by {artist}.','{year} yıl sonu listeleri açıklandı: yılın şarkısı {artist} – “{title}”.', year='int', title='String', artist='String')
+k('chartYearEnd','Year-end','Yıl sonu')
+k('yearEndSongs','Songs','Şarkılar')
+k('yearEndAlbums','Albums','Albümler')
+k('yearEndUs','US','ABD')
+k('yearEndGlobal','Global','Global')
+k('yearEndEmpty','The first year-end charts come out in December.','İlk yıl sonu listeleri Aralık’ta açıklanır.')
+k('yearEndLine','Peak #{peak} · {weeks} wks','Zirve #{peak} · {weeks} hf', peak='int', weeks='int')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

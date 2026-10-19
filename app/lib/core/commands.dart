@@ -200,6 +200,19 @@ abstract final class Cmd {
       };
 
   /// The year's top tours (null: all time) and the first year on the books.
+  /// A year-end chart and the years there are (docs K110); [year] null
+  /// is the latest.
+  static SessionCmd<(List<YearEndRow>, List<int>)> yearEnd(
+          int chartId, int? year) =>
+      (s) {
+        final years = s.yearEndYears;
+        final y = year ?? (years.isEmpty ? null : years.first);
+        return (
+          y == null ? const <YearEndRow>[] : s.yearEnd(chartId, y),
+          years
+        );
+      };
+
   static SessionCmd<(List<TourRankView>, int)> topTours(int? year) => (s) =>
       (year == null ? s.allTimeTours() : s.topTours(year), s.firstTourYear);
 

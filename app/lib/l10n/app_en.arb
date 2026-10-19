@@ -3549,5 +3549,58 @@
         "type": "String"
       }
     }
+  },
+  "eventYearEndSongs": "{year} year-end chart: {list} among the songs of the year.",
+  "@eventYearEndSongs": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "eventYearEndAlbums": "{year} year-end chart: {list} among the albums of the year.",
+  "@eventYearEndAlbums": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "eventYearEndTop": "The {year} year-end charts are out: the song of the year is “{title}” by {artist}.",
+  "@eventYearEndTop": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "chartYearEnd": "Year-end",
+  "yearEndSongs": "Songs",
+  "yearEndAlbums": "Albums",
+  "yearEndUs": "US",
+  "yearEndGlobal": "Global",
+  "yearEndEmpty": "The first year-end charts come out in December.",
+  "yearEndLine": "Peak #{peak} · {weeks} wks",
+  "@yearEndLine": {
+    "placeholders": {
+      "peak": {
+        "type": "int"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
   }
 }

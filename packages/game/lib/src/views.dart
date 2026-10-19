@@ -687,6 +687,78 @@ class ChartView {
   final List<ChartRow> rows;
 }
 
+/// Year-end charts (docs K110), Billboard style: every week on the chart
+/// earns points, more the higher the position; the tracking year runs
+/// from December to November and the charts come out in early December.
+abstract final class YearEnd {
+  /// Week of the year the charts come out (early December).
+  static const publishWeekOfYear = 48;
+
+  /// Entries in a year-end chart.
+  static const size = 100;
+
+  /// First and last chart week counted for [year].
+  static (int, int) tracking(int year) => (
+        GameTime.firstWeekOf(year - 1) + publishWeekOfYear - 1,
+        GameTime.firstWeekOf(year) + publishWeekOfYear - 2,
+      );
+
+  /// Whether [year]'s charts are out in [week].
+  static bool publishedBy(int year, int week) =>
+      week >= GameTime.firstWeekOf(year) + publishWeekOfYear - 1;
+
+  /// Year-end charts there are (song and album charts of the US and the
+  /// world).
+  static const charts = [
+    Charts.usSongs,
+    Charts.usAlbums,
+    Charts.globalSongs,
+    Charts.globalAlbums,
+  ];
+}
+
+/// One entry of a year-end chart (docs K110).
+class YearEndRow {
+  YearEndRow.of(World w, EntityKind kind,
+      {required this.rank,
+      required this.entityId,
+      required this.points,
+      required this.peak,
+      required this.weeksOn})
+      : title = kind == EntityKind.song
+            ? w.songs[entityId].title
+            : w.albums[entityId].title,
+        artistId = kind == EntityKind.song
+            ? w.songs[entityId].primaryArtistId
+            : w.albums[entityId].artistId,
+        albumId = kind == EntityKind.song
+            ? coverAlbumOf(w, w.songs[entityId])
+            : entityId,
+        artistName = w.artists[kind == EntityKind.song
+                ? w.songs[entityId].primaryArtistId
+                : w.albums[entityId].artistId]
+            .name,
+        isPlayer = (kind == EntityKind.song
+                ? w.songs[entityId].primaryArtistId
+                : w.albums[entityId].artistId) ==
+            w.playerArtistId;
+
+  final int rank;
+  final int entityId;
+
+  /// Album for the cover (-1: a loose single).
+  final int albumId;
+  final String title;
+  final int artistId;
+  final String artistName;
+  final bool isPlayer;
+
+  /// Chart points over the year, best position and weeks on the chart.
+  final int points;
+  final int peak;
+  final int weeksOn;
+}
+
 /// One collaborator the player can hire (fame permitting).
 class CollaboratorView {
   CollaboratorView(Collaborator c,

@@ -1101,6 +1101,35 @@ void main() {
       g.close();
     });
 
+    test('year-end charts come out in December (K110)', () {
+      final g = GameSession.start(
+          slots, _setup(tier: StartTier.superstar, premium: true));
+      expect(g.yearEndYears, isEmpty);
+      YearEndCharts? news;
+      while (GameTime.weekOfYear(g.week) != YearEnd.publishWeekOfYear + 1) {
+        for (final e in g.advanceWeek().events) {
+          if (e is YearEndCharts) news = e;
+        }
+      }
+      expect(news, isNotNull);
+      expect(news!.year, 2018);
+      expect(g.yearEndYears, [2018]);
+      final songs = g.yearEnd(Charts.usSongs, 2018);
+      expect(songs.length, YearEnd.size);
+      expect([for (final r in songs) r.rank],
+          [for (var i = 1; i <= YearEnd.size; i++) i]);
+      for (var i = 1; i < songs.length; i++) {
+        expect(songs[i].points, lessThanOrEqualTo(songs[i - 1].points));
+      }
+      expect(songs.first.entityId, news.topSongId);
+      expect(songs.first.peak, lessThanOrEqualTo(10));
+      // The player's entries are the ones the news names.
+      expect([for (final r in songs) if (r.isPlayer) (r.rank, r.entityId)],
+          news.songs);
+      expect(g.yearEnd(Charts.usAlbums, 2018), isNotEmpty);
+      g.close();
+    });
+
     test('labels: what they ask for, contracts, campaigns, drops', () {
       final g = GameSession.start(slots, _setup(path: CareerPath.smallLabel));
       expect(g.player.label, Label.small);

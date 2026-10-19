@@ -79,9 +79,22 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         RivalBotsCaught() => EventLine(e,
             title: song(e.songId), artistName: w.artists[e.artistId].name),
         PitchDeclined() => EventLine(e, title: song(e.songId)),
+        YearEndCharts() => EventLine(e,
+            title: e.hasPlayer
+                ? _ranked([for (final (r, id) in e.songs) (r, song(id))])
+                : e.topSongId < 0
+                    ? ''
+                    : song(e.topSongId),
+            title2: _ranked([for (final (r, id) in e.albums) (r, album(id))]),
+            artistName: e.topSongId < 0
+                ? ''
+                : w.artists[w.songs[e.topSongId].primaryArtistId].name,
+            songId: e.songs.isNotEmpty
+                ? e.songs.first.$2
+                : (!e.hasPlayer && e.topSongId >= 0 ? e.topSongId : null),
+            albumId: e.albums.isNotEmpty ? e.albums.first.$2 : -1),
         RivalAlbumClash() => EventLine(e,
-            title: e.clash.title,
-            artistName: w.artists[e.clash.artistId].name),
+            title: e.clash.title, artistName: w.artists[e.clash.artistId].name),
         BrandDealBroken() => EventLine(e),
         AwardNominated() => EventLine(e, genre: w.player!.genre),
         AwardResults() => EventLine(e, genre: w.player!.genre),
@@ -159,10 +172,18 @@ List<EventLine> sortLines(List<EventLine> lines) {
         BotsCaught() => 1,
         PitchDeclined() => 6,
         RivalAlbumClash() => 3,
+        YearEndCharts() => 0,
         BrandDealBroken() => 2,
         RivalBotsCaught() => 9,
         AwardNominated() => 1,
         AwardWinners() => 9,
       };
   return [...lines]..sort((a, b) => rank(a).compareTo(rank(b)));
+}
+
+/// “A” #4, “B” #37 and 2 more (year-end news, docs K110).
+String _ranked(List<(int, String)> entries) {
+  final shown = [for (final (rank, title) in entries.take(3)) '“$title” #$rank']
+      .join(', ');
+  return entries.length > 3 ? '$shown +${entries.length - 3}' : shown;
 }

@@ -525,6 +525,16 @@ void main() {
     await Scrollable.ensureVisible(tester.element(deals), alignment: 0.1);
     await tester.pumpAndSettle();
     await shot(tester, '04h_brand_deals');
+    // The year-end charts (docs K110).
+    await tab(tester, 'Charts');
+    await tester.scrollUntilVisible(_ci('Year-end'), 200,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .first);
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Year-end'));
+    await shot(tester, '08d_year_end');
     await tab(tester, 'Career');
     final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,
