@@ -143,6 +143,10 @@ class _TimingSheetState extends State<_TimingSheet> {
                 style: TextStyle(
                     color: AppColors.peach, fontWeight: FontWeight.w700)),
           ],
+          if (!later) ...[
+            const SizedBox(height: 10),
+            Text(l.surpriseHint, style: t.bodySmall),
+          ],
           if (later) ...[
             const SizedBox(height: 8),
             Text(l.releaseDate(fmt.week(_releaseWeek)),
@@ -171,7 +175,8 @@ class _TimingSheetState extends State<_TimingSheet> {
                 Text(l.announceDate(fmt.week(_announceWeek)),
                     style: const TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 6),
-              Text(l.announceHint, style: t.bodySmall),
+              Text(_announce == 0 ? l.surpriseHint : l.announceHint,
+                  style: t.bodySmall),
             ],
           ],
           const SizedBox(height: 18),

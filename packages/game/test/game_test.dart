@@ -1151,6 +1151,45 @@ void main() {
       g.close();
     });
 
+    test('a surprise drop makes headlines for a known name (K124)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      List<int> songs(int n) => [
+            for (var i = 0; i < n; i++)
+              (() {
+                p.creativeEnergy = 100;
+                return g.writeSong(budget: BudgetTier.low).id;
+              })(),
+          ];
+      final first = songs(4);
+      final shock = Actions.surpriseShock(g.world, p, AlbumType.ep, first);
+      expect(shock, greaterThan(0.3));
+      final hype = p.hype;
+      final ep = g.releaseAlbum('Out Of Nowhere', first, type: AlbumType.ep);
+      expect(p.hype - hype,
+          closeTo(g.world.config.announceBuzzCap(AlbumType.ep, p.fame) * shock,
+              1e-9));
+      expect(p.surpriseWeek, g.week);
+      final events = g.advanceWeek().events;
+      expect(events.whereType<SurpriseDrop>().single.albumId, ep.id);
+      // The trick again soon after: less noise.
+      final second = songs(4);
+      expect(Actions.surpriseShock(g.world, p, AlbumType.ep, second),
+          closeTo(shock * 0.4, 0.05));
+      // With a single from it out already, it is no surprise.
+      g.releaseSingle(second.first, campaign: Campaign.none);
+      expect(Actions.surpriseShock(g.world, p, AlbumType.ep, second), 0);
+      // Nobody notices an unknown's.
+      p.fame = 0.1;
+      expect(Actions.surpriseShock(g.world, p, AlbumType.album, songs(1)), 0);
+      g.close();
+    });
+
     test('the year on the streaming app comes out in December (K123)', () {
       final g = GameSession.start(
           slots,

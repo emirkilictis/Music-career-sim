@@ -202,6 +202,11 @@ TOPICS = {
   ("{title} keeps growing. Word of mouth is real.", "{title} büyümeye devam ediyor. Kulaktan kulağa gerçekten işe yarıyor."),
   ("Months later and {title} is everywhere?? Sleeper hit", "Aylar sonra {title} her yerde mi?? Sinsi hit"),
  ],
+ 'surpriseDrop': [
+  ("WAKE UP. {name} just dropped {title} out of NOWHERE", "UYANIN. {name} hiç haber vermeden {title} yayınladı"),
+  ("No teaser, no date, just {title}. I'm not okay 😭", "Teaser yok, tarih yok, direkt {title}. İyi değilim 😭"),
+  ("Cancelled all my plans. {title} front to back, now.", "Bütün planlarımı iptal ettim. {title} baştan sona, şimdi."),
+ ],
  'wrapped': [
   ("My Wrapped just dropped and it's {name}. Again. {title} on repeat all year 🔁", "Wrapped geldi ve yine {name}. Bütün yıl {title} tekrarda 🔁"),
   ("Top 0.1% listener of {name}. Not even sorry.", "{name} dinleyicilerinin ilk %0.1'indeyim. Hiç pişman değilim."),

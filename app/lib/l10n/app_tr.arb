@@ -1016,6 +1016,9 @@
   "smCatchingOn0": "Okulda herkes birden {title} söylemeye başladı",
   "smCatchingOn1": "{title} büyümeye devam ediyor. Kulaktan kulağa gerçekten işe yarıyor.",
   "smCatchingOn2": "Aylar sonra {title} her yerde mi?? Sinsi hit",
+  "smSurpriseDrop0": "UYANIN. {name} hiç haber vermeden {title} yayınladı",
+  "smSurpriseDrop1": "Teaser yok, tarih yok, direkt {title}. İyi değilim 😭",
+  "smSurpriseDrop2": "Bütün planlarımı iptal ettim. {title} baştan sona, şimdi.",
   "smWrapped0": "Wrapped geldi ve yine {name}. Bütün yıl {title} tekrarda 🔁",
   "smWrapped1": "{name} dinleyicilerinin ilk %0.1'indeyim. Hiç pişman değilim.",
   "smWrapped2": "Bu yıl en çok dinlediğim şarkı {title}. Belliydi.",
@@ -1265,5 +1268,7 @@
   "wrappedStoryCatalog": "Kataloğun yılı",
   "wrappedStoryQuiet": "Sakin bir yıl",
   "wrappedStorySteady": "İstikrarlı yıl",
-  "eventWrapped": "{year} Wrapped'in çıktı: Streamify'da {plays} dinlenme, zirvede “{title}”. {story}."
+  "eventWrapped": "{year} Wrapped'in çıktı: Streamify'da {plays} dinlenme, zirvede “{title}”. {story}.",
+  "eventSurpriseDrop": "Sürpriz! “{title}” hiç haber verilmeden çıktı ve herkes ondan bahsediyor.",
+  "surpriseHint": "Duyuru yok: sürpriz çıkış. Henüz hiçbir şarkısı çıkmamış bir albüm ya da EP, tanınmış bir isimse manşet olur (anında bir hype patlaması; son üç yılda bunu yaptıysan daha az). Tanınmayan birininkini kimse fark etmez ve pre-save toplanmaz."
 }

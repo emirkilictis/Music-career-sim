@@ -136,6 +136,9 @@ abstract final class SocialFeed {
             fan(FanTopic.yearEndHit,
                 albumId: albums.first.$2, number: albums.first.$1);
           }
+        case SurpriseDrop(:final albumId):
+          fan(FanTopic.surpriseDrop, albumId: albumId);
+          fan(FanTopic.surpriseDrop, albumId: albumId);
         case WrappedOut(:final topSongId):
           fan(FanTopic.wrapped, songId: topSongId);
           fan(FanTopic.wrapped, songId: topSongId);

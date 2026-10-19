@@ -92,6 +92,7 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
             ? EventLine(e, title: album(entityId), albumId: entityId)
             : release(e, EntityKind.song, entityId),
         WrappedOut() => release(e, EntityKind.song, e.topSongId),
+        SurpriseDrop() => release(e, EntityKind.album, e.albumId),
         YearEndCharts() => EventLine(e,
             title: e.hasPlayer
                 ? _ranked([for (final (r, id) in e.songs) (r, song(id))])
@@ -187,6 +188,7 @@ List<EventLine> sortLines(List<EventLine> lines) {
         RivalAlbumClash() => 3,
         YearEndCharts() => 0,
         WrappedOut() => 1,
+        SurpriseDrop() => 0,
         RecordBroken() => 0,
         TopArtist() => 1,
         DiscoverPick() => 6,

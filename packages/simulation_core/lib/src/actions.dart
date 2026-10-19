@@ -663,11 +663,19 @@ abstract final class Actions {
       Campaign campaign = Campaign.standard,
       bool prepaid = false,
       int paidCents = 0,
-      double buzz = 0}) {
+      double buzz = 0,
+      bool announced = false}) {
     final paid = prepaid ? paidCents : _payCampaign(a, campaign);
     _comeback(w, a);
     _convertAnticipation(a, album: type == AlbumType.album);
     a.hype += buzz;
+    if (!announced && a.tier == ArtistTier.player) {
+      final shock = surpriseShock(w, a, type, songIds);
+      if (shock > 0) {
+        a.hype += w.config.announceBuzzCap(type, a.fame) * shock;
+        a.surpriseWeek = w.week;
+      }
+    }
     final quality = songIds.isEmpty
         ? 0.0
         : songIds.map((id) => w.songs[id].quality).reduce((x, y) => x + y) /
@@ -884,7 +892,8 @@ abstract final class Actions {
             prepaid: true,
             paidCents: sr.paidCents -
                 editionsCostCents(sr.variantWeeks.length, sr.variantFormats),
-            buzz: sr.buzz);
+            buzz: sr.buzz,
+            announced: !sr.isSurprise);
         out.add((scheduleId: sr.id, isAlbum: true, id: al.id));
       } else {
         final s = w.songs[sr.songIds.single];
@@ -900,6 +909,27 @@ abstract final class Actions {
       }
     }
     return out;
+  }
+
+  /// Years before another surprise drop shocks as much as the first.
+  static const surpriseMemoryWeeks = 3 * GameTime.weeksPerYear;
+
+  /// How much of a full announcement's buzz an album or EP dropped without
+  /// one gets at once (docs K124): only with nothing from it out before,
+  /// and only for a known name (none below fame 0.25, up to 0.6 from
+  /// 0.75). The press soon tires of the trick: a second one within three
+  /// years makes less noise.
+  static double surpriseShock(
+      World w, Artist a, AlbumType type, List<int> songIds) {
+    if (type != AlbumType.album && type != AlbumType.ep) return 0;
+    for (final id in songIds) {
+      if (w.songs[id].status != SongStatus.vault) return 0;
+    }
+    final x = ((a.fame - 0.25) / 0.5).clamp(0.0, 1.0);
+    final known = x * x * (3 - 2 * x);
+    if (known <= 0) return 0;
+    final fresh = w.week - a.surpriseWeek >= surpriseMemoryWeeks;
+    return 0.6 * known * (fresh ? 1.0 : 0.4);
   }
 
   /// Pre-saves start on the streaming apps (docs K121).

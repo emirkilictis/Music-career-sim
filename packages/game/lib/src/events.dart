@@ -222,6 +222,15 @@ class YearEndCharts extends GameEvent {
   bool get isIndustry => !hasPlayer;
 }
 
+/// The player's album or EP came out with no announcement and made
+/// headlines (docs K124).
+class SurpriseDrop extends GameEvent {
+  const SurpriseDrop(this.albumId);
+  final int albumId;
+  @override
+  bool get isMajor => true;
+}
+
 /// The player's year on the streaming app is out (docs K123).
 class WrappedOut extends GameEvent {
   const WrappedOut(this.year,

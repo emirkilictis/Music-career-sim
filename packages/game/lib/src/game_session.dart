@@ -2248,6 +2248,16 @@ class GameSession {
       if (al.artistId == p.id) check(al, EntityKind.album, id, _albumCharts);
     }
 
+    // A surprise drop that made headlines (docs K124).
+    if (p.surpriseWeek == r.week) {
+      for (final id in w.activeAlbumIds) {
+        final al = w.albums[id];
+        if (al.artistId == p.id && al.releaseWeek == r.week) {
+          events.add(SurpriseDrop(id));
+          break;
+        }
+      }
+    }
     for (final o in r.scheduledOut) {
       events.add(ReleaseOut(
           o.isAlbum ? EntityKind.album : EntityKind.song, o.id, o.scheduleId));

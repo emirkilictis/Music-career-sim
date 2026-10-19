@@ -21,6 +21,7 @@ class EventIcon extends StatelessWidget {
       ViralTrend() => (Icons.local_fire_department_rounded, AppColors.peach),
       PlaylistAdded() => (Icons.headphones_rounded, AppColors.mint),
       CatchingOn() => (Icons.trending_up_rounded, AppColors.mint),
+      SurpriseDrop() => (Icons.bolt_rounded, AppColors.gold),
       WrappedOut() => (Icons.graphic_eq_rounded, AppColors.gold),
       YearEndCharts() => (Icons.workspace_premium_rounded, AppColors.gold),
       RecordBroken() => (Icons.military_tech_rounded, AppColors.gold),

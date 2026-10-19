@@ -765,6 +765,7 @@ class Fmt {
           RecordKind.streamWeek => l.eventRecordStreamWeek(t, compact(value)),
           _ => l.eventRecordAlbumDebut(t, compact(value)),
         },
+      SurpriseDrop() => l.eventSurpriseDrop(t),
       WrappedOut() => l.eventWrapped(
           e.year, compact(e.plays), t, wrappedStory(e.story)),
       YearEndCharts() => e.hasPlayer

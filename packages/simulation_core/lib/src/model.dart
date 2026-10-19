@@ -428,6 +428,9 @@ class Artist {
   int contractAlbums = 0;
   int unrecoupedCents = 0;
 
+  /// The week of the artist's last surprise album or EP (docs K124).
+  int surpriseWeek = -1000;
+
   /// What royalties paid back of the advance last week (not saved).
   int weekRecoupedCents = 0;
 

@@ -3338,6 +3338,33 @@
       }
     }
   },
+  "smSurpriseDrop0": "WAKE UP. {name} just dropped {title} out of NOWHERE",
+  "@smSurpriseDrop0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smSurpriseDrop1": "No teaser, no date, just {title}. I'm not okay 😭",
+  "@smSurpriseDrop1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smSurpriseDrop2": "Cancelled all my plans. {title} front to back, now.",
+  "@smSurpriseDrop2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "smWrapped0": "My Wrapped just dropped and it's {name}. Again. {title} on repeat all year 🔁",
   "@smWrapped0": {
     "placeholders": {
@@ -4322,5 +4349,14 @@
         "type": "String"
       }
     }
-  }
+  },
+  "eventSurpriseDrop": "Surprise! “{title}” is out with no warning and it is all anyone is talking about.",
+  "@eventSurpriseDrop": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "surpriseHint": "No announcement: a surprise drop. An album or EP with nothing out from it yet makes headlines for a big name (a burst of hype at once, less if you did one in the last three years). Nobody notices an unknown's, and there are no pre-saves."
 }

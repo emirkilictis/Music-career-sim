@@ -216,6 +216,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
           ? 'music show win #${e.wins} song ${e.songId}'
           : 'music show 2nd song ${e.songId}',
       RecordBroken() => 'record ${e.kind.name}: ${e.entityId} ${e.value}',
+      SurpriseDrop() => 'surprise drop: album ${e.albumId}',
       WrappedOut() =>
         'wrapped ${e.year}: ${e.plays.round()} plays, ${e.story.name}',
       YearEndCharts() =>

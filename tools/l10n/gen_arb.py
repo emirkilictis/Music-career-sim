@@ -1209,6 +1209,10 @@ k('wrappedStoryQuiet','A quiet year','Sakin bir yıl')
 k('wrappedStorySteady','Steady year','İstikrarlı yıl')
 k('eventWrapped','Your {year} Wrapped is out: {plays} plays on Streamify, “{title}” on top. {story}.','{year} Wrapped\'in çıktı: Streamify\'da {plays} dinlenme, zirvede “{title}”. {story}.', year='int', plays='String', title='String', story='String')
 
+# Surprise drops (K124)
+k('eventSurpriseDrop','Surprise! “{title}” is out with no warning and it is all anyone is talking about.','Sürpriz! “{title}” hiç haber verilmeden çıktı ve herkes ondan bahsediyor.', title='String')
+k('surpriseHint','No announcement: a surprise drop. An album or EP with nothing out from it yet makes headlines for a big name (a burst of hype at once, less if you did one in the last three years). Nobody notices an unknown\'s, and there are no pre-saves.','Duyuru yok: sürpriz çıkış. Henüz hiçbir şarkısı çıkmamış bir albüm ya da EP, tanınmış bir isimse manşet olur (anında bir hype patlaması; son üç yılda bunu yaptıysan daha az). Tanınmayan birininkini kimse fark etmez ve pre-save toplanmaz.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():
