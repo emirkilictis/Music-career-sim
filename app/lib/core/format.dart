@@ -713,6 +713,8 @@ class Fmt {
           ? l.eventPlaylistBig(t, platformName)
           : l.eventPlaylistMid(t, platformName),
       CatchingOn() => l.eventCatchingOn(t),
+      TopArtist(:final rank) =>
+        rank == 1 ? l.eventTopArtistNo1 : l.eventTopArtist(rank),
       RecordBroken(:final kind, :final value) => switch (kind) {
           RecordKind.weeksAtNo1Song ||
           RecordKind.weeksAtNo1Album =>

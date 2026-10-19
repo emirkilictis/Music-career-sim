@@ -184,6 +184,20 @@ class _ArtistPageState extends State<ArtistPage> {
                   style: const TextStyle(
                       color: StreamifyColors.muted,
                       fontWeight: FontWeight.w600)),
+              // Like the apps: a place in the world for the top 500 (K113).
+              if (page.worldRank > 0) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                      color: StreamifyColors.accent,
+                      borderRadius: BorderRadius.circular(4)),
+                  child: Text(l.worldRank(page.worldRank),
+                      style: const TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.w800)),
+                ),
+              ],
               const SizedBox(height: 14),
               Row(children: [
                 OutlinedButton(

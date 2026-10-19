@@ -890,6 +890,7 @@ class Simulator {
       // Fame changed: refresh where the audience is (frozen once retired).
       a.updateRegionShare();
     }
+    _rankArtists();
     _playerIncome();
     _fadeCatalogs();
     // Offers between releases (docs K59).
@@ -1492,6 +1493,24 @@ class Simulator {
       RandomStream.keyed(world.seed, 0, al.id, RngPurpose.albumLegs)
           .logNormal(world.config.albumLegsSigma)
           .clamp(0.5, 2.0);
+
+  /// Size of the top artists chart (docs K113).
+  static const artistChartSize = 100;
+
+  /// The top artists this week by their songs' and catalog's chart points
+  /// (docs K113), keeping last week's for the movement.
+  void _rankArtists() {
+    final w = world;
+    final ranked = [
+      for (final id in w.activeArtistIds)
+        if (w.artists[id].weekPoints > 0) id
+    ]..sort((x, y) {
+        final d = w.artists[y].weekPoints.compareTo(w.artists[x].weekPoints);
+        return d != 0 ? d : x.compareTo(y);
+      });
+    w.artistChartPrev = w.artistChart;
+    w.artistChart = List.unmodifiable(ranked.take(artistChartSize));
+  }
 
   void _playerIncome() {
     final p = world.player;

@@ -108,9 +108,14 @@ class PlatformProfile {
     required this.followers,
     required this.monthlyListeners,
     required this.verified,
+    this.worldRank = 0,
   });
   final int artistId;
   final String name;
+
+  /// Place in the world by listeners on the streaming apps (docs K113;
+  /// 0: below the top 500 or not a streaming app).
+  final int worldRank;
 
   /// Followers (subscribers on the video site); null in the download store.
   final double? followers;
@@ -196,6 +201,43 @@ abstract final class Platforms {
       p == MusicPlatform.streamify || p == MusicPlatform.fruitMusic
           ? weekPlays * 4.3 / 12
           : 0;
+
+  /// Last week's streams of every artist with any, from their songs and
+  /// back catalog (kept in the save, unlike the artists' own tally).
+  static Map<int, double> weekStreamsByArtist(World w) {
+    final out = <int, double>{};
+    for (final id in w.activeSongIds) {
+      final s = w.songs[id];
+      out[s.primaryArtistId] = (out[s.primaryArtistId] ?? 0) +
+          w.songWeekStreamsIn(s, ChartMarket.global);
+    }
+    for (final id in w.activeArtistIds) {
+      final a = w.artists[id];
+      if (a.sumDormantRate <= 0) continue;
+      var catalog = 0.0;
+      for (var k = 0; k < regionCount; k++) {
+        catalog += a.sumDormantRate *
+            a.catalogFactor *
+            a.regionShare[k] *
+            w.lastSpa[k];
+      }
+      out[id] = (out[id] ?? 0) + catalog;
+    }
+    return out;
+  }
+
+  /// [a]'s place among every artist by last week's streams (docs K113),
+  /// the way the apps rank monthly listeners; 0 below the top 500.
+  static int worldRank(World w, Artist a, [Map<int, double>? streams]) {
+    final all = streams ?? weekStreamsByArtist(w);
+    final mine = all[a.id] ?? 0;
+    if (mine <= 0) return 0;
+    var ahead = 0;
+    for (final e in all.entries) {
+      if (e.key != a.id && e.value > mine) ahead++;
+    }
+    return ahead < 500 ? ahead + 1 : 0;
+  }
 
   /// Platforms open in [year], in launch order.
   static List<MusicPlatform> openIn(int year) => [
@@ -291,6 +333,8 @@ abstract final class Platforms {
               name: player.name,
               followers: followers(w, player, p, year),
               monthlyListeners: monthlyListeners(p, mine),
+              worldRank:
+                  monthlyListeners(p, mine) > 0 ? worldRank(w, player) : 0,
               verified: player.fame >= 0.1 ||
                   (followers(w, player, p, year) ?? 0) >= 1e5,
             ),

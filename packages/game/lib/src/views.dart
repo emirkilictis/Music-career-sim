@@ -764,6 +764,23 @@ class YearEndRow {
   final int weeksOn;
 }
 
+/// One artist on the top artists chart (docs K113).
+class ArtistChartRow {
+  ArtistChartRow.of(World w, this.rank, int id, this.weekStreams)
+      : artistId = id,
+        lastRank = w.artistChartPrev.indexOf(id) + 1,
+        name = w.artists[id].name,
+        isPlayer = id == w.playerArtistId;
+  final int rank;
+
+  /// Last week's place (0: not on the chart).
+  final int lastRank;
+  final int artistId;
+  final String name;
+  final double weekStreams;
+  final bool isPlayer;
+}
+
 /// All-time records of a save (docs K111). Index order is UI order.
 enum RecordKind {
   /// Most weeks at #1 on the US songs chart (a song).
@@ -874,7 +891,11 @@ class ArtistPageView {
     required this.albums,
     required this.singles,
     this.followers = 0,
+    this.worldRank = 0,
   }) : listenerStreams = listenerStreams ?? weeklyStreams;
+
+  /// Place in the world by listeners (docs K113; 0: below the top 500).
+  final int worldRank;
 
   /// Followers on Streamify (docs K82).
   final double followers;

@@ -1093,6 +1093,14 @@ k('outletHypeBureau','Hype Bureau','Hype Bureau')
 k('outletPopMatter','PopMatter','PopMatter')
 k('eventCriticReviews','Reviews are in for “{title}”: Metascore {meta}. Pitchwork gives it {score}: {blurb}','“{title}” için eleştiriler geldi: Metascore {meta}. Pitchwork {score} verdi: {blurb}', title='String', meta='int', score='String', blurb='String')
 
+# Top artists (docs K113)
+k('chartArtists','Artists','Sanatçılar')
+k('chartTopArtists','Top Artists','En İyi Sanatçılar')
+k('artistChartLine','{streams} streams this week','Bu hafta {streams} stream', streams='String')
+k('worldRank','#{rank} in the world','Dünyada #{rank}', rank='int')
+k('eventTopArtistNo1','You are the #1 artist in the world this week.','Bu hafta dünyanın #1 sanatçısısın.')
+k('eventTopArtist','You are #{rank} on the top artists chart this week.','Bu hafta en iyi sanatçılar listesinde #{rank} sıradasın.', rank='int')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

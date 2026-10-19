@@ -3697,5 +3697,32 @@
         "type": "String"
       }
     }
+  },
+  "chartArtists": "Artists",
+  "chartTopArtists": "Top Artists",
+  "artistChartLine": "{streams} streams this week",
+  "@artistChartLine": {
+    "placeholders": {
+      "streams": {
+        "type": "String"
+      }
+    }
+  },
+  "worldRank": "#{rank} in the world",
+  "@worldRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "eventTopArtistNo1": "You are the #1 artist in the world this week.",
+  "eventTopArtist": "You are #{rank} on the top artists chart this week.",
+  "@eventTopArtist": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -105,6 +105,11 @@ class SaveStore {
     w.social.decode(meta['social'] as String?);
     // Brand deals (docs K102).
     w.brandDeals.addAll(BrandDeal.decode(meta['brandDeals'] as String?));
+    if (meta['artistChart'] case final String s when s.isNotEmpty) {
+      final j = jsonDecode(s) as List;
+      w.artistChartPrev = List.unmodifiable((j[0] as List).cast<int>());
+      w.artistChart = List.unmodifiable((j[1] as List).cast<int>());
+    }
     for (final (key, arr) in _metaArrays(w)) {
       for (var i = 0; i < arr.length; i++) {
         arr[i] = _d(meta['$key$i']);
@@ -334,6 +339,7 @@ class SaveStore {
       'awards': AwardShow.encode(w.awardShows),
       'social': w.social.encode(),
       'brandDeals': BrandDeal.encode(w.brandDeals),
+      'artistChart': jsonEncode([w.artistChartPrev, w.artistChart]),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

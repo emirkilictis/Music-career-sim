@@ -1149,5 +1149,11 @@
   "outletNeedle": "The Needle",
   "outletHypeBureau": "Hype Bureau",
   "outletPopMatter": "PopMatter",
-  "eventCriticReviews": "“{title}” için eleştiriler geldi: Metascore {meta}. Pitchwork {score} verdi: {blurb}"
+  "eventCriticReviews": "“{title}” için eleştiriler geldi: Metascore {meta}. Pitchwork {score} verdi: {blurb}",
+  "chartArtists": "Sanatçılar",
+  "chartTopArtists": "En İyi Sanatçılar",
+  "artistChartLine": "Bu hafta {streams} stream",
+  "worldRank": "Dünyada #{rank}",
+  "eventTopArtistNo1": "Bu hafta dünyanın #1 sanatçısısın.",
+  "eventTopArtist": "Bu hafta en iyi sanatçılar listesinde #{rank} sıradasın."
 }

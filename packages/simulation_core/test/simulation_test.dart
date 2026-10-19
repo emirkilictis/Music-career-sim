@@ -198,6 +198,7 @@ void main() {
   group('word of mouth (K108)', wordOfMouthTests);
   group('album clashes (K109)', albumClashTests);
   group('critics (K112)', criticTests);
+  group('top artists (K113)', topArtistTests);
   group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
@@ -2180,6 +2181,33 @@ void criticTests() {
         x.length;
     if (good.isNotEmpty && weak.isNotEmpty) {
       expect(avg(good), greaterThan(avg(weak)));
+    }
+  });
+}
+
+void topArtistTests() {
+  test('the week ranks artists by chart points, last week kept', () {
+    final w = WorldGen.create(seed: 113, startYear: 2015);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2015)) {
+      sim.step();
+    }
+    final last = w.artistChart;
+    sim.step();
+    expect(w.artistChartPrev, last);
+    final chart = w.artistChart;
+    expect(chart.length, 100);
+    expect(chart.toSet().length, chart.length);
+    for (var i = 1; i < chart.length; i++) {
+      expect(w.artists[chart[i]].weekPoints,
+          lessThanOrEqualTo(w.artists[chart[i - 1]].weekPoints));
+    }
+    // Nobody off the chart has more points than its last artist.
+    final floor = w.artists[chart.last].weekPoints;
+    for (final id in w.activeArtistIds) {
+      if (!chart.contains(id)) {
+        expect(w.artists[id].weekPoints, lessThanOrEqualTo(floor));
+      }
     }
   });
 }

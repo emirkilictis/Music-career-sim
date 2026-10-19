@@ -208,6 +208,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       ViralTrend() => 'VIRAL song ${e.songId}',
       PlaylistAdded() => 'playlist ${e.size.name} song ${e.songId}',
       CatchingOn() => 'word of mouth: song ${e.songId}',
+      TopArtist() => 'top artists #${e.rank}',
       RecordBroken() => 'record ${e.kind.name}: ${e.entityId} ${e.value}',
       YearEndCharts() =>
         'year-end ${e.year}: songs ${e.songs} albums ${e.albums}',

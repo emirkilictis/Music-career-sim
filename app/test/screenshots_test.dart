@@ -547,6 +547,15 @@ void main() {
     // All-time records (docs K111).
     await tester.tap(_ci('Records'));
     await shot(tester, '08e_records');
+    // The week's top artists (docs K113).
+    await tester.scrollUntilVisible(_ci('Artists'), -200,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .first);
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Artists'));
+    await shot(tester, '08f_top_artists');
     await tab(tester, 'Career');
     final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,

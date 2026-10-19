@@ -57,6 +57,11 @@ class World {
   /// The player's brand deals, running and past (docs K102).
   final List<BrandDeal> brandDeals = [];
 
+  /// The week's top artists by chart points, best first, and last week's
+  /// (docs K113; ids).
+  List<int> artistChart = const [];
+  List<int> artistChartPrev = const [];
+
   /// Non-retired artists, sorted by id. Weekly loops run over these only.
   final List<int> activeArtistIds = [];
 

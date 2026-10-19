@@ -334,6 +334,7 @@ class GameSession {
       followers: Platforms.followers(
               w, a, MusicPlatform.streamify, GameTime.yearOf(w.week)) ??
           0,
+      worldRank: Platforms.worldRank(w, a),
       popular: [for (final s in popular.take(10)) SongView.of(w, s)],
       albums: [
         for (final al in w.albums.reversed)
@@ -1578,6 +1579,15 @@ class GameSession {
     return out;
   }
 
+  /// This week's top artists (docs K113).
+  List<ArtistChartRow> get artistChart {
+    final streams = Platforms.weekStreamsByArtist(world);
+    return [
+      for (final (i, id) in world.artistChart.indexed)
+        ArtistChartRow.of(world, i + 1, id, streams[id] ?? 0)
+    ];
+  }
+
   /// First week of this save's chart history (records count from it).
   int get historyStartWeek {
     final r = _store.db.select('SELECT MIN(week) AS w FROM chartEntry');
@@ -2037,6 +2047,16 @@ class GameSession {
       events.add(RivalAlbumClash(c));
     }
     events.addAll(_recordsBroken(r));
+    // The top artists chart (docs K113): into the top 10, or to #1.
+    final rankNow = w.artistChart.indexOf(p.id) + 1;
+    final rankBefore = w.artistChartPrev.indexOf(p.id) + 1;
+    if (rankNow == 1 && rankBefore != 1) {
+      events.add(const TopArtist(1));
+    } else if (rankNow >= 1 &&
+        rankNow <= 10 &&
+        (rankBefore == 0 || rankBefore > 10)) {
+      events.add(TopArtist(rankNow));
+    }
     // The year-end charts come out in early December (docs K110).
     if (GameTime.weekOfYear(r.week) == YearEnd.publishWeekOfYear) {
       final y = GameTime.yearOf(r.week);

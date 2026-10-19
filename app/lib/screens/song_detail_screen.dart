@@ -407,8 +407,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   if (s.catchingOn) ...[
                     const SizedBox(height: 8),
                     Tag(l.tagWordOfMouth,
-                        icon: Icons.trending_up_rounded,
-                        color: AppColors.mint),
+                        icon: Icons.trending_up_rounded, color: AppColors.mint),
                   ],
                   if (s.isPlayer &&
                       s.inVault &&

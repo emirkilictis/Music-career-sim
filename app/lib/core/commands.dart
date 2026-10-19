@@ -200,6 +200,9 @@ abstract final class Cmd {
       };
 
   /// The year's top tours (null: all time) and the first year on the books.
+  /// This week's top artists (docs K113).
+  static SessionCmd<List<ArtistChartRow>> artistChart() => (s) => s.artistChart;
+
   /// Every all-time record's top 10 and the year they count from (K111).
   static SessionCmd<(Map<RecordKind, List<RecordEntry>>, int)> records() =>
       (s) => (s.records, GameTime.yearOf(s.historyStartWeek));

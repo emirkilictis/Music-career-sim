@@ -8,7 +8,9 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import 'album_detail_screen.dart';
+import 'game_shell.dart' show pushInCareer;
 import 'song_detail_screen.dart';
+import 'streamify/artist_page.dart';
 
 /// The charts as a music magazine prints them: paper white, big black
 /// ranks, last week / peak / weeks columns (docs/game-design.md §11.1).
@@ -37,6 +39,9 @@ const _yearEndChart = -2;
 /// The all-time records in the chart tabs (docs K111).
 const _recordsChart = -3;
 
+/// The top artists in the chart tabs (docs K113).
+const _artistsChart = -4;
+
 /// Saturday of a game week, for "Week of …" dates.
 DateTime chartDate(int week) {
   final first = DateTime(GameTime.yearOf(week));
@@ -64,6 +69,9 @@ class _ChartsTabState extends State<ChartsTab> {
   List<YearEndRow>? _yearEnd;
   List<int> _yearEndYears = const [];
 
+  /// Top artists this week.
+  List<ArtistChartRow>? _artists;
+
   /// Records: every board and the year they count from.
   Map<RecordKind, List<RecordEntry>>? _records;
   int _recordsSince = 0;
@@ -80,6 +88,11 @@ class _ChartsTabState extends State<ChartsTab> {
 
   Future<void> _load() async {
     final career = context.careerRead;
+    if (_chart == _artistsChart) {
+      final rows = await career.read(Cmd.artistChart());
+      if (mounted) setState(() => _artists = rows);
+      return;
+    }
     if (_chart == _recordsChart) {
       final (boards, since) = await career.read(Cmd.records());
       if (mounted) {
@@ -125,6 +138,7 @@ class _ChartsTabState extends State<ChartsTab> {
     setState(() {
       if (chart == _yearEndChart && _chart != _yearEndChart) _yearEnd = null;
       if (chart == _recordsChart && _chart != _recordsChart) _records = null;
+      if (chart == _artistsChart && _chart != _artistsChart) _artists = null;
       if (chart == _toursChart && _chart != _toursChart) {
         _tourYear = context.careerRead.year;
         _tours = null;
@@ -179,7 +193,9 @@ class _ChartsTabState extends State<ChartsTab> {
                               ? '${l.chartYearEnd} · ${fmt.chartShort(_yearEndOf)}'
                               : _chart == _recordsChart
                                   ? l.chartRecords
-                                  : fmt.chart(_chart))
+                                  : _chart == _artistsChart
+                                      ? l.chartTopArtists
+                                      : fmt.chart(_chart))
                       .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
@@ -196,7 +212,11 @@ class _ChartsTabState extends State<ChartsTab> {
                                   ? (_records == null
                                       ? ''
                                       : l.recordsSince(_recordsSince))
-                                  : l.weekOf(date))
+                                  : _chart == _artistsChart
+                                      ? l.weekOf(DateFormat.yMMMMd(l.localeName)
+                                          .format(chartDate(
+                                              context.career.week - 1)))
+                                      : l.weekOf(date))
                       .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
@@ -216,6 +236,11 @@ class _ChartsTabState extends State<ChartsTab> {
                         selected: _chart == id,
                         onTap: () => _select(id),
                       ),
+                    _ChartTab(
+                      label: l.chartArtists,
+                      selected: _chart == _artistsChart,
+                      onTap: () => _select(_artistsChart),
+                    ),
                     _ChartTab(
                       label: l.chartYearEnd,
                       selected: _chart == _yearEndChart,
@@ -237,7 +262,15 @@ class _ChartsTabState extends State<ChartsTab> {
             ],
           ),
         ),
-        if (_chart == _recordsChart)
+        if (_chart == _artistsChart)
+          Expanded(
+            child: _ArtistsBoard(
+              rows: _artists,
+              onOpen: (r) =>
+                  pushInCareer(context, ArtistPage(artistId: r.artistId)),
+            ),
+          )
+        else if (_chart == _recordsChart)
           Expanded(
             child: _RecordsBoard(
               boards: _records,
@@ -402,6 +435,97 @@ class _ChartTab extends StatelessWidget {
 }
 
 /// Top-grossing tours, magazine style: rank, artist, tour, gross.
+/// The week's top artists (docs K113): rank, movement, weekly streams.
+class _ArtistsBoard extends StatelessWidget {
+  const _ArtistsBoard({required this.rows, required this.onOpen});
+  final List<ArtistChartRow>? rows;
+  final ValueChanged<ArtistChartRow> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final list = rows;
+    if (list == null) {
+      return const Center(
+          child: CircularProgressIndicator(color: PaperColors.ink));
+    }
+    if (list.isEmpty) {
+      return Center(
+          child: Text(l.chartEmpty,
+              style: const TextStyle(color: PaperColors.muted)));
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.only(bottom: 16),
+      itemCount: list.length,
+      separatorBuilder: (_, __) =>
+          const Divider(color: PaperColors.line, height: 1, indent: 16),
+      itemBuilder: (context, i) {
+        final r = list[i];
+        final top = r.rank == 1;
+        final gain = r.lastRank > 0 ? r.lastRank - r.rank : 0;
+        return InkWell(
+          onTap: () => onOpen(r),
+          child: Container(
+            color: r.isPlayer ? const Color(0xFFE6EAFF) : PaperColors.card,
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+            child: Row(children: [
+              SizedBox(
+                width: 54,
+                child: Column(children: [
+                  Text('${r.rank}',
+                      style: TextStyle(
+                          fontFamily: AppFonts.condensed,
+                          fontWeight: FontWeight.w800,
+                          fontSize: top ? 40 : 30,
+                          height: 1,
+                          color: PaperColors.ink)),
+                  SizedBox(
+                    height: 20,
+                    child: Center(
+                      child: r.lastRank == 0
+                          ? _Badge(l.chartNew, PaperColors.ink, Colors.white)
+                          : gain > 0
+                              ? const Icon(Icons.arrow_drop_up_rounded,
+                                  color: PaperColors.up, size: 24)
+                              : gain < 0
+                                  ? const Icon(Icons.arrow_drop_down_rounded,
+                                      color: PaperColors.down, size: 24)
+                                  : const Icon(Icons.remove_rounded,
+                                      color: PaperColors.muted, size: 14),
+                    ),
+                  ),
+                ]),
+              ),
+              ArtistAvatar(
+                  name: r.name, seed: r.artistId, artistId: r.artistId),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(r.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: top ? 18 : 15.5,
+                              color: PaperColors.ink)),
+                      Text(l.artistChartLine(fmt.compact(r.weekStreams)),
+                          style: const TextStyle(
+                              fontSize: 12.5, color: PaperColors.muted)),
+                    ]),
+              ),
+              if (r.isPlayer)
+                _Badge(l.you, AppColors.lilac, const Color(0xFF241A45)),
+            ]),
+          ),
+        );
+      },
+    );
+  }
+}
+
 /// All-time records (docs K111): each record's top 5, the holder first.
 class _RecordsBoard extends StatelessWidget {
   const _RecordsBoard({required this.boards, required this.onOpen});

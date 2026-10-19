@@ -138,6 +138,15 @@ class RivalNumberOne extends GameEvent {
   bool get isIndustry => true;
 }
 
+/// The player made the top 10 of the top artists chart, or #1 (docs
+/// K113).
+class TopArtist extends GameEvent {
+  const TopArtist(this.rank);
+  final int rank;
+  @override
+  bool get isMajor => rank == 1;
+}
+
 /// The player set an all-time record (docs K111): [value] is weeks,
 /// units or streams, by [kind].
 class RecordBroken extends GameEvent {
