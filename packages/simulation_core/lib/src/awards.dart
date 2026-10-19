@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'audience.dart';
 import 'config/charts.dart';
+import 'critics.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
@@ -224,7 +225,7 @@ abstract final class Awards {
       if (al.releaseWeek < from || al.releaseWeek >= to) continue;
       if (al.type != AlbumType.album || al.criticScore < 0) continue;
       final a = w.artists[al.artistId];
-      final critic = (al.criticScore - 1) / 9;
+      final critic = (Critics.metascore(w, al) / 10 - 1) / 9;
       final hit = _albumHit(al);
       final q = _quality(al.quality);
       final n = AwardNominee(al.id, a.id);

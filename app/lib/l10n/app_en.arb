@@ -3672,5 +3672,30 @@
         "type": "String"
       }
     }
+  },
+  "reviewsTitle": "Reviews",
+  "metascoreLabel": "Metascore",
+  "metascoreHint": "The average of every review; it moves the opening week and the awards.",
+  "outletPitchwork": "Pitchwork",
+  "outletRollingPage": "Rolling Page",
+  "outletNeedle": "The Needle",
+  "outletHypeBureau": "Hype Bureau",
+  "outletPopMatter": "PopMatter",
+  "eventCriticReviews": "Reviews are in for “{title}”: Metascore {meta}. Pitchwork gives it {score}: {blurb}",
+  "@eventCriticReviews": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "meta": {
+        "type": "int"
+      },
+      "score": {
+        "type": "String"
+      },
+      "blurb": {
+        "type": "String"
+      }
+    }
   }
 }

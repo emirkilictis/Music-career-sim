@@ -473,6 +473,8 @@ class AlbumView {
         isPlayer = al.artistId == w.playerArtistId,
         scheduleId = al.scheduleId,
         criticScore = al.criticScore,
+        reviews = Critics.reviews(w, al),
+        metascore = Critics.metascore(w, al),
         preSingleUnits = al.preSingleUnits,
         campaignCostCents = al.campaignCostCents,
         campaignReturnCents = al.campaignReturnCents.round(),
@@ -527,6 +529,11 @@ class AlbumView {
 
   /// Pitchwork's review (1.0–10.0), or -1 for albums from before reviews.
   final double criticScore;
+
+  /// Every outlet's score out of 10 and their average out of 100
+  /// (docs K112; -1 when not reviewed).
+  final Map<Outlet, double> reviews;
+  final int metascore;
 
   /// Lifetime units from singles out before the album (part of
   /// [lifetimeUnits], never of a week's sales; docs K56).

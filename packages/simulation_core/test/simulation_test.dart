@@ -197,6 +197,7 @@ void main() {
   group('record deals (K107)', recordDealTests);
   group('word of mouth (K108)', wordOfMouthTests);
   group('album clashes (K109)', albumClashTests);
+  group('critics (K112)', criticTests);
   group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
@@ -2145,5 +2146,40 @@ void albumClashTests() {
     expect(clash.moved, isFalse);
     expect(clash.playerWeek, week);
     expect(rival.plan.first.week, week);
+  });
+}
+
+void criticTests() {
+  test('five outlets with their tastes; the average counts', () {
+    final w = WorldGen.create(seed: 112, startYear: 2015);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2015)) {
+      sim.step();
+    }
+    final albums = w.albums.where((a) => a.criticScore >= 0).toList();
+    expect(albums.length, greaterThan(20));
+    final al = albums.first;
+    final r = Critics.reviews(w, al);
+    expect(r.keys, Outlet.values);
+    expect(r[Outlet.pitchwork], al.criticScore);
+    // The same album always gets the same reviews.
+    expect(Critics.reviews(w, al), r);
+    final mean = r.values.reduce((a, b) => a + b) / r.length;
+    expect(Critics.metascore(w, al), (mean * 10).round());
+    // Tastes: hip-hop's outlet over the British weekly on hip-hop, the
+    // other way round on rock.
+    expect(Critics.bias(Outlet.hypeBureau, 1),
+        greaterThan(Critics.bias(Outlet.needle, 1)));
+    expect(Critics.bias(Outlet.needle, 3),
+        greaterThan(Critics.bias(Outlet.hypeBureau, 3)));
+    // Across many albums the average follows quality.
+    final good = albums.where((a) => a.quality >= 80).toList();
+    final weak = albums.where((a) => a.quality < 60).toList();
+    double avg(List<Album> x) =>
+        x.map((a) => Critics.metascore(w, a)).reduce((a, b) => a + b) /
+        x.length;
+    if (good.isNotEmpty && weak.isNotEmpty) {
+      expect(avg(good), greaterThan(avg(weak)));
+    }
   });
 }

@@ -1940,7 +1940,8 @@ class GameSession {
       if (al.artistId == p.id &&
           al.releaseWeek == r.week &&
           al.criticScore >= 0) {
-        events.add(CriticReview(al.id, al.criticScore));
+        events.add(CriticReview(al.id, al.criticScore,
+            metascore: Critics.metascore(w, al)));
       }
     }
     for (final id in debutAlbums) {

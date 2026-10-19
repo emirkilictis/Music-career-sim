@@ -252,9 +252,12 @@ class LabelDropped extends GameEvent {
 
 /// Pitchwork reviewed a player album that came out this week (docs K55).
 class CriticReview extends GameEvent {
-  const CriticReview(this.albumId, this.score);
+  const CriticReview(this.albumId, this.score, {this.metascore = -1});
   final int albumId;
+
+  /// Pitchwork's score, and the average of every outlet (docs K112).
   final double score;
+  final int metascore;
   @override
   bool get isMajor => false;
 }

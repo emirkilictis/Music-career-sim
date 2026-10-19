@@ -1082,6 +1082,17 @@ k('recordKindAlbum','album','albüm')
 k('eventRecordStreamWeek','Record! “{title}” was streamed {streams} times this week, the most ever.','Rekor! “{title}” bu hafta {streams} kez dinlendi, tüm zamanların en çoğu.', title='String', streams='String')
 k('eventRecordAlbumDebut','Record! “{title}” opened with {units} units in the US, the biggest debut ever.','Rekor! “{title}” ABD’de {units} birimle açıldı, tüm zamanların en büyük çıkışı.', title='String', units='String')
 
+# Critics' panel (docs K112)
+k('reviewsTitle','Reviews','Eleştiriler')
+k('metascoreLabel','Metascore','Metascore')
+k('metascoreHint','The average of every review; it moves the opening week and the awards.','Tüm eleştirilerin ortalaması; çıkış haftasını ve ödülleri etkiliyor.')
+k('outletPitchwork','Pitchwork','Pitchwork')
+k('outletRollingPage','Rolling Page','Rolling Page')
+k('outletNeedle','The Needle','The Needle')
+k('outletHypeBureau','Hype Bureau','Hype Bureau')
+k('outletPopMatter','PopMatter','PopMatter')
+k('eventCriticReviews','Reviews are in for “{title}”: Metascore {meta}. Pitchwork gives it {score}: {blurb}','“{title}” için eleştiriler geldi: Metascore {meta}. Pitchwork {score} verdi: {blurb}', title='String', meta='int', score='String', blurb='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -299,6 +299,15 @@ void main() {
         scrollable: find.byType(Scrollable).first);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -180));
     await shot(tester, '14b_album_weekly');
+    // The critics' panel (docs K112).
+    final meta = _ci('Metascore');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 5000));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(meta, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(meta), alignment: 0.3);
+    await tester.pumpAndSettle();
+    await shot(tester, '14h_reviews');
     await tester.pageBack();
     await tester.pumpAndSettle();
     // A single's numbers (F46): four figures, regions as one bar.

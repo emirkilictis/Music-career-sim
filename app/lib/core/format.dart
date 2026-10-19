@@ -329,6 +329,38 @@ class Fmt {
 
   String criticScore(double score) => score.toStringAsFixed(1);
 
+  String outlet(Outlet o) => switch (o) {
+        Outlet.pitchwork => l.outletPitchwork,
+        Outlet.rollingPage => l.outletRollingPage,
+        Outlet.needle => l.outletNeedle,
+        Outlet.hypeBureau => l.outletHypeBureau,
+        Outlet.popMatter => l.outletPopMatter,
+      };
+
+  /// Rolling Page's stars for a [score] out of 10, in halves (3.5).
+  double stars(double score) => score.round().clamp(1, 10) / 2;
+
+  /// A review [score] out of 10 the way [o] prints it (docs K112): a
+  /// tenth, stars, out of 10, a letter grade or out of 100.
+  String outletScore(Outlet o, double score) => switch (o) {
+        Outlet.pitchwork => score.toStringAsFixed(1),
+        Outlet.rollingPage => '${stars(score)}/5',
+        Outlet.needle => '${score.round()}/10',
+        Outlet.hypeBureau => switch (score) {
+            >= 9.5 => 'A+',
+            >= 9.0 => 'A',
+            >= 8.5 => 'A−',
+            >= 8.0 => 'B+',
+            >= 7.0 => 'B',
+            >= 6.5 => 'B−',
+            >= 6.0 => 'C+',
+            >= 5.0 => 'C',
+            >= 4.0 => 'D',
+            _ => 'F',
+          },
+        Outlet.popMatter => '${(score * 10).round()}/100',
+      };
+
   String milestoneName(Milestone m) => switch (m) {
         Milestone.firstRelease => l.msFirstRelease,
         Milestone.firstChart => l.msFirstChart,
@@ -707,8 +739,10 @@ class Fmt {
       BurnoutOver() => l.eventBurnoutOver,
       ReleaseOut() => l.eventReleaseOut(t),
       LabelOffer() => l.eventLabelOffer(labelName(e.label)),
-      CriticReview() =>
-        l.eventCriticReview(t, criticScore(e.score), criticBlurb(e.score)),
+      CriticReview() => e.metascore >= 0
+          ? l.eventCriticReviews(
+              t, e.metascore, criticScore(e.score), criticBlurb(e.score))
+          : l.eventCriticReview(t, criticScore(e.score), criticBlurb(e.score)),
       LabelDropped() => l.eventLabelDropped(labelName(e.label)),
       OpportunityCame() => l.eventOfferCame(offerTitle(e.kind)),
       PlatformOpened(:final platform) =>

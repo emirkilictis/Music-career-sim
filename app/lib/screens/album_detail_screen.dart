@@ -121,27 +121,82 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           if (a.criticScore >= 0) ...[
             const SizedBox(height: 14),
             Section(
-              title: '${l.criticName} · ${l.criticReviewTitle}',
+              title: l.reviewsTitle,
               icon: Icons.rate_review_outlined,
-              child: Row(children: [
-                Text(fmt.criticScore(a.criticScore),
-                    style: TextStyle(
-                        fontFamily: AppFonts.condensed,
-                        fontSize: 40,
-                        height: 1,
-                        fontWeight: FontWeight.w800,
-                        color: a.criticScore >= 8
-                            ? AppColors.gold
-                            : a.criticScore >= 6
-                                ? AppColors.text
-                                : AppColors.coral)),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text('“${fmt.criticBlurb(a.criticScore)}”',
-                      style: const TextStyle(
-                          fontStyle: FontStyle.italic, fontSize: 15)),
-                ),
-              ]),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // The consensus (docs K112).
+                    Row(children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        alignment: Alignment.center,
+                        color: a.metascore >= 75
+                            ? const Color(0xFF2E9E5B)
+                            : a.metascore >= 50
+                                ? const Color(0xFFE0B020)
+                                : AppColors.coral,
+                        child: Text('${a.metascore}',
+                            style: const TextStyle(
+                                fontFamily: AppFonts.condensed,
+                                fontSize: 34,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white)),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l.metascoreLabel,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w800)),
+                              Text(l.metascoreHint,
+                                  style: TextStyle(
+                                      fontSize: 12.5,
+                                      color: AppColors.textMuted)),
+                            ]),
+                      ),
+                    ]),
+                    const SizedBox(height: 10),
+                    for (final e in a.reviews.entries)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 3),
+                        child: Row(children: [
+                          Expanded(
+                              child: Text(fmt.outlet(e.key),
+                                  style:
+                                      TextStyle(color: AppColors.textMuted))),
+                          if (e.key == Outlet.rollingPage)
+                            _Stars(fmt.stars(e.value))
+                          else
+                            Text(fmt.outletScore(e.key, e.value),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700)),
+                        ]),
+                      ),
+                    const SizedBox(height: 10),
+                    Row(children: [
+                      Text(fmt.criticScore(a.criticScore),
+                          style: TextStyle(
+                              fontFamily: AppFonts.condensed,
+                              fontSize: 40,
+                              height: 1,
+                              fontWeight: FontWeight.w800,
+                              color: a.criticScore >= 8
+                                  ? AppColors.gold
+                                  : a.criticScore >= 6
+                                      ? AppColors.text
+                                      : AppColors.coral)),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text('“${fmt.criticBlurb(a.criticScore)}”',
+                            style: const TextStyle(
+                                fontStyle: FontStyle.italic, fontSize: 15)),
+                      ),
+                    ]),
+                  ]),
             ),
           ],
           const SizedBox(height: 14),
@@ -377,4 +432,26 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
       ),
     );
   }
+}
+
+/// Rolling Page's star rating (docs K112), drawn rather than typed.
+class _Stars extends StatelessWidget {
+  const _Stars(this.stars);
+  final double stars;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 1; i <= 5; i++)
+            Icon(
+                stars >= i
+                    ? Icons.star_rounded
+                    : stars >= i - 0.5
+                        ? Icons.star_half_rounded
+                        : Icons.star_outline_rounded,
+                size: 18,
+                color: AppColors.gold),
+        ],
+      );
 }

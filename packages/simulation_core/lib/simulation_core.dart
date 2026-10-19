@@ -8,6 +8,7 @@ export 'src/brands.dart';
 export 'src/ai.dart' show AiPlanner, RivalClash;
 export 'src/bot.dart';
 export 'src/contracts.dart';
+export 'src/critics.dart';
 export 'src/config/charts.dart';
 export 'src/config/difficulty.dart';
 export 'src/config/era_table.dart';

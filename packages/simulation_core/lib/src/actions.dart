@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'audience.dart';
 import 'config/charts.dart';
+import 'critics.dart';
 import 'contracts.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
@@ -690,8 +691,9 @@ abstract final class Actions {
         (((quality - 10) / 9 + rc.nextNormal() * 0.5).clamp(1.0, 10.0) * 10)
                 .round() /
             10;
-    album.hypeAtRelease =
-        math.max(0.0, album.hypeAtRelease + (album.criticScore - 6.5) * 0.04);
+    // The consensus counts, not one outlet (docs K112).
+    album.hypeAtRelease = math.max(0.0,
+        album.hypeAtRelease + (Critics.metascore(w, album) / 10 - 6.5) * 0.04);
     album.campaign = campaign;
     album.campaignCostCents = paid;
     // Formats follow their editions when the weeks are sorted.

@@ -1140,5 +1140,14 @@
   "recordKindSong": "şarkı",
   "recordKindAlbum": "albüm",
   "eventRecordStreamWeek": "Rekor! “{title}” bu hafta {streams} kez dinlendi, tüm zamanların en çoğu.",
-  "eventRecordAlbumDebut": "Rekor! “{title}” ABD’de {units} birimle açıldı, tüm zamanların en büyük çıkışı."
+  "eventRecordAlbumDebut": "Rekor! “{title}” ABD’de {units} birimle açıldı, tüm zamanların en büyük çıkışı.",
+  "reviewsTitle": "Eleştiriler",
+  "metascoreLabel": "Metascore",
+  "metascoreHint": "Tüm eleştirilerin ortalaması; çıkış haftasını ve ödülleri etkiliyor.",
+  "outletPitchwork": "Pitchwork",
+  "outletRollingPage": "Rolling Page",
+  "outletNeedle": "The Needle",
+  "outletHypeBureau": "Hype Bureau",
+  "outletPopMatter": "PopMatter",
+  "eventCriticReviews": "“{title}” için eleştiriler geldi: Metascore {meta}. Pitchwork {score} verdi: {blurb}"
 }
