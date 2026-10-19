@@ -1143,6 +1143,11 @@ void main() {
       final runs = g.chartRun(EntityKind.song, no1.entityId).where((w) =>
           w.entries[Charts.usSongs]?.position == 1);
       expect(no1.value, runs.length);
+      // Honours (K116): a player with nothing out holds none.
+      final h = g.honors;
+      expect(h.recordsHeld, isEmpty);
+      expect(h.bestYearEndSong, isNull);
+      expect(h.isEmpty, isTrue);
       g.close();
     });
 
@@ -1180,6 +1185,9 @@ void main() {
       }
       expect(() => g.releaseDeluxe(album, bonus), _code('deluxeOut'));
       g.advanceWeek();
+      // Fans talk about it (K115).
+      expect(g.world.social.feed.any((i) => i.topic == FanTopic.deluxeOut),
+          isTrue);
       g.close();
       g = GameSession.resume(slots, id);
       expect(g.album(album).trackIds, [...tracks, ...bonus]);

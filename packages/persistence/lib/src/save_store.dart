@@ -110,6 +110,10 @@ class SaveStore {
       final j = jsonDecode(s) as List;
       w.artistChartPrev = List.unmodifiable((j[0] as List).cast<int>());
       w.artistChart = List.unmodifiable((j[1] as List).cast<int>());
+      if (j.length > 3) {
+        w.playerBestArtistRank = j[2] as int;
+        w.playerWeeksTopArtist = j[3] as int;
+      }
     }
     for (final (key, arr) in _metaArrays(w)) {
       for (var i = 0; i < arr.length; i++) {
@@ -340,7 +344,12 @@ class SaveStore {
       'awards': AwardShow.encode(w.awardShows),
       'social': w.social.encode(),
       'brandDeals': BrandDeal.encode(w.brandDeals),
-      'artistChart': jsonEncode([w.artistChartPrev, w.artistChart]),
+      'artistChart': jsonEncode([
+        w.artistChartPrev,
+        w.artistChart,
+        w.playerBestArtistRank,
+        w.playerWeeksTopArtist,
+      ]),
       'musicShow': w.musicShow.encode(),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],

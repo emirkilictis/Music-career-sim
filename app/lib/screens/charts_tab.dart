@@ -676,14 +676,6 @@ class _RecordsBoard extends StatelessWidget {
           child: Text(l.recordsEmpty,
               style: const TextStyle(color: PaperColors.muted)));
     }
-    String title(RecordKind k) => switch (k) {
-          RecordKind.weeksAtNo1Song => l.recordWeeksAtNo1Song,
-          RecordKind.weeksAtNo1Album => l.recordWeeksAtNo1Album,
-          RecordKind.weeksOnChart => l.recordWeeksOnChart,
-          RecordKind.albumDebut => l.recordAlbumDebut,
-          RecordKind.streamWeek => l.recordStreamWeek,
-          RecordKind.mostNo1s => l.recordMostNo1s,
-        };
     String value(RecordKind k, double v) => switch (k) {
           RecordKind.weeksAtNo1Song ||
           RecordKind.weeksAtNo1Album ||
@@ -697,7 +689,7 @@ class _RecordsBoard extends StatelessWidget {
         if (all[k]!.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 18, 16, 6),
-            child: Text(title(k).toUpperCase(),
+            child: Text(fmt.recordName(k).toUpperCase(),
                 style: const TextStyle(
                     fontFamily: AppFonts.condensed,
                     fontWeight: FontWeight.w800,

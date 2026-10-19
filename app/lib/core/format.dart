@@ -329,6 +329,16 @@ class Fmt {
 
   String criticScore(double score) => score.toStringAsFixed(1);
 
+  /// A record's name (docs K111).
+  String recordName(RecordKind k) => switch (k) {
+        RecordKind.weeksAtNo1Song => l.recordWeeksAtNo1Song,
+        RecordKind.weeksAtNo1Album => l.recordWeeksAtNo1Album,
+        RecordKind.weeksOnChart => l.recordWeeksOnChart,
+        RecordKind.albumDebut => l.recordAlbumDebut,
+        RecordKind.streamWeek => l.recordStreamWeek,
+        RecordKind.mostNo1s => l.recordMostNo1s,
+      };
+
   String outlet(Outlet o) => switch (o) {
         Outlet.pitchwork => l.outletPitchwork,
         Outlet.rollingPage => l.outletRollingPage,

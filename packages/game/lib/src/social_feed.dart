@@ -51,6 +51,19 @@ abstract final class SocialFeed {
         release(al.quality, albumId: al.id);
       }
     }
+    // A deluxe edition out this week (docs K115).
+    for (final al in w.albums) {
+      if (al.artistId != p.id || !Actions.hasDeluxe(al)) continue;
+      for (var k = 0; k < al.variantWeeks.length; k++) {
+        if (al.releaseWeek + al.variantWeeks[k] == week &&
+            al.variantWeeks[k] > 0 &&
+            k < al.variantFormats.length &&
+            al.variantFormats[k] == EditionFormat.deluxe.index) {
+          fan(FanTopic.deluxeOut, albumId: al.id);
+          fan(FanTopic.deluxeOut, albumId: al.id);
+        }
+      }
+    }
     for (final id in w.playerSongIds) {
       final s = w.songs[id];
       if (s.primaryArtistId == p.id &&
@@ -107,6 +120,32 @@ abstract final class SocialFeed {
           fan(FanTopic.rivalPurge, songId: songId);
         case MilestoneReached():
           fan(FanTopic.milestone);
+        // The newer stories (docs K108–K115).
+        case RecordBroken(:final kind, :final entityId):
+          fan(FanTopic.recordBroken,
+              songId: kind.isAlbum ? -1 : entityId,
+              albumId: kind.isAlbum ? entityId : -1);
+          fan(FanTopic.recordBroken,
+              songId: kind.isAlbum ? -1 : entityId,
+              albumId: kind.isAlbum ? entityId : -1);
+        case YearEndCharts(:final songs, :final albums) when e.hasPlayer:
+          if (songs.isNotEmpty) {
+            fan(FanTopic.yearEndHit,
+                songId: songs.first.$2, number: songs.first.$1);
+          } else {
+            fan(FanTopic.yearEndHit,
+                albumId: albums.first.$2, number: albums.first.$1);
+          }
+        case MusicShowResult(:final songId, won: true, tripleCrown: true):
+          fan(FanTopic.tripleCrown, songId: songId);
+          fan(FanTopic.tripleCrown, songId: songId);
+        case MusicShowResult(:final songId, won: true, :final wins):
+          fan(FanTopic.musicShowWin, songId: songId, number: wins);
+        case CatchingOn(:final songId):
+          fan(FanTopic.catchingOn, songId: songId);
+        case TopArtist(rank: 1):
+          fan(FanTopic.topArtistNo1);
+          fan(FanTopic.topArtistNo1);
         default:
           break;
       }

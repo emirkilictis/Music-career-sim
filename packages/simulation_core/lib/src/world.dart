@@ -66,6 +66,10 @@ class World {
   List<int> artistChart = const [];
   List<int> artistChartPrev = const [];
 
+  /// The player's best place on it (0: never on it) and weeks at #1.
+  int playerBestArtistRank = 0;
+  int playerWeeksTopArtist = 0;
+
   /// Non-retired artists, sorted by id. Weekly loops run over these only.
   final List<int> activeArtistIds = [];
 

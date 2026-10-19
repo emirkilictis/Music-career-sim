@@ -69,6 +69,13 @@ enum FanTopic {
   postSponsored,
   replySponsored,
   replySellout,
+  recordBroken,
+  yearEndHit,
+  musicShowWin,
+  tripleCrown,
+  deluxeOut,
+  catchingOn,
+  topArtistNo1,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.

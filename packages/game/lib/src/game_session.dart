@@ -1607,6 +1607,44 @@ class GameSession {
     return out;
   }
 
+  /// The player's honours beyond awards (docs K116).
+  HonorsView get honors {
+    final w = world;
+    final me = w.playerArtistId;
+    (int, int, String)? best(int chart) {
+      (int, int, String)? out;
+      for (final y in yearEndYears) {
+        for (final r in yearEnd(chart, y)) {
+          if (!r.isPlayer) continue;
+          if (out == null || r.rank < out.$1) out = (r.rank, y, r.title);
+          break;
+        }
+      }
+      return out;
+    }
+
+    var wins = 0, crowns = 0;
+    w.musicShow.wins.forEach((id, n) {
+      if (w.songs[id].primaryArtistId == me) wins += n;
+    });
+    for (final id in w.musicShow.crowned) {
+      if (w.songs[id].primaryArtistId == me) crowns++;
+    }
+    final boards = records;
+    return HonorsView(
+      recordsHeld: [
+        for (final k in RecordKind.values)
+          if (boards[k]!.isNotEmpty && boards[k]!.first.isPlayer) k
+      ],
+      bestYearEndSong: best(Charts.usSongs),
+      bestYearEndAlbum: best(Charts.usAlbums),
+      musicShowWins: wins,
+      tripleCrowns: crowns,
+      bestArtistRank: w.playerBestArtistRank,
+      weeksTopArtist: w.playerWeeksTopArtist,
+    );
+  }
+
   /// The K-pop music show's recent weeks, newest first (docs K114).
   List<MusicShowRow> get musicShow => [
         for (final x in world.musicShow.weeks.reversed)

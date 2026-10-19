@@ -204,6 +204,9 @@ abstract final class Cmd {
   static SessionCmd<void> releaseDeluxe(int albumId, List<int> songIds) =>
       (s) => s.releaseDeluxe(albumId, songIds);
 
+  /// The player's honours beyond awards (docs K116).
+  static SessionCmd<HonorsView> honors() => (s) => s.honors;
+
   /// The K-pop music show's recent weeks (docs K114).
   static SessionCmd<List<MusicShowRow>> musicShow() => (s) => s.musicShow;
 

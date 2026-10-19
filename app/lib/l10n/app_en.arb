@@ -3182,6 +3182,179 @@
   },
   "smReplySellout1": "The sellout era has begun",
   "smReplySellout2": "Unfollowing until the next album",
+  "smRecordBroken0": "{title} just broke an ALL-TIME record. History.",
+  "@smRecordBroken0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRecordBroken1": "Record broken. Say it with me: {name} is a legend.",
+  "@smRecordBroken1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smRecordBroken2": "Wikipedia editors, update the {title} page",
+  "@smRecordBroken2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smYearEndHit0": "{title} at #{n} on the year-end chart!! What a year",
+  "@smYearEndHit0": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smYearEndHit1": "Year-end #{n}. {name} owned this year.",
+  "@smYearEndHit1": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smYearEndHit2": "Song of my year? {title}. Chart agrees (#{n}).",
+  "@smYearEndHit2": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMusicShowWin0": "{title} WON on Music Peak!! Win #{n} 🏆",
+  "@smMusicShowWin0": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMusicShowWin1": "Voting all night paid off. {title} took the trophy!",
+  "@smMusicShowWin1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMusicShowWin2": "Encore stage of {title} had me screaming",
+  "@smMusicShowWin2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smTripleCrown0": "TRIPLE CROWN for {title}!!! Three in a row 👑",
+  "@smTripleCrown0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smTripleCrown1": "{name} with a Triple Crown. Legends only.",
+  "@smTripleCrown1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smTripleCrown2": "{title} leaves Music Peak undefeated. Iconic.",
+  "@smTripleCrown2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smDeluxeOut0": "{title} DELUXE?? Bonus tracks?? I'm not ready",
+  "@smDeluxeOut0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smDeluxeOut1": "Buying {title} again for the bonus tracks. Obviously.",
+  "@smDeluxeOut1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smDeluxeOut2": "The {title} deluxe tracks are better than some albums",
+  "@smDeluxeOut2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCatchingOn0": "Everyone at my school is suddenly singing {title}",
+  "@smCatchingOn0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCatchingOn1": "{title} keeps growing. Word of mouth is real.",
+  "@smCatchingOn1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCatchingOn2": "Months later and {title} is everywhere?? Sleeper hit",
+  "@smCatchingOn2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smTopArtistNo10": "{name} is the #1 artist in the world this week 🌍",
+  "@smTopArtistNo10": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smTopArtistNo11": "Biggest artist on the planet: {name}. Facts.",
+  "@smTopArtistNo11": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smTopArtistNo12": "Number one artist. We built this together.",
   "networkForum": "Fan forum",
   "networkMyPlace": "MyPlace",
   "networkChirper": "Chirper",
@@ -3821,5 +3994,65 @@
     }
   },
   "errorDeluxeOut": "This album already had its deluxe edition.",
-  "errorDeluxeTracks": "Pick 1–6 bonus tracks."
+  "errorDeluxeTracks": "Pick 1–6 bonus tracks.",
+  "honorsSection": "Honours",
+  "honorsEmpty": "Records, year-end places and chart runs show up here.",
+  "honorsRecords": "Records held: {list}",
+  "@honorsRecords": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "honorsYearEndSong": "Best year-end song: #{rank} in {year} (“{title}”)",
+  "@honorsYearEndSong": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "honorsYearEndAlbum": "Best year-end album: #{rank} in {year} (“{title}”)",
+  "@honorsYearEndAlbum": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "honorsMusicShow": "Music Peak: {wins} wins, {crowns} Triple Crowns",
+  "@honorsMusicShow": {
+    "placeholders": {
+      "wins": {
+        "type": "int"
+      },
+      "crowns": {
+        "type": "int"
+      }
+    }
+  },
+  "honorsArtistRank": "Top artists: best #{rank}, {weeks} weeks at #1",
+  "@honorsArtistRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  }
 }

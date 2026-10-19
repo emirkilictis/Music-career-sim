@@ -1517,6 +1517,13 @@ class Simulator {
       });
     w.artistChartPrev = w.artistChart;
     w.artistChart = List.unmodifiable(ranked.take(artistChartSize));
+    final mine = w.artistChart.indexOf(w.playerArtistId) + 1;
+    if (mine > 0) {
+      if (w.playerBestArtistRank == 0 || mine < w.playerBestArtistRank) {
+        w.playerBestArtistRank = mine;
+      }
+      if (mine == 1) w.playerWeeksTopArtist++;
+    }
   }
 
   void _playerIncome() {

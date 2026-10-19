@@ -581,9 +581,17 @@ void main() {
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
     await shot(tester, '15o_awards_more');
 
-    // A record deal: three shapes with their terms (docs K107).
+    // Honours beyond the awards (docs K116).
     await tester.pageBack();
     await tester.pumpAndSettle();
+    final honours = _ci('Honours');
+    await tester.scrollUntilVisible(honours, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(honours), alignment: 0.2);
+    await tester.pumpAndSettle();
+    await shot(tester, '15q_honours');
+
+    // A record deal: three shapes with their terms (docs K107).
     final labels = _ci('See labels');
     // Above the awards: scroll back up.
     await tester.scrollUntilVisible(labels, -300,

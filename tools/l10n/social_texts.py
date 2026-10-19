@@ -172,4 +172,39 @@ TOPICS = {
   ("The sellout era has begun", "Satılmışlık dönemi başladı"),
   ("Unfollowing until the next album", "Bir sonraki albüme kadar takipten çıkıyorum"),
  ],
+ 'recordBroken': [
+  ("{title} just broke an ALL-TIME record. History.", "{title} TÜM ZAMANLARIN rekorunu kırdı. Tarih yazıldı."),
+  ("Record broken. Say it with me: {name} is a legend.", "Rekor kırıldı. Hep beraber: {name} bir efsane."),
+  ("Wikipedia editors, update the {title} page", "Vikipedi editörleri, {title} sayfasını güncelleyin"),
+ ],
+ 'yearEndHit': [
+  ("{title} at #{n} on the year-end chart!! What a year", "{title} yıl sonu listesinde #{n}!! Ne yıldı ama"),
+  ("Year-end #{n}. {name} owned this year.", "Yıl sonu #{n}. Bu yıl {name} yılıydı."),
+  ("Song of my year? {title}. Chart agrees (#{n}).", "Yılımın şarkısı mı? {title}. Liste de katılıyor (#{n})."),
+ ],
+ 'musicShowWin': [
+  ("{title} WON on Music Peak!! Win #{n} 🏆", "{title} Music Peak'te KAZANDI!! {n}. galibiyet 🏆"),
+  ("Voting all night paid off. {title} took the trophy!", "Bütün gece oy verdik, değdi. {title} kupayı aldı!"),
+  ("Encore stage of {title} had me screaming", "{title} encore sahnesinde çığlık attım"),
+ ],
+ 'tripleCrown': [
+  ("TRIPLE CROWN for {title}!!! Three in a row 👑", "{title} için TRIPLE CROWN!!! Üst üste üç 👑"),
+  ("{name} with a Triple Crown. Legends only.", "{name} Triple Crown aldı. Sadece efsaneler."),
+  ("{title} leaves Music Peak undefeated. Iconic.", "{title} Music Peak'ten yenilmeden ayrılıyor. İkonik."),
+ ],
+ 'deluxeOut': [
+  ("{title} DELUXE?? Bonus tracks?? I'm not ready", "{title} DELUXE mi?? Bonus parçalar mı?? Hazır değilim"),
+  ("Buying {title} again for the bonus tracks. Obviously.", "Bonus parçalar için {title} albümünü tekrar alıyorum. Tabii ki."),
+  ("The {title} deluxe tracks are better than some albums", "{title} deluxe parçaları bazı albümlerden iyi"),
+ ],
+ 'catchingOn': [
+  ("Everyone at my school is suddenly singing {title}", "Okulda herkes birden {title} söylemeye başladı"),
+  ("{title} keeps growing. Word of mouth is real.", "{title} büyümeye devam ediyor. Kulaktan kulağa gerçekten işe yarıyor."),
+  ("Months later and {title} is everywhere?? Sleeper hit", "Aylar sonra {title} her yerde mi?? Sinsi hit"),
+ ],
+ 'topArtistNo1': [
+  ("{name} is the #1 artist in the world this week 🌍", "{name} bu hafta dünyanın #1 sanatçısı 🌍"),
+  ("Biggest artist on the planet: {name}. Facts.", "Gezegendeki en büyük sanatçı: {name}. Gerçek bu."),
+  ("Number one artist. We built this together.", "Bir numaralı sanatçı. Bunu birlikte kurduk."),
+ ],
 }

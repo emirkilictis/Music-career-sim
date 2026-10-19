@@ -774,6 +774,41 @@ class YearEndRow {
   final int weeksOn;
 }
 
+/// What the player has to show for a career beyond awards (docs K116):
+/// records held, best year-end places, music show wins, the top artists
+/// chart.
+class HonorsView {
+  HonorsView({
+    required this.recordsHeld,
+    required this.bestYearEndSong,
+    required this.bestYearEndAlbum,
+    required this.musicShowWins,
+    required this.tripleCrowns,
+    required this.bestArtistRank,
+    required this.weeksTopArtist,
+  });
+
+  /// Records the player holds right now.
+  final List<RecordKind> recordsHeld;
+
+  /// Best year-end places on the US charts: (rank, year, title), or null.
+  final (int, int, String)? bestYearEndSong;
+  final (int, int, String)? bestYearEndAlbum;
+  final int musicShowWins;
+  final int tripleCrowns;
+
+  /// Best place on the top artists chart (0: never) and weeks at #1.
+  final int bestArtistRank;
+  final int weeksTopArtist;
+
+  bool get isEmpty =>
+      recordsHeld.isEmpty &&
+      bestYearEndSong == null &&
+      bestYearEndAlbum == null &&
+      musicShowWins == 0 &&
+      bestArtistRank == 0;
+}
+
 /// One week of the K-pop music show (docs K114).
 class MusicShowRow {
   MusicShowRow.of(World w, MusicShowWeek x)

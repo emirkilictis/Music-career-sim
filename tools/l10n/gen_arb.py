@@ -1124,6 +1124,15 @@ k('deluxeOut','The deluxe edition of “{title}” is out!','“{title}” albü
 k('errorDeluxeOut','This album already had its deluxe edition.','Bu albümün deluxe sürümü zaten çıktı.')
 k('errorDeluxeTracks','Pick 1–6 bonus tracks.','1–6 bonus parça seç.')
 
+# Honours (docs K116)
+k('honorsSection','Honours','Onurlar')
+k('honorsEmpty','Records, year-end places and chart runs show up here.','Rekorlar, yıl sonu sıraları ve liste başarıları burada görünür.')
+k('honorsRecords','Records held: {list}','Elindeki rekorlar: {list}', list='String')
+k('honorsYearEndSong','Best year-end song: #{rank} in {year} (“{title}”)','En iyi yıl sonu şarkısı: {year} yılında #{rank} (“{title}”)', rank='int', year='int', title='String')
+k('honorsYearEndAlbum','Best year-end album: #{rank} in {year} (“{title}”)','En iyi yıl sonu albümü: {year} yılında #{rank} (“{title}”)', rank='int', year='int', title='String')
+k('honorsMusicShow','Music Peak: {wins} wins, {crowns} Triple Crowns','Music Peak: {wins} galibiyet, {crowns} Triple Crown', wins='int', crowns='int')
+k('honorsArtistRank','Top artists: best #{rank}, {weeks} weeks at #1','En iyi sanatçılar: en iyi #{rank}, #1’de {weeks} hafta', rank='int', weeks='int')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

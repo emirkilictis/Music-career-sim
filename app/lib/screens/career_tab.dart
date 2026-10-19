@@ -29,6 +29,7 @@ class CareerScreen extends StatefulWidget {
 class _CareerScreenState extends State<CareerScreen> {
   List<CareerYear> _years = const [];
   List<SongView> _songs = const [];
+  HonorsView? _honors;
   int _loadedRevision = -1;
 
   @override
@@ -45,9 +46,11 @@ class _CareerScreenState extends State<CareerScreen> {
     final career = context.careerRead;
     final years = await career.read(Cmd.careerByYear());
     final songs = await career.read(Cmd.songs());
+    final honors = await career.read(Cmd.honors());
     if (mounted) {
       setState(() {
         _years = years;
+        _honors = honors;
         final fmt = context.fmt;
         final week = career.week;
         _songs = songs.where((s) => !s.inVault).toList()
@@ -220,6 +223,42 @@ class _CareerScreenState extends State<CareerScreen> {
             ),
           ]),
         ),
+        if (_honors case final h?) ...[
+          const SizedBox(height: 12),
+          Section(
+            title: l.honorsSection,
+            icon: Icons.military_tech_outlined,
+            child: h.isEmpty
+                ? EmptyNote(l.honorsEmpty)
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                        for (final line in [
+                          if (h.recordsHeld.isNotEmpty)
+                            l.honorsRecords(h.recordsHeld
+                                .map((k) => fmt.recordName(k))
+                                .join(' · ')),
+                          if (h.bestYearEndSong
+                              case (final r, final y, final t))
+                            l.honorsYearEndSong(r, y, t),
+                          if (h.bestYearEndAlbum
+                              case (final r, final y, final t))
+                            l.honorsYearEndAlbum(r, y, t),
+                          if (h.musicShowWins > 0)
+                            l.honorsMusicShow(h.musicShowWins, h.tripleCrowns),
+                          if (h.bestArtistRank > 0)
+                            l.honorsArtistRank(
+                                h.bestArtistRank, h.weeksTopArtist),
+                        ])
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 3),
+                            child: Text(line,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                      ]),
+          ),
+        ],
         const SizedBox(height: 12),
         Section(
           title: l.numberOnes,
