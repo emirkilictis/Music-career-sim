@@ -252,6 +252,9 @@ abstract final class Cmd {
         );
       };
 
+  static SessionCmd<List<BillionsRow>> billionsClub() =>
+      (s) => s.billionsClub;
+
   /// The streaming app's editorial playlists open last week (docs K125).
   static SessionCmd<List<EditorialPlaylist>> editorialPlaylists() =>
       (s) => Editorial.playlists(s.world);

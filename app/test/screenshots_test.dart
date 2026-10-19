@@ -12,6 +12,7 @@ import 'package:music_career_sim/core/commands.dart';
 import 'package:music_career_sim/core/event_lines.dart';
 import 'package:music_career_sim/core/scope.dart';
 import 'package:music_career_sim/screens/charts_tab.dart';
+import 'package:music_career_sim/screens/streamify/editorial_page.dart';
 import 'package:music_career_sim/widgets/art.dart';
 import 'package:music_career_sim/widgets/celebration.dart';
 import 'package:music_career_sim/widgets/media_tile.dart';
@@ -558,6 +559,18 @@ void main() {
     await tester.tap(find.text('Hot Right Now').first);
     await tester.pumpAndSettle();
     await shot(tester, '09i_editorial_playlist');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    // The Billions Club at the end of the row (docs K132).
+    await tester.scrollUntilVisible(find.byType(BillionsCover), 400,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BillionsCover));
+    await tester.pumpAndSettle();
+    await shot(tester, '09j_billions_club');
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));

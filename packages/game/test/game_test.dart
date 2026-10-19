@@ -1315,6 +1315,39 @@ void main() {
       g.close();
     });
 
+    test('play milestones and the Billions Club (K132)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      g.world.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id, campaign: Campaign.standard);
+      g.advanceWeek();
+      // Just short of 100M plays: next week crosses it.
+      final s = g.world.songs[id];
+      s.reg[SongReg.lifeStreams] += Platforms.playMilestones.first /
+              Streamify.share -
+          Platforms.streamifyPlays(g.world, s) / Streamify.share -
+          1000;
+      final hits = g.advanceWeek().events.whereType<StreamMilestone>().toList();
+      expect(hits.length, 1);
+      expect(hits.first.songId, id);
+      expect(hits.first.plays, Platforms.playMilestones.first);
+      expect(Platforms.streamifyPlays(g.world, g.world.songs[id]),
+          greaterThanOrEqualTo(hits.first.plays));
+      // The club: real hits from before, a billion and up, best first.
+      final club = g.billionsClub;
+      expect(club, isNotEmpty);
+      for (var i = 0; i < club.length; i++) {
+        expect(club[i].plays, greaterThanOrEqualTo(Platforms.billionsClub));
+        if (i > 0) expect(club[i].plays, lessThanOrEqualTo(club[i - 1].plays));
+      }
+      g.close();
+    });
+
     test('the radio chart ranks US airplay (K129)', () {
       final g = GameSession.start(slots, _setup());
       g.advanceWeeks(3, stop: SkipStop.never);

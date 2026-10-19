@@ -417,11 +417,10 @@ class _ArtistPageState extends State<ArtistPage> {
                     child: Row(children: [
                       Expanded(
                           child: Text(c.name,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700))),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w700))),
                       Text(l.cityListeners(plays.format(c.listeners.round())),
-                          style:
-                              const TextStyle(color: StreamifyColors.muted)),
+                          style: const TextStyle(color: StreamifyColors.muted)),
                     ]),
                   ),
               ],

@@ -29,6 +29,7 @@ class EventIcon extends StatelessWidget {
       DiscoverPick() => (Icons.auto_awesome_rounded, AppColors.mint),
       AdvanceRecouped() => (Icons.task_alt_rounded, AppColors.mint),
       VideoMilestone() => (Icons.smart_display_rounded, AppColors.coral),
+      StreamMilestone() => (Icons.graphic_eq_rounded, AppColors.mint),
       MusicShowResult(:final won) => won
           ? (Icons.emoji_events_rounded, AppColors.gold)
           : (Icons.tv_rounded, AppColors.lilac),

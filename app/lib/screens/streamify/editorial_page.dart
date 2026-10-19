@@ -223,3 +223,166 @@ class _EditorialPageState extends State<EditorialPage> {
     );
   }
 }
+
+/// The Billions Club cover: black with a gold disc (docs K132).
+class BillionsCover extends StatelessWidget {
+  const BillionsCover({super.key, this.size = 150});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: size,
+        height: size,
+        color: const Color(0xFF141414),
+        padding: EdgeInsets.all(size * 0.09),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            width: size * 0.3,
+            height: size * 0.3,
+            decoration: const BoxDecoration(
+                color: AppColors.gold, shape: BoxShape.circle),
+          ),
+          const Spacer(),
+          Text(context.l10n.billionsClubTitle,
+              maxLines: 2,
+              style: TextStyle(
+                  fontFamily: AppFonts.condensed,
+                  color: AppColors.gold,
+                  fontWeight: FontWeight.w800,
+                  fontSize: size * 0.2,
+                  height: 0.95)),
+        ]),
+      );
+}
+
+/// Every song with a billion plays on the app, the player's marked
+/// (docs K132).
+class BillionsClubPage extends StatefulWidget {
+  const BillionsClubPage({super.key});
+
+  @override
+  State<BillionsClubPage> createState() => _BillionsClubPageState();
+}
+
+class _BillionsClubPageState extends State<BillionsClubPage> {
+  List<BillionsRow>? _rows;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final rows = await context.careerRead.read(Cmd.billionsClub());
+    if (mounted) setState(() => _rows = rows);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final rows = _rows;
+    final career = context.careerRead;
+    return Scaffold(
+      backgroundColor: StreamifyColors.bg,
+      appBar: AppBar(
+          backgroundColor: Colors.transparent, foregroundColor: Colors.white),
+      extendBodyBehindAppBar: true,
+      body: rows == null
+          ? const Center(
+              child: CircularProgressIndicator(color: StreamifyColors.accent))
+          : ListView(padding: EdgeInsets.zero, children: [
+              Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF5A4A12), StreamifyColors.bg],
+                  ),
+                ),
+                padding: const EdgeInsets.fromLTRB(16, 100, 16, 12),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(child: BillionsCover(size: 210)),
+                      const SizedBox(height: 18),
+                      Text(l.billionsClubTitle,
+                          style: const TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.w900)),
+                      const SizedBox(height: 6),
+                      Text(l.billionsClubDesc,
+                          style: const TextStyle(color: StreamifyColors.muted)),
+                      const SizedBox(height: 8),
+                      Text('$platformName · ${l.songsCount(rows.length)}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 13)),
+                    ]),
+              ),
+              if (rows.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(l.billionsClubEmpty,
+                      style: const TextStyle(color: StreamifyColors.muted)),
+                ),
+              for (final (i, r) in rows.indexed)
+                InkWell(
+                  onTap: () => r.isPlayer
+                      ? Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => SongDetailScreen(
+                                  songId: r.songId, state: career)))
+                      : pushInCareer(context, ArtistPage(artistId: r.artistId)),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                    child: Row(children: [
+                      SizedBox(
+                        width: 30,
+                        child: Text('${i + 1}',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: StreamifyColors.muted)),
+                      ),
+                      CoverArt(
+                          seed: songCoverSeed(r.songId, r.coverAlbumId),
+                          songId: r.songId,
+                          albumId: r.coverAlbumId,
+                          size: 48,
+                          radius: 2),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(r.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15.5,
+                                      color: r.isPlayer
+                                          ? StreamifyColors.accent
+                                          : Colors.white)),
+                              Text(
+                                  '${r.artistName} · ${GameTime.yearOf(r.releasedWeek)}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      color: StreamifyColors.muted,
+                                      fontSize: 13)),
+                            ]),
+                      ),
+                      Text(fmt.compact(r.plays),
+                          style: const TextStyle(
+                              color: AppColors.gold,
+                              fontWeight: FontWeight.w800)),
+                    ]),
+                  ),
+                ),
+              const SizedBox(height: 24),
+            ]),
+    );
+  }
+}

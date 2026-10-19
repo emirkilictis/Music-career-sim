@@ -3365,6 +3365,23 @@
       }
     }
   },
+  "smBillionsClub0": "{title} just hit a BILLION streams. Billions Club 💿",
+  "@smBillionsClub0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smBillionsClub1": "One billion plays. I did like 40 million of those.",
+  "smBillionsClub2": "{name} in the Billions Club. We said it from day one.",
+  "@smBillionsClub2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "smWrapped0": "My Wrapped just dropped and it's {name}. Again. {title} on repeat all year 🔁",
   "@smWrapped0": {
     "placeholders": {
@@ -4493,5 +4510,27 @@
         "type": "String"
       }
     }
-  }
+  },
+  "eventBillionsClub": "“{title}” joined the Billions Club: a billion plays on Streamify!",
+  "@eventBillionsClub": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventStreamPlays": "“{title}” passed {plays} plays on Streamify.",
+  "@eventStreamPlays": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "plays": {
+        "type": "String"
+      }
+    }
+  },
+  "billionsClubTitle": "Billions Club",
+  "billionsClubDesc": "Every song with a billion plays on Streamify.",
+  "billionsClubEmpty": "No song has a billion plays yet."
 }

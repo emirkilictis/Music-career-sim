@@ -165,6 +165,16 @@ class VideoMilestone extends GameEvent {
   bool get isMajor => views >= Platforms.billionViews;
 }
 
+/// A player song passed a play count on the streaming app (docs K132);
+/// a billion is the Billions Club.
+class StreamMilestone extends GameEvent {
+  const StreamMilestone(this.songId, this.plays);
+  final int songId;
+  final double plays;
+  @override
+  bool get isMajor => plays >= Platforms.billionsClub;
+}
+
 /// The player's song on the K-pop music show (docs K114): won (its
 /// [wins]th time, a Triple Crown at three in a row) or came second.
 class MusicShowResult extends GameEvent {

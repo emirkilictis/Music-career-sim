@@ -177,8 +177,61 @@ class VideoRow {
   final bool isPlayer;
 }
 
+/// A song in the streaming app's Billions Club (docs K132).
+class BillionsRow {
+  BillionsRow.of(World w, Song s, this.plays)
+      : songId = s.id,
+        title = s.title,
+        artistId = s.primaryArtistId,
+        artistName = w.artists[s.primaryArtistId].name,
+        coverAlbumId = coverAlbumOf(w, s),
+        releasedWeek = s.releasedWeek,
+        isPlayer = s.primaryArtistId == w.playerArtistId;
+  final int songId;
+  final String title;
+  final int artistId;
+  final String artistName;
+  final int coverAlbumId;
+  final int releasedWeek;
+
+  /// All-time plays on the app.
+  final double plays;
+  final bool isPlayer;
+}
+
 abstract final class Platforms {
   static const chartSize = 50;
+
+  /// Play counts on the streaming app the news reports (docs K132), and
+  /// the Billions Club.
+  static const playMilestones = [1e8, 5e8, 1e9, 2e9, 3e9, 5e9];
+  static const billionsClub = 1e9;
+
+  /// All-time plays of [s] on the streaming app, [streamsAgo] streams
+  /// back (its share of every stream, all along).
+  static double streamifyPlays(World w, Song s, {double streamsAgo = 0}) {
+    if (s.releasedWeek < 0) return 0;
+    var life = -streamsAgo;
+    for (var r = 0; r < regionCount; r++) {
+      life += w.songLifetimeStreams(s, r);
+    }
+    return math.max(0, life) * Streamify.share;
+  }
+
+  /// Every song with a billion plays on the app, most played first.
+  static List<BillionsRow> billionsClubOf(World w) {
+    final rows = <BillionsRow>[];
+    for (final s in w.songs) {
+      if (s.releasedWeek < 0) continue;
+      final v = streamifyPlays(w, s);
+      if (v >= billionsClub) rows.add(BillionsRow.of(w, s, v));
+    }
+    rows.sort((a, b) {
+      final d = b.plays.compareTo(a.plays);
+      return d != 0 ? d : a.songId.compareTo(b.songId);
+    });
+    return rows;
+  }
 
   /// Views that make a video certified, and the billion views club (docs
   /// K118).

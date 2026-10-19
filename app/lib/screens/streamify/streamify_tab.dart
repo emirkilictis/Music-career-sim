@@ -190,25 +190,31 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
                   ),
                 ),
               ],
-              // The editors' playlists (docs K125).
-              if (_editorial.isNotEmpty) ...[
-                const SizedBox(height: 26),
-                Text(l.edTitle, style: h),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 150,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _editorial.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (context, i) => InkWell(
-                      onTap: () => pushInCareer(
-                          context, EditorialPage(playlist: _editorial[i])),
-                      child: EditorialCover(playlist: _editorial[i], size: 140),
-                    ),
-                  ),
+              // The editors' playlists (docs K125) and the Billions Club
+              // (K132).
+              const SizedBox(height: 26),
+              Text(l.edTitle, style: h),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 150,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _editorial.length + 1,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, i) => i == _editorial.length
+                      ? InkWell(
+                          onTap: () =>
+                              pushInCareer(context, const BillionsClubPage()),
+                          child: const BillionsCover(size: 140),
+                        )
+                      : InkWell(
+                          onTap: () => pushInCareer(
+                              context, EditorialPage(playlist: _editorial[i])),
+                          child: EditorialCover(
+                              playlist: _editorial[i], size: 140),
+                        ),
                 ),
-              ],
+              ),
               const SizedBox(height: 22),
               Text(l.yourTopTracks, style: h),
               const SizedBox(height: 8),

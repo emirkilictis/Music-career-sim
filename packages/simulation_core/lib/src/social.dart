@@ -78,6 +78,7 @@ enum FanTopic {
   topArtistNo1,
   wrapped,
   surpriseDrop,
+  billionsClub,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.

@@ -1,6 +1,7 @@
 import 'package:simulation_core/simulation_core.dart';
 
 import 'events.dart';
+import 'platforms.dart';
 
 /// Fans react to the player's week in the feed (docs K93): a release, a
 /// #1, a review, the awards, a scandal, a long silence.
@@ -139,6 +140,10 @@ abstract final class SocialFeed {
         case SurpriseDrop(:final albumId):
           fan(FanTopic.surpriseDrop, albumId: albumId);
           fan(FanTopic.surpriseDrop, albumId: albumId);
+        case StreamMilestone(:final songId, :final plays)
+            when plays >= Platforms.billionsClub:
+          fan(FanTopic.billionsClub, songId: songId);
+          fan(FanTopic.billionsClub, songId: songId);
         case WrappedOut(:final topSongId):
           fan(FanTopic.wrapped, songId: topSongId);
           fan(FanTopic.wrapped, songId: topSongId);

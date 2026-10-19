@@ -212,6 +212,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       DiscoverPick() => 'discover mix: song ${e.songId}',
       AdvanceRecouped() => 'advance recouped (${e.label.name})',
       VideoMilestone() => 'video ${e.songId} passed ${e.views} views',
+      StreamMilestone() => 'song ${e.songId} passed ${e.plays} plays',
       MusicShowResult() => e.won
           ? 'music show win #${e.wins} song ${e.songId}'
           : 'music show 2nd song ${e.songId}',

@@ -1261,6 +1261,13 @@ k('creatorsCaughtOn','The creator campaign started a real trend!','İçerik üre
 k('creatorsFlopped','The creator campaign did not catch on.','İçerik üretici kampanyası tutmadı.')
 k('eventCreatorsFlopped','The paid TikTak videos for “{title}” did not start a trend.','“{title}” için çektirilen TikTak videoları trend başlatmadı.', title='String')
 
+# Billions Club (K132)
+k('eventBillionsClub','“{title}” joined the Billions Club: a billion plays on Streamify!','“{title}” Milyarlar Kulübü’ne girdi: Streamify’da bir milyar dinlenme!', title='String')
+k('eventStreamPlays','“{title}” passed {plays} plays on Streamify.','“{title}” Streamify’da {plays} dinlenmeyi geçti.', title='String', plays='String')
+k('billionsClubTitle','Billions Club','Milyarlar Kulübü')
+k('billionsClubDesc','Every song with a billion plays on Streamify.','Streamify’da bir milyar dinlenmeyi geçen her şarkı.')
+k('billionsClubEmpty','No song has a billion plays yet.','Henüz bir milyar dinlenmeye ulaşan şarkı yok.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

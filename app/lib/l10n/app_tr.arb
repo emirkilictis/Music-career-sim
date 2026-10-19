@@ -1019,6 +1019,9 @@
   "smSurpriseDrop0": "UYANIN. {name} hiç haber vermeden {title} yayınladı",
   "smSurpriseDrop1": "Teaser yok, tarih yok, direkt {title}. İyi değilim 😭",
   "smSurpriseDrop2": "Bütün planlarımı iptal ettim. {title} baştan sona, şimdi.",
+  "smBillionsClub0": "{title} MİLYAR stream'e ulaştı. Milyarlar Kulübü 💿",
+  "smBillionsClub1": "Bir milyar dinlenme. Bunun 40 milyonu bende.",
+  "smBillionsClub2": "{name} Milyarlar Kulübü'nde. İlk günden söylüyorduk.",
   "smWrapped0": "Wrapped geldi ve yine {name}. Bütün yıl {title} tekrarda 🔁",
   "smWrapped1": "{name} dinleyicilerinin ilk %0.1'indeyim. Hiç pişman değilim.",
   "smWrapped2": "Bu yıl en çok dinlediğim şarkı {title}. Belliydi.",
@@ -1306,5 +1309,10 @@
   "creatorsRunning": "TikTak'te {count} içerik üretici: {weeks} haftanın {week}. haftası",
   "creatorsCaughtOn": "İçerik üretici kampanyası gerçek bir trend başlattı!",
   "creatorsFlopped": "İçerik üretici kampanyası tutmadı.",
-  "eventCreatorsFlopped": "“{title}” için çektirilen TikTak videoları trend başlatmadı."
+  "eventCreatorsFlopped": "“{title}” için çektirilen TikTak videoları trend başlatmadı.",
+  "eventBillionsClub": "“{title}” Milyarlar Kulübü’ne girdi: Streamify’da bir milyar dinlenme!",
+  "eventStreamPlays": "“{title}” Streamify’da {plays} dinlenmeyi geçti.",
+  "billionsClubTitle": "Milyarlar Kulübü",
+  "billionsClubDesc": "Streamify’da bir milyar dinlenmeyi geçen her şarkı.",
+  "billionsClubEmpty": "Henüz bir milyar dinlenmeye ulaşan şarkı yok."
 }

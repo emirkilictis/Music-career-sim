@@ -1873,6 +1873,9 @@ class GameSession {
     }
   }
 
+  /// The streaming app's Billions Club (docs K132).
+  List<BillionsRow> get billionsClub => Platforms.billionsClubOf(world);
+
   /// Years with a Wrapped (docs K123), newest first: out already, and the
   /// player had plays in them.
   List<int> get wrappedYears {
@@ -2379,6 +2382,21 @@ class GameSession {
             streamsAgo: w.songWeekStreamsIn(s, ChartMarket.global));
         for (final m in Platforms.videoMilestones) {
           if (before < m && now >= m) events.add(VideoMilestone(id, m));
+        }
+      }
+    }
+    // Play counts on the streaming app (docs K132), catalog songs too.
+    if (MusicPlatform.streamify.openIn(GameTime.yearOf(r.week))) {
+      for (final id in w.playerSongIds) {
+        final s = w.songs[id];
+        if (s.status != SongStatus.active && s.status != SongStatus.dormant) {
+          continue;
+        }
+        final now = Platforms.streamifyPlays(w, s);
+        final before = Platforms.streamifyPlays(w, s,
+            streamsAgo: w.songWeekStreamsIn(s, ChartMarket.global));
+        for (final m in Platforms.playMilestones) {
+          if (before < m && now >= m) events.add(StreamMilestone(id, m));
         }
       }
     }

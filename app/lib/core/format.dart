@@ -769,6 +769,9 @@ class Fmt {
               : wins == 1
                   ? l.eventMusicShowFirstWin(t, line.title2)
                   : l.eventMusicShowWin(t, wins),
+      StreamMilestone(:final plays) => plays == Platforms.billionsClub
+          ? l.eventBillionsClub(t)
+          : l.eventStreamPlays(t, compact(plays)),
       VideoMilestone(:final views) => views >= Platforms.billionViews * 2
           ? l.eventVideoViews(t, compact(views))
           : views >= Platforms.billionViews

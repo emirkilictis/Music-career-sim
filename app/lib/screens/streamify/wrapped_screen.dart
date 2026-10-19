@@ -157,8 +157,7 @@ class _WrappedScreenState extends State<WrappedScreen> {
                               radius: 2),
                           const SizedBox(width: 14),
                           Expanded(
-                            child: _Big(
-                                context.fmt.compact(v.topAlbumPlays),
+                            child: _Big(context.fmt.compact(v.topAlbumPlays),
                                 l.wrappedPlays,
                                 dark: true),
                           ),
@@ -284,8 +283,9 @@ class _Summary extends StatelessWidget {
                 style: const TextStyle(color: _C.ink, fontSize: 13.5)),
             if (growth != null) ...[
               const SizedBox(height: 4),
-              Text(l.wrappedGrowth(growth >= 0 ? '+$growth' : '$growth',
-                  v.year - 1),
+              Text(
+                  l.wrappedGrowth(
+                      growth >= 0 ? '+$growth' : '$growth', v.year - 1),
                   style: const TextStyle(
                       color: _C.ink,
                       fontSize: 13.5,
@@ -378,7 +378,8 @@ class _Big extends StatelessWidget {
               height: 1,
               fontWeight: FontWeight.w800)),
       Text(caption,
-          style: TextStyle(color: c, fontSize: 14, fontWeight: FontWeight.w700)),
+          style:
+              TextStyle(color: c, fontSize: 14, fontWeight: FontWeight.w700)),
     ]);
   }
 }
@@ -409,21 +410,20 @@ class _SongLine extends StatelessWidget {
               radius: 2),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(song.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15.5,
-                          fontWeight: FontWeight.w800)),
-                  Text(context.l10n.wrappedSongPlays(
-                      context.fmt.compact(song.plays)),
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 13)),
-                ]),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(song.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15.5,
+                      fontWeight: FontWeight.w800)),
+              Text(
+                  context.l10n
+                      .wrappedSongPlays(context.fmt.compact(song.plays)),
+                  style: const TextStyle(color: Colors.white70, fontSize: 13)),
+            ]),
           ),
         ]),
       );
