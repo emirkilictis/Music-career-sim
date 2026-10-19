@@ -135,6 +135,48 @@ abstract final class StreamingTools {
     w.dirtySongs.add(s.id);
   }
 
+  // ------------------------------------------- creator campaigns (K131)
+
+  /// The short-video app opens; creators can be paid from then on.
+  static const creatorYear = 2018;
+
+  static int creatorCostCents(Artist a, CreatorCampaign c) =>
+      (c.costCents * math.sqrt(Actions.campaignSizeFactor(a))).round();
+
+  /// A released song with no campaign yet, in the short-video era.
+  static bool canRunCreators(World w, Song s) =>
+      GameTime.yearOf(w.week) >= creatorYear &&
+      s.releasedWeek >= 0 &&
+      s.releasedWeek <= w.week &&
+      s.status == SongStatus.active &&
+      s.creatorWeek < 0;
+
+  /// Whether [s]'s creator campaign is on in [week].
+  static bool creatorsActive(Song s, int week) =>
+      s.creatorWeek >= 0 &&
+      week >= s.creatorWeek &&
+      week < s.creatorWeek + CreatorCampaign.weeks;
+
+  /// How much likelier [s] is to start a trend in [week] (1: no campaign).
+  static double creatorChance(Song s, int week) =>
+      creatorsActive(s, week) ? s.creatorTier.chanceFactor : 1;
+
+  /// Pays creators to use [s]'s sound (docs K131).
+  static void runCreators(World w, Artist a, Song s, CreatorCampaign c) {
+    if (!canRunCreators(w, s)) throw ActionException('No creator campaign');
+    final cost = creatorCostCents(a, c);
+    if (cost > a.moneyCents) throw ActionException('Not enough money');
+    a.moneyCents -= cost;
+    s.campaignCostCents += cost;
+    s.creatorWeek = w.week;
+    s.creatorTier = c;
+    s.creatorResult = CreatorResult.running;
+    final era = w.config.viralEraFactor(GameTime.yearOf(w.week));
+    s.viralBoost = math.max(s.viralBoost, c.seed * era);
+    s.viralRamp = math.max(s.viralRamp, 2);
+    w.dirtySongs.add(s.id);
+  }
+
   // ------------------------------------------------- the algorithm (K119)
 
   /// Algorithmic playlists start: personal discovery mixes, then the

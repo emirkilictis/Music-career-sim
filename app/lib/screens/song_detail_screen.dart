@@ -652,6 +652,45 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         ),
                       ),
                     ],
+                    // Creators on the short-video app (docs K131).
+                    if (s.creatorWeek >= 0) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                          switch (s.creatorResult) {
+                            CreatorResult.running => l.creatorsRunning(
+                                s.creatorTier.creators,
+                                widget.state.week - s.creatorWeek + 1,
+                                CreatorCampaign.weeks),
+                            CreatorResult.caughtOn => l.creatorsCaughtOn,
+                            CreatorResult.flopped => l.creatorsFlopped,
+                          },
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: s.creatorResult == CreatorResult.caughtOn
+                                  ? AppColors.mint
+                                  : null)),
+                    ] else if (s.creatorCosts.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(l.creatorsTitle,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text(l.creatorsHint,
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5)),
+                      const SizedBox(height: 6),
+                      Wrap(spacing: 8, runSpacing: 8, children: [
+                        for (final e in s.creatorCosts.entries)
+                          ActionChip(
+                            avatar:
+                                const Icon(Icons.videocam_outlined, size: 16),
+                            label: Text(
+                                '${l.creatorsCount(e.key.creators)} · ${fmt.money(e.value)}'),
+                            onPressed: e.value > widget.state.player.moneyCents
+                                ? null
+                                : () => _tool(Cmd.runCreators(s.id, e.key)),
+                          ),
+                      ]),
+                    ],
                     if (s.autoplayOpen) ...[
                       const SizedBox(height: 10),
                       AutoplayLevelPicker(

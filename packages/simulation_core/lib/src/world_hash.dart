@@ -113,6 +113,9 @@ int worldHash(World w) {
     addInt(s.chartFilterUntil);
     addInt(s.autoplay.index);
     addInt(s.pitchWeek);
+    addInt(s.creatorWeek);
+    addInt(s.creatorTier.index);
+    addInt(s.creatorResult.index);
     for (final (v, wk) in s.versions) {
       addInt(v.index * 100000 + wk);
     }

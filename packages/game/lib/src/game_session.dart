@@ -1306,6 +1306,17 @@ class GameSession {
     _saveNow();
   }
 
+  /// Pays creators on the short-video app to use a song's sound (K131).
+  void runCreators(int songId, CreatorCampaign c) {
+    final s = _ownSong(songId);
+    if (!StreamingTools.canRunCreators(world, s)) {
+      throw GameException('cannotRunCreators', 'No creator campaign now');
+    }
+    _requireMoney(StreamingTools.creatorCostCents(_p, c));
+    StreamingTools.runCreators(world, _p, s, c);
+    _saveNow();
+  }
+
   /// Sets a song's autoplay level (docs K128).
   void setAutoplayLevel(int songId, AutoplayLevel level) {
     final s = _ownSong(songId);
@@ -2438,6 +2449,10 @@ class GameSession {
       if (StreamingTools.pitchAnswerWeek(s) == r.week &&
           s.playlistWeek != r.week) {
         events.add(PitchDeclined(id));
+      }
+      if (s.creatorResult == CreatorResult.flopped &&
+          r.week == s.creatorWeek + CreatorCampaign.weeks - 1) {
+        events.add(CreatorsFlopped(id));
       }
     }
     if (before.eraOpen && !p.eraOpen && p.lastEraResult != null) {

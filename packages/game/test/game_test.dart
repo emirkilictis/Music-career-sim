@@ -1273,6 +1273,48 @@ void main() {
       g.close();
     });
 
+    test('creators paid to use the sound, for four weeks (K131)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2020,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      g.world.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      // Not before it is out.
+      expect(g.song(id).creatorCosts, isEmpty);
+      g.releaseSingle(id);
+      final costs = g.song(id).creatorCosts;
+      expect(costs.keys, CreatorCampaign.values);
+      expect(costs[CreatorCampaign.large]!,
+          greaterThan(costs[CreatorCampaign.small]!));
+      final money = g.player.moneyCents;
+      g.runCreators(id, CreatorCampaign.large);
+      expect(g.player.moneyCents, money - costs[CreatorCampaign.large]!);
+      final s = g.world.songs[id];
+      expect(s.viralBoost, greaterThan(0));
+      expect(StreamingTools.creatorChance(s, g.week), 25);
+      expect(() => g.runCreators(id, CreatorCampaign.small),
+          _code('cannotRunCreators'));
+      // Kept through a save.
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.song(id).creatorTier, CreatorCampaign.large);
+      final events = <GameEvent>[];
+      for (var i = 0; i < CreatorCampaign.weeks; i++) {
+        events.addAll(g.advanceWeek().events);
+      }
+      final result = g.song(id).creatorResult;
+      expect(result, isNot(CreatorResult.running));
+      expect(events.whereType<CreatorsFlopped>().isNotEmpty,
+          result == CreatorResult.flopped);
+      expect(StreamingTools.creatorChance(g.world.songs[id], g.week), 1);
+      g.close();
+    });
+
     test('the radio chart ranks US airplay (K129)', () {
       final g = GameSession.start(slots, _setup());
       g.advanceWeeks(3, stop: SkipStop.never);

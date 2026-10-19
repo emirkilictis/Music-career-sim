@@ -304,6 +304,9 @@ abstract final class Cmd {
 
   static SessionCmd<void> upgradeRadio(int id, RadioPush to) =>
       (s) => s.upgradeRadio(id, to);
+
+  static SessionCmd<void> runCreators(int id, CreatorCampaign c) =>
+      (s) => s.runCreators(id, c);
   static SessionCmd<void> pitchSong(int id) => (s) => s.pitchSong(id);
   static SessionCmd<PostOutcome> post(PostKind kind, {int songId = -1}) =>
       (s) => s.post(kind, songId: songId);

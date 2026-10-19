@@ -231,6 +231,8 @@ abstract final class Codec {
     'bots', 'autoplay', 'pitchWeek',
     'videoWeek', 'videoBase',
     'sources', 'preSaves',
+    // Added in schema v26.
+    'creator',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -275,6 +277,13 @@ abstract final class Codec {
         s.streamsAtVideo,
         s.streamSources == null ? null : jsonEncode(s.streamSources),
         s.preSaves,
+        s.creatorWeek < 0
+            ? null
+            : jsonEncode([
+                s.creatorWeek,
+                s.creatorTier.index,
+                s.creatorResult.index,
+              ]),
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -320,6 +329,13 @@ abstract final class Codec {
     s.videoWeek = r['videoWeek'] as int? ?? -1;
     s.streamsAtVideo = (r['videoBase'] as num?)?.toDouble() ?? 0;
     s.preSaves = (r['preSaves'] as num?)?.toDouble() ?? 0;
+    if (r['creator'] case final String x when x.isNotEmpty) {
+      final v = (jsonDecode(x) as List).cast<int>();
+      s
+        ..creatorWeek = v[0]
+        ..creatorTier = CreatorCampaign.values[v[1]]
+        ..creatorResult = CreatorResult.values[v[2]];
+    }
     if (r['sources'] case final String x when x.isNotEmpty) {
       s.streamSources = Float64List.fromList(
           [for (final v in jsonDecode(x) as List) (v as num).toDouble()]);

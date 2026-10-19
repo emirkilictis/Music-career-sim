@@ -285,15 +285,30 @@ class Simulator {
       final videoViral = 1 + 2 * s.videoPower * (viralEra > 0 ? 1 : 0);
       // Songs people already hear catch on far more often: an unknown
       // artist rarely goes viral, and smaller when it happens (docs T12).
-      final viralReach = c.viralReach(fans, cas);
+      final ownReach = c.viralReach(fans, cas);
+      // Paid creators bring their own audiences (docs K131).
+      final viralReach = StreamingTools.creatorsActive(s, w.week)
+          ? math.max(ownReach, s.creatorTier.reach)
+          : ownReach;
       if (r.chance(c.viralWeeklyChance *
           p.kind.viral *
           viralEra *
           (0.3 + 2 * s.virality) *
           videoViral *
-          viralReach)) {
+          viralReach *
+          StreamingTools.creatorChance(s, w.week))) {
         _startViral(s, r, viralEra, reach: viralReach);
         virals.add(s.id);
+        // Paid creators started a real trend (docs K131).
+        if (StreamingTools.creatorsActive(s, w.week)) {
+          s.creatorResult = CreatorResult.caughtOn;
+        }
+      }
+      if (s.creatorResult == CreatorResult.running &&
+          s.creatorWeek >= 0 &&
+          w.week >= s.creatorWeek + CreatorCampaign.weeks - 1 &&
+          !StreamingTools.creatorsActive(s, w.week + 1)) {
+        s.creatorResult = CreatorResult.flopped;
       }
 
       // Chart feedback favours the very top (playlists, radio adds, press);

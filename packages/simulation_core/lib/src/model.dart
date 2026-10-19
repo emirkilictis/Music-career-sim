@@ -207,6 +207,54 @@ enum RadioPush {
   }
 }
 
+/// Paid creator campaigns on the short-video app (docs K131): creators
+/// are paid to use a song's sound. For [CreatorCampaign.weeks] the song is
+/// far likelier to start a real trend ([chanceFactor]), and the paid
+/// videos alone give a small [seed] of viral listening. Index order is
+/// stored in saves: only append.
+enum CreatorCampaign {
+  small(
+      costCents: 1000000,
+      creators: 25,
+      chanceFactor: 4,
+      seed: 0.004,
+      reach: 0.3),
+  medium(
+      costCents: 5000000,
+      creators: 120,
+      chanceFactor: 10,
+      seed: 0.008,
+      reach: 0.5),
+  large(
+      costCents: 20000000,
+      creators: 500,
+      chanceFactor: 25,
+      seed: 0.014,
+      reach: 0.8);
+
+  const CreatorCampaign(
+      {required this.costCents,
+      required this.creators,
+      required this.chanceFactor,
+      required this.seed,
+      required this.reach});
+
+  /// The creators' own audiences: a trend reaches at least this far
+  /// however small the artist (see [SimConfig.viralReach]).
+  final double reach;
+
+  /// Price for an artist of ~1.5M listeners (scales like radio).
+  final int costCents;
+  final int creators;
+  final double chanceFactor;
+  final double seed;
+
+  static const weeks = 4;
+}
+
+/// How a creator campaign went. Index order is stored in saves.
+enum CreatorResult { running, caughtOn, flopped }
+
 /// Autoplay levels (docs K96, K128): how much more the algorithm plays a
 /// song ([lift] on its autoplay listening) for what share of the usual
 /// royalty. Index order is stored in saves: only append; [ladder] is the
@@ -708,6 +756,12 @@ class Song with Charted {
 
   /// Week the player pitched it to the playlist editors (docs K97), -1.
   int pitchWeek = -1;
+
+  /// A paid creator campaign on the short-video app (docs K131): when it
+  /// started (-1: none), how big, and how it went.
+  int creatorWeek = -1;
+  CreatorCampaign creatorTier = CreatorCampaign.small;
+  CreatorResult creatorResult = CreatorResult.running;
 
   /// Pre-saves it came out with (docs K121): they play it in its first
   /// weeks.

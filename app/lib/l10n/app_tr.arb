@@ -1299,5 +1299,12 @@
   "listenersHistory": "Aylık dinleyiciler",
   "weeksAgo": "{weeks} hafta önce",
   "topCities": "En çok dinlenen şehirler",
-  "cityListeners": "{count} dinleyici"
+  "cityListeners": "{count} dinleyici",
+  "creatorsTitle": "TikTak'te içerik üretici kampanyası",
+  "creatorsHint": "4 hafta boyunca içerik üreticilere şarkının sesiyle video çektir: biraz dinlenme kesin, gerçek bir trend olma şansı çok daha yüksek. Akılda kalan, viral şarkılar patlar; diğerleri tutmayabilir.",
+  "creatorsCount": "{count} içerik üretici",
+  "creatorsRunning": "TikTak'te {count} içerik üretici: {weeks} haftanın {week}. haftası",
+  "creatorsCaughtOn": "İçerik üretici kampanyası gerçek bir trend başlattı!",
+  "creatorsFlopped": "İçerik üretici kampanyası tutmadı.",
+  "eventCreatorsFlopped": "“{title}” için çektirilen TikTak videoları trend başlatmadı."
 }

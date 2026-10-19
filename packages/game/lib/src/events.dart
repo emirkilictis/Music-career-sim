@@ -447,6 +447,14 @@ class PitchDeclined extends GameEvent {
   bool get isMajor => false;
 }
 
+/// The paid creators did not start a trend (docs K131).
+class CreatorsFlopped extends GameEvent {
+  const CreatorsFlopped(this.songId);
+  final int songId;
+  @override
+  bool get isMajor => false;
+}
+
 /// The player is up for Golden Record Awards (docs K91).
 class AwardNominated extends GameEvent {
   const AwardNominated(this.year, this.categories);

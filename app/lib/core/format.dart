@@ -857,6 +857,7 @@ class Fmt {
       RivalBotsCaught() =>
         l.eventRivalBotsCaught(line.artistName, t, compact(e.removed)),
       PitchDeclined() => l.eventPitchDeclined(t),
+      CreatorsFlopped() => l.eventCreatorsFlopped(t),
       BrandDealBroken() =>
         l.eventBrandDealBroken(e.brand.name, money(e.lostCents)),
       AwardWinners() => l.eventAwardWinners(

@@ -1883,6 +1883,22 @@ void streamingToolTests() {
     expect(perStreamOn, lessThan(perStreamOff * 0.85));
   });
 
+  test('paid creators can start a trend even for an unknown (K131)', () {
+    // Without creators an unknown's song almost never trends (about 0.1%
+    // a month); a large campaign makes it about one in four.
+    var caught = 0;
+    for (var seed = 1; seed <= 8; seed++) {
+      final paid = _newcomerSingle(seed,
+          extra: (w, p, s) =>
+              StreamingTools.runCreators(w, p, s, CreatorCampaign.large),
+          weeks: CreatorCampaign.weeks);
+      expect(paid.s.creatorResult, isNot(CreatorResult.running));
+      if (paid.s.creatorResult == CreatorResult.caughtOn) caught++;
+    }
+    printOnFailure('caught $caught of 8');
+    expect(caught, inInclusiveRange(1, 6));
+  });
+
   test('a pitch can land an editorial playlist, once per song (K97)', () {
     var landed = 0;
     for (var seed = 11; seed < 23; seed++) {

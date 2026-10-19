@@ -4459,5 +4459,39 @@
         "type": "String"
       }
     }
+  },
+  "creatorsTitle": "Creator campaign on TikTak",
+  "creatorsHint": "Pay creators to make videos with the sound for 4 weeks: a little listening for sure, and a much better chance it becomes a real trend. Catchy, viral songs take off; others may not.",
+  "creatorsCount": "{count} creators",
+  "@creatorsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "creatorsRunning": "{count} creators on TikTak: week {week} of {weeks}",
+  "@creatorsRunning": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "week": {
+        "type": "int"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "creatorsCaughtOn": "The creator campaign started a real trend!",
+  "creatorsFlopped": "The creator campaign did not catch on.",
+  "eventCreatorsFlopped": "The paid TikTak videos for “{title}” did not start a trend.",
+  "@eventCreatorsFlopped": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
   }
 }

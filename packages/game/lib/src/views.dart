@@ -312,6 +312,16 @@ class SongView {
                       r.rank <= Actions.maxRadioPush(w.player!.label).rank)
                     r: Actions.radioUpgradeCost(w.player!, s, r),
               },
+        creatorWeek = s.creatorWeek,
+        creatorTier = s.creatorTier,
+        creatorResult = s.creatorResult,
+        creatorCosts = s.primaryArtistId != w.playerArtistId ||
+                !StreamingTools.canRunCreators(w, s)
+            ? const {}
+            : {
+                for (final c in CreatorCampaign.values)
+                  c: StreamingTools.creatorCostCents(w.player!, c),
+              },
         canPitch = StreamingTools.canPitch(w, s),
         pitchWeek = s.pitchWeek,
         pitchAnswerWeek = StreamingTools.pitchAnswerWeek(s),
@@ -380,6 +390,14 @@ class SongView {
   /// In the autoplay programme (docs K96), and how far (K128).
   final bool autoplay;
   final AutoplayLevel autoplayLevel;
+
+  /// A creator campaign on the short-video app (docs K131): when it
+  /// started (-1: none), its size, how it went; and what each size costs
+  /// while one can still be run (empty otherwise).
+  final int creatorWeek;
+  final CreatorCampaign creatorTier;
+  final CreatorResult creatorResult;
+  final Map<CreatorCampaign, int> creatorCosts;
 
   /// Last week on the radio (docs K128): plays and stations playing it.
   final double radioSpins;

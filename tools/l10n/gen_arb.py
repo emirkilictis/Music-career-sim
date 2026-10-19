@@ -1252,6 +1252,15 @@ k('weeksAgo','{weeks} weeks ago','{weeks} hafta önce', weeks='int')
 k('topCities','Top cities','En çok dinlenen şehirler')
 k('cityListeners','{count} listeners','{count} dinleyici', count='String')
 
+# Creator campaigns (K131)
+k('creatorsTitle','Creator campaign on TikTak','TikTak\'te içerik üretici kampanyası')
+k('creatorsHint','Pay creators to make videos with the sound for 4 weeks: a little listening for sure, and a much better chance it becomes a real trend. Catchy, viral songs take off; others may not.','4 hafta boyunca içerik üreticilere şarkının sesiyle video çektir: biraz dinlenme kesin, gerçek bir trend olma şansı çok daha yüksek. Akılda kalan, viral şarkılar patlar; diğerleri tutmayabilir.')
+k('creatorsCount','{count} creators','{count} içerik üretici', count='int')
+k('creatorsRunning','{count} creators on TikTak: week {week} of {weeks}','TikTak\'te {count} içerik üretici: {weeks} haftanın {week}. haftası', count='int', week='int', weeks='int')
+k('creatorsCaughtOn','The creator campaign started a real trend!','İçerik üretici kampanyası gerçek bir trend başlattı!')
+k('creatorsFlopped','The creator campaign did not catch on.','İçerik üretici kampanyası tutmadı.')
+k('eventCreatorsFlopped','The paid TikTak videos for “{title}” did not start a trend.','“{title}” için çektirilen TikTak videoları trend başlatmadı.', title='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

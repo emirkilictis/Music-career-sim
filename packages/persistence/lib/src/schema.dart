@@ -5,8 +5,13 @@ import 'codec.dart';
 /// (v1 has not shipped yet, so it is still being shaped.)
 final List<String> migrations = [
   _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, _v13,
-  _v14, _v15, _v16, _v17, _v18, _v19, _v20, _v21, _v22, _v23, _v24, _v25, //
+  _v14, _v15, _v16, _v17, _v18, _v19, _v20, _v21, _v22, _v23, _v24, _v25, _v26, //
 ];
+
+/// v26: creator campaigns on the short-video app (docs K131).
+const _v26 = '''
+ALTER TABLE song ADD COLUMN creator TEXT;
+''';
 
 /// v25: album copies ordered before the release (docs K126).
 const _v25 = '''
