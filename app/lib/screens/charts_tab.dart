@@ -71,6 +71,7 @@ class _ChartsTabState extends State<ChartsTab> {
   int? _yearEndYear;
   List<YearEndRow>? _yearEnd;
   List<int> _yearEndYears = const [];
+  bool _yearEndMine = false;
 
   /// Top artists this week.
   List<ArtistChartRow>? _artists;
@@ -327,6 +328,8 @@ class _ChartsTabState extends State<ChartsTab> {
               chart: _yearEndOf,
               year: _yearEndYear,
               years: _yearEndYears,
+              mineOnly: _yearEndMine,
+              onMine: (v) => setState(() => _yearEndMine = v),
               onChart: (c) {
                 setState(() {
                   _yearEndOf = c;
@@ -767,9 +770,15 @@ class _YearEndBoard extends StatelessWidget {
       required this.years,
       required this.onChart,
       required this.onYear,
-      required this.onOpen});
+      required this.onOpen,
+      required this.mineOnly,
+      required this.onMine});
   final List<YearEndRow>? rows;
   final int chart;
+
+  /// Only the player's entries (F74).
+  final bool mineOnly;
+  final ValueChanged<bool> onMine;
   final int? year;
   final List<int> years;
   final ValueChanged<int> onChart;
@@ -780,7 +789,7 @@ class _YearEndBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final fmt = context.fmt;
-    final list = rows;
+    final list = mineOnly ? rows?.where((r) => r.isPlayer).toList() : rows;
     final albums = Charts.all[chart].kind == ChartKind.albums;
     return Column(children: [
       SizedBox(
@@ -789,6 +798,14 @@ class _YearEndBoard extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 6),
+              child: FilterChip(
+                label: Text(l.yearEndMine),
+                selected: mineOnly,
+                onSelected: onMine,
+              ),
+            ),
             for (final c in YearEnd.charts)
               Padding(
                 padding: const EdgeInsets.only(right: 6),
@@ -883,7 +900,10 @@ class _YearEndBoard extends StatelessWidget {
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                             color: PaperColors.ink)),
-                                    Text(l.yearEndLine(r.peak, r.weeksOn),
+                                    Text(
+                                        albums
+                                            ? '${l.yearEndSold(fmt.compact(r.points.toDouble()))} · ${l.yearEndLine(r.peak, r.weeksOn)}'
+                                            : l.yearEndLine(r.peak, r.weeksOn),
                                         style: const TextStyle(
                                             fontSize: 12.5,
                                             color: PaperColors.muted)),

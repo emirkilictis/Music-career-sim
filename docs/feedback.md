@@ -136,6 +136,7 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F71 | **K-pop'a çok yüklenme; YouTube'a ve Spotify autoplay gibi özelliklere önem ver** (Emir). | ✅ K118 (ViewTube izlenmeleri), K119 (autoplay, Release Radar, Discover Weekly). |
 | F72 | **Bağımsızken albümden para kazandım, şirkete geçince para gelmemeye başladı** (Emir, ekran görüntüsü: haftalık +$0). | ✅ K107 düzeltmesi: sebep avansın geri ödenmesiydi (telifin tamamı avansa gidiyordu) ama oyun bunu anlatmıyordu. Artık şarkı yazarlığı payı (%30) hiç avansa gitmiyor, gerçekteki gibi; hafta kartında "$X telif şirket avansına gitti" yazıyor; avans kapanınca haber geliyor; şirket ekranındaki açıklamalar güncellendi. |
 | F73 | **Yıl sonu listesi listede kalma süresine göre değil puana/satışa göre olsun, albümüm her sene #1 oluyor** (Emir). | ✅ K110 düzeltmesi: yıl sonu listesi artık yıl içindeki haftalık liste puanlarının (albümde birim) toplamına göre. |
+| F74 | **Yılın en çok satan albümlerimi de görmek isterim** (Emir). | ✅ K122: Listeler → Yıl sonu → ABD/Global Albümler → "Sadece benimkiler"; satırlarda o yılki satış. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

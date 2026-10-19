@@ -304,6 +304,8 @@ class SongView {
         streamingOpen = StreamingTools.streamingOpen(w),
         autoplayOpen = StreamingTools.autoplayOpen(w),
         skipRate = StreamingTools.skipRate(s),
+        streamSources = _sources(s),
+        preSaves = s.preSaves,
         autoplayLift = StreamingTools.autoplayLift(
             w.config,
             s,
@@ -382,6 +384,23 @@ class SongView {
   /// radar carry it this week.
   final double skipRate;
   final double autoplayLift;
+
+  /// Pre-saves it came out with (docs K121).
+  final double preSaves;
+
+  /// Last week's listening by [StreamSource], as shares that add up to 1
+  /// (empty when not known: a rival's song, or right after loading;
+  /// docs K120).
+  final List<double> streamSources;
+
+  static List<double> _sources(Song s) {
+    final x = s.streamSources;
+    if (x == null) return const [];
+    final total = x.fold(0.0, (t, v) => t + v);
+    if (total <= 0) return const [];
+    return List.unmodifiable([for (final v in x) v / total]);
+  }
+
   final bool inDiscover;
   final bool inReleaseRadar;
   final List<(SingleFormat, int)> variants;
@@ -1063,6 +1082,7 @@ class ScheduledView {
         radioPush = sr.radioPush,
         paidCents = sr.paidCents,
         buzz = sr.buzz,
+        preSaves = sr.preSaves,
         buzzCap = w.config.announceBuzzCap(sr.type, w.player!.fame);
 
   final int id;
@@ -1092,6 +1112,9 @@ class ScheduledView {
 
   /// Excitement built since the announcement, and its ceiling.
   final double buzz;
+
+  /// Pre-saves on the streaming apps so far (docs K121).
+  final double preSaves;
   final double buzzCap;
   bool get isAlbum => type != AlbumType.single;
 }

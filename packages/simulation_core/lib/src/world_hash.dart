@@ -77,6 +77,7 @@ int worldHash(World w) {
       addInt(sr.releaseWeek);
       addInt(sr.announceWeek);
       addDouble(sr.buzz);
+      addDouble(sr.preSaves);
     }
     addDouble(a.creativeEnergy);
     addInt(a.kind.index);

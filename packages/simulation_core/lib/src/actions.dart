@@ -872,6 +872,9 @@ abstract final class Actions {
             if (w.songs[id].albumId < 0) id
         ];
         if (free.isEmpty) continue;
+        for (final id in free) {
+          w.songs[id].preSaves = sr.preSaves;
+        }
         final al = releaseAlbum(w, a, sr.title, free,
             type: sr.type,
             variantWeeks: sr.variantWeeks,
@@ -886,6 +889,7 @@ abstract final class Actions {
       } else {
         final s = w.songs[sr.songIds.single];
         if (s.isSingle) continue;
+        s.preSaves = sr.preSaves;
         releaseSingle(w, a, s,
             campaign: sr.campaign,
             radio: sr.radioPush,
@@ -898,6 +902,9 @@ abstract final class Actions {
     return out;
   }
 
+  /// Pre-saves start on the streaming apps (docs K121).
+  static const preSaveYear = 2017;
+
   /// Announced releases build buzz until they come out; fans already feel
   /// it (half of it lifts the artist's hype in the meantime).
   static void buildAnnouncedBuzz(World w, Artist a) {
@@ -907,6 +914,15 @@ abstract final class Actions {
       final cap = c.announceBuzzCap(sr.type, a.fame);
       if (sr.buzz < cap) sr.buzz += (cap - sr.buzz) * c.announceBuildRate;
       a.hype = math.max(a.hype, 0.5 * sr.buzz);
+      // Pre-saves on the streaming apps (docs K121): fans first, more as
+      // the buzz grows, up to most of the fans and some listeners.
+      if (GameTime.yearOf(w.week) >= preSaveYear) {
+        final most = a.coreFans * 0.6 + a.casual * 0.05;
+        sr.preSaves = math.min(
+            most,
+            sr.preSaves +
+                (a.coreFans * 0.05 + a.casual * 0.003) * (0.5 + sr.buzz));
+      }
     }
   }
 

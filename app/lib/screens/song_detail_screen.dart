@@ -604,6 +604,19 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                                 const TextStyle(fontWeight: FontWeight.w700)),
                         subtitle: Text(l.autoplayHint),
                       ),
+                    if (s.preSaves >= 1)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(l.preSavesHint(fmt.compact(s.preSaves)),
+                            style: TextStyle(
+                                color: AppColors.textMuted, fontSize: 12.5)),
+                      ),
+                    // Where the listening came from (docs K120).
+                    if (s.streamSources.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      _SourcesBar(shares: s.streamSources),
+                      const SizedBox(height: 8),
+                    ],
                     if (s.autoplayOpen)
                       Text(
                           l.skipRateLine((s.skipRate * 100).round(),
@@ -913,4 +926,61 @@ class ReleaseHeader extends StatelessWidget {
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w600)),
       ]);
+}
+
+/// Last week's listening by source, Spotify for Artists style (K120).
+class _SourcesBar extends StatelessWidget {
+  const _SourcesBar({required this.shares});
+  final List<double> shares;
+
+  static const _colors = [
+    Color(0xFF4B63FF),
+    Color(0xFF8E9BFF),
+    Color(0xFF2BD97C),
+    Color(0xFFF5B83D),
+    Color(0xFFFF5A5F),
+    Color(0xFF9E9E9E),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final names = [
+      l.sourceFans,
+      l.sourceLibrary,
+      l.sourceAlgorithm,
+      l.sourceEditorial,
+      l.sourceViral,
+      l.sourcePromotion,
+    ];
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text(l.sourcesTitle,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+      const SizedBox(height: 6),
+      ClipRRect(
+        borderRadius: BorderRadius.circular(3),
+        child: SizedBox(
+          height: 12,
+          child: Row(children: [
+            for (var i = 0; i < shares.length; i++)
+              if (shares[i] > 0.005)
+                Expanded(
+                    flex: (shares[i] * 1000).round(),
+                    child: ColoredBox(color: _colors[i])),
+          ]),
+        ),
+      ),
+      const SizedBox(height: 6),
+      Wrap(spacing: 12, runSpacing: 4, children: [
+        for (var i = 0; i < shares.length; i++)
+          if (shares[i] >= 0.01)
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              Container(width: 8, height: 8, color: _colors[i]),
+              const SizedBox(width: 4),
+              Text('${names[i]} ${(shares[i] * 100).round()}%',
+                  style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+            ]),
+      ]),
+    ]);
+  }
 }

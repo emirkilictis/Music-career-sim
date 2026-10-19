@@ -5,8 +5,15 @@ import 'codec.dart';
 /// (v1 has not shipped yet, so it is still being shaped.)
 final List<String> migrations = [
   _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, _v13,
-  _v14, _v15, _v16, _v17, _v18, _v19, _v20, _v21, _v22, //
+  _v14, _v15, _v16, _v17, _v18, _v19, _v20, _v21, _v22, _v23, //
 ];
+
+/// v23: where a player song's listening came from last week (docs K120)
+/// and the pre-saves it came out with (K121).
+const _v23 = '''
+ALTER TABLE song ADD COLUMN sources TEXT;
+ALTER TABLE song ADD COLUMN preSaves REAL;
+''';
 
 /// v22: when a song's music video came out (docs K118).
 const _v22 = '''

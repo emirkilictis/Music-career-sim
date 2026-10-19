@@ -1164,6 +1164,23 @@ k('tagDiscover','Discover Weekly','Discover Weekly')
 k('tagReleaseRadar','Release Radar','Release Radar')
 k('eventDiscoverPick','The algorithm picked “{title}” for listeners’ Discover Weekly mixes.','Algoritma “{title}” şarkısını dinleyicilerin Discover Weekly listelerine seçti.', title='String')
 
+# Stream sources (docs K120)
+k('sourcesTitle','Where last week’s listening came from','Geçen haftaki dinlenme nereden geldi')
+k('sourceFans','Fans','Hayranlar')
+k('sourceLibrary','Listeners’ libraries','Dinleyici kütüphaneleri')
+k('sourceAlgorithm','Algorithm','Algoritma')
+k('sourceEditorial','Editorial playlists','Editoryal playlistler')
+k('sourceViral','Viral & video','Viral ve klip')
+k('sourcePromotion','Promotion & radio','Tanıtım ve radyo')
+
+# Pre-saves (docs K121)
+k('preSavesValue','{count} pre-saves','{count} pre-save', count='String')
+k('preSavesHint','Came out with {count} pre-saves: they play it in its first two weeks.','{count} pre-save ile çıktı: ilk iki haftasında dinliyorlar.', count='String')
+
+# Year-end: my releases and sales (F74)
+k('yearEndMine','Only mine','Sadece benimkiler')
+k('yearEndSold','{count} sold','{count} satış', count='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

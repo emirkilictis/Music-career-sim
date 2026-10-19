@@ -544,6 +544,29 @@ class PlannedRelease {
 
 enum PlannedKind { leadSingle, single, album }
 
+/// Where a song's listening comes from (docs K120), Spotify for Artists
+/// style.
+enum StreamSource {
+  /// The artist's fans.
+  fans,
+
+  /// Casual listeners with it in their library.
+  library,
+
+  /// The algorithm: autoplay, discovery mixes, the release radar, word of
+  /// mouth.
+  algorithm,
+
+  /// Editorial playlists.
+  editorial,
+
+  /// Viral trends and the music video.
+  viral,
+
+  /// Campaign, radio, the charts and the buzz around the artist.
+  promotion,
+}
+
 class Song with Charted {
   Song({
     required this.id,
@@ -642,6 +665,14 @@ class Song with Charted {
 
   /// Week the player pitched it to the playlist editors (docs K97), -1.
   int pitchWeek = -1;
+
+  /// Pre-saves it came out with (docs K121): they play it in its first
+  /// weeks.
+  double preSaves = 0;
+
+  /// Last week's listening by where it came from, in [StreamSource]
+  /// order (player songs; not saved; docs K120).
+  Float64List? streamSources;
 
   /// Week its music video came out (-1: none) and the song's streams by
   /// then (docs K118): views before it are audio and lyric uploads.
@@ -991,6 +1022,10 @@ class ScheduledRelease {
   /// Campaign and edition costs paid when it was scheduled.
   final int paidCents;
   double buzz;
+
+  /// Listeners who saved it on the streaming apps before it came out
+  /// (docs K121).
+  double preSaves = 0;
 
   bool get isAlbum => type != AlbumType.single;
   bool get isSurprise => announceWeek >= releaseWeek;

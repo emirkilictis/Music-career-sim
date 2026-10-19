@@ -1235,6 +1235,63 @@ void main() {
       g.close();
     });
 
+    test('stream sources add up and survive a save (K120)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2018,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      g.world.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.setAutoplay(id, true);
+      g.releaseSingle(id);
+      g.advanceWeeks(3, stop: SkipStop.never);
+      final shares = g.song(id).streamSources;
+      expect(shares.length, StreamSource.values.length);
+      expect(shares.reduce((a, b) => a + b), closeTo(1, 1e-9));
+      expect(shares[StreamSource.fans.index], greaterThan(0));
+      expect(shares[StreamSource.algorithm.index], greaterThan(0));
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.song(id).streamSources, hasLength(StreamSource.values.length));
+      g.close();
+    });
+
+    test('pre-saves build while a release is announced (K121)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2018,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      g.world.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.scheduleSingle(id, releaseWeek: g.week + 5, announceWeek: g.week);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      final early = g.scheduled.single.preSaves;
+      expect(early, greaterThan(0));
+      // Kept through a save.
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.scheduled.single.preSaves, early);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      final late = g.scheduled.single.preSaves;
+      expect(late, greaterThan(early));
+      g.advanceWeeks(2, stop: SkipStop.never);
+      expect(g.scheduled, isEmpty);
+      expect(g.song(id).preSaves, greaterThanOrEqualTo(late));
+      final p = g.world.player!;
+      expect(
+          StreamingTools.preSaveLift(g.world.songs[id], p, 0), greaterThan(0));
+      expect(StreamingTools.preSaveLift(g.world.songs[id], p, 2), 0);
+      g.close();
+    });
+
     test('labels: what they ask for, contracts, campaigns, drops', () {
       final g = GameSession.start(slots, _setup(path: CareerPath.smallLabel));
       expect(g.player.label, Label.small);

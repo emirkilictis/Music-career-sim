@@ -315,6 +315,21 @@ class Simulator {
       // People already know a famous artist: a campaign adds less on top
       // of fame (half as much for a household name; docs K81).
       final campExp = _knownCampaign(exposureOf(s), p.fame);
+      // The lifts on top of the campaign, kept apart for the player's
+      // stream sources (docs K120).
+      final hypeLift = 0.5 * p.hype;
+      final womLift = WordOfMouth.lift(w, s, promoAge);
+      final listLift = s.playlistBoost;
+      final versionLift = s.versionBoost;
+      final algoLift =
+          (s.autoplay ? StreamingTools.autoplayLift(c, s, promoAge) : 0.0) +
+              StreamingTools.releaseRadarLift(year, promoAge) +
+              StreamingTools.discoverLift(w, s, w.week) +
+              StreamingTools.preSaveLift(s, p, promoAge);
+      final videoLift = s.videoPower * videoEra;
+      final lifts =
+          hypeLift + womLift + listLift + versionLift + algoLift + videoLift;
+      final stacked = c.stackedLift(lifts);
       final exposure = (c.baseExposure +
               c.fameExposure * p.fame +
               chartBoost +
@@ -328,14 +343,7 @@ class Simulator {
           // Hype, word of mouth, playlists, a new version, autoplay and the
           // video add up with diminishing returns instead of multiplying
           // (docs K105, K108).
-          c.stackedLift(0.5 * p.hype +
-              WordOfMouth.lift(w, s, promoAge) +
-              s.playlistBoost +
-              s.versionBoost +
-              (s.autoplay ? StreamingTools.autoplayLift(c, s, promoAge) : 0.0) +
-              StreamingTools.releaseRadarLift(year, promoAge) +
-              StreamingTools.discoverLift(w, s, w.week) +
-              s.videoPower * videoEra);
+          stacked;
       if (s.playlistWeek == w.week) playlistAdds.add(s.id);
       s.playlistBoost *= c.playlistFade;
       // New versions bring a wave of listening (docs K92).
@@ -378,6 +386,20 @@ class Simulator {
           trackShare;
       s.lastAttention = a;
       songAttention[i] = a;
+      // Where the player's listening came from (docs K120).
+      if (p.tier == ArtistTier.player) {
+        final m = qMult * noise * trackShare;
+        final liftPart = pubPart * (1 - 1 / stacked);
+        double of(double x) => lifts > 0 ? liftPart * x / lifts : 0.0;
+        s.streamSources = Float64List.fromList([
+          fanPart * m,
+          casPart * m,
+          of(algoLift + womLift) * m,
+          of(listLift) * m,
+          (viralPart + of(videoLift)) * m,
+          (pubPart - liftPart + of(hypeLift + versionLift)) * m,
+        ]);
+      }
       final dbg = debugParts;
       if (dbg != null && p.tier == ArtistTier.player) {
         final m = qMult * noise * trackShare;

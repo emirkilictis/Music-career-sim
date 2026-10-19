@@ -223,9 +223,10 @@ abstract final class Codec {
     // Added in schema v13, v17, v18, v19.
     'revenue', 'productionCost', 'gradeSpread', 'radioPush',
     'versions', 'variants', 'versionBoost',
-    // Added in schema v20, v22.
+    // Added in schema v20, v22, v23.
     'bots', 'autoplay', 'pitchWeek',
     'videoWeek', 'videoBase',
+    'sources', 'preSaves',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -268,6 +269,8 @@ abstract final class Codec {
         s.pitchWeek,
         s.videoWeek,
         s.streamsAtVideo,
+        s.streamSources == null ? null : jsonEncode(s.streamSources),
+        s.preSaves,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -312,6 +315,11 @@ abstract final class Codec {
     s.pitchWeek = r['pitchWeek'] as int? ?? -1;
     s.videoWeek = r['videoWeek'] as int? ?? -1;
     s.streamsAtVideo = (r['videoBase'] as num?)?.toDouble() ?? 0;
+    s.preSaves = (r['preSaves'] as num?)?.toDouble() ?? 0;
+    if (r['sources'] case final String x when x.isNotEmpty) {
+      s.streamSources = Float64List.fromList(
+          [for (final v in jsonDecode(x) as List) (v as num).toDouble()]);
+    }
     s
       ..status = SongStatus.values[r['status'] as int]
       ..releasedWeek = r['releasedWeek'] as int
@@ -504,6 +512,7 @@ abstract final class Codec {
             'created': sr.createdWeek,
             'paid': sr.paidCents,
             'buzz': sr.buzz,
+            'ps': sr.preSaves,
           }
       ]);
 
@@ -526,6 +535,6 @@ abstract final class Codec {
               createdWeek: m['created'] as int,
               paidCents: m['paid'] as int,
               buzz: (m['buzz'] as num).toDouble(),
-            ),
+            )..preSaves = (m['ps'] as num?)?.toDouble() ?? 0,
       ];
 }

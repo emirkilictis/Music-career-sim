@@ -152,6 +152,14 @@ abstract final class StreamingTools {
   static double releaseRadarLift(int year, int age) =>
       year >= releaseRadarYear && age >= 0 && age < 2 ? 0.15 : 0;
 
+  /// Pre-saves play a song in its first two weeks (docs K121): up to +50%
+  /// when everyone who might listen saved it.
+  static double preSaveLift(Song s, Artist a, int age) => s.preSaves <= 0 ||
+          age < 0 ||
+          age >= 2
+      ? 0
+      : 0.5 * math.min(1.0, s.preSaves / (a.coreFans + 0.05 * a.casual + 1));
+
   /// Whether the discovery mixes picked [s] in [week]: songs few people
   /// skip, a few weeks out (docs K119).
   static bool discoverPick(World w, Song s, int week) {

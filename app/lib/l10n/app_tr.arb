@@ -1225,5 +1225,16 @@
   "skipRateLine": "Atlanma oranı %{skip} · autoplay şu an %{lift} dinlenme ekler",
   "tagDiscover": "Discover Weekly",
   "tagReleaseRadar": "Release Radar",
-  "eventDiscoverPick": "Algoritma “{title}” şarkısını dinleyicilerin Discover Weekly listelerine seçti."
+  "eventDiscoverPick": "Algoritma “{title}” şarkısını dinleyicilerin Discover Weekly listelerine seçti.",
+  "sourcesTitle": "Geçen haftaki dinlenme nereden geldi",
+  "sourceFans": "Hayranlar",
+  "sourceLibrary": "Dinleyici kütüphaneleri",
+  "sourceAlgorithm": "Algoritma",
+  "sourceEditorial": "Editoryal playlistler",
+  "sourceViral": "Viral ve klip",
+  "sourcePromotion": "Tanıtım ve radyo",
+  "preSavesValue": "{count} pre-save",
+  "preSavesHint": "{count} pre-save ile çıktı: ilk iki haftasında dinliyorlar.",
+  "yearEndMine": "Sadece benimkiler",
+  "yearEndSold": "{count} satış"
 }

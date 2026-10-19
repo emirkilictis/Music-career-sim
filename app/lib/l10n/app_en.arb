@@ -4159,5 +4159,37 @@
         "type": "String"
       }
     }
+  },
+  "sourcesTitle": "Where last week’s listening came from",
+  "sourceFans": "Fans",
+  "sourceLibrary": "Listeners’ libraries",
+  "sourceAlgorithm": "Algorithm",
+  "sourceEditorial": "Editorial playlists",
+  "sourceViral": "Viral & video",
+  "sourcePromotion": "Promotion & radio",
+  "preSavesValue": "{count} pre-saves",
+  "@preSavesValue": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "preSavesHint": "Came out with {count} pre-saves: they play it in its first two weeks.",
+  "@preSavesHint": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "yearEndMine": "Only mine",
+  "yearEndSold": "{count} sold",
+  "@yearEndSold": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }

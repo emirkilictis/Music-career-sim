@@ -544,6 +544,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('Year-end'));
     await shot(tester, '08d_year_end');
+    // The year's best sellers, the player's own (F74).
+    await tester.tap(_ci('US Albums').last);
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Only mine'));
+    await shot(tester, '08h_year_end_mine');
     // All-time records (docs K111).
     await tester.tap(_ci('Records'));
     await shot(tester, '08e_records');
