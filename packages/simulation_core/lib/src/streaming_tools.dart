@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'actions.dart';
 import 'config/charts.dart';
 import 'config/regions.dart';
+import 'config/sim_config.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
@@ -123,6 +124,56 @@ abstract final class StreamingTools {
     s.autoplay = on;
     if (on && s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
     w.dirtySongs.add(s.id);
+  }
+
+  // ------------------------------------------------- the algorithm (K119)
+
+  /// Algorithmic playlists start: personal discovery mixes, then the
+  /// weekly radar of new releases from the artists one follows.
+  static const discoverYear = 2015, releaseRadarYear = 2016;
+
+  /// Weeks after release a song can be picked for discovery mixes.
+  static const discoverFrom = 2, discoverTo = 20;
+
+  /// Share of listeners who skip [s] early: good, catchy songs are
+  /// played through (docs K119).
+  static double skipRate(Song s) =>
+      (0.6 - 0.45 * s.quality / 100 - 0.15 * s.commercial).clamp(0.1, 0.7);
+
+  /// Autoplay's lift for [s] [age] weeks after release: it plays songs
+  /// people finish, and less as they get old (docs K96, K119).
+  static double autoplayLift(SimConfig c, Song s, int age) =>
+      c.autoplayLift *
+      (1 - skipRate(s)) /
+      0.65 *
+      math.max(0.4, math.exp(-math.max(0, age) / 26));
+
+  /// The new-releases radar: followers find a song in its first two weeks.
+  static double releaseRadarLift(int year, int age) =>
+      year >= releaseRadarYear && age >= 0 && age < 2 ? 0.15 : 0;
+
+  /// Whether the discovery mixes picked [s] in [week]: songs few people
+  /// skip, a few weeks out (docs K119).
+  static bool discoverPick(World w, Song s, int week) {
+    if (GameTime.yearOf(week) < discoverYear || s.releasedWeek < 0) {
+      return false;
+    }
+    final age = week - (s.isSingle ? s.singleWeek : s.releasedWeek);
+    if (age < discoverFrom || age > discoverTo) return false;
+    final keep = 1 - skipRate(s);
+    return keyedUnit(w.seed, week, s.id, RngPurpose.discover) <
+        0.03 * keep * keep;
+  }
+
+  /// The discovery mixes' lift on [s] in [week]: each pick lasts a few
+  /// weeks.
+  static double discoverLift(World w, Song s, int week) {
+    var lift = 0.0, f = 0.4;
+    for (var j = 0; j < 6; j++) {
+      if (discoverPick(w, s, week - j)) lift += f;
+      f *= 0.7;
+    }
+    return lift;
   }
 
   // ----------------------------------------------------------------- pitch

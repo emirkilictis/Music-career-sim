@@ -332,7 +332,9 @@ class Simulator {
               WordOfMouth.lift(w, s, promoAge) +
               s.playlistBoost +
               s.versionBoost +
-              (s.autoplay ? c.autoplayLift : 0.0) +
+              (s.autoplay ? StreamingTools.autoplayLift(c, s, promoAge) : 0.0) +
+              StreamingTools.releaseRadarLift(year, promoAge) +
+              StreamingTools.discoverLift(w, s, w.week) +
               s.videoPower * videoEra);
       if (s.playlistWeek == w.week) playlistAdds.add(s.id);
       s.playlistBoost *= c.playlistFade;

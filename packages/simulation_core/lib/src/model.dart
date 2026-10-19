@@ -428,6 +428,9 @@ class Artist {
   int contractAlbums = 0;
   int unrecoupedCents = 0;
 
+  /// What royalties paid back of the advance last week (not saved).
+  int weekRecoupedCents = 0;
+
   /// No longer used: campaign fatigue (K57) was removed. Kept so saves keep
   /// their layout.
   double campaignFatigue = 0;

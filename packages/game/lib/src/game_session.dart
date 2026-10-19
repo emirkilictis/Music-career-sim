@@ -16,7 +16,14 @@ class WeekReport {
     required this.week,
     required this.events,
     required this.moneyDeltaCents,
+    this.recoupedCents = 0,
+    this.unrecoupedCents = 0,
   });
+
+  /// Royalties that went to the label's advance this week, and what is
+  /// still owed (docs K107).
+  final int recoupedCents;
+  final int unrecoupedCents;
 
   /// The week that was simulated (charts and numbers are for this week).
   final int week;
@@ -1434,6 +1441,8 @@ class GameSession {
       week: r.week,
       events: events,
       moneyDeltaCents: p.moneyCents - before.money,
+      recoupedCents: p.weekRecoupedCents,
+      unrecoupedCents: p.unrecoupedCents,
     );
   }
 
@@ -1538,8 +1547,10 @@ class GameSession {
     ];
   }
 
-  /// [year]'s year-end chart of [chartId] (docs K110): points over the
-  /// tracking year, best position and weeks on.
+  /// [year]'s year-end chart of [chartId] (docs K110): what it sold and
+  /// streamed over the tracking year (its weekly chart points: units for
+  /// albums), not how long it stayed (F73), with its best position and
+  /// weeks on.
   List<YearEndRow> yearEnd(int chartId, int year, {int limit = YearEnd.size}) {
     final def = Charts.all[chartId];
     final (from, to) = YearEnd.tracking(year);
@@ -1548,12 +1559,12 @@ class GameSession {
     var rank = 0;
     return [
       for (final r in _store.db.select(
-          'SELECT entityId, SUM(? - position) AS pts, MIN(position) AS peak, '
+          'SELECT entityId, SUM(points) AS pts, MIN(position) AS peak, '
           'COUNT(*) AS weeks FROM chartEntry '
           'WHERE chartId = ? AND week BETWEEN ? AND ? '
           'GROUP BY entityId ORDER BY pts DESC, peak ASC, entityId ASC '
           'LIMIT ?',
-          [def.size + 1, chartId, from, to, limit]))
+          [chartId, from, to, limit]))
         YearEndRow.of(world, kind,
             rank: ++rank,
             entityId: r['entityId'] as int,
@@ -2150,6 +2161,17 @@ class GameSession {
       events.add(RivalAlbumClash(c));
     }
     events.addAll(_recordsBroken(r));
+    // The discovery mixes (docs K119).
+    for (final id in w.playerSongIds) {
+      final s = w.songs[id];
+      if (s.status == SongStatus.active &&
+          StreamingTools.discoverPick(w, s, r.week)) {
+        events.add(DiscoverPick(id));
+      }
+    }
+    if (p.weekRecoupedCents > 0 && p.unrecoupedCents == 0) {
+      events.add(AdvanceRecouped(p.label));
+    }
     // Views milestones on the video site (docs K118).
     if (MusicPlatform.viewTube.openIn(GameTime.yearOf(r.week))) {
       for (final id in w.playerSongIds) {

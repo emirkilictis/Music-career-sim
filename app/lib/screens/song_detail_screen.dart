@@ -570,6 +570,14 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       else if (s.pitchWeek >= 0)
                         Tag(l.pitchDeclinedTag,
                             icon: Icons.playlist_remove_rounded),
+                      // The algorithm (docs K119).
+                      if (s.inDiscover)
+                        Tag(l.tagDiscover,
+                            icon: Icons.auto_awesome_rounded,
+                            color: AppColors.mint),
+                      if (s.inReleaseRadar)
+                        Tag(l.tagReleaseRadar,
+                            icon: Icons.radar_rounded, color: AppColors.mint),
                     ]),
                     if (s.canPitch) ...[
                       const SizedBox(height: 8),
@@ -596,6 +604,12 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                                 const TextStyle(fontWeight: FontWeight.w700)),
                         subtitle: Text(l.autoplayHint),
                       ),
+                    if (s.autoplayOpen)
+                      Text(
+                          l.skipRateLine((s.skipRate * 100).round(),
+                              (s.autoplayLift * 100).round()),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5)),
                     if (s.streamingOpen &&
                         s.releasedWeek >= 0 &&
                         s.botStatus != BotStatus.caught &&

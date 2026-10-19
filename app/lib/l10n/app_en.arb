@@ -3640,7 +3640,7 @@
   "errorNoEnergy": "Not enough creative energy.",
   "errorDealOver": "That deal is over.",
   "dealTitle": "Choose your deal",
-  "dealHint": "The advance is paid back from your royalties first: until it is, your songs and albums pay you nothing.",
+  "dealHint": "The advance is paid back from your recording royalties (70% of them) until it is covered; your songwriting money (30%) always comes to you.",
   "dealLeverage": "Your leverage: {pct}%. More fans than the label asks for get bigger advances and better splits.",
   "@dealLeverage": {
     "placeholders": {
@@ -3677,7 +3677,7 @@
       }
     }
   },
-  "labelUnrecouped": "Advance still to pay back: {amount}. Your royalties go to it first.",
+  "labelUnrecouped": "Advance still to pay back: {amount}. 70% of your royalties go to it until then; songwriting money still comes to you.",
   "@labelUnrecouped": {
     "placeholders": {
       "amount": {
@@ -4119,6 +4119,43 @@
         "type": "String"
       },
       "views": {
+        "type": "String"
+      }
+    }
+  },
+  "weekRecouped": "{money} of royalties went to the label’s advance",
+  "@weekRecouped": {
+    "placeholders": {
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "eventAdvanceRecouped": "Your {label} advance is paid back: from now on your royalties are all yours.",
+  "@eventAdvanceRecouped": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "skipRateLine": "Skip rate {skip}% · autoplay would add {lift}% listening now",
+  "@skipRateLine": {
+    "placeholders": {
+      "skip": {
+        "type": "int"
+      },
+      "lift": {
+        "type": "int"
+      }
+    }
+  },
+  "tagDiscover": "Discover Weekly",
+  "tagReleaseRadar": "Release Radar",
+  "eventDiscoverPick": "The algorithm picked “{title}” for listeners’ Discover Weekly mixes.",
+  "@eventDiscoverPick": {
+    "placeholders": {
+      "title": {
         "type": "String"
       }
     }

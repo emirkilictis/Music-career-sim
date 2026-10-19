@@ -64,13 +64,22 @@ abstract final class Contracts {
     };
   }
 
+  /// Share of the artist's royalties that is songwriting (publishing)
+  /// money: a record label never recoups it (docs K107, F72).
+  static const publishingShare = 0.3;
+
   /// Royalties [cents] (the artist's share) after paying back what is
-  /// left of the advance.
+  /// left of the advance from the recording part; the week's payback is
+  /// kept in [Artist.weekRecoupedCents].
   static double recoup(Artist a, double cents) {
+    a.weekRecoupedCents = 0;
     if (a.unrecoupedCents <= 0 || cents <= 0) return cents;
-    final take = cents < a.unrecoupedCents ? cents : a.unrecoupedCents * 1.0;
+    final recording = cents * (1 - publishingShare);
+    final take =
+        recording < a.unrecoupedCents ? recording : a.unrecoupedCents * 1.0;
     a.unrecoupedCents -= take.round();
     if (a.unrecoupedCents < 0) a.unrecoupedCents = 0;
+    a.weekRecoupedCents = take.round();
     return cents - take;
   }
 }

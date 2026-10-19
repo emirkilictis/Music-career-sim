@@ -1031,7 +1031,7 @@ k('errorDealOver','That deal is over.','Bu anlaşma bitti.')
 
 # Record deals (docs K107)
 k('dealTitle','Choose your deal','Sözleşmeni seç')
-k('dealHint','The advance is paid back from your royalties first: until it is, your songs and albums pay you nothing.','Avans önce telif gelirinden geri ödenir: kapanana kadar şarkı ve albümlerden para gelmez.')
+k('dealHint','The advance is paid back from your recording royalties (70% of them) until it is covered; your songwriting money (30%) always comes to you.','Avans, kapanana kadar kayıt telifinden (gelirin %70’i) geri ödenir; şarkı yazarlığı payın (%30) her zaman sana gelir.')
 k('dealLeverage','Your leverage: {pct}%. More fans than the label asks for get bigger advances and better splits.','Pazarlık gücün: %{pct}. Şirketin istediğinden fazla hayranın varsa avans ve pay büyür.', pct='int')
 k('dealStandard','Standard deal','Standart sözleşme')
 k('dealStandardHint','The label’s usual terms.','Şirketin olağan şartları.')
@@ -1041,7 +1041,7 @@ k('dealBetterSplit','Better split','Yüksek pay')
 k('dealBetterSplitHint','A bigger share of every sale and stream, for a small advance.','Her satış ve stream’den daha büyük pay, küçük bir avansa.')
 k('dealTerms','{advance} advance · {share}% split · {albums} albums','{advance} avans · %{share} pay · {albums} albüm', advance='String', share='int', albums='int')
 k('dealNet','In hand after the buyout: {net}','Sözleşme bedelinden sonra elde: {net}', net='String')
-k('labelUnrecouped','Advance still to pay back: {amount}. Your royalties go to it first.','Geri ödenecek avans: {amount}. Telif gelirin önce buna gidiyor.', amount='String')
+k('labelUnrecouped','Advance still to pay back: {amount}. 70% of your royalties go to it until then; songwriting money still comes to you.','Geri ödenecek avans: {amount}. O zamana kadar telifinin %70’i buna gidiyor; şarkı yazarlığı payın yine sana geliyor.', amount='String')
 k('labelRecouped','Advance paid back: your royalties are all yours.','Avans geri ödendi: telif gelirinin tamamı senin.')
 
 # Word of mouth (docs K108)
@@ -1153,6 +1153,16 @@ k('videoNoVideo','Audio only','Sadece ses')
 k('eventVideoCertified','“{title}” passed 100 million views on ViewTube: certified!','“{title}” ViewTube’da 100 milyon izlenmeyi geçti: onaylı!', title='String')
 k('eventVideoBillion','“{title}” joined the Billion Views Club on ViewTube!','“{title}” ViewTube’da Milyar İzlenme Kulübü’ne girdi!', title='String')
 k('eventVideoViews','“{title}” passed {views} views on ViewTube.','“{title}” ViewTube’da {views} izlenmeyi geçti.', title='String', views='String')
+
+# Recoupment explained (F72)
+k('weekRecouped','{money} of royalties went to the label’s advance','{money} telif şirket avansına gitti', money='String')
+k('eventAdvanceRecouped','Your {label} advance is paid back: from now on your royalties are all yours.','{label} avansın geri ödendi: bundan sonra telif gelirinin tamamı senin.', label='String')
+
+# The streaming algorithm (docs K119)
+k('skipRateLine','Skip rate {skip}% · autoplay would add {lift}% listening now','Atlanma oranı %{skip} · autoplay şu an %{lift} dinlenme ekler', skip='int', lift='int')
+k('tagDiscover','Discover Weekly','Discover Weekly')
+k('tagReleaseRadar','Release Radar','Release Radar')
+k('eventDiscoverPick','The algorithm picked “{title}” for listeners’ Discover Weekly mixes.','Algoritma “{title}” şarkısını dinleyicilerin Discover Weekly listelerine seçti.', title='String')
 
 def write(lang, idx):
     out = {'@@locale': lang}

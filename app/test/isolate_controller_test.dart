@@ -30,7 +30,7 @@ void main() {
     await c.run(Cmd.setJob(Job.cafe));
     await c.run(Cmd.rewardAd());
 
-    final (w, _, delta) = await c.run(Cmd.nextWeek());
+    final (w, _, delta, _) = await c.run(Cmd.nextWeek());
     expect(w, week);
     expect(delta, greaterThan(0));
 

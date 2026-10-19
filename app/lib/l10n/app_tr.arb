@@ -1120,7 +1120,7 @@
   "errorNoEnergy": "Yeterli yaratıcı enerji yok.",
   "errorDealOver": "Bu anlaşma bitti.",
   "dealTitle": "Sözleşmeni seç",
-  "dealHint": "Avans önce telif gelirinden geri ödenir: kapanana kadar şarkı ve albümlerden para gelmez.",
+  "dealHint": "Avans, kapanana kadar kayıt telifinden (gelirin %70’i) geri ödenir; şarkı yazarlığı payın (%30) her zaman sana gelir.",
   "dealLeverage": "Pazarlık gücün: %{pct}. Şirketin istediğinden fazla hayranın varsa avans ve pay büyür.",
   "dealStandard": "Standart sözleşme",
   "dealStandardHint": "Şirketin olağan şartları.",
@@ -1130,7 +1130,7 @@
   "dealBetterSplitHint": "Her satış ve stream’den daha büyük pay, küçük bir avansa.",
   "dealTerms": "{advance} avans · %{share} pay · {albums} albüm",
   "dealNet": "Sözleşme bedelinden sonra elde: {net}",
-  "labelUnrecouped": "Geri ödenecek avans: {amount}. Telif gelirin önce buna gidiyor.",
+  "labelUnrecouped": "Geri ödenecek avans: {amount}. O zamana kadar telifinin %70’i buna gidiyor; şarkı yazarlığı payın yine sana geliyor.",
   "labelRecouped": "Avans geri ödendi: telif gelirinin tamamı senin.",
   "eventCatchingOn": "“{title}” kulaktan kulağa yayılıyor: her hafta daha çok kişi keşfediyor.",
   "tagWordOfMouth": "Kulaktan kulağa",
@@ -1219,5 +1219,11 @@
   "videoNoVideo": "Sadece ses",
   "eventVideoCertified": "“{title}” ViewTube’da 100 milyon izlenmeyi geçti: onaylı!",
   "eventVideoBillion": "“{title}” ViewTube’da Milyar İzlenme Kulübü’ne girdi!",
-  "eventVideoViews": "“{title}” ViewTube’da {views} izlenmeyi geçti."
+  "eventVideoViews": "“{title}” ViewTube’da {views} izlenmeyi geçti.",
+  "weekRecouped": "{money} telif şirket avansına gitti",
+  "eventAdvanceRecouped": "{label} avansın geri ödendi: bundan sonra telif gelirinin tamamı senin.",
+  "skipRateLine": "Atlanma oranı %{skip} · autoplay şu an %{lift} dinlenme ekler",
+  "tagDiscover": "Discover Weekly",
+  "tagReleaseRadar": "Release Radar",
+  "eventDiscoverPick": "Algoritma “{title}” şarkısını dinleyicilerin Discover Weekly listelerine seçti."
 }

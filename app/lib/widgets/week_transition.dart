@@ -3,15 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:game/game.dart' hide Actions;
 
 import '../ui/palette.dart';
+import '../core/scope.dart';
 import 'common.dart';
 
 /// What the week that just ended brought, once it is known.
 class WeekOutcome {
-  const WeekOutcome(this.week, this.moneyDeltaCents) : failed = false;
+  const WeekOutcome(this.week, this.moneyDeltaCents, {this.recoupedCents = 0})
+      : failed = false;
   const WeekOutcome.failed()
       : week = 0,
         moneyDeltaCents = 0,
+        recoupedCents = 0,
         failed = true;
+
+  /// Royalties that paid back the label's advance instead (docs K107).
+  final int recoupedCents;
 
   /// The new current week.
   final int week;
@@ -119,10 +125,21 @@ class _WeekTransitionState extends State<WeekTransition>
                 AnimatedOpacity(
                   opacity: arrived ? 1 : 0,
                   duration: const Duration(milliseconds: 250),
-                  child: Tag(fmt.signedMoney(o?.moneyDeltaCents ?? 0),
-                      color: (o?.moneyDeltaCents ?? 0) >= 0
-                          ? AppColors.mint
-                          : AppColors.coral),
+                  child: Column(children: [
+                    Tag(fmt.signedMoney(o?.moneyDeltaCents ?? 0),
+                        color: (o?.moneyDeltaCents ?? 0) >= 0
+                            ? AppColors.mint
+                            : AppColors.coral),
+                    if ((o?.recoupedCents ?? 0) > 0) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                          context.l10n
+                              .weekRecouped(fmt.money(o!.recoupedCents)),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 12.5, color: AppColors.textMuted)),
+                    ],
+                  ]),
                 ),
                 const SizedBox(height: 16),
                 PillBar(value: _c.value, height: 6),

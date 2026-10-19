@@ -739,6 +739,8 @@ class Fmt {
           : views >= Platforms.billionViews
               ? l.eventVideoBillion(t)
               : l.eventVideoCertified(t),
+      DiscoverPick() => l.eventDiscoverPick(t),
+      AdvanceRecouped(:final label) => l.eventAdvanceRecouped(labelName(label)),
       TopArtist(:final rank) =>
         rank == 1 ? l.eventTopArtistNo1 : l.eventTopArtist(rank),
       RecordBroken(:final kind, :final value) => switch (kind) {

@@ -29,6 +29,9 @@ class CareerState extends ChangeNotifier {
   int lastWeekPlayed = -1;
   int lastMoneyDelta = 0;
 
+  /// Royalties that paid back the label's advance last week (K107).
+  int lastRecouped = 0;
+
   /// Called when a scheduled album comes out (moves its advance cover).
   void Function(int scheduleId, int albumId)? onScheduledAlbumOut;
 
@@ -79,7 +82,9 @@ class CareerState extends ChangeNotifier {
     _setBusy(true);
     before = _player;
     try {
-      final (week, lines, delta) = await controller.run(Cmd.nextWeek());
+      final (week, lines, delta, recouped) =
+          await controller.run(Cmd.nextWeek());
+      lastRecouped = recouped;
       _adoptCovers(lines);
       lastEvents = sortLines(playerNews(lines));
       lastWeekPlayed = week;

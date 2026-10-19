@@ -303,6 +303,19 @@ class SongView {
             s.playlistWeek == StreamingTools.pitchAnswerWeek(s),
         streamingOpen = StreamingTools.streamingOpen(w),
         autoplayOpen = StreamingTools.autoplayOpen(w),
+        skipRate = StreamingTools.skipRate(s),
+        autoplayLift = StreamingTools.autoplayLift(
+            w.config,
+            s,
+            s.releasedWeek < 0
+                ? 0
+                : w.week - (s.isSingle ? s.singleWeek : s.releasedWeek)),
+        inDiscover = s.releasedWeek >= 0 &&
+            StreamingTools.discoverLift(w, s, w.week - 1) > 0.05,
+        inReleaseRadar = s.releasedWeek >= 0 &&
+            StreamingTools.releaseRadarLift(GameTime.yearOf(w.week - 1),
+                    w.week - 1 - (s.isSingle ? s.singleWeek : s.releasedWeek)) >
+                0,
         catchingOn = s.releasedWeek >= 0 &&
             WordOfMouth.lift(w, s,
                     w.week - (s.isSingle ? s.singleWeek : s.releasedWeek)) >=
@@ -363,6 +376,14 @@ class SongView {
 
   /// More people find it every week by word of mouth (docs K108).
   final bool catchingOn;
+
+  /// The streaming algorithm (docs K119): how many skip it, what autoplay
+  /// would add now, and whether the discovery mixes or the new-releases
+  /// radar carry it this week.
+  final double skipRate;
+  final double autoplayLift;
+  final bool inDiscover;
+  final bool inReleaseRadar;
   final List<(SingleFormat, int)> variants;
 
   /// The song's campaign, what the player paid and the income it brought
@@ -701,9 +722,10 @@ class ChartView {
   final List<ChartRow> rows;
 }
 
-/// Year-end charts (docs K110), Billboard style: every week on the chart
-/// earns points, more the higher the position; the tracking year runs
-/// from December to November and the charts come out in early December.
+/// Year-end charts (docs K110), Billboard style: everything a release
+/// sold and streamed over the year (its weekly chart points) counts; the
+/// tracking year runs from December to November and the charts come out
+/// in early December.
 abstract final class YearEnd {
   /// Week of the year the charts come out (early December).
   static const publishWeekOfYear = 48;

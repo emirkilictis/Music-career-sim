@@ -56,9 +56,16 @@ abstract final class Cmd {
   static SessionCmd<(ArtistView, int, Difficulty)> snapshot() =>
       (s) => (s.player, s.week, s.difficulty);
 
-  static SessionCmd<(int, List<EventLine>, int)> nextWeek() => (s) {
+  /// Plays a week: its number, news, money change and what went to the
+  /// label's advance (docs K107).
+  static SessionCmd<(int, List<EventLine>, int, int)> nextWeek() => (s) {
         final r = s.advanceWeek();
-        return (r.week, describeEvents(s, r.events), r.moneyDeltaCents);
+        return (
+          r.week,
+          describeEvents(s, r.events),
+          r.moneyDeltaCents,
+          r.recoupedCents
+        );
       };
 
   /// Skips up to [weeks] weeks (52 = a year), stopping per [stop]; the

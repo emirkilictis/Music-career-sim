@@ -138,6 +138,23 @@ class RivalNumberOne extends GameEvent {
   bool get isIndustry => true;
 }
 
+/// The streaming app's discovery mixes picked a player song (docs K119).
+class DiscoverPick extends GameEvent {
+  const DiscoverPick(this.songId);
+  final int songId;
+  @override
+  bool get isMajor => false;
+}
+
+/// The label's advance is paid back: royalties are all the player's
+/// again (docs K107, F72).
+class AdvanceRecouped extends GameEvent {
+  const AdvanceRecouped(this.label);
+  final Label label;
+  @override
+  bool get isMajor => true;
+}
+
 /// A player's video passed [views] on the video site (docs K118): 100M
 /// is certified, 1B the billion views club.
 class VideoMilestone extends GameEvent {

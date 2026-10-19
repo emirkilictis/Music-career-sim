@@ -80,7 +80,8 @@ class _GameShellState extends State<GameShell> {
     }
     try {
       final lines = await state.nextWeek();
-      outcome?.value = WeekOutcome(state.week, state.lastMoneyDelta);
+      outcome?.value = WeekOutcome(state.week, state.lastMoneyDelta,
+          recoupedCents: state.lastRecouped);
       await shown;
       if (!mounted) return;
       // The biggest moment gets its own screen (feedback E6).

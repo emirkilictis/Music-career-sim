@@ -202,6 +202,7 @@ void main() {
   group('music show (K114)', musicShowTests);
   group('deluxe (K115)', deluxeTests);
   group('features (K117)', featureTests);
+  group('streaming algorithm (K119)', algorithmTests);
   group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
@@ -2033,15 +2034,20 @@ void recordDealTests() {
     expect(p.unrecoupedCents, p.contractAdvanceCents);
     expect(p.contractAlbumsLeft, Label.giant.contractAlbums + 1);
     expect(p.artistShare, closeTo(t.artistShare, 1e-9));
-    // Royalties go to the advance until it is paid back.
+    // The recording royalties go to the advance until it is paid back;
+    // songwriting (30%) is never recouped (F72).
     p.unrecoupedCents = 1000;
-    expect(Contracts.recoup(p, 600), 0);
-    expect(p.unrecoupedCents, 400);
-    expect(Contracts.recoup(p, 600), closeTo(200, 1e-9));
+    expect(Contracts.recoup(p, 600), closeTo(180, 1e-9));
+    expect(p.unrecoupedCents, 580);
+    expect(p.weekRecoupedCents, 420);
+    expect(Contracts.recoup(p, 600), closeTo(180, 1e-9));
+    expect(p.unrecoupedCents, 160);
+    expect(Contracts.recoup(p, 600), closeTo(440, 1e-9));
     expect(p.unrecoupedCents, 0);
     expect(Contracts.recoup(p, 600), 600);
+    expect(p.weekRecoupedCents, 0);
     // A week of a superstar's songs pays some of a big advance back and
-    // nothing into the bank.
+    // the songwriting part into the bank.
     p.unrecoupedCents = 1 << 40;
     for (var i = 0; i < 3; i++) {
       p.creativeEnergy = 100;
@@ -2051,7 +2057,8 @@ void recordDealTests() {
     final bank = p.moneyCents;
     sim.step();
     expect(p.unrecoupedCents, lessThan(1 << 40));
-    expect(p.moneyCents - bank, lessThanOrEqualTo(p.job.wageCents));
+    expect(p.moneyCents - bank, greaterThan(p.job.wageCents));
+    expect(p.weekRecoupedCents, greaterThan(p.moneyCents - bank));
   });
 }
 
@@ -2332,4 +2339,54 @@ void featureTests() {
     expect(() => Features.request(w, p, s, ok),
         throwsA(isA<ActionException>()));
   });
+}
+
+void algorithmTests() {
+  test('good songs are skipped less, autoplay and the mixes favour them', () {
+    final w = WorldGen.create(seed: 119, startYear: 2018);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2018)) {
+      sim.step();
+    }
+    final songs = w.songs.where((s) => s.releasedWeek >= 0).toList();
+    final good = songs.where((s) => s.quality >= 80).toList();
+    final weak = songs.where((s) => s.quality < 50).toList();
+    expect(good, isNotEmpty);
+    expect(weak, isNotEmpty);
+    double mean(List<Song> x, double Function(Song) f) =>
+        x.map(f).reduce((a, b) => a + b) / x.length;
+    expect(mean(good, StreamingTools.skipRate),
+        lessThan(mean(weak, StreamingTools.skipRate)));
+    final c = w.config;
+    expect(mean(good, (s) => StreamingTools.autoplayLift(c, s, 0)),
+        greaterThan(mean(weak, (s) => StreamingTools.autoplayLift(c, s, 0))));
+    // Autoplay helps less as a song gets old.
+    final s = good.first;
+    expect(StreamingTools.autoplayLift(c, s, 52),
+        lessThan(StreamingTools.autoplayLift(c, s, 0)));
+    // The radar: the first two weeks only, from its year.
+    expect(StreamingTools.releaseRadarLift(2018, 0), greaterThan(0));
+    expect(StreamingTools.releaseRadarLift(2018, 2), 0);
+    expect(StreamingTools.releaseRadarLift(2014, 0), 0);
+    // Discovery picks: rare, better songs more often, a lift that fades.
+    var goodPicks = 0, weakPicks = 0;
+    final week = w.week;
+    for (var k = 0; k < 400; k++) {
+      final wk = week + k;
+      for (final x in good) {
+        // Pretend each was a single out ten weeks earlier.
+        if (_pickAt(w, x, wk)) goodPicks++;
+      }
+      for (final x in weak) {
+        if (_pickAt(w, x, wk)) weakPicks++;
+      }
+    }
+    expect(goodPicks / good.length, greaterThan(weakPicks / weak.length));
+  });
+}
+
+bool _pickAt(World w, Song s, int week) {
+  final keep = 1 - StreamingTools.skipRate(s);
+  return keyedUnit(w.seed, week, s.id, RngPurpose.discover) <
+      0.03 * keep * keep;
 }
