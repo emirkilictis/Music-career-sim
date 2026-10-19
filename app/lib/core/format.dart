@@ -734,6 +734,11 @@ class Fmt {
               : wins == 1
                   ? l.eventMusicShowFirstWin(t, line.title2)
                   : l.eventMusicShowWin(t, wins),
+      VideoMilestone(:final views) => views >= Platforms.billionViews * 2
+          ? l.eventVideoViews(t, compact(views))
+          : views >= Platforms.billionViews
+              ? l.eventVideoBillion(t)
+              : l.eventVideoCertified(t),
       TopArtist(:final rank) =>
         rank == 1 ? l.eventTopArtistNo1 : l.eventTopArtist(rank),
       RecordBroken(:final kind, :final value) => switch (kind) {

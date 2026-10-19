@@ -5,8 +5,14 @@ import 'codec.dart';
 /// (v1 has not shipped yet, so it is still being shaped.)
 final List<String> migrations = [
   _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, _v13,
-  _v14, _v15, _v16, _v17, _v18, _v19, _v20, _v21, //
+  _v14, _v15, _v16, _v17, _v18, _v19, _v20, _v21, _v22, //
 ];
+
+/// v22: when a song's music video came out (docs K118).
+const _v22 = '''
+ALTER TABLE song ADD COLUMN videoWeek INTEGER;
+ALTER TABLE song ADD COLUMN videoBase REAL;
+''';
 
 /// v21: the record deal signed and what of its advance is unrecouped
 /// (docs K107).

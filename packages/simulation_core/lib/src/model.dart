@@ -640,6 +640,11 @@ class Song with Charted {
   /// Week the player pitched it to the playlist editors (docs K97), -1.
   int pitchWeek = -1;
 
+  /// Week its music video came out (-1: none) and the song's streams by
+  /// then (docs K118): views before it are audio and lyric uploads.
+  int videoWeek = -1;
+  double streamsAtVideo = 0;
+
   /// Editorial playlist pickup: extra exposure that fades week by week.
   PlaylistAdd playlistAdd = PlaylistAdd.none;
   int playlistWeek = -1;

@@ -210,6 +210,15 @@ abstract final class Cmd {
   static SessionCmd<void> releaseDeluxe(int albumId, List<int> songIds) =>
       (s) => s.releaseDeluxe(albumId, songIds);
 
+  /// The player's videos and the biggest of all time (docs K118).
+  static SessionCmd<(List<VideoRow>, List<VideoRow>)> videos() => (s) => (
+        Platforms.topVideos(s.world, limit: 5, mine: true),
+        [
+          for (final v in Platforms.topVideos(s.world, limit: 15))
+            if (v.views >= Platforms.billionViews) v
+        ],
+      );
+
   /// The player's honours beyond awards (docs K116).
   static SessionCmd<HonorsView> honors() => (s) => s.honors;
 

@@ -25,6 +25,9 @@ class PlatformScreen extends StatefulWidget {
 class _PlatformScreenState extends State<PlatformScreen> {
   PlatformView? _view;
 
+  /// On the video site: the player's videos and the billion club (K118).
+  (List<VideoRow>, List<VideoRow>)? _videos;
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +36,15 @@ class _PlatformScreenState extends State<PlatformScreen> {
 
   Future<void> _load() async {
     final v = await widget.state.read(Cmd.platform(widget.platform));
-    if (mounted) setState(() => _view = v);
+    final videos = widget.platform == MusicPlatform.viewTube
+        ? await widget.state.read(Cmd.videos())
+        : null;
+    if (mounted) {
+      setState(() {
+        _view = v;
+        _videos = videos;
+      });
+    }
   }
 
   @override
@@ -83,6 +94,23 @@ class _PlatformScreenState extends State<PlatformScreen> {
                       style: TextStyle(color: AppColors.textMuted)),
                   const SizedBox(height: 12),
                   if (v != null) _ProfileCard(view: v, color: color),
+                  if (_videos case (final mine, final club)) ...[
+                    if (mine.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      _VideoList(
+                          title: l.videosMine,
+                          rows: mine,
+                          color: color,
+                          state: widget.state),
+                    ],
+                    const SizedBox(height: 16),
+                    _VideoList(
+                        title: l.videosBillion,
+                        rows: club,
+                        color: color,
+                        state: widget.state,
+                        empty: l.videosBillionEmpty),
+                  ],
                   const SizedBox(height: 16),
                   Text(caps(context, l.platformTop(Platforms.chartSize)),
                       style: capsStyle(const TextStyle(
@@ -241,5 +269,77 @@ class _ProfileCard extends StatelessWidget {
         ],
       ]),
     );
+  }
+}
+
+/// Videos with their all-time views (docs K118).
+class _VideoList extends StatelessWidget {
+  const _VideoList(
+      {required this.title,
+      required this.rows,
+      required this.color,
+      required this.state,
+      this.empty});
+  final String title;
+  final List<VideoRow> rows;
+  final Color color;
+  final CareerState state;
+  final String? empty;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text(caps(context, title),
+          style: capsStyle(
+              const TextStyle(fontSize: 16, fontWeight: FontWeight.w800))),
+      const SizedBox(height: 6),
+      if (rows.isEmpty && empty != null)
+        Text(empty!, style: TextStyle(color: AppColors.textFaint)),
+      for (final r in rows)
+        InkWell(
+          onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) =>
+                      SongDetailScreen(songId: r.songId, state: state))),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(children: [
+              CoverArt(
+                  seed: songCoverSeed(r.songId, r.albumId),
+                  size: 44,
+                  radius: 4,
+                  songId: r.songId,
+                  albumId: r.albumId),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(r.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text(
+                          '${r.artistName} · ${l.videosViews(fmt.compact(r.views))}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontSize: 13, color: AppColors.textMuted)),
+                    ]),
+              ),
+              if (r.views >= Platforms.billionViews)
+                Tag('1B+', color: color)
+              else if (r.views >= Platforms.certifiedViews)
+                Tag(l.videoCertified, color: color)
+              else if (!r.hasVideo)
+                Text(l.videoNoVideo,
+                    style: TextStyle(fontSize: 12, color: AppColors.textFaint)),
+            ]),
+          ),
+        ),
+    ]);
   }
 }

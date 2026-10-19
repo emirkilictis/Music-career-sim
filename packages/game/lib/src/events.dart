@@ -138,6 +138,16 @@ class RivalNumberOne extends GameEvent {
   bool get isIndustry => true;
 }
 
+/// A player's video passed [views] on the video site (docs K118): 100M
+/// is certified, 1B the billion views club.
+class VideoMilestone extends GameEvent {
+  const VideoMilestone(this.songId, this.views);
+  final int songId;
+  final double views;
+  @override
+  bool get isMajor => views >= Platforms.billionViews;
+}
+
 /// The player's song on the K-pop music show (docs K114): won (its
 /// [wins]th time, a Triple Crown at three in a row) or came second.
 class MusicShowResult extends GameEvent {

@@ -157,8 +157,71 @@ class PlatformView {
   final double playerBestValue;
 }
 
+/// A music video on the video site (docs K118).
+class VideoRow {
+  VideoRow.of(World w, Song s, this.views)
+      : songId = s.id,
+        title = s.title,
+        artistName = w.artists[s.primaryArtistId].name,
+        albumId = coverAlbumOf(w, s),
+        hasVideo = s.videoBudget >= 0,
+        isPlayer = s.primaryArtistId == w.playerArtistId;
+  final int songId;
+  final String title;
+  final String artistName;
+  final int albumId;
+
+  /// All-time views (an official video, or audio and lyric uploads).
+  final double views;
+  final bool hasVideo;
+  final bool isPlayer;
+}
+
 abstract final class Platforms {
   static const chartSize = 50;
+
+  /// Views that make a video certified, and the billion views club (docs
+  /// K118).
+  static const certifiedViews = 1e8;
+  static const billionViews = 1e9;
+  static const videoMilestones = [certifiedViews, billionViews, 5e9];
+
+  /// All-time views of [s] on the video site (docs K118), [streamsAgo]
+  /// streams back: its share of the song's streams, the music video
+  /// pulling far more than the audio and lyric uploads before it.
+  static double videoViews(World w, Song s, {double streamsAgo = 0}) {
+    if (s.releasedWeek < 0) return 0;
+    final year = math.max(
+        MusicPlatform.viewTube.launchYear, GameTime.yearOf(s.releasedWeek));
+    final share = MusicPlatform.viewTube.streamShare(year);
+    var life = -streamsAgo;
+    for (var r = 0; r < regionCount; r++) {
+      life += w.songLifetimeStreams(s, r);
+    }
+    if (life <= 0) return 0;
+    // Saves before K118: a video counts from the release.
+    final before = s.videoBudget < 0
+        ? life
+        : s.videoWeek < 0
+            ? 0.0
+            : math.min(life, s.streamsAtVideo);
+    return share * (0.6 * before + (0.6 + 2 * s.videoPower) * (life - before));
+  }
+
+  /// The biggest videos of all time, everyone's (docs K118).
+  static List<VideoRow> topVideos(World w,
+      {int limit = 25, bool mine = false}) {
+    final rows = [
+      for (final s in w.songs)
+        if (s.releasedWeek >= 0 &&
+            (!mine || s.primaryArtistId == w.playerArtistId))
+          (s, videoViews(w, s))
+    ]..sort((x, y) => y.$2.compareTo(x.$2));
+    return [
+      for (final (s, v) in rows.take(limit))
+        if (v > 0) VideoRow.of(w, s, v)
+    ];
+  }
 
   /// Followers of [a] on [p] in [year] (docs K82): core fans follow, a
   /// few casual listeners too, more the longer the platform has been

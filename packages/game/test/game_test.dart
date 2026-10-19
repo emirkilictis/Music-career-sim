@@ -1195,6 +1195,46 @@ void main() {
       g.close();
     });
 
+    test('video views: audio first, the official video pulls more (K118)',
+        () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      g.world.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id, campaign: Campaign.none);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      final s = g.world.songs[id];
+      final audio = Platforms.videoViews(g.world, s);
+      expect(audio, greaterThan(0));
+      g.shootVideo(id, VideoBudget.high);
+      // Views so far stay what they were.
+      expect(Platforms.videoViews(g.world, s), closeTo(audio, audio * 1e-9));
+      var last = audio;
+      double gain = 0;
+      for (var i = 0; i < 4; i++) {
+        final before = Platforms.videoViews(g.world, s);
+        g.advanceWeek();
+        final now = Platforms.videoViews(g.world, s);
+        expect(now, greaterThanOrEqualTo(before));
+        gain = now - last;
+        last = now;
+      }
+      // A week of the official video beats a week of audio uploads for
+      // the same streams.
+      final weekStreams = g.world.songWeekStreamsIn(s, ChartMarket.global);
+      final share = MusicPlatform.viewTube.streamShare(2016);
+      expect(gain, greaterThan(0.6 * share * weekStreams));
+      final mine = Platforms.topVideos(g.world, mine: true);
+      expect(mine.first.songId, id);
+      expect(mine.first.hasVideo, isTrue);
+      g.close();
+    });
+
     test('labels: what they ask for, contracts, campaigns, drops', () {
       final g = GameSession.start(slots, _setup(path: CareerPath.smallLabel));
       expect(g.player.label, Label.small);

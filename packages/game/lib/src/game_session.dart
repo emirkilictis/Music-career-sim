@@ -2150,6 +2150,19 @@ class GameSession {
       events.add(RivalAlbumClash(c));
     }
     events.addAll(_recordsBroken(r));
+    // Views milestones on the video site (docs K118).
+    if (MusicPlatform.viewTube.openIn(GameTime.yearOf(r.week))) {
+      for (final id in w.playerSongIds) {
+        final s = w.songs[id];
+        if (s.status != SongStatus.active) continue;
+        final now = Platforms.videoViews(w, s);
+        final before = Platforms.videoViews(w, s,
+            streamsAgo: w.songWeekStreamsIn(s, ChartMarket.global));
+        for (final m in Platforms.videoMilestones) {
+          if (before < m && now >= m) events.add(VideoMilestone(id, m));
+        }
+      }
+    }
     // The K-pop music show (docs K114).
     if (r.musicShow case final show?) {
       if (w.songs[show.songId].primaryArtistId == p.id) {

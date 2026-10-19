@@ -24,6 +24,7 @@ class EventIcon extends StatelessWidget {
       YearEndCharts() => (Icons.workspace_premium_rounded, AppColors.gold),
       RecordBroken() => (Icons.military_tech_rounded, AppColors.gold),
       TopArtist() => (Icons.public_rounded, AppColors.gold),
+      VideoMilestone() => (Icons.smart_display_rounded, AppColors.coral),
       MusicShowResult(:final won) => won
           ? (Icons.emoji_events_rounded, AppColors.gold)
           : (Icons.tv_rounded, AppColors.lilac),

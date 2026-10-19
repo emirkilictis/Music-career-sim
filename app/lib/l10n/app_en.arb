@@ -4082,5 +4082,45 @@
     }
   },
   "errorFeatureRefused": "They said no: out of your league for now.",
-  "errorFeaturesFull": "A song can have two features at most."
+  "errorFeaturesFull": "A song can have two features at most.",
+  "videosMine": "Your videos",
+  "videosBillion": "Billion Views Club",
+  "videosBillionEmpty": "No video has reached a billion views yet.",
+  "videosViews": "{views} views",
+  "@videosViews": {
+    "placeholders": {
+      "views": {
+        "type": "String"
+      }
+    }
+  },
+  "videoCertified": "Certified",
+  "videoNoVideo": "Audio only",
+  "eventVideoCertified": "“{title}” passed 100 million views on ViewTube: certified!",
+  "@eventVideoCertified": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventVideoBillion": "“{title}” joined the Billion Views Club on ViewTube!",
+  "@eventVideoBillion": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventVideoViews": "“{title}” passed {views} views on ViewTube.",
+  "@eventVideoViews": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "views": {
+        "type": "String"
+      }
+    }
+  }
 }

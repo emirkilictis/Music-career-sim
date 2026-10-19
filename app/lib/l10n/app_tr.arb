@@ -1210,5 +1210,14 @@
   "featureLocked": "Senin liginin dışında",
   "featureDone": "{name} “{title}” şarkısında!",
   "errorFeatureRefused": "Hayır dediler: şimdilik senin liginin dışında.",
-  "errorFeaturesFull": "Bir şarkıda en fazla iki feat. olabilir."
+  "errorFeaturesFull": "Bir şarkıda en fazla iki feat. olabilir.",
+  "videosMine": "Kliplerin",
+  "videosBillion": "Milyar İzlenme Kulübü",
+  "videosBillionEmpty": "Henüz hiçbir klip bir milyar izlenmeye ulaşmadı.",
+  "videosViews": "{views} izlenme",
+  "videoCertified": "Onaylı",
+  "videoNoVideo": "Sadece ses",
+  "eventVideoCertified": "“{title}” ViewTube’da 100 milyon izlenmeyi geçti: onaylı!",
+  "eventVideoBillion": "“{title}” ViewTube’da Milyar İzlenme Kulübü’ne girdi!",
+  "eventVideoViews": "“{title}” ViewTube’da {views} izlenmeyi geçti."
 }

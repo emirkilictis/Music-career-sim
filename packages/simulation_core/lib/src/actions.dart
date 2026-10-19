@@ -118,6 +118,11 @@ abstract final class Actions {
         0.15 * a.skills.charisma / 100;
     s.videoBudget = budget.index;
     s.videoPower = budget.basePower * craft;
+    s.videoWeek = w.week;
+    s.streamsAtVideo = s.releasedWeek < 0
+        ? 0
+        : [for (var r = 0; r < regionCount; r++) w.songLifetimeStreams(s, r)]
+            .fold(0.0, (t, x) => t + x);
     w.dirtySongs.add(s.id);
   }
 

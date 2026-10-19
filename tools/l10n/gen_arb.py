@@ -1143,6 +1143,17 @@ k('featureDone','{name} is on “{title}”!','{name} “{title}” şarkısınd
 k('errorFeatureRefused','They said no: out of your league for now.','Hayır dediler: şimdilik senin liginin dışında.')
 k('errorFeaturesFull','A song can have two features at most.','Bir şarkıda en fazla iki feat. olabilir.')
 
+# Video views (docs K118)
+k('videosMine','Your videos','Kliplerin')
+k('videosBillion','Billion Views Club','Milyar İzlenme Kulübü')
+k('videosBillionEmpty','No video has reached a billion views yet.','Henüz hiçbir klip bir milyar izlenmeye ulaşmadı.')
+k('videosViews','{views} views','{views} izlenme', views='String')
+k('videoCertified','Certified','Onaylı')
+k('videoNoVideo','Audio only','Sadece ses')
+k('eventVideoCertified','“{title}” passed 100 million views on ViewTube: certified!','“{title}” ViewTube’da 100 milyon izlenmeyi geçti: onaylı!', title='String')
+k('eventVideoBillion','“{title}” joined the Billion Views Club on ViewTube!','“{title}” ViewTube’da Milyar İzlenme Kulübü’ne girdi!', title='String')
+k('eventVideoViews','“{title}” passed {views} views on ViewTube.','“{title}” ViewTube’da {views} izlenmeyi geçti.', title='String', views='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

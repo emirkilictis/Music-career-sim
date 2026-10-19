@@ -209,6 +209,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       PlaylistAdded() => 'playlist ${e.size.name} song ${e.songId}',
       CatchingOn() => 'word of mouth: song ${e.songId}',
       TopArtist() => 'top artists #${e.rank}',
+      VideoMilestone() => 'video ${e.songId} passed ${e.views} views',
       MusicShowResult() => e.won
           ? 'music show win #${e.wins} song ${e.songId}'
           : 'music show 2nd song ${e.songId}',
