@@ -23,6 +23,7 @@ class EventIcon extends StatelessWidget {
       EraClosed() => (Icons.insights_rounded, AppColors.pink),
       BurnoutOver() => (Icons.edit_note_rounded, AppColors.butter),
       PlatformLaunched() => (Icons.graphic_eq_rounded, AppColors.mint),
+      HolidaySeason() => (Icons.card_giftcard_rounded, AppColors.mint),
       ReleaseOut() => (Icons.rocket_launch_rounded, AppColors.pink),
       LabelOffer() => (Icons.handshake_rounded, AppColors.gold),
       CriticReview() => (Icons.rate_review_rounded, AppColors.sky),

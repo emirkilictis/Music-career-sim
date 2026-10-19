@@ -9,6 +9,8 @@ class SimConfig {
   SimConfig({
     EraTable? era,
     this.publicPool = 324e6,
+    this.fanCapShare = 0.022,
+    this.casualCapShare = 0.25,
     this.globalAudienceScale = 1.8,
     this.outsideAttentionRatio = 0.35,
     this.outsideDownloadRatio = 1.2,
@@ -35,6 +37,11 @@ class SimConfig {
     this.playlistMidBoost = 0.3,
     this.playlistBigBoost = 0.8,
     this.playlistFade = 0.85,
+    this.marketShareKnee = 0.005,
+    this.marketShareCap = 0.012,
+    this.liftCeiling = 2.0,
+    this.momentumSigma = 0.12,
+    this.albumLegsSigma = 0.3,
     this.longAlbumBonus = 0.08,
     this.eventBuyRate = 0.11,
     this.superfanBuyRate = 0.07,
@@ -44,7 +51,7 @@ class SimConfig {
     this.botFiltered = 0.25,
     this.autoplayLift = 0.3,
     this.autoplayRoyalty = 0.7,
-    this.variantDecay = 0.6,
+    this.variantDecay = 0.45,
     this.casualBuyRate = 0.012,
     this.albumSecondWeekRatio = 0.22,
     this.albumWeeklyDecay = 0.86,
@@ -91,6 +98,14 @@ class SimConfig {
 
   /// General public that can be reached by exposure (people, worldwide).
   final double publicPool;
+
+  /// The biggest audience an artist can build, as shares of [publicPool]
+  /// (docs K105): about the biggest real stars' (7M core fans, 80M
+  /// casual listeners). Growth slows the closer an artist gets.
+  final double fanCapShare;
+  final double casualCapShare;
+  double get fanCap => fanCapShare * publicPool;
+  double get casualCap => casualCapShare * publicPool;
 
   /// Fan counts are worldwide; presets were calibrated on US audiences, so
   /// they are scaled up by this factor (≈ 1 / typical US share of an artist).
@@ -219,6 +234,58 @@ class SimConfig {
   final double playlistMidBoost;
   final double playlistBigBoost;
   final double playlistFade;
+
+  /// An artist's listening in a region, as a share of everyone else's
+  /// (simulated and outside), is untouched up to [marketShareKnee] and
+  /// bends towards [marketShareCap] beyond it (docs K105): listeners'
+  /// time is shared, so even the biggest star takes a few per cent.
+  final double marketShareKnee;
+  final double marketShareCap;
+
+  /// Spread of a song's weekly run of luck (log scale; docs K105).
+  final double momentumSigma;
+
+  /// Spread of how well albums hold on after week one (log scale).
+  final double albumLegsSigma;
+
+  /// Gift buying (docs K105): non-fans buy far more records from
+  /// Thanksgiving to Christmas and fewer in January; less so once
+  /// listening moves to streaming.
+  double holidaySales(int weekOfYear, int year) {
+    final peak = switch (weekOfYear) {
+      47 => 0.6,
+      48 => 0.3,
+      49 => 0.45,
+      50 => 0.6,
+      51 => 0.9,
+      52 => 0.15,
+      1 || 2 || 3 => -0.2,
+      _ => 0.0,
+    };
+    final amp =
+        year < 2010 ? 1.0 : (year < 2016 ? 1 - 0.07 * (year - 2009) : 0.55);
+    return 1 + peak * amp;
+  }
+
+  /// Most that stacked lifts on a song's exposure can add (docs K105).
+  final double liftCeiling;
+
+  /// Exposure multiplier for lifts adding up to [x]: about 1 + [x] for
+  /// one lift, bending towards 1 + [liftCeiling] when many stack up.
+  double stackedLift(double x) =>
+      x <= 0 ? 1.0 : 1 + liftCeiling * (1 - math.exp(-x / liftCeiling));
+
+  /// [x] (an artist's share of the rest of a market) after the bend.
+  double cappedMarketShare(double x) {
+    if (x <= marketShareKnee) return x;
+    final room = marketShareCap - marketShareKnee;
+    return marketShareKnee + room * _tanh((x - marketShareKnee) / room);
+  }
+
+  static double _tanh(double x) {
+    final e = math.exp(-2 * x);
+    return (1 - e) / (1 + e);
+  }
 
   /// First-week album purchases by non-fans, per casual listener × fame³
   /// (event albums of superstars).

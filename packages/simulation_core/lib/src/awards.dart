@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'audience.dart';
 import 'config/charts.dart';
 import 'lifecycle.dart';
 import 'model.dart';
@@ -347,7 +348,7 @@ abstract final class Awards {
       case AwardAttendance.none:
         break;
     }
-    me.coreFans += fans;
+    fans = Audience.addFans(w, me, fans);
     me.hype += hype;
     w.dirtyArtists.add(me.id);
     return AwardNight(
@@ -369,7 +370,7 @@ abstract final class Awards {
     }
     a.devotion = math.min(1.0, a.devotion + 0.01);
     a.hype += (big ? 0.1 : 0.04) * (there ? 1 : 0.5);
-    a.coreFans += a.casual * (big ? 0.008 : 0.003);
+    Audience.addFans(w, a, a.casual * (big ? 0.008 : 0.003));
     w.dirtyArtists.add(a.id);
     void lift(Song s, double boost) {
       if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
@@ -390,7 +391,7 @@ abstract final class Awards {
           lift(w.songs[id], race.category == AwardCategory.album ? 0.35 : 0.12);
         }
       case AwardCategory.newArtist:
-        a.casual *= 1.05;
+        Audience.addCasual(w, a, a.casual * 0.05);
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'audience.dart';
 import 'config/charts.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
@@ -758,7 +759,7 @@ abstract final class Actions {
         (year >= 2007 && year <= 2016 ? 1.4 : 1.0);
     a.buzz += 0.4 * f;
     a.hype += 0.05 * f;
-    a.casual += a.casual * 0.03 * f;
+    Audience.addCasual(w, a, a.casual * 0.03 * f);
     w.dirtyArtists.add(a.id);
   }
 

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'actions.dart';
+import 'audience.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
@@ -172,6 +173,12 @@ class PostOutcome {
 abstract final class Social {
   static const postsPerWeek = 3;
 
+  /// Hype posts can build at most, a song's lift from being promoted
+  /// and the buzz of hot takes (docs K105).
+  static const postHypeCeiling = 0.3;
+  static const postBoostCeiling = 0.3;
+  static const postBuzzCeiling = 0.1;
+
   /// Wordings per topic.
   static const variants = 3;
 
@@ -234,20 +241,26 @@ abstract final class Social {
         RandomStream.keyed(w.seed, w.week, a.id * 8 + made, RngPurpose.social);
     final f = math.pow(0.7, made).toDouble();
     final charm = 0.5 + a.skills.charisma / 100;
+    // Posts keep fans talking, they do not make an era (docs K105): their
+    // hype fades out near [postHypeCeiling].
+    final room = math.max(0.0, 1 - a.hype / postHypeCeiling);
     var hype = 0.0, fans = 0.0, devotion = 0.0;
     var backlash = false;
     switch (kind) {
       case PostKind.teaser:
-        hype = 0.04 * charm * f;
+        hype = 0.02 * charm * f * room;
       case PostKind.studio:
-        devotion = 0.004 * f;
+        devotion = 0.004 * f * (1 - a.devotion);
         fans = a.casual * 0.001 * charm * f;
       case PostKind.fans:
-        devotion = 0.01 * charm * f;
+        // Answering fans brings them closer, less so once they are.
+        devotion = 0.01 * charm * f * (1 - a.devotion);
       case PostKind.hotTake:
-        hype = 0.08 * f;
-        a.buzz += 0.3 * f;
-        a.casual += a.casual * 0.004 * f;
+        hype = 0.04 * f * room;
+        // People talk, less with every take (a weekly one is noise).
+        a.buzz +=
+            0.08 * f * math.max(0.0, 1 - a.buzz / postBuzzCeiling);
+        Audience.addCasual(w, a, a.casual * 0.004 * f);
         backlash = r.chance(0.3);
         if (backlash) {
           devotion = -0.02;
@@ -257,11 +270,15 @@ abstract final class Social {
         final s = song!;
         if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
         s.weeksBelowCutoff = 0;
-        s.versionBoost += 0.06 * charm * f;
+        // A song pushed every week wears out its welcome.
+        s.versionBoost += 0.03 *
+            charm *
+            f *
+            math.max(0.0, 1 - s.versionBoost / postBoostCeiling);
         w.dirtySongs.add(s.id);
     }
     a.hype += hype;
-    a.coreFans += fans;
+    fans = Audience.addFans(w, a, fans);
     a.devotion = (a.devotion + devotion).clamp(0.0, 1.0);
     st.engagement = math.min(1.0, st.engagement + 0.03 * f);
     st.postWeek = w.week;

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'actions.dart';
+import 'audience.dart';
 import 'model.dart';
 import 'rng.dart';
 import 'social.dart';
@@ -226,7 +227,7 @@ abstract final class Brands {
       case DealTask.adShoot:
         a.creativeEnergy -= kind.energy;
         a.hype += 0.03;
-        a.casual += a.casual * (0.003 + 0.005 * b.prestige);
+        Audience.addCasual(w, a, a.casual * (0.003 + 0.005 * b.prestige));
       case DealTask.launchEvent:
         a.creativeEnergy -= kind.energy;
         a.hype += 0.04;

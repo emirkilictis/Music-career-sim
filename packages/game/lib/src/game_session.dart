@@ -1905,6 +1905,7 @@ class GameSession {
         }
       }
     }
+    if (GameTime.weekOfYear(r.week) == 46) events.add(const HolidaySeason());
     for (final c in const [
       Charts.platformGlobal,
       Charts.platformNorthAmerica,

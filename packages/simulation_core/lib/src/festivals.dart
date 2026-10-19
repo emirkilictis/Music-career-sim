@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'audience.dart';
 import 'model.dart';
 import 'time.dart';
 import 'tours.dart';
@@ -312,8 +313,8 @@ abstract final class Festivals {
     final fans = seen * charm;
     final listeners = seen * 0.4;
     a.moneyCents += a.manager.net(fee.toDouble()).round();
-    a.coreFans += fans;
-    a.casual += listeners;
+    Audience.addFans(w, a, fans);
+    Audience.addCasual(w, a, listeners);
     a.hype = math.max(a.hype, 0.25 * b.slot.reach);
     a.skills.performance += 0.3 * (1 - a.skills.performance / 100);
     w.dirtyArtists.add(a.id);

@@ -802,6 +802,7 @@ k('photoPlatformOwn','Its own photo','Kendine özel fotoğraf')
 k('photoUsesGeneral','Uses your profile photo','Profil fotoğrafını kullanıyor')
 
 k('eventPlatformLaunched','{platform} has launched: songs now get streamed there, with its own Top 50.','{platform} yayına girdi: şarkılar artık orada da dinleniyor, kendi Top 50 listesiyle.', platform='String')
+k('eventHolidaySeason','Holiday season: until Christmas people buy far more records as gifts, older albums too. A good time to have something out.','Tatil sezonu: Noel’e kadar insanlar hediye olarak çok daha fazla albüm alıyor, eski albümler de. Elinde çıkmış bir şey olmasının tam zamanı.')
 k('eventPlatformArrived','{platform} arrived in {region}.','{platform} {region} pazarına geldi.', platform='String', region='String')
 k('platformsLater','Music platforms start arriving in 2003.','Müzik platformları 2003’te gelmeye başlıyor.')
 # Celebrations and sharing (feedback E6, R1)

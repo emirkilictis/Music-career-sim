@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'audience.dart';
 import 'config/regions.dart';
 import 'model.dart';
 import 'rng.dart';
@@ -770,13 +771,13 @@ abstract final class Tours {
         t.costCents += cost;
         t.merchCents += merch;
         t.fans += fans;
-        a.coreFans += fans;
+        Audience.addFans(w, a, fans);
         net += r.grossCents * t.cut + merch - cost;
         fill += r.sold / s.capacity;
         // The support act wins some of the crowd.
         if (t.openerId >= 0) {
           final o = w.artists[t.openerId];
-          o.coreFans += 0.01 * r.sold;
+          Audience.addFans(w, o, 0.01 * r.sold);
           w.dirtyArtists.add(o.id);
         }
       }

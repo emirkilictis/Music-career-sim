@@ -2265,6 +2265,7 @@
       }
     }
   },
+  "eventHolidaySeason": "Holiday season: until Christmas people buy far more records as gifts, older albums too. A good time to have something out.",
   "eventPlatformArrived": "{platform} arrived in {region}.",
   "@eventPlatformArrived": {
     "placeholders": {

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:simulation_core/simulation_core.dart';
 import 'package:test/test.dart';
 
@@ -191,6 +193,7 @@ void main() {
   group('versions and editions', versionTests);
   group('streaming tools', streamingToolTests);
   group('viral', viralTests);
+  group('audience limits (K105)', audienceLimitTests);
   group('novice', noviceTests);
 
   test('in 2015 every album collects its earlier streams (K44, K49)', () {
@@ -1882,5 +1885,95 @@ void streamingToolTests() {
     }
     printOnFailure('landed $landed of 12');
     expect(landed, inInclusiveRange(1, 10));
+  });
+}
+
+void audienceLimitTests() {
+  test('gains outside listening saturate near the fan cap', () {
+    final w = WorldGen.create(seed: 105, startYear: 2015);
+    final p = WorldGen.addPlayer(w, name: 'Cap', genre: 0);
+    final cap = Audience.fanCap(w);
+    p.coreFans = cap / 2;
+    expect(Audience.addFans(w, p, 1000), closeTo(500, 1e-6));
+    p.coreFans = cap;
+    expect(Audience.addFans(w, p, 1e6), 0);
+    expect(Audience.addFans(w, p, -1e6), -1e6);
+    p.casual = w.config.publicPool;
+    expect(Audience.addCasual(w, p, 1e6), 0);
+  });
+
+  test('no artist reaches more than a few per cent of a market', () {
+    final w = WorldGen.create(seed: 105, startYear: 2020);
+    final sim = Simulator(w);
+    while (w.week < GameTime.firstWeekOf(2020)) {
+      sim.step();
+    }
+    final p = WorldGen.addPlayer(w,
+        name: 'Giant',
+        genre: 0,
+        tier: StartTier.superstar,
+        money: StartMoney.millionaire);
+    // Far more listeners than anyone could have (fans flooding a new
+    // record are not capped; few fans here).
+    p.coreFans = 1e4;
+    p.casual = 3e8;
+    p.hype = 2;
+    for (var i = 0; i < 4; i++) {
+      final s = Actions.writeSong(w, p, producerSkill: 90, aiMode: true);
+      Actions.releaseSingle(w, p, s);
+    }
+    final eras = w.regionalEra.forWeek(w.week);
+    for (var i = 0; i < 3; i++) {
+      sim.step();
+    }
+    for (var k = 0; k < regionCount; k++) {
+      var mine = 0.0;
+      for (final id in w.playerSongIds) {
+        mine += w.songs[id].weekRegion?[k] ?? 0;
+      }
+      printOnFailure('region $k: ${mine / eras[k].streamsWeekly}');
+      expect(mine, lessThan(w.config.marketShareCap * eras[k].streamsWeekly));
+      expect(mine, greaterThan(0));
+    }
+  });
+
+  test('lifts add up with diminishing returns', () {
+    final c = SimConfig();
+    expect(c.stackedLift(0), 1);
+    expect(c.stackedLift(0.3), closeTo(1.28, 0.01));
+    // Playlist, autoplay, video and hype together: far less than their
+    // product (1.8 × 1.3 × 1.4 × 1.2 ≈ 3.9).
+    final all = c.stackedLift(0.8 + 0.3 + 0.4 + 0.2);
+    expect(all, lessThan(2.2));
+    expect(all, greaterThan(c.stackedLift(0.8)));
+    expect(c.stackedLift(100), lessThanOrEqualTo(1 + c.liftCeiling));
+  });
+
+  test('posting every week cannot keep hype high', () {
+    final w = WorldGen.create(seed: 105, startYear: 2015);
+    final sim = Simulator(w);
+    final p = WorldGen.addPlayer(w, name: 'Poster', genre: 0);
+    while (w.week < GameTime.firstWeekOf(2015)) {
+      sim.step();
+    }
+    Actions.writeSong(w, p, aiMode: true);
+    var top = 0.0;
+    for (var i = 0; i < 20; i++) {
+      for (var j = 0; j < Social.postsPerWeek; j++) {
+        Social.post(w, p, PostKind.teaser);
+      }
+      top = math.max(top, p.hype);
+      sim.step();
+    }
+    expect(top, lessThan(Social.postHypeCeiling));
+  });
+
+  test('records sell more in the holidays, less in January', () {
+    final c = SimConfig();
+    expect(c.holidaySales(51, 2005), greaterThan(1.8));
+    expect(c.holidaySales(51, 2020), lessThan(c.holidaySales(51, 2005)));
+    expect(c.holidaySales(51, 2020), greaterThan(1.3));
+    expect(c.holidaySales(2, 2005), lessThan(1));
+    expect(c.holidaySales(20, 2005), 1);
   });
 }

@@ -10,6 +10,7 @@
 // every 6 weeks with the best campaign worth a quarter of the money, an
 // album once a year with 10+ songs, sign any bigger label that offers.
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:game/game.dart';
 
@@ -35,7 +36,7 @@ void main(List<String> args) {
         slots,
         CareerSetup(
             name: 'Probe Star',
-            genre: 0,
+            genre: int.parse(Platform.environment['PROBE_GENRE'] ?? '0'),
             startYear: startYear,
             difficulty: diff,
             tier: tier,
@@ -50,13 +51,50 @@ void main(List<String> args) {
       final money0 = s.player.moneyCents;
       final songRev0 = _songRevenue(s);
       var spent = 0, noms = 0, wins = 0;
+      var maxUs = 0.0, maxGlobal = 0.0, maxWeekStreams = 0.0, maxRival = 0.0;
       for (var wk = 0; wk < GameTime.weeksPerYear; wk++) {
         spent += _week(s, (k) => lastSingle = k, () => lastSingle, (k) {
           lastAlbum = k;
         }, () => lastAlbum);
+        if (y == years - 1 && wk == 20) Simulator.debugParts = {};
         final r = s.advanceWeek();
+        if (y == years - 1 && wk == 20) {
+          final d = Simulator.debugParts!;
+          final pl = s.world.player!;
+          var dormant = 0.0;
+          for (var k = 0; k < regionCount; k++) {
+            dormant += pl.sumDormantRate * pl.catalogFactor * pl.regionShare[k];
+          }
+          print('   parts ${d.map((k, v) => MapEntry(k, _k(v)))} '
+              'dormant ${_k(dormant)} weekStreams ${_k(pl.weekStreams)}');
+          Simulator.debugParts = null;
+        }
+        final ws = s.world.playerSongIds
+            .fold(0.0, (t, id) => t + s.world.songs[id].weekStreams);
+        if (ws > maxWeekStreams) maxWeekStreams = ws;
+        for (final id in s.world.activeArtistIds) {
+          final a = s.world.artists[id];
+          if (a.tier != ArtistTier.player && a.weekStreams > maxRival) {
+            maxRival = a.weekStreams;
+          }
+        }
         for (final e in r.events) {
           if (e is AwardNominated) noms += e.categories.length;
+          if (e is AlbumFirstWeek &&
+              Platform.environment['PROBE_LOG'] == '$seed') {
+            final a = s.world.player!;
+            final al = s.world.albums[e.albumId];
+            print('   album wk1 US ${_k(e.usUnits)} pure ${_k(e.usPure)} '
+                'global ${_k(e.globalUnits)} | fans ${_k(a.coreFans)} '
+                'casual ${_k(a.casual)} fame ${a.fame.toStringAsFixed(2)} '
+                'hypeAtRel ${al.hypeAtRelease.toStringAsFixed(2)} '
+                'devotion ${a.devotion.toStringAsFixed(2)} '
+                'share ${[for (final x in a.regionShare) x.toStringAsFixed(2)]}');
+          }
+          if (e is AlbumFirstWeek) {
+            if (e.usUnits > maxUs) maxUs = e.usUnits;
+            if (e.globalUnits > maxGlobal) maxGlobal = e.globalUnits;
+          }
           if (e is AwardResults) wins += e.won.length;
           if (e is LabelOffer && e.label.index > s.player.label.index) {
             try {
@@ -125,6 +163,12 @@ void main(List<String> args) {
         no1,
         noms,
         wins,
+        maxUs,
+        maxGlobal,
+        maxWeekStreams,
+        for (var k = 0; k < regionCount; k++)
+          p.lifetimeStreams.byRegion[k],
+        maxRival,
       ]);
     }
     s.close();
@@ -154,6 +198,12 @@ void main(List<String> args) {
         ' awards ${sum(12)}/${sum(13)}'
         '  fame ${med(9).toStringAsFixed(0)}% label ${med(10).toStringAsFixed(0)}'
         '  US song peaks [${peaks(5)}] album [${peaks(8)}]');
+    double mx(int i) => rows[y].map((r) => r[i].toDouble()).reduce(math.max);
+    print('     max album wk1 US ${_k(mx(14))} global ${_k(mx(15))}'
+        '  max weekly streams ${_k(mx(16))} (monthly listeners '
+        '${_k(mx(16) * 0.45 * 4.3 / 12)})  life streams NA/EU/other '
+        '${_k(med(17))}/${_k(med(18))}/${_k(med(19))}  top rival week '
+        '${_k(mx(20))}');
   }
 }
 
@@ -200,6 +250,15 @@ int _week(GameSession s, void Function(int) setSingle, int Function() single,
   p = s.player;
   final want = p.moneyCents < 2000000 ? Job.cafe : Job.none;
   if (p.job != want) s.setJob(want);
+
+  // A heavy player posts three times a week (docs K105 probe).
+  if (heavy && s.year >= 2004) {
+    for (final k in [PostKind.studio, PostKind.fans, PostKind.hotTake]) {
+      try {
+        s.post(k);
+      } on GameException {/* limit */}
+    }
+  }
 
   // Write while creativity keeps songs at full strength.
   for (var i = 0; i < 3; i++) {
@@ -257,7 +316,24 @@ int _week(GameSession s, void Function(int) setSingle, int Function() single,
     final c = _campaign(s, s.player.moneyCents ~/ 3);
     final before = s.player.moneyCents;
     try {
-      s.releaseAlbum('Album ${s.year}', tracks, campaign: c);
+      if (heavy) {
+        // Eight collector editions, one a week (docs K105 probe).
+        s.releaseAlbum('Album ${s.year}', tracks,
+            campaign: c,
+            variantWeeks: const [0, 0, 1, 2, 3, 4, 5, 6],
+            variantFormats: const [
+              null,
+              EditionFormat.signed,
+              EditionFormat.vinyl,
+              EditionFormat.cd,
+              EditionFormat.deluxe,
+              EditionFormat.signed,
+              EditionFormat.vinyl,
+              EditionFormat.cd,
+            ]);
+      } else {
+        s.releaseAlbum('Album ${s.year}', tracks, campaign: c);
+      }
       spent += before - s.player.moneyCents;
       setAlbum(s.week);
     } on GameException catch (e) {
@@ -285,6 +361,8 @@ RadioPush _radio(GameSession s, int budget) {
   }
   return RadioPush.none;
 }
+
+final heavy = Platform.environment['PROBE_HEAVY'] == '1';
 
 String _k(double v) => v.abs() >= 1e6
     ? '${(v / 1e6).toStringAsFixed(1)}M'

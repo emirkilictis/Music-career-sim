@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'actions.dart';
 import 'ai.dart';
+import 'audience.dart';
 import 'awards.dart';
 import 'brands.dart';
 import 'social.dart';
@@ -105,6 +106,14 @@ class Simulator {
 
   static const _r = regionCount;
 
+  /// This week's market share factor per artist and region (docs K105);
+  /// missing means 1. Applied to active songs and the dormant catalog.
+  final Map<int, Float64List> _capFactor = {};
+  double _cap(int artistId, int k) => _capFactor[artistId]?[k] ?? 1.0;
+
+  /// Debugging aid for probes: the player's attention by part.
+  static Map<String, double>? debugParts;
+
   WeekResult step() {
     final sw = Stopwatch()..start();
     final w = world;
@@ -183,6 +192,8 @@ class Simulator {
     final sumA = Float64List(_r), sumD = Float64List(_r);
     final sumR = Float64List(_r), sumSingles = Float64List(_r);
     final songAttention = Float64List(n);
+    // Share of each song's attention from the artist's fans (docs K105).
+    final fanFrac = Float64List(n);
     // How many fresh singles each artist's fans are splitting their time
     // between (docs K83): each single released in the last 26 weeks
     // weighs its fan curve now.
@@ -299,14 +310,17 @@ class Simulator {
               0.02 * p.buzz) *
           promo *
           p.labelReach *
-          (1 + 0.5 * p.hype) *
           (p.tier == ArtistTier.player
               ? w.difficulty.exposure
               : w.difficulty.aiExposure) *
           campExp *
-          (1 + s.playlistBoost + s.versionBoost) *
-          (s.autoplay ? 1 + c.autoplayLift : 1.0) *
-          (1 + s.videoPower * videoEra);
+          // Hype, playlists, a new version, autoplay and the video add up
+          // with diminishing returns instead of multiplying (docs K105).
+          c.stackedLift(0.5 * p.hype +
+              s.playlistBoost +
+              s.versionBoost +
+              (s.autoplay ? c.autoplayLift : 0.0) +
+              s.videoPower * videoEra);
       if (s.playlistWeek == w.week) playlistAdds.add(s.id);
       s.playlistBoost *= c.playlistFade;
       // New versions bring a wave of listening (docs K92).
@@ -341,13 +355,33 @@ class Simulator {
       // A viral trend reaches people regardless of the song's age.
       final viralPart =
           c.publicPool * (0.5 + 0.5 * s.commercial) * s.viralBoost * 0.1;
-      final noise = r.logNormal(0.10);
+      final noise = r.logNormal(0.06) *
+          _momentum(s.id, s.releasedWeek, RngPurpose.momentum);
       final a = (fanPart + casPart + pubPart + viralPart) *
           qMult *
           noise *
           trackShare;
       s.lastAttention = a;
       songAttention[i] = a;
+      final dbg = debugParts;
+      if (dbg != null && p.tier == ArtistTier.player) {
+        final m = qMult * noise * trackShare;
+        final floorPart = fans *
+            s.fanAppeal *
+            c.fanCurveFloor *
+            math.exp(-ageRel / 104.0) *
+            fanShare *
+            (1 + p.hype) *
+            (s.isSingle ? 1.0 : c.albumTrackFanShare * p.kind.albumAffinity);
+        dbg['songs'] = (dbg['songs'] ?? 0) + 1;
+        dbg['fan'] = (dbg['fan'] ?? 0) + fanPart * m;
+        dbg['fanFloor'] = (dbg['fanFloor'] ?? 0) + floorPart * m;
+        dbg['cas'] = (dbg['cas'] ?? 0) + casPart * m;
+        dbg['pub'] = (dbg['pub'] ?? 0) + pubPart * m;
+        dbg['viral'] = (dbg['viral'] ?? 0) + viralPart * m;
+      }
+      final all = fanPart + casPart + pubPart + viralPart;
+      fanFrac[i] = all > 0 ? fanPart / all : 0;
       s.lastReach = (casPart + pubPart + viralPart) * qMult * trackShare;
       // What the campaign added over none at all, for the player's
       // profit/loss (docs K57).
@@ -391,6 +425,9 @@ class Simulator {
       }
     }
 
+    _capMarketShare(
+        ids, att, dl, songAttention, fanFrac, sumA, sumD, sumSingles);
+
     // Digital purchases pile onto the biggest hits (docs K44): each song's
     // download demand is scaled by (attention / mean)^(γ−1), so a smash
     // takes a much bigger share of the same market (the tail sells less).
@@ -424,7 +461,10 @@ class Simulator {
       for (final id in w.activeArtistIds) {
         final a = w.artists[id];
         if (a.sumDormantRate > 0) {
-          dormant += a.sumDormantRate * a.catalogFactor * a.regionShare[k];
+          dormant += a.sumDormantRate *
+              a.catalogFactor *
+              a.regionShare[k] *
+              _cap(id, k);
         }
       }
       sumA[k] += dormant;
@@ -559,8 +599,8 @@ class Simulator {
     // 8. Dormant catalog per active artist (retired artists accrue lazily).
     for (final id in w.activeArtistIds) {
       final a = w.artists[id];
-      final f = a.catalogFactor;
       for (var k = 0; k < _r; k++) {
+        final f = a.catalogFactor * _cap(id, k);
         final share = a.regionShare[k];
         a.reg[ArtistReg.indexStreams + k] += f * share * spa[k];
         a.reg[ArtistReg.indexDownloads + k] += f * share * 0.1 * dpa[k];
@@ -583,14 +623,19 @@ class Simulator {
     final albumPts =
         List.generate(Charts.count, (_) => Float64List(albumIds.length));
     final albumRules = Charts.songRules(ChartMarket.global, w.week);
+    final holiday = c.holidaySales(GameTime.weekOfYear(w.week), year);
     for (var ai = 0; ai < albumIds.length; ai++) {
       final al = w.albums[albumIds[ai]];
       final p = w.artists[al.artistId];
       final age = w.week - al.releaseWeek;
       // Good albums hold their sales; weak ones fall off faster.
       final q01 = al.quality / 100;
-      final secondWeek = c.albumSecondWeekRatio * (0.55 + 0.9 * q01);
-      final decay = 1 - (1 - c.albumWeeklyDecay) * (1.5 - 0.7 * q01);
+      // Some records have legs, others are all first week (docs K105):
+      // a trait drawn once per album.
+      final legs = _albumLegs(al);
+      final secondWeek = c.albumSecondWeekRatio * (0.55 + 0.9 * q01) * legs;
+      final decay = math.min(0.97,
+          1 - (1 - c.albumWeeklyDecay) * (1.5 - 0.7 * q01) / math.sqrt(legs));
       final superCurve = age == 0 ? 1.0 : secondWeek * math.pow(decay, age - 1);
       // Devoted fanbases buy more (and buy variants).
       final superRate = c.superfanBuyRate * p.devotionBuyFactor;
@@ -608,7 +653,8 @@ class Simulator {
       }
       final noise =
           RandomStream.keyed(w.seed, w.week, al.id, RngPurpose.albumNoise)
-              .logNormal(0.08);
+                  .logNormal(0.05) *
+              _momentum(al.id, al.releaseWeek, RngPurpose.albumMomentum);
       // Long tracklists sell a little more (more for the money, bundles);
       // each doubling beyond 10 tracks adds [SimConfig.longAlbumBonus].
       final demand = p.tier == ArtistTier.player
@@ -678,13 +724,19 @@ class Simulator {
                 (1 + al.hypeAtRelease);
         // Listeners reached by the album's songs buy it, fewer as the album
         // ages (those who wanted it already have it; docs K51).
-        final casPart = reach[k] *
+        // Gift buying: non-fans buy records in the holidays, catalog too.
+        final casPart = holiday *
+                reach[k] *
                 c.casualBuyRate *
                 era.casualPurchaseRate *
                 (age == 0 ? 1.5 : 1.0) /
                 (1 + age / c.albumReachFatigueWeeks) +
             (age == 0 ? casual * 0.003 * era.casualPurchaseRate : 0.0) +
-            casual * c.albumCatalogRate * era.casualPurchaseRate * (0.5 + q01);
+            holiday *
+                casual *
+                c.albumCatalogRate *
+                era.casualPurchaseRate *
+                (0.5 + q01);
         // A superstar's album is an event: even non-fans buy it in the
         // first weeks. Grows steeply with fame (fame³), so it lifts the
         // biggest stars without touching working artists.
@@ -712,8 +764,12 @@ class Simulator {
             (1 + age / c.albumReachFatigueWeeks);
         // A mixtape is given away: nothing sold (docs K62).
         final pure = al.isMixtape ? 0.0 : bought * noise * tracklist * demand;
-        final streams =
-            sea[k] + al.sumDormantRate * p.catalogFactor * share * spa[k];
+        final streams = sea[k] +
+            al.sumDormantRate *
+                p.catalogFactor *
+                _cap(p.id, k) *
+                share *
+                spa[k];
         final t = al.isMixtape ? 0.0 : tea[k] / c.trackEquivalentAlbum;
         final se = streams / c.streamEquivalentAlbum;
         final units = albumRules.albumUsesUnits ? pure + t + se : pure + t;
@@ -803,8 +859,8 @@ class Simulator {
         a.fame += 0.002 * (a.popularity - a.fame);
       }
       // Growth saturates: you cannot convert people who are already fans.
-      final casualRoom = math.max(0.0, 1 - a.casual / c.publicPool);
-      final fanRoom = math.max(0.0, 1 - a.coreFans / (0.04 * c.publicPool));
+      final casualRoom = math.max(0.0, 1 - a.casual / c.casualCap);
+      final fanRoom = math.max(0.0, 1 - a.coreFans / c.fanCap);
       // Charisma: likeable artists turn listeners into fans more easily
       // (×0.8 at 0, ×1.0 at 50, ×1.2 at 100).
       final charm = 0.8 + 0.4 * a.skills.charisma / 100;
@@ -1312,6 +1368,122 @@ class Simulator {
     }
   }
 
+  /// No artist reaches more than a few per cent of a market (docs K105):
+  /// each artist's listening beyond their fans in a region is compared
+  /// with everyone else's (other artists and the outside market) and bent
+  /// towards [SimConfig.marketShareCap]. Reach shrinks with it, so a
+  /// superstar's audience stops feeding on its own size; fans flooding a
+  /// new album are left alone (a record week can still take more). The
+  /// back catalog counts and is bent the same way.
+  void _capMarketShare(
+      List<int> ids,
+      Float64List att,
+      Float64List dl,
+      Float64List songAttention,
+      Float64List fanFrac,
+      Float64List sumA,
+      Float64List sumD,
+      Float64List sumSingles) {
+    final w = world;
+    final c = w.config;
+    final n = ids.length;
+    _capFactor.clear();
+    // Per artist and region: all their listening, and the part beyond
+    // their fans flooding new releases (the rest of the active songs and
+    // the whole back catalog).
+    final byArtist = <int, Float64List>{};
+    for (var i = 0; i < n; i++) {
+      final id = w.songs[ids[i]].primaryArtistId;
+      final t = byArtist.putIfAbsent(id, () => Float64List(2 * _r));
+      for (var k = 0; k < _r; k++) {
+        final a = att[i * _r + k];
+        t[k] += a;
+        t[_r + k] += a * (1 - fanFrac[i]);
+      }
+    }
+    final allDormant = Float64List(_r);
+    for (var k = 0; k < _r; k++) {
+      allDormant[k] = w.retiredDormantAttention[k];
+    }
+    for (final id in w.activeArtistIds) {
+      final a = w.artists[id];
+      if (a.sumDormantRate <= 0) continue;
+      final t = byArtist.putIfAbsent(id, () => Float64List(2 * _r));
+      for (var k = 0; k < _r; k++) {
+        final d = a.sumDormantRate * a.catalogFactor * a.regionShare[k];
+        t[k] += d;
+        t[_r + k] += d;
+        allDormant[k] += d;
+      }
+    }
+    byArtist.forEach((id, t) {
+      Float64List? f;
+      for (final region in Region.values) {
+        final k = region.index;
+        final reach = t[_r + k];
+        if (reach <= 0) continue;
+        final ema = w.emaAttention[k] == 0 ? sumA[k] : w.emaAttention[k];
+        final rest = sumA[k] +
+            allDormant[k] -
+            t[k] +
+            regionConfigs[region]!.outsideAttention * ema +
+            1;
+        final x = reach / rest;
+        if (x <= c.marketShareKnee) continue;
+        f ??= Float64List(_r)..fillRange(0, _r, 1.0);
+        f[k] = c.cappedMarketShare(x) / x;
+      }
+      if (f != null) _capFactor[id] = f;
+    });
+    if (_capFactor.isEmpty) return;
+    for (var i = 0; i < n; i++) {
+      final s = w.songs[ids[i]];
+      final f = _capFactor[s.primaryArtistId];
+      if (f == null) continue;
+      final p = w.artists[s.primaryArtistId];
+      final out = 1 - fanFrac[i];
+      var mean = 0.0;
+      for (var k = 0; k < _r; k++) {
+        final j = i * _r + k;
+        final cut = att[j] * out * (1 - f[k]);
+        sumA[k] -= cut;
+        if (s.isSingle) sumSingles[k] -= cut;
+        att[j] -= cut;
+        final dcut = dl[j] * out * (1 - f[k]);
+        sumD[k] -= dcut;
+        dl[j] -= dcut;
+        mean += p.regionShare[k] * f[k];
+      }
+      final kept = fanFrac[i] + out * mean;
+      songAttention[i] *= kept;
+      s.lastAttention *= kept;
+      s.lastReach *= mean;
+    }
+  }
+
+  /// A song's or album's run of luck (docs K106): this week's shock plus
+  /// fading echoes of the last seven, so its numbers drift up or down for
+  /// weeks instead of jittering around a smooth curve.
+  double _momentum(int id, int released, int purpose) {
+    final w = world;
+    var m = 0.0, weight = 1.0;
+    for (var j = 0; j < 8; j++) {
+      final week = w.week - j;
+      if (week < released) break;
+      final u = RandomStream.keyed(w.seed, week, id, purpose).nextDouble();
+      m += weight * (u - 0.5);
+      weight *= 0.75;
+    }
+    // (u − 0.5) has a deviation of 0.29; the echoes add up to about 1.5×.
+    return math.exp(w.config.momentumSigma / 0.29 / 1.47 * m);
+  }
+
+  /// How well [al] holds on after its first week, around 1.
+  double _albumLegs(Album al) =>
+      RandomStream.keyed(world.seed, 0, al.id, RngPurpose.albumLegs)
+          .logNormal(world.config.albumLegsSigma)
+          .clamp(0.5, 2.0);
+
   void _playerIncome() {
     final p = world.player;
     if (p == null) return;
@@ -1373,8 +1545,8 @@ class Simulator {
       case Job.studioAssistant:
         s.production += 0.12 * (1 - s.production / 100);
       case Job.barGigs:
-        p.coreFans += 40;
-        p.casual += 300;
+        Audience.addFans(world, p, 40);
+        Audience.addCasual(world, p, 300);
       case Job.none || Job.cafe || Job.nightShift:
         break;
     }

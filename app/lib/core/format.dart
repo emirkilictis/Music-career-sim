@@ -716,6 +716,7 @@ class Fmt {
       PlatformLaunched() => e.chartId == Charts.platformGlobal
           ? l.eventPlatformLaunched(platformName)
           : l.eventPlatformArrived(platformName, l.regionNorthAmerica),
+      HolidaySeason() => l.eventHolidaySeason,
       RivalNumberOne() =>
         l.eventRivalNumberOne(line.artistName, t, chart(e.chartId)),
       AwardNominated() => l.eventAwardNominated(e.year,

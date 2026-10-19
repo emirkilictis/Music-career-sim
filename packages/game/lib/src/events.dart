@@ -137,6 +137,14 @@ class PlatformLaunched extends GameEvent {
   bool get isMajor => false;
 }
 
+/// The holiday season starts (docs K106): until Christmas people buy far
+/// more records as gifts, catalog albums too.
+class HolidaySeason extends GameEvent {
+  const HolidaySeason();
+  @override
+  bool get isMajor => false;
+}
+
 /// A scheduled player release came out this week (docs K45). Albums also
 /// report [AlbumFirstWeek] when they chart.
 class ReleaseOut extends GameEvent {

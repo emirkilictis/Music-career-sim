@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'audience.dart';
 import 'awards.dart';
 import 'brands.dart';
 import 'model.dart';
@@ -255,7 +256,7 @@ abstract final class Opportunities {
         final partner = w.artists[o.partnerArtistId];
         money = o.feeCents;
         fans = partner.coreFans * (0.01 + 0.02 * s.vocals / 100);
-        p.casual += partner.casual * 0.02;
+        Audience.addCasual(w, p, partner.casual * 0.02);
         hype = 0.04;
       case (OpportunityKind.festival, OpportunityChoice.accept):
         spendEnergy(festivalEnergy);
@@ -295,7 +296,7 @@ abstract final class Opportunities {
       case (OpportunityKind.memberSolo, OpportunityChoice.accept):
         spendEnergy(memberSoloEnergy);
         fans = p.casual * 0.008;
-        p.casual *= 1.03;
+        Audience.addCasual(w, p, p.casual * 0.03);
         hype = 0.04;
       // Asked to wait: some fans wanted it.
       case (OpportunityKind.memberSolo, OpportunityChoice.decline):
@@ -323,7 +324,7 @@ abstract final class Opportunities {
     money = p.manager.net(money.toDouble()).round();
     p.moneyCents += money;
     p.hype = math.max(0.0, p.hype + hype);
-    p.coreFans += fans;
+    fans = Audience.addFans(w, p, fans);
     return OpportunityOutcome(
         kind: o.kind,
         choice: choice,
