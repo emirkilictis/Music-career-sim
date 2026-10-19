@@ -1480,7 +1480,7 @@ class Simulator {
     for (var j = 0; j < 8; j++) {
       final week = w.week - j;
       if (week < released) break;
-      final u = RandomStream.keyed(w.seed, week, id, purpose).nextDouble();
+      final u = keyedUnit(w.seed, week, id, purpose);
       m += weight * (u - 0.5);
       weight *= 0.75;
     }

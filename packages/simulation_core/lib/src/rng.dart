@@ -39,6 +39,16 @@ int mix64(int z) {
 
 const int _golden = 0x9E3779B97F4A7C15;
 
+/// One uniform draw in [0, 1) for a key: cheaper than a [RandomStream]
+/// when a single number is all that is needed (two mixes instead of five).
+double keyedUnit(int seed, int week, int entity, int purpose) {
+  final k = mix64(seed * _golden ^
+      week * 0x632BE59BD9B4E019 ^
+      entity * 0x85EBCA77C2B2AE63 ^
+      purpose * 0xC2B2AE3D27D4EB4F);
+  return (mix64(k + _golden) >>> 11) * (1.0 / 9007199254740992.0);
+}
+
 /// Counter-based random stream derived from a key. Cheap to create; create a
 /// fresh one per (week, entity, purpose) instead of sharing a global generator.
 class RandomStream {
