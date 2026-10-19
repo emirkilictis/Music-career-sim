@@ -329,6 +329,16 @@ class Fmt {
 
   String criticScore(double score) => score.toStringAsFixed(1);
 
+  /// The year in one phrase (docs K123).
+  String wrappedStory(WrappedStory s) => switch (s) {
+        WrappedStory.newcomer => l.wrappedStoryNewcomer,
+        WrappedStory.breakout => l.wrappedStoryBreakout,
+        WrappedStory.oneSong => l.wrappedStoryOneSong,
+        WrappedStory.catalog => l.wrappedStoryCatalog,
+        WrappedStory.quiet => l.wrappedStoryQuiet,
+        WrappedStory.steady => l.wrappedStorySteady,
+      };
+
   /// A record's name (docs K111).
   String recordName(RecordKind k) => switch (k) {
         RecordKind.weeksAtNo1Song => l.recordWeeksAtNo1Song,
@@ -755,6 +765,8 @@ class Fmt {
           RecordKind.streamWeek => l.eventRecordStreamWeek(t, compact(value)),
           _ => l.eventRecordAlbumDebut(t, compact(value)),
         },
+      WrappedOut() => l.eventWrapped(
+          e.year, compact(e.plays), t, wrappedStory(e.story)),
       YearEndCharts() => e.hasPlayer
           ? [
               if (e.songs.isNotEmpty) l.eventYearEndSongs(e.year, t),

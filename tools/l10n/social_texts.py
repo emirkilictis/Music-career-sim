@@ -202,6 +202,11 @@ TOPICS = {
   ("{title} keeps growing. Word of mouth is real.", "{title} büyümeye devam ediyor. Kulaktan kulağa gerçekten işe yarıyor."),
   ("Months later and {title} is everywhere?? Sleeper hit", "Aylar sonra {title} her yerde mi?? Sinsi hit"),
  ],
+ 'wrapped': [
+  ("My Wrapped just dropped and it's {name}. Again. {title} on repeat all year 🔁", "Wrapped geldi ve yine {name}. Bütün yıl {title} tekrarda 🔁"),
+  ("Top 0.1% listener of {name}. Not even sorry.", "{name} dinleyicilerinin ilk %0.1'indeyim. Hiç pişman değilim."),
+  ("{title} was my most played song this year. Obviously.", "Bu yıl en çok dinlediğim şarkı {title}. Belliydi."),
+ ],
  'topArtistNo1': [
   ("{name} is the #1 artist in the world this week 🌍", "{name} bu hafta dünyanın #1 sanatçısı 🌍"),
   ("Biggest artist on the planet: {name}. Facts.", "Gezegendeki en büyük sanatçı: {name}. Gerçek bu."),

@@ -1814,6 +1814,133 @@ class GameSession {
     }
   }
 
+  /// Years with a Wrapped (docs K123), newest first: out already, and the
+  /// player had plays in them.
+  List<int> get wrappedYears {
+    final out = <int>[];
+    for (var y = year; y >= Wrapped.firstYear; y--) {
+      if (!Wrapped.publishedBy(y, world.week - 1)) continue;
+      final (from, to) = Wrapped.tracking(y);
+      final any = _store.db.select(
+          'SELECT 1 FROM songWeek WHERE week BETWEEN ? AND ? AND streams > 0 '
+          'LIMIT 1',
+          [from, to]);
+      if (any.isNotEmpty) out.add(y);
+    }
+    return out;
+  }
+
+  /// The player's [year] on the streaming app (docs K123); null without
+  /// plays then.
+  WrappedView? wrapped(int year) {
+    final w = world;
+    final me = w.player;
+    if (me == null) return null;
+    final (from, to) = Wrapped.tracking(year);
+    final share = MusicPlatform.streamify.streamShare(year);
+    final songs = <(Song, double)>[];
+    final regions = List.filled(regionCount, 0.0);
+    var plays = 0.0, older = 0.0;
+    final albums = <int, double>{};
+    for (final r in _store.db.select(
+        'SELECT songId, SUM(streams) AS s, SUM(streamsNA) AS na, '
+        'SUM(streamsEU) AS eu, SUM(streamsOT) AS ot FROM songWeek '
+        'WHERE week BETWEEN ? AND ? GROUP BY songId',
+        [from, to])) {
+      final v = ((r['s'] as num?) ?? 0).toDouble() * share;
+      if (v <= 0) continue;
+      final s = w.songs[r['songId'] as int];
+      songs.add((s, v));
+      plays += v;
+      if (s.releasedWeek < from) older += v;
+      regions[0] += ((r['na'] as num?) ?? 0).toDouble();
+      regions[1] += ((r['eu'] as num?) ?? 0).toDouble();
+      regions[2] += ((r['ot'] as num?) ?? 0).toDouble();
+      if (s.albumId >= 0 && w.albums[s.albumId].artistId == me.id) {
+        albums[s.albumId] = (albums[s.albumId] ?? 0) + v;
+      }
+    }
+    if (plays <= 0) return null;
+    songs.sort((a, b) {
+      final d = b.$2.compareTo(a.$2);
+      return d != 0 ? d : a.$1.id.compareTo(b.$1.id);
+    });
+    var peak = 0.0, peakWeek = from;
+    for (final r in _store.db.select(
+        'SELECT week, SUM(streams) AS s FROM songWeek '
+        'WHERE week BETWEEN ? AND ? GROUP BY week ORDER BY week',
+        [from, to])) {
+      final v = ((r['s'] as num?) ?? 0).toDouble();
+      if (v > peak) {
+        peak = v;
+        peakWeek = r['week'] as int;
+      }
+    }
+    final (bFrom, bTo) = Wrapped.tracking(year - 1);
+    final before = _store.db.select(
+        'SELECT SUM(streams) AS s FROM songWeek WHERE week BETWEEN ? AND ?',
+        [bFrom, bTo]);
+    final playsBefore = before.isEmpty
+        ? 0.0
+        : ((before.first['s'] as num?) ?? 0).toDouble() *
+            MusicPlatform.streamify.streamShare(year - 1);
+    var topAlbum = -1;
+    albums.forEach((id, v) {
+      if (topAlbum < 0 ||
+          v > albums[topAlbum]! ||
+          (v == albums[topAlbum]! && id < topAlbum)) {
+        topAlbum = id;
+      }
+    });
+    final regionSum = regions.fold(0.0, (a, b) => a + b);
+    var newSongs = 0;
+    for (final id in w.playerSongIds) {
+      final s = w.songs[id];
+      if (s.primaryArtistId == me.id &&
+          s.releasedWeek >= from &&
+          s.releasedWeek <= to) {
+        newSongs++;
+      }
+    }
+    final followers =
+        Platforms.followers(w, me, MusicPlatform.streamify, year) ?? 0;
+    final top = songs.first.$2;
+    final story = playsBefore <= 0
+        ? WrappedStory.newcomer
+        : plays >= 3 * playsBefore
+            ? WrappedStory.breakout
+            : plays <= 0.5 * playsBefore
+                ? WrappedStory.quiet
+                : top >= 0.6 * plays && songs.length > 1
+                    ? WrappedStory.oneSong
+                    : older >= 0.6 * plays
+                        ? WrappedStory.catalog
+                        : WrappedStory.steady;
+    return WrappedView(
+      year: year,
+      plays: plays,
+      playsBefore: playsBefore,
+      peakListeners: Streamify.monthlyListeners(peak),
+      peakWeek: peakWeek,
+      topSongs: [
+        for (final (s, v) in songs.take(5))
+          WrappedSong(
+              songId: s.id,
+              title: s.title,
+              coverAlbumId: coverAlbumOf(w, s),
+              plays: v),
+      ],
+      topAlbumId: topAlbum,
+      topAlbumPlays: topAlbum < 0 ? 0 : albums[topAlbum]!,
+      regionShare: [
+        for (final v in regions) regionSum <= 0 ? 0.0 : v / regionSum
+      ],
+      newSongs: newSongs,
+      topFans: followers * (0.05 + 0.25 * me.devotion.clamp(0.0, 1.0)),
+      story: story,
+    );
+  }
+
   /// Years with year-end charts, newest first: out already, and with at
   /// least half of their tracking year in this save's history.
   List<int> get yearEndYears {
@@ -2226,6 +2353,17 @@ class GameSession {
                 if (e.isPlayer) (e.rank, e.entityId)
             ],
             topSongId: songs.isEmpty ? -1 : songs.first.entityId));
+      }
+    }
+    // The streaming app's year in review (docs K123).
+    if (GameTime.weekOfYear(r.week) == Wrapped.publishWeekOfYear) {
+      final y = GameTime.yearOf(r.week);
+      final wr = Wrapped.publishedBy(y, r.week) ? wrapped(y) : null;
+      if (wr != null) {
+        events.add(WrappedOut(y,
+            plays: wr.plays,
+            topSongId: wr.topSongs.first.songId,
+            story: wr.story));
       }
     }
     // Bought streams caught, and pitches the editors passed on (K95, K97).

@@ -3338,6 +3338,33 @@
       }
     }
   },
+  "smWrapped0": "My Wrapped just dropped and it's {name}. Again. {title} on repeat all year 🔁",
+  "@smWrapped0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smWrapped1": "Top 0.1% listener of {name}. Not even sorry.",
+  "@smWrapped1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smWrapped2": "{title} was my most played song this year. Obviously.",
+  "@smWrapped2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "smTopArtistNo10": "{name} is the #1 artist in the world this week 🌍",
   "@smTopArtistNo10": {
     "placeholders": {
@@ -4188,6 +4215,110 @@
   "@yearEndSold": {
     "placeholders": {
       "count": {
+        "type": "String"
+      }
+    }
+  },
+  "wrappedTitle": "Wrapped",
+  "wrappedHeader": "YOUR {year} WRAPPED",
+  "@wrappedHeader": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedBanner": "Your {year} Wrapped is here",
+  "@wrappedBanner": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedBannerSub": "Your year in plays, songs and fans",
+  "wrappedNone": "Wrapped comes out every December from {year}, once you have plays.",
+  "@wrappedNone": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedPlaysLine": "plays on Streamify this year",
+  "wrappedMinutes": "{count} minutes of you",
+  "@wrappedMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "wrappedGrowth": "{pct}% on {year}",
+  "@wrappedGrowth": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedTopSongs": "Your top songs",
+  "wrappedSongPlays": "{count} plays",
+  "@wrappedSongPlays": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "wrappedTopAlbum": "Your top album",
+  "wrappedPlays": "plays",
+  "wrappedPeak": "Your peak",
+  "wrappedListeners": "monthly listeners",
+  "wrappedWhere": "Where they listened",
+  "wrappedFans": "Your top fans",
+  "wrappedFansLine": "listeners had you as their #1 artist",
+  "wrappedNewSongs": "New songs out this year: {count}",
+  "@wrappedNewSongs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedShareText": "{name}'s {year} Wrapped",
+  "@wrappedShareText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "wrappedStoryNewcomer": "The arrival",
+  "wrappedStoryBreakout": "Breakout year",
+  "wrappedStoryOneSong": "One song year",
+  "wrappedStoryCatalog": "Catalog year",
+  "wrappedStoryQuiet": "A quiet year",
+  "wrappedStorySteady": "Steady year",
+  "eventWrapped": "Your {year} Wrapped is out: {plays} plays on Streamify, “{title}” on top. {story}.",
+  "@eventWrapped": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "plays": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "story": {
         "type": "String"
       }
     }

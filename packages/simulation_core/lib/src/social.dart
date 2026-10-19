@@ -76,6 +76,7 @@ enum FanTopic {
   deluxeOut,
   catchingOn,
   topArtistNo1,
+  wrapped,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.

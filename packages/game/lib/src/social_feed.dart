@@ -136,6 +136,9 @@ abstract final class SocialFeed {
             fan(FanTopic.yearEndHit,
                 albumId: albums.first.$2, number: albums.first.$1);
           }
+        case WrappedOut(:final topSongId):
+          fan(FanTopic.wrapped, songId: topSongId);
+          fan(FanTopic.wrapped, songId: topSongId);
         case MusicShowResult(:final songId, won: true, tripleCrown: true):
           fan(FanTopic.tripleCrown, songId: songId);
           fan(FanTopic.tripleCrown, songId: songId);

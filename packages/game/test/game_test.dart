@@ -1151,6 +1151,49 @@ void main() {
       g.close();
     });
 
+    test('the year on the streaming app comes out in December (K123)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      g.world.player!.creativeEnergy = 100;
+      final a = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(a);
+      g.advanceWeeks(3, stop: SkipStop.never);
+      g.world.player!.creativeEnergy = 100;
+      final b = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(b);
+      expect(g.wrappedYears, isEmpty);
+      WrappedOut? news;
+      while (GameTime.weekOfYear(g.week) != Wrapped.publishWeekOfYear + 1) {
+        for (final e in g.advanceWeek().events) {
+          if (e is WrappedOut) news = e;
+        }
+      }
+      expect(news, isNotNull);
+      expect(news!.year, g.year);
+      expect(g.wrappedYears, [g.year]);
+      final wr = g.wrapped(g.year)!;
+      expect(wr.plays, closeTo(news.plays, 1));
+      expect(wr.minutes, closeTo(wr.plays * Wrapped.minutesPerPlay, 1));
+      expect(wr.story, WrappedStory.newcomer);
+      expect(wr.growthPct, isNull);
+      expect(wr.topSongs.length, 2);
+      expect(wr.topSongs.first.songId, news.topSongId);
+      expect(wr.topSongs.first.plays,
+          greaterThanOrEqualTo(wr.topSongs.last.plays));
+      expect(wr.topSongs.fold(0.0, (t, s) => t + s.plays),
+          closeTo(wr.plays, 1));
+      expect(wr.regionShare.fold(0.0, (t, v) => t + v), closeTo(1, 1e-9));
+      expect(wr.peakListeners, greaterThan(0));
+      expect(wr.newSongs, 2);
+      expect(wr.topFans, greaterThan(0));
+      expect(g.wrapped(g.year - 1), isNull);
+      g.close();
+    });
+
     test('a deluxe edition adds bonus tracks once and survives a save (K115)',
         () {
       var g = GameSession.start(

@@ -13,6 +13,7 @@ import '../game_shell.dart';
 import '../song_detail_screen.dart';
 import 'artist_page.dart';
 import 'playlist_page.dart';
+import 'wrapped_screen.dart';
 
 const _top50 = [
   Charts.platformGlobal,
@@ -32,6 +33,7 @@ class StreamifyScreen extends StatefulWidget {
 class _StreamifyScreenState extends State<StreamifyScreen> {
   ArtistPageView? _me;
   List<int> _active = const [];
+  int? _wrapped;
   int _loadedRevision = -1;
 
   @override
@@ -48,10 +50,12 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
     final career = context.careerRead;
     final me = await career.read(Cmd.artistPage(career.player.id));
     final active = await career.read(Cmd.activeCharts());
+    final wrapped = await career.read(Cmd.latestWrapped());
     if (mounted) {
       setState(() {
         _me = me;
         _active = active;
+        _wrapped = wrapped;
       });
     }
   }
@@ -142,6 +146,13 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
                   ),
                 ),
               ),
+              if (_wrapped != null) ...[
+                const SizedBox(height: 14),
+                _WrappedBanner(
+                    year: _wrapped!,
+                    onTap: () => pushInCareer(
+                        context, WrappedScreen(year: _wrapped))),
+              ],
               if (charts.isNotEmpty) ...[
                 const SizedBox(height: 26),
                 Text(l.streamifyCharts, style: h),
@@ -228,5 +239,54 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
             ],
           ),
         ));
+  }
+}
+
+/// The way into the year in review (docs K123).
+class _WrappedBanner extends StatelessWidget {
+  const _WrappedBanner({required this.year, required this.onTap});
+  final int year;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    const ink = Color(0xFF141414);
+    return Material(
+      color: const Color(0xFFD7F75B),
+      child: InkWell(
+        onTap: onTap,
+        child: Row(children: [
+          Container(
+            width: 64,
+            height: 64,
+            color: const Color(0xFFFF4FA3),
+            alignment: Alignment.center,
+            child: Text('$year',
+                style: const TextStyle(
+                    fontFamily: AppFonts.condensed,
+                    color: ink,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800)),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l.wrappedBanner(year),
+                      style: const TextStyle(
+                          color: ink,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900)),
+                  Text(l.wrappedBannerSub,
+                      style: const TextStyle(color: ink, fontSize: 13)),
+                ]),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: ink),
+          const SizedBox(width: 8),
+        ]),
+      ),
+    );
   }
 }

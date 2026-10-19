@@ -252,6 +252,20 @@ abstract final class Cmd {
         );
       };
 
+  /// The player's year on the streaming app and the years there are (docs
+  /// K123); [year] null is the latest.
+  static SessionCmd<(WrappedView?, List<int>)> wrapped(int? year) => (s) {
+        final years = s.wrappedYears;
+        final y = year ?? (years.isEmpty ? null : years.first);
+        return (y == null ? null : s.wrapped(y), years);
+      };
+
+  /// The latest year with a Wrapped (null: none yet).
+  static SessionCmd<int?> latestWrapped() => (s) {
+        final years = s.wrappedYears;
+        return years.isEmpty ? null : years.first;
+      };
+
   static SessionCmd<(List<TourRankView>, int)> topTours(int? year) => (s) =>
       (year == null ? s.allTimeTours() : s.topTours(year), s.firstTourYear);
 

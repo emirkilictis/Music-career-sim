@@ -2,7 +2,7 @@ import 'package:simulation_core/simulation_core.dart';
 
 import 'milestones.dart';
 import 'platforms.dart';
-import 'views.dart' show RecordKind;
+import 'views.dart' show RecordKind, WrappedStory;
 
 /// Something worth telling the player after a week (docs/game-design.md §15).
 /// Events carry ids and numbers only; the UI builds the localized text.
@@ -220,6 +220,18 @@ class YearEndCharts extends GameEvent {
   bool get isMajor => hasPlayer;
   @override
   bool get isIndustry => !hasPlayer;
+}
+
+/// The player's year on the streaming app is out (docs K123).
+class WrappedOut extends GameEvent {
+  const WrappedOut(this.year,
+      {required this.plays, required this.topSongId, required this.story});
+  final int year;
+  final double plays;
+  final int topSongId;
+  final WrappedStory story;
+  @override
+  bool get isMajor => true;
 }
 
 /// A rival's answer to the player's announced album (docs K109): moved

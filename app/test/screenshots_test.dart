@@ -534,6 +534,22 @@ void main() {
     await Scrollable.ensureVisible(tester.element(deals), alignment: 0.1);
     await tester.pumpAndSettle();
     await shot(tester, '04h_brand_deals');
+    // The year on the streaming app (docs K123).
+    await tester.scrollUntilVisible(_ci('Streamify'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Streamify'));
+    await tester.pumpAndSettle();
+    await shot(tester, '09e_wrapped_banner');
+    await tester.tap(find.textContaining('Wrapped is here'));
+    await tester.pumpAndSettle();
+    await shot(tester, '09f_wrapped');
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, -700));
+    await shot(tester, '09g_wrapped_more');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     // The year-end charts (docs K110).
     await tab(tester, 'Charts');
     await tester.scrollUntilVisible(_ci('Year-end'), 200,

@@ -871,6 +871,119 @@ class HonorsView {
       bestArtistRank == 0;
 }
 
+/// The streaming app's year in review (docs K123), out in early December
+/// from 2016, like the real one: January to the end of November.
+abstract final class Wrapped {
+  static const firstYear = 2016;
+
+  /// Week of the year it comes out (a week after the year-end charts).
+  static const publishWeekOfYear = 49;
+
+  /// About three and a half minutes a play.
+  static const minutesPerPlay = 3.4;
+
+  /// First and last week counted for [year].
+  static (int, int) tracking(int year) => (
+        GameTime.firstWeekOf(year),
+        GameTime.firstWeekOf(year) + publishWeekOfYear - 2,
+      );
+
+  /// Whether [year]'s is out in [week].
+  static bool publishedBy(int year, int week) =>
+      year >= firstYear &&
+      week >= GameTime.firstWeekOf(year) + publishWeekOfYear - 1;
+}
+
+/// What the year was, in one word (docs K123).
+enum WrappedStory {
+  /// The first year with plays.
+  newcomer,
+
+  /// At least three times last year's plays.
+  breakout,
+
+  /// One song carried most of it.
+  oneSong,
+
+  /// Most plays came from songs out before the year.
+  catalog,
+
+  /// Half or more down on last year.
+  quiet,
+  steady,
+}
+
+/// One song of the player's year on the streaming app.
+class WrappedSong {
+  WrappedSong(
+      {required this.songId,
+      required this.title,
+      required this.coverAlbumId,
+      required this.plays});
+  final int songId;
+  final String title;
+  final int coverAlbumId;
+  final double plays;
+}
+
+/// The player's year on the streaming app (docs K123).
+class WrappedView {
+  WrappedView({
+    required this.year,
+    required this.plays,
+    required this.playsBefore,
+    required this.peakListeners,
+    required this.peakWeek,
+    required this.topSongs,
+    required this.topAlbumId,
+    required this.topAlbumPlays,
+    required this.regionShare,
+    required this.newSongs,
+    required this.topFans,
+    required this.story,
+  });
+  final int year;
+
+  /// Plays of the player's songs there, and the same weeks a year before
+  /// (0: none).
+  final double plays;
+  final double playsBefore;
+  double get minutes => plays * Wrapped.minutesPerPlay;
+
+  /// The most monthly listeners in a week, and that week.
+  final double peakListeners;
+  final int peakWeek;
+
+  /// The most played songs, at most five.
+  final List<WrappedSong> topSongs;
+
+  /// The most played album (-1: none) and its tracks' plays.
+  final int topAlbumId;
+  final double topAlbumPlays;
+
+  /// Share of the plays in each region ([Region] order).
+  final List<double> regionShare;
+
+  /// Songs first out this year.
+  final int newSongs;
+
+  /// Listeners whose most played artist the player was.
+  final double topFans;
+  final WrappedStory story;
+
+  /// Change on last year, in percent (null: no plays then).
+  int? get growthPct =>
+      playsBefore <= 0 ? null : ((plays / playsBefore - 1) * 100).round();
+
+  Region get topRegion {
+    var best = 0;
+    for (var k = 1; k < regionShare.length; k++) {
+      if (regionShare[k] > regionShare[best]) best = k;
+    }
+    return Region.values[best];
+  }
+}
+
 /// One week of the K-pop music show (docs K114).
 class MusicShowRow {
   MusicShowRow.of(World w, MusicShowWeek x)
