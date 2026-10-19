@@ -492,9 +492,41 @@ abstract final class Actions {
       .round();
 
   /// The biggest radio push a label can arrange: heavy rotation needs at
-  /// least a mid-size label.
-  static RadioPush maxRadioPush(Label l) =>
-      l.index >= Label.mid.index ? RadioPush.heavy : RadioPush.standard;
+  /// least a mid-size label, a blitz a major (docs K128).
+  static RadioPush maxRadioPush(Label l) => l.index >= Label.major.index
+      ? RadioPush.blitz
+      : l.index >= Label.mid.index
+          ? RadioPush.heavy
+          : RadioPush.standard;
+
+  /// Weeks after a single comes out its radio push can still be raised
+  /// (docs K128): stations add a song early or not at all.
+  static const radioUpgradeWeeks = 8;
+
+  /// What raising [s]'s radio push to [to] costs now: the difference.
+  static int radioUpgradeCost(Artist a, Song s, RadioPush to) => math.max(
+      0, radioPushCostFor(a, to) - radioPushCostFor(a, s.radioPush));
+
+  static bool canUpgradeRadio(World w, Artist a, Song s) =>
+      s.isSingle &&
+      s.status == SongStatus.active &&
+      w.week - s.singleWeek < radioUpgradeWeeks &&
+      s.radioPush.rank < maxRadioPush(a.label).rank;
+
+  /// Raises a released single's radio push (docs K128).
+  static void upgradeRadio(World w, Artist a, Song s, RadioPush to) {
+    if (!canUpgradeRadio(w, a, s) ||
+        to.rank <= s.radioPush.rank ||
+        to.rank > maxRadioPush(a.label).rank) {
+      throw ActionException('Radio push not possible');
+    }
+    final cost = radioUpgradeCost(a, s, to);
+    if (cost > a.moneyCents) throw ActionException('Not enough money');
+    a.moneyCents -= cost;
+    s.campaignCostCents += cost;
+    s.radioPush = to;
+    w.dirtySongs.add(s.id);
+  }
 
   /// A long break makes the return an event (docs K87): after two years
   /// without a release, fans and press are hungry, most of all for a

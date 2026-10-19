@@ -111,7 +111,7 @@ int worldHash(World w) {
     addDouble(s.botDelivered);
     addInt(s.botStatus.index);
     addInt(s.chartFilterUntil);
-    addInt(s.autoplay ? 1 : 0);
+    addInt(s.autoplay.index);
     addInt(s.pitchWeek);
     for (final (v, wk) in s.versions) {
       addInt(v.index * 100000 + wk);

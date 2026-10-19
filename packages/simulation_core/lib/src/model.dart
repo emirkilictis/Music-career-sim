@@ -3,6 +3,7 @@
 /// deterministic.
 library;
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'config/charts.dart';
@@ -165,12 +166,26 @@ enum Campaign {
 /// K84). Without it a star's single gets about half the radio: their
 /// airplay comes from the label's promotion machine. A newcomer's few
 /// spins are local and earned, so skipping the push costs them little.
+/// Index order is stored in saves: only append; [ladder] is the order
+/// from none to the most (docs K128).
 enum RadioPush {
-  none(costCents: 0, factor: 0.5),
-  standard(costCents: 15000000, factor: 1.0),
-  heavy(costCents: 60000000, factor: 1.6);
+  none(costCents: 0, factor: 0.5, rank: 0),
+  standard(costCents: 15000000, factor: 1.0, rank: 2),
+  heavy(costCents: 60000000, factor: 1.6, rank: 3),
 
-  const RadioPush({required this.costCents, required this.factor});
+  /// A few regional stations (docs K128).
+  light(costCents: 5000000, factor: 0.75, rank: 1),
+
+  /// Every format at once, heavy rotation everywhere (docs K128).
+  blitz(costCents: 150000000, factor: 2.1, rank: 4);
+
+  const RadioPush(
+      {required this.costCents, required this.factor, required this.rank});
+
+  /// Place on [ladder].
+  final int rank;
+
+  static const ladder = [none, light, standard, heavy, blitz];
 
   /// Price for an artist of ~1.5M listeners; it scales with the audience
   /// (see Actions.radioPushCostFor).
@@ -181,8 +196,33 @@ enum RadioPush {
 
   /// The multiplier for an artist this famous: no push costs a newcomer
   /// ×0.85, anyone from 50% fame ×0.5.
-  double factorFor(double fame) =>
-      this == none ? 0.85 - 0.7 * fame.clamp(0.0, 0.5) : factor;
+  double factorFor(double fame) {
+    final bare = 0.85 - 0.7 * fame.clamp(0.0, 0.5);
+    return switch (this) {
+      none => bare,
+      // A light push always adds something over none.
+      light => math.max(factor, bare + 0.15),
+      _ => factor,
+    };
+  }
+}
+
+/// Autoplay levels (docs K96, K128): how much more the algorithm plays a
+/// song ([lift] on its autoplay listening) for what share of the usual
+/// royalty. Index order is stored in saves: only append; [ladder] is the
+/// order from off to the most.
+enum AutoplayLevel {
+  off(lift: 0, royalty: 1),
+  standard(lift: 1, royalty: 0.7),
+  light(lift: 0.5, royalty: 0.85),
+  max(lift: 1.6, royalty: 0.5);
+
+  const AutoplayLevel({required this.lift, required this.royalty});
+  final double lift;
+  final double royalty;
+  bool get on => this != off;
+
+  static const ladder = [off, light, standard, max];
 }
 
 /// Extra versions of a released song (docs K92, F26). Streaming services
@@ -662,9 +702,9 @@ class Song with Charted {
   BotStatus botStatus = BotStatus.none;
   int chartFilterUntil = -1;
 
-  /// In the streaming apps' autoplay programme (docs K96): more listening
-  /// from the algorithm for a smaller royalty.
-  bool autoplay = false;
+  /// How far it is in the streaming apps' autoplay programme (docs K96,
+  /// K128): more listening from the algorithm for a smaller royalty.
+  AutoplayLevel autoplay = AutoplayLevel.off;
 
   /// Week the player pitched it to the playlist editors (docs K97), -1.
   int pitchWeek = -1;

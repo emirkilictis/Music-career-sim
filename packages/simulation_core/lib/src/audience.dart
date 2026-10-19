@@ -14,8 +14,7 @@ abstract final class Audience {
   static double addFans(World w, Artist a, double n) {
     final before = a.coreFans;
     if (n > 0) {
-      final room = 1 - a.coreFans / fanCap(w);
-      a.coreFans += n * (room < 0 ? 0 : room);
+      a.coreFans += n * w.config.fanRoom(a.coreFans);
     } else {
       a.coreFans += n;
     }

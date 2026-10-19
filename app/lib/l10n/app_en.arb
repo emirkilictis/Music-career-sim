@@ -4399,5 +4399,37 @@
         "type": "String"
       }
     }
-  }
+  },
+  "radioLight": "Light radio push",
+  "radioLightHint": "A few regional stations give it a try.",
+  "radioBlitz": "Radio blitz",
+  "radioBlitzHint": "Every format, heavy rotation everywhere (a major label only).",
+  "autoplayOff": "Off",
+  "autoplayLight": "Light",
+  "autoplayStandard": "Standard",
+  "autoplayMax": "Max",
+  "autoplayOffHint": "The algorithm plays it like any other song, for the full royalty.",
+  "autoplayTerms": "Up to +{lift}% listening from autoplay, for a {cut}% smaller royalty on its streams.",
+  "@autoplayTerms": {
+    "placeholders": {
+      "lift": {
+        "type": "int"
+      },
+      "cut": {
+        "type": "int"
+      }
+    }
+  },
+  "radioWeekLine": "{spins} radio plays last week on {stations} stations.",
+  "@radioWeekLine": {
+    "placeholders": {
+      "spins": {
+        "type": "String"
+      },
+      "stations": {
+        "type": "int"
+      }
+    }
+  },
+  "radioUpgradeHint": "Raise the radio push while stations are still deciding (first 8 weeks; you pay the difference):"
 }

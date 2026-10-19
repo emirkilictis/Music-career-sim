@@ -269,7 +269,7 @@ abstract final class Codec {
                 s.botStatus.index,
                 s.chartFilterUntil,
               ]),
-        s.autoplay ? 1 : 0,
+        s.autoplay.index,
         s.pitchWeek,
         s.videoWeek,
         s.streamsAtVideo,
@@ -315,7 +315,7 @@ abstract final class Codec {
         ..botStatus = BotStatus.values[j[3] as int]
         ..chartFilterUntil = j[4] as int;
     }
-    s.autoplay = r['autoplay'] == 1;
+    s.autoplay = AutoplayLevel.values[r['autoplay'] as int? ?? 0];
     s.pitchWeek = r['pitchWeek'] as int? ?? -1;
     s.videoWeek = r['videoWeek'] as int? ?? -1;
     s.streamsAtVideo = (r['videoBase'] as num?)?.toDouble() ?? 0;

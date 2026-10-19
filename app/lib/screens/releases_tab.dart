@@ -475,7 +475,7 @@ Future<bool> releaseSingleFlow(
       extraCents: career.player.campaignCosts[campaign.index]);
   if (radio == null || !context.mounted) return false;
   // Playlist pitch and autoplay before it comes out (docs K101).
-  var pitch = false, autoplay = song.autoplay;
+  var pitch = false, autoplay = song.autoplayLevel;
   if (song.canPitch || song.autoplayOpen) {
     final picked = await pickStreamingOptions(context, song);
     if (picked == null || !context.mounted) return false;
@@ -483,8 +483,8 @@ Future<bool> releaseSingleFlow(
   }
   try {
     if (pitch) await career.act(Cmd.pitchSong(song.id));
-    if (autoplay != song.autoplay) {
-      await career.act(Cmd.setAutoplay(song.id, autoplay));
+    if (autoplay != song.autoplayLevel) {
+      await career.act(Cmd.setAutoplayLevel(song.id, autoplay));
     }
     if (when.releaseWeek == career.week) {
       await career.act(Cmd.releaseSingle(song.id, campaign, radio));
@@ -506,11 +506,16 @@ Future<bool> releaseSingleFlow(
 
 /// Pitch to the playlist editors and autoplay, chosen while putting a song
 /// out (docs K101). Null when cancelled.
-Future<(bool, bool)?> pickStreamingOptions(
+Future<(bool, AutoplayLevel)?> pickStreamingOptions(
     BuildContext context, SongView song) {
   final l = context.l10n;
-  var pitch = song.canPitch, autoplay = song.autoplay || song.autoplayOpen;
-  return showModalBottomSheet<(bool, bool)>(
+  var pitch = song.canPitch;
+  var autoplay = song.autoplay
+      ? song.autoplayLevel
+      : song.autoplayOpen
+          ? AutoplayLevel.standard
+          : AutoplayLevel.off;
+  return showModalBottomSheet<(bool, AutoplayLevel)>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
@@ -536,15 +541,12 @@ Future<(bool, bool)?> pickStreamingOptions(
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     subtitle: Text(l.pitchHint),
                   ),
-                if (song.autoplayOpen)
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    value: autoplay,
-                    onChanged: (v) => set(() => autoplay = v),
-                    title: Text(l.autoplayLabel,
-                        style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: Text(l.autoplayHint),
-                  ),
+                if (song.autoplayOpen) ...[
+                  const SizedBox(height: 8),
+                  AutoplayLevelPicker(
+                      value: autoplay,
+                      onChanged: (v) => set(() => autoplay = v)),
+                ],
                 const SizedBox(height: 8),
                 FilledButton(
                   onPressed: () => Navigator.pop(c, (pitch, autoplay)),
@@ -631,23 +633,15 @@ Future<RadioPush?> pickRadioPush(BuildContext context, CareerState career,
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Text(l.radioPushHint, style: Theme.of(c).textTheme.bodySmall),
         ),
-        for (final r in RadioPush.values)
+        for (final r in RadioPush.ladder)
           ListTile(
-            enabled: r.index <= p.maxRadioPush.index &&
+            enabled: r.rank <= p.maxRadioPush.rank &&
                 cost(r) + extraCents <= p.moneyCents,
-            leading: Icon(switch (r) {
-              RadioPush.none => Icons.radio_outlined,
-              RadioPush.standard => Icons.radio,
-              RadioPush.heavy => Icons.cell_tower_rounded,
-            }),
+            leading: Icon(radioIcon(r)),
             title: Text(fmt.radioPush(r)),
-            subtitle: Text(r.index > p.maxRadioPush.index
+            subtitle: Text(r.rank > p.maxRadioPush.rank
                 ? l.radioLockedHint
-                : switch (r) {
-                    RadioPush.none => l.radioNoneHint,
-                    RadioPush.standard => l.radioStandardHint,
-                    RadioPush.heavy => l.radioHeavyHint,
-                  }),
+                : fmt.radioPushHint(r)),
             trailing: Text(fmt.money(cost(r))),
             onTap: () => Navigator.pop(c, r),
           ),
@@ -655,6 +649,44 @@ Future<RadioPush?> pickRadioPush(BuildContext context, CareerState career,
       ])),
     ),
   );
+}
+
+IconData radioIcon(RadioPush r) => switch (r) {
+      RadioPush.none => Icons.radio_outlined,
+      RadioPush.light => Icons.radio,
+      RadioPush.standard => Icons.radio,
+      RadioPush.heavy => Icons.cell_tower_rounded,
+      RadioPush.blitz => Icons.campaign_rounded,
+    };
+
+/// The autoplay levels as chips (docs K128).
+class AutoplayLevelPicker extends StatelessWidget {
+  const AutoplayLevelPicker(
+      {super.key, required this.value, required this.onChanged});
+  final AutoplayLevel value;
+  final ValueChanged<AutoplayLevel> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final fmt = context.fmt;
+    final l = context.l10n;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(l.autoplayLabel,
+          style: const TextStyle(fontWeight: FontWeight.w700)),
+      const SizedBox(height: 6),
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        for (final a in AutoplayLevel.ladder)
+          ChoiceChip(
+            label: Text(fmt.autoplayLevel(a)),
+            selected: a == value,
+            onSelected: (_) => onChanged(a),
+          ),
+      ]),
+      const SizedBox(height: 6),
+      Text(fmt.autoplayTerms(value),
+          style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+    ]);
+  }
 }
 
 /// Builds an album or EP from vault songs and earlier singles.

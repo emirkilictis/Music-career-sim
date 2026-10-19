@@ -24,7 +24,7 @@ class SimConfig {
     this.baseExposure = 0.0015,
     this.fameExposure = 0.020,
     this.fameRate = 0.02,
-    this.playerFameRate = 0.04,
+    this.playerFameRate = 0.03,
     this.chartFeedback = 0.12,
     this.chartFatigueWeeks = 12,
     this.albumTrackFanShare = 0.6,
@@ -37,9 +37,13 @@ class SimConfig {
     this.playlistMidBoost = 0.3,
     this.playlistBigBoost = 0.8,
     this.playlistFade = 0.85,
-    this.marketShareKnee = 0.005,
-    this.marketShareCap = 0.012,
-    this.liftCeiling = 2.0,
+    // 0.005 / 0.012 until docs K127: the biggest stars took too much.
+    this.marketShareKnee = 0.004,
+    this.marketShareCap = 0.008,
+    this.songShareKnee = 0.0025,
+    this.songShareCap = 0.004,
+    // 2.0 until docs K127: the player's tools stacked to ×2.4 on reach.
+    this.liftCeiling = 1.2,
     this.momentumSigma = 0.12,
     this.albumLegsSigma = 0.3,
     this.longAlbumBonus = 0.08,
@@ -50,7 +54,8 @@ class SimConfig {
     this.versionFade = 0.8,
     this.botFiltered = 0.25,
     this.autoplayLift = 0.3,
-    this.autoplayRoyalty = 0.7,
+    this.resonanceSigma = 0.5,
+    this.resonanceMedian = 0.75,
     this.variantDecay = 0.45,
     this.casualBuyRate = 0.012,
     this.albumSecondWeekRatio = 0.22,
@@ -242,6 +247,10 @@ class SimConfig {
   final double marketShareKnee;
   final double marketShareCap;
 
+  /// The same bend for one song's listening beyond its fans (docs K127).
+  final double songShareKnee;
+  final double songShareCap;
+
   /// Spread of a song's weekly run of luck (log scale; docs K105).
   final double momentumSigma;
 
@@ -275,11 +284,26 @@ class SimConfig {
   double stackedLift(double x) =>
       x <= 0 ? 1.0 : 1 + liftCeiling * (1 - math.exp(-x / liftCeiling));
 
+  /// Share of new fans an artist with [fans] core fans can still win
+  /// (docs K127): it shrinks with the square of the fandom's size, so a
+  /// star's fandom grows by years, not weeks (linear until K127).
+  double fanRoom(double fans) {
+    final x = fans / fanCap;
+    if (x >= 1) return 0;
+    return (1 - x) * (1 - x);
+  }
+
   /// [x] (an artist's share of the rest of a market) after the bend.
   double cappedMarketShare(double x) {
     if (x <= marketShareKnee) return x;
     final room = marketShareCap - marketShareKnee;
     return marketShareKnee + room * _tanh((x - marketShareKnee) / room);
+  }
+
+  double cappedSongShare(double x) {
+    if (x <= songShareKnee) return x;
+    final room = songShareCap - songShareKnee;
+    return songShareKnee + room * _tanh((x - songShareKnee) / room);
   }
 
   static double _tanh(double x) {
@@ -349,7 +373,10 @@ class SimConfig {
   /// royalty it pays (docs K96).
   final double botFiltered;
   final double autoplayLift;
-  final double autoplayRoyalty;
+
+  /// How much a song connects with listeners beyond its quality: drawn
+  /// once per song, log-normal around [resonanceMedian] (docs K127).
+  final double resonanceSigma, resonanceMedian;
   final double variantDecay;
   final double casualBuyRate;
   final double albumSecondWeekRatio;

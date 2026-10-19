@@ -298,6 +298,12 @@ abstract final class Cmd {
       (s) => s.buyBots(id, pkg);
   static SessionCmd<void> setAutoplay(int id, bool on) =>
       (s) => s.setAutoplay(id, on);
+
+  static SessionCmd<void> setAutoplayLevel(int id, AutoplayLevel level) =>
+      (s) => s.setAutoplayLevel(id, level);
+
+  static SessionCmd<void> upgradeRadio(int id, RadioPush to) =>
+      (s) => s.upgradeRadio(id, to);
   static SessionCmd<void> pitchSong(int id) => (s) => s.pitchSong(id);
   static SessionCmd<PostOutcome> post(PostKind kind, {int songId = -1}) =>
       (s) => s.post(kind, songId: songId);

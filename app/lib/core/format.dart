@@ -303,7 +303,30 @@ class Fmt {
         RadioPush.none => l.radioNone,
         RadioPush.standard => l.radioStandard,
         RadioPush.heavy => l.radioHeavy,
+        RadioPush.light => l.radioLight,
+        RadioPush.blitz => l.radioBlitz,
       };
+
+  String radioPushHint(RadioPush r) => switch (r) {
+        RadioPush.none => l.radioNoneHint,
+        RadioPush.light => l.radioLightHint,
+        RadioPush.standard => l.radioStandardHint,
+        RadioPush.heavy => l.radioHeavyHint,
+        RadioPush.blitz => l.radioBlitzHint,
+      };
+
+  /// An autoplay level's name (docs K128).
+  String autoplayLevel(AutoplayLevel a) => switch (a) {
+        AutoplayLevel.off => l.autoplayOff,
+        AutoplayLevel.light => l.autoplayLight,
+        AutoplayLevel.standard => l.autoplayStandard,
+        AutoplayLevel.max => l.autoplayMax,
+      };
+
+  /// What a level gives and takes.
+  String autoplayTerms(AutoplayLevel a) => a.on
+      ? l.autoplayTerms((a.lift * 30).round(), ((1 - a.royalty) * 100).round())
+      : l.autoplayOffHint;
 
   String campaign(Campaign c) => switch (c) {
         Campaign.none => l.campaignNone,

@@ -29,6 +29,7 @@ abstract final class RngPurpose {
   static const wordOfMouth = 33;
   static const criticPanel = 34;
   static const discover = 35;
+  static const resonance = 36;
 }
 
 /// SplitMix64 finalizer. Dart native ints are 64-bit and wrap on overflow.

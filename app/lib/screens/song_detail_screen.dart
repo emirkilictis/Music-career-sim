@@ -444,6 +444,39 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     style:
                         TextStyle(color: Theme.of(context).colorScheme.outline),
                   ),
+                  // On the radio (docs K128).
+                  if (s.isSingle &&
+                      s.releasedWeek >= 0 &&
+                      s.radioSpins >= 1) ...[
+                    const SizedBox(height: 8),
+                    Row(children: [
+                      Icon(radioIcon(s.radioPush),
+                          size: 18, color: AppColors.textMuted),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                            l.radioWeekLine(
+                                fmt.compact(s.radioSpins), s.radioStations),
+                            style: TextStyle(color: AppColors.textMuted)),
+                      ),
+                    ]),
+                  ],
+                  if (s.radioUpgradeCosts.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(l.radioUpgradeHint,
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                    const SizedBox(height: 6),
+                    Wrap(spacing: 8, runSpacing: 8, children: [
+                      for (final e in s.radioUpgradeCosts.entries)
+                        ActionChip(
+                          avatar: Icon(radioIcon(e.key), size: 16),
+                          label: Text(
+                              '${fmt.radioPush(e.key)} · ${fmt.money(e.value)}'),
+                          onPressed: () => _tool(Cmd.upgradeRadio(s.id, e.key)),
+                        ),
+                    ]),
+                  ],
                   if (s.scheduledSingleWeek >= 0) ...[
                     const SizedBox(height: 12),
                     Tag(l.scheduledSingleTag(fmt.week(s.scheduledSingleWeek)),
@@ -619,16 +652,13 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         ),
                       ),
                     ],
-                    if (s.autoplayOpen)
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        value: s.autoplay,
-                        onChanged: (on) => _tool(Cmd.setAutoplay(s.id, on)),
-                        title: Text(l.autoplayLabel,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w700)),
-                        subtitle: Text(l.autoplayHint),
-                      ),
+                    if (s.autoplayOpen) ...[
+                      const SizedBox(height: 10),
+                      AutoplayLevelPicker(
+                          value: s.autoplayLevel,
+                          onChanged: (a) =>
+                              _tool(Cmd.setAutoplayLevel(s.id, a))),
+                    ],
                     if (s.preSaves >= 1)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),

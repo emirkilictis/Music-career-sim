@@ -138,6 +138,8 @@ Kaynak: **E** = Emir'in notu, **T** = Claude'un test oyunu. Öncelik: **1** = ö
 | F73 | **Yıl sonu listesi listede kalma süresine göre değil puana/satışa göre olsun, albümüm her sene #1 oluyor** (Emir). | ✅ K110 düzeltmesi: yıl sonu listesi artık yıl içindeki haftalık liste puanlarının (albümde birim) toplamına göre. |
 | F74 | **Yılın en çok satan albümlerimi de görmek isterim** (Emir). | ✅ K122: Listeler → Yıl sonu → ABD/Global Albümler → "Sadece benimkiler"; satırlarda o yılki satış. |
 | F75 | **Taylor gibi aylar öncesinden albüm duyurup ön siparişleri ilk hafta kargolamak; hype albüm çıkana kadar birikebilsin** (Emir). | ✅ K126: ön siparişler duyuru boyunca birikiyor ve ilk hafta sayılıyor; heyecan tavanı 6 aya kadar yükselmeye devam ediyor. |
+| F76 | **Normal modda süperstar olarak yine tanrı gibi oldum (1M$ başlangıç): her rekor bende, single'lar 7–9 milyar stream, albümler 25 hafta #1** (Emir, ekran görüntüleri). | ✅ K127 (aşağıda). |
+| F77 | **Autoplay ve radyo daha detaylı olmalı, seviyeleri olmalı** (Emir). | ✅ K128: autoplay 4 seviye, radyo 5 seviye, çıkıştan sonra 8 hafta yükseltilebilir, haftalık çalınma/istasyon sayısı. |
 
 ## Test oyunu 3 — Gerçek kariyer tekrarı (JT, Gerçekçi mod)
 

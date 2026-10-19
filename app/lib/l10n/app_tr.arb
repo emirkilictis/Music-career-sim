@@ -1280,5 +1280,17 @@
   "edPick": "Editör seçimi",
   "edOnPlaylists": "Çalma listelerinde",
   "preOrdersValue": "{count} ön sipariş",
-  "preOrdersShipped": "{count} ön sipariş ilk hafta kargolandı (o hafta {total} satış)."
+  "preOrdersShipped": "{count} ön sipariş ilk hafta kargolandı (o hafta {total} satış).",
+  "radioLight": "Hafif radyo tanıtımı",
+  "radioLightHint": "Birkaç bölgesel istasyon şansını dener.",
+  "radioBlitz": "Radyo bombardımanı",
+  "radioBlitzHint": "Her format, her yerde yoğun rotasyon (sadece büyük şirketler).",
+  "autoplayOff": "Kapalı",
+  "autoplayLight": "Hafif",
+  "autoplayStandard": "Standart",
+  "autoplayMax": "Maksimum",
+  "autoplayOffHint": "Algoritma onu diğer şarkılar gibi çalar, telifin tamamı sende.",
+  "autoplayTerms": "Autoplay'den +%{lift}'e kadar dinlenme, karşılığında stream telifi %{cut} düşer.",
+  "radioWeekLine": "Geçen hafta {stations} istasyonda {spins} radyo çalınması.",
+  "radioUpgradeHint": "İstasyonlar hâlâ karar verirken radyo tanıtımını yükselt (ilk 8 hafta; farkı ödersin):"
 }

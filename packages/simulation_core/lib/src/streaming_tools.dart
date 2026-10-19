@@ -116,13 +116,22 @@ abstract final class StreamingTools {
 
   static bool autoplayOpen(World w) => GameTime.yearOf(w.week) >= autoplayYear;
 
-  /// Puts [s] in (or takes it out of) the autoplay programme; an
-  /// unreleased song starts in it on release (docs K101).
-  static void setAutoplay(World w, Song s, bool on) {
-    if (on && !autoplayOpen(w)) throw ActionException('No autoplay yet');
+  /// Puts [s] in (or takes it out of) the autoplay programme at the
+  /// standard level; an unreleased song starts in it on release (docs
+  /// K101).
+  static void setAutoplay(World w, Song s, bool on) => setAutoplayLevel(
+      w, s, on ? AutoplayLevel.standard : AutoplayLevel.off);
+
+  /// Sets how far [s] is in the autoplay programme (docs K128).
+  static void setAutoplayLevel(World w, Song s, AutoplayLevel level) {
+    if (level.on && !autoplayOpen(w)) {
+      throw ActionException('No autoplay yet');
+    }
     if (s.status == SongStatus.scrapped) throw ActionException('Scrapped');
-    s.autoplay = on;
-    if (on && s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
+    s.autoplay = level;
+    if (level.on && s.status == SongStatus.dormant) {
+      Lifecycle.reactivateSong(w, s);
+    }
     w.dirtySongs.add(s.id);
   }
 

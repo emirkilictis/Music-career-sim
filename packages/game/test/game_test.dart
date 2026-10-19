@@ -552,6 +552,8 @@ void main() {
       expect(top, isNotEmpty);
       expect(top.first.rank, 1);
       expect(top.first.grossCents, greaterThanOrEqualTo(top.last.grossCents));
+      // Stadiums need a fandom the superstar start has to grow into (K127).
+      g.world.player!.coreFans = 6e6;
       g.startTour(const TourRequest(
           name: 'Big Night',
           legs: [TourLeg(TourMarket.usa, TourKind.stadium, 6)]));
@@ -1087,7 +1089,8 @@ void main() {
 
       final without = streams(false);
       final withVideo = streams(true);
-      expect(withVideo, greaterThan(without * 1.15));
+      // Less than before K127: the lifts saturate sooner.
+      expect(withVideo, greaterThan(without * 1.07));
     });
 
     test('radio push: paid apart, heavy needs a bigger label (K84)', () {
@@ -1235,6 +1238,45 @@ void main() {
           Editorial.placements(w, id)
               .any((pl) => pl.playlist == EditorialPlaylist.freshFriday),
           isTrue);
+      g.close();
+    });
+
+    test('autoplay levels and a radio push raised after release (K128)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      g.world.player!.moneyCents = 1 << 40;
+      if (g.player.label.index < Label.major.index) g.signLabel(Label.major);
+      g.world.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id, radio: RadioPush.standard);
+      g.setAutoplayLevel(id, AutoplayLevel.max);
+      expect(g.song(id).autoplayLevel, AutoplayLevel.max);
+      expect(g.song(id).autoplay, isTrue);
+      // Raise the push while the stations decide.
+      final costs = g.song(id).radioUpgradeCosts;
+      expect(costs.keys, [RadioPush.heavy, RadioPush.blitz]);
+      final money = g.world.player!.moneyCents;
+      g.upgradeRadio(id, RadioPush.heavy);
+      expect(g.world.player!.moneyCents, money - costs[RadioPush.heavy]!);
+      expect(g.song(id).radioPush, RadioPush.heavy);
+      expect(() => g.upgradeRadio(id, RadioPush.light), _code('radioLocked'));
+      g.advanceWeek();
+      expect(g.song(id).radioSpins, greaterThan(0));
+      expect(g.song(id).radioStations, greaterThan(0));
+      // Kept through a save.
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.song(id).autoplayLevel, AutoplayLevel.max);
+      expect(g.song(id).radioPush, RadioPush.heavy);
+      // Too late after eight weeks.
+      g.advanceWeeks(Actions.radioUpgradeWeeks, stop: SkipStop.never);
+      expect(g.song(id).radioUpgradeCosts, isEmpty);
+      expect(() => g.upgradeRadio(id, RadioPush.blitz), _code('radioLocked'));
       g.close();
     });
 

@@ -427,7 +427,7 @@ class GameSession {
   /// What the player pays for a radio push, after checking the label can
   /// arrange it (heavy rotation needs a mid-size label or bigger).
   int _radioCost(RadioPush radio) {
-    if (radio.index > Actions.maxRadioPush(_p.label).index) {
+    if (radio.rank > Actions.maxRadioPush(_p.label).rank) {
       throw GameException('radioLocked', 'The label cannot arrange this');
     }
     return Actions.radioPushCostFor(_p, radio);
@@ -1280,6 +1280,31 @@ class GameSession {
       throw GameException('noStreaming', 'No autoplay yet');
     }
     StreamingTools.setAutoplay(world, s, on);
+    _saveNow();
+  }
+
+  /// Sets a song's autoplay level (docs K128).
+  void setAutoplayLevel(int songId, AutoplayLevel level) {
+    final s = _ownSong(songId);
+    if (level.on && !StreamingTools.autoplayOpen(world)) {
+      throw GameException('noStreaming', 'No autoplay yet');
+    }
+    StreamingTools.setAutoplayLevel(world, s, level);
+    _saveNow();
+  }
+
+  /// Raises a released single's radio push (docs K128).
+  void upgradeRadio(int songId, RadioPush to) {
+    final s = _ownSong(songId);
+    if (!Actions.canUpgradeRadio(world, _p, s) ||
+        to.rank <= s.radioPush.rank) {
+      throw GameException('radioLocked', 'The stations have decided');
+    }
+    if (to.rank > Actions.maxRadioPush(_p.label).rank) {
+      throw GameException('campaignLocked', 'The label cannot run this');
+    }
+    _requireMoney(Actions.radioUpgradeCost(_p, s, to));
+    Actions.upgradeRadio(world, _p, s, to);
     _saveNow();
   }
 

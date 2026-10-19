@@ -322,7 +322,7 @@ class Simulator {
       final listLift = s.playlistBoost;
       final versionLift = s.versionBoost;
       final algoLift =
-          (s.autoplay ? StreamingTools.autoplayLift(c, s, promoAge) : 0.0) +
+          s.autoplay.lift * StreamingTools.autoplayLift(c, s, promoAge) +
               StreamingTools.releaseRadarLift(year, promoAge) +
               StreamingTools.discoverLift(w, s, w.week) +
               StreamingTools.preSaveLift(s, p, promoAge);
@@ -380,7 +380,10 @@ class Simulator {
           c.publicPool * (0.5 + 0.5 * s.commercial) * s.viralBoost * 0.1;
       final noise = r.logNormal(0.06) *
           _momentum(s.id, s.releasedWeek, RngPurpose.momentum);
-      final a = (fanPart + casPart + pubPart + viralPart) *
+      // Not every good song connects (docs K127): beyond the fans, how far
+      // a song travels is partly luck, drawn once and hidden.
+      final hit = resonance(w, s);
+      final a = (fanPart + (casPart + pubPart + viralPart) * hit) *
           qMult *
           noise *
           trackShare;
@@ -391,13 +394,14 @@ class Simulator {
         final m = qMult * noise * trackShare;
         final liftPart = pubPart * (1 - 1 / stacked);
         double of(double x) => lifts > 0 ? liftPart * x / lifts : 0.0;
+        final mh = m * hit;
         s.streamSources = Float64List.fromList([
           fanPart * m,
-          casPart * m,
-          of(algoLift + womLift) * m,
-          of(listLift) * m,
-          (viralPart + of(videoLift)) * m,
-          (pubPart - liftPart + of(hypeLift + versionLift)) * m,
+          casPart * mh,
+          of(algoLift + womLift) * mh,
+          of(listLift) * mh,
+          (viralPart + of(videoLift)) * mh,
+          (pubPart - liftPart + of(hypeLift + versionLift)) * mh,
         ]);
       }
       final dbg = debugParts;
@@ -419,7 +423,8 @@ class Simulator {
       }
       final all = fanPart + casPart + pubPart + viralPart;
       fanFrac[i] = all > 0 ? fanPart / all : 0;
-      s.lastReach = (casPart + pubPart + viralPart) * qMult * trackShare;
+      s.lastReach =
+          (casPart + pubPart + viralPart) * hit * qMult * trackShare;
       // What the campaign added over none at all, for the player's
       // profit/loss (docs K57).
       if (p.tier == ArtistTier.player) {
@@ -903,13 +908,16 @@ class Simulator {
       }
       // Growth saturates: you cannot convert people who are already fans.
       final casualRoom = math.max(0.0, 1 - a.casual / c.casualCap);
-      final fanRoom = math.max(0.0, 1 - a.coreFans / c.fanCap);
+      final fanRoom = c.fanRoom(a.coreFans);
       // Charisma: likeable artists turn listeners into fans more easily
       // (×0.8 at 0, ×1.0 at 50, ×1.2 at 100).
       final charm = 0.8 + 0.4 * a.skills.charisma / 100;
       a.casual += c.casualConversion * charm * a.weekReach * casualRoom -
           c.casualDecay * a.casual;
+      // A household name's songs mostly reach people who already know
+      // them and chose not to be fans (docs K127).
       final conv = charm *
+          (1 - 0.5 * a.fame) *
           a.kind.fanConversion *
           (a.tier == ArtistTier.player ? w.difficulty.fanConversion : 1);
       a.coreFans += c.fanConversion * conv * a.weekReach * fanRoom -
@@ -1476,14 +1484,18 @@ class Simulator {
             regionConfigs[region]!.outsideAttention * ema +
             1;
         final x = reach / rest;
+        final dbg = debugParts;
+        if (dbg != null && id == w.playerArtistId) dbg['x$k'] = x * 1e6;
+        if (dbg != null && w.artists[id].tier != ArtistTier.player) {
+          dbg['maxRivalX$k'] = math.max(dbg['maxRivalX$k'] ?? 0, x * 1e6);
+        }
         if (x <= c.marketShareKnee) continue;
         f ??= Float64List(_r)..fillRange(0, _r, 1.0);
         f[k] = c.cappedMarketShare(x) / x;
       }
       if (f != null) _capFactor[id] = f;
     });
-    if (_capFactor.isEmpty) return;
-    for (var i = 0; i < n; i++) {
+    for (var i = 0; _capFactor.isNotEmpty && i < n; i++) {
       final s = w.songs[ids[i]];
       final f = _capFactor[s.primaryArtistId];
       if (f == null) continue;
@@ -1501,6 +1513,54 @@ class Simulator {
         dl[j] -= dcut;
         mean += p.regionShare[k] * f[k];
       }
+      final kept = fanFrac[i] + out * mean;
+      songAttention[i] *= kept;
+      s.lastAttention *= kept;
+      s.lastReach *= mean;
+    }
+    // One song takes at most a sliver of everyone's listening (docs
+    // K127): beyond its fans a smash bends like an artist does, so the
+    // biggest songs of the week stay within reach of each other.
+    final dbg = debugParts;
+    for (var i = 0; i < n; i++) {
+      final s = w.songs[ids[i]];
+      final out = 1 - fanFrac[i];
+      if (out <= 0) continue;
+      final p = w.artists[s.primaryArtistId];
+      var mean = 0.0;
+      var cutAny = false;
+      for (final region in Region.values) {
+        final k = region.index;
+        final j = i * _r + k;
+        final reach = att[j] * out;
+        var f = 1.0;
+        if (reach > 0) {
+          final ema = w.emaAttention[k] == 0 ? sumA[k] : w.emaAttention[k];
+          final rest = sumA[k] +
+              allDormant[k] -
+              att[j] +
+              regionConfigs[region]!.outsideAttention * ema +
+              1;
+          final x = reach / rest;
+          if (dbg != null) {
+            final key = p.tier == ArtistTier.player ? 'songX$k' : 'rivalSongX$k';
+            dbg[key] = math.max(dbg[key] ?? 0, x * 1e6);
+          }
+          if (x > c.songShareKnee) {
+            f = c.cappedSongShare(x) / x;
+            final cut = reach * (1 - f);
+            sumA[k] -= cut;
+            if (s.isSingle) sumSingles[k] -= cut;
+            att[j] -= cut;
+            final dcut = dl[j] * out * (1 - f);
+            sumD[k] -= dcut;
+            dl[j] -= dcut;
+            cutAny = true;
+          }
+        }
+        mean += p.regionShare[k] * f;
+      }
+      if (!cutAny) continue;
       final kept = fanFrac[i] + out * mean;
       songAttention[i] *= kept;
       s.lastAttention *= kept;
@@ -1524,6 +1584,14 @@ class Simulator {
     // (u − 0.5) has a deviation of 0.29; the echoes add up to about 1.5×.
     return math.exp(w.config.momentumSigma / 0.29 / 1.47 * m);
   }
+
+  /// How much [s] connects with listeners beyond its fans (docs K127):
+  /// a hidden draw per song, so quality makes a hit likely, not certain.
+  static double resonance(World w, Song s) =>
+      (w.config.resonanceMedian *
+              RandomStream.keyed(w.seed, 0, s.id, RngPurpose.resonance)
+                  .logNormal(w.config.resonanceSigma))
+          .clamp(0.2, 2.5);
 
   /// How well [al] holds on after its first week, around 1.
   double _albumLegs(Album al) =>
@@ -1565,7 +1633,7 @@ class Simulator {
       if (s.primaryArtistId != p.id) continue;
       final songCents = s.weekStreams *
               0.35 *
-              (s.autoplay ? world.config.autoplayRoyalty : 1.0) +
+              s.autoplay.royalty +
           s.weekDownloads * 70 +
           s.weekPhysical * 100;
       cents += songCents;
@@ -1589,7 +1657,7 @@ class Simulator {
       for (var r = 0; r < regionCount; r++) {
         songCents += world.songWeekStreamsRegion(s, r) *
             0.35 *
-            (s.autoplay ? world.config.autoplayRoyalty : 1.0);
+            s.autoplay.royalty;
       }
       cents += songCents;
       s.revenueCents += songCents * p.artistShare;

@@ -144,10 +144,29 @@ void main(List<String> args) {
         }
       }
       var bestAlb = 999;
+      var albNo1 = 0, albMaxWeeks = 0;
       for (final al in s.albums) {
         for (final c in al.charts) {
           if (c.chartId == usAlb && c.peak < bestAlb) bestAlb = c.peak;
+          if (c.chartId == usAlb) {
+            albNo1 += c.weeksAtNo1;
+            albMaxWeeks = math.max(albMaxWeeks, c.weeksOn);
+          }
         }
+      }
+      var songNo1 = 0, songMaxNo1 = 0, songMaxWeeks = 0;
+      for (final song in s.songs) {
+        for (final c in song.charts) {
+          if (c.chartId != us) continue;
+          songNo1 += c.weeksAtNo1;
+          songMaxNo1 = math.max(songMaxNo1, c.weeksAtNo1);
+          songMaxWeeks = math.max(songMaxWeeks, c.weeksOn);
+        }
+      }
+      if (Platform.environment['PROBE_LOG'] == '$seed') {
+        print('   US #1 weeks so far: songs $songNo1 (longest $songMaxNo1, '
+            'most weeks on $songMaxWeeks) albums $albNo1 '
+            '(most weeks on $albMaxWeeks)');
       }
       final p = s.player;
       rows[y].add([

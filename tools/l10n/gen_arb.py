@@ -1227,6 +1227,20 @@ k('edOnPlaylists','On the playlists','Çalma listelerinde')
 k('preOrdersValue','{count} pre-orders','{count} ön sipariş', count='String')
 k('preOrdersShipped','{count} pre-orders shipped in the first week ({total} sold that week).','{count} ön sipariş ilk hafta kargolandı (o hafta {total} satış).', count='String', total='String')
 
+# Autoplay and radio levels (K128, F77)
+k('radioLight','Light radio push','Hafif radyo tanıtımı')
+k('radioLightHint','A few regional stations give it a try.','Birkaç bölgesel istasyon şansını dener.')
+k('radioBlitz','Radio blitz','Radyo bombardımanı')
+k('radioBlitzHint','Every format, heavy rotation everywhere (a major label only).','Her format, her yerde yoğun rotasyon (sadece büyük şirketler).')
+k('autoplayOff','Off','Kapalı')
+k('autoplayLight','Light','Hafif')
+k('autoplayStandard','Standard','Standart')
+k('autoplayMax','Max','Maksimum')
+k('autoplayOffHint','The algorithm plays it like any other song, for the full royalty.','Algoritma onu diğer şarkılar gibi çalar, telifin tamamı sende.')
+k('autoplayTerms','Up to +{lift}% listening from autoplay, for a {cut}% smaller royalty on its streams.','Autoplay\'den +%{lift}\'e kadar dinlenme, karşılığında stream telifi %{cut} düşer.', lift='int', cut='int')
+k('radioWeekLine','{spins} radio plays last week on {stations} stations.','Geçen hafta {stations} istasyonda {spins} radyo çalınması.', spins='String', stations='int')
+k('radioUpgradeHint','Raise the radio push while stations are still deciding (first 8 weeks; you pay the difference):','İstasyonlar hâlâ karar verirken radyo tanıtımını yükselt (ilk 8 hafta; farkı ödersin):')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

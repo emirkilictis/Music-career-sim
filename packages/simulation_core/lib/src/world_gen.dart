@@ -306,7 +306,9 @@ abstract final class WorldGen {
       StartTier.unknown => (0.0, 2e3, 2e4),
       StartTier.localBuzz => (0.05, 2e4, 2e5),
       StartTier.risingStar => (0.30, 4e5, 4e6),
-      StartTier.superstar => (0.80, 3e6, 2.4e7),
+      // (0.80, 3e6, 2.4e7) until docs K127: the top of the industry from
+      // day one, with nothing left to win.
+      StartTier.superstar => (0.75, 2e6, 1.6e7),
     };
     var cash = switch (money) {
       StartMoney.basic => 500000,
@@ -353,7 +355,7 @@ abstract final class WorldGen {
       StartTier.unknown => 0.1,
       StartTier.localBuzz => 0.15,
       StartTier.risingStar => 0.3,
-      StartTier.superstar => 0.6,
+      StartTier.superstar => 0.5,
     };
     w.addArtist(a);
     w.playerArtistId = a.id;

@@ -295,7 +295,19 @@ class SongView {
         botWeeksLeft = s.botWeeksLeft,
         botRemoved = s.botStatus == BotStatus.caught ? s.botDelivered : 0,
         chartFiltered = w.week < s.chartFilterUntil,
-        autoplay = s.autoplay,
+        autoplay = s.autoplay.on,
+        autoplayLevel = s.autoplay,
+        radioSpins = Radio.spins(s.weekRadio),
+        radioStations = Radio.stations(s.weekRadio),
+        radioUpgradeCosts = s.primaryArtistId != w.playerArtistId ||
+                !Actions.canUpgradeRadio(w, w.player!, s)
+            ? const {}
+            : {
+                for (final r in RadioPush.ladder)
+                  if (r.rank > s.radioPush.rank &&
+                      r.rank <= Actions.maxRadioPush(w.player!.label).rank)
+                    r: Actions.radioUpgradeCost(w.player!, s, r),
+              },
         canPitch = StreamingTools.canPitch(w, s),
         pitchWeek = s.pitchWeek,
         pitchAnswerWeek = StreamingTools.pitchAnswerWeek(s),
@@ -361,8 +373,17 @@ class SongView {
   final double botRemoved;
   final bool chartFiltered;
 
-  /// In the autoplay programme (docs K96).
+  /// In the autoplay programme (docs K96), and how far (K128).
   final bool autoplay;
+  final AutoplayLevel autoplayLevel;
+
+  /// Last week on the radio (docs K128): plays and stations playing it.
+  final double radioSpins;
+  final int radioStations;
+
+  /// Radio pushes it can still be raised to, with what each costs now
+  /// (empty once stations have made up their minds; K128).
+  final Map<RadioPush, int> radioUpgradeCosts;
 
   /// Pitch to the playlist editors (docs K97).
   final bool canPitch;
@@ -1125,6 +1146,21 @@ double albumWeekUnitsIn(World w, Album al, ChartMarket market) {
     ChartMarket.uk => CountryShares.ukOfEurope(home) * units(Region.europe),
     _ => al.weekUnits,
   };
+}
+
+/// Radio in numbers the trade press uses (docs K128), from a song's radio
+/// audience: about 8,000 listeners hear each play, a station playing a
+/// song spins it about 12 times a week, some 1,800 stations report.
+abstract final class Radio {
+  static const listenersPerSpin = 8000.0;
+  static const spinsPerStation = 12.0;
+  static const reportingStations = 1800;
+
+  static double spins(double audience) => audience / listenersPerSpin;
+
+  static int stations(double audience) => math
+      .min(reportingStations, spins(audience) / spinsPerStation)
+      .round();
 }
 
 /// The fictional streaming platform's view of an artist (Streamify artist
