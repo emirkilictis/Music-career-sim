@@ -830,6 +830,9 @@ class Song with Charted {
   int rerecordOf = -1;
   int replacedWeek = -1;
 
+  /// The week it leaked before release (-1: never; docs K140).
+  int leakedWeek = -1;
+
   /// The artist's share of what it earns, fixed by the deal it came out
   /// under (docs K139): a label owns the masters for good. Null until
   /// it first earns.

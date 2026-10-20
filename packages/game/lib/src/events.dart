@@ -475,6 +475,15 @@ class SongOfSummer extends GameEvent {
   bool get isIndustry => !hasPlayer;
 }
 
+/// An unreleased song of the player's leaked (docs K140): put it out
+/// within [Leaks.answerWeeks] weeks to turn the talk into listening.
+class SongLeaked extends GameEvent {
+  const SongLeaked(this.songId);
+  final int songId;
+  @override
+  bool get isMajor => true;
+}
+
 /// A player's holiday song is back for the season (docs K136).
 class HolidayReturn extends GameEvent {
   const HolidayReturn(this.songId);

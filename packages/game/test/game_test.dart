@@ -1362,6 +1362,50 @@ void main() {
       g.close();
     });
 
+    test('a leaked song is answered by putting it out (K140)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      for (var i = 0; i < 60; i++) {
+        p.creativeEnergy = 100;
+        g.writeSong(budget: BudgetTier.low);
+      }
+      // Unknowns' songs do not leak, nor anything before file sharing.
+      final s0 = g.world.songs[g.vault.first.id];
+      final fame = p.fame;
+      p.fame = 0;
+      expect(Leaks.chance(g.world, p, s0), 0);
+      p.fame = fame;
+      SongLeaked? leak;
+      for (var i = 0; i < 104 && leak == null; i++) {
+        p.fame = 1;
+        leak = g.advanceWeek().events.whereType<SongLeaked>().firstOrNull;
+      }
+      expect(leak, isNotNull);
+      final id = leak!.songId;
+      expect(g.song(id).leakedWeek, g.week - 1);
+      expect(g.song(id).canAnswerLeak, isTrue);
+      g.releaseSingle(id);
+      expect(g.world.songs[id].versionBoost, greaterThanOrEqualTo(Leaks.answerBoost));
+      expect(g.song(id).leakHurts, isFalse);
+      // Left too long, a leak costs fans' plays and album sales.
+      final late = g.world.songs[g.vault.first.id]
+        ..leakedWeek = g.week - Leaks.answerWeeks - 1;
+      expect(g.song(late.id).canAnswerLeak, isFalse);
+      final tracks = [for (final v in g.vault.take(8)) v.id];
+      final al = g.releaseAlbum('Leaked', tracks);
+      expect(g.song(late.id).leakHurts, isTrue);
+      expect(Leaks.fanFactor(late), Leaks.fanKeep);
+      expect(Leaks.albumKeep(g.world, g.world.albums[al.id]),
+          closeTo(1 - Leaks.albumCutStreamingEra, 1e-9));
+      g.close();
+    });
+
     test('a re-recording wins the masters back from the label (K139)', () {
       var g = GameSession.start(
           slots,

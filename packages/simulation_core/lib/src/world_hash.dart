@@ -118,6 +118,7 @@ int worldHash(World w) {
     addInt(s.holiday ? 1 : 0);
     addInt(s.rerecordOf);
     addInt(s.replacedWeek);
+    addInt(s.leakedWeek);
     addDouble(s.masterShare ?? -1);
     addInt(s.radioFormat?.index ?? -1);
     addInt(s.creatorTier.index);

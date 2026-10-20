@@ -502,6 +502,21 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         ),
                     ]),
                   ],
+                  // A leak (docs K140).
+                  if (s.inVault && s.leakedWeek >= 0) ...[
+                    const SizedBox(height: 12),
+                    Tag(l.leakedTag,
+                        icon: Icons.water_drop_rounded,
+                        color: AppColors.coral),
+                    const SizedBox(height: 6),
+                    Text(
+                        s.canAnswerLeak
+                            ? l.leakAnswerHint(
+                                fmt.week(s.leakedWeek + Leaks.answerWeeks))
+                            : l.leakLateHint,
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                  ],
                   if (s.scheduledSingleWeek >= 0) ...[
                     const SizedBox(height: 12),
                     Tag(l.scheduledSingleTag(fmt.week(s.scheduledSingleWeek)),
@@ -609,6 +624,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       if (s.holiday)
                         Tag(l.holidayTag,
                             icon: Icons.ac_unit_rounded, color: AppColors.sky),
+                      if (s.leakHurts)
+                        Tag(l.leakedTag,
+                            icon: Icons.water_drop_outlined,
+                            color: AppColors.coral),
                       if (s.rerecordOf >= 0)
                         Tag(l.rerecordTag,
                             icon: Icons.replay_rounded,

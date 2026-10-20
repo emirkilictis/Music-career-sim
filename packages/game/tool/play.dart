@@ -248,6 +248,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       PitchDeclined() => 'pitch declined',
       CreatorsFlopped() => 'creator campaign flopped ${e.songId}',
       HolidayReturn() => 'holiday song ${e.songId} is back',
+      SongLeaked() => 'song ${e.songId} leaked',
       SongOfSummer() => 'summer ${e.year}: #1 ${e.topSongId}, you #${e.playerRank}',
       BrandDealBroken() => 'brand deal broken: ${e.brand.name}',
       FestivalPlayed() =>

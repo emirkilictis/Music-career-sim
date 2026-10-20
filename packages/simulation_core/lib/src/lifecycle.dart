@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'config/charts.dart';
 import 'config/regions.dart';
+import 'leaks.dart';
 import 'model.dart';
 import 'rerecords.dart';
 import 'world.dart';
@@ -14,6 +15,7 @@ abstract final class Lifecycle {
     World.insertSorted(w.activeSongIds, s.id);
     w.dirtySongs.add(s.id);
     Rerecords.onRelease(w, s);
+    Leaks.onRelease(w, s);
   }
 
   /// Scales dormant [s]'s catalog listening by [f] from now on, what it

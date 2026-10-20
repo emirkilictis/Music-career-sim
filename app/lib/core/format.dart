@@ -874,6 +874,7 @@ class Fmt {
       PitchDeclined() => l.eventPitchDeclined(t),
       CreatorsFlopped() => l.eventCreatorsFlopped(t),
       HolidayReturn() => l.eventHolidayReturn(t),
+      SongLeaked() => l.eventSongLeaked(t, Leaks.answerWeeks),
       SongOfSummer(:final playerRank, :final year) => playerRank == 1
           ? l.eventSummerMine(year, t)
           : playerRank > 0

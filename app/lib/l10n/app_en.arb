@@ -4720,5 +4720,26 @@
         "type": "int"
       }
     }
-  }
+  },
+  "eventSongLeaked": "“{title}” leaked online. Put it out within {weeks} weeks and the talk turns into plays; wait and fans will already have it.",
+  "@eventSongLeaked": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "leakedTag": "Leaked",
+  "leakAnswerHint": "Out by {week}, the leak turns into a wave of listening. Later, fans already have it: they play it less and an album with it sells less.",
+  "@leakAnswerHint": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "leakLateHint": "Too late to answer the leak: fans have it, they play it less and an album with it sells less."
 }

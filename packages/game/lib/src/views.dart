@@ -327,6 +327,9 @@ class SongView {
               },
         holiday = s.holiday,
         rerecordOf = s.rerecordOf,
+        leakedWeek = s.leakedWeek,
+        canAnswerLeak = Leaks.canAnswer(s, w.week),
+        leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
         masterShare = Rerecords.songShare(w.artists[s.primaryArtistId], s),
         creatorWeek = s.creatorWeek,
@@ -415,6 +418,13 @@ class SongView {
   /// own re-recording came out (-1: none; docs K139).
   final int rerecordOf;
   final int replacedWeek;
+
+  /// Leaks (docs K140): the week it leaked (-1: never), whether it can
+  /// still be put out in answer, and whether the leak cost it (out too
+  /// late).
+  final int leakedWeek;
+  final bool canAnswerLeak;
+  final bool leakHurts;
 
   /// The artist's share of what it earns: the deal it came out under
   /// (docs K139).

@@ -1325,6 +1325,12 @@ k('rerecordSaved','{title} is in the vault as a draft: release it or give it a d
 k('rerecordTag','Re-recording','Yeniden kayıt')
 k('mastersTag','Label masters · {percent}% yours','Şirket masterı · %{percent} senin', percent='int')
 
+# Leaks (docs K140).
+k('eventSongLeaked','“{title}” leaked online. Put it out within {weeks} weeks and the talk turns into plays; wait and fans will already have it.','“{title}” internete sızdı. {weeks} hafta içinde çıkarırsan konuşulması dinlenmeye dönüşür; beklersen hayranların elinde zaten olur.', title='String', weeks='int')
+k('leakedTag','Leaked','Sızdı')
+k('leakAnswerHint','Out by {week}, the leak turns into a wave of listening. Later, fans already have it: they play it less and an album with it sells less.','{week} tarihine kadar çıkarsa sızıntı bir dinlenme dalgasına döner. Sonra çıkarsa hayranlarda zaten olur: daha az dinlerler ve içinde olduğu albüm daha az satar.', week='String')
+k('leakLateHint','Too late to answer the leak: fans have it, they play it less and an album with it sells less.','Sızıntıya cevap vermek için geç: hayranlarda var, daha az dinlerler ve içinde olduğu albüm daha az satar.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -15,6 +15,7 @@ import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'holidays.dart';
+import 'leaks.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'music_show.dart';
@@ -413,7 +414,9 @@ class Simulator {
           (s.isSingle
               ? 1.0
               : c.albumTrackFanShare * albumEvent * p.kind.albumAffinity) *
-          Rerecords.fanFactor(s);
+          Rerecords.fanFactor(s) *
+          // Fans who have the leak already (docs K140).
+          Leaks.fanFactor(s);
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
       final pubPart = c.publicPool *
           s.commercial *
@@ -814,6 +817,8 @@ class Simulator {
       // A re-recording is no event for those who own the old one.
       final fresh = lead == null ? 1.0 : Rerecords.reachFactor(lead);
       final fanFresh = lead == null ? 1.0 : Rerecords.fanFactor(lead);
+      // Leaked tracks people have already (docs K140).
+      final leaked = Leaks.albumKeep(w, al);
       var tPure = 0.0, tUnits = 0.0, tTea = 0.0, tSea = 0.0, tChart = 0.0;
       var buysAll = 0.0, buysFromReach = 0.0;
       final chartRegion = Float64List(_r);
@@ -884,7 +889,7 @@ class Simulator {
         // Pre-orders ship in week one (docs K126).
         final pure = al.isMixtape
             ? 0.0
-            : bought * noise * tracklist * demand * keep +
+            : bought * noise * tracklist * demand * keep * leaked +
                 (age == 0 ? al.preOrders * share * Actions.preOrderExtra : 0.0);
         final streams = sea[k] +
             al.sumDormantRate *
@@ -1011,6 +1016,7 @@ class Simulator {
     final show = MusicShow.weekly(w, GameTime.yearOf(w.week));
     _playerIncome();
     _fadeCatalogs();
+    Leaks.weekly(w);
     // Offers between releases (docs K59).
     OpportunityOutcome? lapsed;
     Opportunity? offered;

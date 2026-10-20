@@ -231,9 +231,10 @@ abstract final class Codec {
     'bots', 'autoplay', 'pitchWeek',
     'videoWeek', 'videoBase',
     'sources', 'preSaves',
-    // Added in schema v26, v27, v29, v30.
+    // Added in schema v26, v27, v29, v30, v31.
     'creator', 'radioFormat', 'holiday',
     'rerecordOf', 'replacedWeek', 'masterShare',
+    'leakedWeek',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -290,6 +291,7 @@ abstract final class Codec {
         s.rerecordOf,
         s.replacedWeek,
         s.masterShare,
+        s.leakedWeek,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -339,6 +341,7 @@ abstract final class Codec {
     s.rerecordOf = r['rerecordOf'] as int? ?? -1;
     s.replacedWeek = r['replacedWeek'] as int? ?? -1;
     s.masterShare = (r['masterShare'] as num?)?.toDouble();
+    s.leakedWeek = r['leakedWeek'] as int? ?? -1;
     if (r['radioFormat'] case final int f) {
       s.radioFormat = RadioFormat.values[f];
     }

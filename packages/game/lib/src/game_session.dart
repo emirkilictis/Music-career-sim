@@ -2509,6 +2509,10 @@ class GameSession {
         }
       }
     }
+    // Leaked songs (docs K140).
+    for (final id in w.playerSongIds) {
+      if (w.songs[id].leakedWeek == r.week) events.add(SongLeaked(id));
+    }
     // Play counts on the streaming app (docs K132), catalog songs too.
     if (MusicPlatform.streamify.openIn(GameTime.yearOf(r.week))) {
       for (final id in w.playerSongIds) {
