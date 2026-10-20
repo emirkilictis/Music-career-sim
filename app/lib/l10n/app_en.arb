@@ -4640,5 +4640,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "remixFeatureButton": "Remix with a feature",
+  "remixFeatureHint": "A remix of the released song with a rival on it: their fans come to the song from now on and the remix brings a wave of listening, bigger with a bigger star. A verse on a remix costs 1.5×."
 }

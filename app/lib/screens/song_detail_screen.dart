@@ -80,8 +80,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child:
-                  Text(l.featureHint, style: Theme.of(c).textTheme.bodySmall),
+              child: Text(s.inVault ? l.featureHint : l.remixFeatureHint,
+                  style: Theme.of(c).textTheme.bodySmall),
             ),
             Flexible(
               child: ListView(shrinkWrap: true, children: [
@@ -535,13 +535,14 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   ],
                   // A rival on the song (docs K117).
                   if (s.isPlayer &&
-                      s.inVault &&
+                      (s.inVault || s.releasedWeek >= 0) &&
                       s.featuredArtistIds.length < 2) ...[
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
                       onPressed: () => _feature(s),
                       icon: const Icon(Icons.group_add_rounded),
-                      label: Text(l.featureButton),
+                      label: Text(
+                          s.inVault ? l.featureButton : l.remixFeatureButton),
                     ),
                   ],
                   if (s.isPlayer &&

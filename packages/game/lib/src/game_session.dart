@@ -1403,15 +1403,16 @@ class GameSession {
     final s = _ownSong(songId);
     return [
       for (final a in Features.candidates(world, _p, s))
-        FeatureCandidateView.of(world, a, _p)
+        FeatureCandidateView.of(world, a, _p, s)
     ];
   }
 
-  /// Gets rival [artistId] on vault song [songId] for their fee.
+  /// Gets rival [artistId] on song [songId] for their fee: a verse on a
+  /// vault song, a remix of a released one (docs K138).
   void requestFeature(int songId, int artistId) {
     final s = _ownSong(songId);
-    if (s.status != SongStatus.vault) {
-      throw GameException('notInVault', 'Only unreleased songs');
+    if (s.status == SongStatus.scrapped) {
+      throw GameException('notInVault', 'Not on a scrapped song');
     }
     if (s.featuredArtistIds.length >= Features.maxPerSong) {
       throw GameException('featuresFull', 'Two features at most');
@@ -1423,8 +1424,12 @@ class GameSession {
     if (!Features.willing(rival, _p)) {
       throw GameException('featureRefused', 'Out of your league');
     }
-    _requireMoney(Features.feeCents(rival));
-    Features.request(world, _p, s, rival);
+    _requireMoney(Features.feeFor(rival, s));
+    if (s.status == SongStatus.vault) {
+      Features.request(world, _p, s, rival);
+    } else {
+      Features.requestRemix(world, _p, s, rival);
+    }
     _saveNow();
   }
 

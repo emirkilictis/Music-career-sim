@@ -1339,5 +1339,7 @@
   "songsOfSummer": "Yazın Şarkıları",
   "eventSummerMine": "“{title}” {year} yazının şarkısı!",
   "eventSummerRank": "{year} yazın şarkıları: “{title}” #{rank} oldu.",
-  "eventSummerTop": "{year} yazının şarkısı {artist} – “{title}”."
+  "eventSummerTop": "{year} yazının şarkısı {artist} – “{title}”.",
+  "remixFeatureButton": "Featli remix yap",
+  "remixFeatureHint": "Çıkmış şarkının bir rakibin de olduğu remix'i: onun hayranları artık şarkıyı da dinler ve remix bir dinlenme dalgası getirir, yıldız ne kadar büyükse o kadar büyük. Remix'te verse 1.5 kat pahalı."
 }

@@ -908,12 +908,14 @@ class YearEndRow {
 
 /// A rival the player could ask to feature on a song (docs K117).
 class FeatureCandidateView {
-  FeatureCandidateView.of(World w, Artist rival, Artist p)
+  FeatureCandidateView.of(World w, Artist rival, Artist p, [Song? song])
       : artistId = rival.id,
         name = rival.name,
         genre = rival.genre,
         fame = rival.fame,
-        feeCents = Features.feeCents(rival),
+        feeCents = song == null
+            ? Features.feeCents(rival)
+            : Features.feeFor(rival, song),
         willing = Features.willing(rival, p),
         sameGenre = rival.genre == p.genre;
   final int artistId;

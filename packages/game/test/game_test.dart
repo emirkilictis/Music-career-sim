@@ -1362,6 +1362,46 @@ void main() {
       g.close();
     });
 
+    test('a remix with a star brings a released song back (K138)', () {
+      (GameSession, int) run() {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire,
+                premium: true));
+        g.world.player!.moneyCents = 1 << 40;
+        g.world.player!.creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.high).id;
+        g.releaseSingle(id);
+        g.advanceWeeks(10, stop: SkipStop.never);
+        return (g, id);
+      }
+
+      final (plain, pid) = run();
+      final (g, id) = run();
+      final rival = g.featureCandidates(id).first;
+      final star = g.world.artists[rival.artistId];
+      expect(rival.feeCents,
+          (Features.feeCents(star) * Features.remixFeeFactor).round());
+      final money = g.player.moneyCents;
+      g.requestFeature(id, rival.artistId);
+      expect(money - g.player.moneyCents, rival.feeCents);
+      expect(g.world.songs[id].featuredArtistIds, contains(rival.artistId));
+      expect(g.world.songs[id].versionBoost, greaterThan(0));
+      expect(() => g.requestFeature(id, rival.artistId), throwsA(anything));
+      plain.advanceWeeks(2, stop: SkipStop.never);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      expect(g.world.songs[id].weekStreams,
+          greaterThan(plain.world.songs[pid].weekStreams * 1.3));
+      plain.close();
+      final slot = g.slotId;
+      g.close();
+      final again = GameSession.resume(slots, slot);
+      expect(again.world.songs[id].featuredArtistIds, contains(rival.artistId));
+      again.close();
+    });
+
     test('the songs of the summer come out in September (K137)', () {
       final g = GameSession.start(slots, _setup());
       expect(g.summerYears, isEmpty);

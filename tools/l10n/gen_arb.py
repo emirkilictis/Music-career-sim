@@ -1303,6 +1303,10 @@ k('eventSummerMine','“{title}” is the song of the summer {year}!','“{title
 k('eventSummerRank','Songs of the summer {year}: “{title}” finished #{rank}.','{year} yazın şarkıları: “{title}” #{rank} oldu.', year='int', title='String', rank='int')
 k('eventSummerTop','The song of the summer {year} is “{title}” by {artist}.','{year} yazının şarkısı {artist} – “{title}”.', year='int', title='String', artist='String')
 
+# Remix featuring a star (K138)
+k('remixFeatureButton','Remix with a feature','Featli remix yap')
+k('remixFeatureHint','A remix of the released song with a rival on it: their fans come to the song from now on and the remix brings a wave of listening, bigger with a bigger star. A verse on a remix costs 1.5×.','Çıkmış şarkının bir rakibin de olduğu remix\'i: onun hayranları artık şarkıyı da dinler ve remix bir dinlenme dalgası getirir, yıldız ne kadar büyükse o kadar büyük. Remix\'te verse 1.5 kat pahalı.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():
