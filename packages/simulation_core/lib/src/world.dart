@@ -91,6 +91,9 @@ class World {
   /// never scan the whole world.
   final List<int> playerSongIds = [];
 
+  /// Songs the player wrote for other artists (docs K143).
+  final List<int> writtenSongIds = [];
+
   /// Per region: Σ sumDormantRate × catalogFactor × regionShare over retired
   /// artists (their factors are frozen).
   final Float64List retiredDormantAttention = Float64List(regionCount);

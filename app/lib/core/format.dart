@@ -751,6 +751,7 @@ class Fmt {
       'featuresFull' => l.errorFeaturesFull,
       'cannotRerecord' => l.errorCannotRerecord,
       'cannotUpload' => l.errorCannotUpload,
+      'songRefused' => l.errorSongRefused,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,
       'labelRefused' => l.errorLabelRefused,
@@ -897,6 +898,9 @@ class Fmt {
       HolidayReturn() => l.eventHolidayReturn(t),
       SongLeaked() => l.eventSongLeaked(t, Leaks.answerWeeks),
       SalesMilestone(:final copies) => l.eventSalesMilestone(compact(copies)),
+      WrittenSongHit(:final position) => position == 1
+          ? l.eventWrittenNo1(t, line.artistName)
+          : l.eventWrittenTop10(t, line.artistName, position),
       AllTimeBestSeller(:final rank) => rank == 1
           ? l.eventAllTimeTop
           : l.eventAllTimeTop10(rank),

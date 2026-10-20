@@ -28,6 +28,7 @@ export 'src/real_artists.dart';
 export 'src/rerecords.dart';
 export 'src/rng.dart';
 export 'src/social.dart';
+export 'src/songwriting.dart';
 export 'src/streaming_tools.dart';
 export 'src/simulator.dart';
 export 'src/time.dart';

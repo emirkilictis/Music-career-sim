@@ -1381,6 +1381,22 @@ k('videoDanceHint','Choreography people copy; the biggest wave once short videos
 k('videoBehindScenesHint','How the record was made: fans feel close and new ones follow.','Plağın nasıl yapıldığı: hayranlar yakın hisseder, yenileri gelir.')
 k('videoVlogHint','Life on the road: cheap and personal, wins the most fans.','Yollardaki hayat: ucuz ve kişisel, en çok hayran kazandıran.')
 
+# Writing for others (docs K143).
+k('errorSongRefused','They will not record that song.','Bu şarkıyı kaydetmezler.')
+k('sellButton','Sell to another artist','Başka sanatçıya sat')
+k('sellTitle','Sell the song','Şarkıyı sat')
+k('sellHint','They pay now and put it out as a single in {weeks} weeks; you keep {share}% of what it earns as its writer. Stars take only great songs of their genre.','Şimdi öderler ve {weeks} hafta içinde single olarak çıkarırlar; yazarı olarak kazandığının %{share}\'i senin. Yıldızlar yalnız kendi türlerinin çok iyi şarkılarını alır.', weeks='int', share='int')
+k('sellNobody','Nobody in this song\'s genres is looking for songs.','Bu şarkının türlerinde şarkı arayan kimse yok.')
+k('sellNotGoodEnough','Wants a better song','Daha iyi bir şarkı istiyor')
+k('sellDone','“{title}” is {artist}\'s now: {fee} paid.','“{title}” artık bir {artist} şarkısı: {fee} ödendi.', title='String', artist='String', fee='String')
+k('writtenByYou','Written by you · {earned} earned','Söz-müzik: sen · {earned} kazandın', earned='String')
+k('writtenBy','Written by {name}','Söz-müzik: {name}', name='String')
+k('writtenSection','Written for others','Başkalarına yazdıkların')
+k('writtenComing','coming soon','yakında çıkıyor')
+k('writtenPeak','US peak #{peak}','ABD zirvesi #{peak}', peak='int')
+k('eventWrittenTop10','“{title}”, the song you wrote for {artist}, is #{position} in the US.','{artist} için yazdığın “{title}” ABD\'de #{position}.', title='String', artist='String', position='int')
+k('eventWrittenNo1','“{title}”, the song you wrote for {artist}, is #1 in the US.','{artist} için yazdığın “{title}” ABD\'de #1!', title='String', artist='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -214,6 +214,17 @@ class RecordBroken extends GameEvent {
   bool get isMajor => true;
 }
 
+/// A song the player wrote for [artistId] reached the US top 10 for the
+/// first time, or #1 (docs K143).
+class WrittenSongHit extends GameEvent {
+  const WrittenSongHit(this.songId, this.artistId, this.position);
+  final int songId;
+  final int artistId;
+  final int position;
+  @override
+  bool get isMajor => true;
+}
+
 /// The player's career records sold passed [copies] (docs K141).
 class SalesMilestone extends GameEvent {
   const SalesMilestone(this.copies);

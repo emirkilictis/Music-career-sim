@@ -155,6 +155,7 @@ class SaveStore {
       final s = Codec.songFrom(hot.songs[id] ?? r, featured[id] ?? []);
       w.songs.add(s);
       if (s.primaryArtistId == w.playerArtistId) w.playerSongIds.add(s.id);
+      if (s.writerId >= 0) w.writtenSongIds.add(s.id);
       if (s.status == SongStatus.active) w.activeSongIds.add(s.id);
       if (s.status == SongStatus.dormant) {
         w.artists[s.primaryArtistId].dormantSongIds.add(s.id);

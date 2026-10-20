@@ -328,6 +328,9 @@ class SongView {
         holiday = s.holiday,
         rerecordOf = s.rerecordOf,
         leakedWeek = s.leakedWeek,
+        writerName = s.writerId >= 0 ? w.artists[s.writerId].name : '',
+        writtenByPlayer = s.writerId >= 0 && s.writerId == w.playerArtistId,
+        writerCents = s.writerCents,
         canAnswerLeak = Leaks.canAnswer(s, w.week),
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
@@ -423,6 +426,13 @@ class SongView {
   /// still be put out in answer, and whether the leak cost it (out too
   /// late).
   final int leakedWeek;
+
+  /// Writing for others (docs K143): the writer when it is not the
+  /// artist ('' otherwise), whether that is the player, and the player's
+  /// royalties from it.
+  final String writerName;
+  final bool writtenByPlayer;
+  final double writerCents;
   final bool canAnswerLeak;
   final bool leakHurts;
 
@@ -2167,4 +2177,48 @@ class BrandDealView {
   final DealStatus status;
   final int startWeek;
   final List<({DealTask task, int dueWeek, int doneWeek})> tasks;
+}
+
+/// A rival who could buy one of the player's songs (docs K143).
+class SongBuyerView {
+  SongBuyerView.of(World w, Artist rival, Song s)
+      : artistId = rival.id,
+        name = rival.name,
+        genre = rival.genre,
+        fame = rival.fame,
+        feeCents = Songwriting.feeCents(rival, s),
+        wants = Songwriting.wants(rival, s);
+  final int artistId;
+  final String name;
+  final int genre;
+  final double fame;
+  final int feeCents;
+
+  /// They would record it (the song is good enough for them).
+  final bool wants;
+}
+
+/// A song the player wrote for someone else (docs K143).
+class WrittenSongView {
+  WrittenSongView.of(World w, Song s)
+      : songId = s.id,
+        title = s.title,
+        artistId = s.primaryArtistId,
+        artistName = w.artists[s.primaryArtistId].name,
+        albumId = coverAlbumOf(w, s),
+        released = s.releasedWeek >= 0,
+        peak = s.statsOrNull(Charts.usSongs)?.peak ?? 0,
+        streams = w.songLifetimeStreams(s),
+        earnedCents = s.writerCents;
+  final int songId;
+  final String title;
+  final int artistId;
+  final String artistName;
+  final int albumId;
+  final bool released;
+
+  /// Best place on the US songs chart (0: never charted).
+  final int peak;
+  final double streams;
+  final double earnedCents;
 }

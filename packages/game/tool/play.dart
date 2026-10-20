@@ -251,6 +251,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       SongLeaked() => 'song ${e.songId} leaked',
       SalesMilestone() => 'sold ${e.copies} records',
       AllTimeBestSeller() => 'all-time best seller #${e.rank}',
+      WrittenSongHit() => 'your song ${e.songId} for ${e.artistId} at #${e.position}',
       SongOfSummer() => 'summer ${e.year}: #1 ${e.topSongId}, you #${e.playerRank}',
       BrandDealBroken() => 'brand deal broken: ${e.brand.name}',
       FestivalPlayed() =>

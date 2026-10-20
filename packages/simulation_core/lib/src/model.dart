@@ -833,6 +833,13 @@ class Song with Charted {
   /// The week it leaked before release (-1: never; docs K140).
   int leakedWeek = -1;
 
+  /// Writing for others (docs K143): who wrote it when it is not its
+  /// artist (-1), the song it became when sold (-1: not sold), and the
+  /// writer's royalties so far.
+  int writerId = -1;
+  int soldTo = -1;
+  double writerCents = 0;
+
   /// The artist's share of what it earns, fixed by the deal it came out
   /// under (docs K139): a label owns the masters for good. Null until
   /// it first earns.

@@ -1362,6 +1362,56 @@ void main() {
       g.close();
     });
 
+    test('a song sold to another artist pays its writer (K143)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      // A song someone wants.
+      late int id;
+      late SongBuyerView buyer;
+      for (var i = 0;; i++) {
+        p.creativeEnergy = 100;
+        id = g.writeSong(budget: BudgetTier.high).id;
+        final list = g.songBuyers(id);
+        if (list.isNotEmpty && list.first.wants) {
+          buyer = list.first;
+          final refused = list.where((b) => !b.wants).firstOrNull;
+          if (refused != null) {
+            expect(() => g.sellSong(id, refused.artistId),
+                _code('songRefused'));
+          }
+          break;
+        }
+        expect(i, lessThan(30));
+      }
+      final money = g.player.moneyCents;
+      g.sellSong(id, buyer.artistId);
+      expect(g.player.moneyCents - money, buyer.feeCents);
+      expect(g.vault.map((s) => s.id), isNot(contains(id)));
+      final sold = g.writtenForOthers.single;
+      expect(sold.artistId, buyer.artistId);
+      expect(sold.released, isFalse);
+      g.advanceWeeks(Songwriting.releaseAfter + 1, stop: SkipStop.never);
+      final s = g.world.songs[sold.songId];
+      expect(s.releasedWeek, greaterThanOrEqualTo(0));
+      expect(s.primaryArtistId, buyer.artistId);
+      expect(g.song(s.id).writtenByPlayer, isTrue);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      expect(g.writtenForOthers.single.earnedCents, greaterThan(0));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.writtenForOthers.single.songId, sold.songId);
+      expect(g.writtenForOthers.single.earnedCents, greaterThan(0));
+      g.close();
+    });
+
     test('the channel: upload videos for songs and about the artist (K142)',
         () {
       var g = GameSession.start(

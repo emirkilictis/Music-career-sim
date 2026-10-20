@@ -1407,5 +1407,19 @@
   "videoAcousticHint": "Sade bir versiyon: sesin kadar iyi. İyi bir dalga.",
   "videoDanceHint": "İnsanların taklit ettiği koreografi; kısa videolar dönemi (2018+) en büyük dalga.",
   "videoBehindScenesHint": "Plağın nasıl yapıldığı: hayranlar yakın hisseder, yenileri gelir.",
-  "videoVlogHint": "Yollardaki hayat: ucuz ve kişisel, en çok hayran kazandıran."
+  "videoVlogHint": "Yollardaki hayat: ucuz ve kişisel, en çok hayran kazandıran.",
+  "errorSongRefused": "Bu şarkıyı kaydetmezler.",
+  "sellButton": "Başka sanatçıya sat",
+  "sellTitle": "Şarkıyı sat",
+  "sellHint": "Şimdi öderler ve {weeks} hafta içinde single olarak çıkarırlar; yazarı olarak kazandığının %{share}'i senin. Yıldızlar yalnız kendi türlerinin çok iyi şarkılarını alır.",
+  "sellNobody": "Bu şarkının türlerinde şarkı arayan kimse yok.",
+  "sellNotGoodEnough": "Daha iyi bir şarkı istiyor",
+  "sellDone": "“{title}” artık bir {artist} şarkısı: {fee} ödendi.",
+  "writtenByYou": "Söz-müzik: sen · {earned} kazandın",
+  "writtenBy": "Söz-müzik: {name}",
+  "writtenSection": "Başkalarına yazdıkların",
+  "writtenComing": "yakında çıkıyor",
+  "writtenPeak": "ABD zirvesi #{peak}",
+  "eventWrittenTop10": "{artist} için yazdığın “{title}” ABD'de #{position}.",
+  "eventWrittenNo1": "{artist} için yazdığın “{title}” ABD'de #1!"
 }

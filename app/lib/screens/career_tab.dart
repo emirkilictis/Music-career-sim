@@ -30,6 +30,7 @@ class _CareerScreenState extends State<CareerScreen> {
   List<CareerYear> _years = const [];
   List<SongView> _songs = const [];
   HonorsView? _honors;
+  List<WrittenSongView> _written = const [];
   int _loadedRevision = -1;
 
   @override
@@ -47,10 +48,12 @@ class _CareerScreenState extends State<CareerScreen> {
     final years = await career.read(Cmd.careerByYear());
     final songs = await career.read(Cmd.songs());
     final honors = await career.read(Cmd.honors());
+    final written = await career.read(Cmd.writtenForOthers());
     if (mounted) {
       setState(() {
         _years = years;
         _honors = honors;
+        _written = written;
         final fmt = context.fmt;
         final week = career.week;
         _songs = songs.where((s) => !s.inVault).toList()
@@ -112,6 +115,34 @@ class _CareerScreenState extends State<CareerScreen> {
             ),
           ]),
         ),
+        // Songs written for others (docs K143).
+        if (_written.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Section(
+            title: l.writtenSection,
+            icon: Icons.edit_note_rounded,
+            child: Column(children: [
+              for (final w in _written)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(w.title,
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  subtitle: Text([
+                    w.artistName,
+                    if (!w.released) l.writtenComing,
+                    if (w.peak > 0) l.writtenPeak(w.peak),
+                  ].join(' · ')),
+                  trailing: Text(fmt.money(w.earnedCents.round()),
+                      style: const TextStyle(fontWeight: FontWeight.w800)),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              SongDetailScreen(songId: w.songId, state: career))),
+                ),
+            ]),
+          ),
+        ],
         const SizedBox(height: 12),
         Section(
           title: l.artistPhotos,

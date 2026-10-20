@@ -231,6 +231,14 @@ abstract final class Cmd {
           List<int> vaultSongIds) =>
       (s) => s.rerecordAlbum(albumId, title, vaultSongIds: vaultSongIds);
 
+  /// Writing for others (docs K143).
+  static SessionCmd<List<SongBuyerView>> songBuyers(int songId) =>
+      (s) => s.songBuyers(songId);
+  static SessionCmd<void> sellSong(int songId, int artistId) =>
+      (s) => s.sellSong(songId, artistId);
+  static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
+      (s) => s.writtenForOthers;
+
   /// The player's channel on the video site (docs K142).
   static SessionCmd<ChannelView> channel() => (s) => s.channel;
   static SessionCmd<void> uploadVideo(VideoKind kind, int songId) =>

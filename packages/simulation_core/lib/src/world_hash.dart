@@ -119,6 +119,9 @@ int worldHash(World w) {
     addInt(s.rerecordOf);
     addInt(s.replacedWeek);
     addInt(s.leakedWeek);
+    addInt(s.writerId);
+    addInt(s.soldTo);
+    addDouble(s.writerCents);
     addDouble(s.masterShare ?? -1);
     addInt(s.radioFormat?.index ?? -1);
     addInt(s.creatorTier.index);

@@ -118,6 +118,74 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
+  /// Sells the vault song to a rival (docs K143); the song leaves the
+  /// vault, so the page closes.
+  Future<void> _sell(SongView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final list = await widget.state.read(Cmd.songBuyers(s.id));
+    if (!mounted) return;
+    final pick = await showModalBottomSheet<SongBuyerView>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.of(c).size.height * 0.8),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child:
+                  Text(l.sellTitle, style: Theme.of(c).textTheme.titleLarge),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                  l.sellHint(Songwriting.releaseAfter,
+                      (Songwriting.writerShare * 100).round()),
+                  style: Theme.of(c).textTheme.bodySmall),
+            ),
+            if (list.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(l.sellNobody),
+              ),
+            Flexible(
+              child: ListView(shrinkWrap: true, children: [
+                for (final a in list)
+                  ListTile(
+                    enabled: a.wants,
+                    leading: ArtistAvatar(
+                        name: a.name, seed: a.artistId, artistId: a.artistId),
+                    title: Text(a.name),
+                    subtitle: Text(a.wants
+                        ? l.featureLine(
+                            fmt.genre(a.genre), (a.fame * 100).round())
+                        : l.sellNotGoodEnough),
+                    trailing: Text(fmt.money(a.feeCents)),
+                    onTap: () => Navigator.pop(c, a),
+                  ),
+              ]),
+            ),
+            const SizedBox(height: 8),
+          ]),
+        ),
+      ),
+    );
+    if (pick == null || !mounted) return;
+    try {
+      await widget.state.act(Cmd.sellSong(s.id, pick.artistId));
+      if (mounted) {
+        showInfo(context, l.sellDone(s.title, pick.name, fmt.money(pick.feeCents)),
+            icon: Icons.handshake_rounded);
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _shootVideo(SongView s) async {
     final l = context.l10n;
     final fmt = context.fmt;
@@ -559,6 +627,26 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       label: Text(
                           s.inVault ? l.featureButton : l.remixFeatureButton),
                     ),
+                  ],
+                  // Writing for others (docs K143).
+                  if (s.isPlayer &&
+                      s.inVault &&
+                      s.rerecordOf < 0 &&
+                      s.scheduledSingleWeek < 0 &&
+                      s.scheduledAlbumWeek < 0)
+                    TextButton.icon(
+                      onPressed: () => _sell(s),
+                      icon: const Icon(Icons.handshake_outlined),
+                      label: Text(l.sellButton),
+                    ),
+                  if (s.writerName.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Tag(
+                        s.writtenByPlayer
+                            ? l.writtenByYou(fmt.money(s.writerCents.round()))
+                            : l.writtenBy(s.writerName),
+                        icon: Icons.edit_note_rounded,
+                        color: AppColors.mint),
                   ],
                   if (s.isPlayer &&
                       s.inVault &&

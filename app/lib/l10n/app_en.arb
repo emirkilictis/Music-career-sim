@@ -4842,5 +4842,86 @@
   "videoAcousticHint": "Stripped down: as good as your voice. A good wave.",
   "videoDanceHint": "Choreography people copy; the biggest wave once short videos rule (2018+).",
   "videoBehindScenesHint": "How the record was made: fans feel close and new ones follow.",
-  "videoVlogHint": "Life on the road: cheap and personal, wins the most fans."
+  "videoVlogHint": "Life on the road: cheap and personal, wins the most fans.",
+  "errorSongRefused": "They will not record that song.",
+  "sellButton": "Sell to another artist",
+  "sellTitle": "Sell the song",
+  "sellHint": "They pay now and put it out as a single in {weeks} weeks; you keep {share}% of what it earns as its writer. Stars take only great songs of their genre.",
+  "@sellHint": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      },
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "sellNobody": "Nobody in this song's genres is looking for songs.",
+  "sellNotGoodEnough": "Wants a better song",
+  "sellDone": "“{title}” is {artist}'s now: {fee} paid.",
+  "@sellDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "writtenByYou": "Written by you · {earned} earned",
+  "@writtenByYou": {
+    "placeholders": {
+      "earned": {
+        "type": "String"
+      }
+    }
+  },
+  "writtenBy": "Written by {name}",
+  "@writtenBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "writtenSection": "Written for others",
+  "writtenComing": "coming soon",
+  "writtenPeak": "US peak #{peak}",
+  "@writtenPeak": {
+    "placeholders": {
+      "peak": {
+        "type": "int"
+      }
+    }
+  },
+  "eventWrittenTop10": "“{title}”, the song you wrote for {artist}, is #{position} in the US.",
+  "@eventWrittenTop10": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "eventWrittenNo1": "“{title}”, the song you wrote for {artist}, is #1 in the US.",
+  "@eventWrittenNo1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  }
 }

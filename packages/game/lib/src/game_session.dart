@@ -1727,6 +1727,65 @@ class GameSession {
     ];
   }
 
+  /// Rivals who could buy vault song [songId] (docs K143).
+  List<SongBuyerView> songBuyers(int songId) {
+    final s = _ownSong(songId);
+    return [
+      for (final a in Songwriting.buyers(world, _p, s))
+        SongBuyerView.of(world, a, s)
+    ];
+  }
+
+  /// Sells vault song [songId] to rival [artistId] (docs K143): they pay
+  /// now, put it out in a few weeks, and the player earns the writer's
+  /// share of it.
+  void sellSong(int songId, int artistId) {
+    final s = _ownSong(songId);
+    if (s.status != SongStatus.vault ||
+        _p.scheduled.any((sr) => sr.songIds.contains(songId))) {
+      throw GameException('notInVault', 'Only unreleased songs');
+    }
+    if (artistId < 0 || artistId >= world.artists.length) {
+      throw GameException('noArtist', 'No such artist');
+    }
+    final rival = world.artists[artistId];
+    if (!Songwriting.wants(rival, s)) {
+      throw GameException('songRefused', 'Not for them');
+    }
+    Songwriting.sell(world, _p, s, rival);
+    _saveNow();
+  }
+
+  /// Songs the player wrote for others, newest first (docs K143).
+  List<WrittenSongView> get writtenForOthers => [
+        for (final id in world.writtenSongIds.reversed)
+          if (world.songs[id].writerId == world.playerArtistId)
+            WrittenSongView.of(world, world.songs[id]),
+      ];
+
+  /// The player's songs on others' records reaching the US top 10 for
+  /// the first time, or #1 (docs K143).
+  List<GameEvent> _writtenHits(WeekResult r) {
+    final out = <GameEvent>[];
+    final me = world.playerArtistId;
+    for (final row in r.charts[Charts.usSongs]) {
+      if (row.position > 10) break;
+      final s = world.songs[row.entityId];
+      if (s.writerId != me || s.primaryArtistId == me) continue;
+      final before = _store.db.select(
+          'SELECT MIN(position) AS p FROM chartEntry '
+          'WHERE chartId = ? AND entityId = ? AND week < ?',
+          [Charts.usSongs, s.id, r.week]);
+      final best = before.isEmpty ? null : before.first['p'] as int?;
+      final first10 = best == null || best > 10;
+      final firstNo1 = row.position == 1 && (best == null || best > 1);
+      if (first10 || firstNo1) {
+        out.add(WrittenSongHit(s.id, s.primaryArtistId, row.position));
+      }
+    }
+    return out;
+  }
+
   /// The player's channel on the video site (docs K142).
   ChannelView get channel => ChannelView.of(world);
 
@@ -2606,6 +2665,7 @@ class GameSession {
     }
     events.addAll(_recordsBroken(r));
     events.addAll(_bestSellerNews());
+    events.addAll(_writtenHits(r));
     // The discovery mixes (docs K119).
     for (final id in w.playerSongIds) {
       final s = w.songs[id];

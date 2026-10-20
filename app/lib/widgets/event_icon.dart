@@ -77,6 +77,7 @@ class EventIcon extends StatelessWidget {
       HolidayReturn() => (Icons.ac_unit_rounded, AppColors.sky),
       SongLeaked() => (Icons.water_drop_rounded, AppColors.coral),
       SalesMilestone() => (Icons.album_rounded, AppColors.gold),
+      WrittenSongHit() => (Icons.edit_note_rounded, AppColors.mint),
       AllTimeBestSeller() => (Icons.emoji_events_rounded, AppColors.gold),
       SongOfSummer() => (Icons.wb_sunny_rounded, AppColors.gold),
       BrandDealBroken() => (Icons.link_off_rounded, AppColors.coral),

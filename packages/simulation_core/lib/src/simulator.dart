@@ -7,6 +7,7 @@ import 'audience.dart';
 import 'awards.dart';
 import 'brands.dart';
 import 'social.dart';
+import 'songwriting.dart';
 import 'streaming_tools.dart';
 import 'config/charts.dart';
 import 'contracts.dart';
@@ -1757,6 +1758,27 @@ class Simulator {
       final share = s.masterShare ??= p.artistShare;
       cents += songCents * share;
       s.revenueCents += songCents * share;
+      world.dirtySongs.add(id);
+    }
+    // Songs written for others pay the writer's share (docs K143).
+    for (final id in world.writtenSongIds) {
+      final s = world.songs[id];
+      if (s.writerId != p.id || s.releasedWeek < 0) continue;
+      var songCents = 0.0;
+      if (s.status == SongStatus.active) {
+        songCents = s.weekStreams * 0.35 +
+            s.weekDownloads * 70 +
+            s.weekPhysical * 100;
+      } else if (s.status == SongStatus.dormant) {
+        for (var r = 0; r < regionCount; r++) {
+          songCents += world.songWeekStreamsRegion(s, r) * 0.35;
+        }
+      }
+      final royalty = Songwriting.royalty(s, songCents);
+      if (royalty <= 0) continue;
+      s.writerCents += royalty;
+      // Publishing money: the label recoups none of it.
+      p.moneyCents += p.manager.net(royalty).round();
       world.dirtySongs.add(id);
     }
     for (final id in world.activeAlbumIds) {
