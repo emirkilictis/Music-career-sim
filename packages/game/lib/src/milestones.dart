@@ -38,7 +38,9 @@ enum Milestone {
   (double, double)? progress(World w, Artist p) => switch (this) {
         fans100k => (p.coreFans, 1e5),
         fans1m => (p.coreFans, 1e6),
-        fans10m => (p.coreFans, 1e7),
+        // 5M since F81: no fandom reaches 10M (the cap is about 7M); the
+        // name stays, it is stored.
+        fans10m => (p.coreFans, 5e6),
         money1m => (p.moneyCents / 100, 1e6),
         money100m => (p.moneyCents / 100, 1e8),
         billionStreams => (_bestSongStreams(w, p), 1e9),
