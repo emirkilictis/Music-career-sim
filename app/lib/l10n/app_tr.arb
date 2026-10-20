@@ -1481,5 +1481,11 @@
   "snippetHot": "patladı",
   "snippetGood": "beğenildi",
   "snippetLukewarm": "ılık",
-  "snippetCold": "tutmadı"
+  "snippetCold": "tutmadı",
+  "errorNoOffer": "Şu an kataloğunu isteyen bir fon yok.",
+  "catalogTitle": "Kataloğun",
+  "catalogLine": "Üç yaşından büyük {songs} şarkın yılda yaklaşık {year} kazandırıyor. Fonlar bunun {multiple} yıllığını tek seferde öder.",
+  "catalogSell": "{price} karşılığında sat",
+  "catalogConfirm": "{songs} şarkının masterlarını {price} karşılığında satıyorsun. Artık fona öderler, sana değil; albümlerini yine de yeniden kaydedebilirsin. Geri alınamaz.",
+  "catalogSold": "Katalog {price} karşılığında satıldı."
 }

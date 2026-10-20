@@ -1473,6 +1473,14 @@ k('snippetGood','went down well','beğenildi')
 k('snippetLukewarm','lukewarm','ılık')
 k('snippetCold','fell flat','tutmadı')
 
+# Selling the catalog (docs K153).
+k('errorNoOffer','No fund wants the catalog now.','Şu an kataloğunu isteyen bir fon yok.')
+k('catalogTitle','Your catalog','Kataloğun')
+k('catalogLine','{songs} songs three years and older earn you about {year} a year. Funds pay {multiple} years of it at once.','Üç yaşından büyük {songs} şarkın yılda yaklaşık {year} kazandırıyor. Fonlar bunun {multiple} yıllığını tek seferde öder.', songs='int', year='String', multiple='int')
+k('catalogSell','Sell for {price}','{price} karşılığında sat', price='String')
+k('catalogConfirm','You sell the masters of {songs} songs for {price}. From now on they pay the fund, not you; you can still re-record their albums. This cannot be undone.','{songs} şarkının masterlarını {price} karşılığında satıyorsun. Artık fona öderler, sana değil; albümlerini yine de yeniden kaydedebilirsin. Geri alınamaz.', songs='int', price='String')
+k('catalogSold','Catalog sold for {price}.','Katalog {price} karşılığında satıldı.', price='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -788,6 +788,7 @@ class Fmt {
       'noAnniversary' => l.errorNoAnniversary,
       'noPartner' => l.errorNoPartner,
       'noSnippet' => l.errorNoSnippet,
+      'noOffer' => l.errorNoOffer,
       'noShowcase' => l.errorNoShowcase,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,

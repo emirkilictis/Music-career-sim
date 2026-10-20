@@ -5143,5 +5143,48 @@
   "snippetHot": "blew up",
   "snippetGood": "went down well",
   "snippetLukewarm": "lukewarm",
-  "snippetCold": "fell flat"
+  "snippetCold": "fell flat",
+  "errorNoOffer": "No fund wants the catalog now.",
+  "catalogTitle": "Your catalog",
+  "catalogLine": "{songs} songs three years and older earn you about {year} a year. Funds pay {multiple} years of it at once.",
+  "@catalogLine": {
+    "placeholders": {
+      "songs": {
+        "type": "int"
+      },
+      "year": {
+        "type": "String"
+      },
+      "multiple": {
+        "type": "int"
+      }
+    }
+  },
+  "catalogSell": "Sell for {price}",
+  "@catalogSell": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "catalogConfirm": "You sell the masters of {songs} songs for {price}. From now on they pay the fund, not you; you can still re-record their albums. This cannot be undone.",
+  "@catalogConfirm": {
+    "placeholders": {
+      "songs": {
+        "type": "int"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "catalogSold": "Catalog sold for {price}.",
+  "@catalogSold": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  }
 }

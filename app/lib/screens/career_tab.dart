@@ -33,6 +33,7 @@ class _CareerScreenState extends State<CareerScreen> {
   HonorsView? _honors;
   List<WrittenSongView> _written = const [];
   IncomeBreakdown? _income;
+  CatalogOfferView? _catalog;
   int _loadedRevision = -1;
 
   @override
@@ -52,18 +53,51 @@ class _CareerScreenState extends State<CareerScreen> {
     final honors = await career.read(Cmd.honors());
     final written = await career.read(Cmd.writtenForOthers());
     final income = await career.read(Cmd.careerIncome());
+    final catalog = await career.read(Cmd.catalogOffer());
     if (mounted) {
       setState(() {
         _years = years;
         _honors = honors;
         _written = written;
         _income = income;
+        _catalog = catalog;
         final fmt = context.fmt;
         final week = career.week;
         _songs = songs.where((s) => !s.inVault).toList()
           ..sort((a, b) =>
               fmt.songMainValue(b, week).compareTo(fmt.songMainValue(a, week)));
       });
+    }
+  }
+
+  /// Sells the catalog after asking (docs K153).
+  Future<void> _sellCatalog(CatalogOfferView c) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l.catalogTitle),
+        content: Text(l.catalogConfirm(c.songs, fmt.money(c.offerCents))),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(d, false), child: Text(l.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, true),
+              child: Text(l.catalogSell(fmt.money(c.offerCents)))),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      final price = await career.act(Cmd.sellCatalog());
+      if (mounted) {
+        showInfo(context, l.catalogSold(fmt.money(price)),
+            icon: Icons.sell_outlined);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
     }
   }
 
@@ -123,6 +157,28 @@ class _CareerScreenState extends State<CareerScreen> {
         if (_income case final income? when income.total >= 100) ...[
           const SizedBox(height: 12),
           IncomeCard(income: income, title: l.incomeCareerTitle),
+        ],
+        // Selling the catalog (docs K153).
+        if (_catalog case final c? when c.open && c.offerCents > 0) ...[
+          const SizedBox(height: 12),
+          Section(
+            title: l.catalogTitle,
+            icon: Icons.account_balance_outlined,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                      l.catalogLine(c.songs, fmt.money(c.yearCents.round()),
+                          c.multiple.round()),
+                      style: TextStyle(color: AppColors.textMuted)),
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    onPressed: () => _sellCatalog(c),
+                    icon: const Icon(Icons.sell_outlined),
+                    label: Text(l.catalogSell(fmt.money(c.offerCents))),
+                  ),
+                ]),
+          ),
         ],
         // Songs written for others (docs K143).
         if (_written.isNotEmpty) ...[

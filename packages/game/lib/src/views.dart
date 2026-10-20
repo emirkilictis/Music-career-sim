@@ -2336,3 +2336,28 @@ class JointPartnerView {
   final double fame;
   final int feeCents;
 }
+
+/// A fund's offer for the player's catalog (docs K153).
+class CatalogOfferView {
+  CatalogOfferView.of(World w, Artist a)
+      : open = GameTime.yearOf(w.week) >= CatalogSale.fromYear,
+        songs = CatalogSale.songs(w, a).length,
+        yearCents = CatalogSale.yearCents(w, a),
+        multiple = CatalogSale.multiple(GameTime.yearOf(w.week)),
+        offerCents = CatalogSale.offerCents(w, a);
+
+  /// Funds buy catalogs this year.
+  final bool open;
+
+  /// Songs three years and older the player still owns a part of.
+  final int songs;
+
+  /// What they earn the player in a year at last week's pace.
+  final double yearCents;
+
+  /// Years of earnings funds pay now.
+  final double multiple;
+
+  /// The offer (0: none).
+  final int offerCents;
+}

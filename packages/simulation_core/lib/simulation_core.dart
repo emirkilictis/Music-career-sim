@@ -7,6 +7,7 @@ export 'src/audience.dart';
 export 'src/awards.dart';
 export 'src/brands.dart';
 export 'src/bundles.dart';
+export 'src/catalog_sale.dart';
 export 'src/channel.dart';
 export 'src/cloud.dart';
 export 'src/ai.dart' show AiPlanner, RivalClash;

@@ -253,6 +253,11 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// Selling the catalog (docs K153).
+  static SessionCmd<CatalogOfferView> catalogOffer() =>
+      (s) => s.catalogOffer;
+  static SessionCmd<int> sellCatalog() => (s) => s.sellCatalog();
+
   /// A snippet test (docs K152).
   static SessionCmd<void> teaseSnippet(int songId) =>
       (s) => s.teaseSnippet(songId);

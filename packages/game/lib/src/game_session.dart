@@ -1374,6 +1374,19 @@ class GameSession {
   }
 
   /// Pays creators on the short-video app to use a song's sound (K131).
+  /// A fund's offer for the player's catalog (docs K153).
+  CatalogOfferView get catalogOffer => CatalogOfferView.of(world, _p);
+
+  /// Sells the catalog for the offer; returns the price (docs K153).
+  int sellCatalog() {
+    if (CatalogSale.offerCents(world, _p) <= 0) {
+      throw GameException('noOffer', 'No offer for the catalog');
+    }
+    final price = CatalogSale.sell(world, _p);
+    _saveNow();
+    return price;
+  }
+
   /// Teases vault song [songId] on the short-video app (docs K152).
   void teaseSnippet(int songId) {
     final s = _ownSong(songId);

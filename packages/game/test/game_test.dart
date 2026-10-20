@@ -1362,6 +1362,51 @@ void main() {
       g.close();
     });
 
+    test('selling the catalog: money now, the songs pay the fund (K153)',
+        () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2018,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final al = g.releaseAlbum('Old', ids);
+      expect(g.catalogOffer.songs, 0);
+      expect(() => g.sellCatalog(), _code('noOffer'));
+      g.advanceWeeks(CatalogSale.ageWeeks, stop: SkipStop.never);
+      final offer = g.catalogOffer;
+      expect(offer.open, isTrue);
+      expect(offer.songs, ids.length);
+      expect(offer.multiple, CatalogSale.multiple(g.year));
+      expect(offer.offerCents, greaterThan(0));
+      final money = g.player.moneyCents;
+      final price = g.sellCatalog();
+      expect(price, offer.offerCents);
+      expect(g.player.moneyCents - money, price);
+      expect(g.song(ids.first).masterShare, 0);
+      expect(g.album(al.id).masterShare, 0);
+      // Sold: no more offers, and nothing more from those songs.
+      expect(g.catalogOffer.offerCents, 0);
+      final revenue = g.world.songs[ids.first].revenueCents;
+      g.advanceWeek();
+      expect(g.world.songs[ids.first].revenueCents, revenue);
+      // A sold album can be recorded again.
+      expect(g.album(al.id).canRerecord, isTrue);
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.song(ids.first).masterShare, 0);
+      g.close();
+    });
+
     test('a snippet test shows the reaction and builds a wait (K152)', () {
       var g = GameSession.start(
           slots,
