@@ -1443,5 +1443,17 @@
   "liveHint": "Setten {min}–{max} çıkmış şarkı seç. Canlı versiyonlar sahnedeki kadar iyi olur; hayranlar alır, başkaları pek almaz, hayranlar da çoğunlukla stüdyo hallerini dinler. Yeni dönem açmaz, plak şirketine borçlu olduğun albümlerden sayılmaz. Parça başına {cost} ve {energy} yaratıcılık.",
   "liveGo": "Canlı albümü çıkar ({n} şarkı)",
   "liveDefaultTitle": "{tour} (Canlı)",
-  "liveTag": "Canlı"
+  "liveTag": "Canlı",
+  "errorNoMarquee": "Marquee yeni çıkışlar için, bir kez.",
+  "errorNoShowcase": "Showcase katalog şarkıları için, yılda bir.",
+  "marqueeTitle": "Streamify Marquee",
+  "marqueeHint": "Yeni çıkışın için kendi dinleyicilerine tam ekran reklam: {weeks} hafta boyunca çok daha fazla dinlerler. Ücret dinleyici sayına göre.",
+  "marqueeRun": "Marquee'yi başlat",
+  "marqueeRan": "{week} tarihinden beri Marquee'de.",
+  "marqueeAlbum": "Albümü Marquee'ye koy",
+  "marqueeAlbumRan": "Albüm Marquee'de gösterildi.",
+  "marqueeOn": "{title} Marquee'de.",
+  "showcaseTitle": "Streamify Showcase",
+  "showcaseHint": "Eski bir şarkı için dinleyicilerin ana ekranında afiş: bir süre yeniden dinlenir. Yılda bir.",
+  "showcaseRun": "Showcase başlat"
 }

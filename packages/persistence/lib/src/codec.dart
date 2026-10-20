@@ -235,8 +235,8 @@ abstract final class Codec {
     'creator', 'radioFormat', 'holiday',
     'rerecordOf', 'replacedWeek', 'masterShare',
     'leakedWeek',
-    // Added in schema v32, v34.
-    'writer', 'liveOf',
+    // Added in schema v32, v34, v35.
+    'writer', 'liveOf', 'promo',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -298,6 +298,9 @@ abstract final class Codec {
             ? null
             : jsonEncode([s.writerId, s.soldTo, s.writerCents]),
         s.liveOf,
+        s.marqueeWeek < 0 && s.showcaseWeek < 0
+            ? null
+            : jsonEncode([s.marqueeWeek, s.showcaseWeek]),
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -349,6 +352,11 @@ abstract final class Codec {
     s.masterShare = (r['masterShare'] as num?)?.toDouble();
     s.leakedWeek = r['leakedWeek'] as int? ?? -1;
     s.liveOf = r['liveOf'] as int? ?? -1;
+    if (r['promo'] case final String x when x.isNotEmpty) {
+      final j = jsonDecode(x) as List;
+      s.marqueeWeek = j[0] as int;
+      s.showcaseWeek = j[1] as int;
+    }
     if (r['writer'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       s.writerId = j[0] as int;

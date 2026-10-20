@@ -1425,6 +1425,20 @@ k('liveGo','Release live album ({n} songs)','Canlı albümü çıkar ({n} şark�
 k('liveDefaultTitle','{tour} (Live)','{tour} (Canlı)', tour='String')
 k('liveTag','Live','Canlı')
 
+# Marquee and Showcase (docs K147).
+k('errorNoMarquee','The Marquee is for new releases, once.','Marquee yeni çıkışlar için, bir kez.')
+k('errorNoShowcase','A Showcase is for catalog songs, once a year.','Showcase katalog şarkıları için, yılda bir.')
+k('marqueeTitle','Streamify Marquee','Streamify Marquee')
+k('marqueeHint','A full-screen ad for your new release to your own listeners: they play it far more for {weeks} weeks. Paid by how many listeners you have.','Yeni çıkışın için kendi dinleyicilerine tam ekran reklam: {weeks} hafta boyunca çok daha fazla dinlerler. Ücret dinleyici sayına göre.', weeks='int')
+k('marqueeRun','Run the Marquee','Marquee\'yi başlat')
+k('marqueeRan','On the Marquee since {week}.','{week} tarihinden beri Marquee\'de.', week='String')
+k('marqueeAlbum','Put the album on the Marquee','Albümü Marquee\'ye koy')
+k('marqueeAlbumRan','The album went on the Marquee.','Albüm Marquee\'de gösterildi.')
+k('marqueeOn','{title} is on the Marquee.','{title} Marquee\'de.', title='String')
+k('showcaseTitle','Streamify Showcase','Streamify Showcase')
+k('showcaseHint','A banner on listeners\' home screens for an older song: it is played again for a while. Once a year.','Eski bir şarkı için dinleyicilerin ana ekranında afiş: bir süre yeniden dinlenir. Yılda bir.')
+k('showcaseRun','Run a Showcase','Showcase başlat')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

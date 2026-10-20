@@ -350,6 +350,29 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               ),
             ],
           ],
+          // The whole album on the app's Marquee (docs K147).
+          if (a.marqueeCostCents case final cost?) ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () async {
+                try {
+                  await widget.state.act(Cmd.runAlbumMarquee(a.id));
+                  if (context.mounted) {
+                    showInfo(context, l.marqueeOn(a.title),
+                        icon: Icons.campaign_outlined);
+                  }
+                  _load();
+                } catch (e) {
+                  if (context.mounted) showError(context, e);
+                }
+              },
+              icon: const Icon(Icons.campaign_outlined),
+              label: Text('${l.marqueeAlbum} · ${fmt.money(cost)}'),
+            ),
+          ] else if (a.isPlayer && a.onMarquee) ...[
+            const SizedBox(height: 10),
+            _Line(icon: Icons.campaign_outlined, text: l.marqueeAlbumRan),
+          ],
           // Bundled copies (docs K144).
           if (a.isPlayer && a.bundle != AlbumBundle.none) ...[
             const SizedBox(height: 10),

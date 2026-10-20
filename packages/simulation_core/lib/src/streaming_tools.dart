@@ -207,6 +207,107 @@ abstract final class StreamingTools {
     w.dirtySongs.add(s.id);
   }
 
+  // --------------------------------------- Marquee and Showcase (K147)
+
+  /// The streaming app's paid recommendations: a full-screen ad for a new
+  /// release to the artist's own listeners (2020+), and a banner for a
+  /// catalog song (2022+).
+  static const marqueeYear = 2020, showcaseYear = 2022;
+
+  /// Weeks a new release can still get the Marquee, and weeks it shows.
+  static const marqueeWindow = 4, marqueeWeeks = 2;
+
+  /// How much more the artist's casual listeners play a song on Marquee.
+  static const marqueeLift = 1.5;
+
+  /// A catalog song is half a year out; a Showcase once a year.
+  static const showcaseAge = 26, showcaseEvery = 52;
+
+  /// The wave a Showcase brings a catalog song (a remix brings 0.35).
+  static const showcaseBoost = 0.12;
+
+  static int marqueeCostCents(Artist a) => 100000 + (a.casual * 0.05).round();
+  static int showcaseCostCents(Artist a) => 50000 + (a.casual * 0.025).round();
+
+  static int _promoStart(Song s) => s.isSingle ? s.singleWeek : s.releasedWeek;
+
+  /// Whether [s] can get the Marquee now.
+  static bool canMarquee(World w, Song s) =>
+      GameTime.yearOf(w.week) >= marqueeYear &&
+      s.primaryArtistId == w.playerArtistId &&
+      s.releasedWeek >= 0 &&
+      s.status == SongStatus.active &&
+      s.marqueeWeek < 0 &&
+      w.week - _promoStart(s) < marqueeWindow;
+
+  /// Whether [s] can get a Showcase now.
+  static bool canShowcase(World w, Song s) =>
+      GameTime.yearOf(w.week) >= showcaseYear &&
+      s.primaryArtistId == w.playerArtistId &&
+      s.releasedWeek >= 0 &&
+      s.status != SongStatus.scrapped &&
+      w.week - s.releasedWeek >= showcaseAge &&
+      (s.showcaseWeek < 0 || w.week - s.showcaseWeek >= showcaseEvery);
+
+  /// Puts new release [s] on the Marquee.
+  static void marquee(World w, Artist a, Song s) {
+    if (!canMarquee(w, s)) throw ActionException('No Marquee');
+    final cost = marqueeCostCents(a);
+    if (cost > a.moneyCents) throw ActionException('Not enough money');
+    a.moneyCents -= cost;
+    s.campaignCostCents += cost;
+    s.marqueeWeek = w.week;
+    w.dirtySongs.add(s.id);
+    w.dirtyArtists.add(a.id);
+  }
+
+  /// An album on the Marquee: every track, for half as much again.
+  static int albumMarqueeCostCents(Artist a) =>
+      (marqueeCostCents(a) * 1.5).round();
+
+  /// Whether new album [al] can go on the Marquee now.
+  static bool canMarqueeAlbum(World w, Album al) =>
+      GameTime.yearOf(w.week) >= marqueeYear &&
+      al.artistId == w.playerArtistId &&
+      w.week - al.releaseWeek < marqueeWindow &&
+      al.songIds.every((id) => w.songs[id].marqueeWeek < 0);
+
+  /// Puts new album [al] on the Marquee: all its tracks.
+  static void marqueeAlbum(World w, Artist a, Album al) {
+    if (!canMarqueeAlbum(w, al)) throw ActionException('No Marquee');
+    final cost = albumMarqueeCostCents(a);
+    if (cost > a.moneyCents) throw ActionException('Not enough money');
+    a.moneyCents -= cost;
+    al.campaignCostCents += cost;
+    for (final id in al.songIds) {
+      w.songs[id].marqueeWeek = w.week;
+      w.dirtySongs.add(id);
+    }
+    w.dirtyAlbums.add(al.id);
+    w.dirtyArtists.add(a.id);
+  }
+
+  /// Gives catalog song [s] a Showcase: it is played again.
+  static void showcase(World w, Artist a, Song s) {
+    if (!canShowcase(w, s)) throw ActionException('No Showcase');
+    final cost = showcaseCostCents(a);
+    if (cost > a.moneyCents) throw ActionException('Not enough money');
+    a.moneyCents -= cost;
+    s.campaignCostCents += cost;
+    s.showcaseWeek = w.week;
+    if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
+    s.weeksBelowCutoff = 0;
+    s.versionBoost += showcaseBoost;
+    w.dirtySongs.add(s.id);
+    w.dirtyArtists.add(a.id);
+  }
+
+  /// How much more [s]'s casual listeners play it in [week].
+  static double marqueeFactor(Song s, int week) =>
+      s.marqueeWeek >= 0 && week - s.marqueeWeek < marqueeWeeks
+          ? 1 + marqueeLift
+          : 1.0;
+
   // ------------------------------------------------- the algorithm (K119)
 
   /// Algorithmic playlists start: personal discovery mixes, then the

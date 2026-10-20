@@ -836,6 +836,11 @@ class Song with Charted {
   /// The week it leaked before release (-1: never; docs K140).
   int leakedWeek = -1;
 
+  /// The streaming app's paid recommendations (docs K147): when the song
+  /// went on the Marquee and got a Showcase (-1: never).
+  int marqueeWeek = -1;
+  int showcaseWeek = -1;
+
   /// The song this is a live recording of (-1: a studio song; docs K146).
   int liveOf = -1;
 

@@ -336,6 +336,14 @@ class SongView {
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
         masterShare = Rerecords.songShare(w.artists[s.primaryArtistId], s),
+        marqueeWeek = s.marqueeWeek,
+        marqueeCostCents = StreamingTools.canMarquee(w, s)
+            ? StreamingTools.marqueeCostCents(w.player!)
+            : null,
+        showcaseWeek = s.showcaseWeek,
+        showcaseCostCents = StreamingTools.canShowcase(w, s)
+            ? StreamingTools.showcaseCostCents(w.player!)
+            : null,
         creatorWeek = s.creatorWeek,
         creatorTier = s.creatorTier,
         creatorResult = s.creatorResult,
@@ -451,6 +459,13 @@ class SongView {
   final CreatorCampaign creatorTier;
   final CreatorResult creatorResult;
   final Map<CreatorCampaign, int> creatorCosts;
+
+  /// The streaming app's Marquee and Showcase (docs K147): when the song
+  /// got them (-1: never) and what they cost now (null: not possible).
+  final int marqueeWeek;
+  final int? marqueeCostCents;
+  final int showcaseWeek;
+  final int? showcaseCostCents;
 
   /// The radio format it is worked to (docs K134), and while it can still
   /// change, each format's play and run against the calibrated ones.
@@ -611,6 +626,11 @@ class AlbumView {
         exclusiveFeeCents = al.exclusiveFeeCents,
         bundle = al.bundle,
         isLive = al.isLive,
+        marqueeCostCents = StreamingTools.canMarqueeAlbum(w, al)
+            ? StreamingTools.albumMarqueeCostCents(w.player!)
+            : null,
+        onMarquee = al.songIds.isNotEmpty &&
+            w.songs[al.songIds.first].marqueeWeek >= 0,
         bundleUnits = al.bundleUnits,
         masterShare = Rerecords.albumShare(w.artists[al.artistId], al),
         isRerecord = Rerecords.isRerecord(w, al),
@@ -706,6 +726,11 @@ class AlbumView {
 
   /// A live album (docs K146).
   final bool isLive;
+
+  /// The Marquee for the whole album (docs K147): its cost now (null:
+  /// not possible) and whether it ran.
+  final int? marqueeCostCents;
+  final bool onMarquee;
 
   /// Re-recordings (docs K139): the artist's share of its money (the
   /// deal it came out under), whether it re-records [originalAlbumId],

@@ -5012,5 +5012,38 @@
       }
     }
   },
-  "liveTag": "Live"
+  "liveTag": "Live",
+  "errorNoMarquee": "The Marquee is for new releases, once.",
+  "errorNoShowcase": "A Showcase is for catalog songs, once a year.",
+  "marqueeTitle": "Streamify Marquee",
+  "marqueeHint": "A full-screen ad for your new release to your own listeners: they play it far more for {weeks} weeks. Paid by how many listeners you have.",
+  "@marqueeHint": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "marqueeRun": "Run the Marquee",
+  "marqueeRan": "On the Marquee since {week}.",
+  "@marqueeRan": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "marqueeAlbum": "Put the album on the Marquee",
+  "marqueeAlbumRan": "The album went on the Marquee.",
+  "marqueeOn": "{title} is on the Marquee.",
+  "@marqueeOn": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "showcaseTitle": "Streamify Showcase",
+  "showcaseHint": "A banner on listeners' home screens for an older song: it is played again for a while. Once a year.",
+  "showcaseRun": "Run a Showcase"
 }

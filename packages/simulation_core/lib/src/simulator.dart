@@ -421,7 +421,13 @@ class Simulator {
           Leaks.fanFactor(s) *
           // Fans mostly play the studio versions (docs K146).
           (s.liveOf >= 0 ? LiveAlbums.fanListen : 1.0);
-      final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
+      // The app's Marquee shows a new release to the artist's listeners
+      // (docs K147).
+      final casPart = cas *
+          s.commercial *
+          life *
+          (0.05 + 0.15 * promo) *
+          StreamingTools.marqueeFactor(s, w.week);
       final pubPart = c.publicPool *
           s.commercial *
           life *

@@ -247,6 +247,14 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// The streaming app's Marquee and Showcase (docs K147).
+  static SessionCmd<void> runMarquee(int songId) =>
+      (s) => s.runMarquee(songId);
+  static SessionCmd<void> runAlbumMarquee(int albumId) =>
+      (s) => s.runAlbumMarquee(albumId);
+  static SessionCmd<void> runShowcase(int songId) =>
+      (s) => s.runShowcase(songId);
+
   /// Live albums (docs K146).
   static SessionCmd<List<LiveTourView>> liveAlbumTours() =>
       (s) => s.liveAlbumTours;

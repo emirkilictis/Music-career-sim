@@ -1342,6 +1342,41 @@ class GameSession {
   }
 
   /// Pays creators on the short-video app to use a song's sound (K131).
+  /// The streaming app's Marquee for a new release, a song or a whole
+  /// album, and a Showcase for a catalog song (docs K147).
+  void runMarquee(int songId) {
+    final s = _ownSong(songId);
+    if (!StreamingTools.canMarquee(world, s)) {
+      throw GameException('noMarquee', 'Only new releases, once');
+    }
+    _requireMoney(StreamingTools.marqueeCostCents(_p));
+    StreamingTools.marquee(world, _p, s);
+    _saveNow();
+  }
+
+  void runAlbumMarquee(int albumId) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    if (!StreamingTools.canMarqueeAlbum(world, al)) {
+      throw GameException('noMarquee', 'Only new releases, once');
+    }
+    _requireMoney(StreamingTools.albumMarqueeCostCents(_p));
+    StreamingTools.marqueeAlbum(world, _p, al);
+    _saveNow();
+  }
+
+  void runShowcase(int songId) {
+    final s = _ownSong(songId);
+    if (!StreamingTools.canShowcase(world, s)) {
+      throw GameException('noShowcase', 'Catalog songs, once a year');
+    }
+    _requireMoney(StreamingTools.showcaseCostCents(_p));
+    StreamingTools.showcase(world, _p, s);
+    _saveNow();
+  }
+
   void runCreators(int songId, CreatorCampaign c) {
     final s = _ownSong(songId);
     if (!StreamingTools.canRunCreators(world, s)) {

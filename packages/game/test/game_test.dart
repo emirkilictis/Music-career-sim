@@ -1362,6 +1362,70 @@ void main() {
       g.close();
     });
 
+    test('the streaming app\'s Marquee and Showcase (K147)', () {
+      (GameSession, List<int>) start(int year) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: year,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire,
+                premium: true));
+        final p = g.world.player!;
+        p.moneyCents = 1 << 40;
+        final ids = <int>[];
+        for (var i = 0; i < 9; i++) {
+          p.creativeEnergy = 100;
+          ids.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        g.releaseSingle(ids.first);
+        return (g, ids);
+      }
+
+      // Before 2020 there is no Marquee.
+      var (g, ids) = start(2019);
+      expect(g.song(ids.first).marqueeCostCents, isNull);
+      expect(() => g.runMarquee(ids.first), _code('noMarquee'));
+      g.close();
+      final (plain, pIds) = start(2022);
+      (g, ids) = start(2022);
+      final cost = g.song(ids.first).marqueeCostCents!;
+      final money = g.player.moneyCents;
+      g.runMarquee(ids.first);
+      expect(money - g.player.moneyCents, cost);
+      expect(g.song(ids.first).marqueeCostCents, isNull);
+      expect(() => g.runMarquee(ids.first), _code('noMarquee'));
+      plain.advanceWeek();
+      g.advanceWeek();
+      // More of the artist's listeners played it.
+      expect(g.world.songs[ids.first].weekStreams,
+          greaterThan(plain.world.songs[pIds.first].weekStreams));
+      plain.close();
+      // A whole album on the Marquee.
+      final al = g.releaseAlbum('Marquee', ids.skip(1).toList());
+      expect(g.album(al.id).marqueeCostCents, isNotNull);
+      g.runAlbumMarquee(al.id);
+      expect(g.album(al.id).onMarquee, isTrue);
+      for (final id in al.trackIds) {
+        expect(g.world.songs[id].marqueeWeek, g.week);
+      }
+      // A catalog song gets a Showcase, once a year.
+      expect(g.song(ids.first).showcaseCostCents, isNull);
+      g.advanceWeeks(StreamingTools.showcaseAge, stop: SkipStop.never);
+      expect(g.song(ids.first).showcaseCostCents, isNotNull);
+      final boost = g.world.songs[ids.first].versionBoost;
+      g.runShowcase(ids.first);
+      expect(g.world.songs[ids.first].versionBoost, greaterThan(boost));
+      expect(g.world.songs[ids.first].status, SongStatus.active);
+      expect(() => g.runShowcase(ids.first), _code('noShowcase'));
+      final slot = g.slotId;
+      final week = g.song(ids.first).showcaseWeek;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.song(ids.first).showcaseWeek, week);
+      g.close();
+    });
+
     test('a live album from the tour, for the fans (K146)', () {
       final g = GameSession.start(
           slots,

@@ -775,6 +775,8 @@ class Fmt {
       'cannotUpload' => l.errorCannotUpload,
       'songRefused' => l.errorSongRefused,
       'cannotBundle' => l.errorCannotBundle,
+      'noMarquee' => l.errorNoMarquee,
+      'noShowcase' => l.errorNoShowcase,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,
       'labelRefused' => l.errorLabelRefused,

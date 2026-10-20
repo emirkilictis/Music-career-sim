@@ -852,6 +852,45 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           ),
                       ]),
                     ],
+                    // The app's Marquee and Showcase (docs K147).
+                    if (s.marqueeCostCents case final cost?) ...[
+                      const SizedBox(height: 10),
+                      Text(l.marqueeTitle,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text(l.marqueeHint(StreamingTools.marqueeWeeks),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5)),
+                      const SizedBox(height: 6),
+                      ActionChip(
+                        avatar: const Icon(Icons.campaign_outlined, size: 16),
+                        label: Text('${l.marqueeRun} · ${fmt.money(cost)}'),
+                        onPressed: cost > widget.state.player.moneyCents
+                            ? null
+                            : () => _tool(Cmd.runMarquee(s.id)),
+                      ),
+                    ] else if (s.marqueeWeek >= 0) ...[
+                      const SizedBox(height: 10),
+                      Text(l.marqueeRan(fmt.week(s.marqueeWeek)),
+                          style: TextStyle(color: AppColors.textMuted)),
+                    ],
+                    if (s.showcaseCostCents case final cost?) ...[
+                      const SizedBox(height: 10),
+                      Text(l.showcaseTitle,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text(l.showcaseHint,
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5)),
+                      const SizedBox(height: 6),
+                      ActionChip(
+                        avatar: const Icon(Icons.history_rounded, size: 16),
+                        label: Text('${l.showcaseRun} · ${fmt.money(cost)}'),
+                        onPressed: cost > widget.state.player.moneyCents
+                            ? null
+                            : () => _tool(Cmd.runShowcase(s.id)),
+                      ),
+                    ],
                     if (s.autoplayOpen) ...[
                       const SizedBox(height: 10),
                       AutoplayLevelPicker(
