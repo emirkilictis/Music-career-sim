@@ -805,8 +805,8 @@ class Fmt {
           _ => l.eventRecordAlbumDebut(t, compact(value)),
         },
       SurpriseDrop() => l.eventSurpriseDrop(t),
-      WrappedOut() => l.eventWrapped(
-          e.year, compact(e.plays), t, wrappedStory(e.story)),
+      WrappedOut() =>
+        l.eventWrapped(e.year, compact(e.plays), t, wrappedStory(e.story)),
       YearEndCharts() => e.hasPlayer
           ? [
               if (e.songs.isNotEmpty) l.eventYearEndSongs(e.year, t),
@@ -873,6 +873,11 @@ class Fmt {
       PitchDeclined() => l.eventPitchDeclined(t),
       CreatorsFlopped() => l.eventCreatorsFlopped(t),
       HolidayReturn() => l.eventHolidayReturn(t),
+      SongOfSummer(:final playerRank, :final year) => playerRank == 1
+          ? l.eventSummerMine(year, t)
+          : playerRank > 0
+              ? l.eventSummerRank(year, t, playerRank)
+              : l.eventSummerTop(year, t, line.artistName),
       BrandDealBroken() =>
         l.eventBrandDealBroken(e.brand.name, money(e.lostCents)),
       AwardWinners() => l.eventAwardWinners(

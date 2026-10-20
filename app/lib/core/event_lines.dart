@@ -81,6 +81,12 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         PitchDeclined() => EventLine(e, title: song(e.songId)),
         CreatorsFlopped() => EventLine(e, title: song(e.songId)),
         HolidayReturn() => release(e, EntityKind.song, e.songId),
+        SongOfSummer() => e.hasPlayer
+            ? release(e, EntityKind.song, e.playerSongId)
+            : EventLine(e,
+                title: song(e.topSongId),
+                artistName:
+                    w.artists[w.songs[e.topSongId].primaryArtistId].name),
         TopArtist() => EventLine(e),
         DiscoverPick() => release(e, EntityKind.song, e.songId),
         AdvanceRecouped() => EventLine(e),
@@ -190,6 +196,7 @@ List<EventLine> sortLines(List<EventLine> lines) {
         PitchDeclined() => 6,
         CreatorsFlopped() => 6,
         HolidayReturn() => 4,
+        SongOfSummer() => 1,
         RivalAlbumClash() => 3,
         YearEndCharts() => 0,
         WrappedOut() => 1,

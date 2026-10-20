@@ -4600,5 +4600,45 @@
         "type": "String"
       }
     }
+  },
+  "songsOfSummer": "Songs of the Summer",
+  "eventSummerMine": "“{title}” is the song of the summer {year}!",
+  "@eventSummerMine": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventSummerRank": "Songs of the summer {year}: “{title}” finished #{rank}.",
+  "@eventSummerRank": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      },
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "eventSummerTop": "The song of the summer {year} is “{title}” by {artist}.",
+  "@eventSummerTop": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
   }
 }

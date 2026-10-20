@@ -1297,6 +1297,12 @@ k('holidaySongHint','Little played most of the year, back every December: a good
 k('holidayTag','Holiday song','Yılbaşı şarkısı')
 k('eventHolidayReturn','It is that time of year: “{title}” is back on playlists for the holidays.','Yine o zaman geldi: “{title}” yılbaşı için listelere döndü.', title='String')
 
+# Songs of the summer (K137)
+k('songsOfSummer','Songs of the Summer','Yazın Şarkıları')
+k('eventSummerMine','“{title}” is the song of the summer {year}!','“{title}” {year} yazının şarkısı!', year='int', title='String')
+k('eventSummerRank','Songs of the summer {year}: “{title}” finished #{rank}.','{year} yazın şarkıları: “{title}” #{rank} oldu.', year='int', title='String', rank='int')
+k('eventSummerTop','The song of the summer {year} is “{title}” by {artist}.','{year} yazının şarkısı {artist} – “{title}”.', year='int', title='String', artist='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -253,8 +253,11 @@ abstract final class Cmd {
   static SessionCmd<(List<YearEndRow>, List<int>)> yearEnd(
           int chartId, int? year) =>
       (s) {
-        final years = s.yearEndYears;
-        final y = year ?? (years.isEmpty ? null : years.first);
+        final years =
+            chartId == YearEnd.summer ? s.summerYears : s.yearEndYears;
+        final y = year != null && years.contains(year)
+            ? year
+            : (years.isEmpty ? null : years.first);
         return (
           y == null ? const <YearEndRow>[] : s.yearEnd(chartId, y),
           years

@@ -1628,8 +1628,13 @@ class GameSession {
   /// albums), not how long it stayed (F73), with its best position and
   /// weeks on.
   List<YearEndRow> yearEnd(int chartId, int year, {int limit = YearEnd.size}) {
+    // The songs of the summer: the US songs chart over the summer weeks
+    // (docs K137).
+    final summer = chartId == YearEnd.summer;
+    if (summer) chartId = Charts.usSongs;
     final def = Charts.all[chartId];
-    final (from, to) = YearEnd.tracking(year);
+    final (from, to) =
+        summer ? YearEnd.summerTracking(year) : YearEnd.tracking(year);
     final kind =
         def.kind == ChartKind.songs ? EntityKind.song : EntityKind.album;
     var rank = 0;
@@ -2029,6 +2034,19 @@ class GameSession {
 
   /// Years with year-end charts, newest first: out already, and with at
   /// least half of their tracking year in this save's history.
+  /// Years with a song-of-the-summer chart, newest first (docs K137).
+  List<int> get summerYears {
+    final first = _store.db.select('SELECT MIN(week) AS w FROM chartEntry');
+    final start = first.isEmpty ? null : first.first['w'] as int?;
+    if (start == null) return const [];
+    return [
+      for (var y = year; y >= GameTime.yearOf(start); y--)
+        if (YearEnd.summerPublishedBy(y, world.week - 1) &&
+            YearEnd.summerTracking(y).$1 >= start)
+          y
+    ];
+  }
+
   List<int> get yearEndYears {
     final first = _store.db.select('SELECT MIN(week) AS w FROM chartEntry');
     final start = first.isEmpty ? null : first.first['w'] as int?;
@@ -2460,6 +2478,20 @@ class GameSession {
         rankNow <= 10 &&
         (rankBefore == 0 || rankBefore > 10)) {
       events.add(TopArtist(rankNow));
+    }
+    // The song of the summer (docs K137).
+    if (GameTime.weekOfYear(r.week) == YearEnd.summerToWeekOfYear + 1) {
+      final y = GameTime.yearOf(r.week);
+      if (summerYears.contains(y)) {
+        final rows = yearEnd(YearEnd.summer, y, limit: 20);
+        if (rows.isNotEmpty) {
+          final mine = rows.where((e) => e.isPlayer).firstOrNull;
+          events.add(SongOfSummer(y,
+              topSongId: rows.first.entityId,
+              playerRank: mine?.rank ?? 0,
+              playerSongId: mine?.entityId ?? -1));
+        }
+      }
     }
     // The year-end charts come out in early December (docs K110).
     if (GameTime.weekOfYear(r.week) == YearEnd.publishWeekOfYear) {

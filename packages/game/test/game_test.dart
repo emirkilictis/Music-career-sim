@@ -1362,6 +1362,29 @@ void main() {
       g.close();
     });
 
+    test('the songs of the summer come out in September (K137)', () {
+      final g = GameSession.start(slots, _setup());
+      expect(g.summerYears, isEmpty);
+      SongOfSummer? news;
+      while (GameTime.weekOfYear(g.week) != YearEnd.summerToWeekOfYear + 2) {
+        for (final e in g.advanceWeek().events) {
+          if (e is SongOfSummer) news = e;
+        }
+      }
+      expect(news, isNotNull);
+      expect(g.summerYears, [news!.year]);
+      final rows = g.yearEnd(YearEnd.summer, news.year);
+      expect(rows, isNotEmpty);
+      expect(rows.first.entityId, news.topSongId);
+      for (var i = 1; i < rows.length; i++) {
+        expect(rows[i].points, lessThanOrEqualTo(rows[i - 1].points));
+      }
+      // Only summer weeks count: fewer weeks on than a whole year allows.
+      expect(rows.first.weeksOn,
+          lessThanOrEqualTo(YearEnd.summerToWeekOfYear - YearEnd.summerFromWeekOfYear + 1));
+      g.close();
+    });
+
     test('a holiday song sleeps all year and comes back in December (K136)',
         () {
       final g = GameSession.start(

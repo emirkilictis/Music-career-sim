@@ -839,6 +839,20 @@ abstract final class YearEnd {
   static bool publishedBy(int year, int week) =>
       week >= GameTime.firstWeekOf(year) + publishWeekOfYear - 1;
 
+  /// The songs of the summer (docs K137): a pseudo chart id for the US
+  /// songs chart from late May to early September, out in mid-September.
+  static const summer = -100;
+  static const summerFromWeekOfYear = 22, summerToWeekOfYear = 36;
+
+  static (int, int) summerTracking(int year) => (
+        GameTime.firstWeekOf(year) + summerFromWeekOfYear - 1,
+        GameTime.firstWeekOf(year) + summerToWeekOfYear - 1,
+      );
+
+  /// Whether [year]'s summer chart is out in [week].
+  static bool summerPublishedBy(int year, int week) =>
+      week >= GameTime.firstWeekOf(year) + summerToWeekOfYear;
+
   /// Year-end charts there are (song and album charts of the US and the
   /// world).
   static const charts = [

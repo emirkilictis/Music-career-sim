@@ -204,7 +204,9 @@ class _ChartsTabState extends State<ChartsTab> {
                   (_chart == _toursChart
                           ? l.chartTopTours
                           : _chart == _yearEndChart
-                              ? '${l.chartYearEnd} · ${fmt.chartShort(_yearEndOf)}'
+                              ? (_yearEndOf == YearEnd.summer
+                                  ? l.songsOfSummer
+                                  : '${l.chartYearEnd} · ${fmt.chartShort(_yearEndOf)}')
                               : _chart == _recordsChart
                                   ? l.chartRecords
                                   : _chart == _artistsChart
@@ -791,7 +793,8 @@ class _YearEndBoard extends StatelessWidget {
     final l = context.l10n;
     final fmt = context.fmt;
     final list = mineOnly ? rows?.where((r) => r.isPlayer).toList() : rows;
-    final albums = Charts.all[chart].kind == ChartKind.albums;
+    final albums =
+        chart != YearEnd.summer && Charts.all[chart].kind == ChartKind.albums;
     return Column(children: [
       SizedBox(
         height: 48,
@@ -807,11 +810,13 @@ class _YearEndBoard extends StatelessWidget {
                 onSelected: onMine,
               ),
             ),
-            for (final c in YearEnd.charts)
+            for (final c in [...YearEnd.charts, YearEnd.summer])
               Padding(
                 padding: const EdgeInsets.only(right: 6),
                 child: ChoiceChip(
-                  label: Text(fmt.chartShort(c)),
+                  label: Text(c == YearEnd.summer
+                      ? l.songsOfSummer
+                      : fmt.chartShort(c)),
                   selected: chart == c,
                   onSelected: (_) => onChart(c),
                 ),

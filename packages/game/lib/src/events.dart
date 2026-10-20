@@ -457,6 +457,24 @@ class PitchDeclined extends GameEvent {
   bool get isMajor => false;
 }
 
+/// The songs of the summer are out (docs K137): the #1, and the player's
+/// best place in the top 20 (0: none).
+class SongOfSummer extends GameEvent {
+  const SongOfSummer(this.year,
+      {required this.topSongId,
+      required this.playerRank,
+      required this.playerSongId});
+  final int year;
+  final int topSongId;
+  final int playerRank;
+  final int playerSongId;
+  bool get hasPlayer => playerRank > 0;
+  @override
+  bool get isMajor => playerRank > 0 && playerRank <= 10;
+  @override
+  bool get isIndustry => !hasPlayer;
+}
+
 /// A player's holiday song is back for the season (docs K136).
 class HolidayReturn extends GameEvent {
   const HolidayReturn(this.songId);

@@ -603,6 +603,18 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('Only mine'));
     await shot(tester, '08h_year_end_mine');
+    // The songs of the summer (docs K137).
+    await tester.tap(_ci('Only mine'));
+    await tester.pumpAndSettle();
+    final summer = _ci('Songs of the Summer');
+    await tester.scrollUntilVisible(summer, 200,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .at(1));
+    await tester.pumpAndSettle();
+    await tester.tap(summer);
+    await shot(tester, '08j_songs_of_summer');
     // All-time records (docs K111).
     await tester.tap(_ci('Records'));
     await shot(tester, '08e_records');

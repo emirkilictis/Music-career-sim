@@ -1335,5 +1335,9 @@
   "holidaySong": "Yılbaşı şarkısı",
   "holidaySongHint": "Yılın çoğunda az dinlenir, her aralıkta geri döner: iyisi her Noel daha çok kazandırır.",
   "holidayTag": "Yılbaşı şarkısı",
-  "eventHolidayReturn": "Yine o zaman geldi: “{title}” yılbaşı için listelere döndü."
+  "eventHolidayReturn": "Yine o zaman geldi: “{title}” yılbaşı için listelere döndü.",
+  "songsOfSummer": "Yazın Şarkıları",
+  "eventSummerMine": "“{title}” {year} yazının şarkısı!",
+  "eventSummerRank": "{year} yazın şarkıları: “{title}” #{rank} oldu.",
+  "eventSummerTop": "{year} yazının şarkısı {artist} – “{title}”."
 }
