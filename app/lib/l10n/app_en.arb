@@ -6035,5 +6035,34 @@
   },
   "errorNoImprint": "A label of your own is not possible now.",
   "errorRosterFull": "Your label is full.",
-  "errorNotSignable": "That artist cannot be signed."
+  "errorNotSignable": "That artist cannot be signed.",
+  "labelMate": "On your label · free",
+  "imprintPush": "Push “{title}” · {cost}",
+  "@imprintPush": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "imprintPushHint": "Your label works the newest single: editors' playlists, radio and press, once every {weeks} weeks.",
+  "@imprintPushHint": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "imprintPushed": "Your label is pushing “{title}”.",
+  "@imprintPushed": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoPush": "There is no new single to push now."
 }

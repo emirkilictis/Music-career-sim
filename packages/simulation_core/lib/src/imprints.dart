@@ -13,18 +13,24 @@ class Signing {
       {required this.artistId,
       required this.signedWeek,
       required this.advanceCents,
-      this.earnedCents = 0});
+      this.earnedCents = 0,
+      this.lastPushWeek = -1});
   final int artistId;
   final int signedWeek;
   final int advanceCents;
   double earnedCents;
 
-  List<Object> toJson() => [artistId, signedWeek, advanceCents, earnedCents];
+  /// The last week the label pushed one of their singles (docs K170).
+  int lastPushWeek;
+
+  List<Object> toJson() =>
+      [artistId, signedWeek, advanceCents, earnedCents, lastPushWeek];
   static Signing fromJson(List<dynamic> j) => Signing(
       artistId: j[0] as int,
       signedWeek: j[1] as int,
       advanceCents: j[2] as int,
-      earnedCents: (j[3] as num).toDouble());
+      earnedCents: (j[3] as num).toDouble(),
+      lastPushWeek: j.length > 4 ? j[4] as int : -1);
 }
 
 /// The player's own label (docs K169).
@@ -34,8 +40,8 @@ class Imprint {
   final int foundedWeek;
   final List<Signing> roster = [];
 
-  String encode() => jsonEncode(
-      [name, foundedWeek, for (final s in roster) s.toJson()]);
+  String encode() =>
+      jsonEncode([name, foundedWeek, for (final s in roster) s.toJson()]);
 
   static Imprint? decode(String? s) {
     if (s == null || s.isEmpty) return null;
@@ -86,6 +92,60 @@ abstract final class Imprints {
     return w.imprint = Imprint(name: n, foundedWeek: w.week);
   }
 
+  /// Whether artist [id] is on the player's label.
+  static bool isSigned(World w, int id) =>
+      w.imprint?.roster.any((s) => s.artistId == id) ?? false;
+
+  /// Weeks between two pushes for one signee, and how recent a single
+  /// the label still pushes.
+  static const pushGapWeeks = 8, pushWindowWeeks = 12;
+
+  /// The single the label would push for [s] now (null: none).
+  static Song? pushable(World w, Signing s) {
+    if (s.lastPushWeek >= 0 && w.week - s.lastPushWeek < pushGapWeeks) {
+      return null;
+    }
+    Song? best;
+    for (final id in w.activeSongIds) {
+      final song = w.songs[id];
+      if (song.primaryArtistId != s.artistId ||
+          !song.isSingle ||
+          song.singleWeek < s.signedWeek ||
+          w.week - song.singleWeek > pushWindowWeeks) {
+        continue;
+      }
+      if (best == null || song.singleWeek > best.singleWeek) best = song;
+    }
+    return best;
+  }
+
+  /// What a label push costs for [r]: an intensive campaign at their size.
+  static int pushCostCents(Artist r) =>
+      (Campaign.intensive.costCents * Actions.campaignSizeFactor(r)).round();
+
+  /// The label works [s]'s newest single: editors' playlists, radio and
+  /// press, paid by the player. Returns the song.
+  static Song push(World w, Artist a, Signing s) {
+    final song = pushable(w, s);
+    if (song == null) throw ActionException('Nothing to push');
+    final r = w.artists[s.artistId];
+    final cost = pushCostCents(r);
+    if (a.moneyCents < cost) throw ActionException('Not enough money');
+    a.moneyCents -= cost;
+    s.lastPushWeek = w.week;
+    song.playlistBoost =
+        math.max(song.playlistBoost, w.config.playlistMidBoost);
+    song.versionBoost += pushLift;
+    r.hype += 0.05;
+    w.dirtySongs.add(song.id);
+    w.dirtyArtists.add(a.id);
+    w.dirtyArtists.add(r.id);
+    return song;
+  }
+
+  /// The wave of listening a push brings on top of the playlists.
+  static const pushLift = 0.2;
+
   /// The artist ids on the roster.
   static Set<int> signedIds(World w) =>
       {for (final s in w.imprint?.roster ?? const <Signing>[]) s.artistId};
@@ -120,7 +180,8 @@ abstract final class Imprints {
     final i = w.imprint;
     if (i == null) throw ActionException('No label');
     if (i.roster.length >= maxRoster) throw ActionException('Roster full');
-    if (!_signable(w, r, a, signedIds(w))) throw ActionException('Not signable');
+    if (!_signable(w, r, a, signedIds(w)))
+      throw ActionException('Not signable');
     final cost = advanceCents(r);
     if (a.moneyCents < cost) throw ActionException('Not enough money');
     a.moneyCents -= cost;

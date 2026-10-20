@@ -1223,9 +1223,12 @@ class FeatureCandidateView {
         name = rival.name,
         genre = rival.genre,
         fame = rival.fame,
-        feeCents = song == null
-            ? Features.feeCents(rival)
-            : Features.feeFor(rival, song),
+        feeCents = Imprints.isSigned(w, rival.id)
+            ? 0
+            : song == null
+                ? Features.feeCents(rival)
+                : Features.feeFor(rival, song),
+        labelMate = Imprints.isSigned(w, rival.id),
         willing = Features.willing(rival, p, w),
         favoured = OwnPlaylists.favours(w, rival),
         sameGenre = rival.genre == p.genre;
@@ -1236,6 +1239,8 @@ class FeatureCandidateView {
   final int feeCents;
 
   /// Would say yes (a star does not feature on an unknown's song).
+  /// On the player's own label: free and always willing (docs K170).
+  final bool labelMate;
   final bool willing;
 
   /// One of their songs is on the player's playlist (docs K159).
@@ -2509,7 +2514,9 @@ class SigneeView {
         advanceCents = s.advanceCents,
         earnedCents = s.earnedCents,
         retired = w.artists[s.artistId].isRetired,
-        bestPeak = Imprints.bestPeak(w, s, Charts.usSongs);
+        bestPeak = Imprints.bestPeak(w, s, Charts.usSongs),
+        pushTitle = Imprints.pushable(w, s)?.title,
+        pushCostCents = Imprints.pushCostCents(w.artists[s.artistId]);
   final int artistId;
   final String name;
   final int genre;
@@ -2522,6 +2529,11 @@ class SigneeView {
 
   /// Best US songs chart place since signing (0: none).
   final int bestPeak;
+
+  /// The single the label can push now (null: none) and what it costs
+  /// (docs K170).
+  final String? pushTitle;
+  final int pushCostCents;
 }
 
 /// A newcomer the player's label could sign.

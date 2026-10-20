@@ -1699,6 +1699,14 @@ k('errorNoImprint','A label of your own is not possible now.','Şu an kendi şir
 k('errorRosterFull','Your label is full.','Şirketin dolu.')
 k('errorNotSignable','That artist cannot be signed.','Bu sanatçı imzalanamaz.')
 
+
+# Label mates and the label push (docs K170).
+k('labelMate','On your label · free','Şirket arkadaşın · ücretsiz')
+k('imprintPush','Push “{title}” · {cost}','“{title}” için tanıtım · {cost}', title='String', cost='String')
+k('imprintPushHint','Your label works the newest single: editors\' playlists, radio and press, once every {weeks} weeks.','Şirketin en yeni single\'ı çalışır: editör listeleri, radyo ve basın; {weeks} haftada bir.', weeks='int')
+k('imprintPushed','Your label is pushing “{title}”.','Şirketin “{title}” şarkısını öne çıkarıyor.', title='String')
+k('errorNoPush','There is no new single to push now.','Şu an öne çıkarılacak yeni bir single yok.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

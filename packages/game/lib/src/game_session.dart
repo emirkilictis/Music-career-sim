@@ -1635,9 +1635,17 @@ class GameSession {
   /// (docs K117).
   List<FeatureCandidateView> featureCandidates(int songId) {
     final s = _ownSong(songId);
+    // Label mates first (docs K170).
+    final mates = [
+      for (final x in world.imprint?.roster ?? const <Signing>[])
+        if (!s.featuredArtistIds.contains(x.artistId) &&
+            !world.artists[x.artistId].isRetired)
+          world.artists[x.artistId]
+    ];
     return [
+      for (final a in mates) FeatureCandidateView.of(world, a, _p, s),
       for (final a in Features.candidates(world, _p, s))
-        FeatureCandidateView.of(world, a, _p, s)
+        if (!mates.contains(a)) FeatureCandidateView.of(world, a, _p, s)
     ];
   }
 
@@ -1658,7 +1666,7 @@ class GameSession {
     if (!Features.willing(rival, _p, world)) {
       throw GameException('featureRefused', 'Out of your league');
     }
-    _requireMoney(Features.feeFor(rival, s));
+    _requireMoney(Features.feeFor(rival, s, world));
     if (s.status == SongStatus.vault) {
       Features.request(world, _p, s, rival);
     } else {
@@ -2034,6 +2042,22 @@ class GameSession {
     _requireMoney(Imprints.advanceCents(r));
     Imprints.sign(world, _p, r);
     _saveNow();
+  }
+
+  /// Has the label push signee [artistId]'s newest single (docs K170).
+  /// Returns what it cost.
+  int pushSignee(int artistId) {
+    final label = world.imprint;
+    final s = label?.roster.where((x) => x.artistId == artistId).firstOrNull;
+    if (s == null) throw GameException('notSignable', 'Not on the label');
+    if (Imprints.pushable(world, s) == null) {
+      throw GameException('noPush', 'Nothing to push now');
+    }
+    final cost = Imprints.pushCostCents(world.artists[artistId]);
+    _requireMoney(cost);
+    Imprints.push(world, _p, s);
+    _saveNow();
+    return cost;
   }
 
   void dropFromImprint(int artistId) {

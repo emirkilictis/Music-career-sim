@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'actions.dart';
 import 'lifecycle.dart';
 import 'model.dart';
+import 'imprints.dart';
 import 'own_playlist.dart';
 import 'time.dart';
 import 'world.dart';
@@ -26,12 +27,18 @@ abstract final class Features {
   /// [w] given, a rival whose song is on the player's playlist is a
   /// little easier to get (docs K159).
   static bool willing(Artist rival, Artist a, [World? w]) =>
+      // An artist on the player's own label always says yes (K170).
+      (w != null &&
+          a.tier == ArtistTier.player &&
+          Imprints.isSigned(w, rival.id)) ||
       rival.fame <=
-      a.fame +
-          (rival.genre == a.genre ? 0.5 : 0.35) +
-          (w != null && a.tier == ArtistTier.player && OwnPlaylists.favours(w, rival)
-              ? OwnPlaylists.goodwill
-              : 0);
+          a.fame +
+              (rival.genre == a.genre ? 0.5 : 0.35) +
+              (w != null &&
+                      a.tier == ArtistTier.player &&
+                      OwnPlaylists.favours(w, rival)
+                  ? OwnPlaylists.goodwill
+                  : 0);
 
   /// Rivals worth asking for [s]: the ones who would say yes first, the
   /// same genre first among them, then the most famous.
@@ -60,9 +67,13 @@ abstract final class Features {
   static const remixFeeFactor = 1.5;
 
   /// What [rival] asks for a verse on [s]: a released song is a remix.
-  static int feeFor(Artist rival, Song s) => s.releasedWeek >= 0
-      ? (feeCents(rival) * remixFeeFactor).round()
-      : feeCents(rival);
+  static int feeFor(Artist rival, Song s, [World? w]) =>
+      // A label mate's verse costs nothing (docs K170).
+      w != null && Imprints.isSigned(w, rival.id)
+          ? 0
+          : s.releasedWeek >= 0
+              ? (feeCents(rival) * remixFeeFactor).round()
+              : feeCents(rival);
 
   /// A remix of released [s] featuring [rival] (docs K138), the Despacito
   /// move: the star's fans and listeners come to the song from now on,
@@ -80,7 +91,7 @@ abstract final class Features {
       throw ActionException('Already on it');
     }
     if (!willing(rival, a, w)) throw ActionException('Out of reach');
-    final fee = feeFor(rival, s);
+    final fee = feeFor(rival, s, w);
     if (a.moneyCents < fee) throw ActionException('Not enough money');
     a.moneyCents -= fee;
     s.productionCostCents += fee;
@@ -111,7 +122,7 @@ abstract final class Features {
       throw ActionException('Already on it');
     }
     if (!willing(rival, a, w)) throw ActionException('Out of reach');
-    final fee = feeCents(rival);
+    final fee = feeFor(rival, s, w);
     if (a.moneyCents < fee) throw ActionException('Not enough money');
     a.moneyCents -= fee;
     s.productionCostCents += fee;

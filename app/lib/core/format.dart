@@ -826,6 +826,7 @@ class Fmt {
       'noImprint' => l.errorNoImprint,
       'rosterFull' => l.errorRosterFull,
       'notSignable' => l.errorNotSignable,
+      'noPush' => l.errorNoPush,
       'noPlaylists' ||
       'hasPlaylist' ||
       'noPlaylist' ||

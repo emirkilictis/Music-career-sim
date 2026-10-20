@@ -108,6 +108,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           : l.featureLocked,
                       // Put on the player's playlist (docs K159).
                       if (a.favoured) l.ownPlFavoured,
+                      // On the player's own label (docs K170).
+                      if (a.labelMate) l.labelMate,
                     ].join(' · ')),
                     trailing: Text(fmt.money(a.feeCents)),
                     onTap: () => Navigator.pop(c, a),

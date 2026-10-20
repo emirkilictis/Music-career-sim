@@ -262,6 +262,8 @@ abstract final class Cmd {
       (s) => s.foundImprint(name);
   static SessionCmd<void> signToImprint(int artistId) =>
       (s) => s.signToImprint(artistId);
+  static SessionCmd<int> pushSignee(int artistId) =>
+      (s) => s.pushSignee(artistId);
   static SessionCmd<void> dropFromImprint(int artistId) =>
       (s) => s.dropFromImprint(artistId);
 

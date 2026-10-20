@@ -1515,6 +1515,48 @@ void main() {
       g.close();
     });
 
+    test('label mates feature free and singles get the label push (K170)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      g.foundImprint('Mate Records');
+      final mate = g.imprintCandidates.first;
+      g.signToImprint(mate.artistId);
+      p.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      final list = g.featureCandidates(id);
+      expect(list.first.artistId, mate.artistId);
+      expect(list.first.labelMate, isTrue);
+      expect(list.first.feeCents, 0);
+      final money = p.moneyCents;
+      g.requestFeature(id, mate.artistId);
+      expect(p.moneyCents, money);
+      expect(g.world.songs[id].featuredArtistIds, contains(mate.artistId));
+      // The label pushes the signee's newest single once it is out.
+      expect(() => g.pushSignee(mate.artistId), _code('noPush'));
+      for (var i = 0; i < 20 && g.imprint.roster.single.pushTitle == null; i++) {
+        g.advanceWeek();
+      }
+      final v = g.imprint.roster.single;
+      expect(v.pushTitle, isNotNull);
+      final before = p.moneyCents;
+      expect(g.pushSignee(mate.artistId), v.pushCostCents);
+      expect(before - p.moneyCents, v.pushCostCents);
+      expect(g.imprint.roster.single.pushTitle, isNull);
+      expect(() => g.pushSignee(mate.artistId), _code('noPush'));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.imprint.roster.single.pushTitle, isNull);
+      g.close();
+    });
+
     test('an album rollout (K165)', () {
       var g = GameSession.start(
           slots,

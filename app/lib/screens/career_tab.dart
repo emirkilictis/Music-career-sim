@@ -125,6 +125,7 @@ class _CareerScreenState extends State<CareerScreen> {
                     fmt.money(s.earnedCents.round()), fmt.week(s.signedWeek)),
                 if (s.bestPeak > 0) l.imprintSigneePeak(s.bestPeak),
               ].join('\n')),
+              isThreeLine: s.bestPeak > 0,
               trailing: TextButton(
                 onPressed: () async {
                   try {
@@ -136,6 +137,30 @@ class _CareerScreenState extends State<CareerScreen> {
                 child: Text(l.imprintDrop),
               ),
             ),
+          // The label push (docs K170).
+          for (final s in v.roster)
+            if (s.pushTitle case final title?)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () async {
+                    try {
+                      await career.act(Cmd.pushSignee(s.artistId));
+                      if (mounted) {
+                        showInfo(context, l.imprintPushed(title),
+                            icon: Icons.campaign_rounded);
+                      }
+                    } catch (e) {
+                      if (mounted) showError(context, e);
+                    }
+                  },
+                  icon: const Icon(Icons.campaign_rounded),
+                  label: Text(
+                      '${s.name}: ${l.imprintPush(title, fmt.money(s.pushCostCents))}'),
+                ),
+              ),
+          if (v.roster.any((s) => s.pushTitle != null))
+            Text(l.imprintPushHint(Imprints.pushGapWeeks), style: muted),
           if (v.roster.length < Imprints.maxRoster)
             Align(
               alignment: Alignment.centerLeft,

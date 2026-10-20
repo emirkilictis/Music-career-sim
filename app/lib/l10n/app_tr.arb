@@ -1667,5 +1667,10 @@
   "eventImprintNo1": "Şirketindeki {artist}, “{title}” ile ABD'de #1!",
   "errorNoImprint": "Şu an kendi şirketini kuramazsın.",
   "errorRosterFull": "Şirketin dolu.",
-  "errorNotSignable": "Bu sanatçı imzalanamaz."
+  "errorNotSignable": "Bu sanatçı imzalanamaz.",
+  "labelMate": "Şirket arkadaşın · ücretsiz",
+  "imprintPush": "“{title}” için tanıtım · {cost}",
+  "imprintPushHint": "Şirketin en yeni single'ı çalışır: editör listeleri, radyo ve basın; {weeks} haftada bir.",
+  "imprintPushed": "Şirketin “{title}” şarkısını öne çıkarıyor.",
+  "errorNoPush": "Şu an öne çıkarılacak yeni bir single yok."
 }
