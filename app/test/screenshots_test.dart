@@ -796,8 +796,10 @@ void main() {
         ..moneyCents = 1 << 40;
       final fresh = s.writeSong(budget: BudgetTier.high, title: 'Home Again');
       final hits = [for (final h in s.compilationCandidates.take(14)) h.songId];
-      s.releaseGreatestHits('Greatest Hits', hits, [fresh.id]);
+      final gh = s.releaseGreatestHits('Greatest Hits', hits, [fresh.id]);
       s.advanceWeeks(6, stop: SkipStop.never);
+      // On sale this week (docs K163).
+      s.cutAlbumPrice(gh.id, PriceCut.deep);
     });
     await c.exec(Cmd.closeCareer());
 
@@ -819,6 +821,12 @@ void main() {
     await Scrollable.ensureVisible(tester.element(hitsOn), alignment: 0.1);
     await tester.pumpAndSettle();
     await shot(tester, '14l_greatest_hits_tracks');
+    final cut = _ci('Price cut on Fruit Tunes');
+    await tester.scrollUntilVisible(cut, -300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(cut), alignment: 0.2);
+    await tester.pumpAndSettle();
+    await shot(tester, '14n_price_cut');
   });
 
   testWidgets('screenshots: a K-pop music show', skip: !enabled,

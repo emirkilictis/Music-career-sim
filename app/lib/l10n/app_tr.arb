@@ -1607,5 +1607,15 @@
   "loadFailedTitle": "Bu kayıt açılamadı",
   "loadFailedBody": "Kaydın yerinde duruyor. Aşağıdaki yazıyı kopyalayıp gönder ki düzeltilebilsin.",
   "copy": "Kopyala",
-  "copied": "Kopyalandı"
+  "copied": "Kopyalandı",
+  "priceCutTitle": "Fruit Tunes'ta indirim",
+  "priceCutHint": "Bir haftalık. Dijital kopyalar (bu yıl albüm satışlarının %{pct}'si) katlanarak satar, her biri fiyatın bir kısmını öder: listede daha büyük bir hafta, kopya başına daha az para.",
+  "priceCutSale": "$7,99",
+  "priceCutDeep": "$3,99",
+  "priceCutNinetyNine": "$0,99",
+  "priceCutOn": "Bu hafta indirimde: {price}",
+  "priceCutTooSoon": "{weeks} haftada bir indirim yapılabilir.",
+  "priceCutChartRule": "2011'den beri liste, ilk {weeks} haftasında $3,49'un altında satılan albümleri saymıyor.",
+  "priceCutDone": "“{title}” bu hafta {price}.",
+  "errorNoPriceCut": "Şu an indirim yapılamaz."
 }

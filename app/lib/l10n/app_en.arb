@@ -5755,5 +5755,53 @@
   "loadFailedTitle": "This save did not open",
   "loadFailedBody": "Your save is still there. Copy the text below and send it, so it can be fixed.",
   "copy": "Copy",
-  "copied": "Copied"
+  "copied": "Copied",
+  "priceCutTitle": "Price cut on Fruit Tunes",
+  "priceCutHint": "For one week. Download copies ({pct}% of album sales this year) sell several times over, each paying a fraction: a bigger week on the chart for less money a copy.",
+  "@priceCutHint": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "priceCutSale": "$7.99",
+  "priceCutDeep": "$3.99",
+  "priceCutNinetyNine": "$0.99",
+  "priceCutOn": "On sale this week: {price}",
+  "@priceCutOn": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "priceCutTooSoon": "One price cut every {weeks} weeks.",
+  "@priceCutTooSoon": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "priceCutChartRule": "Since 2011 the chart does not count albums sold under $3.49 in their first {weeks} weeks.",
+  "@priceCutChartRule": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "priceCutDone": "“{title}” is {price} this week.",
+  "@priceCutDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoPriceCut": "The price cannot be cut now."
 }

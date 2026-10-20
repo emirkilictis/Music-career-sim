@@ -254,6 +254,10 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // Download price cuts (docs K163).
+  static SessionCmd<void> cutAlbumPrice(int albumId, PriceCut cut) =>
+      (s) => s.cutAlbumPrice(albumId, cut);
+
   // Buying masters back (docs K162).
   static SessionCmd<int> buyAlbumMasters(int albumId) =>
       (s) => s.buyAlbumMasters(albumId);

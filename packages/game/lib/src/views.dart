@@ -712,6 +712,14 @@ class AlbumView {
         bundle = al.bundle,
         isLive = al.isLive,
         hitTrackIds = List.unmodifiable(al.hitIds),
+        priceCutWeek = al.priceCutWeek,
+        priceCut = al.priceCut,
+        priceCutBlocks = {
+          if (w.player != null && al.artistId == w.playerArtistId)
+            for (final c in PriceCut.values)
+              c: PriceCuts.block(w, w.player!, al, c),
+        },
+        digitalShare = PriceCuts.digitalShare(GameTime.yearOf(w.week)),
         partnerId = al.partnerId,
         visual = al.visual,
         visualCostCents = w.player != null && VisualAlbums.can(w, w.player!, al)
@@ -840,6 +848,14 @@ class AlbumView {
   /// ones; docs K161).
   final List<int> hitTrackIds;
   bool get isCompilation => hitTrackIds.isNotEmpty;
+
+  /// Download price cuts (docs K163): the last one (-1: never), what
+  /// stops each now (empty: not the player's; null value: possible) and
+  /// the share of copies sold as downloads this year.
+  final int priceCutWeek;
+  final PriceCut priceCut;
+  final Map<PriceCut, PriceCutBlock?> priceCutBlocks;
+  final double digitalShare;
 
   /// A visual album, or what making it one costs now (null: not
   /// possible; docs K154).

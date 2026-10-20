@@ -10,6 +10,7 @@ import 'config/charts.dart';
 import 'config/regions.dart';
 import 'curators.dart';
 import 'distribution.dart';
+import 'price_cuts.dart';
 import 'opportunities.dart';
 import 'tours.dart';
 
@@ -1040,6 +1041,11 @@ class Album with Charted {
   /// Anniversaries it was reissued for, a bit per [Anniversaries.years]
   /// entry (docs K149).
   int anniversaries = 0;
+
+  /// The last week its download price was cut and how far (-1: never;
+  /// docs K163).
+  int priceCutWeek = -1;
+  PriceCut priceCut = PriceCut.sale;
 
   /// A greatest hits album's released songs (docs K161); [songIds] are
   /// its new ones. Empty for any other album.

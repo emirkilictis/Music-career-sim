@@ -26,6 +26,7 @@ import 'compilations.dart';
 import 'curators.dart';
 import 'model.dart';
 import 'own_playlist.dart';
+import 'price_cuts.dart';
 import 'music_show.dart';
 import 'opportunities.dart';
 import 'rerecords.dart';
@@ -930,7 +931,14 @@ class Simulator {
         // Pre-orders ship in week one (docs K126).
         final pure = al.isMixtape
             ? 0.0
-            : bought * noise * tracklist * demand * keep * leaked +
+            : bought *
+                    noise *
+                    tracklist *
+                    demand *
+                    keep *
+                    leaked *
+                    // A cut download price (docs K163).
+                    PriceCuts.salesFactor(w, al) +
                 (age == 0 ? al.preOrders * share * Actions.preOrderExtra : 0.0) +
                 // Bundled copies (docs K144).
                 (age == 0 ? al.bundleUnits * share : 0.0);
@@ -1858,9 +1866,11 @@ class Simulator {
           (al.bundle == AlbumBundle.tickets && world.week == al.releaseWeek
               ? al.bundleUnits
               : 0);
-      cents += paid * 600 * share;
-      al.revenueCents += paid * 600 * share;
-      al.campaignReturnCents += paid * 600 * share * al.campaignShareOfSales;
+      // Copies sold cheap pay less (docs K163).
+      final price = 600 * PriceCuts.priceFactor(world, al);
+      cents += paid * price * share;
+      al.revenueCents += paid * price * share;
+      al.campaignReturnCents += paid * price * share * al.campaignShareOfSales;
       world.dirtyAlbums.add(id);
     }
     // The manager takes a cut of everything (docs K68).

@@ -1403,6 +1403,20 @@ class GameSession {
     _saveNow();
   }
 
+  /// Cuts album [albumId]'s download price with [cut] for this week
+  /// (docs K163).
+  void cutAlbumPrice(int albumId, PriceCut cut) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    if (PriceCuts.block(world, _p, al, cut) != null) {
+      throw GameException('noPriceCut', 'Not now');
+    }
+    PriceCuts.start(world, _p, al, cut);
+    _saveNow();
+  }
+
   /// Buys back album [albumId]'s masters from whoever owns them (docs
   /// K162). Returns the price.
   int buyAlbumMasters(int albumId) {

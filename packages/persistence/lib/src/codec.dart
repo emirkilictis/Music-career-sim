@@ -485,8 +485,8 @@ abstract final class Codec {
     // Added in schema v13, v25, v28, v30.
     'revenue', 'preOrders', 'exclusiveUntil', 'exclusiveFee',
     'masterShare',
-    // Added in schema v33, v34, v37, v38, v40, v45.
-    'bundle', 'liveTour', 'anniv', 'partner', 'visual', 'hits',
+    // Added in schema v33, v34, v37, v38, v40, v45, v46.
+    'bundle', 'liveTour', 'anniv', 'partner', 'visual', 'hits', 'priceCut',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -517,6 +517,9 @@ abstract final class Codec {
         al.partnerId,
         al.visual ? 1 : 0,
         al.hitIds.isEmpty ? null : jsonEncode(al.hitIds),
+        al.priceCutWeek < 0
+            ? null
+            : jsonEncode([al.priceCutWeek, al.priceCut.index]),
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -548,6 +551,13 @@ abstract final class Codec {
       ..anniversaries = r['anniv'] as int? ?? 0
       ..partnerId = r['partner'] as int? ?? -1
       ..visual = r['visual'] == 1
+      ..priceCutWeek = r['priceCut'] is String
+          ? (jsonDecode(r['priceCut'] as String) as List)[0] as int
+          : -1
+      ..priceCut = r['priceCut'] is String
+          ? PriceCut
+              .values[(jsonDecode(r['priceCut'] as String) as List)[1] as int]
+          : PriceCut.sale
       ..hitIds.addAll([
         if (r['hits'] case final String x when x.isNotEmpty)
           for (final id in jsonDecode(x) as List) id as int

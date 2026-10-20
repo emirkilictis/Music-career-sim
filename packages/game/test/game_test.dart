@@ -1404,6 +1404,53 @@ void main() {
       g.close();
     });
 
+    test('a download price cut (K163)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2012,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final id = g.releaseAlbum('Cheap Thrills', ids).id;
+      // Not before it is out, and $0.99 does not count in its first weeks.
+      expect(() => g.cutAlbumPrice(id, PriceCut.deep), _code('noPriceCut'));
+      g.advanceWeek();
+      expect(g.album(id).priceCutBlocks[PriceCut.ninetyNine],
+          PriceCutBlock.chartRule);
+      expect(() => g.cutAlbumPrice(id, PriceCut.ninetyNine),
+          _code('noPriceCut'));
+      g.advanceWeeks(4, stop: SkipStop.never);
+      final al = g.world.albums[id];
+      final before = al.weekPure;
+      final revenue = al.revenueCents;
+      g.advanceWeek();
+      final usual = al.weekPure;
+      final usualMoney = al.revenueCents - revenue;
+      g.cutAlbumPrice(id, PriceCut.ninetyNine);
+      expect(g.album(id).priceCutBlocks[PriceCut.sale], PriceCutBlock.tooSoon);
+      final r2 = al.revenueCents;
+      g.advanceWeek();
+      // Many more copies, each paying little.
+      expect(al.weekPure, greaterThan(usual * 3));
+      expect(al.weekPure, greaterThan(before));
+      expect((al.revenueCents - r2) / al.weekPure,
+          lessThan(usualMoney / usual));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.album(id).priceCut, PriceCut.ninetyNine);
+      expect(g.album(id).priceCutWeek, greaterThan(0));
+      g.close();
+    });
+
     test('buying masters back from the label (K162)', () {
       var g = GameSession.start(
           slots,

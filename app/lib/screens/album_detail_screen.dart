@@ -4,6 +4,7 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
+import '../l10n/gen/app_localizations.dart';
 import '../widgets/bar_chart.dart';
 import '../widgets/profit_card.dart';
 import '../widgets/campaign_result.dart';
@@ -64,6 +65,26 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         _sales = sales;
         _run = run;
       });
+    }
+  }
+
+  String _priceLabel(AppLocalizations l, PriceCut c) => switch (c) {
+        PriceCut.sale => l.priceCutSale,
+        PriceCut.deep => l.priceCutDeep,
+        PriceCut.ninetyNine => l.priceCutNinetyNine,
+      };
+
+  Future<void> _cutPrice(AlbumView a, PriceCut c) async {
+    final l = context.l10n;
+    try {
+      await widget.state.act(Cmd.cutAlbumPrice(a.id, c));
+      if (mounted) {
+        showInfo(context, l.priceCutDone(a.title, _priceLabel(l, c)),
+            icon: Icons.sell_rounded);
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
     }
   }
 
@@ -322,6 +343,50 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     style: TextStyle(color: AppColors.textMuted)),
               ),
             ]),
+          ],
+          // A week's price cut on the download store (docs K163).
+          if (a.priceCutBlocks.isNotEmpty &&
+              !a.priceCutBlocks.values.contains(PriceCutBlock.noStore) &&
+              !a.priceCutBlocks.values.contains(PriceCutBlock.mixtape)) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.priceCutTitle,
+              icon: Icons.sell_outlined,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(l.priceCutHint((a.digitalShare * 100).round()),
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                    if (a.priceCutWeek == widget.state.week)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Tag(l.priceCutOn(_priceLabel(l, a.priceCut)),
+                            icon: Icons.sell_rounded, color: AppColors.mint),
+                      ),
+                    const SizedBox(height: 8),
+                    Wrap(spacing: 8, runSpacing: 8, children: [
+                      for (final c in PriceCut.values)
+                        OutlinedButton(
+                          onPressed: a.priceCutBlocks[c] != null ||
+                                  widget.state.busy
+                              ? null
+                              : () => _cutPrice(a, c),
+                          child: Text(_priceLabel(l, c)),
+                        ),
+                    ]),
+                    if (a.priceCutBlocks.values
+                        .contains(PriceCutBlock.tooSoon))
+                      Text(l.priceCutTooSoon(PriceCuts.gapWeeks),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5))
+                    else if (a.priceCutBlocks[PriceCut.ninetyNine] ==
+                        PriceCutBlock.chartRule)
+                      Text(l.priceCutChartRule(PriceCuts.ruleWeeks),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5)),
+                  ]),
+            ),
           ],
           // Who owns the masters; re-recordings (docs K139).
           if (a.isPlayer && a.type != AlbumType.mixtape) ...[

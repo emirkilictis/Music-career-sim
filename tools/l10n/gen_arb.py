@@ -1627,6 +1627,19 @@ k('loadFailedBody','Your save is still there. Copy the text below and send it, s
 k('copy','Copy','Kopyala')
 k('copied','Copied','Kopyalandı')
 
+
+# Download price cuts (docs K163).
+k('priceCutTitle','Price cut on Fruit Tunes','Fruit Tunes\'ta indirim')
+k('priceCutHint','For one week. Download copies ({pct}% of album sales this year) sell several times over, each paying a fraction: a bigger week on the chart for less money a copy.','Bir haftalık. Dijital kopyalar (bu yıl albüm satışlarının %{pct}\'si) katlanarak satar, her biri fiyatın bir kısmını öder: listede daha büyük bir hafta, kopya başına daha az para.', pct='int')
+k('priceCutSale','$7.99','$7,99')
+k('priceCutDeep','$3.99','$3,99')
+k('priceCutNinetyNine','$0.99','$0,99')
+k('priceCutOn','On sale this week: {price}','Bu hafta indirimde: {price}', price='String')
+k('priceCutTooSoon','One price cut every {weeks} weeks.','{weeks} haftada bir indirim yapılabilir.', weeks='int')
+k('priceCutChartRule','Since 2011 the chart does not count albums sold under $3.49 in their first {weeks} weeks.','2011\'den beri liste, ilk {weeks} haftasında $3,49\'un altında satılan albümleri saymıyor.', weeks='int')
+k('priceCutDone','“{title}” is {price} this week.','“{title}” bu hafta {price}.', title='String', price='String')
+k('errorNoPriceCut','The price cannot be cut now.','Şu an indirim yapılamaz.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():
