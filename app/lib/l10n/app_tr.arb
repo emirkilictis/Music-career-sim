@@ -1429,5 +1429,12 @@
   "bundleMerch": "Merch",
   "bundleTickets": "Turne biletleri",
   "bundleOption": "{bundle} · +{units} kopya",
-  "bundleLine": "{bundle} paketi: ilk haftasında {units} kopya."
+  "bundleLine": "{bundle} paketi: ilk haftasında {units} kopya.",
+  "incomeSongTitle": "Sana kazandırdığı",
+  "incomeCareerTitle": "Plak gelirin, kaynaklara göre",
+  "incomeHint": "Senin payın, nereden geldiğine göre. Dinlenme başına ikinci streaming servisi büyük uygulamanın yaklaşık iki katını, video sitesi dörtte birini öder.",
+  "incomeDownloads": "İndirmeler",
+  "incomePhysical": "Fiziksel single'lar",
+  "incomeAlbums": "Albüm kopyaları",
+  "perStream": "Dinlenme başına yaklaşık {amount} öder."
 }

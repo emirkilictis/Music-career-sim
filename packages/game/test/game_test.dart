@@ -1362,6 +1362,52 @@ void main() {
       g.close();
     });
 
+    test('record money by source: the services pay differently (K145)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2018,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      g.releaseSingle(ids.first);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      g.releaseAlbum('Paid', ids);
+      g.advanceWeeks(6, stop: SkipStop.never);
+      // Per play: the second service pays most, the video site least,
+      // and on average what the simulation pays.
+      final y = g.year;
+      double rate(MusicPlatform m) => Income.perStreamCents(m, y);
+      expect(rate(MusicPlatform.fruitMusic),
+          greaterThan(rate(MusicPlatform.streamify)));
+      expect(rate(MusicPlatform.streamify),
+          greaterThan(rate(MusicPlatform.viewTube)));
+      var plays = 0.0, money = 0.0;
+      for (final m in Income.rate.keys) {
+        plays += m.streamShare(y);
+        money += m.streamShare(y) * rate(m);
+      }
+      expect(money / plays, closeTo(Income.averageCents, 1e-9));
+      // A song's sources add up to what it earned.
+      final song = g.songIncome(ids.first);
+      expect(song.cents.keys,
+          containsAll([IncomeSource.streamify, IncomeSource.viewTube]));
+      expect(song.total,
+          closeTo(g.world.songs[ids.first].revenueCents,
+              g.world.songs[ids.first].revenueCents * 0.1));
+      final career = g.careerIncome;
+      expect(career.cents[IncomeSource.albumSales], greaterThan(0));
+      expect(career.total, greaterThan(song.total));
+      g.close();
+    });
+
     test('album bundles count merch and tickets, until 2020 (K144)', () {
       (GameSession, List<int>) start(int year) {
         final g = GameSession.start(

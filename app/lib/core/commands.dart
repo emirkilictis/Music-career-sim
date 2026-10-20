@@ -247,6 +247,11 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// Record money by source (docs K145).
+  static SessionCmd<IncomeBreakdown> songIncome(int songId) =>
+      (s) => s.songIncome(songId);
+  static SessionCmd<IncomeBreakdown> careerIncome() => (s) => s.careerIncome;
+
   /// The player's channel on the video site (docs K142).
   static SessionCmd<ChannelView> channel() => (s) => s.channel;
   static SessionCmd<void> uploadVideo(VideoKind kind, int songId) =>

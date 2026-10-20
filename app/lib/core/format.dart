@@ -318,6 +318,21 @@ class Fmt {
       };
 
   /// A radio format's name (docs K134).
+  /// A per-play payout in dollars (cents in): \$0.0035.
+  String perStream(double cents) =>
+      '\$${(cents / 100).toStringAsFixed(4)}';
+
+  /// Where record money comes from (docs K145).
+  String incomeSource(IncomeSource s) => switch (s) {
+        IncomeSource.streamify => MusicPlatform.streamify.displayName,
+        IncomeSource.fruitMusic => MusicPlatform.fruitMusic.displayName,
+        IncomeSource.viewTube => MusicPlatform.viewTube.displayName,
+        IncomeSource.noiseCloud => MusicPlatform.noiseCloud.displayName,
+        IncomeSource.downloads => l.incomeDownloads,
+        IncomeSource.physical => l.incomePhysical,
+        IncomeSource.albumSales => l.incomeAlbums,
+      };
+
   /// An album bundle (docs K144).
   String bundle(AlbumBundle b) => switch (b) {
         AlbumBundle.none => l.bundleNone,

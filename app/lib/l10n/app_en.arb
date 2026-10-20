@@ -4951,5 +4951,19 @@
         "type": "String"
       }
     }
+  },
+  "incomeSongTitle": "What it earned you",
+  "incomeCareerTitle": "Record money by source",
+  "incomeHint": "Your share, by where it came from. Per play, the second streaming service pays about twice the big app and the video site a quarter of it.",
+  "incomeDownloads": "Downloads",
+  "incomePhysical": "Physical singles",
+  "incomeAlbums": "Album copies",
+  "perStream": "Pays about {amount} a play.",
+  "@perStream": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   }
 }

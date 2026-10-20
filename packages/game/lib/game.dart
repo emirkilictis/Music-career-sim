@@ -11,6 +11,7 @@ export 'src/career_setup.dart';
 export 'src/editorial.dart';
 export 'src/events.dart';
 export 'src/game_session.dart';
+export 'src/income.dart';
 export 'src/milestones.dart';
 export 'src/platforms.dart';
 export 'src/social_feed.dart';

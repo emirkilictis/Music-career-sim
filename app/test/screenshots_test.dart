@@ -664,6 +664,13 @@ void main() {
     await tester.tap(_ci('US Radio'));
     await shot(tester, '08i_radio_chart');
     await tab(tester, 'Career');
+    // Record money by source (docs K145).
+    final income = _ci('Record money by source');
+    await tester.scrollUntilVisible(income, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(income), alignment: 0.1);
+    await tester.pumpAndSettle();
+    await shot(tester, '15l_income');
     final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,
         scrollable: find.byType(Scrollable).first);

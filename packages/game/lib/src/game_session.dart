@@ -6,6 +6,7 @@ import 'package:simulation_core/simulation_core.dart';
 import 'best_sellers.dart';
 import 'career_setup.dart';
 import 'events.dart';
+import 'income.dart';
 import 'social_feed.dart';
 import 'milestones.dart';
 import 'platforms.dart';
@@ -1813,6 +1814,13 @@ class GameSession {
     }
     return out;
   }
+
+  /// Song [songId]'s record money by source (docs K145).
+  IncomeBreakdown songIncome(int songId) =>
+      Income.ofSong(world, world.songs[songId]);
+
+  /// The player's career record money by source (docs K145).
+  IncomeBreakdown get careerIncome => Income.ofCareer(world);
 
   /// The player's channel on the video site (docs K142).
   ChannelView get channel => ChannelView.of(world);

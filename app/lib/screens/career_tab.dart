@@ -9,6 +9,7 @@ import '../widgets/festival_section.dart';
 import '../widgets/tour_section.dart';
 import '../widgets/milestones_section.dart';
 import '../widgets/common.dart';
+import '../widgets/income_card.dart';
 import '../widgets/image_pickers.dart';
 import 'awards_screen.dart';
 import 'discography_screen.dart';
@@ -31,6 +32,7 @@ class _CareerScreenState extends State<CareerScreen> {
   List<SongView> _songs = const [];
   HonorsView? _honors;
   List<WrittenSongView> _written = const [];
+  IncomeBreakdown? _income;
   int _loadedRevision = -1;
 
   @override
@@ -49,11 +51,13 @@ class _CareerScreenState extends State<CareerScreen> {
     final songs = await career.read(Cmd.songs());
     final honors = await career.read(Cmd.honors());
     final written = await career.read(Cmd.writtenForOthers());
+    final income = await career.read(Cmd.careerIncome());
     if (mounted) {
       setState(() {
         _years = years;
         _honors = honors;
         _written = written;
+        _income = income;
         final fmt = context.fmt;
         final week = career.week;
         _songs = songs.where((s) => !s.inVault).toList()
@@ -115,6 +119,11 @@ class _CareerScreenState extends State<CareerScreen> {
             ),
           ]),
         ),
+        // Record money by source (docs K145).
+        if (_income case final income? when income.total >= 100) ...[
+          const SizedBox(height: 12),
+          IncomeCard(income: income, title: l.incomeCareerTitle),
+        ],
         // Songs written for others (docs K143).
         if (_written.isNotEmpty) ...[
           const SizedBox(height: 12),

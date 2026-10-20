@@ -1407,6 +1407,15 @@ k('bundleTickets','Tour tickets','Turne biletleri')
 k('bundleOption','{bundle} · +{units} copies','{bundle} · +{units} kopya', bundle='String', units='String')
 k('bundleLine','{bundle} bundle: {units} copies in its first week.','{bundle} paketi: ilk haftasında {units} kopya.', bundle='String', units='String')
 
+# Income by source (docs K145).
+k('incomeSongTitle','What it earned you','Sana kazandırdığı')
+k('incomeCareerTitle','Record money by source','Plak gelirin, kaynaklara göre')
+k('incomeHint','Your share, by where it came from. Per play, the second streaming service pays about twice the big app and the video site a quarter of it.','Senin payın, nereden geldiğine göre. Dinlenme başına ikinci streaming servisi büyük uygulamanın yaklaşık iki katını, video sitesi dörtte birini öder.')
+k('incomeDownloads','Downloads','İndirmeler')
+k('incomePhysical','Physical singles','Fiziksel single\'lar')
+k('incomeAlbums','Album copies','Albüm kopyaları')
+k('perStream','Pays about {amount} a play.','Dinlenme başına yaklaşık {amount} öder.', amount='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

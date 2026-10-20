@@ -11,6 +11,7 @@ import '../core/images.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/income_card.dart';
 import '../widgets/artist_link.dart';
 import '../widgets/history_tables.dart';
 import '../widgets/line_chart.dart';
@@ -41,14 +42,21 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     _load();
   }
 
+  /// The song's record money by source (docs K145).
+  IncomeBreakdown? _income;
+
   Future<void> _load() async {
     final song = await widget.state.read(Cmd.song(widget.songId));
     final history = await widget.state.read(Cmd.songHistory(widget.songId));
     final run =
         await widget.state.read(Cmd.chartRun(EntityKind.song, widget.songId));
     final playlists = await widget.state.read(Cmd.placements(widget.songId));
+    final income = song.isPlayer && song.releasedWeek >= 0
+        ? await widget.state.read(Cmd.songIncome(widget.songId))
+        : null;
     if (mounted) {
       setState(() {
+        _income = income;
         _song = song;
         _history = history;
         _run = run;
@@ -661,6 +669,11 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     ),
                 ]),
           ),
+          // Record money by source (docs K145).
+          if (_income case final income? when income.total >= 100) ...[
+            const SizedBox(height: 12),
+            IncomeCard(income: income, title: l.incomeSongTitle),
+          ],
           if (s.isPlayer && s.releasedWeek >= 0) ...[
             const SizedBox(height: 12),
             Section(

@@ -93,6 +93,16 @@ class _PlatformScreenState extends State<PlatformScreen> {
                 children: [
                   Text(fmt.platformTagline(p),
                       style: TextStyle(color: AppColors.textMuted)),
+                  // What a play pays here (docs K145).
+                  if (Income.perStreamCents(p, widget.state.year) > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                          l.perStream(fmt.perStream(
+                              Income.perStreamCents(p, widget.state.year))),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 13)),
+                    ),
                   const SizedBox(height: 12),
                   if (v != null) _ProfileCard(view: v, color: color),
                   // The player's channel (docs K142).
