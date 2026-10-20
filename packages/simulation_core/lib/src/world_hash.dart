@@ -131,6 +131,11 @@ int worldHash(World w) {
     }
     addCharts(s);
   }
+  addInt(w.channelVideos.length);
+  for (final v in w.channelVideos) {
+    addInt(v.kind.index * 100000 + v.week);
+    addDouble(v.baseViews);
+  }
   addInt(w.albums.length);
   for (final al in w.albums) {
     addAll(al.reg);

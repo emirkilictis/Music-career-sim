@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'awards.dart';
 import 'brands.dart';
+import 'channel.dart';
 import 'social.dart';
 import 'config/charts.dart';
 import 'config/difficulty.dart';
@@ -57,6 +58,9 @@ class World {
 
   /// The player's brand deals, running and past (docs K102).
   final List<BrandDeal> brandDeals = [];
+
+  /// The player's channel videos besides music videos (docs K142).
+  final List<ChannelVideo> channelVideos = [];
 
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();

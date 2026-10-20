@@ -1351,6 +1351,36 @@ k('eventSalesMilestone','You have sold {copies} records in your career.','Kariye
 k('eventAllTimeTop10','You are now #{rank} among the best-selling artists of all time.','Artık tüm zamanların en çok satan sanatçıları arasında #{rank} sıradasın.', rank='int')
 k('eventAllTimeTop','You are the best-selling artist of all time.','Tüm zamanların en çok satan sanatçısı sensin.')
 
+# The ViewTube channel (docs K142).
+k('errorCannotUpload','That video cannot be made now.','Bu video şu an çekilemez.')
+k('channelTitle','Your channel','Kanalın')
+k('channelOpen','Open your channel','Kanalını aç')
+k('channelUpload','Upload a video','Video yükle')
+k('channelStats','{subs} subscribers · {count} videos · {views} views','{subs} abone · {count} video · {views} görüntülenme', subs='String', count='int', views='String')
+k('channelClosed','The video site opens in 2005.','Video sitesi 2005\'te açılıyor.')
+k('channelHint','Song videos bring their song a wave of listening (each one less than the last); videos about you win fans, one a week. Live, acoustic and dance videos are as good as your stage and voice skills.','Şarkı videoları şarkısına bir dinlenme dalgası getirir (her yenisi bir öncekinden az); senin hakkındaki videolar hayran kazandırır, haftada bir. Canlı, akustik ve dans videoları sahne ve vokal becerin kadar iyi olur.')
+k('channelLatest','Latest','En yeni')
+k('channelPopular','Popular','Popüler')
+k('channelEmpty','No videos yet. A music video or any upload shows up here.','Henüz video yok. Klipler ve yüklediğin her video burada görünür.')
+k('channelMusicVideo','Official Video','Resmi Klip')
+k('channelPickSong','Which song gets a {kind}?','Hangi şarkıya {kind}?', kind='String')
+k('channelUploaded','{kind} is up on your channel.','{kind} kanalında yayında.', kind='String')
+k('energyCost','{n} creativity','{n} yaratıcılık', n='int')
+k('videoLyric','Lyric Video','Lirik Video')
+k('videoVisualizer','Visualizer','Visualizer')
+k('videoLive','Live Performance','Canlı Performans')
+k('videoAcoustic','Acoustic Version','Akustik Versiyon')
+k('videoDance','Dance Video','Dans Videosu')
+k('videoBehindScenes','Behind the Scenes','Kamera Arkası')
+k('videoVlog','Vlog','Vlog')
+k('videoLyricHint','Cheap; people search the words. A small wave for the song.','Ucuz; insanlar sözleri arar. Şarkıya küçük bir dalga.')
+k('videoVisualizerHint','The cheapest: a loop for the audio. The smallest wave.','En ucuzu: ses için bir döngü. En küçük dalga.')
+k('videoLiveHint','A filmed show: as good as your stage skills.','Çekilmiş bir canlı: sahne becerin kadar iyi.')
+k('videoAcousticHint','Stripped down: as good as your voice. A good wave.','Sade bir versiyon: sesin kadar iyi. İyi bir dalga.')
+k('videoDanceHint','Choreography people copy; the biggest wave once short videos rule (2018+).','İnsanların taklit ettiği koreografi; kısa videolar dönemi (2018+) en büyük dalga.')
+k('videoBehindScenesHint','How the record was made: fans feel close and new ones follow.','Plağın nasıl yapıldığı: hayranlar yakın hisseder, yenileri gelir.')
+k('videoVlogHint','Life on the road: cheap and personal, wins the most fans.','Yollardaki hayat: ucuz ve kişisel, en çok hayran kazandıran.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

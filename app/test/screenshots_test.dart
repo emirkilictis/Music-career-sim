@@ -271,6 +271,20 @@ void main() {
     await shot(tester, '04b_home_platforms');
     await tester.tap(_ci('ViewTube'));
     await shot(tester, '09c_viewtube');
+    // The player's channel and its uploads (docs K142).
+    await tester.scrollUntilVisible(_ci('Open your channel'), 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Open your channel'));
+    await tester.pumpAndSettle();
+    await shot(tester, '09k_channel');
+    await tester.tap(_ci('Upload a video'));
+    await tester.pumpAndSettle();
+    await shot(tester, '09l_channel_upload');
+    await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.tap(_ci('Streamify'));

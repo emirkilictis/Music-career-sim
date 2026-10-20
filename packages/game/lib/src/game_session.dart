@@ -1727,6 +1727,23 @@ class GameSession {
     ];
   }
 
+  /// The player's channel on the video site (docs K142).
+  ChannelView get channel => ChannelView.of(world);
+
+  /// Makes and uploads a [kind] video, for song [songId] if it is one
+  /// for a song (docs K142).
+  void uploadVideo(VideoKind kind, {int songId = -1}) {
+    final s = songId >= 0 ? _ownSong(songId) : null;
+    final why = Channel.block(world, _p, kind, s);
+    if (why != null) throw GameException('cannotUpload', why.name);
+    _requireMoney(kind.costCents);
+    if (_p.creativeEnergy < kind.energy) {
+      throw GameException('noEnergy', 'Not enough creativity');
+    }
+    Channel.upload(world, _p, kind, s: s);
+    _saveNow();
+  }
+
   /// The all-time best sellers of [kind] by [measure] (docs K141).
   List<BestSellerRow> bestSellers(BestSellerKind kind,
           {SalesMeasure measure = SalesMeasure.units,

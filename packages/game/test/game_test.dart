@@ -1362,6 +1362,64 @@ void main() {
       g.close();
     });
 
+    test('the channel: upload videos for songs and about the artist (K142)',
+        () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      p.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      // Only released songs get videos.
+      expect(() => g.uploadVideo(VideoKind.lyric, songId: id),
+          _code('cannotUpload'));
+      g.releaseSingle(id);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      expect(g.channel.kinds, VideoKind.values);
+      p.creativeEnergy = 100;
+      final money = g.player.moneyCents;
+      final boost = g.world.songs[id].versionBoost;
+      g.uploadVideo(VideoKind.lyric, songId: id);
+      expect(money - g.player.moneyCents, VideoKind.lyric.costCents);
+      expect(g.player.creativeEnergy, 100 - VideoKind.lyric.energy);
+      expect(g.world.songs[id].versionBoost, greaterThan(boost));
+      expect(g.channel.made[id], {VideoKind.lyric});
+      expect(() => g.uploadVideo(VideoKind.lyric, songId: id),
+          _code('cannotUpload'));
+      g.uploadVideo(VideoKind.acoustic, songId: id);
+      // Videos about the artist win fans; one a week.
+      final fans = g.player.coreFans;
+      g.uploadVideo(VideoKind.vlog);
+      expect(g.player.coreFans, greaterThan(fans));
+      expect(() => g.uploadVideo(VideoKind.behindScenes),
+          _code('cannotUpload'));
+      g.advanceWeek();
+      final first = g.channel;
+      expect(first.videos.length, 3);
+      expect(first.totalViews, greaterThan(0));
+      g.advanceWeeks(4, stop: SkipStop.never);
+      final later = g.channel;
+      expect(later.totalViews, greaterThan(first.totalViews));
+      final lyric = later.videos.firstWhere((v) => v.kind == VideoKind.lyric);
+      expect(lyric.views, greaterThan(0));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.channel.videos.length, 3);
+      expect(g.channel.made[id], {VideoKind.lyric, VideoKind.acoustic});
+      g.close();
+      // Before the video site opened there is no channel.
+      final old = GameSession.start(slots, _setup(startYear: 2003));
+      expect(old.channel.open, isFalse);
+      expect(() => old.uploadVideo(VideoKind.vlog), _code('cannotUpload'));
+      old.close();
+    });
+
     test('best sellers: all time, by year and each year\'s best (K141)', () {
       final g = GameSession.start(
           slots,

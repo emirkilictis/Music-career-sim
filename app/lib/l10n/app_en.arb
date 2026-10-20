@@ -4780,5 +4780,67 @@
       }
     }
   },
-  "eventAllTimeTop": "You are the best-selling artist of all time."
+  "eventAllTimeTop": "You are the best-selling artist of all time.",
+  "errorCannotUpload": "That video cannot be made now.",
+  "channelTitle": "Your channel",
+  "channelOpen": "Open your channel",
+  "channelUpload": "Upload a video",
+  "channelStats": "{subs} subscribers · {count} videos · {views} views",
+  "@channelStats": {
+    "placeholders": {
+      "subs": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "views": {
+        "type": "String"
+      }
+    }
+  },
+  "channelClosed": "The video site opens in 2005.",
+  "channelHint": "Song videos bring their song a wave of listening (each one less than the last); videos about you win fans, one a week. Live, acoustic and dance videos are as good as your stage and voice skills.",
+  "channelLatest": "Latest",
+  "channelPopular": "Popular",
+  "channelEmpty": "No videos yet. A music video or any upload shows up here.",
+  "channelMusicVideo": "Official Video",
+  "channelPickSong": "Which song gets a {kind}?",
+  "@channelPickSong": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "channelUploaded": "{kind} is up on your channel.",
+  "@channelUploaded": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
+  "energyCost": "{n} creativity",
+  "@energyCost": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "videoLyric": "Lyric Video",
+  "videoVisualizer": "Visualizer",
+  "videoLive": "Live Performance",
+  "videoAcoustic": "Acoustic Version",
+  "videoDance": "Dance Video",
+  "videoBehindScenes": "Behind the Scenes",
+  "videoVlog": "Vlog",
+  "videoLyricHint": "Cheap; people search the words. A small wave for the song.",
+  "videoVisualizerHint": "The cheapest: a loop for the audio. The smallest wave.",
+  "videoLiveHint": "A filmed show: as good as your stage skills.",
+  "videoAcousticHint": "Stripped down: as good as your voice. A good wave.",
+  "videoDanceHint": "Choreography people copy; the biggest wave once short videos rule (2018+).",
+  "videoBehindScenesHint": "How the record was made: fans feel close and new ones follow.",
+  "videoVlogHint": "Life on the road: cheap and personal, wins the most fans."
 }

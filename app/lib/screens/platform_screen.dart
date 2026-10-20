@@ -9,6 +9,7 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
+import 'channel_screen.dart';
 import 'song_detail_screen.dart';
 
 /// One music platform (docs K67): your week there and its Top 50.
@@ -94,6 +95,20 @@ class _PlatformScreenState extends State<PlatformScreen> {
                       style: TextStyle(color: AppColors.textMuted)),
                   const SizedBox(height: 12),
                   if (v != null) _ProfileCard(view: v, color: color),
+                  // The player's channel (docs K142).
+                  if (p == MusicPlatform.viewTube) ...[
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => ChannelScreen(
+                                  state: widget.state, color: color))).then(
+                          (_) => _load()),
+                      icon: const Icon(Icons.video_library_outlined),
+                      label: Text(l.channelOpen),
+                    ),
+                  ],
                   if (_videos case (final mine, final club)) ...[
                     if (mine.isNotEmpty) ...[
                       const SizedBox(height: 16),

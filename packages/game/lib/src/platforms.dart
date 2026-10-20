@@ -299,9 +299,14 @@ abstract final class Platforms {
         for (final s in w.songs) {
           if (s.primaryArtistId == a.id && s.videoBudget >= 0) videos++;
         }
+        // The player's own uploads bring subscribers too (docs K142).
+        final uploads =
+            a.id == w.playerArtistId ? w.channelVideos.length : 0;
         return (0.6 * fans + 0.06 * cas) *
             m *
-            (0.8 + 0.4 * math.min(1, videos / 5));
+            (0.8 +
+                0.4 * math.min(1, videos / 5) +
+                0.2 * math.min(1, uploads / 20));
       case MusicPlatform.noiseCloud:
         return (0.1 * fans + 0.008 * cas) * m;
       case MusicPlatform.tikTak:
@@ -455,5 +460,126 @@ abstract final class Platforms {
                   (followers(w, player, p, year) ?? 0) >= 1e5,
             ),
     );
+  }
+}
+
+/// One video on the player's channel (docs K142): a music video
+/// ([kind] null) or an upload.
+class ChannelVideoRow {
+  ChannelVideoRow(
+      {required this.kind,
+      required this.songId,
+      required this.title,
+      required this.albumId,
+      required this.week,
+      required this.views});
+  final VideoKind? kind;
+
+  /// The song (-1: a video about the artist).
+  final int songId;
+  final String title;
+
+  /// Album for the thumbnail (-1: none).
+  final int albumId;
+  final int week;
+  final double views;
+}
+
+/// The player's channel on the video site (docs K142).
+class ChannelView {
+  ChannelView(
+      {required this.name,
+      required this.artistId,
+      required this.subscribers,
+      required this.totalViews,
+      required this.videos,
+      required this.songs,
+      required this.made,
+      required this.artistVideoThisWeek,
+      required this.open,
+      required this.year});
+  final String name;
+  final int artistId;
+  final double subscribers;
+  final double totalViews;
+
+  /// Newest first.
+  final List<ChannelVideoRow> videos;
+
+  /// Released songs a video can be made for, newest first: id and title.
+  final List<(int, String)> songs;
+
+  /// Kinds already made for each song.
+  final Map<int, Set<VideoKind>> made;
+
+  /// A behind-the-scenes or vlog is already up this week.
+  final bool artistVideoThisWeek;
+
+  /// The site is open.
+  final bool open;
+  final int year;
+
+  bool get hasVideos => videos.isNotEmpty;
+  List<ChannelVideoRow> get popular =>
+      [...videos]..sort((a, b) => b.views.compareTo(a.views));
+
+  /// Kinds that can be made in [year].
+  List<VideoKind> get kinds => [
+        for (final k in VideoKind.values)
+          if (year >= k.fromYear) k
+      ];
+
+  static ChannelView of(World w) {
+    final p = w.player!;
+    final year = GameTime.yearOf(w.week);
+    final rows = <ChannelVideoRow>[];
+    var total = 0.0;
+    for (final id in w.playerSongIds) {
+      final s = w.songs[id];
+      if (s.releasedWeek < 0 || s.videoBudget < 0) continue;
+      final views = Platforms.videoViews(w, s);
+      total += views;
+      rows.add(ChannelVideoRow(
+          kind: null,
+          songId: s.id,
+          title: s.title,
+          albumId: coverAlbumOf(w, s),
+          week: s.videoWeek >= 0 ? s.videoWeek : s.releasedWeek,
+          views: views));
+    }
+    final made = <int, Set<VideoKind>>{};
+    for (final v in w.channelVideos) {
+      final views = v.viewsAt(w.week - 1);
+      total += views;
+      final s = v.songId >= 0 ? w.songs[v.songId] : null;
+      if (s != null) (made[s.id] ??= {}).add(v.kind);
+      rows.add(ChannelVideoRow(
+          kind: v.kind,
+          songId: v.songId,
+          title: s?.title ?? '',
+          albumId: s == null ? -1 : coverAlbumOf(w, s),
+          week: v.week,
+          views: views));
+    }
+    rows.sort((a, b) => b.week.compareTo(a.week));
+    final songs = [
+      for (final id in w.playerSongIds)
+        if (w.songs[id].releasedWeek >= 0 &&
+            w.songs[id].status != SongStatus.scrapped)
+          w.songs[id]
+    ]..sort((a, b) => b.releasedWeek.compareTo(a.releasedWeek));
+    return ChannelView(
+        name: p.name,
+        artistId: p.id,
+        subscribers:
+            Platforms.followers(w, p, MusicPlatform.viewTube, year) ?? 0,
+        totalViews: total,
+        videos: rows,
+        songs: [for (final s in songs) (s.id, s.title)],
+        made: made,
+        artistVideoThisWeek:
+            w.channelVideos.any((v) => !v.kind.forSong && v.week == w.week),
+        open: year >= Channel.openYear,
+        year: year);
   }
 }

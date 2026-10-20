@@ -318,6 +318,26 @@ class Fmt {
       };
 
   /// A radio format's name (docs K134).
+  /// A channel video kind (docs K142) and what it does.
+  String videoKind(VideoKind k) => switch (k) {
+        VideoKind.lyric => l.videoLyric,
+        VideoKind.visualizer => l.videoVisualizer,
+        VideoKind.live => l.videoLive,
+        VideoKind.acoustic => l.videoAcoustic,
+        VideoKind.dance => l.videoDance,
+        VideoKind.behindScenes => l.videoBehindScenes,
+        VideoKind.vlog => l.videoVlog,
+      };
+  String videoKindHint(VideoKind k) => switch (k) {
+        VideoKind.lyric => l.videoLyricHint,
+        VideoKind.visualizer => l.videoVisualizerHint,
+        VideoKind.live => l.videoLiveHint,
+        VideoKind.acoustic => l.videoAcousticHint,
+        VideoKind.dance => l.videoDanceHint,
+        VideoKind.behindScenes => l.videoBehindScenesHint,
+        VideoKind.vlog => l.videoVlogHint,
+      };
+
   String radioFormat(RadioFormat f) => switch (f) {
         RadioFormat.top40 => l.formatTop40,
         RadioFormat.rhythmic => l.formatRhythmic,
@@ -730,6 +750,7 @@ class Fmt {
       'featureRefused' => l.errorFeatureRefused,
       'featuresFull' => l.errorFeaturesFull,
       'cannotRerecord' => l.errorCannotRerecord,
+      'cannotUpload' => l.errorCannotUpload,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,
       'labelRefused' => l.errorLabelRefused,

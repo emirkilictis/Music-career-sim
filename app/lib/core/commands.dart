@@ -231,6 +231,11 @@ abstract final class Cmd {
           List<int> vaultSongIds) =>
       (s) => s.rerecordAlbum(albumId, title, vaultSongIds: vaultSongIds);
 
+  /// The player's channel on the video site (docs K142).
+  static SessionCmd<ChannelView> channel() => (s) => s.channel;
+  static SessionCmd<void> uploadVideo(VideoKind kind, int songId) =>
+      (s) => s.uploadVideo(kind, songId: songId);
+
   /// The player's videos and the biggest of all time (docs K118).
   static SessionCmd<(List<VideoRow>, List<VideoRow>)> videos() => (s) => (
         Platforms.topVideos(s.world, limit: 5, mine: true),
