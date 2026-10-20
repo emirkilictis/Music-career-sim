@@ -158,6 +158,7 @@ int worldHash(World w) {
     addInt(al.liveTour);
     addInt(al.anniversaries);
     addInt(al.partnerId);
+    addInt(al.visual ? 1 : 0);
     addDouble(al.bundleUnits);
     addCharts(al);
   }

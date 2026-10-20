@@ -1481,6 +1481,13 @@ k('catalogSell','Sell for {price}','{price} karşılığında sat', price='Strin
 k('catalogConfirm','You sell the masters of {songs} songs for {price}. From now on they pay the fund, not you; you can still re-record their albums. This cannot be undone.','{songs} şarkının masterlarını {price} karşılığında satıyorsun. Artık fona öderler, sana değil; albümlerini yine de yeniden kaydedebilirsin. Geri alınamaz.', songs='int', price='String')
 k('catalogSold','Catalog sold for {price}.','Katalog {price} karşılığında satıldı.', price='String')
 
+# Visual albums (docs K154).
+k('errorNoVisual','A visual album is for a new record with songs not filmed yet.','Görsel albüm, henüz klibi çekilmemiş şarkıları olan yeni bir albüm için.')
+k('visualButton','Make it a visual album · {cost}','Görsel albüm yap · {cost}', cost='String')
+k('visualHint','A film for every song without a video, cheaper than one by one: the record becomes an event and every track is watched. Within {weeks} weeks of release.','Klibi olmayan her şarkıya bir film, tek tek çekmekten ucuz: albüm bir olaya döner ve her parça izlenir. Çıkıştan sonraki {weeks} hafta içinde.', weeks='int')
+k('visualDone','{title} is a visual album now.','{title} artık görsel bir albüm.', title='String')
+k('visualLine','A visual album: every song has its film.','Görsel albüm: her şarkının filmi var.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

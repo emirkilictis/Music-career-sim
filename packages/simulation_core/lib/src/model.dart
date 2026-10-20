@@ -1002,6 +1002,9 @@ class Album with Charted {
   AlbumBundle bundle = AlbumBundle.none;
   double bundleUnits = 0;
 
+  /// Every track filmed: a visual album (docs K154).
+  bool visual = false;
+
   /// The rival it was made with, a joint album (-1: none; docs K150).
   int partnerId = -1;
 

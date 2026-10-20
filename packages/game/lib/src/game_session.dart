@@ -1374,6 +1374,20 @@ class GameSession {
   }
 
   /// Pays creators on the short-video app to use a song's sound (K131).
+  /// Films every track of new album [albumId] (docs K154).
+  void makeVisualAlbum(int albumId) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    if (!VisualAlbums.can(world, _p, al)) {
+      throw GameException('noVisual', 'New albums with unfilmed songs');
+    }
+    _requireMoney(VisualAlbums.costCents(world, al));
+    VisualAlbums.make(world, _p, al);
+    _saveNow();
+  }
+
   /// A fund's offer for the player's catalog (docs K153).
   CatalogOfferView get catalogOffer => CatalogOfferView.of(world, _p);
 

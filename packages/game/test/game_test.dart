@@ -1362,6 +1362,56 @@ void main() {
       g.close();
     });
 
+    test('a visual album films every track (K154)', () {
+      (GameSession, AlbumView) start() {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire,
+                premium: true));
+        final p = g.world.player!;
+        p.moneyCents = 1 << 40;
+        final ids = <int>[];
+        for (var i = 0; i < 8; i++) {
+          p.creativeEnergy = 100;
+          ids.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        return (g, g.releaseAlbum('Lemonade', ids));
+      }
+
+      final (plain, pAl) = start();
+      var (g, al) = start();
+      final cost = g.album(al.id).visualCostCents!;
+      expect(cost, VisualAlbums.trackCostCents() * al.trackIds.length);
+      final money = g.player.moneyCents;
+      final hype = g.player.hype;
+      g.makeVisualAlbum(al.id);
+      expect(money - g.player.moneyCents, cost);
+      expect(g.player.hype, closeTo(hype + VisualAlbums.hype, 1e-9));
+      expect(g.album(al.id).visual, isTrue);
+      expect(g.album(al.id).visualCostCents, isNull);
+      for (final id in al.trackIds) {
+        expect(g.world.songs[id].videoPower, greaterThan(0));
+      }
+      expect(() => g.makeVisualAlbum(al.id), _code('noVisual'));
+      expect(g.channel.videos.length, greaterThanOrEqualTo(al.trackIds.length));
+      plain.advanceWeeks(3, stop: SkipStop.never);
+      g.advanceWeeks(3, stop: SkipStop.never);
+      double streams(GameSession s, AlbumView a) => a.trackIds
+          .fold(0.0, (t, id) => t + s.world.songLifetimeStreams(s.world.songs[id]));
+      expect(streams(g, al), greaterThan(streams(plain, pAl)));
+      // Too late after a month.
+      plain.advanceWeek();
+      expect(plain.album(pAl.id).visualCostCents, isNull);
+      plain.close();
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.album(al.id).visual, isTrue);
+      g.close();
+    });
+
     test('selling the catalog: money now, the songs pay the fund (K153)',
         () {
       var g = GameSession.start(

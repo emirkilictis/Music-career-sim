@@ -253,6 +253,10 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// A visual album (docs K154).
+  static SessionCmd<void> makeVisualAlbum(int albumId) =>
+      (s) => s.makeVisualAlbum(albumId);
+
   /// Selling the catalog (docs K153).
   static SessionCmd<CatalogOfferView> catalogOffer() =>
       (s) => s.catalogOffer;

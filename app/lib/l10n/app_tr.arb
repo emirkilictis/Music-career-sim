@@ -1487,5 +1487,10 @@
   "catalogLine": "Üç yaşından büyük {songs} şarkın yılda yaklaşık {year} kazandırıyor. Fonlar bunun {multiple} yıllığını tek seferde öder.",
   "catalogSell": "{price} karşılığında sat",
   "catalogConfirm": "{songs} şarkının masterlarını {price} karşılığında satıyorsun. Artık fona öderler, sana değil; albümlerini yine de yeniden kaydedebilirsin. Geri alınamaz.",
-  "catalogSold": "Katalog {price} karşılığında satıldı."
+  "catalogSold": "Katalog {price} karşılığında satıldı.",
+  "errorNoVisual": "Görsel albüm, henüz klibi çekilmemiş şarkıları olan yeni bir albüm için.",
+  "visualButton": "Görsel albüm yap · {cost}",
+  "visualHint": "Klibi olmayan her şarkıya bir film, tek tek çekmekten ucuz: albüm bir olaya döner ve her parça izlenir. Çıkıştan sonraki {weeks} hafta içinde.",
+  "visualDone": "{title} artık görsel bir albüm.",
+  "visualLine": "Görsel albüm: her şarkının filmi var."
 }

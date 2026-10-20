@@ -5186,5 +5186,31 @@
         "type": "String"
       }
     }
-  }
+  },
+  "errorNoVisual": "A visual album is for a new record with songs not filmed yet.",
+  "visualButton": "Make it a visual album · {cost}",
+  "@visualButton": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "visualHint": "A film for every song without a video, cheaper than one by one: the record becomes an event and every track is watched. Within {weeks} weeks of release.",
+  "@visualHint": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "visualDone": "{title} is a visual album now.",
+  "@visualDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "visualLine": "A visual album: every song has its film."
 }

@@ -651,6 +651,10 @@ class AlbumView {
         bundle = al.bundle,
         isLive = al.isLive,
         partnerId = al.partnerId,
+        visual = al.visual,
+        visualCostCents = w.player != null && VisualAlbums.can(w, w.player!, al)
+            ? VisualAlbums.costCents(w, al)
+            : null,
         partnerName = al.partnerId >= 0 ? w.artists[al.partnerId].name : '',
         anniversaryDue = w.player != null &&
                 Anniversaries.can(w, w.player!, al)
@@ -760,6 +764,11 @@ class AlbumView {
 
   /// A live album (docs K146).
   final bool isLive;
+
+  /// A visual album, or what making it one costs now (null: not
+  /// possible; docs K154).
+  final bool visual;
+  final int? visualCostCents;
 
   /// A joint album's partner (-1 and '': none; docs K150).
   final int partnerId;

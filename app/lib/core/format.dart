@@ -789,6 +789,7 @@ class Fmt {
       'noPartner' => l.errorNoPartner,
       'noSnippet' => l.errorNoSnippet,
       'noOffer' => l.errorNoOffer,
+      'noVisual' => l.errorNoVisual,
       'noShowcase' => l.errorNoShowcase,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,

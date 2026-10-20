@@ -352,6 +352,32 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               ),
             ],
           ],
+          // A visual album (docs K154).
+          if (a.visualCostCents case final cost?) ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () async {
+                try {
+                  await widget.state.act(Cmd.makeVisualAlbum(a.id));
+                  if (context.mounted) {
+                    showInfo(context, l.visualDone(a.title),
+                        icon: Icons.movie_creation_outlined);
+                  }
+                  _load();
+                } catch (e) {
+                  if (context.mounted) showError(context, e);
+                }
+              },
+              icon: const Icon(Icons.movie_creation_outlined),
+              label: Text(l.visualButton(fmt.money(cost))),
+            ),
+            const SizedBox(height: 4),
+            Text(l.visualHint(VisualAlbums.windowWeeks),
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+          ] else if (a.visual) ...[
+            const SizedBox(height: 10),
+            _Line(icon: Icons.movie_creation_outlined, text: l.visualLine),
+          ],
           // Anniversary reissues (docs K149).
           if (a.anniversaryDue > 0) ...[
             const SizedBox(height: 10),
