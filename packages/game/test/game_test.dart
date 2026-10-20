@@ -1362,6 +1362,55 @@ void main() {
       g.close();
     });
 
+    test('album bundles count merch and tickets, until 2020 (K144)', () {
+      (GameSession, List<int>) start(int year) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: year,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire,
+                premium: true));
+        final p = g.world.player!;
+        p.moneyCents = 1 << 40;
+        final ids = <int>[];
+        for (var i = 0; i < 8; i++) {
+          p.creativeEnergy = 100;
+          ids.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        return (g, ids);
+      }
+
+      var (g, ids) = start(2018);
+      // No tour ahead: no ticket bundle.
+      expect(g.bundleOptions.keys, [AlbumBundle.merch]);
+      expect(() => g.releaseAlbum('X', ids, bundle: AlbumBundle.tickets),
+          _code('cannotBundle'));
+      g.startTour(TourRequest(
+          name: 'Big', legs: [TourLeg(TourMarket.usa, TourKind.arena, 20)]));
+      expect(g.bundleOptions.keys,
+          containsAll([AlbumBundle.merch, AlbumBundle.tickets]));
+      final tickets = g.bundleOptions[AlbumBundle.tickets]!;
+      expect(tickets, greaterThan(0));
+      final money = g.player.moneyCents;
+      final al = g.releaseAlbum('Merch', ids, bundle: AlbumBundle.merch);
+      final units = g.world.albums[al.id].bundleUnits;
+      expect(units, greaterThan(0));
+      expect(g.player.moneyCents - money,
+          greaterThanOrEqualTo((units * Bundles.merchMarginCents).round() -
+              Actions.campaignCostFor(g.world.player!, Campaign.standard)));
+      g.advanceWeek();
+      expect(g.album(al.id).bundle, AlbumBundle.merch);
+      expect(g.album(al.id).firstWeekPure, greaterThan(units));
+      g.close();
+      // The charts stopped counting bundles after 2020.
+      (g, ids) = start(2021);
+      expect(g.bundleOptions, isEmpty);
+      expect(() => g.releaseAlbum('X', ids, bundle: AlbumBundle.merch),
+          _code('cannotBundle'));
+      g.close();
+    });
+
     test('a song sold to another artist pays its writer (K143)', () {
       var g = GameSession.start(
           slots,

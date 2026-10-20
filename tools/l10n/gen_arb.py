@@ -1397,6 +1397,16 @@ k('writtenPeak','US peak #{peak}','ABD zirvesi #{peak}', peak='int')
 k('eventWrittenTop10','“{title}”, the song you wrote for {artist}, is #{position} in the US.','{artist} için yazdığın “{title}” ABD\'de #{position}.', title='String', artist='String', position='int')
 k('eventWrittenNo1','“{title}”, the song you wrote for {artist}, is #1 in the US.','{artist} için yazdığın “{title}” ABD\'de #1!', title='String', artist='String')
 
+# Album bundles (docs K144).
+k('errorCannotBundle','That bundle is not possible now.','Bu paket şu an mümkün değil.')
+k('bundleTitle','Bundle','Paket')
+k('bundleHint','Until the rules change late in 2020, the album charts count a copy sold with merch or a concert ticket. Merch bundles sell to fans and pay a margin; ticket bundles count a copy for tickets redeemed on your tour ahead, but those copies pay nothing.','Kurallar 2020 sonunda değişene kadar albüm listeleri merch ya da konser biletiyle satılan kopyayı da sayar. Merch paketi hayranlara satar ve kâr bırakır; bilet paketi önündeki turnede kullanılan biletler için kopya sayar ama o kopyalar para getirmez.')
+k('bundleNone','No bundle','Paket yok')
+k('bundleMerch','Merch','Merch')
+k('bundleTickets','Tour tickets','Turne biletleri')
+k('bundleOption','{bundle} · +{units} copies','{bundle} · +{units} kopya', bundle='String', units='String')
+k('bundleLine','{bundle} bundle: {units} copies in its first week.','{bundle} paketi: ilk haftasında {units} kopya.', bundle='String', units='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

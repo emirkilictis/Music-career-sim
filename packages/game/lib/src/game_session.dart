@@ -982,9 +982,11 @@ class GameSession {
     required int releaseWeek,
     required int announceWeek,
     bool exclusive = false,
+    AlbumBundle bundle = AlbumBundle.none,
   }) {
     final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
     _checkDates(releaseWeek, announceWeek);
+    _checkBundle(type, bundle);
     final formats = _formats(variantFormats);
     final cost = _campaignCost(campaign) +
         Actions.editionsCostCents(variantWeeks.length, formats);
@@ -1001,8 +1003,27 @@ class GameSession {
       createdWeek: world.week,
       campaign: campaign,
       paidCents: cost,
-    )..exclusive = exclusive);
+    )
+      ..exclusive = exclusive
+      ..bundle = bundle);
   }
+
+  /// Album bundles (docs K144): only while the charts count them, and a
+  /// ticket bundle needs a tour ahead.
+  void _checkBundle(AlbumType type, AlbumBundle bundle) {
+    if (!Bundles.can(world, _p, type, bundle)) {
+      throw GameException('cannotBundle', 'No such bundle now');
+    }
+  }
+
+  /// What each bundle would add to an album's first week now (docs
+  /// K144); empty when the charts do not count bundles.
+  Map<AlbumBundle, double> get bundleOptions => {
+        for (final b in AlbumBundle.values)
+          if (b != AlbumBundle.none &&
+              Bundles.can(world, _p, AlbumType.album, b))
+            b: Bundles.units(world, _p, b),
+      };
 
   /// Keeps an album, EP or mixtape in the vault with no date (docs F31):
   /// its songs, title and editions are set and its cover can be chosen;
@@ -1032,8 +1053,11 @@ class GameSession {
 
   /// Releases a draft this week with [campaign]. Its schedule id stays on
   /// the album, so a cover chosen for the draft follows it.
-  AlbumView releaseDraft(int id, {Campaign campaign = Campaign.standard}) {
+  AlbumView releaseDraft(int id,
+      {Campaign campaign = Campaign.standard,
+      AlbumBundle bundle = AlbumBundle.none}) {
     final sr = _draftById(id);
+    _checkBundle(sr.type, bundle);
     _p.scheduled.remove(sr);
     try {
       _checkAlbum(sr.title, sr.songIds, sr.type, sr.variantWeeks,
@@ -1050,7 +1074,8 @@ class GameSession {
         variantFormats: sr.variantFormats,
         scheduleId: sr.id,
         payForVariants: true,
-        campaign: campaign);
+        campaign: campaign,
+        bundle: bundle);
     _saveNow();
     return AlbumView.of(world, al);
   }
@@ -1174,8 +1199,10 @@ class GameSession {
     List<EditionFormat?> variantFormats = const [],
     Campaign campaign = Campaign.standard,
     bool exclusive = false,
+    AlbumBundle bundle = AlbumBundle.none,
   }) {
     final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
+    _checkBundle(type, bundle);
     final formats = _formats(variantFormats);
     _requireMoney(_campaignCost(campaign) +
         Actions.editionsCostCents(variantWeeks.length, formats));
@@ -1185,7 +1212,8 @@ class GameSession {
         variantFormats: formats,
         payForVariants: true,
         campaign: campaign,
-        exclusive: exclusive);
+        exclusive: exclusive,
+        bundle: bundle);
     _saveNow();
     return AlbumView.of(world, al);
   }

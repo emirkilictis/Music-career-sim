@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'audience.dart';
+import 'bundles.dart';
 import 'config/charts.dart';
 import 'critics.dart';
 import 'contracts.dart';
@@ -719,7 +720,8 @@ abstract final class Actions {
       int paidCents = 0,
       double buzz = 0,
       bool announced = false,
-      bool exclusive = false}) {
+      bool exclusive = false,
+      AlbumBundle bundle = AlbumBundle.none}) {
     final paid = prepaid ? paidCents : _payCampaign(a, campaign);
     _comeback(w, a);
     _convertAnticipation(a, album: type == AlbumType.album);
@@ -808,6 +810,19 @@ abstract final class Actions {
         ..exclusiveUntil = w.week + StreamingTools.exclusiveWeeks
         ..exclusiveFeeCents = fee
         ..revenueCents += fee;
+    }
+    // Bundles (docs K144): copies counted in the first week; merch pays
+    // its margin now, ticket copies pay nothing.
+    if (bundle != AlbumBundle.none && Bundles.can(w, a, type, bundle)) {
+      final units = Bundles.units(w, a, bundle);
+      album
+        ..bundle = bundle
+        ..bundleUnits = units;
+      if (bundle == AlbumBundle.merch) {
+        final margin = (units * Bundles.merchMarginCents).round();
+        a.moneyCents += margin;
+        album.revenueCents += margin;
+      }
     }
     if (type == AlbumType.album) {
       if (a.contractAlbumsLeft > 0) a.contractAlbumsLeft--;
@@ -959,7 +974,8 @@ abstract final class Actions {
                 editionsCostCents(sr.variantWeeks.length, sr.variantFormats),
             buzz: sr.buzz,
             announced: !sr.isSurprise,
-            exclusive: sr.exclusive)
+            exclusive: sr.exclusive,
+            bundle: sr.bundle)
           ..preOrders = sr.preOrders;
         out.add((scheduleId: sr.id, isAlbum: true, id: al.id));
       } else {

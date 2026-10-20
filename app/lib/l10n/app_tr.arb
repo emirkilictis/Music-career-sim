@@ -1421,5 +1421,13 @@
   "writtenComing": "yakında çıkıyor",
   "writtenPeak": "ABD zirvesi #{peak}",
   "eventWrittenTop10": "{artist} için yazdığın “{title}” ABD'de #{position}.",
-  "eventWrittenNo1": "{artist} için yazdığın “{title}” ABD'de #1!"
+  "eventWrittenNo1": "{artist} için yazdığın “{title}” ABD'de #1!",
+  "errorCannotBundle": "Bu paket şu an mümkün değil.",
+  "bundleTitle": "Paket",
+  "bundleHint": "Kurallar 2020 sonunda değişene kadar albüm listeleri merch ya da konser biletiyle satılan kopyayı da sayar. Merch paketi hayranlara satar ve kâr bırakır; bilet paketi önündeki turnede kullanılan biletler için kopya sayar ama o kopyalar para getirmez.",
+  "bundleNone": "Paket yok",
+  "bundleMerch": "Merch",
+  "bundleTickets": "Turne biletleri",
+  "bundleOption": "{bundle} · +{units} kopya",
+  "bundleLine": "{bundle} paketi: ilk haftasında {units} kopya."
 }

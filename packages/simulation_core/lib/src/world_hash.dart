@@ -147,6 +147,8 @@ int worldHash(World w) {
     addDouble(al.preOrders);
     addInt(al.exclusiveUntil);
     addDouble(al.masterShare ?? -1);
+    addInt(al.bundle.index);
+    addDouble(al.bundleUnits);
     addCharts(al);
   }
   for (final chart in w.charts) {

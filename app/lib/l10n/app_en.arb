@@ -4923,5 +4923,33 @@
         "type": "String"
       }
     }
+  },
+  "errorCannotBundle": "That bundle is not possible now.",
+  "bundleTitle": "Bundle",
+  "bundleHint": "Until the rules change late in 2020, the album charts count a copy sold with merch or a concert ticket. Merch bundles sell to fans and pay a margin; ticket bundles count a copy for tickets redeemed on your tour ahead, but those copies pay nothing.",
+  "bundleNone": "No bundle",
+  "bundleMerch": "Merch",
+  "bundleTickets": "Tour tickets",
+  "bundleOption": "{bundle} · +{units} copies",
+  "@bundleOption": {
+    "placeholders": {
+      "bundle": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "bundleLine": "{bundle} bundle: {units} copies in its first week.",
+  "@bundleLine": {
+    "placeholders": {
+      "bundle": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
   }
 }

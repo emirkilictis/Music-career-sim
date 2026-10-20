@@ -720,13 +720,25 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
   int? _exclusiveOffer;
   bool _exclusive = false;
 
+  /// Album bundles on offer and the one picked (docs K144).
+  Map<AlbumBundle, double> _bundles = const {};
+  AlbumBundle _bundle = AlbumBundle.none;
+
   @override
   void initState() {
     super.initState();
     widget.state.read(Cmd.exclusiveOffer()).then((fee) {
       if (mounted) setState(() => _exclusiveOffer = fee);
     });
+    widget.state.read(Cmd.bundleOptions()).then((b) {
+      if (mounted) setState(() => _bundles = b);
+    });
   }
+
+  AlbumBundle get _goBundle => _bundles.containsKey(_bundle) &&
+          (_type == AlbumType.album || _type == AlbumType.ep)
+      ? _bundle
+      : AlbumBundle.none;
 
   bool get _goExclusive =>
       _exclusive && _exclusiveOffer != null && _type == AlbumType.album;
@@ -805,6 +817,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           variantFormats: _variantFormats,
           campaign: campaign,
           exclusive: _goExclusive,
+          bundle: _goBundle,
         ));
         _saveCovers(images, ImageStore.albumKey(album.id));
         if (!mounted) return;
@@ -821,6 +834,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           releaseWeek: when.releaseWeek,
           announceWeek: when.announceWeek,
           exclusive: _goExclusive,
+          bundle: _goBundle,
         ));
         _saveCovers(images, ImageStore.scheduledKey(s.id));
         if (!mounted) return;
@@ -913,6 +927,31 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
               subtitle: Text(l.exclusiveHint(
                   fmt.money(_exclusiveOffer!), StreamingTools.exclusiveWeeks)),
             ),
+          ],
+          // Album bundles while the charts count them (docs K144).
+          if (_bundles.isNotEmpty &&
+              (_type == AlbumType.album || _type == AlbumType.ep)) ...[
+            const SizedBox(height: 12),
+            Text(l.bundleTitle,
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Text(l.bundleHint,
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+            const SizedBox(height: 6),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              ChoiceChip(
+                label: Text(l.bundleNone),
+                selected: _bundle == AlbumBundle.none,
+                onSelected: (_) => setState(() => _bundle = AlbumBundle.none),
+              ),
+              for (final e in _bundles.entries)
+                ChoiceChip(
+                  label: Text(l.bundleOption(
+                      fmt.bundle(e.key), fmt.compact(e.value))),
+                  selected: _bundle == e.key,
+                  onSelected: (_) => setState(() => _bundle = e.key),
+                ),
+            ]),
           ],
           // The order the songs play in (docs K133).
           if (_picked.length > 1) ...[

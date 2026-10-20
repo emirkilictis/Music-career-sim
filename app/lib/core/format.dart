@@ -318,6 +318,13 @@ class Fmt {
       };
 
   /// A radio format's name (docs K134).
+  /// An album bundle (docs K144).
+  String bundle(AlbumBundle b) => switch (b) {
+        AlbumBundle.none => l.bundleNone,
+        AlbumBundle.merch => l.bundleMerch,
+        AlbumBundle.tickets => l.bundleTickets,
+      };
+
   /// A channel video kind (docs K142) and what it does.
   String videoKind(VideoKind k) => switch (k) {
         VideoKind.lyric => l.videoLyric,
@@ -752,6 +759,7 @@ class Fmt {
       'cannotRerecord' => l.errorCannotRerecord,
       'cannotUpload' => l.errorCannotUpload,
       'songRefused' => l.errorSongRefused,
+      'cannotBundle' => l.errorCannotBundle,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,
       'labelRefused' => l.errorLabelRefused,

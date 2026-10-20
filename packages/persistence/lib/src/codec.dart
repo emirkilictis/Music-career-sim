@@ -423,6 +423,8 @@ abstract final class Codec {
     // Added in schema v13, v25, v28, v30.
     'revenue', 'preOrders', 'exclusiveUntil', 'exclusiveFee',
     'masterShare',
+    // Added in schema v33.
+    'bundle',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -445,6 +447,9 @@ abstract final class Codec {
         al.exclusiveUntil,
         al.exclusiveFeeCents,
         al.masterShare,
+        al.bundle == AlbumBundle.none
+            ? null
+            : jsonEncode([al.bundle.index, al.bundleUnits]),
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -485,6 +490,12 @@ abstract final class Codec {
       ..sumDormantRate = _d(r['sumDormantRate']);
     _readReg(r, albumRegColumns, al.reg);
     _decodeCharts(r['charts'] as String, al);
+    if (r['bundle'] case final String x when x.isNotEmpty) {
+      final j = jsonDecode(x) as List;
+      al
+        ..bundle = AlbumBundle.values[j[0] as int]
+        ..bundleUnits = (j[1] as num).toDouble();
+    }
     return al;
   }
 
@@ -571,6 +582,7 @@ abstract final class Codec {
             'ps': sr.preSaves,
             'po': sr.preOrders,
             'ex': sr.exclusive,
+            'bd': sr.bundle.index,
           }
       ]);
 
@@ -596,6 +608,7 @@ abstract final class Codec {
             )
               ..preSaves = (m['ps'] as num?)?.toDouble() ?? 0
               ..preOrders = (m['po'] as num?)?.toDouble() ?? 0
-              ..exclusive = m['ex'] as bool? ?? false,
+              ..exclusive = m['ex'] as bool? ?? false
+              ..bundle = AlbumBundle.values[m['bd'] as int? ?? 0],
       ];
 }

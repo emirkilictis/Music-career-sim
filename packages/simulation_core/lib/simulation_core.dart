@@ -5,6 +5,7 @@ export 'src/actions.dart';
 export 'src/audience.dart';
 export 'src/awards.dart';
 export 'src/brands.dart';
+export 'src/bundles.dart';
 export 'src/channel.dart';
 export 'src/ai.dart' show AiPlanner, RivalClash;
 export 'src/bot.dart';

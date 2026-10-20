@@ -349,6 +349,14 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               ),
             ],
           ],
+          // Bundled copies (docs K144).
+          if (a.isPlayer && a.bundle != AlbumBundle.none) ...[
+            const SizedBox(height: 10),
+            _Line(
+                icon: Icons.inventory_2_outlined,
+                text: l.bundleLine(fmt.bundle(a.bundle),
+                    fmt.compact(a.bundleUnits))),
+          ],
           // Pre-orders shipped in week one (docs K126).
           if (a.isPlayer && a.preOrders >= 1) ...[
             const SizedBox(height: 10),

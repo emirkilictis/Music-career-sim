@@ -891,7 +891,9 @@ class Simulator {
         final pure = al.isMixtape
             ? 0.0
             : bought * noise * tracklist * demand * keep * leaked +
-                (age == 0 ? al.preOrders * share * Actions.preOrderExtra : 0.0);
+                (age == 0 ? al.preOrders * share * Actions.preOrderExtra : 0.0) +
+                // Bundled copies (docs K144).
+                (age == 0 ? al.bundleUnits * share : 0.0);
         final streams = sea[k] +
             al.sumDormantRate *
                 p.catalogFactor *
@@ -1785,10 +1787,14 @@ class Simulator {
       final al = world.albums[id];
       if (al.artistId != p.id) continue;
       final share = al.masterShare ??= p.artistShare;
-      cents += al.weekPure * 600 * share;
-      al.revenueCents += al.weekPure * 600 * share;
-      al.campaignReturnCents +=
-          al.weekPure * 600 * share * al.campaignShareOfSales;
+      // Copies bundled with tickets pay nothing (docs K144).
+      final paid = al.weekPure -
+          (al.bundle == AlbumBundle.tickets && world.week == al.releaseWeek
+              ? al.bundleUnits
+              : 0);
+      cents += paid * 600 * share;
+      al.revenueCents += paid * 600 * share;
+      al.campaignReturnCents += paid * 600 * share * al.campaignShareOfSales;
       world.dirtyAlbums.add(id);
     }
     // The manager takes a cut of everything (docs K68).

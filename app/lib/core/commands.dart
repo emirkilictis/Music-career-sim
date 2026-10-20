@@ -109,13 +109,19 @@ abstract final class Cmd {
     List<EditionFormat?> variantFormats = const [],
     required Campaign campaign,
     bool exclusive = false,
+    AlbumBundle bundle = AlbumBundle.none,
   }) =>
       (s) => s.releaseAlbum(title, songIds,
           type: type,
           variantWeeks: variantWeeks,
           variantFormats: variantFormats,
           campaign: campaign,
-          exclusive: exclusive);
+          exclusive: exclusive,
+          bundle: bundle);
+
+  /// What each album bundle would add now (docs K144).
+  static SessionCmd<Map<AlbumBundle, double>> bundleOptions() =>
+      (s) => s.bundleOptions;
 
   /// The exclusive fee on offer for an album now (docs K135).
   static SessionCmd<int?> exclusiveOffer() => (s) => s.exclusiveOffer;
@@ -139,6 +145,7 @@ abstract final class Cmd {
     required int releaseWeek,
     required int announceWeek,
     bool exclusive = false,
+    AlbumBundle bundle = AlbumBundle.none,
   }) =>
       (s) => s.scheduleAlbum(title, songIds,
           type: type,
@@ -147,7 +154,8 @@ abstract final class Cmd {
           campaign: campaign,
           releaseWeek: releaseWeek,
           announceWeek: announceWeek,
-          exclusive: exclusive);
+          exclusive: exclusive,
+          bundle: bundle);
 
   static SessionCmd<ScheduledView> saveDraft({
     required String title,

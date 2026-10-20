@@ -605,6 +605,8 @@ class AlbumView {
         preOrders = al.preOrders,
         exclusiveUntil = al.exclusiveUntil,
         exclusiveFeeCents = al.exclusiveFeeCents,
+        bundle = al.bundle,
+        bundleUnits = al.bundleUnits,
         masterShare = Rerecords.albumShare(w.artists[al.artistId], al),
         isRerecord = Rerecords.isRerecord(w, al),
         rerecordBlock = al.artistId == w.playerArtistId
@@ -692,6 +694,10 @@ class AlbumView {
   /// A streaming exclusive until this week (-1: none) and its fee (K135).
   final int exclusiveUntil;
   final int exclusiveFeeCents;
+
+  /// What it came bundled with and the copies that added (docs K144).
+  final AlbumBundle bundle;
+  final double bundleUnits;
 
   /// Re-recordings (docs K139): the artist's share of its money (the
   /// deal it came out under), whether it re-records [originalAlbumId],

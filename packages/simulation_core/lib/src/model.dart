@@ -132,6 +132,9 @@ enum AlbumType { single, ep, album, mixtape }
 
 enum AlbumStatus { active, dormant }
 
+/// What an album comes bundled with (docs K144). Index order is stored.
+enum AlbumBundle { none, merch, tickets }
+
 enum CollaboratorRole { producer, songwriter }
 
 enum BudgetTier { low, medium, high }
@@ -974,6 +977,11 @@ class Album with Charted {
   int exclusiveUntil = -1;
   int exclusiveFeeCents = 0;
 
+  /// What it came bundled with and the copies that added to its first
+  /// week (docs K144).
+  AlbumBundle bundle = AlbumBundle.none;
+  double bundleUnits = 0;
+
   /// The artist's share of its sales, fixed by the deal it came out
   /// under (docs K139). Null until it first earns.
   double? masterShare;
@@ -1231,6 +1239,9 @@ class ScheduledRelease {
 
   /// Out as a streaming exclusive (docs K135).
   bool exclusive = false;
+
+  /// Bundled with merch or tickets (docs K144).
+  AlbumBundle bundle = AlbumBundle.none;
 
   bool get isAlbum => type != AlbumType.single;
   bool get isSurprise => announceWeek >= releaseWeek;
