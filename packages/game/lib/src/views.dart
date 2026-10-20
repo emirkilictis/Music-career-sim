@@ -2516,6 +2516,67 @@ class DocumentaryView {
       })> docs;
 }
 
+/// Streamify Sessions (docs K178): the invitation, the player's songs
+/// that could be recorded, the hits that could be covered and the
+/// sessions so far.
+class SessionsView {
+  SessionsView.of(World w, Artist a, this.listeners)
+      : block = StreamifySessions.block(w, listeners),
+        nextWeek = w.streamifySessions.isEmpty
+            ? -1
+            : w.streamifySessions.last.week + StreamifySessions.gapWeeks,
+        songs = [
+          for (final id in w.playerSongIds.reversed)
+            if (StreamifySessions.canRecord(w.songs[id], a))
+              (id: id, title: w.songs[id].title, artist: a.name, listeners: 0.0)
+        ],
+        covers = _covers(w, a),
+        sessions = [
+          for (final s in w.streamifySessions.reversed)
+            (
+              week: s.week,
+              title: w.songs[s.songId].title,
+              coverTitle: w.songs[s.coverSongId].title,
+              coverArtist: w.artists[w.songs[s.coverSongId].primaryArtistId]
+                  .name
+            )
+        ];
+
+  /// The player's monthly listeners on the app now.
+  final double listeners;
+  final SessionBlock? block;
+
+  /// When the next invitation comes after the last session (-1: none yet).
+  final int nextWeek;
+  final List<({int id, String title, String artist, double listeners})>
+      songs;
+
+  /// The biggest songs of others this week, with the listeners a cover
+  /// would win.
+  final List<({int id, String title, String artist, double listeners})>
+      covers;
+  final List<
+      ({int week, String title, String coverTitle, String coverArtist})>
+      sessions;
+
+  static List<({int id, String title, String artist, double listeners})>
+      _covers(World w, Artist a) {
+    final hits = [
+      for (final id in w.activeSongIds)
+        if (StreamifySessions.canCover(w.songs[id], a)) w.songs[id]
+    ]..sort((x, y) => y.weekStreams.compareTo(x.weekStreams));
+    return [
+      for (final s in hits.take(15))
+        (
+          id: s.id,
+          title: s.title,
+          artist: w.artists[s.primaryArtistId].name,
+          listeners: StreamifySessions.coverListeners(w, a, s)
+        )
+    ];
+  }
+}
+
 /// The awards season and the player's campaign (docs K171).
 class FycView {
   FycView.of(World w)

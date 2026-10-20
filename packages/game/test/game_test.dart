@@ -3298,6 +3298,53 @@ void main() {
       g.close();
     });
 
+    test('a Streamify Session: own song stripped back and a cover (K178)',
+        () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2019,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final slot = g.slotId;
+      final p = g.world.player!;
+      p.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id);
+      for (var i = 0; i < 6; i++) {
+        g.advanceWeek();
+      }
+      final v = g.sessions;
+      expect(v.listeners, greaterThan(StreamifySessions.minListeners));
+      expect(v.block, isNull);
+      expect(v.songs.map((s) => s.id), contains(id));
+      expect(v.covers, isNotEmpty);
+      expect(() => g.releaseVersion(id, SongVersion.session),
+          _code('noSession'));
+      final cover = v.covers.first;
+      final casual = p.casual;
+      final original = g.world.songs[cover.id].versionBoost;
+      p.creativeEnergy = 100;
+      g.recordSession(id, cover.id);
+      expect(g.world.songs[id].versions.map((x) => x.$1),
+          contains(SongVersion.session));
+      expect(g.world.songs[id].playlistBoost,
+          greaterThanOrEqualTo(g.world.config.playlistMidBoost));
+      expect(p.casual, greaterThan(casual));
+      expect(g.world.songs[cover.id].versionBoost, greaterThan(original));
+      // One a year.
+      expect(g.sessions.block, SessionBlock.tooSoon);
+      expect(() => g.recordSession(id, cover.id), _code('noSession'));
+      g.close();
+      g = GameSession.resume(slots, slot);
+      final after = g.sessions;
+      expect(after.sessions.single.title, g.song(id).title);
+      expect(after.sessions.single.coverTitle, cover.title);
+      expect(after.songs.map((s) => s.id), isNot(contains(id)));
+      g.close();
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;

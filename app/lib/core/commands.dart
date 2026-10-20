@@ -211,6 +211,11 @@ abstract final class Cmd {
   static SessionCmd<List<MilestoneView>> milestones() => (s) => s.milestones;
   static SessionCmd<List<PlatformView>> platforms() => (s) => s.platforms;
   static SessionCmd<void> hireManager(Manager m) => (s) => s.hireManager(m);
+  /// Streamify Sessions (docs K178).
+  static SessionCmd<SessionsView> sessions() => (s) => s.sessions;
+  static SessionCmd<void> recordSession(int songId, int coverSongId) =>
+      (s) => s.recordSession(songId, coverSongId);
+
   /// The next weeks' dates (docs K177).
   static SessionCmd<List<CalendarWeek>> calendar() => (s) => s.calendar;
   static SessionCmd<List<UpcomingRelease>> upcomingRivalAlbums() =>

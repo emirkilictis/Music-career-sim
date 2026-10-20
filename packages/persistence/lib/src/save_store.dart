@@ -118,6 +118,9 @@ class SaveStore {
     w.fycCampaign = FycCampaign.decode(meta['fyc'] as String?);
     // The player's documentaries (docs K172).
     w.documentaries.addAll(Documentary.decode(meta['docs'] as String?));
+    // The player's Streamify Sessions (docs K178).
+    w.streamifySessions
+        .addAll(StreamifySession.decode(meta['sessions'] as String?));
     w.playerPeakListeners =
         (meta['listenersPeak'] as num?)?.toDouble() ?? -1;
     if (meta['artistChart'] case final String s when s.isNotEmpty) {
@@ -381,6 +384,7 @@ class SaveStore {
       'imprint': w.imprint?.encode() ?? '',
       'fyc': w.fycCampaign?.encode() ?? '',
       'docs': Documentary.encode(w.documentaries),
+      'sessions': StreamifySession.encode(w.streamifySessions),
       'listenersPeak': w.playerPeakListeners,
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],

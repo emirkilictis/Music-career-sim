@@ -126,6 +126,7 @@ class Fmt {
         SongVersion.slowed => l.versionSlowed,
         SongVersion.acapella => l.versionAcapella,
         SongVersion.instrumental => l.versionInstrumental,
+        SongVersion.session => l.versionSession,
       };
 
   String singleFormat(SingleFormat f) => switch (f) {
@@ -813,6 +814,7 @@ class Fmt {
       'cannotCloud' => l.errorCannotCloud,
       'noAnniversary' => l.errorNoAnniversary,
       'noPartner' => l.errorNoPartner,
+      'noSession' => l.errorNoSession,
       'noWindow' || 'invalidWindow' => l.errorNoWindow,
       'noSnippet' => l.errorNoSnippet,
       'noOffer' => l.errorNoOffer,

@@ -15,6 +15,7 @@ import 'artist_page.dart';
 import 'editorial_page.dart';
 import 'own_playlist_page.dart';
 import 'playlist_page.dart';
+import 'session_page.dart';
 import 'wrapped_screen.dart';
 
 const _top50 = [
@@ -39,6 +40,7 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
   List<EditorialPlaylist> _editorial = const [];
   bool _playlistOpen = false;
   OwnPlaylistView? _playlist;
+  SessionsView? _sessions;
   int _loadedRevision = -1;
 
   @override
@@ -59,8 +61,10 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
     final editorial = await career.read(Cmd.editorialPlaylists());
     final open = await career.read(Cmd.ownPlaylistOpen());
     final playlist = await career.read(Cmd.ownPlaylist());
+    final sessions = await career.read(Cmd.sessions());
     if (mounted) {
       setState(() {
+        _sessions = sessions;
         _playlistOpen = open;
         _playlist = playlist;
         _me = me;
@@ -218,6 +222,18 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
                     ),
                   ),
                 ),
+              ],
+              // Streamify Sessions (docs K178).
+              if (_sessions case final s?
+                  when s.block != SessionBlock.tooEarly) ...[
+                const SizedBox(height: 26),
+                Text(l.sessTitle, style: h),
+                const SizedBox(height: 12),
+                SessionsCard(
+                    view: s,
+                    onRecord: career.busy
+                        ? null
+                        : () => pushInCareer(context, SessionPage(view: s))),
               ],
               // The editors' playlists (docs K125) and the Billions Club
               // (K132).

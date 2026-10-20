@@ -12,6 +12,7 @@ import 'festivals.dart';
 import 'model.dart';
 import 'award_campaigns.dart';
 import 'documentaries.dart';
+import 'streamify_sessions.dart';
 import 'fan_club.dart';
 import 'imprints.dart';
 import 'own_playlist.dart';
@@ -85,6 +86,9 @@ class World {
 
   /// The player's documentaries (docs K172).
   final List<Documentary> documentaries = [];
+
+  /// The player's Streamify Sessions (docs K178).
+  final List<StreamifySession> streamifySessions = [];
 
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();

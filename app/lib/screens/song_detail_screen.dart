@@ -146,8 +146,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           TextButton(
               onPressed: () => Navigator.pop(c, false), child: Text(l.cancel)),
           FilledButton(
-              onPressed: () => Navigator.pop(c, true),
-              child: Text(l.cloudGo)),
+              onPressed: () => Navigator.pop(c, true), child: Text(l.cloudGo)),
         ],
       ),
     );
@@ -181,8 +180,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-              child:
-                  Text(l.sellTitle, style: Theme.of(c).textTheme.titleLarge),
+              child: Text(l.sellTitle, style: Theme.of(c).textTheme.titleLarge),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -222,7 +220,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     try {
       await widget.state.act(Cmd.sellSong(s.id, pick.artistId));
       if (mounted) {
-        showInfo(context, l.sellDone(s.title, pick.name, fmt.money(pick.feeCents)),
+        showInfo(
+            context, l.sellDone(s.title, pick.name, fmt.money(pick.feeCents)),
             icon: Icons.handshake_rounded);
         Navigator.pop(context);
       }
@@ -271,8 +270,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Text(l.memberSoloHint,
-                style: Theme.of(c).textTheme.bodySmall),
+            child:
+                Text(l.memberSoloHint, style: Theme.of(c).textTheme.bodySmall),
           ),
           for (final m in members)
             ListTile(
@@ -375,29 +374,31 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             child: Text(l.newVersion, style: Theme.of(c).textTheme.titleLarge),
           ),
           for (final v in SongVersion.values)
-            ListTile(
-              enabled:
-                  v.costCents <= money && !s.versions.any((x) => x.$1 == v),
-              leading: Icon(switch (v) {
-                SongVersion.remix => Icons.equalizer_rounded,
-                SongVersion.spedUp => Icons.fast_forward_rounded,
-                SongVersion.slowed => Icons.slow_motion_video_rounded,
-                SongVersion.acapella => Icons.record_voice_over_rounded,
-                SongVersion.instrumental => Icons.piano_rounded,
-              }),
-              title: Text(fmt.songVersion(v)),
-              subtitle: Text([
-                switch (v.boost(year)) {
-                  >= 0.3 => l.waveBig,
-                  >= 0.1 => l.waveMid,
-                  _ => l.waveSmall,
-                },
-                if (v.trendy && year >= 2020) l.waveTrend,
-                if (recent) l.waveLess,
-              ].join(' · ')),
-              trailing: Text(fmt.money(v.costCents)),
-              onTap: () => Navigator.pop(c, v),
-            ),
+            if (v.onOffer)
+              ListTile(
+                enabled:
+                    v.costCents <= money && !s.versions.any((x) => x.$1 == v),
+                leading: Icon(switch (v) {
+                  SongVersion.remix => Icons.equalizer_rounded,
+                  SongVersion.spedUp => Icons.fast_forward_rounded,
+                  SongVersion.slowed => Icons.slow_motion_video_rounded,
+                  SongVersion.acapella => Icons.record_voice_over_rounded,
+                  SongVersion.instrumental => Icons.piano_rounded,
+                  SongVersion.session => Icons.mic_rounded,
+                }),
+                title: Text(fmt.songVersion(v)),
+                subtitle: Text([
+                  switch (v.boost(year)) {
+                    >= 0.3 => l.waveBig,
+                    >= 0.1 => l.waveMid,
+                    _ => l.waveSmall,
+                  },
+                  if (v.trendy && year >= 2020) l.waveTrend,
+                  if (recent) l.waveLess,
+                ].join(' · ')),
+                trailing: Text(fmt.money(v.costCents)),
+                onTap: () => Navigator.pop(c, v),
+              ),
           const SizedBox(height: 8),
         ]),
       ),
@@ -492,8 +493,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Text(l.curatorsTitle,
-                style: Theme.of(c).textTheme.titleLarge),
+            child:
+                Text(l.curatorsTitle, style: Theme.of(c).textTheme.titleLarge),
           ),
           for (final k in CuratorPack.values)
             ListTile(
@@ -786,8 +787,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   if (s.inVault && s.leakedWeek >= 0) ...[
                     const SizedBox(height: 12),
                     Tag(l.leakedTag,
-                        icon: Icons.water_drop_rounded,
-                        color: AppColors.coral),
+                        icon: Icons.water_drop_rounded, color: AppColors.coral),
                     const SizedBox(height: 6),
                     Text(
                         s.canAnswerLeak
@@ -887,9 +887,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       icon: Icon(s.onOwnPlaylist
                           ? Icons.playlist_remove_rounded
                           : Icons.playlist_add_rounded),
-                      label: Text(s.onOwnPlaylist
-                          ? l.ownPlSongRemove
-                          : l.ownPlSongAdd),
+                      label: Text(
+                          s.onOwnPlaylist ? l.ownPlSongRemove : l.ownPlSongAdd),
                     ),
                   if (s.canCloud)
                     TextButton.icon(
@@ -1009,8 +1008,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     if (s.languageOptions.isNotEmpty) ...[
                       const SizedBox(height: 10),
                       Text(
-                          l.languageHint(
-                              fmt.money(Languages.costCents),
+                          l.languageHint(fmt.money(Languages.costCents),
                               Languages.energy.round()),
                           style: TextStyle(
                               color: AppColors.textMuted, fontSize: 12.5)),
@@ -1018,10 +1016,11 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       Wrap(spacing: 8, runSpacing: 8, children: [
                         for (final v in s.languageOptions)
                           ActionChip(
-                            avatar: const Icon(Icons.translate_rounded, size: 16),
+                            avatar:
+                                const Icon(Icons.translate_rounded, size: 16),
                             label: Text(fmt.languageVersion(v)),
-                            onPressed: () => _tool(
-                                Cmd.releaseLanguageVersion(s.id, v)),
+                            onPressed: () =>
+                                _tool(Cmd.releaseLanguageVersion(s.id, v)),
                           ),
                       ]),
                     ],
@@ -1052,8 +1051,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                             color: AppColors.lilac),
                       if (s.rerecordOf >= 0)
                         Tag(l.rerecordTag,
-                            icon: Icons.replay_rounded,
-                            color: AppColors.peach),
+                            icon: Icons.replay_rounded, color: AppColors.peach),
                       if (s.masterShare < 1)
                         Tag(l.mastersTag((s.masterShare * 100).round()),
                             icon: Icons.copyright_rounded,
@@ -1102,8 +1100,13 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         child: TextButton.icon(
                           onPressed: widget.state.busy
                               ? null
-                              : () => buyMastersFlow(context, widget.state,
-                                  s.title, price, Cmd.buySongMaster(s.id), _load),
+                              : () => buyMastersFlow(
+                                  context,
+                                  widget.state,
+                                  s.title,
+                                  price,
+                                  Cmd.buySongMaster(s.id),
+                                  _load),
                           icon: const Icon(Icons.copyright_rounded),
                           label: Text(l.mastersBuyButton(fmt.money(price))),
                         ),

@@ -1640,6 +1640,8 @@ class GameSession {
     if (s.versions.any((x) => x.$1 == v)) {
       throw GameException('versionOut', 'That version is already out');
     }
+    // A session version is by invitation (docs K178).
+    if (!v.onOffer) throw GameException('noSession', 'By invitation only');
     _requireMoney(v.costCents);
     Actions.releaseVersion(world, _p, s, v);
     _saveNow();
@@ -2035,6 +2037,33 @@ class GameSession {
   // ------------------------------------------------- documentary (K172)
 
   DocumentaryView get documentary => DocumentaryView.of(world, _p);
+
+  /// Streamify Sessions (docs K178).
+  SessionsView get sessions => SessionsView.of(
+      world, _p, Streamify.monthlyListeners(_fourWeekStreams()));
+
+  /// Records a Streamify Session: [songId] stripped back and a cover of
+  /// [coverSongId].
+  void recordSession(int songId, int coverSongId) {
+    final listeners = Streamify.monthlyListeners(_fourWeekStreams());
+    if (StreamifySessions.block(world, listeners) != null) {
+      throw GameException('noSession', 'No invitation now');
+    }
+    final own = _ownSong(songId);
+    if (coverSongId < 0 || coverSongId >= world.songs.length) {
+      throw GameException('noSong', 'No such song');
+    }
+    final cover = world.songs[coverSongId];
+    if (!StreamifySessions.canRecord(own, _p) ||
+        !StreamifySessions.canCover(cover, _p)) {
+      throw GameException('noSession', 'Not these songs');
+    }
+    if (_p.creativeEnergy < StreamifySessions.energy) {
+      throw GameException('noEnergy', 'Not enough creativity');
+    }
+    StreamifySessions.record(world, _p, own, cover, listeners);
+    _saveNow();
+  }
 
   /// Starts filming a documentary called [title] under [deal].
   void startDocumentary(DocDeal deal, String title) {

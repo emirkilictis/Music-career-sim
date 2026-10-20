@@ -342,7 +342,11 @@ enum SongVersion {
   spedUp(100000),
   slowed(100000),
   acapella(50000),
-  instrumental(50000);
+  instrumental(50000),
+
+  /// Recorded stripped back at the streaming app's studio, by invitation
+  /// only (docs K178).
+  session(0);
 
   const SongVersion(this.costCents);
   final int costCents;
@@ -362,7 +366,11 @@ enum SongVersion {
                 ? 0.12
                 : 0.03,
         acapella || instrumental => 0.05,
+        session => 0.2,
       };
+
+  /// A version the artist can just put out (not by invitation).
+  bool get onOffer => this != session;
 
   /// Can set off a short-video trend.
   bool get trendy => this == spedUp || this == slowed;

@@ -55,6 +55,7 @@ export 'src/time.dart';
 export 'src/tours.dart';
 export 'src/rival_moves.dart';
 export 'src/stream_windows.dart';
+export 'src/streamify_sessions.dart';
 export 'src/visual_albums.dart';
 export 'src/world.dart';
 export 'src/world_gen.dart';

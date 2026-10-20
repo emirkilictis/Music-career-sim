@@ -154,6 +154,10 @@ int worldHash(World w) {
     addInt(v.kind.index * 100000 + v.week);
     addDouble(v.baseViews);
   }
+  for (final s in w.streamifySessions) {
+    addInt(s.week);
+    addInt(s.coverSongId);
+  }
   for (final d in w.documentaries) {
     addInt(d.startWeek);
     addInt(d.premiered ? 1 : 0);
