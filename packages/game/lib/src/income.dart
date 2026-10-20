@@ -121,7 +121,9 @@ abstract final class Income {
     }
     var albums = 0.0;
     for (final al in w.albums) {
-      if (al.artistId != p.id) continue;
+      if (al.artistId != p.id && w.artists[al.artistId].managedBy != p.id) {
+        continue;
+      }
       final paid = al.lifetimePure -
           (al.bundle == AlbumBundle.tickets ? al.bundleUnits : 0);
       albums += paid * 600 * Rerecords.albumShare(p, al);

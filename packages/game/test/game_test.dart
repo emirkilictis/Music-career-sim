@@ -1602,6 +1602,50 @@ void main() {
       g.close();
     });
 
+    test('a member\'s solo album (K173)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2018,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true,
+              kind: ArtistKind.vocalGroup,
+              members: ['Ari', 'Bo', 'Cy']));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      expect(
+          () => g.releaseMemberAlbum(0, 'Solo', ids, type: AlbumType.mixtape),
+          _code('invalidType'));
+      final money = p.moneyCents;
+      final v = g.releaseMemberAlbum(2, 'Cy Alone', ids);
+      expect(money - p.moneyCents,
+          Credits.soloCostCents(g.world, p, 2, Campaign.standard));
+      expect(v.artistName, 'Cy');
+      expect(v.trackIds, hasLength(8));
+      for (final id in ids) {
+        expect(g.world.songs[id].status, SongStatus.scrapped);
+      }
+      final before = p.moneyCents;
+      g.advanceWeeks(2, stop: SkipStop.never);
+      final m = g.members[2];
+      expect(m.albums.single.title, 'Cy Alone');
+      expect(m.albums.single.firstWeek, greaterThan(0));
+      expect(m.songs, hasLength(8));
+      // The group earns from it.
+      expect(p.moneyCents, greaterThan(before));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.members[2].albums.single.id, v.id);
+      g.close();
+    });
+
     test('a documentary (K172)', () {
       var g = GameSession.start(slots, _setup(startYear: 2012));
       expect(g.documentary.block, DocBlock.tooEarly);

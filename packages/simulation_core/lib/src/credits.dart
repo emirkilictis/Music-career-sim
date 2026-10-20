@@ -88,6 +88,15 @@ abstract final class Credits {
     if (group.moneyCents < cost) throw ActionException('Not enough money');
     final m = memberArtist(w, group, member);
     group.moneyCents -= cost;
+    final song = _transfer(w, group, m, s);
+    Actions.releaseSingle(w, m, song,
+        campaign: campaign, prepaid: true, paidCents: cost);
+    return song;
+  }
+
+  /// Moves [group]'s vault song [s] to member [m]: the member's own
+  /// recording of it; the group's version is gone.
+  static Song _transfer(World w, Artist group, Artist m, Song s) {
     final song = Song(
       id: w.songs.length,
       title: s.title,
@@ -113,9 +122,32 @@ abstract final class Credits {
     s.soldTo = song.id;
     w.dirtySongs.add(s.id);
     w.dirtyArtists.add(group.id);
-    Actions.releaseSingle(w, m, song,
-        campaign: campaign, prepaid: true, paidCents: cost);
     return song;
+  }
+
+  /// Album types a member can put out.
+  static const memberAlbumTypes = [AlbumType.ep, AlbumType.album];
+
+  /// Puts out [group]'s vault songs [songs] as member [member]'s solo
+  /// EP or album [title] (docs K173): under the member's name, paid for
+  /// by the group, earning for it. Returns the album.
+  static Album releaseMemberAlbum(World w, Artist group, int member,
+      String title, List<Song> songs,
+      {AlbumType type = AlbumType.album,
+      Campaign campaign = Campaign.standard}) {
+    if (!memberAlbumTypes.contains(type)) throw ActionException('EP or album');
+    for (final s in songs) {
+      if (s.primaryArtistId != group.id || s.status != SongStatus.vault) {
+        throw ActionException('Only unreleased songs');
+      }
+    }
+    final cost = soloCostCents(w, group, member, campaign);
+    if (group.moneyCents < cost) throw ActionException('Not enough money');
+    final m = memberArtist(w, group, member);
+    group.moneyCents -= cost;
+    final ids = [for (final s in songs) _transfer(w, group, m, s).id];
+    return Actions.releaseAlbum(w, m, title, ids,
+        type: type, campaign: campaign, prepaid: true, paidCents: cost);
   }
 
   /// Whether [a] is run by [owner] (a member's solo name).

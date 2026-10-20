@@ -2274,6 +2274,33 @@ class GameSession {
     _saveNow();
   }
 
+  /// Puts out vault songs [songIds] as member [member]'s solo EP or
+  /// album [title] (docs K173).
+  AlbumView releaseMemberAlbum(int member, String title, List<int> songIds,
+      {AlbumType type = AlbumType.album,
+      Campaign campaign = Campaign.standard}) {
+    _checkMember(member);
+    if (!Credits.memberAlbumTypes.contains(type)) {
+      throw GameException('invalidType', 'An EP or an album');
+    }
+    final t = _checkAlbum(title, songIds, type, const [0]);
+    for (final id in songIds) {
+      if (world.songs[id].status != SongStatus.vault ||
+          _p.scheduled.any((sr) => sr.songIds.contains(id))) {
+        throw GameException('notInVault', 'Only unreleased songs');
+      }
+    }
+    if (campaign.index > Distribution.maxCampaign(_p).index) {
+      throw GameException('campaignLocked', 'The label cannot run this');
+    }
+    _requireMoney(Credits.soloCostCents(world, _p, member, campaign));
+    final al = Credits.releaseMemberAlbum(world, _p, member, t,
+        [for (final id in songIds) world.songs[id]],
+        type: type, campaign: campaign);
+    _saveNow();
+    return AlbumView.of(world, al);
+  }
+
   void _checkMember(int member) {
     if (!_p.kind.isGroup) throw GameException('notGroup', 'Only a group');
     if (member < 0 || member >= _p.members.length) {

@@ -5362,7 +5362,54 @@
     }
   },
   "membersSection": "Members' solo records",
-  "membersHint": "Put out a vault song as a member's solo single from its page.",
+  "membersHint": "Put out a vault song as a member's solo single from its page, or a solo EP or album here.",
+  "memberAlbumButton": "Solo EP or album",
+  "memberAlbumScreen": "{name}'s solo record",
+  "@memberAlbumScreen": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "memberAlbumHint": "Vault songs go out under {name}'s own name. The group pays the campaign and keeps the money; the songs leave the group's vault.",
+  "@memberAlbumHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "memberAlbumDone": "“{title}” is out as {name}'s solo record.",
+  "@memberAlbumDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "memberAlbumLine": "{type} · first week {units}",
+  "@memberAlbumLine": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "memberAlbumPeak": "#{peak} peak",
+  "@memberAlbumPeak": {
+    "placeholders": {
+      "peak": {
+        "type": "int"
+      }
+    }
+  },
   "membersNoSolo": "No solo record yet",
   "guestSection": "Your features",
   "guestHint": "Your verses on others' songs chart under their name; {share}% of what they earn comes to you.",

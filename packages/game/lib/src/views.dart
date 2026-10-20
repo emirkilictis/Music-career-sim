@@ -2742,6 +2742,17 @@ class MemberView {
                 Credits.memberIdOf(group, index))
               WrittenSongView.of(w, w.songs[id],
                   earnedCents: w.songs[id].revenueCents),
+        ],
+        albums = [
+          for (final al in w.albums.reversed)
+            if (al.artistId == Credits.memberIdOf(group, index))
+              (
+                id: al.id,
+                title: al.title,
+                type: al.type,
+                firstWeek: al.firstWeekUnits,
+                peak: al.statsOrNull(Charts.usAlbums)?.peak ?? 0
+              )
         ];
   final int index;
   final String name;
@@ -2751,6 +2762,12 @@ class MemberView {
   final double fans;
   final double fame;
   final List<WrittenSongView> songs;
+
+  /// Their solo EPs and albums (docs K173), newest first: first week
+  /// units and best US albums chart place (0: never charted).
+  final List<
+      ({int id, String title, AlbumType type, double firstWeek, int peak})>
+      albums;
 
   static Artist? _memberOrNull(World w, Artist group, int i) {
     final id = Credits.memberIdOf(group, i);

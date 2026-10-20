@@ -15,7 +15,9 @@ import '../widgets/income_card.dart';
 import '../widgets/image_pickers.dart';
 import 'awards_screen.dart';
 import 'discography_screen.dart';
+import 'album_detail_screen.dart';
 import 'labels_screen.dart';
+import 'member_album_screen.dart';
 import 'song_detail_screen.dart';
 
 /// Career summary: totals by region, #1s, year by year, all songs.
@@ -32,6 +34,9 @@ class CareerScreen extends StatefulWidget {
 class _CareerScreenState extends State<CareerScreen> {
   List<CareerYear> _years = const [];
   List<SongView> _songs = const [];
+
+  /// Vault songs not set for a release, for members' solo records.
+  List<SongView> _vault = const [];
   HonorsView? _honors;
   List<WrittenSongView> _written = const [];
   List<MemberView> _members = const [];
@@ -83,6 +88,13 @@ class _CareerScreenState extends State<CareerScreen> {
         _catalog = catalog;
         final fmt = context.fmt;
         final week = career.week;
+        _vault = [
+          for (final s in songs)
+            if (s.inVault &&
+                s.scheduledSingleWeek < 0 &&
+                s.scheduledAlbumWeek < 0)
+              s
+        ];
         _songs = songs.where((s) => !s.inVault).toList()
           ..sort((a, b) =>
               fmt.songMainValue(b, week).compareTo(fmt.songMainValue(a, week)));
@@ -682,7 +694,41 @@ class _CareerScreenState extends State<CareerScreen> {
                             : l.memberFans(fmt.compact(m.fans)),
                         style: TextStyle(
                             color: AppColors.textMuted, fontSize: 12.5)),
+                    for (final a in m.albums)
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.album_outlined),
+                        title: Text(a.title,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w700)),
+                        subtitle: Text([
+                          l.memberAlbumLine(fmt.albumType(a.type),
+                              fmt.compact(a.firstWeek)),
+                          if (a.peak > 0) l.memberAlbumPeak(a.peak),
+                        ].join(' · ')),
+                        onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => AlbumDetailScreen(
+                                    albumId: a.id, state: career))),
+                      ),
                     for (final w in m.songs) _creditTile(w, career),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        icon: const Icon(Icons.album_outlined, size: 18),
+                        label: Text(l.memberAlbumButton),
+                        onPressed: career.busy
+                            ? null
+                            : () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => MemberAlbumScreen(
+                                        state: career,
+                                        member: m,
+                                        songs: _vault))),
+                      ),
+                    ),
                   ],
                 ]),
           ),

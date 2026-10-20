@@ -1881,7 +1881,11 @@ class Simulator {
     }
     for (final id in world.activeAlbumIds) {
       final al = world.albums[id];
-      if (al.artistId != p.id) continue;
+      // Members' solo records pay the group (docs K173).
+      if (al.artistId != p.id &&
+          world.artists[al.artistId].managedBy != p.id) {
+        continue;
+      }
       final share = al.masterShare ??= p.artistShare;
       // Copies bundled with tickets pay nothing (docs K144).
       final paid = al.weekPure -

@@ -333,6 +333,10 @@ abstract final class Cmd {
   static SessionCmd<void> releaseMemberSolo(
           int member, int songId, Campaign campaign) =>
       (s) => s.releaseMemberSolo(member, songId, campaign: campaign);
+  static SessionCmd<AlbumView> releaseMemberAlbum(int member, String title,
+          List<int> songIds, AlbumType type, Campaign campaign) =>
+      (s) => s.releaseMemberAlbum(member, title, songIds,
+          type: type, campaign: campaign);
   static SessionCmd<List<WrittenSongView>> guestSongs() =>
       (s) => s.guestSongs;
   static SessionCmd<DistributionView> distribution() =>
