@@ -457,6 +457,14 @@ class PitchDeclined extends GameEvent {
   bool get isMajor => false;
 }
 
+/// A player's holiday song is back for the season (docs K136).
+class HolidayReturn extends GameEvent {
+  const HolidayReturn(this.songId);
+  final int songId;
+  @override
+  bool get isMajor => false;
+}
+
 /// The paid creators did not start a trend (docs K131).
 class CreatorsFlopped extends GameEvent {
   const CreatorsFlopped(this.songId);

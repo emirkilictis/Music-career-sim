@@ -1291,6 +1291,12 @@ k('exclusiveTitle','Fruit Music exclusive','Fruit Music özel yayını')
 k('exclusiveHint','Fruit Music pays {fee} now to stream it alone for its first {weeks} weeks. Most people cannot stream it there yet: fewer streams and chart units at first, sales are not affected.','Fruit Music ilk {weeks} hafta sadece kendisinde olması için şimdi {fee} öder. Çoğu kişi orada dinleyemez: ilk haftalarda daha az stream ve liste birimi, satışlar etkilenmez.', fee='String', weeks='int')
 k('exclusiveLine','Fruit Music exclusive until {week}, paid {fee}.','{week} tarihine kadar Fruit Music özel yayını, {fee} ödendi.', fee='String', week='String')
 
+# Holiday songs (K136)
+k('holidaySong','Holiday song','Yılbaşı şarkısı')
+k('holidaySongHint','Little played most of the year, back every December: a good one earns more every Christmas.','Yılın çoğunda az dinlenir, her aralıkta geri döner: iyisi her Noel daha çok kazandırır.')
+k('holidayTag','Holiday song','Yılbaşı şarkısı')
+k('eventHolidayReturn','It is that time of year: “{title}” is back on playlists for the holidays.','Yine o zaman geldi: “{title}” yılbaşı için listelere döndü.', title='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

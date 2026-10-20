@@ -6,6 +6,7 @@ import 'critics.dart';
 import 'contracts.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
+import 'holidays.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
@@ -309,6 +310,7 @@ abstract final class Actions {
     bool aiMode = false,
     String? title,
     List<int>? genres,
+    bool holiday = false,
   }) {
     final songGenres = genres ?? [a.genre];
     if (songGenres.isEmpty ||
@@ -428,6 +430,13 @@ abstract final class Actions {
       estimatedGrade: grade,
     );
     song.gradeSpread = (1.5 * estimateNoise).round();
+    // Holiday songs (docs K136): the player's choice; now and then a
+    // rival records one too.
+    song.holiday = holiday ||
+        (a.tier != ArtistTier.player &&
+            Holidays.writingSeason(GameTime.weekOfYear(w.week)) &&
+            keyedUnit(w.seed, w.week, song.id, RngPurpose.holiday) <
+                Holidays.aiShare);
     song.productionCostCents = paidCents;
     w.songs.add(song);
     w.dirtySongs.add(song.id);

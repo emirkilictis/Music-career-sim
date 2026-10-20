@@ -394,6 +394,7 @@ class GameSession {
     BudgetTier budget = BudgetTier.medium,
     List<int>? genres,
     String? title,
+    bool holiday = false,
   }) {
     final p = _p;
     if (world.week < p.burnoutUntilWeek) {
@@ -431,7 +432,8 @@ class GameSession {
         cowriter: cowriter,
         budget: budget,
         genres: g,
-        title: t);
+        title: t,
+        holiday: holiday);
     _saveNow();
     return SongView.of(world, s);
   }
@@ -2404,6 +2406,17 @@ class GameSession {
             streamsAgo: w.songWeekStreamsIn(s, ChartMarket.global));
         for (final m in Platforms.videoMilestones) {
           if (before < m && now >= m) events.add(VideoMilestone(id, m));
+        }
+      }
+    }
+    // The player's holiday songs back for the season (docs K136).
+    if (GameTime.weekOfYear(r.week) == Holidays.returnWeek + 1) {
+      for (final id in w.playerSongIds) {
+        final s = w.songs[id];
+        if (s.holiday &&
+            s.status == SongStatus.active &&
+            s.releasedWeek < GameTime.firstWeekOf(GameTime.yearOf(r.week))) {
+          events.add(HolidayReturn(id));
         }
       }
     }

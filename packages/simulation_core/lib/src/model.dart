@@ -820,6 +820,10 @@ class Song with Charted {
   /// (the calibrated play; a crossover is the player's call).
   RadioFormat get onFormat => radioFormat ?? RadioFormat.best([genre]);
 
+  /// A holiday song (docs K136): little played most of the year, back
+  /// every December.
+  bool holiday = false;
+
   /// A paid creator campaign on the short-video app (docs K131): when it
   /// started (-1: none), how big, and how it went.
   int creatorWeek = -1;

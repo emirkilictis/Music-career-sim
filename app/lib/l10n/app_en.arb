@@ -4589,5 +4589,16 @@
         "type": "String"
       }
     }
+  },
+  "holidaySong": "Holiday song",
+  "holidaySongHint": "Little played most of the year, back every December: a good one earns more every Christmas.",
+  "holidayTag": "Holiday song",
+  "eventHolidayReturn": "It is that time of year: “{title}” is back on playlists for the holidays.",
+  "@eventHolidayReturn": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
   }
 }

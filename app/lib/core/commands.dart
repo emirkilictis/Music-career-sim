@@ -87,13 +87,15 @@ abstract final class Cmd {
     required BudgetTier budget,
     required List<int> genres,
     String? title,
+    bool holiday = false,
   }) =>
       (s) => s.writeSong(
           producerId: producerId,
           cowriterId: cowriterId,
           budget: budget,
           genres: genres,
-          title: title);
+          title: title,
+          holiday: holiday);
 
   static SessionCmd<void> releaseSingle(int songId, Campaign campaign,
           [RadioPush radio = RadioPush.none]) =>

@@ -247,6 +247,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       RivalBotsCaught() => 'rival bots caught',
       PitchDeclined() => 'pitch declined',
       CreatorsFlopped() => 'creator campaign flopped ${e.songId}',
+      HolidayReturn() => 'holiday song ${e.songId} is back',
       BrandDealBroken() => 'brand deal broken: ${e.brand.name}',
       FestivalPlayed() =>
         'festival ${e.festival} (${e.slot.name}): ${_c(e.watched)} watched',

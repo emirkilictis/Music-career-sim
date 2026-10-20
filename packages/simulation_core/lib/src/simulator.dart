@@ -14,6 +14,7 @@ import 'config/era_table.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'festivals.dart';
+import 'holidays.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'music_show.dart';
@@ -146,6 +147,14 @@ class Simulator {
         : Actions.releaseScheduled(w, player);
     // Playlist editors answer this week's pitches (docs K97).
     StreamingTools.answerPitches(w);
+    // Holiday songs come back for the season (docs K136).
+    if (GameTime.weekOfYear(w.week) == Holidays.returnWeek) {
+      for (final a in w.artists) {
+        for (final id in List.of(a.dormantSongIds)) {
+          if (w.songs[id].holiday) Lifecycle.reactivateSong(w, w.songs[id]);
+        }
+      }
+    }
 
     // 1–2. Scheduled AI activity.
     final clashes = AiPlanner.step(w);
@@ -423,7 +432,12 @@ class Simulator {
               w.week < w.albums[s.albumId].exclusiveUntil
           ? StreamingTools.exclusiveKeep(year)
           : 1.0;
-      final a = (fanPart + (casPart + pubPart + viralPart) * hit) *
+      // Holiday songs: little played most of the year, everywhere in
+      // December (docs K136).
+      final season = Holidays.season(s, w.week);
+      final holidayPart = Holidays.part(c, s, w.week);
+      final a = ((fanPart + (casPart + pubPart + viralPart) * hit) * season +
+              holidayPart * hit) *
           qMult *
           noise *
           trackShare *
@@ -464,7 +478,11 @@ class Simulator {
       }
       final all = fanPart + casPart + pubPart + viralPart;
       fanFrac[i] = all > 0 ? fanPart / all : 0;
-      s.lastReach = (casPart + pubPart + viralPart) * hit * qMult * trackShare;
+      s.lastReach =
+          ((casPart + pubPart + viralPart) * season + holidayPart) *
+              hit *
+              qMult *
+              trackShare;
       // What the campaign added over none at all, for the player's
       // profit/loss (docs K57).
       if (p.tier == ArtistTier.player) {
@@ -1231,6 +1249,10 @@ class Simulator {
       final s = w.songs[ids[i]];
       final promoAge = w.week - (s.isSingle ? s.singleWeek : s.releasedWeek);
       if (promoAge < c.activeMinAgeWeeks) continue;
+      // A holiday song stays out for its whole season (docs K136).
+      if (s.holiday && Holidays.inSeason(GameTime.weekOfYear(w.week))) {
+        continue;
+      }
       var near = false;
       for (final ch in Charts.mainSongCharts) {
         if (pts[ch][i] >= c.dormantShareOfCutoff * w.chartCutoff[ch] &&

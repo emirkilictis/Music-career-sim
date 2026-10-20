@@ -1331,5 +1331,9 @@
   "radioFormatOption": "{format} · %{play} · süre %{run}",
   "exclusiveTitle": "Fruit Music özel yayını",
   "exclusiveHint": "Fruit Music ilk {weeks} hafta sadece kendisinde olması için şimdi {fee} öder. Çoğu kişi orada dinleyemez: ilk haftalarda daha az stream ve liste birimi, satışlar etkilenmez.",
-  "exclusiveLine": "{week} tarihine kadar Fruit Music özel yayını, {fee} ödendi."
+  "exclusiveLine": "{week} tarihine kadar Fruit Music özel yayını, {fee} ödendi.",
+  "holidaySong": "Yılbaşı şarkısı",
+  "holidaySongHint": "Yılın çoğunda az dinlenir, her aralıkta geri döner: iyisi her Noel daha çok kazandırır.",
+  "holidayTag": "Yılbaşı şarkısı",
+  "eventHolidayReturn": "Yine o zaman geldi: “{title}” yılbaşı için listelere döndü."
 }

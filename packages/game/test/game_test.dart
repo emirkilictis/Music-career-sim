@@ -1362,6 +1362,39 @@ void main() {
       g.close();
     });
 
+    test('a holiday song sleeps all year and comes back in December (K136)',
+        () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      g.world.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high, holiday: true).id;
+      expect(g.song(id).holiday, isTrue);
+      g.releaseSingle(id);
+      double streamsAt(int weekOfYear) {
+        while (GameTime.weekOfYear(g.week - 1) != weekOfYear) {
+          g.advanceWeek();
+        }
+        return g.world.songs[id].weekStreams;
+      }
+
+      final summer = streamsAt(30);
+      final christmas = streamsAt(51);
+      expect(christmas, greaterThan(summer * 2));
+      // Next year it is back, with news.
+      final events = <GameEvent>[];
+      while (GameTime.weekOfYear(g.week - 1) != Holidays.returnWeek + 1) {
+        events.addAll(g.advanceWeek().events);
+      }
+      expect(events.whereType<HolidayReturn>().map((e) => e.songId),
+          contains(id));
+      expect(g.world.songs[id].status, SongStatus.active);
+      g.close();
+    });
+
     test('a streaming exclusive pays now and streams less at first (K135)',
         () {
       (AlbumView, int, double) run(bool exclusive) {

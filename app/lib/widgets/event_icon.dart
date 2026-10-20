@@ -74,6 +74,7 @@ class EventIcon extends StatelessWidget {
       RivalBotsCaught() => (Icons.newspaper_rounded, AppColors.textMuted),
       PitchDeclined() => (Icons.playlist_remove_rounded, AppColors.textMuted),
       CreatorsFlopped() => (Icons.videocam_off_outlined, AppColors.textMuted),
+      HolidayReturn() => (Icons.ac_unit_rounded, AppColors.sky),
       BrandDealBroken() => (Icons.link_off_rounded, AppColors.coral),
     };
     return IconBubble(icon, color: color, size: size);

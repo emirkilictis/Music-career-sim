@@ -16,6 +16,7 @@ export 'src/config/regions.dart';
 export 'src/config/sim_config.dart';
 export 'src/features.dart';
 export 'src/festivals.dart';
+export 'src/holidays.dart';
 export 'src/lifecycle.dart';
 export 'src/model.dart';
 export 'src/music_show.dart';

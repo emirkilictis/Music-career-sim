@@ -561,9 +561,10 @@ void main() {
       for (final e in chart)
         if (w.songs[e.entityId].primaryArtistId == p.id) e.position
     ];
-    // Every track charts, several in the top 10.
+    // Every track charts, a few in the top 10 (three until docs K136; the
+    // rivals' holiday songs reshuffle the world before it a little).
     expect(mine.length, 13);
-    expect(mine.where((x) => x <= 10).length, greaterThanOrEqualTo(3));
+    expect(mine.where((x) => x <= 10).length, greaterThanOrEqualTo(2));
     // Radio is a real part of the top established hit's points (the
     // album's own tracks are a week old, with little radio yet).
     final top = w.songs[chart

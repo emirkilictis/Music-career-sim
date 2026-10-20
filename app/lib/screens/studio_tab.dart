@@ -20,6 +20,9 @@ class StudioTab extends StatefulWidget {
 class _StudioTabState extends State<StudioTab> {
   final _title = TextEditingController();
   List<int>? _genres;
+
+  /// Writing a holiday song (docs K136).
+  bool _holiday = false;
   BudgetTier _budget = BudgetTier.low;
   int? _producer;
   int? _cowriter;
@@ -200,6 +203,7 @@ class _StudioTabState extends State<StudioTab> {
         budget: _budget,
         genres: _genres ?? [career.player.genre],
         title: title.isEmpty ? null : title,
+        holiday: _holiday,
       ));
       _title.clear();
       if (!mounted) return;
@@ -293,6 +297,15 @@ class _StudioTabState extends State<StudioTab> {
                 label: l.genre,
                 value: fmt.genres(genres),
                 onTap: () => _pickGenres(genres),
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                value: _holiday,
+                onChanged: (v) => setState(() => _holiday = v),
+                title: Text(l.holidaySong,
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                subtitle: Text(l.holidaySongHint),
               ),
               _ChoiceRow(
                 label: l.producer,

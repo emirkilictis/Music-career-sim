@@ -115,6 +115,7 @@ int worldHash(World w) {
     addInt(s.autoplay.index);
     addInt(s.pitchWeek);
     addInt(s.creatorWeek);
+    addInt(s.holiday ? 1 : 0);
     addInt(s.radioFormat?.index ?? -1);
     addInt(s.creatorTier.index);
     addInt(s.creatorResult.index);

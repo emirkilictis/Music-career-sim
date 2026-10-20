@@ -325,6 +325,7 @@ class SongView {
                       r.rank <= Actions.maxRadioPush(w.player!.label).rank)
                     r: Actions.radioUpgradeCost(w.player!, s, r),
               },
+        holiday = s.holiday,
         creatorWeek = s.creatorWeek,
         creatorTier = s.creatorTier,
         creatorResult = s.creatorResult,
@@ -403,6 +404,9 @@ class SongView {
   /// In the autoplay programme (docs K96), and how far (K128).
   final bool autoplay;
   final AutoplayLevel autoplayLevel;
+
+  /// A holiday song (docs K136).
+  final bool holiday;
 
   /// A creator campaign on the short-video app (docs K131): when it
   /// started (-1: none), its size, how it went; and what each size costs

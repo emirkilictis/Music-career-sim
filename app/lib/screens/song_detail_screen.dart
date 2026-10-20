@@ -605,6 +605,9 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Wrap(spacing: 8, runSpacing: 8, children: [
+                      if (s.holiday)
+                        Tag(l.holidayTag,
+                            icon: Icons.ac_unit_rounded, color: AppColors.sky),
                       if (s.botStatus == BotStatus.running &&
                           s.botWeeksLeft > 0)
                         Tag(l.botsRunning(s.botWeeksLeft),
