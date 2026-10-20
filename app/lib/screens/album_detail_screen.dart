@@ -350,6 +350,35 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               ),
             ],
           ],
+          // Anniversary reissues (docs K149).
+          if (a.anniversaryDue > 0) ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () async {
+                try {
+                  await widget.state.act(Cmd.reissueAnniversary(a.id));
+                  if (context.mounted) {
+                    showInfo(context,
+                        l.anniversaryDone(a.anniversaryDue, a.title),
+                        icon: Icons.cake_outlined);
+                  }
+                  _load();
+                } catch (e) {
+                  if (context.mounted) showError(context, e);
+                }
+              },
+              icon: const Icon(Icons.cake_outlined),
+              label: Text(l.anniversaryButton(a.anniversaryDue,
+                  fmt.money(Anniversaries.costCents()))),
+            ),
+            const SizedBox(height: 4),
+            Text(l.anniversaryHint,
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+          ],
+          for (final n in a.anniversariesMarked) ...[
+            const SizedBox(height: 6),
+            _Line(icon: Icons.cake_outlined, text: l.anniversaryLine(n)),
+          ],
           // The whole album on the app's Marquee (docs K147).
           if (a.marqueeCostCents case final cost?) ...[
             const SizedBox(height: 10),

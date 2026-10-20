@@ -1362,6 +1362,52 @@ void main() {
       g.close();
     });
 
+    test('an anniversary reissue: remastered, with a vinyl (K149)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final w = g.world;
+      final p = w.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final fresh = g.releaseAlbum('New', ids);
+      expect(g.album(fresh.id).anniversaryDue, 0);
+      expect(() => g.reissueAnniversary(fresh.id), _code('noAnniversary'));
+      // An album from ten years ago, long in the catalog.
+      final old = Album(
+          id: w.albums.length,
+          title: 'Classic',
+          artistId: p.id,
+          type: AlbumType.album,
+          releaseWeek: g.week - 10 * GameTime.weeksPerYear,
+          songIds: ids,
+          quality: 70)
+        ..status = AlbumStatus.dormant;
+      w.albums.add(old);
+      expect(g.album(old.id).anniversaryDue, 10);
+      final money = g.player.moneyCents;
+      final boost = w.songs[ids.first].versionBoost;
+      g.reissueAnniversary(old.id);
+      expect(money - g.player.moneyCents, Anniversaries.costCents());
+      expect(old.status, AlbumStatus.active);
+      expect(w.songs[ids.first].versionBoost - boost,
+          closeTo(Anniversaries.remasterBoost, 1e-9));
+      expect(old.variantFormats.last, EditionFormat.vinyl.index);
+      expect(g.album(old.id).anniversariesMarked, [10]);
+      expect(g.album(old.id).anniversaryDue, 0);
+      expect(() => g.reissueAnniversary(old.id), _code('noAnniversary'));
+      g.advanceWeek();
+      expect(g.world.albums[old.id].weekPure, greaterThan(0));
+      g.close();
+    });
+
     test('a free upload to the audio site, then out for real (K148)', () {
       (GameSession, int) start(int year) {
         final g = GameSession.start(

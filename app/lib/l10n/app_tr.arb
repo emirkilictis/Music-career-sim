@@ -1463,5 +1463,10 @@
   "cloudDone": "“{title}” NoiseCloud'da.",
   "cloudOnlyTag": "Sadece NoiseCloud'da · {plays} dinlenme",
   "cloudOfficialHint": "Her yere ve listelere çıkması için single ya da albümle çıkar.",
-  "cloudFromTag": "NoiseCloud'da patladı · orada {plays} dinlenme"
+  "cloudFromTag": "NoiseCloud'da patladı · orada {plays} dinlenme",
+  "errorNoAnniversary": "Şu an yıl dönümü değil: 10, 20, 25 ya da 30. yıl, her biri bir kez.",
+  "anniversaryButton": "{years}. yıl dönümü baskısı · {cost}",
+  "anniversaryHint": "Yeniden mastering ve koleksiyonluk plak: eski hayranlar yeniden alır, şarkıları bir süre yeniden dinlenir.",
+  "anniversaryDone": "{title} albümünün {years}. yıl dönümü baskısı çıktı.",
+  "anniversaryLine": "{years}. yıl dönümü baskısı çıktı"
 }

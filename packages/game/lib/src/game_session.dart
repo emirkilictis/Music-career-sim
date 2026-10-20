@@ -1342,6 +1342,20 @@ class GameSession {
   }
 
   /// Pays creators on the short-video app to use a song's sound (K131).
+  /// Reissues album [albumId] for its anniversary (docs K149).
+  void reissueAnniversary(int albumId) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    if (!Anniversaries.can(world, _p, al)) {
+      throw GameException('noAnniversary', 'Not an anniversary now');
+    }
+    _requireMoney(Anniversaries.costCents());
+    Anniversaries.reissue(world, _p, al);
+    _saveNow();
+  }
+
   /// Puts vault song [songId] up for free on the audio-sharing site
   /// (docs K148).
   void uploadToCloud(int songId) {

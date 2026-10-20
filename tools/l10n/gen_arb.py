@@ -1449,6 +1449,13 @@ k('cloudOnlyTag','Only on NoiseCloud · {plays} plays','Sadece NoiseCloud\'da ·
 k('cloudOfficialHint','Release it as a single or on a record to put it everywhere and on the charts.','Her yere ve listelere çıkması için single ya da albümle çıkar.')
 k('cloudFromTag','Broke on NoiseCloud · {plays} plays there','NoiseCloud\'da patladı · orada {plays} dinlenme', plays='String')
 
+# Anniversary reissues (docs K149).
+k('errorNoAnniversary','Not an anniversary now: 10, 20, 25 or 30 years on, once each.','Şu an yıl dönümü değil: 10, 20, 25 ya da 30. yıl, her biri bir kez.')
+k('anniversaryButton','{years}th anniversary edition · {cost}','{years}. yıl dönümü baskısı · {cost}', years='int', cost='String')
+k('anniversaryHint','Remastered, with a collector\'s vinyl: old fans buy it again and its songs are played again for a while.','Yeniden mastering ve koleksiyonluk plak: eski hayranlar yeniden alır, şarkıları bir süre yeniden dinlenir.')
+k('anniversaryDone','The {years}th anniversary edition of {title} is out.','{title} albümünün {years}. yıl dönümü baskısı çıktı.', years='int', title='String')
+k('anniversaryLine','{years}th anniversary edition out','{years}. yıl dönümü baskısı çıktı', years='int')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -154,6 +154,7 @@ int worldHash(World w) {
     addDouble(al.masterShare ?? -1);
     addInt(al.bundle.index);
     addInt(al.liveTour);
+    addInt(al.anniversaries);
     addDouble(al.bundleUnits);
     addCharts(al);
   }

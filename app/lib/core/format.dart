@@ -777,6 +777,7 @@ class Fmt {
       'cannotBundle' => l.errorCannotBundle,
       'noMarquee' => l.errorNoMarquee,
       'cannotCloud' => l.errorCannotCloud,
+      'noAnniversary' => l.errorNoAnniversary,
       'noShowcase' => l.errorNoShowcase,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,

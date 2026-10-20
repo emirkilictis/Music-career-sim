@@ -637,6 +637,14 @@ class AlbumView {
         exclusiveFeeCents = al.exclusiveFeeCents,
         bundle = al.bundle,
         isLive = al.isLive,
+        anniversaryDue = w.player != null &&
+                Anniversaries.can(w, w.player!, al)
+            ? Anniversaries.years[Anniversaries.due(w, al)]
+            : 0,
+        anniversariesMarked = [
+          for (var i = 0; i < Anniversaries.years.length; i++)
+            if (al.anniversaries & (1 << i) != 0) Anniversaries.years[i]
+        ],
         marqueeCostCents = StreamingTools.canMarqueeAlbum(w, al)
             ? StreamingTools.albumMarqueeCostCents(w.player!)
             : null,
@@ -737,6 +745,11 @@ class AlbumView {
 
   /// A live album (docs K146).
   final bool isLive;
+
+  /// Anniversary reissues (docs K149): the one it can have now (0: none)
+  /// and the ones it had.
+  final int anniversaryDue;
+  final List<int> anniversariesMarked;
 
   /// The Marquee for the whole album (docs K147): its cost now (null:
   /// not possible) and whether it ran.

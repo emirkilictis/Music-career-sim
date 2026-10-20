@@ -5074,5 +5074,37 @@
         "type": "String"
       }
     }
+  },
+  "errorNoAnniversary": "Not an anniversary now: 10, 20, 25 or 30 years on, once each.",
+  "anniversaryButton": "{years}th anniversary edition · {cost}",
+  "@anniversaryButton": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "anniversaryHint": "Remastered, with a collector's vinyl: old fans buy it again and its songs are played again for a while.",
+  "anniversaryDone": "The {years}th anniversary edition of {title} is out.",
+  "@anniversaryDone": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "anniversaryLine": "{years}th anniversary edition out",
+  "@anniversaryLine": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
   }
 }

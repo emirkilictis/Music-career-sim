@@ -2,6 +2,7 @@
 library;
 
 export 'src/actions.dart';
+export 'src/anniversaries.dart';
 export 'src/audience.dart';
 export 'src/awards.dart';
 export 'src/brands.dart';

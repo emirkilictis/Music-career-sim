@@ -997,6 +997,10 @@ class Album with Charted {
   AlbumBundle bundle = AlbumBundle.none;
   double bundleUnits = 0;
 
+  /// Anniversaries it was reissued for, a bit per [Anniversaries.years]
+  /// entry (docs K149).
+  int anniversaries = 0;
+
   /// A live album: the start week of the tour it was recorded on (-1: a
   /// studio record; docs K146).
   int liveTour = -1;

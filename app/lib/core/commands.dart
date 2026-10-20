@@ -247,6 +247,10 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// An anniversary reissue (docs K149).
+  static SessionCmd<void> reissueAnniversary(int albumId) =>
+      (s) => s.reissueAnniversary(albumId);
+
   /// A free upload to the audio site (docs K148).
   static SessionCmd<void> uploadToCloud(int songId) =>
       (s) => s.uploadToCloud(songId);
