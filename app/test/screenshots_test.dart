@@ -707,6 +707,16 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('US Radio'));
     await shot(tester, '08i_radio_chart');
+    // The Hot 100's parts (docs K166).
+    final streamingTab = _ci('US Streaming');
+    await tester.scrollUntilVisible(streamingTab, 200,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .first);
+    await tester.pumpAndSettle();
+    await tester.tap(streamingTab);
+    await shot(tester, '08m_streaming_chart');
     await tab(tester, 'Career');
     // Record money by source (docs K145).
     final income = _ci('Record money by source');

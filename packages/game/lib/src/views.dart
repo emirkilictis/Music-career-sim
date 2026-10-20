@@ -1053,7 +1053,9 @@ class ChartView {
     // A by-region number as the chart's market sees it.
     double inMarket(double Function(int r) byRegion) => switch (market) {
           ChartMarket.us ||
-          ChartMarket.usRadio =>
+          ChartMarket.usRadio ||
+          ChartMarket.usStreaming ||
+          ChartMarket.usDigital =>
             CountryShares.usOfNorthAmerica(artist.homeCountry) *
                 byRegion(Region.northAmerica.index),
           ChartMarket.uk => CountryShares.ukOfEurope(artist.homeCountry) *

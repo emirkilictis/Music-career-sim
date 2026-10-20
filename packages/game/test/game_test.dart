@@ -1404,6 +1404,39 @@ void main() {
       g.close();
     });
 
+    test('US streaming and download charts (K166)', () {
+      var g = GameSession.start(slots, _setup(startYear: 2010));
+      final ids = [for (final c in g.activeCharts) c.id];
+      expect(ids, contains(Charts.usDigital));
+      expect(ids, isNot(contains(Charts.usStreaming)));
+      g.close();
+      g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2015,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      p.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      final streaming = g.chart(Charts.usStreaming).rows;
+      final digital = g.chart(Charts.usDigital).rows;
+      expect(streaming, hasLength(50));
+      expect(digital, hasLength(50));
+      // Ranked by US streams alone.
+      for (var i = 1; i < streaming.length; i++) {
+        expect(streaming[i].points, lessThanOrEqualTo(streaming[i - 1].points));
+      }
+      // Its points are its US streams.
+      final top = streaming.first;
+      expect(top.points, closeTo(top.streams, top.streams * 0.01));
+      g.close();
+    });
+
     test('an album rollout (K165)', () {
       var g = GameSession.start(
           slots,

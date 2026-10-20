@@ -327,6 +327,8 @@ class World {
     return switch (market) {
       ChartMarket.us ||
       ChartMarket.usRadio ||
+      ChartMarket.usStreaming ||
+      ChartMarket.usDigital ||
       ChartMarket.platformNorthAmerica =>
         (market != ChartMarket.platformNorthAmerica
                 ? CountryShares.usOfNorthAmerica(home)

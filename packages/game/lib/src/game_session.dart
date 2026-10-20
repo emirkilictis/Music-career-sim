@@ -3038,6 +3038,8 @@ class GameSession {
     Charts.ukSongs,
     Charts.globalSongs,
     Charts.usRadio,
+    Charts.usStreaming,
+    Charts.usDigital,
   ];
   static const _albumCharts = [
     Charts.usAlbums,

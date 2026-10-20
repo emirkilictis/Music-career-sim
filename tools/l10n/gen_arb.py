@@ -1244,6 +1244,10 @@ k('radioUpgradeHint','Raise the radio push while stations are still deciding (fi
 # US radio chart (K129)
 k('chartUsRadio','US Radio Songs','ABD Radyo Şarkıları')
 k('chartShortUsRadio','US Radio','ABD Radyo')
+k('chartUsStreaming','US Streaming Songs','ABD Streaming Şarkıları')
+k('chartShortUsStreaming','US Streaming','ABD Streaming')
+k('chartUsDigital','US Digital Song Sales','ABD Dijital Şarkı Satışları')
+k('chartShortUsDigital','US Digital','ABD Dijital')
 k('radioChartLine','{audience} listeners on the radio','Radyoda {audience} dinleyici', audience='String')
 
 # Streamify audience (K130)

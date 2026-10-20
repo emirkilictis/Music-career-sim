@@ -13,7 +13,11 @@ enum ChartMarket {
   platformEurope,
 
   /// US radio airplay audience (docs K129).
-  usRadio
+  usRadio,
+
+  /// US streams, and US download sales (docs K166).
+  usStreaming,
+  usDigital,
 }
 
 /// A chart definition. Names are fictional (no real chart or platform
@@ -63,6 +67,10 @@ abstract final class Charts {
 
   /// US radio airplay (docs K129).
   static const usRadio = 9;
+
+  /// The Hot 100's parts (docs K166): streams alone, downloads alone.
+  static const usStreaming = 10;
+  static const usDigital = 11;
 
   static const all = <ChartDef>[
     ChartDef(
@@ -130,9 +138,23 @@ abstract final class Charts {
         kind: ChartKind.songs,
         market: ChartMarket.usRadio,
         size: 50),
+    ChartDef(
+        id: usStreaming,
+        key: 'chart.us.streaming',
+        kind: ChartKind.songs,
+        market: ChartMarket.usStreaming,
+        size: 50,
+        startYear: 2013),
+    ChartDef(
+        id: usDigital,
+        key: 'chart.us.digital',
+        kind: ChartKind.songs,
+        market: ChartMarket.usDigital,
+        size: 50,
+        startYear: 2005),
   ];
 
-  static const count = 10;
+  static const count = 12;
 
   /// Song charts whose positions feed back into exposure and dormancy.
   static const mainSongCharts = [usSongs, ukSongs, globalSongs];

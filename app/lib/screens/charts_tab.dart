@@ -30,6 +30,8 @@ const _magazineCharts = [
   Charts.ukSongs,
   Charts.ukAlbums,
   Charts.usRadio,
+  Charts.usStreaming,
+  Charts.usDigital,
 ];
 
 /// The box-office board in the chart tabs (docs K77).
@@ -215,12 +217,12 @@ class _ChartsTabState extends State<ChartsTab> {
                               : _chart == _bestSellersChart
                                   ? l.chartBestSellers
                                   : _chart == _recordsChart
-                                  ? l.chartRecords
-                                  : _chart == _artistsChart
-                                      ? l.chartTopArtists
-                                      : _chart == _musicShowChart
-                                          ? l.chartMusicShow
-                                          : fmt.chart(_chart))
+                                      ? l.chartRecords
+                                      : _chart == _artistsChart
+                                          ? l.chartTopArtists
+                                          : _chart == _musicShowChart
+                                              ? l.chartMusicShow
+                                              : fmt.chart(_chart))
                       .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
@@ -236,15 +238,16 @@ class _ChartsTabState extends State<ChartsTab> {
                               : _chart == _bestSellersChart
                                   ? l.bestSellersSub
                                   : _chart == _recordsChart
-                                  ? (_records == null
-                                      ? ''
-                                      : l.recordsSince(_recordsSince))
-                                  : _chart == _artistsChart ||
-                                          _chart == _musicShowChart
-                                      ? l.weekOf(DateFormat.yMMMMd(l.localeName)
-                                          .format(chartDate(
-                                              context.career.week - 1)))
-                                      : l.weekOf(date))
+                                      ? (_records == null
+                                          ? ''
+                                          : l.recordsSince(_recordsSince))
+                                      : _chart == _artistsChart ||
+                                              _chart == _musicShowChart
+                                          ? l.weekOf(
+                                              DateFormat.yMMMMd(l.localeName)
+                                                  .format(chartDate(
+                                                      context.career.week - 1)))
+                                          : l.weekOf(date))
                       .toUpperCase(),
                   style: const TextStyle(
                       fontFamily: AppFonts.condensed,
@@ -259,11 +262,14 @@ class _ChartsTabState extends State<ChartsTab> {
                   scrollDirection: Axis.horizontal,
                   children: [
                     for (final id in _magazineCharts)
-                      _ChartTab(
-                        label: fmt.chartShort(id),
-                        selected: _chart == id,
-                        onTap: () => _select(id),
-                      ),
+                      // The streaming and download charts start in their
+                      // year (docs K166).
+                      if (Charts.all[id].activeIn(context.career.week - 1))
+                        _ChartTab(
+                          label: fmt.chartShort(id),
+                          selected: _chart == id,
+                          onTap: () => _select(id),
+                        ),
                     // K-pop artists get their music show (docs K114).
                     if (context.career.player.genre == MusicShow.genre)
                       _ChartTab(
