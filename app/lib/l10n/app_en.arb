@@ -4644,7 +4644,7 @@
   "remixFeatureButton": "Remix with a feature",
   "remixFeatureHint": "A remix of the released song with a rival on it: their fans come to the song from now on and the remix brings a wave of listening, bigger with a bigger star. A verse on a remix costs 1.5×.",
   "errorCannotRerecord": "This album cannot be re-recorded now.",
-  "mastersLabel": "The label owns the masters: you keep {percent}% of what it earns, forever.",
+  "mastersLabel": "The label owns the masters: you keep {percent}% of what it earns, unless you buy them back.",
   "@mastersLabel": {
     "placeholders": {
       "percent": {
@@ -5714,5 +5714,42 @@
   },
   "ghTag": "Greatest hits",
   "ghHitsSection": "The hits on it",
-  "errorNoCompilation": "A greatest hits album is not possible now."
+  "errorNoCompilation": "A greatest hits album is not possible now.",
+  "mastersBuyButton": "Buy the masters back · {price}",
+  "@mastersBuyButton": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "mastersBuyHint": "Their owner gets about {year} a year from it now and asks for many years of that, more while it still sells.",
+  "@mastersBuyHint": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "mastersBuyConfirm": "Buy the masters of “{title}” for {price}? From then on everything it earns is yours.",
+  "@mastersBuyConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "mastersBuy": "Buy them",
+  "mastersBought": "The masters of “{title}” are yours.",
+  "@mastersBought": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoMasters": "There are no masters to buy back here."
 }

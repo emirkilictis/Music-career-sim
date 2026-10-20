@@ -812,6 +812,7 @@ class Fmt {
       'noDistributor' => l.errorNoDistributor,
       'noCurators' => l.errorNoCurators,
       'noCompilation' => l.errorNoCompilation,
+      'noMasters' => l.errorNoMasters,
       'noPlaylists' ||
       'hasPlaylist' ||
       'noPlaylist' ||

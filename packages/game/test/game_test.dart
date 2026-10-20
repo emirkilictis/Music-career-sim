@@ -1404,6 +1404,56 @@ void main() {
       g.close();
     });
 
+    test('buying masters back from the label (K162)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      Actions.signLabel(g.world, p, Label.major);
+      expect(p.artistShare, lessThan(1));
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final albumId = g.releaseAlbum('Under Contract', ids).id;
+      g.advanceWeeks(10, stop: SkipStop.never);
+      final v = g.album(albumId);
+      expect(v.masterShare, lessThan(1));
+      final price = v.masterBuyCents!;
+      expect(price, greaterThanOrEqualTo(MasterBuyback.minCents));
+      expect(price, greaterThan(v.masterOwnerYearCents * 10));
+      final money = p.moneyCents;
+      expect(g.buyAlbumMasters(albumId), price);
+      expect(money - p.moneyCents, price);
+      final after = g.album(albumId);
+      expect(after.masterShare, 1.0);
+      expect(after.masterBuyCents, isNull);
+      for (final id in ids) {
+        expect(g.song(id).masterShare, 1.0);
+      }
+      expect(() => g.buyAlbumMasters(albumId), _code('noMasters'));
+      // A single on its own.
+      p.creativeEnergy = 100;
+      final single = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(single);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      expect(g.song(single).masterBuyCents, isNotNull);
+      g.buySongMaster(single);
+      expect(g.song(single).masterShare, 1.0);
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.album(albumId).masterShare, 1.0);
+      expect(g.song(single).masterShare, 1.0);
+      g.close();
+    });
+
     test('a greatest hits album (K161)', () {
       var g = GameSession.start(
           slots,

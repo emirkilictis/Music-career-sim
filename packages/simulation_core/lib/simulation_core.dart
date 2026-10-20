@@ -15,6 +15,7 @@ export 'src/bot.dart';
 export 'src/contracts.dart';
 export 'src/compilations.dart';
 export 'src/credits.dart';
+export 'src/master_buyback.dart';
 export 'src/curators.dart';
 export 'src/own_playlist.dart';
 export 'src/critics.dart';

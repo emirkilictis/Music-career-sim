@@ -1403,6 +1403,35 @@ class GameSession {
     _saveNow();
   }
 
+  /// Buys back album [albumId]'s masters from whoever owns them (docs
+  /// K162). Returns the price.
+  int buyAlbumMasters(int albumId) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    if (!MasterBuyback.canAlbum(world, _p, al)) {
+      throw GameException('noMasters', 'Nothing to buy');
+    }
+    _requireMoney(MasterBuyback.albumPriceCents(world, _p, al));
+    final price = MasterBuyback.buyAlbum(world, _p, al);
+    _saveNow();
+    return price;
+  }
+
+  /// Buys back loose single [songId]'s master (docs K162). Returns the
+  /// price.
+  int buySongMaster(int songId) {
+    final s = _ownSong(songId);
+    if (!MasterBuyback.canSong(world, _p, s)) {
+      throw GameException('noMasters', 'Nothing to buy');
+    }
+    _requireMoney(MasterBuyback.songPriceCents(world, _p, s));
+    final price = MasterBuyback.buySong(world, _p, s);
+    _saveNow();
+    return price;
+  }
+
   /// Films every track of new album [albumId] (docs K154).
   void makeVisualAlbum(int albumId) {
     if (albumId < 0 || albumId >= world.albums.length) {

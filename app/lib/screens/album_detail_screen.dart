@@ -157,8 +157,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         if (s.rerecordOf < 0) s
     ];
     if (!mounted) return;
-    final name = TextEditingController(
-        text: l.rerecordDefault(a.title, a.artistName));
+    final name =
+        TextEditingController(text: l.rerecordDefault(a.title, a.artistName));
     final picked = await showModalBottomSheet<(String, List<int>)>(
       context: context,
       showDragHandle: true,
@@ -167,7 +167,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         final chosen = <int>[];
         return StatefulBuilder(
           builder: (c, set) => Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
+            padding:
+                EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
             child: SafeArea(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
@@ -331,6 +332,23 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   ? l.mastersLabel((a.masterShare * 100).round())
                   : l.mastersOwn,
             ),
+            // Buying them back (docs K162).
+            if (a.masterBuyCents case final price?) ...[
+              const SizedBox(height: 6),
+              Text(l.mastersBuyHint(fmt.money(a.masterOwnerYearCents.round())),
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  onPressed: widget.state.busy
+                      ? null
+                      : () => buyMastersFlow(context, widget.state, a.title,
+                          price, Cmd.buyAlbumMasters(a.id), _load),
+                  icon: const Icon(Icons.copyright_rounded),
+                  label: Text(l.mastersBuyButton(fmt.money(price))),
+                ),
+              ),
+            ],
             if (a.isRerecord && a.originalTitle.isNotEmpty) ...[
               const SizedBox(height: 6),
               _Line(
@@ -392,8 +410,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 try {
                   await widget.state.act(Cmd.reissueAnniversary(a.id));
                   if (context.mounted) {
-                    showInfo(context,
-                        l.anniversaryDone(a.anniversaryDue, a.title),
+                    showInfo(
+                        context, l.anniversaryDone(a.anniversaryDue, a.title),
                         icon: Icons.cake_outlined);
                   }
                   _load();
@@ -402,8 +420,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 }
               },
               icon: const Icon(Icons.cake_outlined),
-              label: Text(l.anniversaryButton(a.anniversaryDue,
-                  fmt.money(Anniversaries.costCents()))),
+              label: Text(l.anniversaryButton(
+                  a.anniversaryDue, fmt.money(Anniversaries.costCents()))),
             ),
             const SizedBox(height: 4),
             Text(l.anniversaryHint,
@@ -441,8 +459,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
             const SizedBox(height: 10),
             _Line(
                 icon: Icons.inventory_2_outlined,
-                text: l.bundleLine(fmt.bundle(a.bundle),
-                    fmt.compact(a.bundleUnits))),
+                text: l.bundleLine(
+                    fmt.bundle(a.bundle), fmt.compact(a.bundleUnits))),
           ],
           // Pre-orders shipped in week one (docs K126).
           if (a.isPlayer && a.preOrders >= 1) ...[
@@ -841,4 +859,37 @@ class _Line extends StatelessWidget {
         Expanded(
             child: Text(text, style: TextStyle(color: AppColors.textMuted))),
       ]);
+}
+
+/// Asks before buying masters back, then buys them (docs K162).
+Future<void> buyMastersFlow(BuildContext context, CareerState career,
+    String title, int price, SessionCmd<int> cmd, VoidCallback done) async {
+  final l = context.l10n;
+  final fmt = context.fmt;
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (d) => AlertDialog(
+      title: Text(l.mastersBuyButton(fmt.money(price))),
+      content: Text(l.mastersBuyConfirm(title, fmt.money(price))),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(d, false), child: Text(l.cancel)),
+        FilledButton(
+            onPressed: career.player.moneyCents < price
+                ? null
+                : () => Navigator.pop(d, true),
+            child: Text(l.mastersBuy)),
+      ],
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  try {
+    await career.act(cmd);
+    if (context.mounted) {
+      showInfo(context, l.mastersBought(title), icon: Icons.copyright_rounded);
+    }
+    done();
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+  }
 }

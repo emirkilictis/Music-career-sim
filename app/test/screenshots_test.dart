@@ -321,6 +321,13 @@ void main() {
     await tab(tester, 'Releases');
     await tester.tap(_ci('Neon Bloom'));
     await shot(tester, '14_album_detail');
+    // Buying the masters back from the label (docs K162).
+    final buyBack = find.textContaining('Buy the masters back');
+    await tester.scrollUntilVisible(buyBack, 200,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(buyBack), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await shot(tester, '14m_buy_masters');
     await tester.scrollUntilVisible(_ci('Week by week on the charts'), 300,
         scrollable: find.byType(Scrollable).first);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -180));

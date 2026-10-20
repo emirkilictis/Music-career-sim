@@ -1343,7 +1343,7 @@
   "remixFeatureButton": "Featli remix yap",
   "remixFeatureHint": "Çıkmış şarkının bir rakibin de olduğu remix'i: onun hayranları artık şarkıyı da dinler ve remix bir dinlenme dalgası getirir, yıldız ne kadar büyükse o kadar büyük. Remix'te verse 1.5 kat pahalı.",
   "errorCannotRerecord": "Bu albüm şu an yeniden kaydedilemez.",
-  "mastersLabel": "Masterlar plak şirketinin: kazandığının %{percent}'i sende kalır, hep böyle.",
+  "mastersLabel": "Masterlar plak şirketinin: geri satın almadıkça kazandığının %{percent}'i sende kalır.",
   "mastersOwn": "Masterlar senin: kazandığı her şey sana kalır.",
   "rerecordOfLine": "{title} albümünün yeniden kaydı",
   "rerecordedLine": "{week} yeniden kaydedildi: dinleyicilerin çoğu yeni sürüme geçti.",
@@ -1597,5 +1597,11 @@
   "ghFewSongs": "En iyiler albümü için {count} çıkmış şarkın olmalı.",
   "ghTag": "Greatest Hits",
   "ghHitsSection": "İçindeki hitler",
-  "errorNoCompilation": "Şu an en iyiler albümü çıkaramazsın."
+  "errorNoCompilation": "Şu an en iyiler albümü çıkaramazsın.",
+  "mastersBuyButton": "Masterları geri satın al · {price}",
+  "mastersBuyHint": "Sahibi şu an bundan yılda yaklaşık {year} kazanıyor ve bunun yıllarca katını istiyor; hâlâ satıyorsa daha da fazlasını.",
+  "mastersBuyConfirm": "“{title}” masterlarını {price} karşılığında geri alacak mısın? Bundan sonra kazandığı her şey senin.",
+  "mastersBuy": "Satın al",
+  "mastersBought": "“{title}” masterları artık senin.",
+  "errorNoMasters": "Burada geri alınacak master yok."
 }

@@ -254,6 +254,12 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // Buying masters back (docs K162).
+  static SessionCmd<int> buyAlbumMasters(int albumId) =>
+      (s) => s.buyAlbumMasters(albumId);
+  static SessionCmd<int> buySongMaster(int songId) =>
+      (s) => s.buySongMaster(songId);
+
   // Greatest hits (docs K161).
   static SessionCmd<CompilationBlock?> compilationBlock() =>
       (s) => s.compilationBlock;

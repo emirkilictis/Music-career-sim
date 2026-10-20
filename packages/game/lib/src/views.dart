@@ -355,6 +355,10 @@ class SongView {
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
         masterShare = Rerecords.songShare(w.artists[s.primaryArtistId], s),
+        masterBuyCents = w.player != null &&
+                MasterBuyback.canSong(w, w.player!, s)
+            ? MasterBuyback.songPriceCents(w, w.player!, s)
+            : null,
         languageVersions = [
           for (final v in LanguageVersion.values)
             if (s.languages & (1 << v.index) != 0) v
@@ -509,6 +513,10 @@ class SongView {
   /// The artist's share of what it earns: the deal it came out under
   /// (docs K139).
   final double masterShare;
+
+  /// What buying back this loose single's master costs (null: nothing to
+  /// buy; docs K162).
+  final int? masterBuyCents;
 
   /// A creator campaign on the short-video app (docs K131): when it
   /// started (-1: none), its size, how it went; and what each size costs
@@ -725,6 +733,14 @@ class AlbumView {
             w.songs[al.songIds.first].marqueeWeek >= 0,
         bundleUnits = al.bundleUnits,
         masterShare = Rerecords.albumShare(w.artists[al.artistId], al),
+        masterBuyCents = w.player != null &&
+                MasterBuyback.canAlbum(w, w.player!, al)
+            ? MasterBuyback.albumPriceCents(w, w.player!, al)
+            : null,
+        masterOwnerYearCents = w.player != null &&
+                MasterBuyback.canAlbum(w, w.player!, al)
+            ? MasterBuyback.albumYearCents(w, w.player!, al)
+            : 0,
         isRerecord = Rerecords.isRerecord(w, al),
         rerecordBlock = al.artistId == w.playerArtistId
             ? Rerecords.block(w, w.artists[al.artistId], al)
@@ -849,6 +865,11 @@ class AlbumView {
   /// what stops the player re-recording it (null: nothing) and what it
   /// costs, and the week its re-recording came out (-1: none).
   final double masterShare;
+
+  /// What buying back its masters costs (null: nothing to buy) and what
+  /// their owner gets from it in a year now (docs K162).
+  final int? masterBuyCents;
+  final double masterOwnerYearCents;
   final bool isRerecord;
   final RerecordBlock? rerecordBlock;
   final int rerecordCostCents;

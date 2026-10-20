@@ -178,6 +178,8 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | 20/20 ilk hafta (ABD) | 968K | 257–419K | 1,12M (#1, 13 hafta) |
 | FutureSex/LoveSounds ilk hafta | 684K | 594–706K | 992K |
 | F78 | Emir: "Vokal gruptan birine solo kariyer yapma özelliği eklenebilir mi? Solo record koyduğu zaman chartlarda gözüksün; biri bizle collab yaptığı zaman o şarkı da chartlarda gözüksün, satışları ve streamleri bize gelsin." | ✅ K158: kasadaki şarkı bir üyenin solo single'ı olarak çıkıyor (üyenin kendi adı, listelere ayrı giriyor, para gruba); kabul edilen konukluk teklifleri rakibin gerçek şarkısı olarak 2 hafta sonra çıkıyor, listelerde "feat." ve "Konukluğun" etiketiyle görünüyor, kazancın %15'i oyuncuya geliyor. |
+| F79 | Emir: "Masterlar şirkette ya, onları baya yüklü miktarlar ödeyerek satın alma özelliği de ekle." | ✅ K162: albüm ve albümsüz single sayfasında masterları geri satın alma; fiyat sahibinin yıllık payının 12 katı, yeni kayıtlarda ×1,5, en az $100K. |
+| F80 | Emir: "Son sürümü telefona attım ama eski savelerim açılmıyor." | ✅ Düzeltildi: ABD Radyo listesinden (K129) önce yapılmış kayıtlarda yeni listelerin eşik değerleri yoktu ve yükleme "Null is not a subtype of num" ile çöküyordu; eksik değerler artık varsayılan kalıyor. Dört eski sürümün kaydıyla denendi, test eklendi. |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

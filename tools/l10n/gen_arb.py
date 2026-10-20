@@ -1309,7 +1309,7 @@ k('remixFeatureHint','A remix of the released song with a rival on it: their fan
 
 # Re-recordings (docs K139).
 k('errorCannotRerecord','This album cannot be re-recorded now.','Bu albüm şu an yeniden kaydedilemez.')
-k('mastersLabel','The label owns the masters: you keep {percent}% of what it earns, forever.','Masterlar plak şirketinin: kazandığının %{percent}\'i sende kalır, hep böyle.', percent='int')
+k('mastersLabel','The label owns the masters: you keep {percent}% of what it earns, unless you buy them back.','Masterlar plak şirketinin: geri satın almadıkça kazandığının %{percent}\'i sende kalır.', percent='int')
 k('mastersOwn','You own the masters: everything it earns is yours.','Masterlar senin: kazandığı her şey sana kalır.')
 k('rerecordOfLine','Re-recording of {title}','{title} albümünün yeniden kaydı', title='String')
 k('rerecordedLine','Re-recorded {week}: most listeners moved to the new version.','{week} yeniden kaydedildi: dinleyicilerin çoğu yeni sürüme geçti.', week='String')
@@ -1610,6 +1610,15 @@ k('ghFewSongs','You need {count} released songs for a best-of.','En iyiler albü
 k('ghTag','Greatest hits','Greatest Hits')
 k('ghHitsSection','The hits on it','İçindeki hitler')
 k('errorNoCompilation','A greatest hits album is not possible now.','Şu an en iyiler albümü çıkaramazsın.')
+
+
+# Buying masters back (docs K162).
+k('mastersBuyButton','Buy the masters back · {price}','Masterları geri satın al · {price}', price='String')
+k('mastersBuyHint','Their owner gets about {year} a year from it now and asks for many years of that, more while it still sells.','Sahibi şu an bundan yılda yaklaşık {year} kazanıyor ve bunun yıllarca katını istiyor; hâlâ satıyorsa daha da fazlasını.', year='String')
+k('mastersBuyConfirm','Buy the masters of “{title}” for {price}? From then on everything it earns is yours.','“{title}” masterlarını {price} karşılığında geri alacak mısın? Bundan sonra kazandığı her şey senin.', title='String', price='String')
+k('mastersBuy','Buy them','Satın al')
+k('mastersBought','The masters of “{title}” are yours.','“{title}” masterları artık senin.', title='String')
+k('errorNoMasters','There are no masters to buy back here.','Burada geri alınacak master yok.')
 
 def write(lang, idx):
     out = {'@@locale': lang}

@@ -16,6 +16,7 @@ import '../widgets/income_card.dart';
 import '../widgets/artist_link.dart';
 import '../widgets/history_tables.dart';
 import '../widgets/line_chart.dart';
+import 'album_detail_screen.dart' show buyMastersFlow;
 import 'game_shell.dart';
 import 'releases_tab.dart';
 import 'streamify/editorial_page.dart';
@@ -1088,6 +1089,19 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         Tag(l.tagReleaseRadar,
                             icon: Icons.radar_rounded, color: AppColors.mint),
                     ]),
+                    // Buying a loose single's master back (docs K162).
+                    if (s.masterBuyCents case final price?)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: widget.state.busy
+                              ? null
+                              : () => buyMastersFlow(context, widget.state,
+                                  s.title, price, Cmd.buySongMaster(s.id), _load),
+                          icon: const Icon(Icons.copyright_rounded),
+                          label: Text(l.mastersBuyButton(fmt.money(price))),
+                        ),
+                      ),
                     // On the editorial playlists (docs K125).
                     if (_playlists.isNotEmpty) ...[
                       const SizedBox(height: 10),
