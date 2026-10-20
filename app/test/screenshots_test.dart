@@ -155,7 +155,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(_ci('Edition 2'), 300,
         scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(_ci('Edition 2'));
+    await tester.pumpAndSettle();
     await tester.tap(_ci('Edition 2'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(_ci('Edition 3'));
     await tester.pumpAndSettle();
     await tester.tap(_ci('Edition 3'));
     await tester.pumpAndSettle();
@@ -670,7 +674,7 @@ void main() {
         scrollable: find.byType(Scrollable).first);
     await Scrollable.ensureVisible(tester.element(income), alignment: 0.1);
     await tester.pumpAndSettle();
-    await shot(tester, '15l_income');
+    await shot(tester, '15r_income');
     final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,
         scrollable: find.byType(Scrollable).first);
