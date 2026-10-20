@@ -5751,5 +5751,9 @@
       }
     }
   },
-  "errorNoMasters": "There are no masters to buy back here."
+  "errorNoMasters": "There are no masters to buy back here.",
+  "loadFailedTitle": "This save did not open",
+  "loadFailedBody": "Your save is still there. Copy the text below and send it, so it can be fixed.",
+  "copy": "Copy",
+  "copied": "Copied"
 }

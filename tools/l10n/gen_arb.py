@@ -1620,6 +1620,13 @@ k('mastersBuy','Buy them','Satın al')
 k('mastersBought','The masters of “{title}” are yours.','“{title}” masterları artık senin.', title='String')
 k('errorNoMasters','There are no masters to buy back here.','Burada geri alınacak master yok.')
 
+
+# A save that does not open (feedback F80).
+k('loadFailedTitle','This save did not open','Bu kayıt açılamadı')
+k('loadFailedBody','Your save is still there. Copy the text below and send it, so it can be fixed.','Kaydın yerinde duruyor. Aşağıdaki yazıyı kopyalayıp gönder ki düzeltilebilsin.')
+k('copy','Copy','Kopyala')
+k('copied','Copied','Kopyalandı')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

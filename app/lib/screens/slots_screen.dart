@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:game/game.dart' show GameException;
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
@@ -40,10 +42,50 @@ class _SlotsScreenState extends State<SlotsScreen> {
       await controller.exec(Cmd.resume(slotId));
       if (!mounted) return;
       await openCareer(context, CareerState(controller));
-    } catch (e) {
-      if (mounted) showError(context, e);
+    } catch (e, st) {
+      // A rule the game enforces reads as usual; anything else is a save
+      // that does not load, shown in full so it can be reported.
+      if (!mounted) return;
+      if (e is GameException) {
+        showError(context, e);
+      } else {
+        final where = st.toString().split('\n').take(6).join('\n');
+        await _loadFailed('$e\n$where');
+      }
     }
     _load();
+  }
+
+  Future<void> _loadFailed(String detail) {
+    final l = context.l10n;
+    return showDialog<void>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l.loadFailedTitle),
+        content: SingleChildScrollView(
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.loadFailedBody),
+                const SizedBox(height: 12),
+                SelectableText(detail,
+                    style: const TextStyle(
+                        fontFamily: 'monospace', fontSize: 12)),
+              ]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: detail));
+              showInfo(context, l.copied);
+            },
+            child: Text(l.copy),
+          ),
+          FilledButton(onPressed: () => Navigator.pop(d), child: Text(l.ok)),
+        ],
+      ),
+    );
   }
 
   Future<void> _delete(String slotId, String name) async {

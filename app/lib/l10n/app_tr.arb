@@ -1603,5 +1603,9 @@
   "mastersBuyConfirm": "“{title}” masterlarını {price} karşılığında geri alacak mısın? Bundan sonra kazandığı her şey senin.",
   "mastersBuy": "Satın al",
   "mastersBought": "“{title}” masterları artık senin.",
-  "errorNoMasters": "Burada geri alınacak master yok."
+  "errorNoMasters": "Burada geri alınacak master yok.",
+  "loadFailedTitle": "Bu kayıt açılamadı",
+  "loadFailedBody": "Kaydın yerinde duruyor. Aşağıdaki yazıyı kopyalayıp gönder ki düzeltilebilsin.",
+  "copy": "Kopyala",
+  "copied": "Kopyalandı"
 }

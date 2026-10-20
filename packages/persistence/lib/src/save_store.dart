@@ -91,7 +91,7 @@ class SaveStore {
       config: config ?? SimConfig(),
       seed: meta['seed'] as int,
       week: meta['week'] as int,
-      difficulty: Difficulty.values[meta['difficulty'] as int],
+      difficulty: Difficulty.values[meta['difficulty'] as int? ?? Difficulty.normal.index],
       realNames: (meta['realNames'] as int? ?? 0) == 1,
     );
     w.playerArtistId = meta['playerArtistId'] as int;

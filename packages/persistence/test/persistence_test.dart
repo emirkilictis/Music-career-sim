@@ -124,10 +124,13 @@ void main() {
     // ones after it came later).
     store.db.execute("DELETE FROM meta WHERE key LIKE 'chartCutoff%' "
         "AND CAST(substr(key, 12) AS INTEGER) >= 8");
+    // The first saves had no difficulty.
+    store.db.execute("DELETE FROM meta WHERE key = 'difficulty'");
     final loaded = store.load();
     store.close();
     expect(loaded.player!.name, 'Old');
     expect(loaded.chartCutoff.length, w.chartCutoff.length);
+    expect(loaded.difficulty, Difficulty.normal);
   });
 
   test('difficulty and side income survive save/load', () {
