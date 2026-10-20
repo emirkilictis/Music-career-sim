@@ -254,6 +254,11 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // Documentaries (docs K172).
+  static SessionCmd<DocumentaryView> documentary() => (s) => s.documentary;
+  static SessionCmd<void> startDocumentary(DocDeal deal, String title) =>
+      (s) => s.startDocumentary(deal, title);
+
   // Awards campaigns (docs K171).
   static SessionCmd<FycView> fyc() => (s) => s.fyc;
   static SessionCmd<void> runFyc(FycTier tier) => (s) => s.runFyc(tier);

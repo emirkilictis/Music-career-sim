@@ -38,6 +38,7 @@ class _CareerScreenState extends State<CareerScreen> {
   FanClubView? _club;
   ImprintView? _label;
   FycView? _fyc;
+  DocumentaryView? _doc;
   List<WrittenSongView> _guest = const [];
   IncomeBreakdown? _income;
   CatalogOfferView? _catalog;
@@ -63,6 +64,7 @@ class _CareerScreenState extends State<CareerScreen> {
     final club = await career.read(Cmd.fanClub());
     final label = await career.read(Cmd.imprint());
     final fyc = await career.read(Cmd.fyc());
+    final doc = await career.read(Cmd.documentary());
     final guest = await career.read(Cmd.guestSongs());
     final income = await career.read(Cmd.careerIncome());
     final catalog = await career.read(Cmd.catalogOffer());
@@ -75,6 +77,7 @@ class _CareerScreenState extends State<CareerScreen> {
         _club = club;
         _label = label;
         _fyc = fyc;
+        _doc = doc;
         _guest = guest;
         _income = income;
         _catalog = catalog;
@@ -84,6 +87,74 @@ class _CareerScreenState extends State<CareerScreen> {
           ..sort((a, b) =>
               fmt.songMainValue(b, week).compareTo(fmt.songMainValue(a, week)));
       });
+    }
+  }
+
+  Widget _docSection(DocumentaryView d) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final muted = TextStyle(color: AppColors.textMuted, fontSize: 12.5);
+    return Section(
+      title: l.docTitle,
+      icon: Icons.movie_outlined,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(l.docHint, style: muted),
+        const SizedBox(height: 8),
+        for (final x in d.docs)
+          Text(
+              x.premiered
+                  ? l.docOut(x.title, fmt.week(x.premiereWeek))
+                  : l.docFilming(x.title, fmt.week(x.premiereWeek)),
+              style: const TextStyle(fontWeight: FontWeight.w700)),
+        if (d.block == null) ...[
+          const SizedBox(height: 6),
+          OutlinedButton.icon(
+            onPressed: () => _startDoc(DocDeal.selfFunded),
+            icon: const Icon(Icons.smart_display_outlined),
+            label: Text(l.docSelf(fmt.money(Documentaries.selfCostCents))),
+          ),
+          const SizedBox(height: 6),
+          OutlinedButton.icon(
+            onPressed: () => _startDoc(DocDeal.original),
+            icon: const Icon(Icons.movie_creation_outlined),
+            label: Text(l.docOriginal(fmt.money(d.originalFeeCents))),
+          ),
+        ] else if (d.block != DocBlock.filming)
+          Text(
+              switch (d.block!) {
+                DocBlock.tooEarly => l.docTooEarly,
+                DocBlock.notKnown =>
+                  l.docNotKnown((Documentaries.minFame * 100).round()),
+                _ => l.docTooSoon(Documentaries.gapYears),
+              },
+              style: muted),
+      ]),
+    );
+  }
+
+  Future<void> _startDoc(DocDeal deal) async {
+    final l = context.l10n;
+    final career = context.careerRead;
+    final ctrl = TextEditingController(text: l.docDefault(career.player.name));
+    final title = await showDialog<String>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l.docName),
+        content: TextField(controller: ctrl, autofocus: true, maxLength: 60),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d), child: Text(l.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, ctrl.text),
+              child: Text(l.ok)),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (title == null || !mounted) return;
+    try {
+      await career.act(Cmd.startDocumentary(deal, title));
+    } catch (e) {
+      if (mounted) showError(context, e);
     }
   }
 
@@ -573,6 +644,12 @@ class _CareerScreenState extends State<CareerScreen> {
                   ),
                 ]),
           ),
+        ],
+        // Documentaries (docs K172).
+        if (_doc case final doc?
+            when doc.block != DocBlock.tooEarly || doc.docs.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _docSection(doc),
         ],
         // The player's own label (docs K169).
         if (_label case final label?) ...[

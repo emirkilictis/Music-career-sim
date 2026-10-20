@@ -6105,5 +6105,80 @@
     }
   },
   "fycDone": "Your campaign is running.",
-  "errorNoFyc": "No awards campaign now."
+  "errorNoFyc": "No awards campaign now.",
+  "docTitle": "Documentary",
+  "docHint": "Half a year of filming, then a premiere that sends people back to your biggest songs, wins fans and brings the fans closer.",
+  "docSelf": "Self-funded, free on ViewTube · {cost}",
+  "@docSelf": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "docOriginal": "A streaming original · they pay {fee}",
+  "@docOriginal": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      }
+    }
+  },
+  "docName": "Documentary title",
+  "docDefault": "{name}: Behind the Music",
+  "@docDefault": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "docFilming": "“{title}” is being filmed: premiere {when}",
+  "@docFilming": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "docOut": "“{title}” · premiered {when}",
+  "@docOut": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "docTooEarly": "Music documentaries take off on streaming from 2015.",
+  "docNotKnown": "You need to be better known for a documentary ({pct}% fame).",
+  "@docNotKnown": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "docTooSoon": "One documentary every {years} years.",
+  "@docTooSoon": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "eventDocumentary": "Your documentary “{title}” premiered: people are back on your songs.",
+  "@eventDocumentary": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoDoc": "A documentary is not possible now."
 }

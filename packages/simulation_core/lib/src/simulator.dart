@@ -25,6 +25,7 @@ import 'lifecycle.dart';
 import 'compilations.dart';
 import 'curators.dart';
 import 'model.dart';
+import 'documentaries.dart';
 import 'fan_club.dart';
 import 'imprints.dart';
 import 'own_playlist.dart';
@@ -162,6 +163,8 @@ class Simulator {
     StreamingTools.answerPitches(w);
     // Independent curators answer last week's submissions (docs K160).
     Curators.answer(w);
+    // A documentary premieres (docs K172).
+    Documentaries.weekly(w);
     // The player's own playlist gains or loses followers (docs K159).
     OwnPlaylists.weekly(w);
     // Holiday songs come back for the season (docs K136).

@@ -2004,6 +2004,24 @@ class GameSession {
             WrittenSongView.of(world, world.songs[id]),
       ];
 
+  // ------------------------------------------------- documentary (K172)
+
+  DocumentaryView get documentary => DocumentaryView.of(world, _p);
+
+  /// Starts filming a documentary called [title] under [deal].
+  void startDocumentary(DocDeal deal, String title) {
+    if (Documentaries.block(world, _p) != null) {
+      throw GameException('noDoc', 'Not now');
+    }
+    final t = title.trim();
+    if (t.isEmpty || t.length > 60) {
+      throw GameException('invalidTitle', 'Title must be 1–60 chars');
+    }
+    if (deal == DocDeal.selfFunded) _requireMoney(Documentaries.selfCostCents);
+    Documentaries.start(world, _p, deal, t);
+    _saveNow();
+  }
+
   // ---------------------------------------------- awards campaign (K171)
 
   FycView get fyc => FycView.of(world);
@@ -3319,6 +3337,12 @@ class GameSession {
     events.addAll(_recordsBroken(r));
     events.addAll(_bestSellerNews());
     events.addAll(_writtenHits(r));
+    // A documentary premiered (docs K172).
+    for (final d in world.documentaries) {
+      if (d.premiereWeek == r.week) {
+        events.add(DocumentaryPremiere(d.title, d.deal));
+      }
+    }
     // The fan club passes a membership (docs K164).
     final members = world.fanClub?.members ?? 0;
     for (final m in clubMilestones) {

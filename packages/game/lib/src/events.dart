@@ -238,6 +238,15 @@ class CreditSongHit extends GameEvent {
   bool get isMajor => true;
 }
 
+/// The player's documentary premiered (docs K172).
+class DocumentaryPremiere extends GameEvent {
+  const DocumentaryPremiere(this.title, this.deal);
+  final String title;
+  final DocDeal deal;
+  @override
+  bool get isMajor => true;
+}
+
 /// The fan club passed [members] members (docs K164).
 class ClubMilestone extends GameEvent {
   const ClubMilestone(this.members);

@@ -82,6 +82,7 @@ class EventIcon extends StatelessWidget {
       AlbumStreamMilestone() =>
         (Icons.graphic_eq_rounded, platformColor(MusicPlatform.streamify)),
       WrittenSongHit() => (Icons.edit_note_rounded, AppColors.mint),
+      DocumentaryPremiere() => (Icons.movie_rounded, AppColors.gold),
       ClubMilestone() => (Icons.card_membership_rounded, AppColors.lilac),
       CuratorsAnswered(:final adds) => adds > 0
           ? (Icons.playlist_add_check_rounded, AppColors.mint)

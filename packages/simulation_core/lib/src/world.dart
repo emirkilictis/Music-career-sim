@@ -11,6 +11,7 @@ import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'model.dart';
 import 'award_campaigns.dart';
+import 'documentaries.dart';
 import 'fan_club.dart';
 import 'imprints.dart';
 import 'own_playlist.dart';
@@ -81,6 +82,9 @@ class World {
 
   /// The player's latest awards campaign (docs K171).
   FycCampaign? fycCampaign;
+
+  /// The player's documentaries (docs K172).
+  final List<Documentary> documentaries = [];
 
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();

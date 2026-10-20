@@ -22,6 +22,7 @@ export 'src/master_buyback.dart';
 export 'src/price_cuts.dart';
 export 'src/rollouts.dart';
 export 'src/curators.dart';
+export 'src/documentaries.dart';
 export 'src/own_playlist.dart';
 export 'src/critics.dart';
 export 'src/distribution.dart';

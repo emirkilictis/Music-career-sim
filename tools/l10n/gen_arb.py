@@ -1720,6 +1720,22 @@ k('fycTier','{tier} · {cost}','{tier} · {cost}', tier='String', cost='String')
 k('fycDone','Your campaign is running.','Kampanyan başladı.')
 k('errorNoFyc','No awards campaign now.','Şu an ödül kampanyası yapılamaz.')
 
+
+# Documentaries (docs K172).
+k('docTitle','Documentary','Belgesel')
+k('docHint','Half a year of filming, then a premiere that sends people back to your biggest songs, wins fans and brings the fans closer.','Altı ay çekim, ardından en büyük şarkılarına insanları geri döndüren, hayran kazandıran ve hayranlarını sana yaklaştıran bir gösterim.')
+k('docSelf','Self-funded, free on ViewTube · {cost}','Kendi bütçenle, ViewTube\'da ücretsiz · {cost}', cost='String')
+k('docOriginal','A streaming original · they pay {fee}','Streaming orijinal yapımı · sana {fee} öderler', fee='String')
+k('docName','Documentary title','Belgesel adı')
+k('docDefault','{name}: Behind the Music','{name}: Müziğin Arkasında', name='String')
+k('docFilming','“{title}” is being filmed: premiere {when}','“{title}” çekiliyor: gösterim {when}', title='String', when='String')
+k('docOut','“{title}” · premiered {when}','“{title}” · gösterim {when}', title='String', when='String')
+k('docTooEarly','Music documentaries take off on streaming from 2015.','Müzik belgeselleri streaming\'de 2015\'ten itibaren yükselir.')
+k('docNotKnown','You need to be better known for a documentary ({pct}% fame).','Belgesel için daha tanınmış olmalısın (%{pct} ünlülük).', pct='int')
+k('docTooSoon','One documentary every {years} years.','{years} yılda bir belgesel.', years='int')
+k('eventDocumentary','Your documentary “{title}” premiered: people are back on your songs.','Belgeselin “{title}” gösterime girdi: insanlar şarkılarına geri dönüyor.', title='String')
+k('errorNoDoc','A documentary is not possible now.','Şu an belgesel yapılamaz.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

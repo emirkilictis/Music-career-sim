@@ -153,6 +153,10 @@ int worldHash(World w) {
     addInt(v.kind.index * 100000 + v.week);
     addDouble(v.baseViews);
   }
+  for (final d in w.documentaries) {
+    addInt(d.startWeek);
+    addInt(d.premiered ? 1 : 0);
+  }
   if (w.fycCampaign case final fyc?) {
     addInt(fyc.year);
     addInt(fyc.nomination?.index ?? -1);

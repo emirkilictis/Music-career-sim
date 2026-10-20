@@ -2483,6 +2483,35 @@ class WrittenSongView {
   final double earnedCents;
 }
 
+/// The player's documentaries and what making one takes (docs K172).
+class DocumentaryView {
+  DocumentaryView.of(World w, Artist a)
+      : block = Documentaries.block(w, a),
+        originalFeeCents = Documentaries.originalFeeCents(a),
+        docs = [
+          for (final d in w.documentaries.reversed)
+            (
+              title: d.title,
+              deal: d.deal,
+              premiereWeek: d.premiereWeek,
+              premiered: d.premiered,
+              feeCents: d.feeCents
+            )
+        ];
+
+  /// What stops a new one (null: nothing).
+  final DocBlock? block;
+  final int originalFeeCents;
+  final List<
+      ({
+        String title,
+        DocDeal deal,
+        int premiereWeek,
+        bool premiered,
+        int feeCents
+      })> docs;
+}
+
 /// The awards season and the player's campaign (docs K171).
 class FycView {
   FycView.of(World w)

@@ -1682,5 +1682,18 @@
   "fycAllOut": "Her şeyiyle",
   "fycTier": "{tier} · {cost}",
   "fycDone": "Kampanyan başladı.",
-  "errorNoFyc": "Şu an ödül kampanyası yapılamaz."
+  "errorNoFyc": "Şu an ödül kampanyası yapılamaz.",
+  "docTitle": "Belgesel",
+  "docHint": "Altı ay çekim, ardından en büyük şarkılarına insanları geri döndüren, hayran kazandıran ve hayranlarını sana yaklaştıran bir gösterim.",
+  "docSelf": "Kendi bütçenle, ViewTube'da ücretsiz · {cost}",
+  "docOriginal": "Streaming orijinal yapımı · sana {fee} öderler",
+  "docName": "Belgesel adı",
+  "docDefault": "{name}: Müziğin Arkasında",
+  "docFilming": "“{title}” çekiliyor: gösterim {when}",
+  "docOut": "“{title}” · gösterim {when}",
+  "docTooEarly": "Müzik belgeselleri streaming'de 2015'ten itibaren yükselir.",
+  "docNotKnown": "Belgesel için daha tanınmış olmalısın (%{pct} ünlülük).",
+  "docTooSoon": "{years} yılda bir belgesel.",
+  "eventDocumentary": "Belgeselin “{title}” gösterime girdi: insanlar şarkılarına geri dönüyor.",
+  "errorNoDoc": "Şu an belgesel yapılamaz."
 }

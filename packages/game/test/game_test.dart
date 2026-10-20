@@ -1602,6 +1602,55 @@ void main() {
       g.close();
     });
 
+    test('a documentary (K172)', () {
+      var g = GameSession.start(slots, _setup(startYear: 2012));
+      expect(g.documentary.block, DocBlock.tooEarly);
+      g.close();
+      g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2017,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 3; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+        g.releaseSingle(ids.last);
+        g.advanceWeeks(3, stop: SkipStop.never);
+      }
+      expect(g.documentary.block, isNull);
+      final fee = g.documentary.originalFeeCents;
+      final money = p.moneyCents;
+      g.startDocumentary(DocDeal.original, 'Behind the Lights');
+      expect(p.moneyCents - money, fee);
+      expect(g.documentary.block, DocBlock.filming);
+      expect(() => g.startDocumentary(DocDeal.selfFunded, 'Again'),
+          _code('noDoc'));
+      var premiere = <DocumentaryPremiere>[];
+      var fans = 0.0;
+      for (var i = 0; i <= Documentaries.productionWeeks && premiere.isEmpty;
+          i++) {
+        fans = p.coreFans;
+        premiere = g.advanceWeek().events.whereType<DocumentaryPremiere>()
+            .toList();
+      }
+      expect(premiere.single.title, 'Behind the Lights');
+      // People who watched become fans.
+      expect(p.coreFans, greaterThan(fans));
+      expect(g.documentary.docs.single.premiered, isTrue);
+      expect(g.documentary.block, DocBlock.tooSoon);
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.documentary.docs.single.title, 'Behind the Lights');
+      expect(g.documentary.docs.single.premiered, isTrue);
+      g.close();
+    });
+
     test('an album rollout (K165)', () {
       var g = GameSession.start(
           slots,
