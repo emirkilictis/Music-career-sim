@@ -981,6 +981,12 @@ class Fmt {
       BotsCaught() => l.eventBotsCaught(t, compact(e.removed)),
       RivalBotsCaught() =>
         l.eventRivalBotsCaught(line.artistName, t, compact(e.removed)),
+      RivalAlbumMove() => switch (e.move) {
+          RivalMove.surprise => l.eventRivalSurprise(line.artistName, t),
+          RivalMove.exclusive =>
+            l.eventRivalExclusive(line.artistName, t, e.weeks),
+          RivalMove.window => l.eventRivalWindow(line.artistName, t, e.weeks),
+        },
       PitchDeclined() => l.eventPitchDeclined(t),
       CreatorsFlopped() => l.eventCreatorsFlopped(t),
       HolidayReturn() => l.eventHolidayReturn(t),

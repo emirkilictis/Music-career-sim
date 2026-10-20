@@ -3211,6 +3211,31 @@ void main() {
       expect(held.after, greaterThan(0));
     });
 
+    test('rival stars surprise-drop and go exclusive (K175)', () {
+      final g = GameSession.start(slots, _setup(startYear: 2016));
+      final seen = <(int, int)>{};
+      final moves = <RivalAlbumMove>[];
+      for (var i = 0; i < 52; i++) {
+        for (final u in g.upcomingRivalAlbums) {
+          seen.add((u.artistId, u.week));
+        }
+        moves.addAll(g.advanceWeek().events.whereType<RivalAlbumMove>());
+      }
+      expect(moves.map((m) => m.move),
+          containsAll([RivalMove.surprise, RivalMove.exclusive]));
+      for (final m in moves) {
+        final al = g.world.albums[m.albumId];
+        expect(g.world.artists[al.artistId].tier, ArtistTier.a);
+        if (m.move == RivalMove.surprise) {
+          // Nobody saw it coming.
+          expect(seen, isNot(contains((al.artistId, al.releaseWeek))));
+        } else if (m.move == RivalMove.exclusive) {
+          expect(al.exclusiveUntil, al.releaseWeek + m.weeks);
+        }
+      }
+      g.close();
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;

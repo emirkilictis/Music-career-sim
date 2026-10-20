@@ -245,6 +245,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       AwardWinners() => 'awards ${e.year} winners',
       BotsCaught() => 'bots caught: ${e.removed.round()} removed',
       RivalBotsCaught() => 'rival bots caught',
+      RivalAlbumMove() => 'rival album move: ${e.move.name}',
       PitchDeclined() => 'pitch declined',
       CreatorsFlopped() => 'creator campaign flopped ${e.songId}',
       HolidayReturn() => 'holiday song ${e.songId} is back',

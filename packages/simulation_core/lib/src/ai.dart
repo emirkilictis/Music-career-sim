@@ -2,6 +2,7 @@ import 'actions.dart';
 import 'model.dart';
 import 'names.dart';
 import 'real_artists.dart';
+import 'rival_moves.dart';
 import 'rng.dart';
 import 'streaming_tools.dart';
 import 'time.dart';
@@ -64,6 +65,8 @@ abstract final class AiPlanner {
     final i = a.plan.indexWhere((p) => p.kind == PlannedKind.album);
     if (i < 0 || a.plan[i].week - w.week != clashLookahead) return null;
     final week = a.plan[i].week;
+    // A surprise drop keeps its date and its secret (docs K175).
+    if (RivalMoves.surprise(w, a, week)) return null;
     ScheduledRelease? mine;
     for (final sr in me.scheduled) {
       if (sr.isAlbum &&
@@ -130,8 +133,14 @@ abstract final class AiPlanner {
             Actions.releaseVariant(w, a, w.songs[p.songId], SingleFormat.cd);
           }
         case PlannedKind.album:
+          // Stars use the streaming-era moves too (docs K175).
+          final type = a.pendingAlbumType;
+          final exclusive = RivalMoves.exclusive(w, a, type);
           Actions.releaseAlbum(w, a, a.pendingAlbumTitle, a.pendingAlbumSongIds,
-              type: a.pendingAlbumType, variantWeeks: a.pendingVariantWeeks);
+              type: type,
+              variantWeeks: a.pendingVariantWeeks,
+              exclusive: exclusive,
+              windowWeeks: exclusive ? 0 : RivalMoves.window(w, a, type));
           a.pendingAlbumSongIds.clear();
       }
     }

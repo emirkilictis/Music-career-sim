@@ -72,6 +72,7 @@ class EventIcon extends StatelessWidget {
       AwardWinners() => (Icons.newspaper_rounded, AppColors.textMuted),
       BotsCaught() => (Icons.gpp_bad_rounded, AppColors.coral),
       RivalBotsCaught() => (Icons.newspaper_rounded, AppColors.textMuted),
+      RivalAlbumMove() => (Icons.newspaper_rounded, AppColors.textMuted),
       PitchDeclined() => (Icons.playlist_remove_rounded, AppColors.textMuted),
       CreatorsFlopped() => (Icons.videocam_off_outlined, AppColors.textMuted),
       HolidayReturn() => (Icons.ac_unit_rounded, AppColors.sky),

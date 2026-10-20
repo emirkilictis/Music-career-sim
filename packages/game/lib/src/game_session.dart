@@ -818,7 +818,9 @@ class GameSession {
       for (final pr in a.plan) {
         if (pr.kind == PlannedKind.album &&
             pr.week >= w.week &&
-            pr.week < w.week + rivalLookaheadWeeks) {
+            pr.week < w.week + rivalLookaheadWeeks &&
+            // A surprise drop is on no one's calendar (docs K175).
+            !RivalMoves.surprise(w, a, pr.week)) {
           out.add(UpcomingRelease(
               artistId: a.id,
               artistName: a.name,
@@ -3381,6 +3383,21 @@ class GameSession {
     }
     for (final c in r.rivalClashes) {
       events.add(RivalAlbumClash(c));
+    }
+    // Rival stars' release moves (docs K175).
+    for (var i = w.albums.length - 1;
+        i >= 0 && w.albums[i].releaseWeek == r.week;
+        i--) {
+      final al = w.albums[i];
+      if (al.artistId == p.id) continue;
+      final move = RivalMoves.of(w, al);
+      if (move != null) {
+        events.add(RivalAlbumMove(al.id, al.artistId, move, switch (move) {
+          RivalMove.exclusive => al.exclusiveUntil - al.releaseWeek,
+          RivalMove.window => al.windowUntil - al.releaseWeek,
+          RivalMove.surprise => 0,
+        }));
+      }
     }
     events.addAll(_recordsBroken(r));
     events.addAll(_bestSellerNews());

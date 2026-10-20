@@ -4587,6 +4587,45 @@
       }
     }
   },
+  "eventRivalSurprise": "Surprise: {artist} dropped {title} with no warning.",
+  "@eventRivalSurprise": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventRivalExclusive": "{artist} put {title} on Fruit Music alone for its first {weeks} weeks.",
+  "@eventRivalExclusive": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "eventRivalWindow": "{artist} keeps {title} off streaming for {weeks} weeks: only on sale.",
+  "@eventRivalWindow": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
   "windowTitle": "Streaming release",
   "windowHint": "Keep it off the streaming apps at first: fans who would stream it buy it ({lift}% more copies while it is held), but its tracks are not streamed or found on the apps until it arrives.",
   "@windowHint": {

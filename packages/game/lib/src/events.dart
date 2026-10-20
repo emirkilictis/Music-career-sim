@@ -358,6 +358,20 @@ class RivalAlbumClash extends GameEvent {
   bool get isMajor => !clash.moved;
 }
 
+/// A rival star put an album out with a release move (docs K175): a
+/// surprise drop, a streaming exclusive or held off streaming.
+class RivalAlbumMove extends GameEvent {
+  const RivalAlbumMove(this.albumId, this.artistId, this.move, this.weeks);
+  final int albumId;
+  final int artistId;
+  final RivalMove move;
+
+  /// Weeks the exclusive or the hold lasts.
+  final int weeks;
+  @override
+  bool get isMajor => false;
+}
+
 /// A streaming platform opened in a region this week (docs K38): its Top 50
 /// chart [chartId] starts.
 class PlatformLaunched extends GameEvent {
