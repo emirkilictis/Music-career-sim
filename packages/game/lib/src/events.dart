@@ -225,6 +225,24 @@ class WrittenSongHit extends GameEvent {
   bool get isMajor => true;
 }
 
+/// The player's monthly listeners on the streaming app passed [listeners]
+/// for the first time (docs K156).
+class ListenersMilestone extends GameEvent {
+  const ListenersMilestone(this.listeners);
+  final double listeners;
+  @override
+  bool get isMajor => listeners >= 10e6;
+}
+
+/// A player album's tracks passed [streams] streams together (docs K156).
+class AlbumStreamMilestone extends GameEvent {
+  const AlbumStreamMilestone(this.albumId, this.streams);
+  final int albumId;
+  final double streams;
+  @override
+  bool get isMajor => streams >= 1e9;
+}
+
 /// The player's career records sold passed [copies] (docs K141).
 class SalesMilestone extends GameEvent {
   const SalesMilestone(this.copies);

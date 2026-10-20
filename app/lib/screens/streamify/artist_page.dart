@@ -185,6 +185,11 @@ class _ArtistPageState extends State<ArtistPage> {
                   style: const TextStyle(
                       color: StreamifyColors.muted,
                       fontWeight: FontWeight.w600)),
+              // The player's high (docs K156).
+              if (page.peakListeners >= 1)
+                Text(l.peakListeners(plays.format(page.peakListeners.round())),
+                    style: const TextStyle(
+                        color: StreamifyColors.muted, fontSize: 12.5)),
               // Like the apps: a place in the world for the top 500 (K113).
               if (page.worldRank > 0) ...[
                 const SizedBox(height: 10),

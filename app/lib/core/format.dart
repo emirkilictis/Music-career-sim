@@ -944,6 +944,10 @@ class Fmt {
       HolidayReturn() => l.eventHolidayReturn(t),
       SongLeaked() => l.eventSongLeaked(t, Leaks.answerWeeks),
       SalesMilestone(:final copies) => l.eventSalesMilestone(compact(copies)),
+      ListenersMilestone(:final listeners) =>
+        l.eventListenersMilestone(compact(listeners)),
+      AlbumStreamMilestone(:final streams) =>
+        l.eventAlbumStreams(t, compact(streams)),
       WrittenSongHit(:final position) => position == 1
           ? l.eventWrittenNo1(t, line.artistName)
           : l.eventWrittenTop10(t, line.artistName, position),

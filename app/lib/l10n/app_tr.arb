@@ -1496,5 +1496,8 @@
   "errorNoLanguage": "Bu şarkı için bu versiyon mümkün değil.",
   "languageSpanish": "İspanyolca versiyon",
   "languageEnglish": "İngilizce versiyon",
-  "languageHint": "Başka bir dilde kaydet ({cost}, {energy} yaratıcılık): şarkıya bir dalga, o pazar da bundan sonra seni daha çok dinler."
+  "languageHint": "Başka bir dilde kaydet ({cost}, {energy} yaratıcılık): şarkıya bir dalga, o pazar da bundan sonra seni daha çok dinler.",
+  "peakListeners": "Zirven: {listeners} aylık dinleyici",
+  "eventListenersMilestone": "Streamify'da ilk kez {listeners} aylık dinleyiciyi geçtin.",
+  "eventAlbumStreams": "{title} {streams} stream'i geçti."
 }

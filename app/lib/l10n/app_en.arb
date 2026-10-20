@@ -5226,5 +5226,32 @@
         "type": "int"
       }
     }
+  },
+  "peakListeners": "Your high: {listeners} monthly listeners",
+  "@peakListeners": {
+    "placeholders": {
+      "listeners": {
+        "type": "String"
+      }
+    }
+  },
+  "eventListenersMilestone": "You passed {listeners} monthly listeners on Streamify for the first time.",
+  "@eventListenersMilestone": {
+    "placeholders": {
+      "listeners": {
+        "type": "String"
+      }
+    }
+  },
+  "eventAlbumStreams": "{title} passed {streams} streams.",
+  "@eventAlbumStreams": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "streams": {
+        "type": "String"
+      }
+    }
   }
 }

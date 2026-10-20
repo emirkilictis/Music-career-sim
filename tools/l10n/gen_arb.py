@@ -1494,6 +1494,11 @@ k('languageSpanish','Spanish version','İspanyolca versiyon')
 k('languageEnglish','English version','İngilizce versiyon')
 k('languageHint','Record it in another language ({cost}, {energy} creativity): a wave for the song, and that market listens to you more from now on.','Başka bir dilde kaydet ({cost}, {energy} yaratıcılık): şarkıya bir dalga, o pazar da bundan sonra seni daha çok dinler.', cost='String', energy='int')
 
+# Streaming milestones (docs K156).
+k('peakListeners','Your high: {listeners} monthly listeners','Zirven: {listeners} aylık dinleyici', listeners='String')
+k('eventListenersMilestone','You passed {listeners} monthly listeners on Streamify for the first time.','Streamify\'da ilk kez {listeners} aylık dinleyiciyi geçtin.', listeners='String')
+k('eventAlbumStreams','{title} passed {streams} streams.','{title} {streams} stream\'i geçti.', title='String', streams='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

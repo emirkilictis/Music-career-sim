@@ -367,6 +367,9 @@ class GameSession {
           0,
       worldRank: Platforms.worldRank(w, a),
       listenerHistory: artistId == _p.id ? _listenerHistory() : const [],
+      peakListeners: artistId == _p.id
+          ? math.max(0.0, world.playerPeakListeners)
+          : 0,
       popular: [for (final s in popular.take(10)) SongView.of(w, s)],
       albums: [
         for (final al in w.albums.reversed)
@@ -1938,6 +1941,43 @@ class GameSession {
             WrittenSongView.of(world, world.songs[id]),
       ];
 
+  /// Monthly listeners the news reports (docs K156).
+  static const listenerMilestones = [
+    1e6, 5e6, 10e6, 25e6, 50e6, 75e6, 100e6 //
+  ];
+
+  /// Album streams (all its tracks) the news reports (docs K156).
+  static const albumStreamMilestones = [1e9, 2e9, 5e9, 10e9];
+
+  /// New highs in monthly listeners and albums' stream milestones (docs
+  /// K156).
+  List<GameEvent> _streamingNews() {
+    final w = world;
+    final out = <GameEvent>[];
+    final listeners = Streamify.monthlyListeners(_fourWeekStreams());
+    final peak = w.playerPeakListeners;
+    if (peak >= 0) {
+      for (final m in listenerMilestones) {
+        if (peak < m && listeners >= m) out.add(ListenersMilestone(m));
+      }
+    }
+    if (listeners > peak) w.playerPeakListeners = listeners;
+    for (final id in w.activeAlbumIds) {
+      final al = w.albums[id];
+      if (al.artistId != w.playerArtistId) continue;
+      var now = 0.0, week = 0.0;
+      for (final sid in al.songIds) {
+        final s = w.songs[sid];
+        now += w.songLifetimeStreams(s);
+        if (s.status == SongStatus.active) week += s.weekStreams;
+      }
+      for (final m in albumStreamMilestones) {
+        if (now - week < m && now >= m) out.add(AlbumStreamMilestone(id, m));
+      }
+    }
+    return out;
+  }
+
   /// The player's songs on others' records reaching the US top 10 for
   /// the first time, or #1 (docs K143).
   List<GameEvent> _writtenHits(WeekResult r) {
@@ -2887,6 +2927,7 @@ class GameSession {
     events.addAll(_recordsBroken(r));
     events.addAll(_bestSellerNews());
     events.addAll(_writtenHits(r));
+    events.addAll(_streamingNews());
     // The discovery mixes (docs K119).
     for (final id in w.playerSongIds) {
       final s = w.songs[id];

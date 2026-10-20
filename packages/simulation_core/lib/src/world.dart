@@ -59,6 +59,10 @@ class World {
   /// The player's brand deals, running and past (docs K102).
   final List<BrandDeal> brandDeals = [];
 
+  /// The player's most monthly listeners on the streaming app so far (docs
+  /// K156; -1: not known yet, set quietly on the next week).
+  double playerPeakListeners = -1;
+
   /// The player's channel videos besides music videos (docs K142).
   final List<ChannelVideo> channelVideos = [];
 

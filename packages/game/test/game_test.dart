@@ -1362,6 +1362,47 @@ void main() {
       g.close();
     });
 
+    test('monthly listener and album stream milestones (K156)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final al = g.releaseAlbum('Billions', ids);
+      final events = <GameEvent>[];
+      for (var i = 0; i < 20; i++) {
+        events.addAll(g.advanceWeek().events);
+      }
+      final listeners =
+          events.whereType<ListenersMilestone>().map((e) => e.listeners).toList();
+      expect(listeners, isNotEmpty);
+      // Each milestone once, in order.
+      expect(listeners.toSet().length, listeners.length);
+      expect(g.world.playerPeakListeners, greaterThanOrEqualTo(listeners.last));
+      final albums = events.whereType<AlbumStreamMilestone>().toList();
+      expect(albums.map((e) => e.albumId), everyElement(al.id));
+      expect(albums.map((e) => e.streams), contains(1e9));
+      expect(g.artistPage(p.id).peakListeners, g.world.playerPeakListeners);
+      // An old save learns its peak quietly.
+      g.world.playerPeakListeners = -1;
+      expect(g.advanceWeek().events.whereType<ListenersMilestone>(), isEmpty);
+      expect(g.world.playerPeakListeners, greaterThan(0));
+      final peak = g.world.playerPeakListeners;
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.world.playerPeakListeners, peak);
+      g.close();
+    });
+
     test('a version in another language opens a market (K155)', () {
       var g = GameSession.start(
           slots,

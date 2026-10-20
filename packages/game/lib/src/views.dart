@@ -1518,7 +1518,11 @@ class ArtistPageView {
     this.followers = 0,
     this.worldRank = 0,
     this.listenerHistory = const [],
+    this.peakListeners = 0,
   }) : listenerStreams = listenerStreams ?? weeklyStreams;
+
+  /// The player's most monthly listeners so far (docs K156; 0 for others).
+  final double peakListeners;
 
   /// The player's monthly listeners over the last half year, oldest first
   /// (docs K130; empty for other artists).
