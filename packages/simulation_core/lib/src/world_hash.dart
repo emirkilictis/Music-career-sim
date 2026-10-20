@@ -66,6 +66,7 @@ int worldHash(World w) {
     addDouble(a.anticipation);
     addAll(a.reg);
     addAll(a.regionShare);
+    addAll(a.marketBonus);
     addInt(a.moneyCents);
     addInt(a.job.index);
     addInt(a.restWeek);
@@ -124,6 +125,7 @@ int worldHash(World w) {
     addInt(s.marqueeWeek);
     addInt(s.cloudWeek);
     addInt(s.snippetWeek);
+    addInt(s.languages);
     addDouble(s.snippetScore);
     addInt(s.cloudOnly ? 1 : 0);
     addInt(s.showcaseWeek);

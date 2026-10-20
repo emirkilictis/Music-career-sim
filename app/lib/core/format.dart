@@ -333,6 +333,12 @@ class Fmt {
         IncomeSource.albumSales => l.incomeAlbums,
       };
 
+  /// A version in another language (docs K155).
+  String languageVersion(LanguageVersion v) => switch (v) {
+        LanguageVersion.spanish => l.languageSpanish,
+        LanguageVersion.english => l.languageEnglish,
+      };
+
   /// How a snippet went down (docs K152).
   String snippetReaction(SnippetReaction r) => switch (r) {
         SnippetReaction.hot => l.snippetHot,
@@ -790,6 +796,7 @@ class Fmt {
       'noSnippet' => l.errorNoSnippet,
       'noOffer' => l.errorNoOffer,
       'noVisual' => l.errorNoVisual,
+      'noLanguage' => l.errorNoLanguage,
       'noShowcase' => l.errorNoShowcase,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,

@@ -57,8 +57,8 @@ abstract final class Codec {
     // Added in schema v16, v21.
     'manager',
     'dealAdvance', 'dealAlbums', 'unrecouped',
-    // Added in schema v24.
-    'surpriseWeek',
+    // Added in schema v24, v41.
+    'surpriseWeek', 'markets',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -101,6 +101,9 @@ abstract final class Codec {
         a.contractAlbums,
         a.unrecoupedCents,
         a.surpriseWeek,
+        a.marketBonus.every((x) => x == 0)
+            ? null
+            : jsonEncode([for (final x in a.marketBonus) x]),
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -178,6 +181,12 @@ abstract final class Codec {
     a.contractAlbums = r['dealAlbums'] as int? ?? 0;
     a.unrecoupedCents = r['unrecouped'] as int? ?? 0;
     a.surpriseWeek = r['surpriseWeek'] as int? ?? -1000;
+    if (r['markets'] case final String m when m.isNotEmpty) {
+      final j = jsonDecode(m) as List;
+      for (var i = 0; i < j.length && i < a.marketBonus.length; i++) {
+        a.marketBonus[i] = (j[i] as num).toDouble();
+      }
+    }
     if (r['milestones'] case final String m when m.isNotEmpty) {
       for (final e in (jsonDecode(m) as Map<String, Object?>).entries) {
         a.milestones[int.parse(e.key)] = e.value! as int;
@@ -235,8 +244,8 @@ abstract final class Codec {
     'creator', 'radioFormat', 'holiday',
     'rerecordOf', 'replacedWeek', 'masterShare',
     'leakedWeek',
-    // Added in schema v32, v34, v35, v36, v39.
-    'writer', 'liveOf', 'promo', 'cloud', 'snippet',
+    // Added in schema v32, v34, v35, v36, v39, v41.
+    'writer', 'liveOf', 'promo', 'cloud', 'snippet', 'langs',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -305,6 +314,7 @@ abstract final class Codec {
             ? null
             : jsonEncode([s.cloudWeek, s.cloudOnly ? 1 : 0, s.cloudPlays]),
         s.snippetWeek < 0 ? null : jsonEncode([s.snippetWeek, s.snippetScore]),
+        s.languages,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -367,6 +377,7 @@ abstract final class Codec {
       s.cloudOnly = j[1] == 1;
       s.cloudPlays = (j[2] as num).toDouble();
     }
+    s.languages = r['langs'] as int? ?? 0;
     if (r['snippet'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       s.snippetWeek = j[0] as int;

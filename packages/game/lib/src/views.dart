@@ -336,6 +336,15 @@ class SongView {
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
         masterShare = Rerecords.songShare(w.artists[s.primaryArtistId], s),
+        languageVersions = [
+          for (final v in LanguageVersion.values)
+            if (s.languages & (1 << v.index) != 0) v
+        ],
+        languageOptions = [
+          if (w.player != null)
+            for (final v in LanguageVersion.values)
+              if (Languages.can(w, w.player!, s, v)) v
+        ],
         snippetWeek = s.snippetWeek,
         snippetReaction = s.snippetWeek < 0
             ? null
@@ -469,6 +478,11 @@ class SongView {
   final CreatorCampaign creatorTier;
   final CreatorResult creatorResult;
   final Map<CreatorCampaign, int> creatorCosts;
+
+  /// Its versions in other languages, and the ones it can still get
+  /// (docs K155).
+  final List<LanguageVersion> languageVersions;
+  final List<LanguageVersion> languageOptions;
 
   /// A snippet test (docs K152): when (-1: never), the reaction and its
   /// score (0–100), and whether one can be made now.

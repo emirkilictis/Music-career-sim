@@ -5212,5 +5212,19 @@
       }
     }
   },
-  "visualLine": "A visual album: every song has its film."
+  "visualLine": "A visual album: every song has its film.",
+  "errorNoLanguage": "That version is not possible for this song.",
+  "languageSpanish": "Spanish version",
+  "languageEnglish": "English version",
+  "languageHint": "Record it in another language ({cost}, {energy} creativity): a wave for the song, and that market listens to you more from now on.",
+  "@languageHint": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  }
 }

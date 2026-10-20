@@ -784,6 +784,35 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           label: Text(l.newEdition),
                         ),
                     ]),
+                    // Versions in other languages (docs K155).
+                    if (s.languageVersions.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Wrap(spacing: 8, runSpacing: 8, children: [
+                        for (final v in s.languageVersions)
+                          Tag(fmt.languageVersion(v),
+                              icon: Icons.translate_rounded,
+                              color: AppColors.sky),
+                      ]),
+                    ],
+                    if (s.languageOptions.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                          l.languageHint(
+                              fmt.money(Languages.costCents),
+                              Languages.energy.round()),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5)),
+                      const SizedBox(height: 6),
+                      Wrap(spacing: 8, runSpacing: 8, children: [
+                        for (final v in s.languageOptions)
+                          ActionChip(
+                            avatar: const Icon(Icons.translate_rounded, size: 16),
+                            label: Text(fmt.languageVersion(v)),
+                            onPressed: () => _tool(
+                                Cmd.releaseLanguageVersion(s.id, v)),
+                          ),
+                      ]),
+                    ],
                   ]),
             ),
           ],

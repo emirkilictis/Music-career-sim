@@ -1488,6 +1488,12 @@ k('visualHint','A film for every song without a video, cheaper than one by one: 
 k('visualDone','{title} is a visual album now.','{title} artık görsel bir albüm.', title='String')
 k('visualLine','A visual album: every song has its film.','Görsel albüm: her şarkının filmi var.')
 
+# Versions in other languages (docs K155).
+k('errorNoLanguage','That version is not possible for this song.','Bu şarkı için bu versiyon mümkün değil.')
+k('languageSpanish','Spanish version','İspanyolca versiyon')
+k('languageEnglish','English version','İngilizce versiyon')
+k('languageHint','Record it in another language ({cost}, {energy} creativity): a wave for the song, and that market listens to you more from now on.','Başka bir dilde kaydet ({cost}, {energy} yaratıcılık): şarkıya bir dalga, o pazar da bundan sonra seni daha çok dinler.', cost='String', energy='int')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

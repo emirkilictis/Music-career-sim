@@ -1374,6 +1374,20 @@ class GameSession {
   }
 
   /// Pays creators on the short-video app to use a song's sound (K131).
+  /// Puts out released song [songId] in another language (docs K155).
+  void releaseLanguageVersion(int songId, LanguageVersion v) {
+    final s = _ownSong(songId);
+    if (!Languages.can(world, _p, s, v)) {
+      throw GameException('noLanguage', 'Not this version');
+    }
+    _requireMoney(Languages.costCents);
+    if (_p.creativeEnergy < Languages.energy) {
+      throw GameException('noEnergy', 'Not enough creativity');
+    }
+    Languages.release(world, _p, s, v);
+    _saveNow();
+  }
+
   /// Films every track of new album [albumId] (docs K154).
   void makeVisualAlbum(int albumId) {
     if (albumId < 0 || albumId >= world.albums.length) {

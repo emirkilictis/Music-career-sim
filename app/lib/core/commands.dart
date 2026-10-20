@@ -253,6 +253,11 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// A version in another language (docs K155).
+  static SessionCmd<void> releaseLanguageVersion(
+          int songId, LanguageVersion v) =>
+      (s) => s.releaseLanguageVersion(songId, v);
+
   /// A visual album (docs K154).
   static SessionCmd<void> makeVisualAlbum(int albumId) =>
       (s) => s.makeVisualAlbum(albumId);

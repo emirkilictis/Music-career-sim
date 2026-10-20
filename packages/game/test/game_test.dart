@@ -1362,6 +1362,44 @@ void main() {
       g.close();
     });
 
+    test('a version in another language opens a market (K155)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      p.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      expect(g.song(id).languageOptions, isEmpty);
+      g.releaseSingle(id);
+      // At home in North America: Spanish, not English.
+      expect(p.homeCountry.region, Region.northAmerica);
+      expect(g.song(id).languageOptions, [LanguageVersion.spanish]);
+      expect(() => g.releaseLanguageVersion(id, LanguageVersion.english),
+          _code('noLanguage'));
+      final other = p.regionShare[Region.other.index];
+      final boost = g.world.songs[id].versionBoost;
+      g.releaseLanguageVersion(id, LanguageVersion.spanish);
+      expect(p.regionShare[Region.other.index], greaterThan(other));
+      expect(g.world.songs[id].versionBoost, greaterThan(boost));
+      expect(g.song(id).languageVersions, [LanguageVersion.spanish]);
+      expect(g.song(id).languageOptions, isEmpty);
+      // The market stays won, week after week.
+      g.advanceWeeks(3, stop: SkipStop.never);
+      expect(p.marketBonus[Region.other.index], Languages.marketStep);
+      final share = p.regionShare[Region.other.index];
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.world.player!.marketBonus[Region.other.index], Languages.marketStep);
+      expect(g.world.player!.regionShare[Region.other.index], closeTo(share, 1e-9));
+      expect(g.song(id).languageVersions, [LanguageVersion.spanish]);
+      g.close();
+    });
+
     test('a visual album films every track (K154)', () {
       (GameSession, AlbumView) start() {
         final g = GameSession.start(

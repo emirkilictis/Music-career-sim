@@ -619,6 +619,10 @@ class Artist {
   /// weekly for active artists, frozen for retired ones.
   final Float64List regionShare = Float64List(regionCount);
 
+  /// Markets won with songs in their language (docs K155): how much more
+  /// of the audience each region brings.
+  final Float64List marketBonus = Float64List(regionCount);
+
   /// Per-region accounting, layout [ArtistReg]. Catalog indices and their
   /// settle markers drive lazy accrual (retired artists settle lazily, so a
   /// long history of retired artists costs nothing per week).
@@ -633,7 +637,7 @@ class Artist {
       final i = r.index;
       final base = (i == home ? 1 - breadth : 0.0) +
           breadth * regionConfigs[r]!.globalReach;
-      regionShare[i] = base * aff[i];
+      regionShare[i] = base * aff[i] * (1 + marketBonus[i]);
       sum += regionShare[i];
     }
     for (var i = 0; i < regionCount; i++) {
@@ -835,6 +839,10 @@ class Song with Charted {
 
   /// The week it leaked before release (-1: never; docs K140).
   int leakedWeek = -1;
+
+  /// Its versions in other languages, a bit per [LanguageVersion]
+  /// (docs K155).
+  int languages = 0;
 
   /// A snippet test (docs K152): when it was teased (-1: never) and the
   /// reaction score.
