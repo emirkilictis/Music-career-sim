@@ -1328,5 +1328,8 @@
   "formatLatin": "Latin",
   "radioFormatLine": "{format} radyolarına çalışılıyor.",
   "radioFormatHint": "İstasyonlar karar verirken hangi formata çalışılacağını seç: senin sesini çalan büyük bir format daha çok çalınma, niş bir format daha uzun ömür demek. Türün dışında az çalınır.",
-  "radioFormatOption": "{format} · %{play} · süre %{run}"
+  "radioFormatOption": "{format} · %{play} · süre %{run}",
+  "exclusiveTitle": "Fruit Music özel yayını",
+  "exclusiveHint": "Fruit Music ilk {weeks} hafta sadece kendisinde olması için şimdi {fee} öder. Çoğu kişi orada dinleyemez: ilk haftalarda daha az stream ve liste birimi, satışlar etkilenmez.",
+  "exclusiveLine": "{week} tarihine kadar Fruit Music özel yayını, {fee} ödendi."
 }

@@ -716,6 +716,21 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
   String? _cover;
   bool _stagger = true;
 
+  /// The second streaming service's offer for an exclusive (docs K135).
+  int? _exclusiveOffer;
+  bool _exclusive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.state.read(Cmd.exclusiveOffer()).then((fee) {
+      if (mounted) setState(() => _exclusiveOffer = fee);
+    });
+  }
+
+  bool get _goExclusive =>
+      _exclusive && _exclusiveOffer != null && _type == AlbumType.album;
+
   @override
   void dispose() {
     _title.dispose();
@@ -789,6 +804,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           variantWeeks: _variantWeeks,
           variantFormats: _variantFormats,
           campaign: campaign,
+          exclusive: _goExclusive,
         ));
         _saveCovers(images, ImageStore.albumKey(album.id));
         if (!mounted) return;
@@ -804,6 +820,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           campaign: campaign,
           releaseWeek: when.releaseWeek,
           announceWeek: when.announceWeek,
+          exclusive: _goExclusive,
         ));
         _saveCovers(images, ImageStore.scheduledKey(s.id));
         if (!mounted) return;
@@ -884,6 +901,19 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
                       ),
                   ]),
           ),
+          // A streaming exclusive (docs K135).
+          if (_exclusiveOffer != null && _type == AlbumType.album) ...[
+            const SizedBox(height: 12),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _exclusive,
+              onChanged: (v) => setState(() => _exclusive = v),
+              title: Text(l.exclusiveTitle,
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text(l.exclusiveHint(
+                  fmt.money(_exclusiveOffer!), StreamingTools.exclusiveWeeks)),
+            ),
+          ],
           // The order the songs play in (docs K133).
           if (_picked.length > 1) ...[
             const SizedBox(height: 12),

@@ -978,6 +978,7 @@ class GameSession {
     Campaign campaign = Campaign.standard,
     required int releaseWeek,
     required int announceWeek,
+    bool exclusive = false,
   }) {
     final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
     _checkDates(releaseWeek, announceWeek);
@@ -997,7 +998,7 @@ class GameSession {
       createdWeek: world.week,
       campaign: campaign,
       paidCents: cost,
-    ));
+    )..exclusive = exclusive);
   }
 
   /// Keeps an album, EP or mixtape in the vault with no date (docs F31):
@@ -1169,6 +1170,7 @@ class GameSession {
     List<int> variantWeeks = const [0],
     List<EditionFormat?> variantFormats = const [],
     Campaign campaign = Campaign.standard,
+    bool exclusive = false,
   }) {
     final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
     final formats = _formats(variantFormats);
@@ -1179,7 +1181,8 @@ class GameSession {
         variantWeeks: variantWeeks,
         variantFormats: formats,
         payForVariants: true,
-        campaign: campaign);
+        campaign: campaign,
+        exclusive: exclusive);
     _saveNow();
     return AlbumView.of(world, al);
   }
@@ -1884,6 +1887,13 @@ class GameSession {
         ];
     }
   }
+
+  /// What the second streaming service would pay for an exclusive album
+  /// now (docs K135; null: no offer).
+  int? get exclusiveOffer =>
+      StreamingTools.canGoExclusive(world, _p, AlbumType.album)
+          ? StreamingTools.exclusiveFeeCents(_p)
+          : null;
 
   /// The streaming app's Billions Club (docs K132).
   List<BillionsRow> get billionsClub => Platforms.billionsClubOf(world);

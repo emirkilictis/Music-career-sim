@@ -944,6 +944,11 @@ class Album with Charted {
   /// K126).
   double preOrders = 0;
 
+  /// A streaming exclusive (docs K135): only the second streaming service
+  /// plays it until this week (-1: none), for this fee.
+  int exclusiveUntil = -1;
+  int exclusiveFeeCents = 0;
+
   /// What the player paid for the album campaign and the income it brought
   /// in through the album's own tracks and sales (estimated; docs K57).
   int campaignCostCents = 0;
@@ -1194,6 +1199,9 @@ class ScheduledRelease {
   /// Copies of an album or EP ordered ahead (docs K126); they ship and
   /// count in its first week.
   double preOrders = 0;
+
+  /// Out as a streaming exclusive (docs K135).
+  bool exclusive = false;
 
   bool get isAlbum => type != AlbumType.single;
   bool get isSurprise => announceWeek >= releaseWeek;

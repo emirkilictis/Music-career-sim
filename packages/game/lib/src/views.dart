@@ -567,6 +567,8 @@ class AlbumView {
         firstWeekUnits = al.firstWeekUnits,
         firstWeekPure = al.firstWeekPure,
         preOrders = al.preOrders,
+        exclusiveUntil = al.exclusiveUntil,
+        exclusiveFeeCents = al.exclusiveFeeCents,
         weekUnits = al.status == AlbumStatus.active ? al.weekUnits : 0,
         weekPure = al.status == AlbumStatus.active ? al.weekPure : 0,
         weekUsUnits = al.status == AlbumStatus.active
@@ -627,6 +629,10 @@ class AlbumView {
 
   /// Copies ordered ahead that shipped in the first week (docs K126).
   final double preOrders;
+
+  /// A streaming exclusive until this week (-1: none) and its fee (K135).
+  final int exclusiveUntil;
+  final int exclusiveFeeCents;
 
   /// Last played week (0 once the album is in the catalog).
   final double weekUnits;

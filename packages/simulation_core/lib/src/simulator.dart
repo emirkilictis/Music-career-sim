@@ -417,10 +417,17 @@ class Simulator {
       // Not every good song connects (docs K127): beyond the fans, how far
       // a song travels is partly luck, drawn once and hidden.
       final hit = resonance(w, s);
+      // An exclusive album plays on one service only (docs K135).
+      final exclusive = !s.isSingle &&
+              s.albumId >= 0 &&
+              w.week < w.albums[s.albumId].exclusiveUntil
+          ? StreamingTools.exclusiveKeep(year)
+          : 1.0;
       final a = (fanPart + (casPart + pubPart + viralPart) * hit) *
           qMult *
           noise *
-          trackShare;
+          trackShare *
+          exclusive;
       s.lastAttention = a;
       songAttention[i] = a;
       // Where the player's listening came from (docs K120).

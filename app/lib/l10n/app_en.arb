@@ -4566,5 +4566,28 @@
         "type": "int"
       }
     }
+  },
+  "exclusiveTitle": "Fruit Music exclusive",
+  "exclusiveHint": "Fruit Music pays {fee} now to stream it alone for its first {weeks} weeks. Most people cannot stream it there yet: fewer streams and chart units at first, sales are not affected.",
+  "@exclusiveHint": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "exclusiveLine": "Fruit Music exclusive until {week}, paid {fee}.",
+  "@exclusiveLine": {
+    "placeholders": {
+      "fee": {
+        "type": "String"
+      },
+      "week": {
+        "type": "String"
+      }
+    }
   }
 }

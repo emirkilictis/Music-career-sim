@@ -80,6 +80,7 @@ int worldHash(World w) {
       addDouble(sr.buzz);
       addDouble(sr.preSaves);
       addDouble(sr.preOrders);
+      addInt(sr.exclusive ? 1 : 0);
     }
     addDouble(a.creativeEnergy);
     addInt(a.kind.index);
@@ -131,6 +132,7 @@ int worldHash(World w) {
     addInt(al.campaign.index);
     addDouble(al.campaignReturnCents);
     addDouble(al.preOrders);
+    addInt(al.exclusiveUntil);
     addCharts(al);
   }
   for (final chart in w.charts) {

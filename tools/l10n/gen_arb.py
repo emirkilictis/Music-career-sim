@@ -1286,6 +1286,11 @@ k('radioFormatLine','Worked to {format} radio.','{format} radyolarına çalış�
 k('radioFormatHint','Pick the stations to work it to while they decide: a bigger format that plays your sound means more play, a niche one keeps it longer. Off-genre, few spins.','İstasyonlar karar verirken hangi formata çalışılacağını seç: senin sesini çalan büyük bir format daha çok çalınma, niş bir format daha uzun ömür demek. Türün dışında az çalınır.')
 k('radioFormatOption','{format} · {play}% · run {run}%','{format} · %{play} · süre %{run}', format='String', play='int', run='int')
 
+# Streaming exclusives (K135)
+k('exclusiveTitle','Fruit Music exclusive','Fruit Music özel yayını')
+k('exclusiveHint','Fruit Music pays {fee} now to stream it alone for its first {weeks} weeks. Most people cannot stream it there yet: fewer streams and chart units at first, sales are not affected.','Fruit Music ilk {weeks} hafta sadece kendisinde olması için şimdi {fee} öder. Çoğu kişi orada dinleyemez: ilk haftalarda daha az stream ve liste birimi, satışlar etkilenmez.', fee='String', weeks='int')
+k('exclusiveLine','Fruit Music exclusive until {week}, paid {fee}.','{week} tarihine kadar Fruit Music özel yayını, {fee} ödendi.', fee='String', week='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

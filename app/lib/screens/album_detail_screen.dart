@@ -199,6 +199,21 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   ?.peak,
             ),
           ],
+          // A streaming exclusive (docs K135).
+          if (a.isPlayer && a.exclusiveFeeCents > 0) ...[
+            const SizedBox(height: 10),
+            Row(children: [
+              Icon(Icons.lock_clock_outlined,
+                  size: 18, color: AppColors.textMuted),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                    l.exclusiveLine(fmt.money(a.exclusiveFeeCents),
+                        fmt.week(a.exclusiveUntil)),
+                    style: TextStyle(color: AppColors.textMuted)),
+              ),
+            ]),
+          ],
           // Pre-orders shipped in week one (docs K126).
           if (a.isPlayer && a.preOrders >= 1) ...[
             const SizedBox(height: 10),
@@ -208,8 +223,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                    l.preOrdersShipped(fmt.compact(a.preOrders),
-                        fmt.compact(a.firstWeekPure)),
+                    l.preOrdersShipped(
+                        fmt.compact(a.preOrders), fmt.compact(a.firstWeekPure)),
                     style: TextStyle(color: AppColors.textMuted)),
               ),
             ]),

@@ -1362,6 +1362,42 @@ void main() {
       g.close();
     });
 
+    test('a streaming exclusive pays now and streams less at first (K135)',
+        () {
+      (AlbumView, int, double) run(bool exclusive) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2016,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire,
+                premium: true));
+        g.world.player!.moneyCents = 1 << 40;
+        final fee = g.exclusiveOffer!;
+        final songs = <int>[];
+        for (var i = 0; i < 8; i++) {
+          g.world.player!.creativeEnergy = 100;
+          songs.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        final money = g.player.moneyCents;
+        final al = g.releaseAlbum('X', songs, exclusive: exclusive);
+        final paid = g.player.moneyCents - money;
+        g.advanceWeek();
+        final sea = g.world.albums[al.id].weekSea;
+        final view = g.albums.firstWhere((a) => a.id == al.id);
+        g.close();
+        expect(paid, exclusive ? greaterThan(fee ~/ 2) : lessThan(0));
+        return (view, paid, sea);
+      }
+
+      final (open, _, openSea) = run(false);
+      final (only, _, onlySea) = run(true);
+      expect(open.exclusiveFeeCents, 0);
+      expect(only.exclusiveFeeCents, greaterThan(0));
+      expect(only.exclusiveUntil, greaterThan(0));
+      expect(onlySea, lessThan(openSea * 0.6));
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;

@@ -106,12 +106,17 @@ abstract final class Cmd {
     required List<int> variantWeeks,
     List<EditionFormat?> variantFormats = const [],
     required Campaign campaign,
+    bool exclusive = false,
   }) =>
       (s) => s.releaseAlbum(title, songIds,
           type: type,
           variantWeeks: variantWeeks,
           variantFormats: variantFormats,
-          campaign: campaign);
+          campaign: campaign,
+          exclusive: exclusive);
+
+  /// The exclusive fee on offer for an album now (docs K135).
+  static SessionCmd<int?> exclusiveOffer() => (s) => s.exclusiveOffer;
 
   static SessionCmd<ScheduledView> scheduleSingle(
           int songId, Campaign campaign, int releaseWeek, int announceWeek,
@@ -131,6 +136,7 @@ abstract final class Cmd {
     required Campaign campaign,
     required int releaseWeek,
     required int announceWeek,
+    bool exclusive = false,
   }) =>
       (s) => s.scheduleAlbum(title, songIds,
           type: type,
@@ -138,7 +144,8 @@ abstract final class Cmd {
           variantFormats: variantFormats,
           campaign: campaign,
           releaseWeek: releaseWeek,
-          announceWeek: announceWeek);
+          announceWeek: announceWeek,
+          exclusive: exclusive);
 
   static SessionCmd<ScheduledView> saveDraft({
     required String title,

@@ -9,6 +9,7 @@ import 'config/regions.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
+import 'streaming_tools.dart';
 import 'tours.dart';
 import 'names.dart';
 import 'time.dart';
@@ -708,7 +709,8 @@ abstract final class Actions {
       bool prepaid = false,
       int paidCents = 0,
       double buzz = 0,
-      bool announced = false}) {
+      bool announced = false,
+      bool exclusive = false}) {
     final paid = prepaid ? paidCents : _payCampaign(a, campaign);
     _comeback(w, a);
     _convertAnticipation(a, album: type == AlbumType.album);
@@ -788,6 +790,16 @@ abstract final class Actions {
     World.insertSorted(w.activeAlbumIds, album.id);
     a.lastReleaseWeek = w.week;
     if (type == AlbumType.mixtape) _mixtapeBuzz(w, a);
+    // A streaming exclusive (docs K135): paid now, off the other services
+    // for two weeks.
+    if (exclusive && StreamingTools.canGoExclusive(w, a, type)) {
+      final fee = StreamingTools.exclusiveFeeCents(a);
+      a.moneyCents += fee;
+      album
+        ..exclusiveUntil = w.week + StreamingTools.exclusiveWeeks
+        ..exclusiveFeeCents = fee
+        ..revenueCents += fee;
+    }
     if (type == AlbumType.album) {
       if (a.contractAlbumsLeft > 0) a.contractAlbumsLeft--;
       Eras.open(w, a, album);
@@ -937,7 +949,8 @@ abstract final class Actions {
             paidCents: sr.paidCents -
                 editionsCostCents(sr.variantWeeks.length, sr.variantFormats),
             buzz: sr.buzz,
-            announced: !sr.isSurprise)
+            announced: !sr.isSurprise,
+            exclusive: sr.exclusive)
           ..preOrders = sr.preOrders;
         out.add((scheduleId: sr.id, isAlbum: true, id: al.id));
       } else {

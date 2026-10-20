@@ -397,8 +397,8 @@ abstract final class Codec {
     'scheduleId', 'criticScore', 'preSingleUnits',
     // Added in schema v11.
     'campaignCost', 'campaignReturn',
-    // Added in schema v13, v25.
-    'revenue', 'preOrders',
+    // Added in schema v13, v25, v28.
+    'revenue', 'preOrders', 'exclusiveUntil', 'exclusiveFee',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -418,6 +418,8 @@ abstract final class Codec {
         al.campaignReturnCents,
         al.revenueCents,
         al.preOrders,
+        al.exclusiveUntil,
+        al.exclusiveFeeCents,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -442,6 +444,8 @@ abstract final class Codec {
       ..campaignReturnCents = (r['campaignReturn'] as num?)?.toDouble() ?? 0
       ..revenueCents = (r['revenue'] as num?)?.toDouble() ?? 0
       ..preOrders = (r['preOrders'] as num?)?.toDouble() ?? 0
+      ..exclusiveUntil = r['exclusiveUntil'] as int? ?? -1
+      ..exclusiveFeeCents = r['exclusiveFee'] as int? ?? 0
       ..variantFormats = r['editionFormats'] == null
           ? const []
           : _parseInts(r['editionFormats'] as String)
@@ -540,6 +544,7 @@ abstract final class Codec {
             'buzz': sr.buzz,
             'ps': sr.preSaves,
             'po': sr.preOrders,
+            'ex': sr.exclusive,
           }
       ]);
 
@@ -564,6 +569,7 @@ abstract final class Codec {
               buzz: (m['buzz'] as num).toDouble(),
             )
               ..preSaves = (m['ps'] as num?)?.toDouble() ?? 0
-              ..preOrders = (m['po'] as num?)?.toDouble() ?? 0,
+              ..preOrders = (m['po'] as num?)?.toDouble() ?? 0
+              ..exclusive = m['ex'] as bool? ?? false,
       ];
 }

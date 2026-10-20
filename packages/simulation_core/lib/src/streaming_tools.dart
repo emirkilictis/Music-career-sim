@@ -135,6 +135,35 @@ abstract final class StreamingTools {
     w.dirtySongs.add(s.id);
   }
 
+  // ------------------------------------------ streaming exclusives (K135)
+
+  /// The years the second streaming service paid stars for exclusive
+  /// albums.
+  static const exclusiveFrom = 2015, exclusiveTo = 2019;
+
+  /// Weeks an exclusive keeps an album off the other services.
+  static const exclusiveWeeks = 2;
+
+  /// A known name's album in the exclusive years.
+  static bool canGoExclusive(World w, Artist a, AlbumType type) {
+    final y = GameTime.yearOf(w.week);
+    return type == AlbumType.album &&
+        y >= exclusiveFrom &&
+        y <= exclusiveTo &&
+        a.fame >= 0.4;
+  }
+
+  /// What the service pays: more for a bigger audience.
+  static int exclusiveFeeCents(Artist a) =>
+      (30000000 * Actions.campaignSizeFactor(a)).round();
+
+  /// Share of an exclusive album's streams that still happen: the
+  /// service's own listeners, and some fans who sign up for it.
+  static double exclusiveKeep(int year) {
+    final share = math.min(0.2, 0.05 + 0.05 * (year - 2015));
+    return share + 0.35 * (1 - share);
+  }
+
   // ------------------------------------------- creator campaigns (K131)
 
   /// The short-video app opens; creators can be paid from then on.
