@@ -214,6 +214,8 @@ class Fmt {
         Charts.usRadio => l.chartUsRadio,
         Charts.usStreaming => l.chartUsStreaming,
         Charts.usDigital => l.chartUsDigital,
+        Charts.usAlbumSales => l.chartUsAlbumSales,
+        Charts.usStreamingAlbums => l.chartUsStreamingAlbums,
         _ => '?',
       };
 
@@ -234,6 +236,8 @@ class Fmt {
         Charts.usRadio => l.chartShortUsRadio,
         Charts.usStreaming => l.chartShortUsStreaming,
         Charts.usDigital => l.chartShortUsDigital,
+        Charts.usAlbumSales => l.chartShortUsAlbumSales,
+        Charts.usStreamingAlbums => l.chartShortUsStreamingAlbums,
         _ => chart(id),
       };
 

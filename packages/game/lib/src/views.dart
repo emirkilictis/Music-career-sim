@@ -1055,7 +1055,9 @@ class ChartView {
           ChartMarket.us ||
           ChartMarket.usRadio ||
           ChartMarket.usStreaming ||
-          ChartMarket.usDigital =>
+          ChartMarket.usDigital ||
+          ChartMarket.usAlbumSales ||
+          ChartMarket.usStreamingAlbums =>
             CountryShares.usOfNorthAmerica(artist.homeCountry) *
                 byRegion(Region.northAmerica.index),
           ChartMarket.uk => CountryShares.ukOfEurope(artist.homeCountry) *

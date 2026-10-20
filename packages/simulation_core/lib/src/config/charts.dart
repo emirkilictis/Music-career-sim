@@ -18,6 +18,10 @@ enum ChartMarket {
   /// US streams, and US download sales (docs K166).
   usStreaming,
   usDigital,
+
+  /// US album copies sold, and US album streams (docs K168).
+  usAlbumSales,
+  usStreamingAlbums,
 }
 
 /// A chart definition. Names are fictional (no real chart or platform
@@ -71,6 +75,11 @@ abstract final class Charts {
   /// The Hot 100's parts (docs K166): streams alone, downloads alone.
   static const usStreaming = 10;
   static const usDigital = 11;
+
+  /// The album chart's parts (docs K168): copies sold alone, streams
+  /// alone.
+  static const usAlbumSales = 12;
+  static const usStreamingAlbums = 13;
 
   static const all = <ChartDef>[
     ChartDef(
@@ -152,9 +161,23 @@ abstract final class Charts {
         market: ChartMarket.usDigital,
         size: 50,
         startYear: 2005),
+    ChartDef(
+        id: usAlbumSales,
+        key: 'chart.us.albumSales',
+        kind: ChartKind.albums,
+        market: ChartMarket.usAlbumSales,
+        size: 50,
+        startYear: 2015),
+    ChartDef(
+        id: usStreamingAlbums,
+        key: 'chart.us.streamingAlbums',
+        kind: ChartKind.albums,
+        market: ChartMarket.usStreamingAlbums,
+        size: 50,
+        startYear: 2015),
   ];
 
-  static const count = 12;
+  static const count = 14;
 
   /// Song charts whose positions feed back into exposure and dormancy.
   static const mainSongCharts = [usSongs, ukSongs, globalSongs];

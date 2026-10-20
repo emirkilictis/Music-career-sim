@@ -1437,6 +1437,39 @@ void main() {
       g.close();
     });
 
+    test('US album sales and streaming albums charts (K168)', () {
+      var g = GameSession.start(slots, _setup(startYear: 2012));
+      final ids = [for (final c in g.activeCharts) c.id];
+      expect(ids, isNot(contains(Charts.usAlbumSales)));
+      g.close();
+      g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2017,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final songs = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        songs.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final al = g.releaseAlbum('Two Charts', songs);
+      g.advanceWeek();
+      final sales = g.chart(Charts.usAlbumSales).rows;
+      final streaming = g.chart(Charts.usStreamingAlbums).rows;
+      expect(sales, hasLength(50));
+      expect(streaming, hasLength(50));
+      // Ranked by US copies sold alone.
+      for (final r in sales) {
+        expect(r.points, closeTo(r.pure, r.pure * 0.01 + 1));
+      }
+      expect(sales.any((r) => r.entityId == al.id), isTrue);
+      g.close();
+    });
+
     test('an album rollout (K165)', () {
       var g = GameSession.start(
           slots,

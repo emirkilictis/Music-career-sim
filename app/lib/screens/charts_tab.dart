@@ -32,6 +32,8 @@ const _magazineCharts = [
   Charts.usRadio,
   Charts.usStreaming,
   Charts.usDigital,
+  Charts.usAlbumSales,
+  Charts.usStreamingAlbums,
 ];
 
 /// The box-office board in the chart tabs (docs K77).

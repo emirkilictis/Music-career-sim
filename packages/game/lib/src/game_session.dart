@@ -3044,7 +3044,9 @@ class GameSession {
   static const _albumCharts = [
     Charts.usAlbums,
     Charts.ukAlbums,
-    Charts.globalAlbums
+    Charts.globalAlbums,
+    Charts.usAlbumSales,
+    Charts.usStreamingAlbums,
   ];
 
   List<GameEvent> _events(WeekResult r, _Snapshot before) {

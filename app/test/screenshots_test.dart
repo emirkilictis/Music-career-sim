@@ -717,6 +717,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(streamingTab);
     await shot(tester, '08m_streaming_chart');
+    final albumSales = _ci('US Album Sales');
+    await tester.scrollUntilVisible(albumSales, 200,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .first);
+    await tester.pumpAndSettle();
+    await tester.tap(albumSales);
+    await shot(tester, '08n_album_sales_chart');
     await tab(tester, 'Career');
     // Record money by source (docs K145).
     final income = _ci('Record money by source');

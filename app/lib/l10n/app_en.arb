@@ -4455,6 +4455,10 @@
   "chartShortUsStreaming": "US Streaming",
   "chartUsDigital": "US Digital Song Sales",
   "chartShortUsDigital": "US Digital",
+  "chartUsAlbumSales": "US Top Album Sales",
+  "chartShortUsAlbumSales": "US Album Sales",
+  "chartUsStreamingAlbums": "US Streaming Albums",
+  "chartShortUsStreamingAlbums": "US Streaming Albums",
   "radioChartLine": "{audience} listeners on the radio",
   "@radioChartLine": {
     "placeholders": {

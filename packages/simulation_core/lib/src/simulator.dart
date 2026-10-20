@@ -856,6 +856,7 @@ class Simulator {
       var tPure = 0.0, tUnits = 0.0, tTea = 0.0, tSea = 0.0, tChart = 0.0;
       var buysAll = 0.0, buysFromReach = 0.0;
       final chartRegion = Float64List(_r);
+      final seaRegion = Float64List(_r);
       for (var k = 0; k < _r; k++) {
         final era = eras[k];
         final share = p.regionShare[k];
@@ -954,6 +955,7 @@ class Simulator {
                 spa[k];
         final t = al.isMixtape ? 0.0 : tea[k] / c.trackEquivalentAlbum;
         final se = streams / c.streamEquivalentAlbum;
+        seaRegion[k] = se;
         final units = albumRules.albumUsesUnits ? pure + t + se : pure + t;
         chartRegion[k] = albumRules.albumUsesUnits ? units : pure;
         tChart += chartRegion[k];
@@ -996,6 +998,10 @@ class Simulator {
       albumPts[Charts.ukAlbums][ai] =
           CountryShares.ukOfEurope(p.homeCountry) * chartRegion[eu];
       albumPts[Charts.globalAlbums][ai] = tChart;
+      // The album chart's parts (docs K168).
+      final usShare = CountryShares.usOfNorthAmerica(p.homeCountry);
+      albumPts[Charts.usAlbumSales][ai] = usShare * al.weekRegion[na];
+      albumPts[Charts.usStreamingAlbums][ai] = usShare * seaRegion[na];
 
       if (age == 0) {
         al.firstWeekUnits = tUnits;
