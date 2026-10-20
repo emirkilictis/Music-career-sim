@@ -29,6 +29,9 @@ class _ReleasesTabState extends State<ReleasesTab> {
   List<AlbumView> _albums = const [];
   List<ScheduledView> _scheduled = const [];
   List<UpcomingRelease> _rivals = const [];
+
+  /// Tours a live album can come from (docs K146).
+  List<LiveTourView> _liveTours = const [];
   int _loadedRevision = -1;
 
   @override
@@ -47,13 +50,110 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final albums = await career.read(Cmd.albums());
     final scheduled = await career.read(Cmd.scheduled());
     final rivals = await career.read(Cmd.upcomingRivalAlbums());
+    final liveTours = await career.read(Cmd.liveAlbumTours());
     if (mounted) {
       setState(() {
+        _liveTours = liveTours;
         _songs = songs;
         _albums = albums;
         _scheduled = scheduled;
         _rivals = rivals;
       });
+    }
+  }
+
+  /// Picks songs from the tour's set and puts out a live album (K146).
+  Future<void> _liveAlbum(LiveTourView t) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final songs = [
+      for (final s in _songs)
+        if (s.releasedWeek >= 0 && s.liveOf < 0) s
+    ];
+    final name = TextEditingController(
+        text: l.liveDefaultTitle(t.name.isEmpty ? career.player.name : t.name));
+    final picked = await showModalBottomSheet<(String, List<int>)>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) {
+        final chosen = <int>[];
+        return StatefulBuilder(
+          builder: (c, set) => Padding(
+            padding:
+                EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
+            child: SafeArea(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(c).size.height * 0.85),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                    child: Text(l.liveTitle,
+                        style: Theme.of(c).textTheme.titleLarge),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Text(
+                        l.liveHint(
+                            LiveAlbums.minTracks,
+                            LiveAlbums.maxTracks,
+                            fmt.money(LiveAlbums.costPerTrackCents),
+                            LiveAlbums.energyPerTrack.round()),
+                        style: Theme.of(c).textTheme.bodySmall),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                    child: TextField(
+                      controller: name,
+                      maxLength: 60,
+                      decoration: InputDecoration(labelText: l.rerecordName),
+                    ),
+                  ),
+                  Flexible(
+                    child: ListView(shrinkWrap: true, children: [
+                      for (final s in songs)
+                        CheckboxListTile(
+                          value: chosen.contains(s.id),
+                          onChanged: !chosen.contains(s.id) &&
+                                  chosen.length >= LiveAlbums.maxTracks
+                              ? null
+                              : (v) => set(() => v == true
+                                  ? chosen.add(s.id)
+                                  : chosen.remove(s.id)),
+                          title: Text(s.title),
+                          subtitle: Text(fmt.songGrade(s)),
+                        ),
+                    ]),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: FilledButton(
+                      onPressed: chosen.length < LiveAlbums.minTracks
+                          ? null
+                          : () => Navigator.pop(c, (name.text, List.of(chosen))),
+                      child: Text(l.liveGo(chosen.length)),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    name.dispose();
+    if (picked == null || !mounted) return;
+    final campaign = await pickCampaign(context, career,
+        extraCents: LiveAlbums.costCents(picked.$2.length));
+    if (campaign == null || !mounted) return;
+    try {
+      final al = await career.act(
+          Cmd.releaseLiveAlbum(t.startWeek, picked.$1, picked.$2, campaign));
+      if (mounted) showInfo(context, l.albumReleased(al.title));
+    } catch (e) {
+      if (mounted) showError(context, e);
     }
   }
 
@@ -320,6 +420,16 @@ class _ReleasesTabState extends State<ReleasesTab> {
             ),
           ),
         ]),
+        // A live album from a finished tour (docs K146).
+        for (final t in _liveTours) ...[
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: career.busy ? null : () => _liveAlbum(t),
+            icon: const Icon(Icons.mic_external_on_outlined),
+            label: Text(l.liveButton(t.name.isEmpty ? l.liveTourFallback : t.name,
+                t.shows)),
+          ),
+        ],
         const SizedBox(height: 16),
         if (dated.isNotEmpty) ...[
           Section(

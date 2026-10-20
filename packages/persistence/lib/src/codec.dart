@@ -235,8 +235,8 @@ abstract final class Codec {
     'creator', 'radioFormat', 'holiday',
     'rerecordOf', 'replacedWeek', 'masterShare',
     'leakedWeek',
-    // Added in schema v32.
-    'writer',
+    // Added in schema v32, v34.
+    'writer', 'liveOf',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -297,6 +297,7 @@ abstract final class Codec {
         s.writerId < 0 && s.soldTo < 0
             ? null
             : jsonEncode([s.writerId, s.soldTo, s.writerCents]),
+        s.liveOf,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -347,6 +348,7 @@ abstract final class Codec {
     s.replacedWeek = r['replacedWeek'] as int? ?? -1;
     s.masterShare = (r['masterShare'] as num?)?.toDouble();
     s.leakedWeek = r['leakedWeek'] as int? ?? -1;
+    s.liveOf = r['liveOf'] as int? ?? -1;
     if (r['writer'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       s.writerId = j[0] as int;
@@ -423,8 +425,8 @@ abstract final class Codec {
     // Added in schema v13, v25, v28, v30.
     'revenue', 'preOrders', 'exclusiveUntil', 'exclusiveFee',
     'masterShare',
-    // Added in schema v33.
-    'bundle',
+    // Added in schema v33, v34.
+    'bundle', 'liveTour',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -450,6 +452,7 @@ abstract final class Codec {
         al.bundle == AlbumBundle.none
             ? null
             : jsonEncode([al.bundle.index, al.bundleUnits]),
+        al.liveTour,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -477,6 +480,7 @@ abstract final class Codec {
       ..exclusiveUntil = r['exclusiveUntil'] as int? ?? -1
       ..exclusiveFeeCents = r['exclusiveFee'] as int? ?? 0
       ..masterShare = (r['masterShare'] as num?)?.toDouble()
+      ..liveTour = r['liveTour'] as int? ?? -1
       ..variantFormats = r['editionFormats'] == null
           ? const []
           : _parseInts(r['editionFormats'] as String)

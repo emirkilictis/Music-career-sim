@@ -836,6 +836,9 @@ class Song with Charted {
   /// The week it leaked before release (-1: never; docs K140).
   int leakedWeek = -1;
 
+  /// The song this is a live recording of (-1: a studio song; docs K146).
+  int liveOf = -1;
+
   /// Writing for others (docs K143): who wrote it when it is not its
   /// artist (-1), the song it became when sold (-1: not sold), and the
   /// writer's royalties so far.
@@ -981,6 +984,11 @@ class Album with Charted {
   /// week (docs K144).
   AlbumBundle bundle = AlbumBundle.none;
   double bundleUnits = 0;
+
+  /// A live album: the start week of the tour it was recorded on (-1: a
+  /// studio record; docs K146).
+  int liveTour = -1;
+  bool get isLive => liveTour >= 0;
 
   /// The artist's share of its sales, fixed by the deal it came out
   /// under (docs K139). Null until it first earns.

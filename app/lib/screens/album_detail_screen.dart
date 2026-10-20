@@ -269,7 +269,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
             title: a.title,
             subtitle: '${a.artistName} · ${fmt.albumType(a.type)}'
                 '${a.isDeluxe ? ' · ${l.deluxeTag}' : ''}'
-                '${a.isRerecord ? ' · ${l.rerecordTag}' : ''}',
+                '${a.isRerecord ? ' · ${l.rerecordTag}' : ''}'
+                '${a.isLive ? ' · ${l.liveTag}' : ''}',
           ),
           if (a.canDeluxe) ...[
             const SizedBox(height: 10),

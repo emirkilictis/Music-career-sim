@@ -729,6 +729,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         Tag(l.leakedTag,
                             icon: Icons.water_drop_outlined,
                             color: AppColors.coral),
+                      if (s.liveOf >= 0)
+                        Tag(l.liveTag,
+                            icon: Icons.mic_external_on_outlined,
+                            color: AppColors.lilac),
                       if (s.rerecordOf >= 0)
                         Tag(l.rerecordTag,
                             icon: Icons.replay_rounded,

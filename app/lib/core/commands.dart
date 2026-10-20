@@ -247,6 +247,14 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// Live albums (docs K146).
+  static SessionCmd<List<LiveTourView>> liveAlbumTours() =>
+      (s) => s.liveAlbumTours;
+  static SessionCmd<AlbumView> releaseLiveAlbum(int tourStartWeek,
+          String title, List<int> songIds, Campaign campaign) =>
+      (s) => s.releaseLiveAlbum(tourStartWeek, title, songIds,
+          campaign: campaign);
+
   /// Record money by source (docs K145).
   static SessionCmd<IncomeBreakdown> songIncome(int songId) =>
       (s) => s.songIncome(songId);

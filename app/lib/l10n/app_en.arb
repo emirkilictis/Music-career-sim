@@ -4965,5 +4965,52 @@
         "type": "String"
       }
     }
-  }
+  },
+  "liveButton": "Live album from {tour} ({shows} shows)",
+  "@liveButton": {
+    "placeholders": {
+      "tour": {
+        "type": "String"
+      },
+      "shows": {
+        "type": "int"
+      }
+    }
+  },
+  "liveTourFallback": "your tour",
+  "liveTitle": "Live album",
+  "liveHint": "Pick {min}–{max} released songs from the set. Live versions are as good as you are on stage; fans buy them, few others do, and fans still mostly play the studio songs. It opens no era and is not an album your label is owed. {cost} a track and {energy} creativity.",
+  "@liveHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "liveGo": "Release live album ({n} songs)",
+  "@liveGo": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "liveDefaultTitle": "{tour} (Live)",
+  "@liveDefaultTitle": {
+    "placeholders": {
+      "tour": {
+        "type": "String"
+      }
+    }
+  },
+  "liveTag": "Live"
 }

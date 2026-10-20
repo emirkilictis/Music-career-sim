@@ -1815,6 +1815,45 @@ class GameSession {
     return out;
   }
 
+  /// Finished tours a live album can come from, latest first (docs K146).
+  List<LiveTourView> get liveAlbumTours => [
+        for (final t in LiveAlbums.tours(world, _p)) LiveTourView.of(t)
+      ];
+
+  /// Puts out a live album of released songs [songIds] recorded on the
+  /// tour that started in [tourStartWeek] (docs K146).
+  AlbumView releaseLiveAlbum(int tourStartWeek, String title, List<int> songIds,
+      {Campaign campaign = Campaign.none}) {
+    final tour = LiveAlbums.tours(world, _p)
+        .where((t) => t.startWeek == tourStartWeek)
+        .firstOrNull;
+    if (tour == null) throw GameException('noTour', 'No such tour');
+    final t = title.trim();
+    if (t.isEmpty || t.length > 60) {
+      throw GameException('invalidTitle', 'Title must be 1–60 chars');
+    }
+    if (songIds.length < LiveAlbums.minTracks ||
+        songIds.length > LiveAlbums.maxTracks ||
+        songIds.toSet().length != songIds.length) {
+      throw GameException('trackCount',
+          'Needs ${LiveAlbums.minTracks}–${LiveAlbums.maxTracks} tracks');
+    }
+    for (final id in songIds) {
+      final s = _ownSong(id);
+      if (s.releasedWeek < 0 || s.liveOf >= 0) {
+        throw GameException('notReleased', 'Only released studio songs');
+      }
+    }
+    _requireMoney(_campaignCost(campaign) + LiveAlbums.costCents(songIds.length));
+    if (_p.creativeEnergy < LiveAlbums.energyPerTrack * songIds.length) {
+      throw GameException('noEnergy', 'Not enough creativity');
+    }
+    final al = LiveAlbums.release(world, _p, tour, t, songIds,
+        campaign: campaign);
+    _saveNow();
+    return AlbumView.of(world, al);
+  }
+
   /// Song [songId]'s record money by source (docs K145).
   IncomeBreakdown songIncome(int songId) =>
       Income.ofSong(world, world.songs[songId]);

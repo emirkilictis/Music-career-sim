@@ -327,6 +327,7 @@ class SongView {
               },
         holiday = s.holiday,
         rerecordOf = s.rerecordOf,
+        liveOf = s.liveOf,
         leakedWeek = s.leakedWeek,
         writerName = s.writerId >= 0 ? w.artists[s.writerId].name : '',
         writtenByPlayer = s.writerId >= 0 && s.writerId == w.playerArtistId,
@@ -421,6 +422,9 @@ class SongView {
   /// own re-recording came out (-1: none; docs K139).
   final int rerecordOf;
   final int replacedWeek;
+
+  /// The studio song this is a live recording of (-1: none; docs K146).
+  final int liveOf;
 
   /// Leaks (docs K140): the week it leaked (-1: never), whether it can
   /// still be put out in answer, and whether the leak cost it (out too
@@ -606,6 +610,7 @@ class AlbumView {
         exclusiveUntil = al.exclusiveUntil,
         exclusiveFeeCents = al.exclusiveFeeCents,
         bundle = al.bundle,
+        isLive = al.isLive,
         bundleUnits = al.bundleUnits,
         masterShare = Rerecords.albumShare(w.artists[al.artistId], al),
         isRerecord = Rerecords.isRerecord(w, al),
@@ -698,6 +703,9 @@ class AlbumView {
   /// What it came bundled with and the copies that added (docs K144).
   final AlbumBundle bundle;
   final double bundleUnits;
+
+  /// A live album (docs K146).
+  final bool isLive;
 
   /// Re-recordings (docs K139): the artist's share of its money (the
   /// deal it came out under), whether it re-records [originalAlbumId],
@@ -2227,4 +2235,21 @@ class WrittenSongView {
   final int peak;
   final double streams;
   final double earnedCents;
+}
+
+/// A finished tour a live album can come from (docs K146).
+class LiveTourView {
+  LiveTourView.of(TourRecord t)
+      : startWeek = t.startWeek,
+        endWeek = t.endWeek,
+        name = t.name,
+        shows = t.shows,
+        tickets = t.tickets;
+
+  /// Identifies the tour.
+  final int startWeek;
+  final int endWeek;
+  final String name;
+  final int shows;
+  final double tickets;
 }

@@ -21,6 +21,7 @@ export 'src/festivals.dart';
 export 'src/holidays.dart';
 export 'src/leaks.dart';
 export 'src/lifecycle.dart';
+export 'src/live_albums.dart';
 export 'src/model.dart';
 export 'src/music_show.dart';
 export 'src/names.dart';

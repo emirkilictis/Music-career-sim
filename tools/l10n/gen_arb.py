@@ -1416,6 +1416,15 @@ k('incomePhysical','Physical singles','Fiziksel single\'lar')
 k('incomeAlbums','Album copies','Albüm kopyaları')
 k('perStream','Pays about {amount} a play.','Dinlenme başına yaklaşık {amount} öder.', amount='String')
 
+# Live albums (docs K146).
+k('liveButton','Live album from {tour} ({shows} shows)','{tour} turnesinden canlı albüm ({shows} konser)', tour='String', shows='int')
+k('liveTourFallback','your tour','turnen')
+k('liveTitle','Live album','Canlı albüm')
+k('liveHint','Pick {min}–{max} released songs from the set. Live versions are as good as you are on stage; fans buy them, few others do, and fans still mostly play the studio songs. It opens no era and is not an album your label is owed. {cost} a track and {energy} creativity.','Setten {min}–{max} çıkmış şarkı seç. Canlı versiyonlar sahnedeki kadar iyi olur; hayranlar alır, başkaları pek almaz, hayranlar da çoğunlukla stüdyo hallerini dinler. Yeni dönem açmaz, plak şirketine borçlu olduğun albümlerden sayılmaz. Parça başına {cost} ve {energy} yaratıcılık.', min='int', max='int', cost='String', energy='int')
+k('liveGo','Release live album ({n} songs)','Canlı albümü çıkar ({n} şarkı)', n='int')
+k('liveDefaultTitle','{tour} (Live)','{tour} (Canlı)', tour='String')
+k('liveTag','Live','Canlı')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -721,10 +721,12 @@ abstract final class Actions {
       double buzz = 0,
       bool announced = false,
       bool exclusive = false,
-      AlbumBundle bundle = AlbumBundle.none}) {
+      AlbumBundle bundle = AlbumBundle.none,
+      int liveTour = -1}) {
     final paid = prepaid ? paidCents : _payCampaign(a, campaign);
     _comeback(w, a);
-    _convertAnticipation(a, album: type == AlbumType.album);
+    // A live album leaves the anticipation for the next record (K146).
+    _convertAnticipation(a, album: type == AlbumType.album && liveTour < 0);
     a.hype += buzz;
     if (!announced && a.tier == ArtistTier.player) {
       final shock = surpriseShock(w, a, type, songIds);
@@ -824,7 +826,10 @@ abstract final class Actions {
         album.revenueCents += margin;
       }
     }
-    if (type == AlbumType.album) {
+    album.liveTour = liveTour;
+    // A live album opens no era and is not an album the label is owed
+    // (docs K146).
+    if (type == AlbumType.album && liveTour < 0) {
       if (a.contractAlbumsLeft > 0) a.contractAlbumsLeft--;
       Eras.open(w, a, album);
     }

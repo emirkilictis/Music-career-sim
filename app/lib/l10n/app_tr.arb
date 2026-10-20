@@ -1436,5 +1436,12 @@
   "incomeDownloads": "İndirmeler",
   "incomePhysical": "Fiziksel single'lar",
   "incomeAlbums": "Albüm kopyaları",
-  "perStream": "Dinlenme başına yaklaşık {amount} öder."
+  "perStream": "Dinlenme başına yaklaşık {amount} öder.",
+  "liveButton": "{tour} turnesinden canlı albüm ({shows} konser)",
+  "liveTourFallback": "turnen",
+  "liveTitle": "Canlı albüm",
+  "liveHint": "Setten {min}–{max} çıkmış şarkı seç. Canlı versiyonlar sahnedeki kadar iyi olur; hayranlar alır, başkaları pek almaz, hayranlar da çoğunlukla stüdyo hallerini dinler. Yeni dönem açmaz, plak şirketine borçlu olduğun albümlerden sayılmaz. Parça başına {cost} ve {energy} yaratıcılık.",
+  "liveGo": "Canlı albümü çıkar ({n} şarkı)",
+  "liveDefaultTitle": "{tour} (Canlı)",
+  "liveTag": "Canlı"
 }

@@ -1362,6 +1362,53 @@ void main() {
       g.close();
     });
 
+    test('a live album from the tour, for the fans (K146)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final studio = g.releaseAlbum('Studio', ids);
+      expect(g.liveAlbumTours, isEmpty);
+      g.startTour(TourRequest(
+          name: 'Arenas', legs: [TourLeg(TourMarket.usa, TourKind.arena, 12)]));
+      while (g.player.tour != null) {
+        g.advanceWeek();
+      }
+      g.advanceWeek();
+      final tours = g.liveAlbumTours;
+      expect(tours.single.shows, greaterThanOrEqualTo(LiveAlbums.minShows));
+      expect(() => g.releaseLiveAlbum(tours.single.startWeek, 'Live', ids.take(3).toList()),
+          _code('trackCount'));
+      p.creativeEnergy = 100;
+      final owed = p.contractAlbumsLeft;
+      final money = g.player.moneyCents;
+      final live = g.releaseLiveAlbum(tours.single.startWeek, 'Live at the Arenas', ids);
+      expect(money - g.player.moneyCents, LiveAlbums.costCents(ids.length));
+      expect(live.isLive, isTrue);
+      expect(g.player.contractAlbumsLeft, owed);
+      for (final (i, id) in live.trackIds.indexed) {
+        expect(g.song(id).liveOf, ids[i]);
+      }
+      expect(g.liveAlbumTours, isEmpty);
+      g.advanceWeek();
+      final first = g.album(live.id);
+      expect(first.firstWeekUnits, greaterThan(0));
+      // Fans buy it; it is no new studio record.
+      expect(first.firstWeekUnits,
+          lessThan(g.album(studio.id).firstWeekUnits));
+      g.close();
+    });
+
     test('record money by source: the services pay differently (K145)', () {
       final g = GameSession.start(
           slots,

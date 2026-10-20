@@ -17,6 +17,7 @@ import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'holidays.dart';
 import 'leaks.dart';
+import 'live_albums.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'music_show.dart';
@@ -417,7 +418,9 @@ class Simulator {
               : c.albumTrackFanShare * albumEvent * p.kind.albumAffinity) *
           Rerecords.fanFactor(s) *
           // Fans who have the leak already (docs K140).
-          Leaks.fanFactor(s);
+          Leaks.fanFactor(s) *
+          // Fans mostly play the studio versions (docs K146).
+          (s.liveOf >= 0 ? LiveAlbums.fanListen : 1.0);
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
       final pubPart = c.publicPool *
           s.commercial *
@@ -817,7 +820,9 @@ class Simulator {
       final keep = lead == null ? 1.0 : Rerecords.keep(lead);
       // A re-recording is no event for those who own the old one.
       final fresh = lead == null ? 1.0 : Rerecords.reachFactor(lead);
-      final fanFresh = lead == null ? 1.0 : Rerecords.fanFactor(lead);
+      // A live album is for the devoted: few buy it beyond them (K146).
+      final fanFresh = (lead == null ? 1.0 : Rerecords.fanFactor(lead)) *
+          (al.isLive ? LiveAlbums.fanBuy : 1.0);
       // Leaked tracks people have already (docs K140).
       final leaked = Leaks.albumKeep(w, al);
       var tPure = 0.0, tUnits = 0.0, tTea = 0.0, tSea = 0.0, tChart = 0.0;
@@ -873,7 +878,8 @@ class Simulator {
                 era.casualPurchaseRate *
                 (1 + al.hypeAtRelease) *
                 (age == 0 ? 1.0 : 0.25) *
-                fresh;
+                fresh *
+                (al.isLive ? LiveAlbums.eventBuy : 1.0);
         // From 2013 fans buy in week one and everyone else streams (docs
         // K79): every later week sells less, collector editions aside.
         final later = age == 0 ? 1.0 : tail;

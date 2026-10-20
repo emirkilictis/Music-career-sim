@@ -120,6 +120,7 @@ int worldHash(World w) {
     addInt(s.replacedWeek);
     addInt(s.leakedWeek);
     addInt(s.writerId);
+    addInt(s.liveOf);
     addInt(s.soldTo);
     addDouble(s.writerCents);
     addDouble(s.masterShare ?? -1);
@@ -148,6 +149,7 @@ int worldHash(World w) {
     addInt(al.exclusiveUntil);
     addDouble(al.masterShare ?? -1);
     addInt(al.bundle.index);
+    addInt(al.liveTour);
     addDouble(al.bundleUnits);
     addCharts(al);
   }
