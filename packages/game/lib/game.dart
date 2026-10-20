@@ -6,6 +6,7 @@ library;
 export 'package:simulation_core/simulation_core.dart';
 export 'package:persistence/persistence.dart' show SaveSlots;
 
+export 'src/best_sellers.dart';
 export 'src/career_setup.dart';
 export 'src/editorial.dart';
 export 'src/events.dart';

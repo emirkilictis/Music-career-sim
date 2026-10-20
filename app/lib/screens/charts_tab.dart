@@ -8,6 +8,7 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import 'album_detail_screen.dart';
+import 'best_sellers_board.dart';
 import 'game_shell.dart' show pushInCareer;
 import 'song_detail_screen.dart';
 import 'streamify/artist_page.dart';
@@ -45,6 +46,9 @@ const _artistsChart = -4;
 
 /// The K-pop music show, for K-pop artists (docs K114).
 const _musicShowChart = -5;
+
+/// Best sellers (docs K141).
+const _bestSellersChart = -6;
 
 /// Saturday of a game week, for "Week of …" dates.
 DateTime chartDate(int week) {
@@ -106,6 +110,7 @@ class _ChartsTabState extends State<ChartsTab> {
       if (mounted) setState(() => _artists = rows);
       return;
     }
+    if (_chart == _bestSellersChart) return;
     if (_chart == _recordsChart) {
       final (boards, since) = await career.read(Cmd.records());
       if (mounted) {
@@ -207,7 +212,9 @@ class _ChartsTabState extends State<ChartsTab> {
                               ? (_yearEndOf == YearEnd.summer
                                   ? l.songsOfSummer
                                   : '${l.chartYearEnd} · ${fmt.chartShort(_yearEndOf)}')
-                              : _chart == _recordsChart
+                              : _chart == _bestSellersChart
+                                  ? l.chartBestSellers
+                                  : _chart == _recordsChart
                                   ? l.chartRecords
                                   : _chart == _artistsChart
                                       ? l.chartTopArtists
@@ -226,7 +233,9 @@ class _ChartsTabState extends State<ChartsTab> {
                           ? (_tourYear == null ? l.toursAllTime : '$_tourYear')
                           : _chart == _yearEndChart
                               ? (_yearEndYear == null ? '' : '$_yearEndYear')
-                              : _chart == _recordsChart
+                              : _chart == _bestSellersChart
+                                  ? l.bestSellersSub
+                                  : _chart == _recordsChart
                                   ? (_records == null
                                       ? ''
                                       : l.recordsSince(_recordsSince))
@@ -273,6 +282,11 @@ class _ChartsTabState extends State<ChartsTab> {
                       onTap: () => _select(_yearEndChart),
                     ),
                     _ChartTab(
+                      label: l.chartBestSellers,
+                      selected: _chart == _bestSellersChart,
+                      onTap: () => _select(_bestSellersChart),
+                    ),
+                    _ChartTab(
                       label: l.chartRecords,
                       selected: _chart == _recordsChart,
                       onTap: () => _select(_recordsChart),
@@ -307,6 +321,8 @@ class _ChartsTabState extends State<ChartsTab> {
                   pushInCareer(context, ArtistPage(artistId: r.artistId)),
             ),
           )
+        else if (_chart == _bestSellersChart)
+          const Expanded(child: BestSellersBoard())
         else if (_chart == _recordsChart)
           Expanded(
             child: _RecordsBoard(

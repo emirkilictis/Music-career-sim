@@ -228,7 +228,11 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tab(tester, 'Charts');
-    await tester.drag(_ci('US ALBUMS'), const Offset(-600, 0));
+    await tester.scrollUntilVisible(_ci('TOURS'), 200,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .first);
     await tester.pumpAndSettle();
     await tester.tap(_ci('TOURS'));
     await shot(tester, '08b_top_tours');
@@ -618,6 +622,15 @@ void main() {
     // All-time records (docs K111).
     await tester.tap(_ci('Records'));
     await shot(tester, '08e_records');
+    // Best sellers: all time and each year's best (docs K141).
+    await tester.tap(_ci('Best sellers'));
+    await tester.pumpAndSettle();
+    await shot(tester, '08k_best_sellers');
+    await tester.tap(_ci("Each year's best"));
+    await tester.pumpAndSettle();
+    await shot(tester, '08l_year_winners');
+    await tester.tap(_ci('Records'));
+    await tester.pumpAndSettle();
     // The week's top artists (docs K113).
     await tester.scrollUntilVisible(_ci('Artists'), -200,
         scrollable: find

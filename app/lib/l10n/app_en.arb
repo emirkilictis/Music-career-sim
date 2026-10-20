@@ -4741,5 +4741,44 @@
       }
     }
   },
-  "leakLateHint": "Too late to answer the leak: fans have it, they play it less and an album with it sells less."
+  "leakLateHint": "Too late to answer the leak: fans have it, they play it less and an album with it sells less.",
+  "chartBestSellers": "Best sellers",
+  "bestSellersSub": "All time and by year",
+  "bestSellersAllTime": "All time",
+  "bestSellersWinners": "Each year's best",
+  "bestSellersArtists": "Artists",
+  "bestSellersAlbums": "Albums",
+  "bestSellersSongs": "Songs",
+  "bestSellersUnits": "Units",
+  "bestSellersCopies": "Copies sold",
+  "bestSellersMyRank": "You are #{rank} of all artists.",
+  "@bestSellersMyRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "bestSellersYearHint": "Ranked by the year's global charts; albums show their units that year.",
+  "bestSellersYearArtistsHint": "Ranked by their songs' and albums' share of the year's global charts; the number is their album units that year.",
+  "bestSellersArtistOfYear": "Artist of the year",
+  "bestSellersAlbumOfYear": "Album of the year",
+  "bestSellersSongOfYear": "Song of the year",
+  "eventSalesMilestone": "You have sold {copies} records in your career.",
+  "@eventSalesMilestone": {
+    "placeholders": {
+      "copies": {
+        "type": "String"
+      }
+    }
+  },
+  "eventAllTimeTop10": "You are now #{rank} among the best-selling artists of all time.",
+  "@eventAllTimeTop10": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "eventAllTimeTop": "You are the best-selling artist of all time."
 }

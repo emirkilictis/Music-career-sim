@@ -1331,6 +1331,26 @@ k('leakedTag','Leaked','Sızdı')
 k('leakAnswerHint','Out by {week}, the leak turns into a wave of listening. Later, fans already have it: they play it less and an album with it sells less.','{week} tarihine kadar çıkarsa sızıntı bir dinlenme dalgasına döner. Sonra çıkarsa hayranlarda zaten olur: daha az dinlerler ve içinde olduğu albüm daha az satar.', week='String')
 k('leakLateHint','Too late to answer the leak: fans have it, they play it less and an album with it sells less.','Sızıntıya cevap vermek için geç: hayranlarda var, daha az dinlerler ve içinde olduğu albüm daha az satar.')
 
+# Best sellers (docs K141).
+k('chartBestSellers','Best sellers','En çok satanlar')
+k('bestSellersSub','All time and by year','Tüm zamanlar ve yıl yıl')
+k('bestSellersAllTime','All time','Tüm zamanlar')
+k('bestSellersWinners','Each year\'s best','Yılların en iyileri')
+k('bestSellersArtists','Artists','Sanatçılar')
+k('bestSellersAlbums','Albums','Albümler')
+k('bestSellersSongs','Songs','Şarkılar')
+k('bestSellersUnits','Units','Birim')
+k('bestSellersCopies','Copies sold','Satılan kopya')
+k('bestSellersMyRank','You are #{rank} of all artists.','Tüm sanatçılar arasında #{rank} sıradasın.', rank='int')
+k('bestSellersYearHint','Ranked by the year\'s global charts; albums show their units that year.','Yılın global listelerine göre; albümlerde o yıl yaptığı birim yazıyor.')
+k('bestSellersYearArtistsHint','Ranked by their songs\' and albums\' share of the year\'s global charts; the number is their album units that year.','Şarkılarının ve albümlerinin yılın global listelerindeki payına göre; sayı o yılki albüm birimleri.')
+k('bestSellersArtistOfYear','Artist of the year','Yılın sanatçısı')
+k('bestSellersAlbumOfYear','Album of the year','Yılın albümü')
+k('bestSellersSongOfYear','Song of the year','Yılın şarkısı')
+k('eventSalesMilestone','You have sold {copies} records in your career.','Kariyerin boyunca {copies} plak sattın.', copies='String')
+k('eventAllTimeTop10','You are now #{rank} among the best-selling artists of all time.','Artık tüm zamanların en çok satan sanatçıları arasında #{rank} sıradasın.', rank='int')
+k('eventAllTimeTop','You are the best-selling artist of all time.','Tüm zamanların en çok satan sanatçısı sensin.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

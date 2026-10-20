@@ -82,6 +82,8 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         CreatorsFlopped() => EventLine(e, title: song(e.songId)),
         HolidayReturn() => release(e, EntityKind.song, e.songId),
         SongLeaked() => release(e, EntityKind.song, e.songId),
+        SalesMilestone() => EventLine(e),
+        AllTimeBestSeller() => EventLine(e),
         SongOfSummer() => e.hasPlayer
             ? release(e, EntityKind.song, e.playerSongId)
             : EventLine(e,
@@ -198,6 +200,8 @@ List<EventLine> sortLines(List<EventLine> lines) {
         CreatorsFlopped() => 6,
         HolidayReturn() => 4,
         SongLeaked() => 2,
+        SalesMilestone() => 3,
+        AllTimeBestSeller() => 1,
         SongOfSummer() => 1,
         RivalAlbumClash() => 3,
         YearEndCharts() => 0,

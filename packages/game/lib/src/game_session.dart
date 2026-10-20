@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:persistence/persistence.dart';
 import 'package:simulation_core/simulation_core.dart';
 
+import 'best_sellers.dart';
 import 'career_setup.dart';
 import 'events.dart';
 import 'social_feed.dart';
@@ -1726,6 +1727,119 @@ class GameSession {
     ];
   }
 
+  /// The all-time best sellers of [kind] by [measure] (docs K141).
+  List<BestSellerRow> bestSellers(BestSellerKind kind,
+          {SalesMeasure measure = SalesMeasure.units,
+          int limit = BestSellers.size}) =>
+      BestSellers.allTime(world, kind, m: measure, limit: limit);
+
+  /// The player's place among all artists by [measure] (0: none yet).
+  int bestSellerRank({SalesMeasure measure = SalesMeasure.units}) {
+    final totals = BestSellers.artistTotals(world, measure);
+    final mine = totals[world.playerArtistId];
+    if (mine == null || mine <= 0) return 0;
+    return 1 + totals.entries.where((e) => e.value > mine).length;
+  }
+
+  /// [year]'s biggest artists (docs K141): their songs' and albums'
+  /// share of the year's global song and album charts, added up (each
+  /// chart counts the same). The value shown is their album units.
+  List<BestSellerRow> yearEndArtists(int year, {int limit = YearEnd.size}) {
+    final w = world;
+    final (from, to) = YearEnd.tracking(year);
+    final score = <int, double>{};
+    final units = <int, double>{};
+    for (final (chart, songs) in const [
+      (Charts.globalSongs, true),
+      (Charts.globalAlbums, false),
+    ]) {
+      final rows = _store.db.select(
+          'SELECT entityId, SUM(points) AS pts FROM chartEntry '
+          'WHERE chartId = ? AND week BETWEEN ? AND ? GROUP BY entityId',
+          [chart, from, to]);
+      var total = 0.0;
+      for (final r in rows) {
+        total += (r['pts'] as num).toDouble();
+      }
+      if (total <= 0) continue;
+      for (final r in rows) {
+        final id = r['entityId'] as int;
+        final pts = (r['pts'] as num).toDouble();
+        final artist =
+            songs ? w.songs[id].primaryArtistId : w.albums[id].artistId;
+        score[artist] = (score[artist] ?? 0) + pts / total;
+        if (!songs) units[artist] = (units[artist] ?? 0) + pts;
+      }
+    }
+    final order = score.entries.toList()
+      ..sort((a, b) {
+        final d = b.value.compareTo(a.value);
+        return d != 0 ? d : a.key.compareTo(b.key);
+      });
+    var rank = 0;
+    return [
+      for (final e in order.take(limit))
+        BestSellerRow(
+            rank: ++rank,
+            kind: BestSellerKind.artists,
+            entityId: e.key,
+            title: '',
+            artistId: e.key,
+            artistName: w.artists[e.key].name,
+            albumId: -1,
+            isPlayer: e.key == w.playerArtistId,
+            value: units[e.key] ?? 0),
+    ];
+  }
+
+  /// Each year's biggest song, album and artist worldwide, latest first
+  /// (docs K141).
+  List<YearWinners> get yearWinners => [
+        for (final y in yearEndYears)
+          YearWinners(y,
+              song: yearEnd(Charts.globalSongs, y, limit: 1).firstOrNull,
+              album: yearEnd(Charts.globalAlbums, y, limit: 1).firstOrNull,
+              artist: yearEndArtists(y, limit: 1).firstOrNull),
+      ];
+
+  /// Rivals' records sold, refreshed now and then for the all-time news.
+  List<double>? _rivalSales;
+  int _rivalSalesWeek = -1;
+
+  /// Career records sold milestones and the all-time top 10 (docs K141).
+  List<GameEvent> _bestSellerNews() {
+    final w = world;
+    final now = BestSellers.playerSales(w);
+    final before = now - BestSellers.playerWeekSales(w);
+    if (now <= 0) return const [];
+    final out = <GameEvent>[];
+    for (final m in BestSellers.milestones) {
+      if (before < m && now >= m) out.add(SalesMilestone(m));
+    }
+    if (_rivalSales == null || w.week - _rivalSalesWeek >= 4) {
+      final totals = BestSellers.artistTotals(w, SalesMeasure.sales);
+      totals.remove(w.playerArtistId);
+      _rivalSales = totals.values.toList()..sort((a, b) => b.compareTo(a));
+      _rivalSalesWeek = w.week;
+    }
+    final rivals = _rivalSales!;
+    int rankOf(double v) {
+      var n = 0;
+      while (n < rivals.length && rivals[n] > v) {
+        n++;
+      }
+      return n + 1;
+    }
+
+    final was = rankOf(before), is_ = rankOf(now);
+    if (is_ == 1 && was > 1) {
+      out.add(const AllTimeBestSeller(1));
+    } else if (is_ <= 10 && was > 10) {
+      out.add(AllTimeBestSeller(is_));
+    }
+    return out;
+  }
+
   /// All-time records the player set this week (docs K111). The history
   /// holds the weeks before this one; after two years of it, so a record
   /// means something.
@@ -2474,6 +2588,7 @@ class GameSession {
       events.add(RivalAlbumClash(c));
     }
     events.addAll(_recordsBroken(r));
+    events.addAll(_bestSellerNews());
     // The discovery mixes (docs K119).
     for (final id in w.playerSongIds) {
       final s = w.songs[id];

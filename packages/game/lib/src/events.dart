@@ -214,6 +214,23 @@ class RecordBroken extends GameEvent {
   bool get isMajor => true;
 }
 
+/// The player's career records sold passed [copies] (docs K141).
+class SalesMilestone extends GameEvent {
+  const SalesMilestone(this.copies);
+  final double copies;
+  @override
+  bool get isMajor => copies >= 10e6;
+}
+
+/// The player is among the best-selling artists of all time (docs K141):
+/// now #[rank] (10 on entering the top 10, 1 at the top).
+class AllTimeBestSeller extends GameEvent {
+  const AllTimeBestSeller(this.rank);
+  final int rank;
+  @override
+  bool get isMajor => true;
+}
+
 /// The year-end charts are out (docs K110): the player's songs and albums
 /// in the US top 100 with their ranks, and the song of the year.
 class YearEndCharts extends GameEvent {

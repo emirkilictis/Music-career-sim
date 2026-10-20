@@ -1362,6 +1362,58 @@ void main() {
       g.close();
     });
 
+    test('best sellers: all time, by year and each year\'s best (K141)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      g.releaseAlbum('Gold', ids);
+      final events = <GameEvent>[];
+      while (g.yearEndYears.isEmpty) {
+        events.addAll(g.advanceWeek().events);
+      }
+      // A superstar album sells a million in no time.
+      final sold = BestSellers.playerSales(g.world);
+      expect(sold, greaterThan(1e6));
+      expect(events.whereType<SalesMilestone>().map((e) => e.copies),
+          contains(1e6));
+      for (final kind in BestSellerKind.values) {
+        for (final m in SalesMeasure.values) {
+          final rows = g.bestSellers(kind, measure: m);
+          expect(rows.length, BestSellers.size);
+          for (var i = 1; i < rows.length; i++) {
+            expect(rows[i].value, lessThanOrEqualTo(rows[i - 1].value));
+          }
+        }
+      }
+      final artists = g.bestSellers(BestSellerKind.artists);
+      final rank = g.bestSellerRank();
+      expect(rank, greaterThan(0));
+      if (rank <= BestSellers.size) {
+        expect(artists[rank - 1].isPlayer, isTrue);
+      }
+      final copies = g.bestSellerRank(measure: SalesMeasure.sales);
+      expect(copies, greaterThan(0));
+      final y = g.yearEndYears.first;
+      final year = g.yearEndArtists(y);
+      expect(year, isNotEmpty);
+      final wins = g.yearWinners;
+      expect(wins.first.year, y);
+      expect(wins.first.artist!.artistId, year.first.artistId);
+      expect(wins.first.album!.entityId,
+          g.yearEnd(Charts.globalAlbums, y).first.entityId);
+      g.close();
+    });
+
     test('a leaked song is answered by putting it out (K140)', () {
       final g = GameSession.start(
           slots,

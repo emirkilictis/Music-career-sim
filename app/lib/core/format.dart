@@ -875,6 +875,10 @@ class Fmt {
       CreatorsFlopped() => l.eventCreatorsFlopped(t),
       HolidayReturn() => l.eventHolidayReturn(t),
       SongLeaked() => l.eventSongLeaked(t, Leaks.answerWeeks),
+      SalesMilestone(:final copies) => l.eventSalesMilestone(compact(copies)),
+      AllTimeBestSeller(:final rank) => rank == 1
+          ? l.eventAllTimeTop
+          : l.eventAllTimeTop10(rank),
       SongOfSummer(:final playerRank, :final year) => playerRank == 1
           ? l.eventSummerMine(year, t)
           : playerRank > 0

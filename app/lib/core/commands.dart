@@ -253,6 +253,43 @@ abstract final class Cmd {
   static SessionCmd<(Map<RecordKind, List<RecordEntry>>, int)> records() =>
       (s) => (s.records, GameTime.yearOf(s.historyStartWeek));
 
+  /// Best sellers (docs K141): the all-time list of [kind] by [measure]
+  /// and the player's place among artists (0: none).
+  static SessionCmd<(List<BestSellerRow>, int)> bestSellers(
+          BestSellerKind kind, SalesMeasure measure) =>
+      (s) => (
+            s.bestSellers(kind, measure: measure),
+            s.bestSellerRank(measure: measure)
+          );
+
+  /// [year]'s list of [kind] (docs K141): artists by their share of the
+  /// year's charts, albums and songs from the global year-end charts.
+  static SessionCmd<List<BestSellerRow>> yearBestSellers(
+          BestSellerKind kind, int year) =>
+      (s) {
+        if (kind == BestSellerKind.artists) return s.yearEndArtists(year);
+        final albums = kind == BestSellerKind.albums;
+        return [
+          for (final r in s.yearEnd(
+              albums ? Charts.globalAlbums : Charts.globalSongs, year))
+            BestSellerRow(
+                rank: r.rank,
+                kind: kind,
+                entityId: r.entityId,
+                title: r.title,
+                artistId: r.artistId,
+                artistName: r.artistName,
+                albumId: r.albumId,
+                isPlayer: r.isPlayer,
+                value: r.points.toDouble(),
+                releaseYear: year),
+        ];
+      };
+
+  /// Each year's winners and the years there are (docs K141).
+  static SessionCmd<List<YearWinners>> yearWinners() => (s) => s.yearWinners;
+  static SessionCmd<List<int>> yearEndYears() => (s) => s.yearEndYears;
+
   /// A year-end chart and the years there are (docs K110); [year] null
   /// is the latest.
   static SessionCmd<(List<YearEndRow>, List<int>)> yearEnd(
