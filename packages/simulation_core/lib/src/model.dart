@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'config/charts.dart';
 import 'config/regions.dart';
+import 'distribution.dart';
 import 'opportunities.dart';
 import 'tours.dart';
 
@@ -622,6 +623,9 @@ class Artist {
   /// Markets won with songs in their language (docs K155): how much more
   /// of the audience each region brings.
   final Float64List marketBonus = Float64List(regionCount);
+
+  /// How an independent gets their music out (docs K157).
+  Distributor distributor = Distributor.selfRelease;
 
   /// Per-region accounting, layout [ArtistReg]. Catalog indices and their
   /// settle markers drive lazy accrual (retired artists settle lazily, so a

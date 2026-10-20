@@ -57,8 +57,8 @@ abstract final class Codec {
     // Added in schema v16, v21.
     'manager',
     'dealAdvance', 'dealAlbums', 'unrecouped',
-    // Added in schema v24, v41.
-    'surpriseWeek', 'markets',
+    // Added in schema v24, v41, v42.
+    'surpriseWeek', 'markets', 'distributor',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -104,6 +104,7 @@ abstract final class Codec {
         a.marketBonus.every((x) => x == 0)
             ? null
             : jsonEncode([for (final x in a.marketBonus) x]),
+        a.distributor.index,
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -181,6 +182,7 @@ abstract final class Codec {
     a.contractAlbums = r['dealAlbums'] as int? ?? 0;
     a.unrecoupedCents = r['unrecouped'] as int? ?? 0;
     a.surpriseWeek = r['surpriseWeek'] as int? ?? -1000;
+    a.distributor = Distributor.values[r['distributor'] as int? ?? 0];
     if (r['markets'] case final String m when m.isNotEmpty) {
       final j = jsonDecode(m) as List;
       for (var i = 0; i < j.length && i < a.marketBonus.length; i++) {

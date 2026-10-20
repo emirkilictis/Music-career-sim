@@ -675,7 +675,6 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
   final l = context.l10n;
   final fmt = context.fmt;
   final money = career.player.moneyCents;
-  final label = career.player.label;
   int cost(Campaign k) => career.player.campaignCosts[k.index];
   return showModalBottomSheet<Campaign>(
     context: context,
@@ -695,7 +694,7 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
         ),
         for (final k in Campaign.values)
           ListTile(
-            enabled: k.index <= label.maxCampaign.index &&
+            enabled: k.index <= career.player.maxCampaign.index &&
                 cost(k) + extraCents <= money,
             leading: Icon(switch (k) {
               Campaign.none => Icons.volume_off_outlined,
@@ -704,7 +703,7 @@ Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
               Campaign.global => Icons.public,
             }),
             title: Text(fmt.campaign(k)),
-            subtitle: Text(k.index > label.maxCampaign.index
+            subtitle: Text(k.index > career.player.maxCampaign.index
                 ? l.campaignLockedHint
                 : switch (k) {
                     Campaign.none => l.campaignNoneHint,

@@ -333,6 +333,18 @@ class Fmt {
         IncomeSource.albumSales => l.incomeAlbums,
       };
 
+  /// How an independent's music gets out (docs K157).
+  String distributor(Distributor d) => switch (d) {
+        Distributor.selfRelease => l.distributorSelf,
+        Distributor.percent => l.distributorPercent,
+        Distributor.deal => l.distributorDeal,
+      };
+  String distributorHint(Distributor d) => switch (d) {
+        Distributor.selfRelease => l.distributorSelfHint,
+        Distributor.percent => l.distributorPercentHint,
+        Distributor.deal => l.distributorDealHint,
+      };
+
   /// A version in another language (docs K155).
   String languageVersion(LanguageVersion v) => switch (v) {
         LanguageVersion.spanish => l.languageSpanish,
@@ -797,6 +809,7 @@ class Fmt {
       'noOffer' => l.errorNoOffer,
       'noVisual' => l.errorNoVisual,
       'noLanguage' => l.errorNoLanguage,
+      'noDistributor' => l.errorNoDistributor,
       'noShowcase' => l.errorNoShowcase,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,

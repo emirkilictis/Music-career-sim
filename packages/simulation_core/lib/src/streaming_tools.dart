@@ -404,7 +404,9 @@ abstract final class StreamingTools {
     final q01 = s.quality / 100;
     return ((0.25 + 0.5 * q01 * q01) *
             (0.7 + 0.3 * a.fame) *
-            (0.5 + 0.5 * math.min(1.0, pl / 0.3)))
+            (0.5 + 0.5 * math.min(1.0, pl / 0.3)) *
+            // A distributor knows the editors (docs K157).
+            (a.label == Label.independent ? a.distributor.pitch : 1.0))
         .clamp(0.0, 0.8);
   }
 

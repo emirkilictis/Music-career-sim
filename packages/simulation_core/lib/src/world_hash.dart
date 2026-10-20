@@ -67,6 +67,7 @@ int worldHash(World w) {
     addAll(a.reg);
     addAll(a.regionShare);
     addAll(a.marketBonus);
+    addInt(a.distributor.index);
     addInt(a.moneyCents);
     addInt(a.job.index);
     addInt(a.restWeek);

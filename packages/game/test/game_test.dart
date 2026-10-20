@@ -1362,6 +1362,44 @@ void main() {
       g.close();
     });
 
+    test('an independent picks a distributor (K157)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(startYear: 2012, money: StartMoney.millionaire, premium: true));
+      final p = g.world.player!;
+      expect(p.label, Label.independent);
+      final v = g.distribution;
+      expect(v.current, Distributor.selfRelease);
+      expect(v.available, contains(Distributor.percent));
+      // A deal needs an audience.
+      expect(v.available, isNot(contains(Distributor.deal)));
+      expect(() => g.chooseDistributor(Distributor.deal),
+          _code('noDistributor'));
+      final reach = p.labelReach;
+      g.chooseDistributor(Distributor.percent);
+      expect(p.artistShare, Distributor.percent.share);
+      expect(p.labelReach, greaterThan(reach));
+      // With fans, a deal: an advance and bigger campaigns.
+      p.coreFans = 100000;
+      final money = p.moneyCents;
+      final advance = Distribution.advanceCents(p);
+      g.chooseDistributor(Distributor.deal);
+      expect(p.moneyCents - money, advance);
+      expect(p.unrecoupedCents, advance);
+      expect(g.player.maxCampaign, Campaign.intensive);
+      // Not leaving before the advance is paid back.
+      expect(g.distribution.available, isEmpty);
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.world.player!.distributor, Distributor.deal);
+      expect(g.world.player!.labelReach, Distribution.reachOf(g.world.player!));
+      // Signing a label ends it.
+      Actions.signLabel(g.world, g.world.player!, Label.small);
+      expect(g.world.player!.distributor, Distributor.selfRelease);
+      g.close();
+    });
+
     test('monthly listener and album stream milestones (K156)', () {
       var g = GameSession.start(
           slots,

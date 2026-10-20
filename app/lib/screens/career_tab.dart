@@ -70,6 +70,64 @@ class _CareerScreenState extends State<CareerScreen> {
     }
   }
 
+  /// Picks how an independent's music gets out (docs K157).
+  Future<void> _distribution() async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final v = await career.read(Cmd.distribution());
+    if (!mounted) return;
+    final pick = await showModalBottomSheet<Distributor>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: ListView(shrinkWrap: true, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.distributorTitle,
+                style: Theme.of(c).textTheme.titleLarge),
+          ),
+          for (final d in Distributor.values)
+            ListTile(
+              enabled: v.available.contains(d),
+              selected: d == v.current,
+              title: Text(fmt.distributor(d)),
+              subtitle: Text([
+                fmt.distributorHint(d),
+                l.distributorTerms((d.share * 100).round(),
+                    (d.reach * 100).round()),
+                if (d == Distributor.deal)
+                  l.distributorAdvance(fmt.money(v.dealAdvanceCents)),
+                if (v.year < d.fromYear) l.distributorFrom(d.fromYear),
+                if (d.minFans > 0)
+                  l.distributorFans(fmt.compact(d.minFans.toDouble())),
+              ].join('\n')),
+              isThreeLine: true,
+              onTap: () => Navigator.pop(c, d),
+            ),
+          if (v.current == Distributor.deal && v.unrecoupedCents > 0)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                  l.distributorRecoup(fmt.money(v.unrecoupedCents)),
+                  style: Theme.of(c).textTheme.bodySmall),
+            ),
+        ]),
+      ),
+    );
+    if (pick == null || !mounted) return;
+    try {
+      await career.act(Cmd.chooseDistributor(pick));
+      if (mounted) {
+        showInfo(context, l.distributorDone(fmt.distributor(pick)),
+            icon: Icons.local_shipping_outlined);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   /// Sells the catalog after asking (docs K153).
   Future<void> _sellCatalog(CatalogOfferView c) async {
     final l = context.l10n;
@@ -139,6 +197,20 @@ class _CareerScreenState extends State<CareerScreen> {
                             fmt.labelName(p.label), p.contractAlbumsLeft)
                         : l.labelFree,
                 style: TextStyle(color: AppColors.textMuted)),
+            // How an independent's music gets out (docs K157).
+            if (p.label == Label.independent) ...[
+              const SizedBox(height: 6),
+              Text(l.distributorLine(fmt.distributor(p.distributor)),
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: _distribution,
+                  icon: const Icon(Icons.local_shipping_outlined),
+                  label: Text(l.distributorChange),
+                ),
+              ),
+            ],
             const SizedBox(height: 8),
             Align(
               alignment: Alignment.centerLeft,

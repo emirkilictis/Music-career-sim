@@ -253,6 +253,12 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// Distribution for independents (docs K157).
+  static SessionCmd<DistributionView> distribution() =>
+      (s) => s.distribution;
+  static SessionCmd<void> chooseDistributor(Distributor d) =>
+      (s) => s.chooseDistributor(d);
+
   /// A version in another language (docs K155).
   static SessionCmd<void> releaseLanguageVersion(
           int songId, LanguageVersion v) =>

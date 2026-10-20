@@ -5253,5 +5253,73 @@
         "type": "String"
       }
     }
+  },
+  "errorNoDistributor": "That distributor is not possible now.",
+  "distributorLine": "Distribution: {name}",
+  "@distributorLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "distributorChange": "Change distribution",
+  "distributorTitle": "How your music gets out",
+  "distributorSelf": "On my own",
+  "distributorPercent": "Distributor (takes a cut)",
+  "distributorDeal": "Distribution deal",
+  "distributorSelfHint": "Every cent is yours; nobody helps.",
+  "distributorPercentHint": "More reach, and they know the playlist editors (pitches land more often).",
+  "distributorDealHint": "An advance, bigger campaigns like a label, the most reach; they take more.",
+  "distributorTerms": "You keep {share}% · reach +{reach}%",
+  "@distributorTerms": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      },
+      "reach": {
+        "type": "int"
+      }
+    }
+  },
+  "distributorAdvance": "Advance {amount}, paid back from royalties",
+  "@distributorAdvance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "distributorFrom": "From {year}",
+  "@distributorFrom": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "distributorFans": "Needs {fans} fans",
+  "@distributorFans": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "distributorRecoup": "Leave the deal once its advance is paid back ({left} to go).",
+  "@distributorRecoup": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "distributorDone": "Your music now goes out: {name}.",
+  "@distributorDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

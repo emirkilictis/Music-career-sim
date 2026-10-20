@@ -238,8 +238,8 @@ class GameSession {
     // The player's reach always follows their label: older saves get the
     // independent reach raised in docs K70.
     final p = world.player;
-    if (p != null && p.labelReach != p.label.reach) {
-      p.labelReach = p.label.reach;
+    if (p != null && p.labelReach != Distribution.reachOf(p)) {
+      p.labelReach = Distribution.reachOf(p);
       world.dirtyArtists.add(p.id);
     }
     // Points piled up before docs F34 shrink to what the skills can use.
@@ -474,7 +474,7 @@ class GameSession {
   /// What the player pays for [campaign] with their label, after checking
   /// the label can run it at all (docs K54).
   int _campaignCost(Campaign campaign) {
-    if (campaign.index > _p.label.maxCampaign.index) {
+    if (campaign.index > Distribution.maxCampaign(_p).index) {
       throw GameException('campaignLocked', 'The label cannot run this');
     }
     return Actions.campaignCostFor(_p, campaign);
@@ -1377,6 +1377,18 @@ class GameSession {
   }
 
   /// Pays creators on the short-video app to use a song's sound (K131).
+  /// How the independent player's music gets out (docs K157).
+  DistributionView get distribution => DistributionView.of(world, _p);
+
+  /// Moves the independent player to distributor [d] (docs K157).
+  void chooseDistributor(Distributor d) {
+    if (!Distribution.can(world, _p, d)) {
+      throw GameException('noDistributor', 'Not this distributor now');
+    }
+    Distribution.choose(world, _p, d);
+    _saveNow();
+  }
+
   /// Puts out released song [songId] in another language (docs K155).
   void releaseLanguageVersion(int songId, LanguageVersion v) {
     final s = _ownSong(songId);

@@ -177,6 +177,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | SexyBack dünya single satışı | 11,3M | 5,6M | 11,5M |
 | 20/20 ilk hafta (ABD) | 968K | 257–419K | 1,12M (#1, 13 hafta) |
 | FutureSex/LoveSounds ilk hafta | 684K | 594–706K | 992K |
+| F78 | Emir: "Vokal gruptan birine solo kariyer yapma özelliği eklenebilir mi? Solo record koyduğu zaman chartlarda gözüksün; biri bizle collab yaptığı zaman o şarkı da chartlarda gözüksün, satışları ve streamleri bize gelsin." | Sıradaki iş (K158): üye solo projeleri gerçek şarkı olarak listelere girer, misafir olduğun şarkılar gerçek şarkı olarak çıkar ve payı sana gelir. |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

@@ -102,6 +102,8 @@ class ArtistView {
         job = a.job,
         skillPoints = a.skillPoints,
         label = a.label,
+        distributor = a.distributor,
+        maxCampaign = Distribution.maxCampaign(a),
         contractAlbumsLeft = a.contractAlbumsLeft,
         unrecoupedCents = a.unrecoupedCents,
         contractAdvanceCents = a.contractAdvanceCents,
@@ -202,6 +204,11 @@ class ArtistView {
   /// The player's record label and albums still owed to it (docs K54).
   final Label label;
   final int contractAlbumsLeft;
+
+  /// How an independent's music gets out, and the biggest campaign the
+  /// player can run (docs K157).
+  final Distributor distributor;
+  final Campaign maxCampaign;
 
   /// The advance of the deal signed and what of it royalties have not
   /// paid back yet (docs K107); the player's split of the money.
@@ -2387,4 +2394,25 @@ class CatalogOfferView {
 
   /// The offer (0: none).
   final int offerCents;
+}
+
+/// The independent player's distribution (docs K157): the current one and
+/// what each would mean.
+class DistributionView {
+  DistributionView.of(World w, Artist a)
+      : independent = a.label == Label.independent,
+        current = a.distributor,
+        available = {
+          for (final d in Distributor.values)
+            if (Distribution.can(w, a, d)) d
+        },
+        dealAdvanceCents = Distribution.advanceCents(a),
+        unrecoupedCents = a.unrecoupedCents,
+        year = GameTime.yearOf(w.week);
+  final bool independent;
+  final Distributor current;
+  final Set<Distributor> available;
+  final int dealAdvanceCents;
+  final int unrecoupedCents;
+  final int year;
 }

@@ -1499,5 +1499,21 @@
   "languageHint": "Başka bir dilde kaydet ({cost}, {energy} yaratıcılık): şarkıya bir dalga, o pazar da bundan sonra seni daha çok dinler.",
   "peakListeners": "Zirven: {listeners} aylık dinleyici",
   "eventListenersMilestone": "Streamify'da ilk kez {listeners} aylık dinleyiciyi geçtin.",
-  "eventAlbumStreams": "{title} {streams} stream'i geçti."
+  "eventAlbumStreams": "{title} {streams} stream'i geçti.",
+  "errorNoDistributor": "Bu dağıtımcı şu an mümkün değil.",
+  "distributorLine": "Dağıtım: {name}",
+  "distributorChange": "Dağıtımı değiştir",
+  "distributorTitle": "Müziğin nasıl yayınlanıyor",
+  "distributorSelf": "Kendi başıma",
+  "distributorPercent": "Dağıtımcı (pay alır)",
+  "distributorDeal": "Dağıtım anlaşması",
+  "distributorSelfHint": "Her kuruş senin; kimse yardım etmez.",
+  "distributorPercentHint": "Daha geniş erişim, playlist editörlerini tanırlar (öneriler daha sık tutar).",
+  "distributorDealHint": "Avans, şirket gibi büyük kampanyalar, en geniş erişim; daha çok pay alırlar.",
+  "distributorTerms": "Payın %{share} · erişim +%{reach}",
+  "distributorAdvance": "Avans {amount}, kazançtan geri ödenir",
+  "distributorFrom": "{year}'den itibaren",
+  "distributorFans": "{fans} hayran gerekir",
+  "distributorRecoup": "Avans geri ödenince anlaşmadan çıkabilirsin (kalan {left}).",
+  "distributorDone": "Müziğin artık şöyle yayınlanıyor: {name}."
 }

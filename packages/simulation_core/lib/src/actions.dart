@@ -5,6 +5,7 @@ import 'bundles.dart';
 import 'cloud.dart';
 import 'config/charts.dart';
 import 'critics.dart';
+import 'distribution.dart';
 import 'contracts.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
@@ -631,6 +632,8 @@ abstract final class Actions {
     final t = Contracts.terms(w, a, label, deal);
     if (buyout) a.moneyCents -= buyoutCents(w, a);
     a.label = label;
+    // A label distributes its artists (docs K157).
+    a.distributor = Distributor.selfRelease;
     a.labelReach = label.reach;
     a.artistShare = t.artistShare;
     a.contractAlbumsLeft = t.albums;

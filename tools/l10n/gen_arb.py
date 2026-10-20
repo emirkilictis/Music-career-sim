@@ -1499,6 +1499,24 @@ k('peakListeners','Your high: {listeners} monthly listeners','Zirven: {listeners
 k('eventListenersMilestone','You passed {listeners} monthly listeners on Streamify for the first time.','Streamify\'da ilk kez {listeners} aylık dinleyiciyi geçtin.', listeners='String')
 k('eventAlbumStreams','{title} passed {streams} streams.','{title} {streams} stream\'i geçti.', title='String', streams='String')
 
+# Distribution for independents (docs K157).
+k('errorNoDistributor','That distributor is not possible now.','Bu dağıtımcı şu an mümkün değil.')
+k('distributorLine','Distribution: {name}','Dağıtım: {name}', name='String')
+k('distributorChange','Change distribution','Dağıtımı değiştir')
+k('distributorTitle','How your music gets out','Müziğin nasıl yayınlanıyor')
+k('distributorSelf','On my own','Kendi başıma')
+k('distributorPercent','Distributor (takes a cut)','Dağıtımcı (pay alır)')
+k('distributorDeal','Distribution deal','Dağıtım anlaşması')
+k('distributorSelfHint','Every cent is yours; nobody helps.','Her kuruş senin; kimse yardım etmez.')
+k('distributorPercentHint','More reach, and they know the playlist editors (pitches land more often).','Daha geniş erişim, playlist editörlerini tanırlar (öneriler daha sık tutar).')
+k('distributorDealHint','An advance, bigger campaigns like a label, the most reach; they take more.','Avans, şirket gibi büyük kampanyalar, en geniş erişim; daha çok pay alırlar.')
+k('distributorTerms','You keep {share}% · reach +{reach}%','Payın %{share} · erişim +%{reach}', share='int', reach='int')
+k('distributorAdvance','Advance {amount}, paid back from royalties','Avans {amount}, kazançtan geri ödenir', amount='String')
+k('distributorFrom','From {year}','{year}\'den itibaren', year='int')
+k('distributorFans','Needs {fans} fans','{fans} hayran gerekir', fans='String')
+k('distributorRecoup','Leave the deal once its advance is paid back ({left} to go).','Avans geri ödenince anlaşmadan çıkabilirsin (kalan {left}).', left='String')
+k('distributorDone','Your music now goes out: {name}.','Müziğin artık şöyle yayınlanıyor: {name}.', name='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():
