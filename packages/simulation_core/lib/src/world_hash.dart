@@ -116,6 +116,9 @@ int worldHash(World w) {
     addInt(s.pitchWeek);
     addInt(s.creatorWeek);
     addInt(s.holiday ? 1 : 0);
+    addInt(s.rerecordOf);
+    addInt(s.replacedWeek);
+    addDouble(s.masterShare ?? -1);
     addInt(s.radioFormat?.index ?? -1);
     addInt(s.creatorTier.index);
     addInt(s.creatorResult.index);
@@ -134,6 +137,7 @@ int worldHash(World w) {
     addDouble(al.campaignReturnCents);
     addDouble(al.preOrders);
     addInt(al.exclusiveUntil);
+    addDouble(al.masterShare ?? -1);
     addCharts(al);
   }
   for (final chart in w.charts) {

@@ -1307,6 +1307,24 @@ k('eventSummerTop','The song of the summer {year} is “{title}” by {artist}.'
 k('remixFeatureButton','Remix with a feature','Featli remix yap')
 k('remixFeatureHint','A remix of the released song with a rival on it: their fans come to the song from now on and the remix brings a wave of listening, bigger with a bigger star. A verse on a remix costs 1.5×.','Çıkmış şarkının bir rakibin de olduğu remix\'i: onun hayranları artık şarkıyı da dinler ve remix bir dinlenme dalgası getirir, yıldız ne kadar büyükse o kadar büyük. Remix\'te verse 1.5 kat pahalı.')
 
+# Re-recordings (docs K139).
+k('errorCannotRerecord','This album cannot be re-recorded now.','Bu albüm şu an yeniden kaydedilemez.')
+k('mastersLabel','The label owns the masters: you keep {percent}% of what it earns, forever.','Masterlar plak şirketinin: kazandığının %{percent}\'i sende kalır, hep böyle.', percent='int')
+k('mastersOwn','You own the masters: everything it earns is yours.','Masterlar senin: kazandığı her şey sana kalır.')
+k('rerecordOfLine','Re-recording of {title}','{title} albümünün yeniden kaydı', title='String')
+k('rerecordedLine','Re-recorded {week}: most listeners moved to the new version.','{week} yeniden kaydedildi: dinleyicilerin çoğu yeni sürüme geçti.', week='String')
+k('rerecordButton','Re-record (your version)','Yeniden kaydet (senin versiyonun)')
+k('rerecordFrom','Your deal lets you re-record it from {week}.','Sözleşmen yeniden kaydı {week} itibarıyla izin veriyor.', week='String')
+k('rerecordTitle','Re-record the album','Albümü yeniden kaydet')
+k('rerecordHint','The same songs, recorded again and owned by you: once they are out, most listeners leave the old versions for them and they pay you in full. Fewer new listeners find known songs. Costs {cost} and {energy} creativity; the album waits in the vault as a draft until you release it.','Aynı şarkılar yeniden kaydedilir ve senin olur: çıktıklarında dinleyicilerin çoğu eski sürümleri bırakıp bunlara geçer, kazancın tamamı sana kalır. Bilinen şarkıları daha az yeni dinleyici keşfeder. Maliyeti {cost} ve {energy} yaratıcılık; albüm sen çıkarana kadar kasada taslak olarak bekler.', cost='String', energy='int')
+k('rerecordName','Album title','Albüm adı')
+k('rerecordDefault','{title} ({artist}\'s Version)','{title} ({artist} Versiyonu)', title='String', artist='String')
+k('rerecordVault','From the vault: add up to 6 unreleased songs at the end.','Kasadan: sona en fazla 6 çıkmamış şarkı ekle.')
+k('rerecordGo','Record it','Kaydet')
+k('rerecordSaved','{title} is in the vault as a draft: release it or give it a date.','{title} kasada taslak olarak bekliyor: çıkar ya da tarih ver.', title='String')
+k('rerecordTag','Re-recording','Yeniden kayıt')
+k('mastersTag','Label masters · {percent}% yours','Şirket masterı · %{percent} senin', percent='int')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

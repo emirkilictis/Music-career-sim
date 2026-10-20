@@ -226,6 +226,11 @@ abstract final class Cmd {
   static SessionCmd<void> releaseDeluxe(int albumId, List<int> songIds) =>
       (s) => s.releaseDeluxe(albumId, songIds);
 
+  /// Records an album again into a vault draft (docs K139).
+  static SessionCmd<void> rerecordAlbum(int albumId, String title,
+          List<int> vaultSongIds) =>
+      (s) => s.rerecordAlbum(albumId, title, vaultSongIds: vaultSongIds);
+
   /// The player's videos and the biggest of all time (docs K118).
   static SessionCmd<(List<VideoRow>, List<VideoRow>)> videos() => (s) => (
         Platforms.topVideos(s.world, limit: 5, mine: true),

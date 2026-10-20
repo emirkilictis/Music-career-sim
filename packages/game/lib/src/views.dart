@@ -326,6 +326,9 @@ class SongView {
                     r: Actions.radioUpgradeCost(w.player!, s, r),
               },
         holiday = s.holiday,
+        rerecordOf = s.rerecordOf,
+        replacedWeek = s.replacedWeek,
+        masterShare = Rerecords.songShare(w.artists[s.primaryArtistId], s),
         creatorWeek = s.creatorWeek,
         creatorTier = s.creatorTier,
         creatorResult = s.creatorResult,
@@ -407,6 +410,15 @@ class SongView {
 
   /// A holiday song (docs K136).
   final bool holiday;
+
+  /// The song this one re-records (-1: an original), and the week its
+  /// own re-recording came out (-1: none; docs K139).
+  final int rerecordOf;
+  final int replacedWeek;
+
+  /// The artist's share of what it earns: the deal it came out under
+  /// (docs K139).
+  final double masterShare;
 
   /// A creator campaign on the short-video app (docs K131): when it
   /// started (-1: none), its size, how it went; and what each size costs
@@ -573,6 +585,21 @@ class AlbumView {
         preOrders = al.preOrders,
         exclusiveUntil = al.exclusiveUntil,
         exclusiveFeeCents = al.exclusiveFeeCents,
+        masterShare = Rerecords.albumShare(w.artists[al.artistId], al),
+        isRerecord = Rerecords.isRerecord(w, al),
+        rerecordBlock = al.artistId == w.playerArtistId
+            ? Rerecords.block(w, w.artists[al.artistId], al)
+            : RerecordBlock.notYours,
+        rerecordCostCents = Rerecords.costCents(al),
+        replacedWeek = al.songIds.isEmpty
+            ? -1
+            : w.songs[al.songIds.first].replacedWeek,
+        originalAlbumId = _originalAlbum(w, al),
+        originalTitle = _originalAlbum(w, al) < 0
+            ? ''
+            : w.albums[_originalAlbum(w, al)].title,
+        rerecordFrom = al.releaseWeek + Rerecords.waitWeeks,
+        rerecordEnergy = Rerecords.energyCost(al),
         weekUnits = al.status == AlbumStatus.active ? al.weekUnits : 0,
         weekPure = al.status == AlbumStatus.active ? al.weekPure : 0,
         weekUsUnits = al.status == AlbumStatus.active
@@ -611,6 +638,14 @@ class AlbumView {
 
   factory AlbumView.of(World w, Album al) => AlbumView._(w, al);
 
+  static int _originalAlbum(World w, Album al) {
+    for (final id in al.songIds) {
+      final of = w.songs[id].rerecordOf;
+      if (of >= 0) return w.songs[of].albumId;
+    }
+    return -1;
+  }
+
   final int id;
   final String title;
   final int artistId;
@@ -637,6 +672,23 @@ class AlbumView {
   /// A streaming exclusive until this week (-1: none) and its fee (K135).
   final int exclusiveUntil;
   final int exclusiveFeeCents;
+
+  /// Re-recordings (docs K139): the artist's share of its money (the
+  /// deal it came out under), whether it re-records [originalAlbumId],
+  /// what stops the player re-recording it (null: nothing) and what it
+  /// costs, and the week its re-recording came out (-1: none).
+  final double masterShare;
+  final bool isRerecord;
+  final RerecordBlock? rerecordBlock;
+  final int rerecordCostCents;
+  final int replacedWeek;
+  final int originalAlbumId;
+  final String originalTitle;
+
+  /// The first week it may be re-recorded, and the creativity it takes.
+  final int rerecordFrom;
+  final double rerecordEnergy;
+  bool get canRerecord => rerecordBlock == null;
 
   /// Last played week (0 once the album is in the catalog).
   final double weekUnits;

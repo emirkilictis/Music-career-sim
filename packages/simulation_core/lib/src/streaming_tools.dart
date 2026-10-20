@@ -6,6 +6,7 @@ import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'lifecycle.dart';
 import 'model.dart';
+import 'rerecords.dart';
 import 'rng.dart';
 import 'time.dart';
 import 'world.dart';
@@ -94,7 +95,7 @@ abstract final class StreamingTools {
           math.max(0.0, a.reg[ArtistReg.lifeStreams + k] - part);
     }
     if (a.tier == ArtistTier.player) {
-      final back = (removed * 0.35 * a.artistShare).round();
+      final back = (removed * 0.35 * Rerecords.songShare(a, s)).round();
       a.moneyCents -= back;
       s.revenueCents -= back;
     }

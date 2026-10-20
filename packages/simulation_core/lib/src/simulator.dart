@@ -19,6 +19,7 @@ import 'lifecycle.dart';
 import 'model.dart';
 import 'music_show.dart';
 import 'opportunities.dart';
+import 'rerecords.dart';
 import 'tours.dart';
 import 'word_of_mouth.dart';
 import 'rng.dart';
@@ -411,7 +412,8 @@ class Simulator {
           (1 + p.hype) *
           (s.isSingle
               ? 1.0
-              : c.albumTrackFanShare * albumEvent * p.kind.albumAffinity);
+              : c.albumTrackFanShare * albumEvent * p.kind.albumAffinity) *
+          Rerecords.fanFactor(s);
       final casPart = cas * s.commercial * life * (0.05 + 0.15 * promo);
       final pubPart = c.publicPool *
           s.commercial *
@@ -425,7 +427,9 @@ class Simulator {
           _momentum(s.id, s.releasedWeek, RngPurpose.momentum);
       // Not every good song connects (docs K127): beyond the fans, how far
       // a song travels is partly luck, drawn once and hidden.
-      final hit = resonance(w, s);
+      // A re-recording is a song people know: fewer new listeners find
+      // it (docs K139).
+      final hit = resonance(w, s) * Rerecords.reachFactor(s);
       // An exclusive album plays on one service only (docs K135).
       final exclusive = !s.isSingle &&
               s.albumId >= 0 &&
@@ -436,12 +440,15 @@ class Simulator {
       // December (docs K136).
       final season = Holidays.season(s, w.week);
       final holidayPart = Holidays.part(c, s, w.week);
+      // A re-recorded song's listeners moved to the new one (docs K139).
+      final keep = Rerecords.keep(s);
       final a = ((fanPart + (casPart + pubPart + viralPart) * hit) * season +
               holidayPart * hit) *
           qMult *
           noise *
           trackShare *
-          exclusive;
+          exclusive *
+          keep;
       s.lastAttention = a;
       songAttention[i] = a;
       // Where the player's listening came from (docs K120).
@@ -482,7 +489,8 @@ class Simulator {
           ((casPart + pubPart + viralPart) * season + holidayPart) *
               hit *
               qMult *
-              trackShare;
+              trackShare *
+              keep;
       // What the campaign added over none at all, for the player's
       // profit/loss (docs K57).
       if (p.tier == ArtistTier.player) {
@@ -800,6 +808,12 @@ class Simulator {
       // Album units count track sales in every era (docs K49); streams from
       // 2015. The album charts rank pure sales until units arrive (2015),
       // as Billboard did; so do era scores and popularity.
+      // Once re-recorded, most buyers want the new version (docs K139).
+      final lead = al.songIds.isEmpty ? null : w.songs[al.songIds.first];
+      final keep = lead == null ? 1.0 : Rerecords.keep(lead);
+      // A re-recording is no event for those who own the old one.
+      final fresh = lead == null ? 1.0 : Rerecords.reachFactor(lead);
+      final fanFresh = lead == null ? 1.0 : Rerecords.fanFactor(lead);
       var tPure = 0.0, tUnits = 0.0, tTea = 0.0, tSea = 0.0, tChart = 0.0;
       var buysAll = 0.0, buysFromReach = 0.0;
       final chartRegion = Float64List(_r);
@@ -814,7 +828,8 @@ class Simulator {
             era.superfanFactor *
             superCurve *
             (1 + al.hypeAtRelease) *
-            (0.5 + q01);
+            (0.5 + q01) *
+            fanFresh;
         final collectorPart = variantSum == 0
             ? 0.0
             : fans *
@@ -851,7 +866,8 @@ class Simulator {
                 p.fame *
                 era.casualPurchaseRate *
                 (1 + al.hypeAtRelease) *
-                (age == 0 ? 1.0 : 0.25);
+                (age == 0 ? 1.0 : 0.25) *
+                fresh;
         // From 2013 fans buy in week one and everyone else streams (docs
         // K79): every later week sells less, collector editions aside.
         final later = age == 0 ? 1.0 : tail;
@@ -868,7 +884,7 @@ class Simulator {
         // Pre-orders ship in week one (docs K126).
         final pure = al.isMixtape
             ? 0.0
-            : bought * noise * tracklist * demand +
+            : bought * noise * tracklist * demand * keep +
                 (age == 0 ? al.preOrders * share * Actions.preOrderExtra : 0.0);
         final streams = sea[k] +
             al.sumDormantRate *
@@ -1660,7 +1676,9 @@ class Simulator {
   /// How much [s] connects with listeners beyond its fans (docs K127):
   /// a hidden draw per song, so quality makes a hit likely, not certain.
   static double resonance(World w, Song s) => (w.config.resonanceMedian *
-          RandomStream.keyed(w.seed, 0, s.id, RngPurpose.resonance)
+          // A re-recording is the same song: a hit stays one (docs K139).
+          RandomStream.keyed(w.seed, 0,
+                  s.rerecordOf >= 0 ? s.rerecordOf : s.id, RngPurpose.resonance)
               .logNormal(w.config.resonanceSigma))
       .clamp(0.2, 2.5);
 
@@ -1705,11 +1723,14 @@ class Simulator {
       final songCents = s.weekStreams * 0.35 * s.autoplay.royalty +
           s.weekDownloads * 70 +
           s.weekPhysical * 100;
-      cents += songCents;
-      s.revenueCents += songCents * p.artistShare;
+      // The deal it came out under keeps its cut (docs K139).
+      final share = s.masterShare ??= p.artistShare;
+      cents += songCents * share;
+      s.revenueCents += songCents * share;
+      world.dirtySongs.add(id);
       // Campaign profit/loss (docs K57): album cuts earn for the album's
       // campaign, singles for their own.
-      final back = songCents * p.artistShare * s.campaignShareOfAttention;
+      final back = songCents * share * s.campaignShareOfAttention;
       if (!s.isSingle && s.albumId >= 0) {
         world.albums[s.albumId].campaignReturnCents += back;
         world.dirtyAlbums.add(s.albumId);
@@ -1727,22 +1748,25 @@ class Simulator {
         songCents +=
             world.songWeekStreamsRegion(s, r) * 0.35 * s.autoplay.royalty;
       }
-      cents += songCents;
-      s.revenueCents += songCents * p.artistShare;
+      final share = s.masterShare ??= p.artistShare;
+      cents += songCents * share;
+      s.revenueCents += songCents * share;
       world.dirtySongs.add(id);
     }
     for (final id in world.activeAlbumIds) {
       final al = world.albums[id];
       if (al.artistId != p.id) continue;
-      cents += al.weekPure * 600;
-      al.revenueCents += al.weekPure * 600 * p.artistShare;
+      final share = al.masterShare ??= p.artistShare;
+      cents += al.weekPure * 600 * share;
+      al.revenueCents += al.weekPure * 600 * share;
       al.campaignReturnCents +=
-          al.weekPure * 600 * p.artistShare * al.campaignShareOfSales;
+          al.weekPure * 600 * share * al.campaignShareOfSales;
+      world.dirtyAlbums.add(id);
     }
     // The manager takes a cut of everything (docs K68).
     // The advance is paid back first (docs K107).
     p.moneyCents +=
-        p.manager.net(Contracts.recoup(p, cents * p.artistShare)).round();
+        p.manager.net(Contracts.recoup(p, cents)).round();
     // The label takes no cut of the day job.
     p.moneyCents += p.job.wageCents;
     Actions.grantSkillPoints(p, Actions.skillPointsPerWeek);

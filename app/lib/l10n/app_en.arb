@@ -4642,5 +4642,83 @@
     }
   },
   "remixFeatureButton": "Remix with a feature",
-  "remixFeatureHint": "A remix of the released song with a rival on it: their fans come to the song from now on and the remix brings a wave of listening, bigger with a bigger star. A verse on a remix costs 1.5×."
+  "remixFeatureHint": "A remix of the released song with a rival on it: their fans come to the song from now on and the remix brings a wave of listening, bigger with a bigger star. A verse on a remix costs 1.5×.",
+  "errorCannotRerecord": "This album cannot be re-recorded now.",
+  "mastersLabel": "The label owns the masters: you keep {percent}% of what it earns, forever.",
+  "@mastersLabel": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "mastersOwn": "You own the masters: everything it earns is yours.",
+  "rerecordOfLine": "Re-recording of {title}",
+  "@rerecordOfLine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "rerecordedLine": "Re-recorded {week}: most listeners moved to the new version.",
+  "@rerecordedLine": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "rerecordButton": "Re-record (your version)",
+  "rerecordFrom": "Your deal lets you re-record it from {week}.",
+  "@rerecordFrom": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "rerecordTitle": "Re-record the album",
+  "rerecordHint": "The same songs, recorded again and owned by you: once they are out, most listeners leave the old versions for them and they pay you in full. Fewer new listeners find known songs. Costs {cost} and {energy} creativity; the album waits in the vault as a draft until you release it.",
+  "@rerecordHint": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "rerecordName": "Album title",
+  "rerecordDefault": "{title} ({artist}'s Version)",
+  "@rerecordDefault": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "rerecordVault": "From the vault: add up to 6 unreleased songs at the end.",
+  "rerecordGo": "Record it",
+  "rerecordSaved": "{title} is in the vault as a draft: release it or give it a date.",
+  "@rerecordSaved": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "rerecordTag": "Re-recording",
+  "mastersTag": "Label masters · {percent}% yours",
+  "@mastersTag": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -824,6 +824,17 @@ class Song with Charted {
   /// every December.
   bool holiday = false;
 
+  /// Re-recordings (docs K139): the song this one re-records (-1: an
+  /// original), and the week this song's re-recording came out (-1:
+  /// none), after which most of its listeners play the new one.
+  int rerecordOf = -1;
+  int replacedWeek = -1;
+
+  /// The artist's share of what it earns, fixed by the deal it came out
+  /// under (docs K139): a label owns the masters for good. Null until
+  /// it first earns.
+  double? masterShare;
+
   /// A paid creator campaign on the short-video app (docs K131): when it
   /// started (-1: none), how big, and how it went.
   int creatorWeek = -1;
@@ -952,6 +963,10 @@ class Album with Charted {
   /// plays it until this week (-1: none), for this fee.
   int exclusiveUntil = -1;
   int exclusiveFeeCents = 0;
+
+  /// The artist's share of its sales, fixed by the deal it came out
+  /// under (docs K139). Null until it first earns.
+  double? masterShare;
 
   /// What the player paid for the album campaign and the income it brought
   /// in through the album's own tracks and sales (estimated; docs K57).

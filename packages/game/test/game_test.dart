@@ -1362,6 +1362,82 @@ void main() {
       g.close();
     });
 
+    test('a re-recording wins the masters back from the label (K139)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      Actions.signLabel(g.world, p, Label.major);
+      final labelShare = p.artistShare;
+      expect(labelShare, lessThan(1));
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final album = g.releaseAlbum('Fearless', ids);
+      g.advanceWeek();
+      expect(g.album(album.id).masterShare, labelShare);
+      expect(g.album(album.id).rerecordBlock, RerecordBlock.tooSoon);
+      while (g.week < album.releaseWeek + Rerecords.waitWeeks) {
+        g.advanceWeeks(26, stop: SkipStop.never);
+      }
+      // Free of the label: the old album still pays the label's way.
+      Actions.signLabel(g.world, p, Label.independent);
+      g.advanceWeek();
+      expect(g.album(album.id).masterShare, labelShare);
+      expect(g.song(ids.first).masterShare, labelShare);
+      expect(g.album(album.id).canRerecord, isTrue);
+      p.creativeEnergy = 0;
+      expect(() => g.rerecordAlbum(album.id, 'X'), _code('noEnergy'));
+      p.creativeEnergy = 100;
+      final money = g.player.moneyCents;
+      final draft = g.rerecordAlbum(album.id, "Fearless (Nova's Version)");
+      expect(g.player.creativeEnergy,
+          100 - Rerecords.energyCost(g.world.albums[album.id]));
+      expect(money - g.player.moneyCents, Rerecords.costCents(g.world.albums[album.id]));
+      expect(draft.isDraft, isTrue);
+      expect(draft.songIds.length, ids.length);
+      expect(g.album(album.id).rerecordBlock, RerecordBlock.done);
+      final copy = g.song(draft.songIds.first);
+      expect(copy.rerecordOf, ids.first);
+      expect(copy.title, g.song(ids.first).title);
+      double oldStreams() =>
+          ids.fold(0.0, (x, id) => x + g.world.songLifetimeStreams(g.world.songs[id]));
+      g.advanceWeek();
+      final before = oldStreams();
+      g.advanceWeek();
+      final weekBefore = oldStreams() - before;
+      final out = g.releaseDraft(draft.id);
+      expect(out.isRerecord, isTrue);
+      expect(out.originalAlbumId, album.id);
+      expect(g.song(ids.first).replacedWeek, g.week);
+      g.advanceWeek();
+      final at = oldStreams();
+      g.advanceWeek();
+      // Most listeners moved to the new versions, which pay in full.
+      expect(oldStreams() - at, lessThan(weekBefore * 0.6));
+      final newIds = out.trackIds;
+      final newStreams = newIds.fold(
+          0.0, (x, id) => x + g.world.songs[id].weekStreams);
+      expect(newStreams, greaterThan(oldStreams() - at));
+      expect(g.song(newIds.first).masterShare, 1.0);
+      expect(g.album(out.id).masterShare, 1.0);
+      expect(g.album(out.id).rerecordBlock, RerecordBlock.isRerecord);
+      expect(() => g.rerecordAlbum(album.id, 'Again'), _code('cannotRerecord'));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.song(ids.first).replacedWeek, greaterThanOrEqualTo(0));
+      expect(g.song(newIds.first).rerecordOf, ids.first);
+      expect(g.album(album.id).masterShare, labelShare);
+      g.close();
+    });
+
     test('a remix with a star brings a released song back (K138)', () {
       (GameSession, int) run() {
         final g = GameSession.start(

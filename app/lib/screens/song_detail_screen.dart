@@ -609,6 +609,14 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       if (s.holiday)
                         Tag(l.holidayTag,
                             icon: Icons.ac_unit_rounded, color: AppColors.sky),
+                      if (s.rerecordOf >= 0)
+                        Tag(l.rerecordTag,
+                            icon: Icons.replay_rounded,
+                            color: AppColors.peach),
+                      if (s.masterShare < 1)
+                        Tag(l.mastersTag((s.masterShare * 100).round()),
+                            icon: Icons.copyright_rounded,
+                            color: AppColors.textMuted),
                       if (s.botStatus == BotStatus.running &&
                           s.botWeeksLeft > 0)
                         Tag(l.botsRunning(s.botWeeksLeft),

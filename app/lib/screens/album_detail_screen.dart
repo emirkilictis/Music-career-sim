@@ -142,6 +142,104 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     }
   }
 
+  /// Records the album again under the player's own name, with songs from
+  /// the vault if they like, into a draft (docs K139).
+  Future<void> _rerecord(AlbumView a) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final vault = [
+      for (final s in await widget.state.read(Cmd.vault()))
+        if (s.rerecordOf < 0) s
+    ];
+    if (!mounted) return;
+    final name = TextEditingController(
+        text: l.rerecordDefault(a.title, a.artistName));
+    final picked = await showModalBottomSheet<(String, List<int>)>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) {
+        final chosen = <int>[];
+        return StatefulBuilder(
+          builder: (c, set) => Padding(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
+            child: SafeArea(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(c).size.height * 0.85),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                    child: Text(l.rerecordTitle,
+                        style: Theme.of(c).textTheme.titleLarge),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Text(
+                        l.rerecordHint(fmt.money(a.rerecordCostCents),
+                            a.rerecordEnergy.round()),
+                        style: Theme.of(c).textTheme.bodySmall),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: TextField(
+                      controller: name,
+                      maxLength: 60,
+                      decoration: InputDecoration(labelText: l.rerecordName),
+                    ),
+                  ),
+                  if (vault.isNotEmpty) ...[
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                      child: Text(l.rerecordVault,
+                          style: Theme.of(c).textTheme.bodySmall),
+                    ),
+                    Flexible(
+                      child: ListView(shrinkWrap: true, children: [
+                        for (final s in vault)
+                          CheckboxListTile(
+                            value: chosen.contains(s.id),
+                            onChanged:
+                                !chosen.contains(s.id) && chosen.length >= 6
+                                    ? null
+                                    : (v) => set(() => v == true
+                                        ? chosen.add(s.id)
+                                        : chosen.remove(s.id)),
+                            title: Text(s.title),
+                            subtitle: Text(fmt.songGrade(s)),
+                          ),
+                      ]),
+                    ),
+                  ],
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: FilledButton(
+                      onPressed: () =>
+                          Navigator.pop(c, (name.text, List.of(chosen))),
+                      child: Text(l.rerecordGo),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    name.dispose();
+    if (picked == null || !mounted) return;
+    try {
+      await widget.state.act(Cmd.rerecordAlbum(a.id, picked.$1, picked.$2));
+      if (mounted) {
+        showInfo(context, l.rerecordSaved(picked.$1.trim()),
+            icon: Icons.album_rounded);
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -170,7 +268,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 : null,
             title: a.title,
             subtitle: '${a.artistName} · ${fmt.albumType(a.type)}'
-                '${a.isDeluxe ? ' · ${l.deluxeTag}' : ''}',
+                '${a.isDeluxe ? ' · ${l.deluxeTag}' : ''}'
+                '${a.isRerecord ? ' · ${l.rerecordTag}' : ''}',
           ),
           if (a.canDeluxe) ...[
             const SizedBox(height: 10),
@@ -213,6 +312,42 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     style: TextStyle(color: AppColors.textMuted)),
               ),
             ]),
+          ],
+          // Who owns the masters; re-recordings (docs K139).
+          if (a.isPlayer && a.type != AlbumType.mixtape) ...[
+            const SizedBox(height: 10),
+            _Line(
+              icon: Icons.copyright_rounded,
+              text: a.masterShare < 1
+                  ? l.mastersLabel((a.masterShare * 100).round())
+                  : l.mastersOwn,
+            ),
+            if (a.isRerecord && a.originalTitle.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              _Line(
+                  icon: Icons.replay_rounded,
+                  text: l.rerecordOfLine(a.originalTitle)),
+            ],
+            if (a.replacedWeek >= 0) ...[
+              const SizedBox(height: 6),
+              _Line(
+                  icon: Icons.swap_horiz_rounded,
+                  text: l.rerecordedLine(fmt.week(a.replacedWeek))),
+            ],
+            if (a.rerecordBlock == RerecordBlock.tooSoon) ...[
+              const SizedBox(height: 6),
+              _Line(
+                  icon: Icons.schedule_rounded,
+                  text: l.rerecordFrom(fmt.week(a.rerecordFrom))),
+            ],
+            if (a.canRerecord) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => _rerecord(a),
+                icon: const Icon(Icons.replay_rounded),
+                label: Text(l.rerecordButton),
+              ),
+            ],
           ],
           // Pre-orders shipped in week one (docs K126).
           if (a.isPlayer && a.preOrders >= 1) ...[
@@ -573,4 +708,19 @@ class _Stars extends StatelessWidget {
                 color: AppColors.gold),
         ],
       );
+}
+
+/// A muted line with an icon.
+class _Line extends StatelessWidget {
+  const _Line({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        Icon(icon, size: 18, color: AppColors.textMuted),
+        const SizedBox(width: 8),
+        Expanded(
+            child: Text(text, style: TextStyle(color: AppColors.textMuted))),
+      ]);
 }

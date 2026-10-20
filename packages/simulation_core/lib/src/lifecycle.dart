@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'config/charts.dart';
 import 'config/regions.dart';
 import 'model.dart';
+import 'rerecords.dart';
 import 'world.dart';
 
 /// Song / album state transitions (ACTIVE <-> DORMANT) with lazy accrual.
@@ -10,6 +13,37 @@ abstract final class Lifecycle {
     s.status = SongStatus.active;
     World.insertSorted(w.activeSongIds, s.id);
     w.dirtySongs.add(s.id);
+    Rerecords.onRelease(w, s);
+  }
+
+  /// Scales dormant [s]'s catalog listening by [f] from now on, what it
+  /// played so far kept (docs K139).
+  static void scaleDormant(World w, Song s, double f) {
+    if (s.status != SongStatus.dormant) return;
+    final a = w.primaryOf(s);
+    w.settleRetired(a);
+    for (var r = 0; r < regionCount; r++) {
+      s.reg[SongReg.lifeStreams + r] = w.songLifetimeStreams(s, r);
+      s.reg[SongReg.lifeDownloads + r] = w.songLifetimeDownloads(s, r);
+      s.reg[SongReg.indexStreams + r] = w.artistIndexStreams(a, r);
+      s.reg[SongReg.indexDownloads + r] = w.artistIndexDownloads(a, r);
+    }
+    final delta = s.dormantRate * (f - 1);
+    a.sumDormantRate = math.max(0.0, a.sumDormantRate + delta);
+    if (a.isRetired) {
+      for (var r = 0; r < regionCount; r++) {
+        w.retiredDormantAttention[r] +=
+            delta * a.catalogFactor * a.regionShare[r];
+      }
+    }
+    if (s.albumId >= 0) {
+      final al = w.albums[s.albumId];
+      settleAlbum(w, al);
+      al.sumDormantRate = math.max(0.0, al.sumDormantRate + delta);
+    }
+    s.dormantRate *= f;
+    w.dirtySongs.add(s.id);
+    w.dirtyArtists.add(a.id);
   }
 
   /// How much of its last listening a song keeps in the catalog (docs

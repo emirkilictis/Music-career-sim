@@ -1433,6 +1433,72 @@ class GameSession {
     _saveNow();
   }
 
+  /// Records album [albumId] again under the player's own name (docs
+  /// K139): its songs go into the vault as new versions, kept together
+  /// as a draft called [title] with up to [Actions.maxDeluxeTracks]
+  /// unreleased [vaultSongIds] at the end ("from the vault"). The draft
+  /// is released or dated like any other; once its songs are out, most
+  /// listeners leave the old versions for them.
+  ScheduledView rerecordAlbum(int albumId, String title,
+      {List<int> vaultSongIds = const []}) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    final why = Rerecords.block(world, _p, al);
+    if (why != null) throw GameException('cannotRerecord', why.name);
+    final t = title.trim();
+    if (t.isEmpty || t.length > 60) {
+      throw GameException('invalidTitle', 'Title must be 1–60 chars');
+    }
+    if (vaultSongIds.length > Actions.maxDeluxeTracks ||
+        vaultSongIds.toSet().length != vaultSongIds.length) {
+      throw GameException('deluxeTracks', 'Pick up to 6 songs');
+    }
+    for (final id in vaultSongIds) {
+      final s = _ownSong(id);
+      if (s.status != SongStatus.vault ||
+          s.rerecordOf >= 0 ||
+          _p.scheduled.any((sr) => sr.songIds.contains(id))) {
+        throw GameException('trackOnOtherRelease', 'Song $id is taken');
+      }
+    }
+    final (_, most) = trackRange(al.type);
+    if (al.songIds.length + vaultSongIds.length > most) {
+      throw GameException('trackCount', 'At most $most tracks');
+    }
+    _requireMoney(Rerecords.costCents(al));
+    if (_p.creativeEnergy < Rerecords.energyCost(al)) {
+      throw GameException('noEnergy', 'Not enough creativity');
+    }
+    // The editions it came out with; a later deluxe is not one of them.
+    final editions = [
+      for (var k = 0; k < al.variantWeeks.length; k++)
+        if (al.variantWeeks[k] <= maxVariantWeek &&
+            (k >= al.variantFormats.length ||
+                al.variantFormats[k] != EditionFormat.deluxe.index))
+          k
+    ];
+    final songs = Rerecords.record(world, _p, al);
+    return _schedule(ScheduledRelease(
+      id: _nextScheduleId(),
+      type: al.type,
+      songIds: [for (final s in songs) s.id, ...vaultSongIds],
+      title: t,
+      variantWeeks: [for (final k in editions) al.variantWeeks[k]],
+      variantFormats: al.variantFormats.isEmpty
+          ? const []
+          : [
+              for (final k in editions)
+                k < al.variantFormats.length ? al.variantFormats[k] : -1
+            ],
+      releaseWeek: ScheduledRelease.draftWeek,
+      announceWeek: ScheduledRelease.draftWeek,
+      createdWeek: world.week,
+      campaign: Campaign.none,
+    ));
+  }
+
   /// Re-releases album [albumId] as a deluxe edition with unreleased
   /// [songIds] as bonus tracks (docs K115).
   void releaseDeluxe(int albumId, List<int> songIds) {
@@ -2531,7 +2597,10 @@ class GameSession {
       final s = w.songs[id];
       events.add(s.primaryArtistId == p.id
           ? BotsCaught(id, s.botDelivered,
-              refundCents: (s.botDelivered * 0.35 * p.artistShare).round())
+              refundCents: (s.botDelivered *
+                      0.35 *
+                      Rerecords.songShare(p, s))
+                  .round())
           : RivalBotsCaught(id, s.primaryArtistId, s.botDelivered));
     }
     for (final id in w.playerSongIds) {

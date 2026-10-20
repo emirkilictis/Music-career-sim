@@ -729,6 +729,7 @@ class Fmt {
       'deluxeOut' => l.errorDeluxeOut,
       'featureRefused' => l.errorFeatureRefused,
       'featuresFull' => l.errorFeaturesFull,
+      'cannotRerecord' => l.errorCannotRerecord,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,
       'labelRefused' => l.errorLabelRefused,

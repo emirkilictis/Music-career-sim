@@ -231,8 +231,9 @@ abstract final class Codec {
     'bots', 'autoplay', 'pitchWeek',
     'videoWeek', 'videoBase',
     'sources', 'preSaves',
-    // Added in schema v26, v27, v29.
+    // Added in schema v26, v27, v29, v30.
     'creator', 'radioFormat', 'holiday',
+    'rerecordOf', 'replacedWeek', 'masterShare',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -286,6 +287,9 @@ abstract final class Codec {
               ]),
         s.radioFormat?.index,
         s.holiday ? 1 : 0,
+        s.rerecordOf,
+        s.replacedWeek,
+        s.masterShare,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -332,6 +336,9 @@ abstract final class Codec {
     s.streamsAtVideo = (r['videoBase'] as num?)?.toDouble() ?? 0;
     s.preSaves = (r['preSaves'] as num?)?.toDouble() ?? 0;
     s.holiday = r['holiday'] == 1;
+    s.rerecordOf = r['rerecordOf'] as int? ?? -1;
+    s.replacedWeek = r['replacedWeek'] as int? ?? -1;
+    s.masterShare = (r['masterShare'] as num?)?.toDouble();
     if (r['radioFormat'] case final int f) {
       s.radioFormat = RadioFormat.values[f];
     }
@@ -399,8 +406,9 @@ abstract final class Codec {
     'scheduleId', 'criticScore', 'preSingleUnits',
     // Added in schema v11.
     'campaignCost', 'campaignReturn',
-    // Added in schema v13, v25, v28.
+    // Added in schema v13, v25, v28, v30.
     'revenue', 'preOrders', 'exclusiveUntil', 'exclusiveFee',
+    'masterShare',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -422,6 +430,7 @@ abstract final class Codec {
         al.preOrders,
         al.exclusiveUntil,
         al.exclusiveFeeCents,
+        al.masterShare,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -448,6 +457,7 @@ abstract final class Codec {
       ..preOrders = (r['preOrders'] as num?)?.toDouble() ?? 0
       ..exclusiveUntil = r['exclusiveUntil'] as int? ?? -1
       ..exclusiveFeeCents = r['exclusiveFee'] as int? ?? 0
+      ..masterShare = (r['masterShare'] as num?)?.toDouble()
       ..variantFormats = r['editionFormats'] == null
           ? const []
           : _parseInts(r['editionFormats'] as String)

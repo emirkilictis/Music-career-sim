@@ -1341,5 +1341,21 @@
   "eventSummerRank": "{year} yazın şarkıları: “{title}” #{rank} oldu.",
   "eventSummerTop": "{year} yazının şarkısı {artist} – “{title}”.",
   "remixFeatureButton": "Featli remix yap",
-  "remixFeatureHint": "Çıkmış şarkının bir rakibin de olduğu remix'i: onun hayranları artık şarkıyı da dinler ve remix bir dinlenme dalgası getirir, yıldız ne kadar büyükse o kadar büyük. Remix'te verse 1.5 kat pahalı."
+  "remixFeatureHint": "Çıkmış şarkının bir rakibin de olduğu remix'i: onun hayranları artık şarkıyı da dinler ve remix bir dinlenme dalgası getirir, yıldız ne kadar büyükse o kadar büyük. Remix'te verse 1.5 kat pahalı.",
+  "errorCannotRerecord": "Bu albüm şu an yeniden kaydedilemez.",
+  "mastersLabel": "Masterlar plak şirketinin: kazandığının %{percent}'i sende kalır, hep böyle.",
+  "mastersOwn": "Masterlar senin: kazandığı her şey sana kalır.",
+  "rerecordOfLine": "{title} albümünün yeniden kaydı",
+  "rerecordedLine": "{week} yeniden kaydedildi: dinleyicilerin çoğu yeni sürüme geçti.",
+  "rerecordButton": "Yeniden kaydet (senin versiyonun)",
+  "rerecordFrom": "Sözleşmen yeniden kaydı {week} itibarıyla izin veriyor.",
+  "rerecordTitle": "Albümü yeniden kaydet",
+  "rerecordHint": "Aynı şarkılar yeniden kaydedilir ve senin olur: çıktıklarında dinleyicilerin çoğu eski sürümleri bırakıp bunlara geçer, kazancın tamamı sana kalır. Bilinen şarkıları daha az yeni dinleyici keşfeder. Maliyeti {cost} ve {energy} yaratıcılık; albüm sen çıkarana kadar kasada taslak olarak bekler.",
+  "rerecordName": "Albüm adı",
+  "rerecordDefault": "{title} ({artist} Versiyonu)",
+  "rerecordVault": "Kasadan: sona en fazla 6 çıkmamış şarkı ekle.",
+  "rerecordGo": "Kaydet",
+  "rerecordSaved": "{title} kasada taslak olarak bekliyor: çıkar ya da tarih ver.",
+  "rerecordTag": "Yeniden kayıt",
+  "mastersTag": "Şirket masterı · %{percent} senin"
 }

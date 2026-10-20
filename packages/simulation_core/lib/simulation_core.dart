@@ -23,6 +23,7 @@ export 'src/music_show.dart';
 export 'src/names.dart';
 export 'src/opportunities.dart';
 export 'src/real_artists.dart';
+export 'src/rerecords.dart';
 export 'src/rng.dart';
 export 'src/social.dart';
 export 'src/streaming_tools.dart';
