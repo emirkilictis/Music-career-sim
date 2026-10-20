@@ -32,6 +32,7 @@ abstract final class RngPurpose {
   static const resonance = 36;
   static const holiday = 37;
   static const leak = 38;
+  static const snippet = 39;
 }
 
 /// SplitMix64 finalizer. Dart native ints are 64-bit and wrap on overflow.

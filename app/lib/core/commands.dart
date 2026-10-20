@@ -253,6 +253,10 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// A snippet test (docs K152).
+  static SessionCmd<void> teaseSnippet(int songId) =>
+      (s) => s.teaseSnippet(songId);
+
   /// An anniversary reissue (docs K149).
   static SessionCmd<void> reissueAnniversary(int albumId) =>
       (s) => s.reissueAnniversary(albumId);

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'model.dart';
 import 'rng.dart';
+import 'snippets.dart';
 import 'time.dart';
 import 'world.dart';
 
@@ -37,7 +38,13 @@ abstract final class Leaks {
   static double chance(World w, Artist a, Song s, {bool announced = false}) {
     if (GameTime.yearOf(w.week) < fromYear) return 0;
     final waited = math.min(2.0, (w.week - s.writtenWeek) / 26);
-    return weeklyChance * a.fame * a.fame * waited * (announced ? 2 : 1);
+    return weeklyChance *
+        a.fame *
+        a.fame *
+        waited *
+        (announced ? 2 : 1) *
+        // A teased song leaks more easily (docs K152).
+        (s.snippetWeek >= 0 ? Snippets.leakFactor : 1);
   }
 
   /// Rolls this week's leak among the player's vault songs; returns the

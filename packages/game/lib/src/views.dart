@@ -336,6 +336,12 @@ class SongView {
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
         masterShare = Rerecords.songShare(w.artists[s.primaryArtistId], s),
+        snippetWeek = s.snippetWeek,
+        snippetReaction = s.snippetWeek < 0
+            ? null
+            : Snippets.reaction(s.snippetScore),
+        snippetScore = s.snippetWeek < 0 ? 0 : s.snippetScore.round(),
+        canSnippet = w.player != null && Snippets.can(w, w.player!, s),
         cloudWeek = s.cloudWeek,
         cloudOnly = s.cloudOnly,
         cloudPlays = s.cloudOnly ? w.songLifetimeStreams(s) : s.cloudPlays,
@@ -463,6 +469,13 @@ class SongView {
   final CreatorCampaign creatorTier;
   final CreatorResult creatorResult;
   final Map<CreatorCampaign, int> creatorCosts;
+
+  /// A snippet test (docs K152): when (-1: never), the reaction and its
+  /// score (0–100), and whether one can be made now.
+  final int snippetWeek;
+  final SnippetReaction? snippetReaction;
+  final int snippetScore;
+  final bool canSnippet;
 
   /// A free upload to the audio-sharing site (docs K148): when, whether
   /// it is still only there, its plays there, and whether it can go up.

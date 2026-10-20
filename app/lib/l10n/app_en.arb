@@ -5111,5 +5111,37 @@
   "jointTitle": "Joint album",
   "jointHint": "Make it together with a rival: they are on every track and half their fans buy it like their own. Their fee is three verses. A joint album comes out now.",
   "jointNone": "On my own",
-  "jointNowOnly": "A joint album comes out now: pick this week or no partner."
+  "jointNowOnly": "A joint album comes out now: pick this week or no partner.",
+  "errorNoSnippet": "A snippet is for unreleased songs, once each, one a week, from 2019.",
+  "snippetButton": "Tease a snippet on TikTak ({energy} creativity)",
+  "@snippetButton": {
+    "placeholders": {
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "snippetHint": "See how people take a few seconds of it before you release it. Out within {weeks} weeks, the wait turns into a wave; but a teased song leaks more easily.",
+  "@snippetHint": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "snippetTag": "Snippet: {reaction} ({score})",
+  "@snippetTag": {
+    "placeholders": {
+      "reaction": {
+        "type": "String"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "snippetHot": "blew up",
+  "snippetGood": "went down well",
+  "snippetLukewarm": "lukewarm",
+  "snippetCold": "fell flat"
 }

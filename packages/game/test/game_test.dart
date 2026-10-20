@@ -1362,6 +1362,57 @@ void main() {
       g.close();
     });
 
+    test('a snippet test shows the reaction and builds a wait (K152)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2020,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 3; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      expect(g.song(ids.first).canSnippet, isTrue);
+      expect(g.song(ids.first).snippetReaction, isNull);
+      final energy = g.player.creativeEnergy;
+      g.teaseSnippet(ids.first);
+      expect(g.player.creativeEnergy, energy - Snippets.energy);
+      final v = g.song(ids.first);
+      expect(v.snippetReaction, isNotNull);
+      expect(v.snippetReaction, Snippets.reaction(v.snippetScore.toDouble()));
+      // One a week, once a song.
+      expect(() => g.teaseSnippet(ids[1]), _code('noSnippet'));
+      expect(() => g.teaseSnippet(ids.first), _code('noSnippet'));
+      // A teased song leaks more easily.
+      final s = g.world.songs[ids.first];
+      final other = g.world.songs[ids[2]];
+      expect(Leaks.chance(g.world, p, s),
+          closeTo(Leaks.chance(g.world, p, other) * Snippets.leakFactor, 1e-12));
+      g.advanceWeek();
+      g.teaseSnippet(ids[1]);
+      // Out while awaited: its wave.
+      final boost = s.versionBoost;
+      g.releaseSingle(ids.first);
+      expect(s.versionBoost, greaterThan(boost));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.song(ids.first).snippetWeek, greaterThanOrEqualTo(0));
+      expect(g.song(ids.first).snippetScore, v.snippetScore);
+      g.close();
+      // Before 2019 there are no snippets.
+      final old = GameSession.start(slots, _setup(startYear: 2017));
+      old.world.player!.creativeEnergy = 100;
+      final id = old.writeSong(budget: BudgetTier.low).id;
+      expect(old.song(id).canSnippet, isFalse);
+      old.close();
+    });
+
     test('a joint album with a rival sells to both fan bases (K150)', () {
       (GameSession, List<int>) start() {
         final g = GameSession.start(

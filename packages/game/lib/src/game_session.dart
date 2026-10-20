@@ -1374,6 +1374,19 @@ class GameSession {
   }
 
   /// Pays creators on the short-video app to use a song's sound (K131).
+  /// Teases vault song [songId] on the short-video app (docs K152).
+  void teaseSnippet(int songId) {
+    final s = _ownSong(songId);
+    if (!Snippets.can(world, _p, s)) {
+      throw GameException('noSnippet', 'Unreleased songs, once, one a week');
+    }
+    if (_p.creativeEnergy < Snippets.energy) {
+      throw GameException('noEnergy', 'Not enough creativity');
+    }
+    Snippets.tease(world, _p, s);
+    _saveNow();
+  }
+
   /// Reissues album [albumId] for its anniversary (docs K149).
   void reissueAnniversary(int albumId) {
     if (albumId < 0 || albumId >= world.albums.length) {

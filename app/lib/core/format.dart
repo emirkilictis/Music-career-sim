@@ -333,6 +333,14 @@ class Fmt {
         IncomeSource.albumSales => l.incomeAlbums,
       };
 
+  /// How a snippet went down (docs K152).
+  String snippetReaction(SnippetReaction r) => switch (r) {
+        SnippetReaction.hot => l.snippetHot,
+        SnippetReaction.good => l.snippetGood,
+        SnippetReaction.lukewarm => l.snippetLukewarm,
+        SnippetReaction.cold => l.snippetCold,
+      };
+
   /// An album bundle (docs K144).
   String bundle(AlbumBundle b) => switch (b) {
         AlbumBundle.none => l.bundleNone,
@@ -779,6 +787,7 @@ class Fmt {
       'cannotCloud' => l.errorCannotCloud,
       'noAnniversary' => l.errorNoAnniversary,
       'noPartner' => l.errorNoPartner,
+      'noSnippet' => l.errorNoSnippet,
       'noShowcase' => l.errorNoShowcase,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,

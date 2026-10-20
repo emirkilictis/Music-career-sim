@@ -1463,6 +1463,16 @@ k('jointHint','Make it together with a rival: they are on every track and half t
 k('jointNone','On my own','Tek başıma')
 k('jointNowOnly','A joint album comes out now: pick this week or no partner.','Ortak albüm hemen çıkar: bu haftayı seç ya da partnersiz devam et.')
 
+# Snippet tests (docs K152).
+k('errorNoSnippet','A snippet is for unreleased songs, once each, one a week, from 2019.','Snippet çıkmamış şarkılar için: her birine bir kez, haftada bir, 2019\'dan itibaren.')
+k('snippetButton','Tease a snippet on TikTak ({energy} creativity)','TikTak\'ta snippet paylaş ({energy} yaratıcılık)', energy='int')
+k('snippetHint','See how people take a few seconds of it before you release it. Out within {weeks} weeks, the wait turns into a wave; but a teased song leaks more easily.','Çıkarmadan önce birkaç saniyesine insanların nasıl tepki verdiğini gör. {weeks} hafta içinde çıkarsa bekleyiş bir dalgaya döner; ama paylaşılan şarkı daha kolay sızar.', weeks='int')
+k('snippetTag','Snippet: {reaction} ({score})','Snippet: {reaction} ({score})', reaction='String', score='int')
+k('snippetHot','blew up','patladı')
+k('snippetGood','went down well','beğenildi')
+k('snippetLukewarm','lukewarm','ılık')
+k('snippetCold','fell flat','tutmadı')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

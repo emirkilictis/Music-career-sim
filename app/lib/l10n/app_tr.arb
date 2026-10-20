@@ -1473,5 +1473,13 @@
   "jointTitle": "Ortak albüm",
   "jointHint": "Bir rakiple birlikte yap: her parçada yer alır, hayranlarının yarısı kendi albümleri gibi alır. Ücreti üç verse kadar. Ortak albüm hemen çıkar.",
   "jointNone": "Tek başıma",
-  "jointNowOnly": "Ortak albüm hemen çıkar: bu haftayı seç ya da partnersiz devam et."
+  "jointNowOnly": "Ortak albüm hemen çıkar: bu haftayı seç ya da partnersiz devam et.",
+  "errorNoSnippet": "Snippet çıkmamış şarkılar için: her birine bir kez, haftada bir, 2019'dan itibaren.",
+  "snippetButton": "TikTak'ta snippet paylaş ({energy} yaratıcılık)",
+  "snippetHint": "Çıkarmadan önce birkaç saniyesine insanların nasıl tepki verdiğini gör. {weeks} hafta içinde çıkarsa bekleyiş bir dalgaya döner; ama paylaşılan şarkı daha kolay sızar.",
+  "snippetTag": "Snippet: {reaction} ({score})",
+  "snippetHot": "patladı",
+  "snippetGood": "beğenildi",
+  "snippetLukewarm": "ılık",
+  "snippetCold": "tutmadı"
 }

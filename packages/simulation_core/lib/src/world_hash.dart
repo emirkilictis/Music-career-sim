@@ -123,6 +123,8 @@ int worldHash(World w) {
     addInt(s.liveOf);
     addInt(s.marqueeWeek);
     addInt(s.cloudWeek);
+    addInt(s.snippetWeek);
+    addDouble(s.snippetScore);
     addInt(s.cloudOnly ? 1 : 0);
     addInt(s.showcaseWeek);
     addInt(s.soldTo);

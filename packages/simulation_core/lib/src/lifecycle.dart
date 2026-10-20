@@ -5,6 +5,7 @@ import 'config/regions.dart';
 import 'leaks.dart';
 import 'model.dart';
 import 'rerecords.dart';
+import 'snippets.dart';
 import 'world.dart';
 
 /// Song / album state transitions (ACTIVE <-> DORMANT) with lazy accrual.
@@ -16,6 +17,7 @@ abstract final class Lifecycle {
     w.dirtySongs.add(s.id);
     Rerecords.onRelease(w, s);
     Leaks.onRelease(w, s);
+    Snippets.onRelease(w, s);
   }
 
   /// Scales dormant [s]'s catalog listening by [f] from now on, what it

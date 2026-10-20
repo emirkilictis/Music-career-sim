@@ -668,6 +668,28 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           s.inVault ? l.featureButton : l.remixFeatureButton),
                     ),
                   ],
+                  // A snippet test on the short-video app (docs K152).
+                  if (s.snippetReaction case final r?) ...[
+                    const SizedBox(height: 8),
+                    Tag(l.snippetTag(fmt.snippetReaction(r), s.snippetScore),
+                        icon: Icons.music_video_outlined,
+                        color: switch (r) {
+                          SnippetReaction.hot => AppColors.mint,
+                          SnippetReaction.good => AppColors.sky,
+                          SnippetReaction.lukewarm => AppColors.peach,
+                          SnippetReaction.cold => AppColors.coral,
+                        }),
+                  ],
+                  if (s.canSnippet)
+                    TextButton.icon(
+                      onPressed: () => _tool(Cmd.teaseSnippet(s.id)),
+                      icon: const Icon(Icons.music_video_outlined),
+                      label: Text(l.snippetButton(Snippets.energy.round())),
+                    ),
+                  if (s.canSnippet)
+                    Text(l.snippetHint(Snippets.waitWeeks),
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
                   // A free upload to the audio site (docs K148).
                   if (s.cloudOnly) ...[
                     const SizedBox(height: 8),

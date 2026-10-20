@@ -836,6 +836,11 @@ class Song with Charted {
   /// The week it leaked before release (-1: never; docs K140).
   int leakedWeek = -1;
 
+  /// A snippet test (docs K152): when it was teased (-1: never) and the
+  /// reaction score.
+  int snippetWeek = -1;
+  double snippetScore = 0;
+
   /// A free upload to the audio-sharing site (docs K148): when it went up
   /// (-1: never), whether it is still only there, and its plays there
   /// when it came out officially.
