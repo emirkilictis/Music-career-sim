@@ -1672,5 +1672,15 @@
   "imprintPush": "“{title}” için tanıtım · {cost}",
   "imprintPushHint": "Şirketin en yeni single'ı çalışır: editör listeleri, radyo ve basın; {weeks} haftada bir.",
   "imprintPushed": "Şirketin “{title}” şarkısını öne çıkarıyor.",
-  "errorNoPush": "Şu an öne çıkarılacak yeni bir single yok."
+  "errorNoPush": "Şu an öne çıkarılacak yeni bir single yok.",
+  "fycTitle": "Ödül kampanyası",
+  "fycNominations": "{year} adaylıklarından önce: sektör ilanları, gösterimler ve partiler yarıştaki tüm kayıtlarını öne çıkarır.",
+  "fycVoting": "{year} töreninden önce: adaylıkların için oy verenleri ikna et.",
+  "fycRunning": "Sürüyor: {tier}",
+  "fycSmall": "Mütevazı",
+  "fycBig": "Büyük",
+  "fycAllOut": "Her şeyiyle",
+  "fycTier": "{tier} · {cost}",
+  "fycDone": "Kampanyan başladı.",
+  "errorNoFyc": "Şu an ödül kampanyası yapılamaz."
 }

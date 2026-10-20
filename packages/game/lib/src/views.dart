@@ -2483,6 +2483,29 @@ class WrittenSongView {
   final double earnedCents;
 }
 
+/// The awards season and the player's campaign (docs K171).
+class FycView {
+  FycView.of(World w)
+      : phase = AwardCampaigns.phase(w).$2,
+        year = AwardCampaigns.phase(w).$1,
+        nomination =
+            AwardCampaigns.current(w, AwardCampaigns.phase(w).$1)?.nomination,
+        vote = AwardCampaigns.current(w, AwardCampaigns.phase(w).$1)?.vote;
+  final FycPhase phase;
+
+  /// The show it is for (0: closed).
+  final int year;
+  final FycTier? nomination;
+  final FycTier? vote;
+
+  /// What is running for the current part of the season.
+  FycTier? get running => phase == FycPhase.nominations
+      ? nomination
+      : phase == FycPhase.voting
+          ? vote
+          : null;
+}
+
 /// The player's own label, or what founding one takes (docs K169).
 class ImprintView {
   ImprintView.of(World w, Artist a)

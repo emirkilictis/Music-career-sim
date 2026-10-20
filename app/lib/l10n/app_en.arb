@@ -6064,5 +6064,46 @@
       }
     }
   },
-  "errorNoPush": "There is no new single to push now."
+  "errorNoPush": "There is no new single to push now.",
+  "fycTitle": "For Your Consideration",
+  "fycNominations": "Before the {year} nominations: trade ads, screenings and parties lift every record of yours in the running.",
+  "@fycNominations": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "fycVoting": "Before the {year} show: win the voters over for your nominations.",
+  "@fycVoting": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "fycRunning": "Running: {tier}",
+  "@fycRunning": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      }
+    }
+  },
+  "fycSmall": "Modest",
+  "fycBig": "Big",
+  "fycAllOut": "All-out",
+  "fycTier": "{tier} · {cost}",
+  "@fycTier": {
+    "placeholders": {
+      "tier": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "fycDone": "Your campaign is running.",
+  "errorNoFyc": "No awards campaign now."
 }

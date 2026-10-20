@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'audience.dart';
+import 'award_campaigns.dart';
 import 'config/charts.dart';
 import 'critics.dart';
 import 'lifecycle.dart';
@@ -213,8 +214,10 @@ abstract final class Awards {
       final q = _quality(s.quality);
       final fame = w.artists[a].fame;
       final n = AwardNominee(s.id, a);
-      record.add((0.5 * hit + 0.4 * q + 0.1 * fame + noise(), n));
-      song.add((0.3 * hit + 0.65 * q + 0.05 * fame + noise(), n));
+      // A For Your Consideration campaign (docs K171).
+      final fyc = AwardCampaigns.nominationLift(w, year, a);
+      record.add((0.5 * hit + 0.4 * q + 0.1 * fame + noise() + fyc, n));
+      song.add((0.3 * hit + 0.65 * q + 0.05 * fame + noise() + fyc, n));
     }
 
     // Albums out in the window that critics reviewed.
@@ -229,12 +232,16 @@ abstract final class Awards {
       final hit = _albumHit(al);
       final q = _quality(al.quality);
       final n = AwardNominee(al.id, a.id);
+      final fyc = AwardCampaigns.nominationLift(w, year, a.id);
       if (hit > 0 || critic >= 0.75) {
-        album.add(
-            (0.45 * critic + 0.25 * q + 0.2 * hit + 0.1 * a.fame + noise(), n));
+        album.add((
+          0.45 * critic + 0.25 * q + 0.2 * hit + 0.1 * a.fame + noise() + fyc,
+          n
+        ));
       }
       if (me != null && a.genre == me.genre) {
-        genreAlbum.add((0.5 * critic + 0.2 * q + 0.3 * hit + noise(), n));
+        genreAlbum
+            .add((0.5 * critic + 0.2 * q + 0.3 * hit + noise() + fyc, n));
       }
     }
 
@@ -319,7 +326,11 @@ abstract final class Awards {
       // The ballot order is the voters' favorite first; an upset is
       // possible but rare.
       final weights = [
-        for (var i = 0; i < race.nominees.length; i++) math.exp(-0.75 * i)
+        for (var i = 0; i < race.nominees.length; i++)
+          math.exp(-0.75 * i) *
+              // The voting campaign (docs K171).
+              AwardCampaigns.voteFactor(
+                  w, show.year, race.nominees[i].artistId)
       ];
       final total = weights.fold(0.0, (a, b) => a + b);
       var x = r.nextDouble() * total;

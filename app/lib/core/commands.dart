@@ -254,6 +254,10 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // Awards campaigns (docs K171).
+  static SessionCmd<FycView> fyc() => (s) => s.fyc;
+  static SessionCmd<void> runFyc(FycTier tier) => (s) => s.runFyc(tier);
+
   // The player's own label (docs K169).
   static SessionCmd<ImprintView> imprint() => (s) => s.imprint;
   static SessionCmd<List<SigneeCandidateView>> imprintCandidates() =>

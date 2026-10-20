@@ -1557,6 +1557,51 @@ void main() {
       g.close();
     });
 
+    test('an awards campaign (K171)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      // Hits out in the eligibility window.
+      for (var i = 0; i < 4; i++) {
+        p.creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.high).id;
+        g.releaseSingle(id);
+        g.advanceWeeks(6, stop: SkipStop.never);
+      }
+      while (g.fyc.phase != FycPhase.nominations) {
+        expect(() => g.runFyc(FycTier.small), _code('noFyc'));
+        g.advanceWeek();
+      }
+      final money = p.moneyCents;
+      g.runFyc(FycTier.allOut);
+      expect(money - p.moneyCents, FycTier.allOut.costCents);
+      expect(g.fyc.running, FycTier.allOut);
+      expect(() => g.runFyc(FycTier.small), _code('noFyc'));
+      expect(
+          AwardCampaigns.nominationLift(g.world, g.fyc.year, p.id),
+          FycTier.allOut.nominationLift);
+      // Through the nominations to the voting.
+      for (var i = 0; i < 12 && g.fyc.phase != FycPhase.voting; i++) {
+        g.advanceWeek();
+      }
+      expect(g.fyc.phase, FycPhase.voting);
+      expect(g.fyc.nomination, FycTier.allOut);
+      g.runFyc(FycTier.big);
+      expect(AwardCampaigns.voteFactor(g.world, g.fyc.year, p.id),
+          FycTier.big.voteFactor);
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.fyc.vote, FycTier.big);
+      g.close();
+    });
+
     test('an album rollout (K165)', () {
       var g = GameSession.start(
           slots,

@@ -37,6 +37,7 @@ class _CareerScreenState extends State<CareerScreen> {
   List<MemberView> _members = const [];
   FanClubView? _club;
   ImprintView? _label;
+  FycView? _fyc;
   List<WrittenSongView> _guest = const [];
   IncomeBreakdown? _income;
   CatalogOfferView? _catalog;
@@ -61,6 +62,7 @@ class _CareerScreenState extends State<CareerScreen> {
     final members = await career.read(Cmd.members());
     final club = await career.read(Cmd.fanClub());
     final label = await career.read(Cmd.imprint());
+    final fyc = await career.read(Cmd.fyc());
     final guest = await career.read(Cmd.guestSongs());
     final income = await career.read(Cmd.careerIncome());
     final catalog = await career.read(Cmd.catalogOffer());
@@ -72,6 +74,7 @@ class _CareerScreenState extends State<CareerScreen> {
         _members = members;
         _club = club;
         _label = label;
+        _fyc = fyc;
         _guest = guest;
         _income = income;
         _catalog = catalog;
@@ -82,6 +85,27 @@ class _CareerScreenState extends State<CareerScreen> {
               fmt.songMainValue(b, week).compareTo(fmt.songMainValue(a, week)));
       });
     }
+  }
+
+  Future<void> _runFyc(FycTier t) async {
+    final l = context.l10n;
+    try {
+      await context.careerRead.act(Cmd.runFyc(t));
+      if (mounted) {
+        showInfo(context, l.fycDone, icon: Icons.emoji_events_rounded);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  String _fycName(FycTier t) {
+    final l = context.l10n;
+    return switch (t) {
+      FycTier.small => l.fycSmall,
+      FycTier.big => l.fycBig,
+      FycTier.allOut => l.fycAllOut,
+    };
   }
 
   Widget _labelSection(ImprintView v) {
@@ -737,6 +761,30 @@ class _CareerScreenState extends State<CareerScreen> {
                 label: Text(l.awardsButton),
               ),
             ),
+            // For Your Consideration (docs K171).
+            if (_fyc case final f? when f.phase != FycPhase.closed) ...[
+              const Divider(height: 24),
+              Text(l.fycTitle,
+                  style: const TextStyle(fontWeight: FontWeight.w800)),
+              Text(
+                  f.phase == FycPhase.nominations
+                      ? l.fycNominations(f.year)
+                      : l.fycVoting(f.year),
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+              const SizedBox(height: 6),
+              if (f.running case final r?)
+                Text(l.fycRunning(_fycName(r)),
+                    style: const TextStyle(fontWeight: FontWeight.w700))
+              else
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  for (final t in FycTier.values)
+                    OutlinedButton(
+                      onPressed: () => _runFyc(t),
+                      child: Text(
+                          l.fycTier(_fycName(t), fmt.money(t.costCents))),
+                    ),
+                ]),
+            ],
           ]),
         ),
         if (_honors case final h?) ...[

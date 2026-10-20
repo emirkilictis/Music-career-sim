@@ -10,6 +10,7 @@ import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'model.dart';
+import 'award_campaigns.dart';
 import 'fan_club.dart';
 import 'imprints.dart';
 import 'own_playlist.dart';
@@ -77,6 +78,9 @@ class World {
 
   /// The player's own label (docs K169).
   Imprint? imprint;
+
+  /// The player's latest awards campaign (docs K171).
+  FycCampaign? fycCampaign;
 
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();

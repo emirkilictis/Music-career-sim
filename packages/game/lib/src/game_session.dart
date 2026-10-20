@@ -2004,6 +2004,22 @@ class GameSession {
             WrittenSongView.of(world, world.songs[id]),
       ];
 
+  // ---------------------------------------------- awards campaign (K171)
+
+  FycView get fyc => FycView.of(world);
+
+  /// Runs a For Your Consideration campaign at [tier] for the current
+  /// part of the awards season.
+  void runFyc(FycTier tier) {
+    final v = FycView.of(world);
+    if (v.phase == FycPhase.closed || v.running != null) {
+      throw GameException('noFyc', 'Not now');
+    }
+    _requireMoney(tier.costCents);
+    AwardCampaigns.run(world, _p, tier);
+    _saveNow();
+  }
+
   // -------------------------------------------------- own label (K169)
 
   ImprintView get imprint => ImprintView.of(world, _p);

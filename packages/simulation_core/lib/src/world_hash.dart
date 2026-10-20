@@ -153,6 +153,11 @@ int worldHash(World w) {
     addInt(v.kind.index * 100000 + v.week);
     addDouble(v.baseViews);
   }
+  if (w.fycCampaign case final fyc?) {
+    addInt(fyc.year);
+    addInt(fyc.nomination?.index ?? -1);
+    addInt(fyc.vote?.index ?? -1);
+  }
   if (w.imprint case final label?) {
     for (final s in label.roster) {
       addInt(s.artistId);

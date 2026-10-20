@@ -1707,6 +1707,19 @@ k('imprintPushHint','Your label works the newest single: editors\' playlists, ra
 k('imprintPushed','Your label is pushing “{title}”.','Şirketin “{title}” şarkısını öne çıkarıyor.', title='String')
 k('errorNoPush','There is no new single to push now.','Şu an öne çıkarılacak yeni bir single yok.')
 
+
+# Awards campaigns (docs K171).
+k('fycTitle','For Your Consideration','Ödül kampanyası')
+k('fycNominations','Before the {year} nominations: trade ads, screenings and parties lift every record of yours in the running.','{year} adaylıklarından önce: sektör ilanları, gösterimler ve partiler yarıştaki tüm kayıtlarını öne çıkarır.', year='int')
+k('fycVoting','Before the {year} show: win the voters over for your nominations.','{year} töreninden önce: adaylıkların için oy verenleri ikna et.', year='int')
+k('fycRunning','Running: {tier}','Sürüyor: {tier}', tier='String')
+k('fycSmall','Modest','Mütevazı')
+k('fycBig','Big','Büyük')
+k('fycAllOut','All-out','Her şeyiyle')
+k('fycTier','{tier} · {cost}','{tier} · {cost}', tier='String', cost='String')
+k('fycDone','Your campaign is running.','Kampanyan başladı.')
+k('errorNoFyc','No awards campaign now.','Şu an ödül kampanyası yapılamaz.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():
