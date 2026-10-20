@@ -6,6 +6,7 @@ import 'cloud.dart';
 import 'config/charts.dart';
 import 'critics.dart';
 import 'distribution.dart';
+import 'fan_club.dart';
 import 'contracts.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
@@ -839,6 +840,10 @@ abstract final class Actions {
       }
     }
     album.liveTour = liveTour;
+    // The fan club orders every new record ahead (docs K164).
+    if (a.tier == ArtistTier.player && liveTour < 0 && hits.isEmpty) {
+      album.preOrders += FanClubs.albumCopies(w, type);
+    }
     // A live album or a best-of opens no era and is not an album the
     // label is owed (docs K146, K161).
     if (studio) {
@@ -993,7 +998,7 @@ abstract final class Actions {
             announced: !sr.isSurprise,
             exclusive: sr.exclusive,
             bundle: sr.bundle)
-          ..preOrders = sr.preOrders;
+          ..preOrders += sr.preOrders;
         out.add((scheduleId: sr.id, isAlbum: true, id: al.id));
       } else {
         final s = w.songs[sr.songIds.single];

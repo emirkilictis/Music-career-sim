@@ -34,6 +34,7 @@ class _CareerScreenState extends State<CareerScreen> {
   HonorsView? _honors;
   List<WrittenSongView> _written = const [];
   List<MemberView> _members = const [];
+  FanClubView? _club;
   List<WrittenSongView> _guest = const [];
   IncomeBreakdown? _income;
   CatalogOfferView? _catalog;
@@ -56,6 +57,7 @@ class _CareerScreenState extends State<CareerScreen> {
     final honors = await career.read(Cmd.honors());
     final written = await career.read(Cmd.writtenForOthers());
     final members = await career.read(Cmd.members());
+    final club = await career.read(Cmd.fanClub());
     final guest = await career.read(Cmd.guestSongs());
     final income = await career.read(Cmd.careerIncome());
     final catalog = await career.read(Cmd.catalogOffer());
@@ -65,6 +67,7 @@ class _CareerScreenState extends State<CareerScreen> {
         _honors = honors;
         _written = written;
         _members = members;
+        _club = club;
         _guest = guest;
         _income = income;
         _catalog = catalog;
@@ -74,6 +77,97 @@ class _CareerScreenState extends State<CareerScreen> {
           ..sort((a, b) =>
               fmt.songMainValue(b, week).compareTo(fmt.songMainValue(a, week)));
       });
+    }
+  }
+
+  Widget _clubSection(FanClubView c) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final muted = TextStyle(color: AppColors.textMuted, fontSize: 12.5);
+    return Section(
+      title: l.clubTitle,
+      icon: Icons.card_membership_rounded,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(l.clubHint, style: muted),
+        const SizedBox(height: 8),
+        if (!c.open) ...[
+          if (!c.canOpen)
+            Text(l.clubNeedFans(fmt.compact(FanClubs.minFans.toDouble())),
+                style: const TextStyle(fontWeight: FontWeight.w700))
+          else
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FilledButton.icon(
+                onPressed: () => _clubPrice(c, opening: true),
+                icon: const Icon(Icons.card_membership_rounded),
+                label: Text(l.clubOpen(fmt.money(FanClubs.setupCents))),
+              ),
+            ),
+        ] else ...[
+          Text(
+              l.clubMembers(
+                  fmt.compact(c.members), fmt.compact(c.target)),
+              style: const TextStyle(fontWeight: FontWeight.w800)),
+          Text(
+              l.clubMoney(fmt.money(c.weekCents.round()),
+                  fmt.money(c.revenueCents.round())),
+              style: muted),
+          if (c.activity < 1)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(l.clubQuiet,
+                  style: TextStyle(color: AppColors.coral, fontSize: 12.5)),
+            ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => _clubPrice(c, opening: false),
+              icon: const Icon(Icons.sell_outlined),
+              label: Text(
+                  '${l.clubChangePrice} · ${fmt.money(c.price.monthCents)}'),
+            ),
+          ),
+        ],
+      ]),
+    );
+  }
+
+  /// Picks the membership price, opening the club or changing it.
+  Future<void> _clubPrice(FanClubView c, {required bool opening}) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final pick = await showModalBottomSheet<ClubPrice>(
+      context: context,
+      showDragHandle: true,
+      builder: (s) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.clubPriceTitle,
+                style: Theme.of(s).textTheme.titleLarge),
+          ),
+          for (final p in ClubPrice.values)
+            ListTile(
+              selected: c.open && p == c.price,
+              leading: const Icon(Icons.card_membership_rounded),
+              title: Text(l.clubPriceLine(fmt.money(p.monthCents),
+                  fmt.compact(c.estimates[p] ?? 0))),
+              onTap: () => Navigator.pop(s, p),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (pick == null || !mounted) return;
+    try {
+      await career.act(
+          opening ? Cmd.openFanClub(pick) : Cmd.setClubPrice(pick));
+      if (mounted && opening) {
+        showInfo(context, l.clubOpened, icon: Icons.card_membership_rounded);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
     }
   }
 
@@ -281,6 +375,11 @@ class _CareerScreenState extends State<CareerScreen> {
                   ),
                 ]),
           ),
+        ],
+        // The paid fan club (docs K164).
+        if (_club case final club?) ...[
+          const SizedBox(height: 12),
+          _clubSection(club),
         ],
         // Members' solo records and the player's features (docs K158).
         if (_members.isNotEmpty) ...[

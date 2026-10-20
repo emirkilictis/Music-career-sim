@@ -1996,6 +1996,31 @@ class GameSession {
             WrittenSongView.of(world, world.songs[id]),
       ];
 
+  // ------------------------------------------------- fan club (K164)
+
+  FanClubView get fanClub => FanClubView.of(world, _p);
+
+  /// Opens the paid fan club at [price].
+  void openFanClub(ClubPrice price) {
+    if (!FanClubs.can(world, _p)) {
+      throw GameException('noFanClub', 'Not now');
+    }
+    _requireMoney(FanClubs.setupCents);
+    FanClubs.open(world, _p, price);
+    _saveNow();
+  }
+
+  /// Changes what a membership costs.
+  void setClubPrice(ClubPrice price) {
+    final c = world.fanClub;
+    if (c == null) throw GameException('noFanClub', 'No fan club');
+    c.price = price;
+    _saveNow();
+  }
+
+  /// Memberships the news reports.
+  static const clubMilestones = [1e3, 10e3, 100e3, 1e6];
+
   // ------------------------------------------- indie curators (K160)
 
   /// What each curator package costs the player.
@@ -3201,6 +3226,13 @@ class GameSession {
     events.addAll(_recordsBroken(r));
     events.addAll(_bestSellerNews());
     events.addAll(_writtenHits(r));
+    // The fan club passes a membership (docs K164).
+    final members = world.fanClub?.members ?? 0;
+    for (final m in clubMilestones) {
+      if (before.clubMembers < m && members >= m) {
+        events.add(ClubMilestone(m));
+      }
+    }
     // The player's playlist passes a following (docs K159).
     final followers = world.ownPlaylist?.followers ?? 0;
     for (final m in playlistMilestones) {
@@ -3473,7 +3505,8 @@ class _Snapshot {
         eraOpen = p.eraOpen,
         label = p.label,
         burnoutUntil = p.burnoutUntilWeek,
-        playlistFollowers = w.ownPlaylist?.followers ?? 0 {
+        playlistFollowers = w.ownPlaylist?.followers ?? 0,
+        clubMembers = w.fanClub?.members ?? 0 {
     void take(Charted e, EntityKind kind, int id) {
       for (var c = 0; c < Charts.count; c++) {
         final st = e.statsOrNull(c);
@@ -3494,6 +3527,7 @@ class _Snapshot {
   final int week;
   final int money;
   final double playlistFollowers;
+  final double clubMembers;
   final bool eraOpen;
   final Label label;
   final int burnoutUntil;

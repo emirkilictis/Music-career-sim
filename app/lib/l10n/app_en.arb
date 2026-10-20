@@ -5803,5 +5803,69 @@
       }
     }
   },
-  "errorNoPriceCut": "The price cannot be cut now."
+  "errorNoPriceCut": "The price cannot be cut now.",
+  "clubTitle": "Fan club",
+  "clubHint": "Your most devoted fans pay every month to be close: early news, members-only posts, presales. Members order every new album ahead, keep the fandom warm, and leave when you go quiet for half a year.",
+  "clubNeedFans": "You need {fans} fans to start a fan club.",
+  "@clubNeedFans": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "clubOpen": "Start a fan club · {cost}",
+  "@clubOpen": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "clubPriceTitle": "Membership price",
+  "clubPriceLine": "{price} a month · about {members} members",
+  "@clubPriceLine": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "members": {
+        "type": "String"
+      }
+    }
+  },
+  "clubMembers": "{members} members · heading to {target}",
+  "@clubMembers": {
+    "placeholders": {
+      "members": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "clubMoney": "{week} a week · {total} so far",
+  "@clubMoney": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "clubQuiet": "No new release for a while: members are starting to leave.",
+  "clubChangePrice": "Change price",
+  "clubOpened": "Your fan club is open.",
+  "eventClubMembers": "Your fan club passed {count} members.",
+  "@eventClubMembers": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoFanClub": "A fan club is not possible now."
 }

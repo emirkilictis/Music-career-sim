@@ -90,6 +90,7 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         CreditSongHit() => EventLine(e,
             title: song(e.songId), artistName: w.artists[e.artistId].name),
         CuratorsAnswered() => EventLine(e, title: song(e.songId)),
+        ClubMilestone() => EventLine(e),
         PlaylistMilestone() =>
           EventLine(e, title: w.ownPlaylist?.name ?? ''),
         AllTimeBestSeller() => EventLine(e),
@@ -215,6 +216,7 @@ List<EventLine> sortLines(List<EventLine> lines) {
         WrittenSongHit() => 2,
         CreditSongHit() => 2,
         CuratorsAnswered() => 4,
+        ClubMilestone() => 3,
         PlaylistMilestone() => 3,
         AllTimeBestSeller() => 1,
         SongOfSummer() => 1,

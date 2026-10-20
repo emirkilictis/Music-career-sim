@@ -1404,6 +1404,60 @@ void main() {
       g.close();
     });
 
+    test('a paid fan club (K164)', () {
+      var g = GameSession.start(slots, _setup(startYear: 2016));
+      expect(g.fanClub.canOpen, isFalse);
+      expect(() => g.openFanClub(ClubPrice.mid), _code('noFanClub'));
+      g.close();
+      g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final v = g.fanClub;
+      expect(v.canOpen, isTrue);
+      expect(v.estimates[ClubPrice.low]!,
+          greaterThan(v.estimates[ClubPrice.high]!));
+      final money = p.moneyCents;
+      g.openFanClub(ClubPrice.mid);
+      expect(money - p.moneyCents, FanClubs.setupCents);
+      expect(() => g.openFanClub(ClubPrice.mid), _code('noFanClub'));
+      final events = <GameEvent>[];
+      for (var i = 0; i < 12; i++) {
+        events.addAll(g.advanceWeek().events);
+      }
+      final club = g.fanClub;
+      expect(club.members, greaterThan(1000));
+      expect(club.revenueCents, greaterThan(0));
+      expect(events.whereType<ClubMilestone>(), isNotEmpty);
+      // Members keep the fandom warm.
+      final warm = p.devotion;
+      FanClubs.weekly(g.world, p);
+      expect(p.devotion, greaterThan(warm));
+      // Members order the next album ahead.
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final members = g.world.fanClub!.members;
+      final al = g.releaseAlbum('For the Club', ids);
+      expect(g.world.albums[al.id].preOrders,
+          closeTo(members * FanClubs.albumBuy, 1));
+      g.setClubPrice(ClubPrice.high);
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.fanClub.open, isTrue);
+      expect(g.fanClub.price, ClubPrice.high);
+      expect(g.fanClub.members, closeTo(members, 1));
+      g.close();
+    });
+
     test('a download price cut (K163)', () {
       var g = GameSession.start(
           slots,

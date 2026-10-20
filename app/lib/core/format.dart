@@ -814,6 +814,7 @@ class Fmt {
       'noCompilation' => l.errorNoCompilation,
       'noMasters' => l.errorNoMasters,
       'noPriceCut' => l.errorNoPriceCut,
+      'noFanClub' => l.errorNoFanClub,
       'noPlaylists' ||
       'hasPlaylist' ||
       'noPlaylist' ||
@@ -980,6 +981,7 @@ class Fmt {
       CuratorsAnswered(:final adds, :final sent, :final reach) => adds > 0
           ? l.eventCuratorsAdded(t, adds, sent, compact(reach))
           : l.eventCuratorsNone(t, sent),
+      ClubMilestone(:final members) => l.eventClubMembers(compact(members)),
       PlaylistMilestone(:final followers) =>
         l.eventPlaylistFollowers(t, compact(followers)),
       CreditSongHit(:final position, :final credit) => switch ((

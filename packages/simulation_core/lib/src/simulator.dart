@@ -25,6 +25,7 @@ import 'lifecycle.dart';
 import 'compilations.dart';
 import 'curators.dart';
 import 'model.dart';
+import 'fan_club.dart';
 import 'own_playlist.dart';
 import 'price_cuts.dart';
 import 'music_show.dart';
@@ -1837,6 +1838,8 @@ class Simulator {
       p.moneyCents += p.manager.net(royalty).round();
       world.dirtySongs.add(id);
     }
+    // The fan club pays the artist directly; no label shares it (K164).
+    p.moneyCents += p.manager.net(FanClubs.weekly(world, p)).round();
     // Verses on rivals' songs pay the featured artist's share (K158).
     for (final id in world.guestSongIds) {
       final s = world.songs[id];

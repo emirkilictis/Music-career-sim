@@ -1640,6 +1640,22 @@ k('priceCutChartRule','Since 2011 the chart does not count albums sold under $3.
 k('priceCutDone','“{title}” is {price} this week.','“{title}” bu hafta {price}.', title='String', price='String')
 k('errorNoPriceCut','The price cannot be cut now.','Şu an indirim yapılamaz.')
 
+
+# The paid fan club (docs K164).
+k('clubTitle','Fan club','Hayran kulübü')
+k('clubHint','Your most devoted fans pay every month to be close: early news, members-only posts, presales. Members order every new album ahead, keep the fandom warm, and leave when you go quiet for half a year.','En sadık hayranların yakın olmak için her ay ödeme yapar: erken haberler, üyelere özel paylaşımlar, ön satışlar. Üyeler her yeni albümü önceden sipariş eder, hayran kitlesini sıcak tutar, altı ay ses çıkarmazsan ayrılmaya başlar.')
+k('clubNeedFans','You need {fans} fans to start a fan club.','Hayran kulübü kurmak için {fans} hayranın olmalı.', fans='String')
+k('clubOpen','Start a fan club · {cost}','Hayran kulübü kur · {cost}', cost='String')
+k('clubPriceTitle','Membership price','Üyelik ücreti')
+k('clubPriceLine','{price} a month · about {members} members','Aylık {price} · yaklaşık {members} üye', price='String', members='String')
+k('clubMembers','{members} members · heading to {target}','{members} üye · gidişat: {target}', members='String', target='String')
+k('clubMoney','{week} a week · {total} so far','Haftada {week} · şimdiye kadar {total}', week='String', total='String')
+k('clubQuiet','No new release for a while: members are starting to leave.','Bir süredir yeni çıkış yok: üyeler ayrılmaya başladı.')
+k('clubChangePrice','Change price','Ücreti değiştir')
+k('clubOpened','Your fan club is open.','Hayran kulübün açıldı.')
+k('eventClubMembers','Your fan club passed {count} members.','Hayran kulübün {count} üyeyi geçti.', count='String')
+k('errorNoFanClub','A fan club is not possible now.','Şu an hayran kulübü kurulamaz.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

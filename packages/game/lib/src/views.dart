@@ -2454,6 +2454,44 @@ class WrittenSongView {
   final double earnedCents;
 }
 
+/// The player's paid fan club, or what opening one takes (docs K164).
+class FanClubView {
+  FanClubView.of(World w, Artist a)
+      : open = w.fanClub != null,
+        canOpen = FanClubs.can(w, a),
+        coreFans = a.coreFans,
+        price = w.fanClub?.price ?? ClubPrice.mid,
+        members = w.fanClub?.members ?? 0,
+        target = w.fanClub == null ? 0 : FanClubs.target(w, a, w.fanClub!),
+        weekCents = (w.fanClub?.members ?? 0) *
+            (w.fanClub?.price.monthCents ?? 0) *
+            12 /
+            GameTime.weeksPerYear,
+        revenueCents = w.fanClub?.revenueCents ?? 0,
+        activity = FanClubs.activity(w, a),
+        estimates = {
+          for (final p in ClubPrice.values)
+            p: FanClubs.target(
+                w, a, FanClub(openWeek: w.week, price: p)),
+        };
+  final bool open;
+  final bool canOpen;
+  final double coreFans;
+  final ClubPrice price;
+  final double members;
+
+  /// Members it is heading to, and what it pays a week now.
+  final double target;
+  final double weekCents;
+  final double revenueCents;
+
+  /// How active the artist looks to members (1: a recent release).
+  final double activity;
+
+  /// Members each price would hold now.
+  final Map<ClubPrice, double> estimates;
+}
+
 /// A released song that could go on a greatest hits album (docs K161).
 class HitCandidateView {
   HitCandidateView.of(World w, Song s)

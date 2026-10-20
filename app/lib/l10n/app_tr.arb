@@ -1617,5 +1617,18 @@
   "priceCutTooSoon": "{weeks} haftada bir indirim yapılabilir.",
   "priceCutChartRule": "2011'den beri liste, ilk {weeks} haftasında $3,49'un altında satılan albümleri saymıyor.",
   "priceCutDone": "“{title}” bu hafta {price}.",
-  "errorNoPriceCut": "Şu an indirim yapılamaz."
+  "errorNoPriceCut": "Şu an indirim yapılamaz.",
+  "clubTitle": "Hayran kulübü",
+  "clubHint": "En sadık hayranların yakın olmak için her ay ödeme yapar: erken haberler, üyelere özel paylaşımlar, ön satışlar. Üyeler her yeni albümü önceden sipariş eder, hayran kitlesini sıcak tutar, altı ay ses çıkarmazsan ayrılmaya başlar.",
+  "clubNeedFans": "Hayran kulübü kurmak için {fans} hayranın olmalı.",
+  "clubOpen": "Hayran kulübü kur · {cost}",
+  "clubPriceTitle": "Üyelik ücreti",
+  "clubPriceLine": "Aylık {price} · yaklaşık {members} üye",
+  "clubMembers": "{members} üye · gidişat: {target}",
+  "clubMoney": "Haftada {week} · şimdiye kadar {total}",
+  "clubQuiet": "Bir süredir yeni çıkış yok: üyeler ayrılmaya başladı.",
+  "clubChangePrice": "Ücreti değiştir",
+  "clubOpened": "Hayran kulübün açıldı.",
+  "eventClubMembers": "Hayran kulübün {count} üyeyi geçti.",
+  "errorNoFanClub": "Şu an hayran kulübü kurulamaz."
 }

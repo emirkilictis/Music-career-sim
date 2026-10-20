@@ -153,6 +153,10 @@ int worldHash(World w) {
     addInt(v.kind.index * 100000 + v.week);
     addDouble(v.baseViews);
   }
+  if (w.fanClub case final club?) {
+    addDouble(club.members);
+    addInt(club.price.index);
+  }
   final own = w.ownPlaylist;
   if (own != null) {
     addInt(own.songIds.length);

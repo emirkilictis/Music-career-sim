@@ -238,6 +238,14 @@ class CreditSongHit extends GameEvent {
   bool get isMajor => true;
 }
 
+/// The fan club passed [members] members (docs K164).
+class ClubMilestone extends GameEvent {
+  const ClubMilestone(this.members);
+  final double members;
+  @override
+  bool get isMajor => false;
+}
+
 /// Independent curators answered a submission (docs K160): [adds] of
 /// [sent] put the song on playlists with [reach] followers in all.
 class CuratorsAnswered extends GameEvent {

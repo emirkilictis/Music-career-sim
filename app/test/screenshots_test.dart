@@ -869,6 +869,8 @@ void main() {
       final star = s.world.artists.firstWhere((a) =>
           a.tier == ArtistTier.a && !a.isRetired && a.managedBy < 0);
       Credits.guestOn(s.world, star, p, producerSkill: 85);
+      // The fan club (docs K164).
+      s.openFanClub(ClubPrice.mid);
       s.advanceWeeks(4, stop: SkipStop.never);
     });
     await c.exec(Cmd.closeCareer());
@@ -893,6 +895,12 @@ void main() {
     await Scrollable.ensureVisible(tester.element(members), alignment: 0.05);
     await tester.pumpAndSettle();
     await shot(tester, '15s_member_solos');
+    final club = _ci('Fan club');
+    await tester.scrollUntilVisible(club, -300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(club), alignment: 0.05);
+    await tester.pumpAndSettle();
+    await shot(tester, '15t_fan_club');
   });
 }
 

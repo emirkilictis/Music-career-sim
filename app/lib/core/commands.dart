@@ -254,6 +254,13 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // The paid fan club (docs K164).
+  static SessionCmd<FanClubView> fanClub() => (s) => s.fanClub;
+  static SessionCmd<void> openFanClub(ClubPrice price) =>
+      (s) => s.openFanClub(price);
+  static SessionCmd<void> setClubPrice(ClubPrice price) =>
+      (s) => s.setClubPrice(price);
+
   // Download price cuts (docs K163).
   static SessionCmd<void> cutAlbumPrice(int albumId, PriceCut cut) =>
       (s) => s.cutAlbumPrice(albumId, cut);
