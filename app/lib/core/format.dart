@@ -810,6 +810,15 @@ class Fmt {
       'noVisual' => l.errorNoVisual,
       'noLanguage' => l.errorNoLanguage,
       'noDistributor' => l.errorNoDistributor,
+      'noPlaylists' ||
+      'hasPlaylist' ||
+      'noPlaylist' ||
+      'onPlaylist' ||
+      'playlistFull' ||
+      'notOnPlaylist' ||
+      'notReleased' =>
+        l.errorPlaylist,
+      'notGroup' || 'noMember' => l.errorNotGroup,
       'noShowcase' => l.errorNoShowcase,
       'deluxeTracks' => l.errorDeluxeTracks,
       'notSingle' => l.errorNotSingle,
@@ -964,6 +973,8 @@ class Fmt {
       WrittenSongHit(:final position) => position == 1
           ? l.eventWrittenNo1(t, line.artistName)
           : l.eventWrittenTop10(t, line.artistName, position),
+      PlaylistMilestone(:final followers) =>
+        l.eventPlaylistFollowers(t, compact(followers)),
       CreditSongHit(:final position, :final credit) => switch ((
           credit == ChartCredit.member,
           position == 1

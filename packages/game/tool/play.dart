@@ -252,6 +252,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       SalesMilestone() => 'sold ${e.copies} records',
       AllTimeBestSeller() => 'all-time best seller #${e.rank}',
       WrittenSongHit() => 'your song ${e.songId} for ${e.artistId} at #${e.position}',
+      PlaylistMilestone() => 'playlist passed ${e.followers} followers',
       CreditSongHit() => '${e.credit.name} song ${e.songId} by ${e.artistId} at #${e.position}',
       ListenersMilestone() => 'monthly listeners passed ${e.listeners}',
       AlbumStreamMilestone() => 'album ${e.albumId} passed ${e.streams} streams',

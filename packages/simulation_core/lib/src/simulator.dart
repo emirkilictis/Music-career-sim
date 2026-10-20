@@ -23,6 +23,7 @@ import 'leaks.dart';
 import 'live_albums.dart';
 import 'lifecycle.dart';
 import 'model.dart';
+import 'own_playlist.dart';
 import 'music_show.dart';
 import 'opportunities.dart';
 import 'rerecords.dart';
@@ -154,6 +155,8 @@ class Simulator {
         : Actions.releaseScheduled(w, player);
     // Playlist editors answer this week's pitches (docs K97).
     StreamingTools.answerPitches(w);
+    // The player's own playlist gains or loses followers (docs K159).
+    OwnPlaylists.weekly(w);
     // Holiday songs come back for the season (docs K136).
     if (GameTime.weekOfYear(w.week) == Holidays.returnWeek) {
       for (final a in w.artists) {
@@ -212,6 +215,7 @@ class Simulator {
             ? 1.0
             : RadioFormat.factor(s.onFormat, s.genre, s.genres));
     final playlistAdds = <int>[];
+    final ownLifts = OwnPlaylists.lifts(w);
 
     // 5. Raw demand for active songs, split by region.
     final ids = w.activeSongIds;
@@ -369,7 +373,8 @@ class Simulator {
       // stream sources (docs K120).
       final hypeLift = 0.5 * p.hype;
       final womLift = WordOfMouth.lift(w, s, promoAge);
-      final listLift = s.playlistBoost;
+      // Editors' adds and the player's own playlist (docs K159).
+      final listLift = s.playlistBoost + (ownLifts[s.id] ?? 0);
       final versionLift = s.versionBoost;
       final algoLift =
           s.autoplay.lift * StreamingTools.autoplayLift(c, s, promoAge) +

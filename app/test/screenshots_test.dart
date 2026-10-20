@@ -538,6 +538,18 @@ void main() {
         port.sendPort));
     port.close();
     await c.run(_fiveAlbums());
+    await c.run((s) {
+      // A playlist of the week's hits and two of her own (docs K159).
+      s.createPlaylist('Sunday Drive');
+      final picks = s.playlistCandidates;
+      for (final x in picks.where((x) => !x.isPlayer).take(12)) {
+        s.addToPlaylist(x.songId);
+      }
+      for (final x in picks.where((x) => x.isPlayer).take(2)) {
+        s.addToPlaylist(x.songId);
+      }
+      s.advanceWeeks(8, stop: SkipStop.never);
+    });
     // Two brand deals running, one task done (docs K102).
     await c.run((s) {
       final w = s.world, p = w.player!;
@@ -596,6 +608,12 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+    await tester.pumpAndSettle();
+    // The player's own playlist (docs K159).
+    await tester.tap(_ci('Sunday Drive').last);
+    await tester.pumpAndSettle();
+    await shot(tester, '09m_own_playlist');
+    await tester.pageBack();
     await tester.pumpAndSettle();
     // The player's own page: listeners over time, top cities (docs K130).
     await tester.tap(find.text('Nova Reyes').first);

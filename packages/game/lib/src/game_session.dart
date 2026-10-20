@@ -1612,7 +1612,7 @@ class GameSession {
       throw GameException('noArtist', 'No such artist');
     }
     final rival = world.artists[artistId];
-    if (!Features.willing(rival, _p)) {
+    if (!Features.willing(rival, _p, world)) {
       throw GameException('featureRefused', 'Out of your league');
     }
     _requireMoney(Features.feeFor(rival, s));
@@ -1952,6 +1952,90 @@ class GameSession {
           if (world.songs[id].writerId == world.playerArtistId)
             WrittenSongView.of(world, world.songs[id]),
       ];
+
+  // ------------------------------------------------- own playlist (K159)
+
+  /// Whether the player can have a playlist yet.
+  bool get ownPlaylistOpen => OwnPlaylists.open(world);
+
+  /// The player's playlist (null: none yet).
+  OwnPlaylistView? get ownPlaylist => world.ownPlaylist == null
+      ? null
+      : OwnPlaylistView.of(world, world.ownPlaylist!);
+
+  void createPlaylist(String name) {
+    if (!OwnPlaylists.open(world)) {
+      throw GameException('noPlaylists', 'No playlists yet');
+    }
+    if (world.ownPlaylist != null) {
+      throw GameException('hasPlaylist', 'Already have one');
+    }
+    if (name.trim().isEmpty) throw GameException('invalidName', 'Name it');
+    OwnPlaylists.create(world, name);
+    _saveNow();
+  }
+
+  void renamePlaylist(String name) {
+    final p = world.ownPlaylist;
+    if (p == null) throw GameException('noPlaylist', 'No playlist');
+    if (name.trim().isEmpty) throw GameException('invalidName', 'Name it');
+    p.name = name.trim();
+    _saveNow();
+  }
+
+  void addToPlaylist(int songId) {
+    final p = world.ownPlaylist;
+    if (p == null) throw GameException('noPlaylist', 'No playlist');
+    if (songId < 0 || songId >= world.songs.length) {
+      throw GameException('unknownSong', 'No song $songId');
+    }
+    final s = world.songs[songId];
+    if (!OwnPlaylists.canAdd(world, s)) {
+      throw GameException('notReleased', 'Not out');
+    }
+    if (p.songIds.contains(songId)) {
+      throw GameException('onPlaylist', 'Already on it');
+    }
+    if (p.songIds.length >= OwnPlaylists.maxSongs) {
+      throw GameException('playlistFull', 'Full');
+    }
+    OwnPlaylists.add(world, s);
+    _saveNow();
+  }
+
+  void removeFromPlaylist(int songId) {
+    final p = world.ownPlaylist;
+    if (p == null || !p.songIds.contains(songId)) {
+      throw GameException('notOnPlaylist', 'Not on it');
+    }
+    OwnPlaylists.remove(world, songId);
+    _saveNow();
+  }
+
+  /// Songs to put on the playlist: this week's biggest worldwide, then
+  /// the player's own released songs.
+  List<PlaylistTrackView> get playlistCandidates {
+    final seen = <int>{};
+    final out = <PlaylistTrackView>[];
+    void add(Song s) {
+      if (seen.add(s.id) && OwnPlaylists.canAdd(world, s)) {
+        out.add(PlaylistTrackView.of(world, s));
+      }
+    }
+
+    for (final e in world.charts[Charts.globalSongs].take(100)) {
+      add(world.songs[e.entityId]);
+    }
+    for (final id in world.playerSongIds.reversed) {
+      add(world.songs[id]);
+    }
+    return out;
+  }
+
+  /// Followers the news reports (docs K159).
+  static const playlistMilestones = [
+    10e3, 100e3, 1e6, 5e6, 10e6 //
+  ];
 
   // -------------------------------------------------------- credits (K158)
 
@@ -2995,6 +3079,13 @@ class GameSession {
     events.addAll(_recordsBroken(r));
     events.addAll(_bestSellerNews());
     events.addAll(_writtenHits(r));
+    // The player's playlist passes a following (docs K159).
+    final followers = world.ownPlaylist?.followers ?? 0;
+    for (final m in playlistMilestones) {
+      if (before.playlistFollowers < m && followers >= m) {
+        events.add(PlaylistMilestone(m));
+      }
+    }
     events.addAll(_streamingNews());
     // The discovery mixes (docs K119).
     for (final id in w.playerSongIds) {
@@ -3254,7 +3345,8 @@ class _Snapshot {
         money = p.moneyCents,
         eraOpen = p.eraOpen,
         label = p.label,
-        burnoutUntil = p.burnoutUntilWeek {
+        burnoutUntil = p.burnoutUntilWeek,
+        playlistFollowers = w.ownPlaylist?.followers ?? 0 {
     void take(Charted e, EntityKind kind, int id) {
       for (var c = 0; c < Charts.count; c++) {
         final st = e.statsOrNull(c);
@@ -3274,6 +3366,7 @@ class _Snapshot {
 
   final int week;
   final int money;
+  final double playlistFollowers;
   final bool eraOpen;
   final Label label;
   final int burnoutUntil;

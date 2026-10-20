@@ -5443,5 +5443,95 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ownPlTitle": "Your playlist",
+  "ownPlCreate": "Make a playlist",
+  "ownPlCreateHint": "Pick songs people love, yours and others'. Followers come for good, fresh picks, and every song on it gets their listening.",
+  "ownPlName": "Playlist name",
+  "ownPlDefaultName": "{name} Picks",
+  "@ownPlDefaultName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ownPlFollowers": "{count} followers",
+  "@ownPlFollowers": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "ownPlHeading": "heading to {count}",
+  "@ownPlHeading": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "ownPlAppeal": "Appeal",
+  "ownPlOwn": "Your own songs",
+  "ownPlFresh": "Freshness",
+  "ownPlLift": "Lift for each song",
+  "ownPlTooShort": "Add at least {n} songs for people to follow it.",
+  "@ownPlTooShort": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ownPlTooMuchSelf": "Too much of your own music: people leave a playlist that is only a plug.",
+  "ownPlStale": "Not changed for a while: add or swap songs to keep it fresh.",
+  "ownPlAdd": "Add songs",
+  "ownPlAdded": "“{title}” is on your playlist.",
+  "@ownPlAdded": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "ownPlRemoved": "“{title}” is off your playlist.",
+  "@ownPlRemoved": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "ownPlRename": "Rename",
+  "ownPlNew": "New",
+  "ownPlFavourHint": "Artists you put on it are a little easier to get for a feature.",
+  "ownPlFavoured": "On your playlist",
+  "ownPlSongAdd": "Add to your playlist",
+  "ownPlSongRemove": "Remove from your playlist",
+  "ownPlEmpty": "No songs yet.",
+  "ownPlCount": "{count} songs · {max} at most",
+  "@ownPlCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "eventPlaylistFollowers": "Your playlist “{name}” passed {count} followers.",
+  "@eventPlaylistFollowers": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "errorPlaylist": "That cannot be done with your playlist.",
+  "errorNotGroup": "Only a group has members."
 }

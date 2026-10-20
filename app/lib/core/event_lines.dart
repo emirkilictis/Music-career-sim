@@ -89,6 +89,8 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
             title: song(e.songId), artistName: w.artists[e.artistId].name),
         CreditSongHit() => EventLine(e,
             title: song(e.songId), artistName: w.artists[e.artistId].name),
+        PlaylistMilestone() =>
+          EventLine(e, title: w.ownPlaylist?.name ?? ''),
         AllTimeBestSeller() => EventLine(e),
         SongOfSummer() => e.hasPlayer
             ? release(e, EntityKind.song, e.playerSongId)
@@ -211,6 +213,7 @@ List<EventLine> sortLines(List<EventLine> lines) {
         AlbumStreamMilestone() => 3,
         WrittenSongHit() => 2,
         CreditSongHit() => 2,
+        PlaylistMilestone() => 3,
         AllTimeBestSeller() => 1,
         SongOfSummer() => 1,
         RivalAlbumClash() => 3,

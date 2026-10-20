@@ -13,6 +13,7 @@ import '../game_shell.dart';
 import '../song_detail_screen.dart';
 import 'artist_page.dart';
 import 'editorial_page.dart';
+import 'own_playlist_page.dart';
 import 'playlist_page.dart';
 import 'wrapped_screen.dart';
 
@@ -36,6 +37,8 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
   List<int> _active = const [];
   int? _wrapped;
   List<EditorialPlaylist> _editorial = const [];
+  bool _playlistOpen = false;
+  OwnPlaylistView? _playlist;
   int _loadedRevision = -1;
 
   @override
@@ -54,13 +57,31 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
     final active = await career.read(Cmd.activeCharts());
     final wrapped = await career.read(Cmd.latestWrapped());
     final editorial = await career.read(Cmd.editorialPlaylists());
+    final open = await career.read(Cmd.ownPlaylistOpen());
+    final playlist = await career.read(Cmd.ownPlaylist());
     if (mounted) {
       setState(() {
+        _playlistOpen = open;
+        _playlist = playlist;
         _me = me;
         _active = active;
         _wrapped = wrapped;
         _editorial = editorial;
       });
+    }
+  }
+
+  Future<void> _createPlaylist() async {
+    final l = context.l10n;
+    final career = context.careerRead;
+    final name = await askPlaylistName(
+        context, l.ownPlDefaultName(career.player.name));
+    if (name == null || !mounted) return;
+    try {
+      await career.act(Cmd.createPlaylist(name));
+      if (mounted) pushInCareer(context, const OwnPlaylistPage());
+    } catch (e) {
+      if (mounted) showError(context, e);
     }
   }
 
@@ -156,6 +177,14 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
                     year: _wrapped!,
                     onTap: () =>
                         pushInCareer(context, WrappedScreen(year: _wrapped))),
+              ],
+              // The player's own playlist (docs K159).
+              if (_playlistOpen) ...[
+                const SizedBox(height: 26),
+                Text(l.ownPlTitle, style: h),
+                const SizedBox(height: 12),
+                _OwnPlaylistCard(
+                    playlist: _playlist, onCreate: _createPlaylist),
               ],
               if (charts.isNotEmpty) ...[
                 const SizedBox(height: 26),
@@ -268,6 +297,70 @@ class _StreamifyScreenState extends State<StreamifyScreen> {
             ],
           ),
         ));
+  }
+}
+
+/// The player's playlist, or the way to make one (docs K159).
+class _OwnPlaylistCard extends StatelessWidget {
+  const _OwnPlaylistCard({required this.playlist, required this.onCreate});
+  final OwnPlaylistView? playlist;
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final p = playlist;
+    return Material(
+      color: StreamifyColors.surfaceHigh,
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: p == null
+            ? onCreate
+            : () => pushInCareer(context, const OwnPlaylistPage()),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(children: [
+            p == null
+                ? Container(
+                    width: 72,
+                    height: 72,
+                    color: Colors.white10,
+                    child: const Icon(Icons.playlist_add_rounded,
+                        color: Colors.white, size: 34),
+                  )
+                : OwnPlaylistCover(name: p.name, size: 72),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(p?.name ?? l.ownPlCreate,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 17, fontWeight: FontWeight.w900)),
+                    const SizedBox(height: 4),
+                    Text(
+                        p == null
+                            ? l.ownPlCreateHint
+                            : [
+                                l.ownPlFollowers(
+                                    context.fmt.compact(p.followers)),
+                                l.songsCount(p.tracks.length),
+                              ].join(' · '),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: StreamifyColors.muted, fontSize: 13)),
+                  ]),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                color: StreamifyColors.muted),
+          ]),
+        ),
+      ),
+    );
   }
 }
 

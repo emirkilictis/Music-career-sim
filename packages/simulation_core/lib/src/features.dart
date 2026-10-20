@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'actions.dart';
 import 'lifecycle.dart';
 import 'model.dart';
+import 'own_playlist.dart';
 import 'time.dart';
 import 'world.dart';
 
@@ -22,8 +23,15 @@ abstract final class Features {
 
   /// Whether [rival] would say yes to [a]: stars do not feature on
   /// unknowns' songs, though a shared genre helps.
-  static bool willing(Artist rival, Artist a) =>
-      rival.fame <= a.fame + (rival.genre == a.genre ? 0.5 : 0.35);
+  /// [w] given, a rival whose song is on the player's playlist is a
+  /// little easier to get (docs K159).
+  static bool willing(Artist rival, Artist a, [World? w]) =>
+      rival.fame <=
+      a.fame +
+          (rival.genre == a.genre ? 0.5 : 0.35) +
+          (w != null && a.tier == ArtistTier.player && OwnPlaylists.favours(w, rival)
+              ? OwnPlaylists.goodwill
+              : 0);
 
   /// Rivals worth asking for [s]: the ones who would say yes first, the
   /// same genre first among them, then the most famous.
@@ -38,7 +46,7 @@ abstract final class Features {
           w.artists[id]
     ]..sort((x, y) {
         int key(bool b) => b ? 0 : 1;
-        final wx = key(willing(x, a)), wy = key(willing(y, a));
+        final wx = key(willing(x, a, w)), wy = key(willing(y, a, w));
         if (wx != wy) return wx.compareTo(wy);
         final gx = key(x.genre == a.genre), gy = key(y.genre == a.genre);
         if (gx != gy) return gx.compareTo(gy);
@@ -71,7 +79,7 @@ abstract final class Features {
     if (s.featuredArtistIds.contains(rival.id)) {
       throw ActionException('Already on it');
     }
-    if (!willing(rival, a)) throw ActionException('Out of reach');
+    if (!willing(rival, a, w)) throw ActionException('Out of reach');
     final fee = feeFor(rival, s);
     if (a.moneyCents < fee) throw ActionException('Not enough money');
     a.moneyCents -= fee;
@@ -102,7 +110,7 @@ abstract final class Features {
     if (s.featuredArtistIds.contains(rival.id)) {
       throw ActionException('Already on it');
     }
-    if (!willing(rival, a)) throw ActionException('Out of reach');
+    if (!willing(rival, a, w)) throw ActionException('Out of reach');
     final fee = feeCents(rival);
     if (a.moneyCents < fee) throw ActionException('Not enough money');
     a.moneyCents -= fee;

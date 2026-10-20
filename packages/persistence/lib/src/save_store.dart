@@ -108,6 +108,8 @@ class SaveStore {
     w.musicShow.decode(meta['musicShow'] as String?);
     // The player's channel (docs K142).
     w.channelVideos.addAll(ChannelVideo.decode(meta['channel'] as String?));
+    // The player's own playlist (docs K159).
+    w.ownPlaylist = OwnPlaylist.decode(meta['playlist'] as String?);
     w.playerPeakListeners =
         (meta['listenersPeak'] as num?)?.toDouble() ?? -1;
     if (meta['artistChart'] case final String s when s.isNotEmpty) {
@@ -364,6 +366,7 @@ class SaveStore {
       ]),
       'musicShow': w.musicShow.encode(),
       'channel': ChannelVideo.encode(w.channelVideos),
+      'playlist': OwnPlaylist.encode(w.ownPlaylist),
       'listenersPeak': w.playerPeakListeners,
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],

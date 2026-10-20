@@ -10,6 +10,7 @@ import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'model.dart';
+import 'own_playlist.dart';
 import 'music_show.dart';
 import 'tours.dart';
 
@@ -65,6 +66,9 @@ class World {
 
   /// The player's channel videos besides music videos (docs K142).
   final List<ChannelVideo> channelVideos = [];
+
+  /// The player's own playlist on the streaming app (docs K159).
+  OwnPlaylist? ownPlaylist;
 
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();

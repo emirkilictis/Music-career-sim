@@ -254,6 +254,20 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // The player's own playlist (docs K159).
+  static SessionCmd<bool> ownPlaylistOpen() => (s) => s.ownPlaylistOpen;
+  static SessionCmd<OwnPlaylistView?> ownPlaylist() => (s) => s.ownPlaylist;
+  static SessionCmd<void> createPlaylist(String name) =>
+      (s) => s.createPlaylist(name);
+  static SessionCmd<void> renamePlaylist(String name) =>
+      (s) => s.renamePlaylist(name);
+  static SessionCmd<void> addToPlaylist(int songId) =>
+      (s) => s.addToPlaylist(songId);
+  static SessionCmd<void> removeFromPlaylist(int songId) =>
+      (s) => s.removeFromPlaylist(songId);
+  static SessionCmd<List<PlaylistTrackView>> playlistCandidates() =>
+      (s) => s.playlistCandidates;
+
   // Members' solo records and the player's features (docs K158).
   static SessionCmd<List<MemberView>> members() => (s) => s.members;
   static SessionCmd<List<int>> memberSoloCosts(int member) => (s) => [

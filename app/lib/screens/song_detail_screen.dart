@@ -100,10 +100,14 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     leading: ArtistAvatar(
                         name: a.name, seed: a.artistId, artistId: a.artistId),
                     title: Text(a.name),
-                    subtitle: Text(a.willing
-                        ? l.featureLine(
-                            fmt.genre(a.genre), (a.fame * 100).round())
-                        : l.featureLocked),
+                    subtitle: Text([
+                      a.willing
+                          ? l.featureLine(
+                              fmt.genre(a.genre), (a.fame * 100).round())
+                          : l.featureLocked,
+                      // Put on the player's playlist (docs K159).
+                      if (a.favoured) l.ownPlFavoured,
+                    ].join(' · ')),
                     trailing: Text(fmt.money(a.feeCents)),
                     onTap: () => Navigator.pop(c, a),
                   ),
@@ -218,6 +222,25 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         showInfo(context, l.sellDone(s.title, pick.name, fmt.money(pick.feeCents)),
             icon: Icons.handshake_rounded);
         Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  /// Puts the song on the player's playlist or takes it off (K159).
+  Future<void> _ownPlaylist(SongView s) async {
+    final l = context.l10n;
+    try {
+      if (s.onOwnPlaylist) {
+        await widget.state.act(Cmd.removeFromPlaylist(s.id));
+        if (mounted) showInfo(context, l.ownPlRemoved(s.title));
+      } else {
+        await widget.state.act(Cmd.addToPlaylist(s.id));
+        if (mounted) {
+          showInfo(context, l.ownPlAdded(s.title),
+              icon: Icons.queue_music_rounded);
+        }
       }
     } catch (e) {
       if (mounted) showError(context, e);
@@ -765,6 +788,17 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         icon: Icons.cloud_done_rounded,
                         color: platformColor(MusicPlatform.noiseCloud)),
                   ],
+                  // The player's own playlist (docs K159).
+                  if (s.onOwnPlaylist || s.canOwnPlaylist)
+                    TextButton.icon(
+                      onPressed: () => _ownPlaylist(s),
+                      icon: Icon(s.onOwnPlaylist
+                          ? Icons.playlist_remove_rounded
+                          : Icons.playlist_add_rounded),
+                      label: Text(s.onOwnPlaylist
+                          ? l.ownPlSongRemove
+                          : l.ownPlSongAdd),
+                    ),
                   if (s.canCloud)
                     TextButton.icon(
                       onPressed: () => _cloud(s),

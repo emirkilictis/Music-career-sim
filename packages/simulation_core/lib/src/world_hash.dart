@@ -151,6 +151,15 @@ int worldHash(World w) {
     addInt(v.kind.index * 100000 + v.week);
     addDouble(v.baseViews);
   }
+  final own = w.ownPlaylist;
+  if (own != null) {
+    addInt(own.songIds.length);
+    for (final id in own.songIds) {
+      addInt(id);
+    }
+    addDouble(own.followers);
+    addInt(own.updatedWeek);
+  }
   addInt(w.albums.length);
   for (final al in w.albums) {
     addAll(al.reg);

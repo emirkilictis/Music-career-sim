@@ -1400,6 +1400,78 @@ void main() {
       g.close();
     });
 
+    test('the player\'s own playlist (K159)', () {
+      var g = GameSession.start(slots, _setup(startYear: 2008));
+      expect(g.ownPlaylistOpen, isFalse);
+      expect(() => g.createPlaylist('Mine'), _code('noPlaylists'));
+      g.close();
+      g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      // A song of their own out first.
+      p.creativeEnergy = 100;
+      final own = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(own);
+      g.advanceWeek();
+      expect(g.ownPlaylist, isNull);
+      expect(() => g.createPlaylist('  '), _code('invalidName'));
+      g.createPlaylist('Late Night Drive');
+      expect(() => g.createPlaylist('Again'), _code('hasPlaylist'));
+      final list = g.playlistCandidates;
+      expect(list.length, greaterThan(20));
+      p.creativeEnergy = 100;
+      final unreleased = g.writeSong(budget: BudgetTier.low).id;
+      expect(() => g.addToPlaylist(unreleased), _code('notReleased'));
+      g.addToPlaylist(own);
+      expect(g.ownPlaylist!.tooShort, isTrue);
+      final rivals = list.where((t) => !t.isPlayer).take(15).toList();
+      for (final t in rivals) {
+        g.addToPlaylist(t.songId);
+      }
+      expect(() => g.addToPlaylist(own), _code('onPlaylist'));
+      final v = g.ownPlaylist!;
+      expect(v.tracks, hasLength(16));
+      expect(v.tooMuchSelf, isFalse);
+      expect(v.appeal, greaterThan(0));
+      expect(g.song(own).onOwnPlaylist, isTrue);
+      g.advanceWeeks(12, stop: SkipStop.never);
+      final grown = g.ownPlaylist!;
+      expect(grown.followers, greaterThan(0));
+      expect(grown.lift, greaterThan(0));
+      // A rival on it is a little easier to get.
+      final favoured = g.world.artists[rivals.first.artistId];
+      expect(OwnPlaylists.favours(g.world, favoured), isTrue);
+      // Filling it with the player's own songs puts people off.
+      final selfOnly = grown.appeal;
+      for (final t in rivals) {
+        g.removeFromPlaylist(t.songId);
+      }
+      for (var i = 0; i < 6; i++) {
+        p.creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.low).id;
+        g.releaseSingle(id, campaign: Campaign.none);
+        g.addToPlaylist(id);
+      }
+      expect(g.ownPlaylist!.tooMuchSelf, isTrue);
+      expect(g.ownPlaylist!.appeal, lessThan(selfOnly));
+      expect(() => g.removeFromPlaylist(rivals.first.songId),
+          _code('notOnPlaylist'));
+      final slot = g.slotId;
+      final followers = g.ownPlaylist!.followers;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.ownPlaylist!.name, 'Late Night Drive');
+      expect(g.ownPlaylist!.followers, followers);
+      expect(g.ownPlaylist!.tracks, hasLength(7));
+      g.close();
+    });
+
     test('a member\'s solo single and the player\'s verses (K158)', () {
       var g = GameSession.start(
           slots,

@@ -1541,6 +1541,37 @@ k('eventMemberNo1','{artist}\'s solo “{title}” is #1 in the US!','{artist} s
 k('eventGuestTop10','Your feature on {artist}\'s “{title}” is #{position} in the US.','{artist} ile konuk olduğun “{title}” ABD\'de #{position}.', title='String', artist='String', position='int')
 k('eventGuestNo1','Your feature on {artist}\'s “{title}” is #1 in the US!','{artist} ile konuk olduğun “{title}” ABD\'de #1!', title='String', artist='String')
 
+
+# The player's own playlist (docs K159).
+k('ownPlTitle','Your playlist','Çalma listen')
+k('ownPlCreate','Make a playlist','Çalma listesi oluştur')
+k('ownPlCreateHint','Pick songs people love, yours and others\'. Followers come for good, fresh picks, and every song on it gets their listening.','İnsanların sevdiği şarkıları seç, seninkileri ve başkalarınınkini. Takipçiler iyi ve taze seçimler için gelir; listedeki her şarkı onların dinlemesini alır.')
+k('ownPlName','Playlist name','Liste adı')
+k('ownPlDefaultName','{name} Picks','{name} Seçkisi', name='String')
+k('ownPlFollowers','{count} followers','{count} takipçi', count='String')
+k('ownPlHeading','heading to {count}','gidişat: {count}', count='String')
+k('ownPlAppeal','Appeal','Çekicilik')
+k('ownPlOwn','Your own songs','Kendi şarkıların')
+k('ownPlFresh','Freshness','Tazelik')
+k('ownPlLift','Lift for each song','Her şarkıya etkisi')
+k('ownPlTooShort','Add at least {n} songs for people to follow it.','Takip edilmesi için en az {n} şarkı ekle.', n='int')
+k('ownPlTooMuchSelf','Too much of your own music: people leave a playlist that is only a plug.','Fazla kendi şarkın var: reklamdan ibaret bir listeyi insanlar bırakıyor.')
+k('ownPlStale','Not changed for a while: add or swap songs to keep it fresh.','Bir süredir değişmedi: taze kalması için şarkı ekle ya da değiştir.')
+k('ownPlAdd','Add songs','Şarkı ekle')
+k('ownPlAdded','“{title}” is on your playlist.','“{title}” çalma listende.', title='String')
+k('ownPlRemoved','“{title}” is off your playlist.','“{title}” çalma listenden çıktı.', title='String')
+k('ownPlRename','Rename','Adını değiştir')
+k('ownPlNew','New','Yeni')
+k('ownPlFavourHint','Artists you put on it are a little easier to get for a feature.','Listene koyduğun sanatçılar feat. için biraz daha kolay ikna olur.')
+k('ownPlFavoured','On your playlist','Çalma listende')
+k('ownPlSongAdd','Add to your playlist','Çalma listene ekle')
+k('ownPlSongRemove','Remove from your playlist','Çalma listenden çıkar')
+k('ownPlEmpty','No songs yet.','Henüz şarkı yok.')
+k('ownPlCount','{count} songs · {max} at most','{count} şarkı · en fazla {max}', count='int', max='int')
+k('eventPlaylistFollowers','Your playlist “{name}” passed {count} followers.','“{name}” çalma listen {count} takipçiyi geçti.', name='String', count='String')
+k('errorPlaylist','That cannot be done with your playlist.','Çalma listende bu yapılamaz.')
+k('errorNotGroup','Only a group has members.','Sadece grupların üyesi var.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

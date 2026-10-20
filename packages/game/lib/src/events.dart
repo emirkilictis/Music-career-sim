@@ -238,6 +238,14 @@ class CreditSongHit extends GameEvent {
   bool get isMajor => true;
 }
 
+/// The player's own playlist passed [followers] followers (docs K159).
+class PlaylistMilestone extends GameEvent {
+  const PlaylistMilestone(this.followers);
+  final double followers;
+  @override
+  bool get isMajor => followers >= 1e6;
+}
+
 /// The player's monthly listeners on the streaming app passed [listeners]
 /// for the first time (docs K156).
 class ListenersMilestone extends GameEvent {

@@ -341,6 +341,8 @@ class SongView {
         writerCents = s.writerCents,
         credit = ChartCredit.of(w, s.primaryArtistId, s.featuredArtistIds),
         guestCents = s.guestCents,
+        onOwnPlaylist = w.ownPlaylist?.songIds.contains(s.id) ?? false,
+        canOwnPlaylist = w.ownPlaylist != null && OwnPlaylists.canAdd(w, s),
         canAnswerLeak = Leaks.canAnswer(s, w.week),
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
@@ -478,6 +480,10 @@ class SongView {
   /// song or a verse on a rival's, and what the verse has paid.
   final ChartCredit credit;
   final double guestCents;
+
+  /// On the player's own playlist, and whether it can go on it (K159).
+  final bool onOwnPlaylist;
+  final bool canOwnPlaylist;
   final bool canAnswerLeak;
   final bool leakHurts;
 
@@ -1142,7 +1148,8 @@ class FeatureCandidateView {
         feeCents = song == null
             ? Features.feeCents(rival)
             : Features.feeFor(rival, song),
-        willing = Features.willing(rival, p),
+        willing = Features.willing(rival, p, w),
+        favoured = OwnPlaylists.favours(w, rival),
         sameGenre = rival.genre == p.genre;
   final int artistId;
   final String name;
@@ -1152,6 +1159,9 @@ class FeatureCandidateView {
 
   /// Would say yes (a star does not feature on an unknown's song).
   final bool willing;
+
+  /// One of their songs is on the player's playlist (docs K159).
+  final bool favoured;
   final bool sameGenre;
 }
 
@@ -2379,6 +2389,67 @@ class WrittenSongView {
   final int peak;
   final double streams;
   final double earnedCents;
+}
+
+/// The player's own playlist on the streaming app (docs K159).
+class OwnPlaylistView {
+  OwnPlaylistView.of(World w, OwnPlaylist p)
+      : name = p.name,
+        createdWeek = p.createdWeek,
+        followers = p.followers,
+        target = w.player == null ? 0 : OwnPlaylists.target(w, w.player!, p),
+        appeal = OwnPlaylists.appeal(w, p),
+        ownShare = OwnPlaylists.ownShare(w, p, w.playerArtistId),
+        freshness = OwnPlaylists.freshness(w, p),
+        lift = OwnPlaylists.lift(p),
+        tracks = [
+          for (final id in p.songIds) PlaylistTrackView.of(w, w.songs[id])
+        ];
+  final String name;
+  final int createdWeek;
+  final double followers;
+
+  /// Followers it is heading to now.
+  final double target;
+
+  /// What makes people follow it (0..1), the share of the player's own
+  /// songs on it, how fresh it is (1: changed recently) and the lift
+  /// its songs get each week.
+  final double appeal;
+  final double ownShare;
+  final double freshness;
+  final double lift;
+  final List<PlaylistTrackView> tracks;
+
+  bool get tooShort => tracks.length < OwnPlaylists.minSongs;
+  bool get tooMuchSelf => ownShare > OwnPlaylists.ownFree;
+}
+
+/// A song on (or for) the player's playlist.
+class PlaylistTrackView {
+  PlaylistTrackView.of(World w, Song s)
+      : songId = s.id,
+        title = s.title,
+        artistId = s.primaryArtistId,
+        artistName = w.artists[s.primaryArtistId].name,
+        albumId = coverAlbumOf(w, s),
+        isPlayer = s.primaryArtistId == w.playerArtistId,
+        weekStreams = s.releasedWeek < 0
+            ? 0
+            : w.songWeekStreamsIn(s, ChartMarket.global),
+        fresh = w.week - s.releasedWeek <= 12,
+        onPlaylist = w.ownPlaylist?.songIds.contains(s.id) ?? false;
+  final int songId;
+  final String title;
+  final int artistId;
+  final String artistName;
+  final int albumId;
+  final bool isPlayer;
+  final double weekStreams;
+
+  /// Out in the last 12 weeks (new songs draw followers).
+  final bool fresh;
+  final bool onPlaylist;
 }
 
 /// A group member and their solo records (docs K158).
