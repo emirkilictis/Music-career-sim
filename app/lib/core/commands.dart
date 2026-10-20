@@ -254,6 +254,14 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // Independent curators (docs K160).
+  static SessionCmd<Map<CuratorPack, int>> curatorCosts() =>
+      (s) => s.curatorCosts;
+  static SessionCmd<void> submitToCurators(int songId, CuratorPack pack) =>
+      (s) => s.submitToCurators(songId, pack);
+  static SessionCmd<List<CuratorAnswer>> curatorAnswers(int songId) =>
+      (s) => s.curatorAnswers(songId);
+
   // The player's own playlist (docs K159).
   static SessionCmd<bool> ownPlaylistOpen() => (s) => s.ownPlaylistOpen;
   static SessionCmd<OwnPlaylistView?> ownPlaylist() => (s) => s.ownPlaylist;

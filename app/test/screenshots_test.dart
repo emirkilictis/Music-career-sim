@@ -97,6 +97,9 @@ void main() {
     final (_, now, _) = await c.run(Cmd.snapshot());
     await c.run(
         Cmd.scheduleSingle(songs[12], Campaign.standard, now + 8, now + 4));
+    // The lead single goes to independent curators (docs K160).
+    await c.run(Cmd.submitToCurators(songs.first, CuratorPack.medium));
+    await c.run(Cmd.nextWeek());
     // An EP waits in the vault for its moment (F31).
     await c.run(Cmd.saveDraft(
         title: 'Midnight Tapes',
@@ -377,6 +380,18 @@ void main() {
     await tester.tap(_ci('Buy streams'));
     await tester.pumpAndSettle();
     await shot(tester, '14g_buy_streams');
+    await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
+    // What independent curators said (docs K160).
+    final answers = _ci('See their answers');
+    await tester.scrollUntilVisible(answers, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(answers), alignment: 0.4);
+    await tester.pumpAndSettle();
+    await shot(tester, '14i_curators');
+    await tester.tap(answers);
+    await tester.pumpAndSettle();
+    await shot(tester, '14j_curator_answers');
     await tester.tapAt(const Offset(200, 60));
     await tester.pumpAndSettle();
     await tester.pageBack();

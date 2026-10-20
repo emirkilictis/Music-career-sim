@@ -342,6 +342,14 @@ class SongView {
         credit = ChartCredit.of(w, s.primaryArtistId, s.featuredArtistIds),
         guestCents = s.guestCents,
         onOwnPlaylist = w.ownPlaylist?.songIds.contains(s.id) ?? false,
+        canCurators =
+            s.primaryArtistId == w.playerArtistId && Curators.can(w, s),
+        curatorWeek = s.curatorWeek,
+        curatorSent = s.curatorWeek < 0 ? 0 : s.curatorPack.curators,
+        curatorAdds = s.curatorAdds,
+        curatorReach = s.curatorReach,
+        curatorAnswered = s.curatorWeek >= 0 && w.week > Curators.answerWeek(s),
+        curatorStreams = Curators.streams(s, w.week - 1),
         canOwnPlaylist = w.ownPlaylist != null && OwnPlaylists.canAdd(w, s),
         canAnswerLeak = Leaks.canAnswer(s, w.week),
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
@@ -484,6 +492,17 @@ class SongView {
   /// On the player's own playlist, and whether it can go on it (K159).
   final bool onOwnPlaylist;
   final bool canOwnPlaylist;
+
+  /// Independent curators (docs K160): whether it can be sent, when it
+  /// was (-1: not), to how many, how many added it with how many
+  /// followers, whether they answered, and last week's plays from them.
+  final bool canCurators;
+  final int curatorWeek;
+  final int curatorSent;
+  final int curatorAdds;
+  final double curatorReach;
+  final bool curatorAnswered;
+  final double curatorStreams;
   final bool canAnswerLeak;
   final bool leakHurts;
 

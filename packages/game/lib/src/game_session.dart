@@ -1953,6 +1953,33 @@ class GameSession {
             WrittenSongView.of(world, world.songs[id]),
       ];
 
+  // ------------------------------------------- indie curators (K160)
+
+  /// What each curator package costs the player.
+  Map<CuratorPack, int> get curatorCosts => {
+        for (final k in CuratorPack.values) k: Curators.costCents(_p, k),
+      };
+
+  /// Sends released song [songId] to [pack]'s independent curators; they
+  /// answer at the end of the week.
+  void submitToCurators(int songId, CuratorPack pack) {
+    final s = _ownSong(songId);
+    if (!Curators.can(world, s)) {
+      throw GameException('noCurators', 'Cannot send this song');
+    }
+    _requireMoney(Curators.costCents(_p, pack));
+    Curators.submit(world, _p, s, pack);
+    _saveNow();
+  }
+
+  /// What each curator said about [songId] (empty until they answer).
+  List<CuratorAnswer> curatorAnswers(int songId) {
+    final s = _ownSong(songId);
+    final at = Curators.answerWeek(s);
+    if (at < 0 || world.week <= at) return const [];
+    return Curators.answers(world, s);
+  }
+
   // ------------------------------------------------- own playlist (K159)
 
   /// Whether the player can have a playlist yet.
@@ -3222,6 +3249,11 @@ class GameSession {
     }
     for (final id in w.playerSongIds) {
       final s = w.songs[id];
+      // Independent curators answered (docs K160).
+      if (Curators.answerWeek(s) == r.week) {
+        events.add(CuratorsAnswered(
+            id, s.curatorAdds, s.curatorPack.curators, s.curatorReach));
+      }
       if (StreamingTools.pitchAnswerWeek(s) == r.week &&
           s.playlistWeek != r.week) {
         events.add(PitchDeclined(id));

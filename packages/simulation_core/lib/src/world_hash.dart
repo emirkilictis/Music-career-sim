@@ -109,6 +109,8 @@ int worldHash(World w) {
     addInt(s.campaign.index);
     addInt(s.playlistAdd.index);
     addDouble(s.playlistBoost);
+    addInt(s.curatorWeek);
+    addDouble(s.curatorReach);
     addDouble(s.versionBoost);
     addDouble(s.botTotal);
     addInt(s.botWeeksLeft);

@@ -5533,5 +5533,92 @@
     }
   },
   "errorPlaylist": "That cannot be done with your playlist.",
-  "errorNotGroup": "Only a group has members."
+  "errorNotGroup": "Only a group has members.",
+  "curatorsButton": "Send to independent curators",
+  "curatorsHint": "Small playlists run by people, not the app: a few dollars a curator, an answer from each by the end of the week. Most say no; the ones who add it play it to their followers for about two months, and the app's algorithm notices.",
+  "curatorsTitle": "How many curators?",
+  "curatorsPack": "{count} curators",
+  "@curatorsPack": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "curatorsPending": "Sent to {count} curators: answers at the end of the week",
+  "@curatorsPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "curatorsResult": "Curators: {adds} of {sent} added it · {reach} followers",
+  "@curatorsResult": {
+    "placeholders": {
+      "adds": {
+        "type": "int"
+      },
+      "sent": {
+        "type": "int"
+      },
+      "reach": {
+        "type": "String"
+      }
+    }
+  },
+  "curatorsPlays": "{plays} plays from their playlists last week",
+  "@curatorsPlays": {
+    "placeholders": {
+      "plays": {
+        "type": "String"
+      }
+    }
+  },
+  "curatorsSeeAnswers": "See their answers",
+  "curatorsAnswersTitle": "What the curators said",
+  "curatorNoteAdded": "Added it",
+  "curatorNoteNotOurSound": "Not our sound",
+  "curatorNoteNotReady": "The mix isn't there yet",
+  "curatorNotePassed": "Nice, but we'll pass",
+  "curatorLine": "{genre} · {followers} followers",
+  "@curatorLine": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      },
+      "followers": {
+        "type": "String"
+      }
+    }
+  },
+  "eventCuratorsAdded": "{adds} of {sent} curators added “{title}” ({reach} followers).",
+  "@eventCuratorsAdded": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "adds": {
+        "type": "int"
+      },
+      "sent": {
+        "type": "int"
+      },
+      "reach": {
+        "type": "String"
+      }
+    }
+  },
+  "eventCuratorsNone": "None of the {sent} curators added “{title}”.",
+  "@eventCuratorsNone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "sent": {
+        "type": "int"
+      }
+    }
+  },
+  "errorNoCurators": "This song cannot be sent to curators now."
 }

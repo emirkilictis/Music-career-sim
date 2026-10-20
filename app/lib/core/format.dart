@@ -810,6 +810,7 @@ class Fmt {
       'noVisual' => l.errorNoVisual,
       'noLanguage' => l.errorNoLanguage,
       'noDistributor' => l.errorNoDistributor,
+      'noCurators' => l.errorNoCurators,
       'noPlaylists' ||
       'hasPlaylist' ||
       'noPlaylist' ||
@@ -973,6 +974,9 @@ class Fmt {
       WrittenSongHit(:final position) => position == 1
           ? l.eventWrittenNo1(t, line.artistName)
           : l.eventWrittenTop10(t, line.artistName, position),
+      CuratorsAnswered(:final adds, :final sent, :final reach) => adds > 0
+          ? l.eventCuratorsAdded(t, adds, sent, compact(reach))
+          : l.eventCuratorsNone(t, sent),
       PlaylistMilestone(:final followers) =>
         l.eventPlaylistFollowers(t, compact(followers)),
       CreditSongHit(:final position, :final credit) => switch ((

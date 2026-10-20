@@ -238,6 +238,18 @@ class CreditSongHit extends GameEvent {
   bool get isMajor => true;
 }
 
+/// Independent curators answered a submission (docs K160): [adds] of
+/// [sent] put the song on playlists with [reach] followers in all.
+class CuratorsAnswered extends GameEvent {
+  const CuratorsAnswered(this.songId, this.adds, this.sent, this.reach);
+  final int songId;
+  final int adds;
+  final int sent;
+  final double reach;
+  @override
+  bool get isMajor => false;
+}
+
 /// The player's own playlist passed [followers] followers (docs K159).
 class PlaylistMilestone extends GameEvent {
   const PlaylistMilestone(this.followers);

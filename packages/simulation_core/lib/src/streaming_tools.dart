@@ -5,6 +5,7 @@ import 'config/charts.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'lifecycle.dart';
+import 'curators.dart';
 import 'model.dart';
 import 'rerecords.dart';
 import 'rng.dart';
@@ -356,7 +357,7 @@ abstract final class StreamingTools {
     if (age < discoverFrom || age > discoverTo) return false;
     final keep = 1 - skipRate(s);
     return keyedUnit(w.seed, week, s.id, RngPurpose.discover) <
-        0.03 * keep * keep;
+        0.03 * keep * keep * Curators.discoverFactor(s, week);
   }
 
   /// The discovery mixes' lift on [s] in [week]: each pick lasts a few

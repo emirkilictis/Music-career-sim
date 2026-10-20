@@ -1572,6 +1572,26 @@ k('eventPlaylistFollowers','Your playlist “{name}” passed {count} followers.
 k('errorPlaylist','That cannot be done with your playlist.','Çalma listende bu yapılamaz.')
 k('errorNotGroup','Only a group has members.','Sadece grupların üyesi var.')
 
+
+# Independent playlist curators (docs K160).
+k('curatorsButton','Send to independent curators','Bağımsız küratörlere gönder')
+k('curatorsHint','Small playlists run by people, not the app: a few dollars a curator, an answer from each by the end of the week. Most say no; the ones who add it play it to their followers for about two months, and the app\'s algorithm notices.','Uygulamanın değil insanların yönettiği küçük listeler: küratör başına birkaç dolar, hafta sonuna kadar her birinden cevap. Çoğu hayır der; ekleyenler şarkıyı iki ay kadar takipçilerine çalar ve uygulamanın algoritması fark eder.')
+k('curatorsTitle','How many curators?','Kaç küratöre?')
+k('curatorsPack','{count} curators','{count} küratör', count='int')
+k('curatorsPending','Sent to {count} curators: answers at the end of the week','{count} küratöre gönderildi: cevaplar hafta sonunda', count='int')
+k('curatorsResult','Curators: {adds} of {sent} added it · {reach} followers','Küratörler: {sent} kişiden {adds} ekledi · {reach} takipçi', adds='int', sent='int', reach='String')
+k('curatorsPlays','{plays} plays from their playlists last week','Geçen hafta listelerinden {plays} dinlenme', plays='String')
+k('curatorsSeeAnswers','See their answers','Cevapları gör')
+k('curatorsAnswersTitle','What the curators said','Küratörler ne dedi')
+k('curatorNoteAdded','Added it','Listeye ekledi')
+k('curatorNoteNotOurSound','Not our sound','Bizim tarzımız değil')
+k('curatorNoteNotReady','The mix isn\'t there yet','Miks henüz hazır değil')
+k('curatorNotePassed','Nice, but we\'ll pass','Güzel ama geçiyoruz')
+k('curatorLine','{genre} · {followers} followers','{genre} · {followers} takipçi', genre='String', followers='String')
+k('eventCuratorsAdded','{adds} of {sent} curators added “{title}” ({reach} followers).','{sent} küratörden {adds} tanesi “{title}” şarkını listesine ekledi ({reach} takipçi).', title='String', adds='int', sent='int', reach='String')
+k('eventCuratorsNone','None of the {sent} curators added “{title}”.','{sent} küratörün hiçbiri “{title}” şarkını eklemedi.', title='String', sent='int')
+k('errorNoCurators','This song cannot be sent to curators now.','Bu şarkı şu an küratörlere gönderilemez.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -252,8 +252,9 @@ abstract final class Codec {
     'creator', 'radioFormat', 'holiday',
     'rerecordOf', 'replacedWeek', 'masterShare',
     'leakedWeek',
-    // Added in schema v32, v34, v35, v36, v39, v41, v43.
+    // Added in schema v32, v34, v35, v36, v39, v41, v43, v44.
     'writer', 'liveOf', 'promo', 'cloud', 'snippet', 'langs', 'guestCents',
+    'curators',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -324,6 +325,14 @@ abstract final class Codec {
         s.snippetWeek < 0 ? null : jsonEncode([s.snippetWeek, s.snippetScore]),
         s.languages,
         s.guestCents,
+        s.curatorWeek < 0
+            ? null
+            : jsonEncode([
+                s.curatorWeek,
+                s.curatorPack.index,
+                s.curatorAdds,
+                s.curatorReach
+              ]),
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -388,6 +397,13 @@ abstract final class Codec {
     }
     s.languages = r['langs'] as int? ?? 0;
     s.guestCents = (r['guestCents'] as num?)?.toDouble() ?? 0;
+    if (r['curators'] case final String x when x.isNotEmpty) {
+      final j = jsonDecode(x) as List;
+      s.curatorWeek = j[0] as int;
+      s.curatorPack = CuratorPack.values[j[1] as int];
+      s.curatorAdds = j[2] as int;
+      s.curatorReach = (j[3] as num).toDouble();
+    }
     if (r['snippet'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       s.snippetWeek = j[0] as int;

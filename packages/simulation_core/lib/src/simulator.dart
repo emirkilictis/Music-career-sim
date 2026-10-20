@@ -22,6 +22,7 @@ import 'joint_albums.dart';
 import 'leaks.dart';
 import 'live_albums.dart';
 import 'lifecycle.dart';
+import 'curators.dart';
 import 'model.dart';
 import 'own_playlist.dart';
 import 'music_show.dart';
@@ -155,6 +156,8 @@ class Simulator {
         : Actions.releaseScheduled(w, player);
     // Playlist editors answer this week's pitches (docs K97).
     StreamingTools.answerPitches(w);
+    // Independent curators answer last week's submissions (docs K160).
+    Curators.answer(w);
     // The player's own playlist gains or loses followers (docs K159).
     OwnPlaylists.weekly(w);
     // Holiday songs come back for the season (docs K136).
@@ -656,9 +659,11 @@ class Simulator {
       _variantSales(s, p, eras, variantSales);
       // Bought streams land where the artist's audience is (docs K95).
       final bots = StreamingTools.botStreamsThisWeek(w, s);
+      // Plays from independent curators' playlists (docs K160).
+      final curated = Curators.streams(s, w.week);
       for (var k = 0; k < _r; k++) {
         final j = i * _r + k;
-        st[k] = att[j] * spa[k] + bots * p.regionShare[k];
+        st[k] = att[j] * spa[k] + (bots + curated) * p.regionShare[k];
         dw[k] = dl[j] * dpa[k];
         rd[k] = radio[j] * rpr[k];
         ph[k] = s.isSingle ? att[j] * ppa[k] + variantSales[k] : 0;

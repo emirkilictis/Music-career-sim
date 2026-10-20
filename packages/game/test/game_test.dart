@@ -1169,8 +1169,10 @@ void main() {
       expect(songs.first.entityId, news.topSongId);
       expect(songs.first.peak, lessThanOrEqualTo(10));
       // The player's entries are the ones the news names.
-      expect([for (final r in songs) if (r.isPlayer) (r.rank, r.entityId)],
-          news.songs);
+      expect([
+        for (final r in songs)
+          if (r.isPlayer) (r.rank, r.entityId)
+      ], news.songs);
       expect(g.yearEnd(Charts.usAlbums, 2018), isNotEmpty);
 
       // All-time records from the same history (K111).
@@ -1185,8 +1187,9 @@ void main() {
       }
       // Weeks at #1: the year-end #1 song's run counts.
       final no1 = records[RecordKind.weeksAtNo1Song]!.first;
-      final runs = g.chartRun(EntityKind.song, no1.entityId).where((w) =>
-          w.entries[Charts.usSongs]?.position == 1);
+      final runs = g
+          .chartRun(EntityKind.song, no1.entityId)
+          .where((w) => w.entries[Charts.usSongs]?.position == 1);
       expect(no1.value, runs.length);
       // Honours (K116): a player with nothing out holds none.
       final h = g.honors;
@@ -1220,8 +1223,8 @@ void main() {
       expect(fresh.rows, isNotEmpty);
       for (final r in fresh.rows) {
         final s = w.songs[r.songId];
-        expect(s.releasedWeek == w.week - 1 || s.singleWeek == w.week - 1,
-            isTrue);
+        expect(
+            s.releasedWeek == w.week - 1 || s.singleWeek == w.week - 1, isTrue);
       }
       expect(fresh.rows.any((r) => r.songId == id), isTrue);
       // Genre playlists play their genres.
@@ -1241,8 +1244,7 @@ void main() {
       g.close();
     });
 
-    test('the artist page shows listeners over time and top cities (K130)',
-        () {
+    test('the artist page shows listeners over time and top cities (K130)', () {
       final g = GameSession.start(
           slots,
           _setup(
@@ -1328,10 +1330,10 @@ void main() {
       g.advanceWeek();
       // Just short of 100M plays: next week crosses it.
       final s = g.world.songs[id];
-      s.reg[SongReg.lifeStreams] += Platforms.playMilestones.first /
-              Streamify.share -
-          Platforms.streamifyPlays(g.world, s) / Streamify.share -
-          1000;
+      s.reg[SongReg.lifeStreams] +=
+          Platforms.playMilestones.first / Streamify.share -
+              Platforms.streamifyPlays(g.world, s) / Streamify.share -
+              1000;
       final hits = g.advanceWeek().events.whereType<StreamMilestone>().toList();
       expect(hits.length, 1);
       expect(hits.first.songId, id);
@@ -1354,7 +1356,8 @@ void main() {
       final radio = g.chart(Charts.usRadio);
       expect(radio.rows.length, 50);
       for (var i = 1; i < radio.rows.length; i++) {
-        expect(radio.rows[i].points, lessThanOrEqualTo(radio.rows[i - 1].points));
+        expect(
+            radio.rows[i].points, lessThanOrEqualTo(radio.rows[i - 1].points));
       }
       // The audience it counts is the song's US radio.
       final top = g.world.songs[radio.rows.first.entityId];
@@ -1365,7 +1368,8 @@ void main() {
     test('an independent picks a distributor (K157)', () {
       var g = GameSession.start(
           slots,
-          _setup(startYear: 2012, money: StartMoney.millionaire, premium: true));
+          _setup(
+              startYear: 2012, money: StartMoney.millionaire, premium: true));
       final p = g.world.player!;
       expect(p.label, Label.independent);
       final v = g.distribution;
@@ -1373,8 +1377,8 @@ void main() {
       expect(v.available, contains(Distributor.percent));
       // A deal needs an audience.
       expect(v.available, isNot(contains(Distributor.deal)));
-      expect(() => g.chooseDistributor(Distributor.deal),
-          _code('noDistributor'));
+      expect(
+          () => g.chooseDistributor(Distributor.deal), _code('noDistributor'));
       final reach = p.labelReach;
       g.chooseDistributor(Distributor.percent);
       expect(p.artistShare, Distributor.percent.share);
@@ -1397,6 +1401,58 @@ void main() {
       // Signing a label ends it.
       Actions.signLabel(g.world, g.world.player!, Label.small);
       expect(g.world.player!.distributor, Distributor.selfRelease);
+      g.close();
+    });
+
+    test('songs sent to independent curators (K160)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2017, money: StartMoney.millionaire, premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      p.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      // Only released songs.
+      expect(g.song(id).canCurators, isFalse);
+      expect(
+          () => g.submitToCurators(id, CuratorPack.small), _code('noCurators'));
+      g.releaseSingle(id);
+      g.advanceWeek();
+      expect(g.song(id).canCurators, isTrue);
+      final money = p.moneyCents;
+      final casual = p.casual;
+      g.submitToCurators(id, CuratorPack.large);
+      expect(money - p.moneyCents, g.curatorCosts[CuratorPack.large]);
+      expect(g.song(id).canCurators, isFalse);
+      expect(
+          () => g.submitToCurators(id, CuratorPack.small), _code('noCurators'));
+      expect(g.curatorAnswers(id), isEmpty);
+      final report = g.advanceWeek();
+      final news = report.events.whereType<CuratorsAnswered>().single;
+      expect(news.sent, CuratorPack.large.curators);
+      final answers = g.curatorAnswers(id);
+      expect(answers, hasLength(CuratorPack.large.curators));
+      expect(answers.where((a) => a.added).length, news.adds);
+      expect(news.adds, greaterThan(0));
+      final s = g.world.songs[id];
+      expect(s.curatorReach, greaterThan(0));
+      expect(p.casual, greaterThan(casual));
+      g.advanceWeek();
+      final v = g.song(id);
+      expect(v.curatorAnswered, isTrue);
+      expect(v.curatorStreams, greaterThan(0));
+      // The same answers every time.
+      expect(
+          g.curatorAnswers(id).map((a) => a.name), answers.map((a) => a.name));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      final back = g.world.songs[id];
+      expect(back.curatorWeek, s.curatorWeek);
+      expect(back.curatorPack, CuratorPack.large);
+      expect(back.curatorAdds, news.adds);
+      expect(back.curatorReach, s.curatorReach);
       g.close();
     });
 
@@ -1510,8 +1566,8 @@ void main() {
       expect(g.song(solo.songId).credit, ChartCredit.member);
       // A rival puts the player on their song: on the charts as theirs,
       // with the featured share paid to the player.
-      final rival = g.world.artists.firstWhere((a) =>
-          a.tier == ArtistTier.a && !a.isRetired && a.managedBy < 0);
+      final rival = g.world.artists.firstWhere(
+          (a) => a.tier == ArtistTier.a && !a.isRetired && a.managedBy < 0);
       final song = Credits.guestOn(g.world, rival, p, producerSkill: 85);
       expect(g.guestSongs.single.songId, song.id);
       expect(g.guestSongs.single.released, isFalse);
@@ -1562,8 +1618,10 @@ void main() {
       for (var i = 0; i < 20; i++) {
         events.addAll(g.advanceWeek().events);
       }
-      final listeners =
-          events.whereType<ListenersMilestone>().map((e) => e.listeners).toList();
+      final listeners = events
+          .whereType<ListenersMilestone>()
+          .map((e) => e.listeners)
+          .toList();
       expect(listeners, isNotEmpty);
       // Each milestone once, in order.
       expect(listeners.toSet().length, listeners.length);
@@ -1616,8 +1674,10 @@ void main() {
       final slot = g.slotId;
       g.close();
       g = GameSession.resume(slots, slot);
-      expect(g.world.player!.marketBonus[Region.other.index], Languages.marketStep);
-      expect(g.world.player!.regionShare[Region.other.index], closeTo(share, 1e-9));
+      expect(g.world.player!.marketBonus[Region.other.index],
+          Languages.marketStep);
+      expect(g.world.player!.regionShare[Region.other.index],
+          closeTo(share, 1e-9));
       expect(g.song(id).languageVersions, [LanguageVersion.spanish]);
       g.close();
     });
@@ -1658,8 +1718,8 @@ void main() {
       expect(g.channel.videos.length, greaterThanOrEqualTo(al.trackIds.length));
       plain.advanceWeeks(3, stop: SkipStop.never);
       g.advanceWeeks(3, stop: SkipStop.never);
-      double streams(GameSession s, AlbumView a) => a.trackIds
-          .fold(0.0, (t, id) => t + s.world.songLifetimeStreams(s.world.songs[id]));
+      double streams(GameSession s, AlbumView a) => a.trackIds.fold(
+          0.0, (t, id) => t + s.world.songLifetimeStreams(s.world.songs[id]));
       expect(streams(g, al), greaterThan(streams(plain, pAl)));
       // Too late after a month.
       plain.advanceWeek();
@@ -1672,8 +1732,7 @@ void main() {
       g.close();
     });
 
-    test('selling the catalog: money now, the songs pay the fund (K153)',
-        () {
+    test('selling the catalog: money now, the songs pay the fund (K153)', () {
       var g = GameSession.start(
           slots,
           _setup(
@@ -1746,8 +1805,10 @@ void main() {
       // A teased song leaks more easily.
       final s = g.world.songs[ids.first];
       final other = g.world.songs[ids[2]];
-      expect(Leaks.chance(g.world, p, s),
-          closeTo(Leaks.chance(g.world, p, other) * Snippets.leakFactor, 1e-12));
+      expect(
+          Leaks.chance(g.world, p, s),
+          closeTo(
+              Leaks.chance(g.world, p, other) * Snippets.leakFactor, 1e-12));
       g.advanceWeek();
       g.teaseSnippet(ids[1]);
       // Out while awaited: its wave.
@@ -1790,11 +1851,14 @@ void main() {
       final soloAl = solo.releaseAlbum('Alone', sIds);
       var (g, ids) = start();
       final partner = g.jointPartners.first;
-      expect(partner.feeCents, JointAlbums.feeCents(g.world.artists[partner.artistId]));
+      expect(partner.feeCents,
+          JointAlbums.feeCents(g.world.artists[partner.artistId]));
       final money = g.player.moneyCents;
       final al = g.releaseAlbum('Together', ids, partnerId: partner.artistId);
-      expect(money - g.player.moneyCents,
-          partner.feeCents + Actions.campaignCostFor(g.world.player!, Campaign.standard));
+      expect(
+          money - g.player.moneyCents,
+          partner.feeCents +
+              Actions.campaignCostFor(g.world.player!, Campaign.standard));
       expect(g.album(al.id).partnerName, partner.name);
       for (final id in ids) {
         expect(g.world.songs[id].featuredArtistIds, contains(partner.artistId));
@@ -1997,12 +2061,15 @@ void main() {
       g.advanceWeek();
       final tours = g.liveAlbumTours;
       expect(tours.single.shows, greaterThanOrEqualTo(LiveAlbums.minShows));
-      expect(() => g.releaseLiveAlbum(tours.single.startWeek, 'Live', ids.take(3).toList()),
+      expect(
+          () => g.releaseLiveAlbum(
+              tours.single.startWeek, 'Live', ids.take(3).toList()),
           _code('trackCount'));
       p.creativeEnergy = 100;
       final owed = p.contractAlbumsLeft;
       final money = g.player.moneyCents;
-      final live = g.releaseLiveAlbum(tours.single.startWeek, 'Live at the Arenas', ids);
+      final live =
+          g.releaseLiveAlbum(tours.single.startWeek, 'Live at the Arenas', ids);
       expect(money - g.player.moneyCents, LiveAlbums.costCents(ids.length));
       expect(live.isLive, isTrue);
       expect(g.player.contractAlbumsLeft, owed);
@@ -2014,8 +2081,7 @@ void main() {
       final first = g.album(live.id);
       expect(first.firstWeekUnits, greaterThan(0));
       // Fans buy it; it is no new studio record.
-      expect(first.firstWeekUnits,
-          lessThan(g.album(studio.id).firstWeekUnits));
+      expect(first.firstWeekUnits, lessThan(g.album(studio.id).firstWeekUnits));
       g.close();
     });
 
@@ -2056,7 +2122,8 @@ void main() {
       final song = g.songIncome(ids.first);
       expect(song.cents.keys,
           containsAll([IncomeSource.streamify, IncomeSource.viewTube]));
-      expect(song.total,
+      expect(
+          song.total,
           closeTo(g.world.songs[ids.first].revenueCents,
               g.world.songs[ids.first].revenueCents * 0.1));
       final career = g.careerIncome;
@@ -2099,7 +2166,8 @@ void main() {
       final al = g.releaseAlbum('Merch', ids, bundle: AlbumBundle.merch);
       final units = g.world.albums[al.id].bundleUnits;
       expect(units, greaterThan(0));
-      expect(g.player.moneyCents - money,
+      expect(
+          g.player.moneyCents - money,
           greaterThanOrEqualTo((units * Bundles.merchMarginCents).round() -
               Actions.campaignCostFor(g.world.player!, Campaign.standard)));
       g.advanceWeek();
@@ -2135,8 +2203,8 @@ void main() {
           buyer = list.first;
           final refused = list.where((b) => !b.wants).firstOrNull;
           if (refused != null) {
-            expect(() => g.sellSong(id, refused.artistId),
-                _code('songRefused'));
+            expect(
+                () => g.sellSong(id, refused.artistId), _code('songRefused'));
           }
           break;
         }
@@ -2198,8 +2266,8 @@ void main() {
       final fans = g.player.coreFans;
       g.uploadVideo(VideoKind.vlog);
       expect(g.player.coreFans, greaterThan(fans));
-      expect(() => g.uploadVideo(VideoKind.behindScenes),
-          _code('cannotUpload'));
+      expect(
+          () => g.uploadVideo(VideoKind.behindScenes), _code('cannotUpload'));
       g.advanceWeek();
       final first = g.channel;
       expect(first.videos.length, 3);
@@ -2303,7 +2371,8 @@ void main() {
       expect(g.song(id).leakedWeek, g.week - 1);
       expect(g.song(id).canAnswerLeak, isTrue);
       g.releaseSingle(id);
-      expect(g.world.songs[id].versionBoost, greaterThanOrEqualTo(Leaks.answerBoost));
+      expect(g.world.songs[id].versionBoost,
+          greaterThanOrEqualTo(Leaks.answerBoost));
       expect(g.song(id).leakHurts, isFalse);
       // Left too long, a leak costs fans' plays and album sales.
       final late = g.world.songs[g.vault.first.id]
@@ -2355,15 +2424,16 @@ void main() {
       final draft = g.rerecordAlbum(album.id, "Fearless (Nova's Version)");
       expect(g.player.creativeEnergy,
           100 - Rerecords.energyCost(g.world.albums[album.id]));
-      expect(money - g.player.moneyCents, Rerecords.costCents(g.world.albums[album.id]));
+      expect(money - g.player.moneyCents,
+          Rerecords.costCents(g.world.albums[album.id]));
       expect(draft.isDraft, isTrue);
       expect(draft.songIds.length, ids.length);
       expect(g.album(album.id).rerecordBlock, RerecordBlock.done);
       final copy = g.song(draft.songIds.first);
       expect(copy.rerecordOf, ids.first);
       expect(copy.title, g.song(ids.first).title);
-      double oldStreams() =>
-          ids.fold(0.0, (x, id) => x + g.world.songLifetimeStreams(g.world.songs[id]));
+      double oldStreams() => ids.fold(
+          0.0, (x, id) => x + g.world.songLifetimeStreams(g.world.songs[id]));
       g.advanceWeek();
       final before = oldStreams();
       g.advanceWeek();
@@ -2378,8 +2448,8 @@ void main() {
       // Most listeners moved to the new versions, which pay in full.
       expect(oldStreams() - at, lessThan(weekBefore * 0.6));
       final newIds = out.trackIds;
-      final newStreams = newIds.fold(
-          0.0, (x, id) => x + g.world.songs[id].weekStreams);
+      final newStreams =
+          newIds.fold(0.0, (x, id) => x + g.world.songs[id].weekStreams);
       expect(newStreams, greaterThan(oldStreams() - at));
       expect(g.song(newIds.first).masterShare, 1.0);
       expect(g.album(out.id).masterShare, 1.0);
@@ -2452,8 +2522,10 @@ void main() {
         expect(rows[i].points, lessThanOrEqualTo(rows[i - 1].points));
       }
       // Only summer weeks count: fewer weeks on than a whole year allows.
-      expect(rows.first.weeksOn,
-          lessThanOrEqualTo(YearEnd.summerToWeekOfYear - YearEnd.summerFromWeekOfYear + 1));
+      expect(
+          rows.first.weeksOn,
+          lessThanOrEqualTo(
+              YearEnd.summerToWeekOfYear - YearEnd.summerFromWeekOfYear + 1));
       g.close();
     });
 
@@ -2484,14 +2556,13 @@ void main() {
       while (GameTime.weekOfYear(g.week - 1) != Holidays.returnWeek + 1) {
         events.addAll(g.advanceWeek().events);
       }
-      expect(events.whereType<HolidayReturn>().map((e) => e.songId),
-          contains(id));
+      expect(
+          events.whereType<HolidayReturn>().map((e) => e.songId), contains(id));
       expect(g.world.songs[id].status, SongStatus.active);
       g.close();
     });
 
-    test('a streaming exclusive pays now and streams less at first (K135)',
-        () {
+    test('a streaming exclusive pays now and streams less at first (K135)', () {
       (AlbumView, int, double) run(bool exclusive) {
         final g = GameSession.start(
             slots,
@@ -2543,7 +2614,8 @@ void main() {
       expect(g.song(id).radioFormat, RadioFormat.hotAc);
       g.advanceWeeks(Actions.radioUpgradeWeeks, stop: SkipStop.never);
       expect(g.song(id).radioFormatOptions, isEmpty);
-      expect(() => g.setRadioFormat(id, RadioFormat.top40), _code('radioLocked'));
+      expect(
+          () => g.setRadioFormat(id, RadioFormat.top40), _code('radioLocked'));
       g.close();
     });
 
@@ -2606,7 +2678,8 @@ void main() {
       expect(shock, greaterThan(0.3));
       final hype = p.hype;
       final ep = g.releaseAlbum('Out Of Nowhere', first, type: AlbumType.ep);
-      expect(p.hype - hype,
+      expect(
+          p.hype - hype,
           closeTo(g.world.config.announceBuzzCap(AlbumType.ep, p.fame) * shock,
               1e-9));
       expect(p.surpriseWeek, g.week);
@@ -2658,8 +2731,8 @@ void main() {
       expect(wr.topSongs.first.songId, news.topSongId);
       expect(wr.topSongs.first.plays,
           greaterThanOrEqualTo(wr.topSongs.last.plays));
-      expect(wr.topSongs.fold(0.0, (t, s) => t + s.plays),
-          closeTo(wr.plays, 1));
+      expect(
+          wr.topSongs.fold(0.0, (t, s) => t + s.plays), closeTo(wr.plays, 1));
       expect(wr.regionShare.fold(0.0, (t, v) => t + v), closeTo(1, 1e-9));
       expect(wr.peakListeners, greaterThan(0));
       expect(wr.newSongs, 2);
@@ -2712,8 +2785,7 @@ void main() {
       g.close();
     });
 
-    test('video views: audio first, the official video pulls more (K118)',
-        () {
+    test('video views: audio first, the official video pulls more (K118)', () {
       final g = GameSession.start(
           slots,
           _setup(

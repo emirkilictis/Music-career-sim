@@ -475,6 +475,95 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
+  /// Sends the song to independent curators (docs K160).
+  Future<void> _curators(SongView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final costs = await widget.state.read(Cmd.curatorCosts());
+    if (!mounted) return;
+    final money = widget.state.player.moneyCents;
+    final pack = await showModalBottomSheet<CuratorPack>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.curatorsTitle,
+                style: Theme.of(c).textTheme.titleLarge),
+          ),
+          for (final k in CuratorPack.values)
+            ListTile(
+              enabled: costs[k]! <= money,
+              leading: const Icon(Icons.queue_music_rounded),
+              title: Text(l.curatorsPack(k.curators)),
+              trailing: Text(fmt.money(costs[k]!)),
+              onTap: () => Navigator.pop(c, k),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (pack == null || !mounted) return;
+    await _tool(Cmd.submitToCurators(s.id, pack));
+  }
+
+  /// What each curator said (docs K160).
+  Future<void> _curatorAnswers(SongView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final list = await widget.state.read(Cmd.curatorAnswers(s.id));
+    if (!mounted) return;
+    final sorted = [...list]..sort((a, b) {
+        if (a.added != b.added) return a.added ? -1 : 1;
+        return b.followers.compareTo(a.followers);
+      });
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.of(c).size.height * 0.8),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(l.curatorsAnswersTitle,
+                  style: Theme.of(c).textTheme.titleLarge),
+            ),
+            Flexible(
+              child: ListView(shrinkWrap: true, children: [
+                for (final a in sorted)
+                  ListTile(
+                    dense: true,
+                    leading: Icon(
+                        a.added
+                            ? Icons.playlist_add_check_rounded
+                            : Icons.close_rounded,
+                        color: a.added ? AppColors.mint : AppColors.textMuted),
+                    title: Text(a.name,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    subtitle: Text([
+                      l.curatorLine(
+                          fmt.genre(a.genre), fmt.compact(a.followers)),
+                      switch (a.note) {
+                        CuratorNote.added => l.curatorNoteAdded,
+                        CuratorNote.notOurSound => l.curatorNoteNotOurSound,
+                        CuratorNote.notReady => l.curatorNoteNotReady,
+                        CuratorNote.passed => l.curatorNotePassed,
+                      },
+                    ].join(' · ')),
+                  ),
+              ]),
+            ),
+            const SizedBox(height: 8),
+          ]),
+        ),
+      ),
+    );
+  }
+
   /// Picks a physical edition of the single to put out (docs K92, F26).
   Future<void> _newEdition(SongView s) async {
     final l = context.l10n;
@@ -1031,6 +1120,47 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           onPressed: () => _tool(Cmd.pitchSong(s.id)),
                           icon: const Icon(Icons.playlist_add_rounded),
                           label: Text(l.pitchSong),
+                        ),
+                      ),
+                    ],
+                    // Independent curators (docs K160).
+                    if (s.curatorWeek >= 0) ...[
+                      const SizedBox(height: 10),
+                      if (!s.curatorAnswered)
+                        Tag(l.curatorsPending(s.curatorSent),
+                            icon: Icons.schedule_rounded)
+                      else ...[
+                        Text(
+                            l.curatorsResult(s.curatorAdds, s.curatorSent,
+                                fmt.compact(s.curatorReach)),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w700)),
+                        if (s.curatorStreams >= 1)
+                          Text(l.curatorsPlays(fmt.compact(s.curatorStreams)),
+                              style: TextStyle(
+                                  color: AppColors.textMuted, fontSize: 13)),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () => _curatorAnswers(s),
+                            icon: const Icon(Icons.forum_outlined),
+                            label: Text(l.curatorsSeeAnswers),
+                          ),
+                        ),
+                      ],
+                    ],
+                    if (s.canCurators) ...[
+                      const SizedBox(height: 8),
+                      Text(l.curatorsHint,
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 13)),
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _curators(s),
+                          icon: const Icon(Icons.queue_music_rounded),
+                          label: Text(l.curatorsButton),
                         ),
                       ),
                     ],

@@ -8,6 +8,7 @@ import 'dart:typed_data';
 
 import 'config/charts.dart';
 import 'config/regions.dart';
+import 'curators.dart';
 import 'distribution.dart';
 import 'opportunities.dart';
 import 'tours.dart';
@@ -828,6 +829,13 @@ class Song with Charted {
 
   /// Week the player pitched it to the playlist editors (docs K97), -1.
   int pitchWeek = -1;
+
+  /// Sent to independent curators (docs K160): the week (-1: not), how
+  /// many, and how many added it with how many followers in all.
+  int curatorWeek = -1;
+  CuratorPack curatorPack = CuratorPack.small;
+  int curatorAdds = 0;
+  double curatorReach = 0;
 
   /// The radio format the player works it to (docs K134; null: the best
   /// fit).

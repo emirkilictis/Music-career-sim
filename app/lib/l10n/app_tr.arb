@@ -1564,5 +1564,22 @@
   "ownPlCount": "{count} şarkı · en fazla {max}",
   "eventPlaylistFollowers": "“{name}” çalma listen {count} takipçiyi geçti.",
   "errorPlaylist": "Çalma listende bu yapılamaz.",
-  "errorNotGroup": "Sadece grupların üyesi var."
+  "errorNotGroup": "Sadece grupların üyesi var.",
+  "curatorsButton": "Bağımsız küratörlere gönder",
+  "curatorsHint": "Uygulamanın değil insanların yönettiği küçük listeler: küratör başına birkaç dolar, hafta sonuna kadar her birinden cevap. Çoğu hayır der; ekleyenler şarkıyı iki ay kadar takipçilerine çalar ve uygulamanın algoritması fark eder.",
+  "curatorsTitle": "Kaç küratöre?",
+  "curatorsPack": "{count} küratör",
+  "curatorsPending": "{count} küratöre gönderildi: cevaplar hafta sonunda",
+  "curatorsResult": "Küratörler: {sent} kişiden {adds} ekledi · {reach} takipçi",
+  "curatorsPlays": "Geçen hafta listelerinden {plays} dinlenme",
+  "curatorsSeeAnswers": "Cevapları gör",
+  "curatorsAnswersTitle": "Küratörler ne dedi",
+  "curatorNoteAdded": "Listeye ekledi",
+  "curatorNoteNotOurSound": "Bizim tarzımız değil",
+  "curatorNoteNotReady": "Miks henüz hazır değil",
+  "curatorNotePassed": "Güzel ama geçiyoruz",
+  "curatorLine": "{genre} · {followers} takipçi",
+  "eventCuratorsAdded": "{sent} küratörden {adds} tanesi “{title}” şarkını listesine ekledi ({reach} takipçi).",
+  "eventCuratorsNone": "{sent} küratörün hiçbiri “{title}” şarkını eklemedi.",
+  "errorNoCurators": "Bu şarkı şu an küratörlere gönderilemez."
 }
