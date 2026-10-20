@@ -5106,5 +5106,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "errorNoPartner": "That artist cannot make a record with you.",
+  "jointTitle": "Joint album",
+  "jointHint": "Make it together with a rival: they are on every track and half their fans buy it like their own. Their fee is three verses. A joint album comes out now.",
+  "jointNone": "On my own",
+  "jointNowOnly": "A joint album comes out now: pick this week or no partner."
 }

@@ -17,6 +17,7 @@ import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'holidays.dart';
+import 'joint_albums.dart';
 import 'leaks.dart';
 import 'live_albums.dart';
 import 'lifecycle.dart';
@@ -841,7 +842,8 @@ class Simulator {
       for (var k = 0; k < _r; k++) {
         final era = eras[k];
         final share = p.regionShare[k];
-        final fans = p.coreFans * share;
+        // A joint album sells to its partner's fans too (docs K150).
+        final fans = p.coreFans * share + JointAlbums.extraFans(w, al, k);
         final casual = p.casual * share;
         final superPart = fans *
             superRate *

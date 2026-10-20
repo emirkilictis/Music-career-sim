@@ -1468,5 +1468,10 @@
   "anniversaryButton": "{years}. yıl dönümü baskısı · {cost}",
   "anniversaryHint": "Yeniden mastering ve koleksiyonluk plak: eski hayranlar yeniden alır, şarkıları bir süre yeniden dinlenir.",
   "anniversaryDone": "{title} albümünün {years}. yıl dönümü baskısı çıktı.",
-  "anniversaryLine": "{years}. yıl dönümü baskısı çıktı"
+  "anniversaryLine": "{years}. yıl dönümü baskısı çıktı",
+  "errorNoPartner": "Bu sanatçı seninle albüm yapamaz.",
+  "jointTitle": "Ortak albüm",
+  "jointHint": "Bir rakiple birlikte yap: her parçada yer alır, hayranlarının yarısı kendi albümleri gibi alır. Ücreti üç verse kadar. Ortak albüm hemen çıkar.",
+  "jointNone": "Tek başıma",
+  "jointNowOnly": "Ortak albüm hemen çıkar: bu haftayı seç ya da partnersiz devam et."
 }

@@ -997,6 +997,9 @@ class Album with Charted {
   AlbumBundle bundle = AlbumBundle.none;
   double bundleUnits = 0;
 
+  /// The rival it was made with, a joint album (-1: none; docs K150).
+  int partnerId = -1;
+
   /// Anniversaries it was reissued for, a bit per [Anniversaries.years]
   /// entry (docs K149).
   int anniversaries = 0;

@@ -267,7 +267,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 ? () => editImage(context, ImageStore.albumKey(a.id))
                 : null,
             title: a.title,
-            subtitle: '${a.artistName} · ${fmt.albumType(a.type)}'
+            subtitle: '${a.artistName}'
+                '${a.partnerName.isEmpty ? '' : ' & ${a.partnerName}'}'
+                ' · ${fmt.albumType(a.type)}'
                 '${a.isDeluxe ? ' · ${l.deluxeTag}' : ''}'
                 '${a.isRerecord ? ' · ${l.rerecordTag}' : ''}'
                 '${a.isLive ? ' · ${l.liveTag}' : ''}',

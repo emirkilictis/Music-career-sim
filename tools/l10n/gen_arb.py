@@ -1456,6 +1456,13 @@ k('anniversaryHint','Remastered, with a collector\'s vinyl: old fans buy it agai
 k('anniversaryDone','The {years}th anniversary edition of {title} is out.','{title} albümünün {years}. yıl dönümü baskısı çıktı.', years='int', title='String')
 k('anniversaryLine','{years}th anniversary edition out','{years}. yıl dönümü baskısı çıktı', years='int')
 
+# Joint albums (docs K150).
+k('errorNoPartner','That artist cannot make a record with you.','Bu sanatçı seninle albüm yapamaz.')
+k('jointTitle','Joint album','Ortak albüm')
+k('jointHint','Make it together with a rival: they are on every track and half their fans buy it like their own. Their fee is three verses. A joint album comes out now.','Bir rakiple birlikte yap: her parçada yer alır, hayranlarının yarısı kendi albümleri gibi alır. Ücreti üç verse kadar. Ortak albüm hemen çıkar.')
+k('jointNone','On my own','Tek başıma')
+k('jointNowOnly','A joint album comes out now: pick this week or no partner.','Ortak albüm hemen çıkar: bu haftayı seç ya da partnersiz devam et.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

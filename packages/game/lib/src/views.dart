@@ -637,6 +637,8 @@ class AlbumView {
         exclusiveFeeCents = al.exclusiveFeeCents,
         bundle = al.bundle,
         isLive = al.isLive,
+        partnerId = al.partnerId,
+        partnerName = al.partnerId >= 0 ? w.artists[al.partnerId].name : '',
         anniversaryDue = w.player != null &&
                 Anniversaries.can(w, w.player!, al)
             ? Anniversaries.years[Anniversaries.due(w, al)]
@@ -745,6 +747,10 @@ class AlbumView {
 
   /// A live album (docs K146).
   final bool isLive;
+
+  /// A joint album's partner (-1 and '': none; docs K150).
+  final int partnerId;
+  final String partnerName;
 
   /// Anniversary reissues (docs K149): the one it can have now (0: none)
   /// and the ones it had.
@@ -2301,4 +2307,19 @@ class LiveTourView {
   final String name;
   final int shows;
   final double tickets;
+}
+
+/// A rival who would make a joint album with the player (docs K150).
+class JointPartnerView {
+  JointPartnerView.of(Artist rival)
+      : artistId = rival.id,
+        name = rival.name,
+        genre = rival.genre,
+        fame = rival.fame,
+        feeCents = JointAlbums.feeCents(rival);
+  final int artistId;
+  final String name;
+  final int genre;
+  final double fame;
+  final int feeCents;
 }

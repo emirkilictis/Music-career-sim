@@ -21,6 +21,7 @@ export 'src/config/sim_config.dart';
 export 'src/features.dart';
 export 'src/festivals.dart';
 export 'src/holidays.dart';
+export 'src/joint_albums.dart';
 export 'src/leaks.dart';
 export 'src/lifecycle.dart';
 export 'src/live_albums.dart';

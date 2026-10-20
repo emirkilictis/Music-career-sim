@@ -1362,6 +1362,51 @@ void main() {
       g.close();
     });
 
+    test('a joint album with a rival sells to both fan bases (K150)', () {
+      (GameSession, List<int>) start() {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire,
+                premium: true));
+        final p = g.world.player!;
+        p.moneyCents = 1 << 40;
+        final ids = <int>[];
+        for (var i = 0; i < 8; i++) {
+          p.creativeEnergy = 100;
+          ids.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        return (g, ids);
+      }
+
+      final (solo, sIds) = start();
+      final soloAl = solo.releaseAlbum('Alone', sIds);
+      var (g, ids) = start();
+      final partner = g.jointPartners.first;
+      expect(partner.feeCents, JointAlbums.feeCents(g.world.artists[partner.artistId]));
+      final money = g.player.moneyCents;
+      final al = g.releaseAlbum('Together', ids, partnerId: partner.artistId);
+      expect(money - g.player.moneyCents,
+          partner.feeCents + Actions.campaignCostFor(g.world.player!, Campaign.standard));
+      expect(g.album(al.id).partnerName, partner.name);
+      for (final id in ids) {
+        expect(g.world.songs[id].featuredArtistIds, contains(partner.artistId));
+      }
+      expect(() => g.releaseAlbum('X', ids, partnerId: g.world.playerArtistId),
+          throwsA(isA<GameException>()));
+      solo.advanceWeek();
+      g.advanceWeek();
+      expect(g.album(al.id).firstWeekUnits,
+          greaterThan(solo.album(soloAl.id).firstWeekUnits));
+      solo.close();
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.album(al.id).partnerId, partner.artistId);
+      g.close();
+    });
+
     test('an anniversary reissue: remastered, with a vinyl (K149)', () {
       final g = GameSession.start(
           slots,

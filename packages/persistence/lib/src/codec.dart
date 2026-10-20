@@ -442,8 +442,8 @@ abstract final class Codec {
     // Added in schema v13, v25, v28, v30.
     'revenue', 'preOrders', 'exclusiveUntil', 'exclusiveFee',
     'masterShare',
-    // Added in schema v33, v34, v37.
-    'bundle', 'liveTour', 'anniv',
+    // Added in schema v33, v34, v37, v38.
+    'bundle', 'liveTour', 'anniv', 'partner',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -471,6 +471,7 @@ abstract final class Codec {
             : jsonEncode([al.bundle.index, al.bundleUnits]),
         al.liveTour,
         al.anniversaries,
+        al.partnerId,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -500,6 +501,7 @@ abstract final class Codec {
       ..masterShare = (r['masterShare'] as num?)?.toDouble()
       ..liveTour = r['liveTour'] as int? ?? -1
       ..anniversaries = r['anniv'] as int? ?? 0
+      ..partnerId = r['partner'] as int? ?? -1
       ..variantFormats = r['editionFormats'] == null
           ? const []
           : _parseInts(r['editionFormats'] as String)

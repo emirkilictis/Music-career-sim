@@ -834,6 +834,10 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
   Map<AlbumBundle, double> _bundles = const {};
   AlbumBundle _bundle = AlbumBundle.none;
 
+  /// Joint album partners and the one picked (docs K150).
+  List<JointPartnerView> _partners = const [];
+  int _partner = -1;
+
   @override
   void initState() {
     super.initState();
@@ -842,6 +846,9 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
     });
     widget.state.read(Cmd.bundleOptions()).then((b) {
       if (mounted) setState(() => _bundles = b);
+    });
+    widget.state.read(Cmd.jointPartners()).then((p) {
+      if (mounted) setState(() => _partners = p);
     });
   }
 
@@ -928,11 +935,16 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           campaign: campaign,
           exclusive: _goExclusive,
           bundle: _goBundle,
+          partnerId: _type == AlbumType.mixtape ? -1 : _partner,
         ));
         _saveCovers(images, ImageStore.albumKey(album.id));
         if (!mounted) return;
         Navigator.pop(context);
         showInfo(context, l.albumReleased(album.title));
+      } else if (_partner >= 0 && _type != AlbumType.mixtape) {
+        // A joint album comes out now (docs K150).
+        showInfo(context, l.jointNowOnly);
+        return;
       } else {
         final s = await career.act(Cmd.scheduleAlbum(
           title: _title.text,
@@ -1037,6 +1049,29 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
               subtitle: Text(l.exclusiveHint(
                   fmt.money(_exclusiveOffer!), StreamingTools.exclusiveWeeks)),
             ),
+          ],
+          // A joint album with a rival (docs K150).
+          if (_partners.isNotEmpty && _type != AlbumType.mixtape) ...[
+            const SizedBox(height: 12),
+            Text(l.jointTitle,
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Text(l.jointHint,
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+            const SizedBox(height: 6),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              ChoiceChip(
+                label: Text(l.jointNone),
+                selected: _partner < 0,
+                onSelected: (_) => setState(() => _partner = -1),
+              ),
+              for (final p in _partners.take(10))
+                ChoiceChip(
+                  label: Text('${p.name} · ${fmt.money(p.feeCents)}'),
+                  selected: _partner == p.artistId,
+                  onSelected: (_) => setState(() => _partner = p.artistId),
+                ),
+            ]),
           ],
           // Album bundles while the charts count them (docs K144).
           if (_bundles.isNotEmpty &&

@@ -1009,6 +1009,34 @@ class GameSession {
       ..bundle = bundle);
   }
 
+  /// The partner of a joint album (docs K150), checked; null for none.
+  Artist? _jointPartner(int partnerId, AlbumType type) {
+    if (partnerId < 0) return null;
+    if (type == AlbumType.mixtape || partnerId >= world.artists.length) {
+      throw GameException('noPartner', 'No such partner');
+    }
+    final rival = world.artists[partnerId];
+    if (!JointAlbums.willing(rival, _p)) {
+      throw GameException('featureRefused', 'Out of your league');
+    }
+    return rival;
+  }
+
+  /// Rivals who would make a joint album with the player, the most
+  /// famous first (docs K150).
+  List<JointPartnerView> get jointPartners {
+    final all = [
+      for (final id in world.activeArtistIds)
+        if (JointAlbums.willing(world.artists[id], _p) &&
+            world.artists[id].fame >= 0.05)
+          world.artists[id]
+    ]..sort((x, y) {
+        final f = y.fame.compareTo(x.fame);
+        return f != 0 ? f : x.id.compareTo(y.id);
+      });
+    return [for (final a in all.take(20)) JointPartnerView.of(a)];
+  }
+
   /// Album bundles (docs K144): only while the charts count them, and a
   /// ticket bundle needs a tour ahead.
   void _checkBundle(AlbumType type, AlbumBundle bundle) {
@@ -1201,12 +1229,15 @@ class GameSession {
     Campaign campaign = Campaign.standard,
     bool exclusive = false,
     AlbumBundle bundle = AlbumBundle.none,
+    int partnerId = -1,
   }) {
     final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
     _checkBundle(type, bundle);
     final formats = _formats(variantFormats);
+    final partner = _jointPartner(partnerId, type);
     _requireMoney(_campaignCost(campaign) +
-        Actions.editionsCostCents(variantWeeks.length, formats));
+        Actions.editionsCostCents(variantWeeks.length, formats) +
+        (partner == null ? 0 : JointAlbums.feeCents(partner)));
     final al = Actions.releaseAlbum(world, _p, t, songIds,
         type: type,
         variantWeeks: variantWeeks,
@@ -1215,6 +1246,7 @@ class GameSession {
         campaign: campaign,
         exclusive: exclusive,
         bundle: bundle);
+    if (partner != null) JointAlbums.join(world, _p, al, partner);
     _saveNow();
     return AlbumView.of(world, al);
   }

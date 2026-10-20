@@ -110,6 +110,7 @@ abstract final class Cmd {
     required Campaign campaign,
     bool exclusive = false,
     AlbumBundle bundle = AlbumBundle.none,
+    int partnerId = -1,
   }) =>
       (s) => s.releaseAlbum(title, songIds,
           type: type,
@@ -117,7 +118,12 @@ abstract final class Cmd {
           variantFormats: variantFormats,
           campaign: campaign,
           exclusive: exclusive,
-          bundle: bundle);
+          bundle: bundle,
+          partnerId: partnerId);
+
+  /// Rivals who would make a joint album (docs K150).
+  static SessionCmd<List<JointPartnerView>> jointPartners() =>
+      (s) => s.jointPartners;
 
   /// What each album bundle would add now (docs K144).
   static SessionCmd<Map<AlbumBundle, double>> bundleOptions() =>
