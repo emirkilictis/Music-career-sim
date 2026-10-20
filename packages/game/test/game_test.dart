@@ -3252,6 +3252,52 @@ void main() {
       g.close();
     });
 
+    test('the release calendar shows the dates ahead (K177)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final w0 = g.week;
+      g.world.player!.creativeEnergy = 100;
+      final song = g.writeSong(budget: BudgetTier.low).id;
+      g.scheduleSingle(song,
+          campaign: Campaign.standard,
+          releaseWeek: w0 + 6,
+          announceWeek: w0 + 4);
+      g.startTour(const TourRequest(
+          name: 'Run', legs: [TourLeg(TourMarket.usa, TourKind.club, 6)]));
+      final cal = g.calendar;
+      List<CalendarEntry> at(int week) =>
+          cal.where((c) => c.week == week).expand((c) => c.entries).toList();
+      expect(at(w0 + 6).map((e) => e.kind), contains(CalendarKind.release));
+      expect(at(w0 + 6).first.title, g.song(song).title);
+      expect(at(w0 + 4).map((e) => e.kind), contains(CalendarKind.announce));
+      final tourWeeks = [
+        for (final c in cal)
+          if (c.entries.any((e) => e.kind == CalendarKind.tour)) c.week
+      ];
+      expect(tourWeeks, isNotEmpty);
+      // Half a year always holds some of the year's dates, in order.
+      expect(cal.expand((c) => c.entries).where((e) => e.isSeason),
+          isNotEmpty);
+      for (var i = 1; i < cal.length; i++) {
+        expect(cal[i].week, greaterThan(cal[i - 1].week));
+      }
+      for (final c in cal) {
+        expect(c.week, inInclusiveRange(w0, w0 + ReleaseCalendar.weeks - 1));
+      }
+      // Big rivals' announced albums are on it.
+      for (final r in g.upcomingRivalAlbums) {
+        expect(
+            at(r.week).any((e) =>
+                e.kind == CalendarKind.rivalAlbum && e.artistId == r.artistId),
+            isTrue);
+      }
+      g.close();
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;

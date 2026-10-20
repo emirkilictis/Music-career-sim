@@ -4587,6 +4587,124 @@
       }
     }
   },
+  "calTitle": "Release calendar",
+  "calHint": "The next six months: your dates, big rivals' announced albums and the dates of the year that matter for a release.",
+  "calThisWeek": "This week",
+  "calNextWeek": "Next week",
+  "calInWeeks": "In {n} weeks",
+  "@calInWeeks": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "calRelease": "{type} out: {title}",
+  "@calRelease": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "calAnnounce": "Announced: {title}",
+  "@calAnnounce": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "calEdition": "New edition of {title}",
+  "@calEdition": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "calOnStreaming": "{title} comes to streaming",
+  "@calOnStreaming": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "calTour": "Tour: {cities}",
+  "@calTour": {
+    "placeholders": {
+      "cities": {
+        "type": "String"
+      }
+    }
+  },
+  "calFestival": "Festival: {name}",
+  "@calFestival": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "calRival": "Album from {artist}: {title}",
+  "@calRival": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "calAwardCutoff": "Last week to count for the {year} awards",
+  "@calAwardCutoff": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "calNominations": "{year} award nominations",
+  "@calNominations": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "calCeremony": "{year} award show",
+  "@calCeremony": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "calHolidays": "Holiday season: Christmas songs come back",
+  "calSummerStart": "The song of the summer race starts",
+  "calSummerEnd": "Last week of the summer race",
+  "calYearEnd": "{year} year-end charts",
+  "@calYearEnd": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "calWrapped": "Streamify Wrapped {year}",
+  "@calWrapped": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "calEmpty": "Nothing on the calendar yet.",
   "eventRivalSurprise": "Surprise: {artist} dropped {title} with no warning.",
   "@eventRivalSurprise": {
     "placeholders": {

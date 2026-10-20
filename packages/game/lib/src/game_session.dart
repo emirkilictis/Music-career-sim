@@ -4,6 +4,7 @@ import 'package:persistence/persistence.dart';
 import 'package:simulation_core/simulation_core.dart';
 
 import 'best_sellers.dart';
+import 'calendar.dart';
 import 'career_setup.dart';
 import 'events.dart';
 import 'income.dart';
@@ -836,6 +837,10 @@ class GameSession {
     });
     return out;
   }
+
+  /// The next weeks' dates for picking a release week (docs K177).
+  List<CalendarWeek> get calendar => ReleaseCalendar.build(world,
+      rivals: upcomingRivalAlbums, festivals: festivals);
 
   /// Rivals whose releases make news: the top tier or well known.
   static bool _bigRival(Artist a) => a.tier == ArtistTier.a || a.fame >= 0.35;

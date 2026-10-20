@@ -15,6 +15,7 @@ import '../widgets/image_pickers.dart';
 import '../widgets/media_tile.dart';
 import '../widgets/release_timing.dart';
 import 'album_detail_screen.dart';
+import 'calendar_screen.dart';
 import 'song_detail_screen.dart';
 
 /// Releases: put out singles and albums, and see the discography.
@@ -586,6 +587,16 @@ class _ReleasesTabState extends State<ReleasesTab> {
                 t.shows)),
           ),
         ],
+        // Picking a week: the next six months at a glance (docs K177).
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => CalendarScreen(state: career))),
+          icon: const Icon(Icons.calendar_month_rounded),
+          label: Text(l.calTitle),
+        ),
         const SizedBox(height: 16),
         if (dated.isNotEmpty) ...[
           Section(

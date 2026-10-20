@@ -176,6 +176,14 @@ void main() {
     await shot(tester, '06c_album_editions');
     await tester.pageBack();
     await tester.pumpAndSettle();
+    // The release calendar (K177).
+    await tester.scrollUntilVisible(_ci('Release calendar'), 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(_ci('Release calendar'));
+    await tester.pumpAndSettle();
+    await shot(tester, '06d_calendar');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tab(tester, 'Charts');
     await shot(tester, '07_charts_songs');
     // A row opens its week underneath (K89).
