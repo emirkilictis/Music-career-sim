@@ -1581,5 +1581,21 @@
   "curatorLine": "{genre} · {followers} takipçi",
   "eventCuratorsAdded": "{sent} küratörden {adds} tanesi “{title}” şarkını listesine ekledi ({reach} takipçi).",
   "eventCuratorsNone": "{sent} küratörün hiçbiri “{title}” şarkını eklemedi.",
-  "errorNoCurators": "Bu şarkı şu an küratörlere gönderilemez."
+  "errorNoCurators": "Bu şarkı şu an küratörlere gönderilemez.",
+  "ghButton": "Greatest Hits albümü",
+  "ghTitle": "En iyiler albümü",
+  "ghHint": "{minHits}–{maxHits} çıkmış şarkı ve kasadan {minNew}–{maxNew} yeni şarkı seç. Hayranlarda eski şarkılar zaten var; hitlerini bilen geniş kitle onu yıllarca alır, en çok CD döneminde. Yeni bir dönem açmaz ve plak şirketi borçlu olduğun albümlerden saymaz.",
+  "ghDefaultTitle": "Greatest Hits",
+  "ghHits": "Hitler ({count})",
+  "ghNew": "Yeni şarkılar ({count})",
+  "ghPeak": "#{peak} · {year}",
+  "ghNoPeak": "listeye girmedi · {year}",
+  "ghGo": "Devam: {hits} hit + {fresh} yeni",
+  "ghNeedNew": "Önce yeni bir şarkı yaz: en iyiler albümü en az bir yeni şarkı ister.",
+  "ghTooEarly": "En iyiler albümü kariyerin {years}. yılından sonra çıkar.",
+  "ghTooSoon": "Her {years} yılda bir en iyiler albümü çıkar.",
+  "ghFewSongs": "En iyiler albümü için {count} çıkmış şarkın olmalı.",
+  "ghTag": "Greatest Hits",
+  "ghHitsSection": "İçindeki hitler",
+  "errorNoCompilation": "Şu an en iyiler albümü çıkaramazsın."
 }

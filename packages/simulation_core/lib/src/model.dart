@@ -1041,6 +1041,10 @@ class Album with Charted {
   /// entry (docs K149).
   int anniversaries = 0;
 
+  /// A greatest hits album's released songs (docs K161); [songIds] are
+  /// its new ones. Empty for any other album.
+  final List<int> hitIds = [];
+
   /// A live album: the start week of the tour it was recorded on (-1: a
   /// studio record; docs K146).
   int liveTour = -1;

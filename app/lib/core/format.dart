@@ -811,6 +811,7 @@ class Fmt {
       'noLanguage' => l.errorNoLanguage,
       'noDistributor' => l.errorNoDistributor,
       'noCurators' => l.errorNoCurators,
+      'noCompilation' => l.errorNoCompilation,
       'noPlaylists' ||
       'hasPlaylist' ||
       'noPlaylist' ||

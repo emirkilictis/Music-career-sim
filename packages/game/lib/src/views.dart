@@ -703,6 +703,7 @@ class AlbumView {
         exclusiveFeeCents = al.exclusiveFeeCents,
         bundle = al.bundle,
         isLive = al.isLive,
+        hitTrackIds = List.unmodifiable(al.hitIds),
         partnerId = al.partnerId,
         visual = al.visual,
         visualCostCents = w.player != null && VisualAlbums.can(w, w.player!, al)
@@ -747,6 +748,7 @@ class AlbumView {
         isDeluxe = Actions.hasDeluxe(al),
         canDeluxe = al.artistId == w.playerArtistId &&
             al.type != AlbumType.mixtape &&
+            al.hitIds.isEmpty &&
             w.week > al.releaseWeek &&
             !Actions.hasDeluxe(al),
         scheduleId = al.scheduleId,
@@ -817,6 +819,11 @@ class AlbumView {
 
   /// A live album (docs K146).
   final bool isLive;
+
+  /// A greatest hits album's released songs ([trackIds] are its new
+  /// ones; docs K161).
+  final List<int> hitTrackIds;
+  bool get isCompilation => hitTrackIds.isNotEmpty;
 
   /// A visual album, or what making it one costs now (null: not
   /// possible; docs K154).
@@ -2408,6 +2415,29 @@ class WrittenSongView {
   final int peak;
   final double streams;
   final double earnedCents;
+}
+
+/// A released song that could go on a greatest hits album (docs K161).
+class HitCandidateView {
+  HitCandidateView.of(World w, Song s)
+      : songId = s.id,
+        title = s.title,
+        albumId = coverAlbumOf(w, s),
+        year = GameTime.yearOf(s.releasedWeek),
+        peak = Compilations.bestPeak(s),
+        streams = w.songLifetimeStreams(s),
+        weight = Compilations.hitWeight(s);
+  final int songId;
+  final String title;
+  final int albumId;
+  final int year;
+
+  /// Best place on any songs chart (0: never charted).
+  final int peak;
+  final double streams;
+
+  /// What it adds to the album's pull.
+  final double weight;
 }
 
 /// The player's own playlist on the streaming app (docs K159).

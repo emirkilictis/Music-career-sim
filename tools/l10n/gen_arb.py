@@ -1592,6 +1592,25 @@ k('eventCuratorsAdded','{adds} of {sent} curators added “{title}” ({reach} f
 k('eventCuratorsNone','None of the {sent} curators added “{title}”.','{sent} küratörün hiçbiri “{title}” şarkını eklemedi.', title='String', sent='int')
 k('errorNoCurators','This song cannot be sent to curators now.','Bu şarkı şu an küratörlere gönderilemez.')
 
+
+# Greatest hits (docs K161).
+k('ghButton','Greatest hits album','Greatest Hits albümü')
+k('ghTitle','Greatest hits','En iyiler albümü')
+k('ghHint','Pick {minHits}–{maxHits} released songs and {minNew}–{maxNew} new ones from the vault. Fans have the old songs; people who know your hits buy it, for years, most of all in the CD era. No new era, and the label does not count it as an album it is owed.','{minHits}–{maxHits} çıkmış şarkı ve kasadan {minNew}–{maxNew} yeni şarkı seç. Hayranlarda eski şarkılar zaten var; hitlerini bilen geniş kitle onu yıllarca alır, en çok CD döneminde. Yeni bir dönem açmaz ve plak şirketi borçlu olduğun albümlerden saymaz.', minHits='int', maxHits='int', minNew='int', maxNew='int')
+k('ghDefaultTitle','Greatest Hits','Greatest Hits')
+k('ghHits','Hits ({count})','Hitler ({count})', count='int')
+k('ghNew','New songs ({count})','Yeni şarkılar ({count})', count='int')
+k('ghPeak','#{peak} · {year}','#{peak} · {year}', peak='int', year='int')
+k('ghNoPeak','never charted · {year}','listeye girmedi · {year}', year='int')
+k('ghGo','Next: {hits} hits + {fresh} new','Devam: {hits} hit + {fresh} yeni', hits='int', fresh='int')
+k('ghNeedNew','Write a new song first: a best-of needs at least one.','Önce yeni bir şarkı yaz: en iyiler albümü en az bir yeni şarkı ister.')
+k('ghTooEarly','A greatest hits album comes {years} years into a career.','En iyiler albümü kariyerin {years}. yılından sonra çıkar.', years='int')
+k('ghTooSoon','One greatest hits album every {years} years.','Her {years} yılda bir en iyiler albümü çıkar.', years='int')
+k('ghFewSongs','You need {count} released songs for a best-of.','En iyiler albümü için {count} çıkmış şarkın olmalı.', count='int')
+k('ghTag','Greatest hits','Greatest Hits')
+k('ghHitsSection','The hits on it','İçindeki hitler')
+k('errorNoCompilation','A greatest hits album is not possible now.','Şu an en iyiler albümü çıkaramazsın.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

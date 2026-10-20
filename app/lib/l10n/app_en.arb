@@ -5620,5 +5620,99 @@
       }
     }
   },
-  "errorNoCurators": "This song cannot be sent to curators now."
+  "errorNoCurators": "This song cannot be sent to curators now.",
+  "ghButton": "Greatest hits album",
+  "ghTitle": "Greatest hits",
+  "ghHint": "Pick {minHits}–{maxHits} released songs and {minNew}–{maxNew} new ones from the vault. Fans have the old songs; people who know your hits buy it, for years, most of all in the CD era. No new era, and the label does not count it as an album it is owed.",
+  "@ghHint": {
+    "placeholders": {
+      "minHits": {
+        "type": "int"
+      },
+      "maxHits": {
+        "type": "int"
+      },
+      "minNew": {
+        "type": "int"
+      },
+      "maxNew": {
+        "type": "int"
+      }
+    }
+  },
+  "ghDefaultTitle": "Greatest Hits",
+  "ghHits": "Hits ({count})",
+  "@ghHits": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ghNew": "New songs ({count})",
+  "@ghNew": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ghPeak": "#{peak} · {year}",
+  "@ghPeak": {
+    "placeholders": {
+      "peak": {
+        "type": "int"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "ghNoPeak": "never charted · {year}",
+  "@ghNoPeak": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "ghGo": "Next: {hits} hits + {fresh} new",
+  "@ghGo": {
+    "placeholders": {
+      "hits": {
+        "type": "int"
+      },
+      "fresh": {
+        "type": "int"
+      }
+    }
+  },
+  "ghNeedNew": "Write a new song first: a best-of needs at least one.",
+  "ghTooEarly": "A greatest hits album comes {years} years into a career.",
+  "@ghTooEarly": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "ghTooSoon": "One greatest hits album every {years} years.",
+  "@ghTooSoon": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "ghFewSongs": "You need {count} released songs for a best-of.",
+  "@ghFewSongs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ghTag": "Greatest hits",
+  "ghHitsSection": "The hits on it",
+  "errorNoCompilation": "A greatest hits album is not possible now."
 }

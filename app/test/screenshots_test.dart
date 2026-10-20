@@ -759,6 +759,61 @@ void main() {
     await tester.tap(sign);
     await shot(tester, '15p_record_deal');
   });
+  testWidgets('screenshots: a greatest hits album', skip: !enabled,
+      (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+
+    // Five albums in the CD era, then the best-of (docs K161).
+    final c = app.controller;
+    final port = ReceivePort();
+    await c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Dana Vale',
+          genre: 0,
+          startYear: 2001,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 161,
+        ),
+        port.sendPort));
+    port.close();
+    await c.run(_fiveAlbums());
+    await c.run((s) {
+      s.advanceWeeks(60, stop: SkipStop.never);
+      s.world.player!
+        ..creativeEnergy = 100
+        ..moneyCents = 1 << 40;
+      final fresh = s.writeSong(budget: BudgetTier.high, title: 'Home Again');
+      final hits = [for (final h in s.compilationCandidates.take(14)) h.songId];
+      s.releaseGreatestHits('Greatest Hits', hits, [fresh.id]);
+      s.advanceWeeks(6, stop: SkipStop.never);
+    });
+    await c.exec(Cmd.closeCareer());
+
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Dana Vale'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Releases');
+    final gh = _ci('Greatest Hits').first;
+    await tester.scrollUntilVisible(gh, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(gh);
+    await tester.pumpAndSettle();
+    await shot(tester, '14k_greatest_hits');
+    final hitsOn = _ci('The hits on it');
+    await tester.scrollUntilVisible(hitsOn, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(hitsOn), alignment: 0.1);
+    await tester.pumpAndSettle();
+    await shot(tester, '14l_greatest_hits_tracks');
+  });
+
   testWidgets('screenshots: a K-pop music show', skip: !enabled,
       (tester) async {
     await tester.runAsync(loadFonts);

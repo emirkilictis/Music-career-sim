@@ -32,6 +32,7 @@ class AlbumDetailScreen extends StatefulWidget {
 class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   AlbumView? _album;
   List<SongView> _tracks = const [];
+  List<SongView> _hits = const [];
   List<HistoryPoint> _history = const [];
   List<AlbumSalesWeek> _sales = const [];
   List<ChartWeek> _run = const [];
@@ -48,6 +49,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     final tracks = [
       for (final id in album.trackIds) await st.read(Cmd.song(id))
     ];
+    final hits = [
+      for (final id in album.hitTrackIds) await st.read(Cmd.song(id))
+    ];
     final history = await st.read(Cmd.albumHistory(widget.albumId));
     final sales = await st.read(Cmd.albumSales(widget.albumId));
     final run = await st.read(Cmd.chartRun(EntityKind.album, widget.albumId));
@@ -55,6 +59,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
       setState(() {
         _album = album;
         _tracks = tracks;
+        _hits = hits;
         _history = history;
         _sales = sales;
         _run = run;
@@ -272,7 +277,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 ' · ${fmt.albumType(a.type)}'
                 '${a.isDeluxe ? ' · ${l.deluxeTag}' : ''}'
                 '${a.isRerecord ? ' · ${l.rerecordTag}' : ''}'
-                '${a.isLive ? ' · ${l.liveTag}' : ''}',
+                '${a.isLive ? ' · ${l.liveTag}' : ''}'
+                '${a.isCompilation ? ' · ${l.ghTag}' : ''}',
           ),
           if (a.canDeluxe) ...[
             const SizedBox(height: 10),
@@ -725,6 +731,29 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                                     songId: t.id, state: widget.state))),
                       ),
                   ]),
+            ),
+          ],
+          // A greatest hits album's old songs (docs K161).
+          if (_hits.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.ghHitsSection,
+              icon: Icons.star_rounded,
+              child: Column(children: [
+                for (final (i, h) in _hits.indexed)
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: Text('${i + 1}'),
+                    title: Text(h.title),
+                    subtitle: Text(fmt.songMain(h, widget.state.week)),
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => SongDetailScreen(
+                                songId: h.id, state: widget.state))),
+                  ),
+              ]),
             ),
           ],
           const SizedBox(height: 12),

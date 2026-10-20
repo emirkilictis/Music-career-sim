@@ -32,6 +32,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
 
   /// Tours a live album can come from (docs K146).
   List<LiveTourView> _liveTours = const [];
+  CompilationBlock? _hitsBlock = CompilationBlock.tooEarly;
   int _loadedRevision = -1;
 
   @override
@@ -51,14 +52,145 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final scheduled = await career.read(Cmd.scheduled());
     final rivals = await career.read(Cmd.upcomingRivalAlbums());
     final liveTours = await career.read(Cmd.liveAlbumTours());
+    final hitsBlock = await career.read(Cmd.compilationBlock());
     if (mounted) {
       setState(() {
+        _hitsBlock = hitsBlock;
         _liveTours = liveTours;
         _songs = songs;
         _albums = albums;
         _scheduled = scheduled;
         _rivals = rivals;
       });
+    }
+  }
+
+  /// Picks hits and new songs and puts out a greatest hits album (K161).
+  Future<void> _greatestHits() async {
+    final l = context.l10n;
+    final career = context.careerRead;
+    final hits = await career.read(Cmd.compilationCandidates());
+    if (!mounted) return;
+    final fresh = [
+      for (final s in _songs)
+        if (s.inVault &&
+            s.scheduledSingleWeek < 0 &&
+            s.scheduledAlbumWeek < 0 &&
+            s.albumId < 0)
+          s
+    ];
+    if (fresh.isEmpty) {
+      showInfo(context, l.ghNeedNew);
+      return;
+    }
+    final name = TextEditingController(text: l.ghDefaultTitle);
+    final picked = await showModalBottomSheet<(String, List<int>, List<int>)>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) {
+        // The biggest hits are ticked to start with.
+        final chosen = [
+          for (final h in hits.take(Compilations.minHits + 2)) h.songId
+        ];
+        final added = <int>[];
+        return StatefulBuilder(
+          builder: (c, set) => Padding(
+            padding:
+                EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
+            child: SafeArea(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(c).size.height * 0.9),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                    child: Text(l.ghTitle,
+                        style: Theme.of(c).textTheme.titleLarge),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Text(
+                        l.ghHint(Compilations.minHits, Compilations.maxHits,
+                            Compilations.minNew, Compilations.maxNew),
+                        style: Theme.of(c).textTheme.bodySmall),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                    child: TextField(
+                      controller: name,
+                      maxLength: 60,
+                      decoration: InputDecoration(labelText: l.rerecordName),
+                    ),
+                  ),
+                  Flexible(
+                    child: ListView(shrinkWrap: true, children: [
+                      ListTile(
+                          dense: true,
+                          title: Text(l.ghNew(added.length),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800))),
+                      for (final s in fresh)
+                        CheckboxListTile(
+                          value: added.contains(s.id),
+                          onChanged: !added.contains(s.id) &&
+                                  added.length >= Compilations.maxNew
+                              ? null
+                              : (v) => set(() => v == true
+                                  ? added.add(s.id)
+                                  : added.remove(s.id)),
+                          title: Text(s.title),
+                          subtitle: Text(context.fmt.songGrade(s)),
+                        ),
+                      ListTile(
+                          dense: true,
+                          title: Text(l.ghHits(chosen.length),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800))),
+                      for (final h in hits)
+                        CheckboxListTile(
+                          value: chosen.contains(h.songId),
+                          onChanged: !chosen.contains(h.songId) &&
+                                  chosen.length >= Compilations.maxHits
+                              ? null
+                              : (v) => set(() => v == true
+                                  ? chosen.add(h.songId)
+                                  : chosen.remove(h.songId)),
+                          title: Text(h.title),
+                          subtitle: Text(h.peak > 0
+                              ? l.ghPeak(h.peak, h.year)
+                              : l.ghNoPeak(h.year)),
+                        ),
+                    ]),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: FilledButton(
+                      onPressed: chosen.length < Compilations.minHits ||
+                              added.length < Compilations.minNew
+                          ? null
+                          : () => Navigator.pop(
+                              c, (name.text, List.of(chosen), List.of(added))),
+                      child: Text(l.ghGo(chosen.length, added.length)),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+    name.dispose();
+    if (picked == null || !mounted) return;
+    final campaign = await pickCampaign(context, career);
+    if (campaign == null || !mounted) return;
+    try {
+      final al = await career.act(Cmd.releaseGreatestHits(
+          picked.$1, picked.$2, picked.$3, campaign));
+      if (mounted) showInfo(context, l.albumReleased(al.title));
+    } catch (e) {
+      if (mounted) showError(context, e);
     }
   }
 
@@ -420,6 +552,29 @@ class _ReleasesTabState extends State<ReleasesTab> {
             ),
           ),
         ]),
+        // A greatest hits album (docs K161), and why not yet.
+        if (_hitsBlock != CompilationBlock.tooEarly) ...[
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: career.busy || _hitsBlock != null ? null : _greatestHits,
+            icon: const Icon(Icons.star_rounded),
+            label: Text(l.ghButton),
+          ),
+          if (_hitsBlock case final b?)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                  switch (b) {
+                    CompilationBlock.tooEarly =>
+                      l.ghTooEarly(Compilations.minYears),
+                    CompilationBlock.tooSoon =>
+                      l.ghTooSoon(Compilations.gapYears),
+                    CompilationBlock.fewSongs =>
+                      l.ghFewSongs(Compilations.minHits),
+                  },
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+            ),
+        ],
         // A live album from a finished tour (docs K146).
         for (final t in _liveTours) ...[
           const SizedBox(height: 12),

@@ -62,8 +62,10 @@ abstract final class Rerecords {
 
   /// What stops [a] re-recording [al] now, or null.
   static RerecordBlock? block(World w, Artist a, Album al) {
+    // A best-of has nothing of its own to re-record (docs K161).
     if (al.artistId != a.id ||
-        (al.type != AlbumType.album && al.type != AlbumType.ep)) {
+        (al.type != AlbumType.album && al.type != AlbumType.ep) ||
+        al.hitIds.isNotEmpty) {
       return RerecordBlock.notYours;
     }
     if (isRerecord(w, al)) return RerecordBlock.isRerecord;

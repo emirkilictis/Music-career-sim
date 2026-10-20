@@ -254,6 +254,16 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // Greatest hits (docs K161).
+  static SessionCmd<CompilationBlock?> compilationBlock() =>
+      (s) => s.compilationBlock;
+  static SessionCmd<List<HitCandidateView>> compilationCandidates() =>
+      (s) => s.compilationCandidates;
+  static SessionCmd<AlbumView> releaseGreatestHits(String title,
+          List<int> hitIds, List<int> newIds, Campaign campaign) =>
+      (s) =>
+          s.releaseGreatestHits(title, hitIds, newIds, campaign: campaign);
+
   // Independent curators (docs K160).
   static SessionCmd<Map<CuratorPack, int>> curatorCosts() =>
       (s) => s.curatorCosts;

@@ -1404,6 +1404,65 @@ void main() {
       g.close();
     });
 
+    test('a greatest hits album (K161)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2000,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      expect(g.compilationBlock, CompilationBlock.tooEarly);
+      final ids = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      for (final id in ids.take(4)) {
+        g.releaseSingle(id);
+        g.advanceWeeks(6, stop: SkipStop.never);
+      }
+      g.releaseAlbum('First Light', ids);
+      g.advanceWeeks(52 * Compilations.minYears, stop: SkipStop.never);
+      expect(g.compilationBlock, isNull);
+      final hits = g.compilationCandidates;
+      expect(hits.length, greaterThanOrEqualTo(10));
+      expect(hits.first.weight, greaterThanOrEqualTo(hits.last.weight));
+      p.creativeEnergy = 100;
+      final fresh = g.writeSong(budget: BudgetTier.high).id;
+      expect(
+          () => g.releaseGreatestHits(
+              'Best Of', [for (final h in hits.take(5)) h.songId], [fresh]),
+          _code('trackCount'));
+      expect(
+          () => g.releaseGreatestHits('Best Of',
+              [for (final h in hits.take(8)) h.songId], [hits.last.songId]),
+          _code('notInVault'));
+      final picked = [for (final h in hits.take(10)) h.songId];
+      final era = p.eraAlbumId;
+      final contract = p.contractAlbumsLeft;
+      final v = g.releaseGreatestHits('The Hits', picked, [fresh]);
+      expect(v.isCompilation, isTrue);
+      expect(v.trackIds, [fresh]);
+      expect(v.hitTrackIds, picked);
+      // No new era, not an album the label is owed.
+      expect(p.eraAlbumId, era);
+      expect(p.contractAlbumsLeft, contract);
+      // The old songs stay on their albums.
+      expect(g.world.songs[picked.first].albumId, isNot(v.id));
+      expect(g.compilationBlock, CompilationBlock.tooSoon);
+      g.advanceWeeks(8, stop: SkipStop.never);
+      final al = g.world.albums[v.id];
+      expect(al.firstWeekPure, greaterThan(0));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.album(v.id).hitTrackIds, picked);
+      g.close();
+    });
+
     test('songs sent to independent curators (K160)', () {
       var g = GameSession.start(
           slots,

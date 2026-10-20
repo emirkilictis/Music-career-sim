@@ -728,11 +728,14 @@ abstract final class Actions {
       bool announced = false,
       bool exclusive = false,
       AlbumBundle bundle = AlbumBundle.none,
-      int liveTour = -1}) {
+      int liveTour = -1,
+      List<int> hits = const []}) {
     final paid = prepaid ? paidCents : _payCampaign(a, campaign);
     _comeback(w, a);
-    // A live album leaves the anticipation for the next record (K146).
-    _convertAnticipation(a, album: type == AlbumType.album && liveTour < 0);
+    // A live album or a best-of leaves the anticipation for the next
+    // record (K146, K161).
+    final studio = type == AlbumType.album && liveTour < 0 && hits.isEmpty;
+    _convertAnticipation(a, album: studio);
     a.hype += buzz;
     if (!announced && a.tier == ArtistTier.player) {
       final shock = surpriseShock(w, a, type, songIds);
@@ -741,10 +744,12 @@ abstract final class Actions {
         a.surpriseWeek = w.week;
       }
     }
-    final quality = songIds.isEmpty
+    // A best-of is judged on all its songs (docs K161).
+    final judged = [...songIds, ...hits];
+    final quality = judged.isEmpty
         ? 0.0
-        : songIds.map((id) => w.songs[id].quality).reduce((x, y) => x + y) /
-            songIds.length;
+        : judged.map((id) => w.songs[id].quality).reduce((x, y) => x + y) /
+            judged.length;
     final album = Album(
       id: w.albums.length,
       title: title,
@@ -753,7 +758,7 @@ abstract final class Actions {
       releaseWeek: w.week,
       songIds: List.of(songIds),
       quality: quality,
-    );
+    )..hitIds.addAll(hits);
     // Rivals' event albums: their comeback hype is capped, so a 1M+ week
     // stays rare as in reality (a few a year at most); the player's is not
     // (docs K42).
@@ -834,9 +839,9 @@ abstract final class Actions {
       }
     }
     album.liveTour = liveTour;
-    // A live album opens no era and is not an album the label is owed
-    // (docs K146).
-    if (type == AlbumType.album && liveTour < 0) {
+    // A live album or a best-of opens no era and is not an album the
+    // label is owed (docs K146, K161).
+    if (studio) {
       if (a.contractAlbumsLeft > 0) a.contractAlbumsLeft--;
       Eras.open(w, a, album);
     }

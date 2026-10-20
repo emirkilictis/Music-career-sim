@@ -165,6 +165,7 @@ int worldHash(World w) {
   addInt(w.albums.length);
   for (final al in w.albums) {
     addAll(al.reg);
+    addInt(al.hitIds.length);
     addInt(al.campaign.index);
     addDouble(al.campaignReturnCents);
     addDouble(al.preOrders);

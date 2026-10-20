@@ -2180,6 +2180,58 @@ class GameSession {
     return out;
   }
 
+  /// What stops a greatest hits album now (null: nothing; docs K161).
+  CompilationBlock? get compilationBlock => Compilations.block(world, _p);
+
+  /// Released songs a greatest hits album can have, biggest hits first.
+  List<HitCandidateView> get compilationCandidates => [
+        for (final s in Compilations.candidates(world, _p))
+          HitCandidateView.of(world, s)
+      ]..sort((a, b) {
+          final c = b.weight.compareTo(a.weight);
+          return c != 0 ? c : b.streams.compareTo(a.streams);
+        });
+
+  /// Puts out a greatest hits album: released [hitIds] and unreleased
+  /// [newIds] as its new songs (docs K161).
+  AlbumView releaseGreatestHits(
+      String title, List<int> hitIds, List<int> newIds,
+      {Campaign campaign = Campaign.standard}) {
+    if (Compilations.block(world, _p) != null) {
+      throw GameException('noCompilation', 'Not now');
+    }
+    final t = title.trim();
+    if (t.isEmpty || t.length > 60) {
+      throw GameException('invalidTitle', 'Title must be 1–60 chars');
+    }
+    if (hitIds.length < Compilations.minHits ||
+        hitIds.length > Compilations.maxHits ||
+        newIds.length < Compilations.minNew ||
+        newIds.length > Compilations.maxNew ||
+        {...hitIds, ...newIds}.length != hitIds.length + newIds.length) {
+      throw GameException('trackCount', 'Wrong number of songs');
+    }
+    final allowed = {for (final s in Compilations.candidates(world, _p)) s.id};
+    for (final id in hitIds) {
+      _ownSong(id);
+      if (!allowed.contains(id)) {
+        throw GameException('notReleased', 'Only released songs');
+      }
+    }
+    for (final id in newIds) {
+      final s = _ownSong(id);
+      if (s.status != SongStatus.vault ||
+          _p.scheduled.any((sr) => sr.songIds.contains(id))) {
+        throw GameException('notInVault', 'Only unreleased songs');
+      }
+    }
+    _requireMoney(_campaignCost(campaign));
+    final al = Compilations.release(world, _p, t, hitIds, newIds,
+        campaign: campaign);
+    _saveNow();
+    return AlbumView.of(world, al);
+  }
+
   /// Finished tours a live album can come from, latest first (docs K146).
   List<LiveTourView> get liveAlbumTours => [
         for (final t in LiveAlbums.tours(world, _p)) LiveTourView.of(t)

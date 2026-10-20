@@ -22,6 +22,7 @@ import 'joint_albums.dart';
 import 'leaks.dart';
 import 'live_albums.dart';
 import 'lifecycle.dart';
+import 'compilations.dart';
 import 'curators.dart';
 import 'model.dart';
 import 'own_playlist.dart';
@@ -856,7 +857,11 @@ class Simulator {
         // A joint album sells to its partner's fans too (docs K150).
         final fans = p.coreFans * share + JointAlbums.extraFans(w, al, k);
         final casual = p.casual * share;
-        final superPart = fans *
+        // A best-of: fans have the songs, people who know the hits buy
+        // it (docs K161).
+        final comp = Compilations.isCompilation(al);
+        final superPart = (comp ? Compilations.fanShare : 1.0) *
+            fans *
             superRate *
             p.kind.albumAffinity *
             era.superfanFactor *
@@ -906,8 +911,14 @@ class Simulator {
         // From 2013 fans buy in week one and everyone else streams (docs
         // K79): every later week sells less, collector editions aside.
         final later = age == 0 ? 1.0 : tail;
-        final bought =
-            (superPart + casPart + eventPart) * later + collectorPart;
+        final bought = (superPart +
+                    casPart +
+                    eventPart * (comp ? Compilations.fanShare : 1.0)) *
+                later +
+            collectorPart +
+            (comp
+                ? Compilations.sales(w, al, casual, era, age, holiday)
+                : 0.0);
         buysAll += bought;
         buysFromReach += reach[k] *
             c.casualBuyRate *
