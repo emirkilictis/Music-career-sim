@@ -1517,6 +1517,30 @@ k('distributorFans','Needs {fans} fans','{fans} hayran gerekir', fans='String')
 k('distributorRecoup','Leave the deal once its advance is paid back ({left} to go).','Avans geri ödenince anlaşmadan çıkabilirsin (kalan {left}).', left='String')
 k('distributorDone','Your music now goes out: {name}.','Müziğin artık şöyle yayınlanıyor: {name}.', name='String')
 
+
+# Members' solo records and the player's features (docs K158).
+k('memberSoloButton','Release as a member\'s solo','Bir üyenin solo single\'ı olarak çıkar')
+k('memberSoloTitle','Whose solo single?','Kimin solo single\'ı?')
+k('memberSoloHint','It comes out under the member\'s own name and charts on its own. The group pays for the campaign and keeps the money.','Şarkı üyenin kendi adıyla çıkar, listelere ayrı girer. Kampanyayı grup öder, kazanç gruba gelir.')
+k('memberFirstSolo','First solo record','İlk solo kaydı')
+k('memberFans','{fans} fans of their own','Kendi hayranı: {fans}', fans='String')
+k('memberSoloCampaign','Campaign for {name}\'s solo','{name} solosu için kampanya', name='String')
+k('memberSoloDone','“{title}” is out as {name}\'s solo single.','“{title}”, {name} solo single\'ı olarak çıktı.', title='String', name='String')
+k('membersSection','Members\' solo records','Üyelerin solo kayıtları')
+k('membersHint','Put out a vault song as a member\'s solo single from its page.','Kasadaki bir şarkıyı, sayfasından bir üyenin solo single\'ı olarak çıkarabilirsin.')
+k('membersNoSolo','No solo record yet','Henüz solo kaydı yok')
+k('guestSection','Your features','Konuk olduğun şarkılar')
+k('guestHint','Your verses on others\' songs chart under their name; {share}% of what they earn comes to you.','Başkalarının şarkılarındaki konukluğun listelere onların adıyla girer; kazancın %{share} payı sana gelir.', share='int')
+k('chartFeat','{artist} feat. {featuring}','{artist} feat. {featuring}', artist='String', featuring='String')
+k('creditMember','Your member','Üyen')
+k('creditGuest','Your feature','Konukluğun')
+k('memberSoloTag','Your member\'s solo · {earned} to the group','Üyenin solosu · gruba {earned}', earned='String')
+k('guestTag','Your feature · {earned} to you','Konukluğun · sana {earned}', earned='String')
+k('eventMemberTop10','{artist}\'s solo “{title}” is #{position} in the US.','{artist} solosu “{title}” ABD\'de #{position}.', title='String', artist='String', position='int')
+k('eventMemberNo1','{artist}\'s solo “{title}” is #1 in the US!','{artist} solosu “{title}” ABD\'de #1!', title='String', artist='String')
+k('eventGuestTop10','Your feature on {artist}\'s “{title}” is #{position} in the US.','{artist} ile konuk olduğun “{title}” ABD\'de #{position}.', title='String', artist='String', position='int')
+k('eventGuestNo1','Your feature on {artist}\'s “{title}” is #1 in the US!','{artist} ile konuk olduğun “{title}” ABD\'de #1!', title='String', artist='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

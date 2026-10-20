@@ -339,6 +339,8 @@ class SongView {
         writerName = s.writerId >= 0 ? w.artists[s.writerId].name : '',
         writtenByPlayer = s.writerId >= 0 && s.writerId == w.playerArtistId,
         writerCents = s.writerCents,
+        credit = ChartCredit.of(w, s.primaryArtistId, s.featuredArtistIds),
+        guestCents = s.guestCents,
         canAnswerLeak = Leaks.canAnswer(s, w.week),
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
@@ -471,6 +473,11 @@ class SongView {
   final String writerName;
   final bool writtenByPlayer;
   final double writerCents;
+
+  /// The player on it under another name (docs K158): a member's solo
+  /// song or a verse on a rival's, and what the verse has paid.
+  final ChartCredit credit;
+  final double guestCents;
   final bool canAnswerLeak;
   final bool leakHurts;
 
@@ -889,6 +896,8 @@ class ChartRow {
     required this.artistId,
     required this.artistName,
     required this.isPlayer,
+    this.featuring = '',
+    this.credit = ChartCredit.none,
   });
   final int position;
 
@@ -914,8 +923,35 @@ class ChartRow {
   final int artistId;
   final String artistName;
   final bool isPlayer;
+
+  /// The song's featured artists' names, joined ('' for none).
+  final String featuring;
+
+  /// How the player is on it when it is not under their name (K158).
+  final ChartCredit credit;
+
+  /// Under the player's name, by one of their members, or with their verse.
+  bool get isOurs => isPlayer || credit != ChartCredit.none;
   bool get isNew => lastPos == 0 && weeksOn == 1;
   bool get isReentry => lastPos == 0 && weeksOn > 1;
+}
+
+/// How the player is on a record that is not under their name (K158).
+enum ChartCredit {
+  none,
+
+  /// By one of the player's group members, under their own name.
+  member,
+
+  /// The player is featured on it.
+  guest;
+
+  static ChartCredit of(World w, int artistId, List<int> featured) {
+    final me = w.playerArtistId;
+    if (me < 0 || artistId == me) return none;
+    if (w.artists[artistId].managedBy == me) return member;
+    return featured.contains(me) ? guest : none;
+  }
 }
 
 class ChartView {
@@ -994,6 +1030,12 @@ class ChartView {
       artistId: artistId,
       artistName: w.artists[artistId].name,
       isPlayer: artistId == w.playerArtistId,
+      featuring: kind == EntityKind.song
+          ? [for (final f in w.songs[id].featuredArtistIds) w.artists[f].name]
+              .join(', ')
+          : '',
+      credit: ChartCredit.of(w, artistId,
+          kind == EntityKind.song ? w.songs[id].featuredArtistIds : const []),
     );
   }
 
@@ -2316,7 +2358,7 @@ class SongBuyerView {
 
 /// A song the player wrote for someone else (docs K143).
 class WrittenSongView {
-  WrittenSongView.of(World w, Song s)
+  WrittenSongView.of(World w, Song s, {double? earnedCents})
       : songId = s.id,
         title = s.title,
         artistId = s.primaryArtistId,
@@ -2325,7 +2367,7 @@ class WrittenSongView {
         released = s.releasedWeek >= 0,
         peak = s.statsOrNull(Charts.usSongs)?.peak ?? 0,
         streams = w.songLifetimeStreams(s),
-        earnedCents = s.writerCents;
+        earnedCents = earnedCents ?? s.writerCents;
   final int songId;
   final String title;
   final int artistId;
@@ -2337,6 +2379,35 @@ class WrittenSongView {
   final int peak;
   final double streams;
   final double earnedCents;
+}
+
+/// A group member and their solo records (docs K158).
+class MemberView {
+  MemberView.of(World w, Artist group, this.index)
+      : name = group.members[index],
+        artistId = Credits.memberIdOf(group, index),
+        fans = _memberOrNull(w, group, index)?.coreFans ?? 0,
+        fame = _memberOrNull(w, group, index)?.fame ?? 0,
+        songs = [
+          for (final id in w.managedSongIds.reversed)
+            if (w.songs[id].primaryArtistId ==
+                Credits.memberIdOf(group, index))
+              WrittenSongView.of(w, w.songs[id],
+                  earnedCents: w.songs[id].revenueCents),
+        ];
+  final int index;
+  final String name;
+
+  /// Their solo name's artist id (-1: no solo record yet).
+  final int artistId;
+  final double fans;
+  final double fame;
+  final List<WrittenSongView> songs;
+
+  static Artist? _memberOrNull(World w, Artist group, int i) {
+    final id = Credits.memberIdOf(group, i);
+    return id < 0 ? null : w.artists[id];
+  }
 }
 
 /// A finished tour a live album can come from (docs K146).

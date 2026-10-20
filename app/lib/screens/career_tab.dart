@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
+import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
@@ -32,6 +33,8 @@ class _CareerScreenState extends State<CareerScreen> {
   List<SongView> _songs = const [];
   HonorsView? _honors;
   List<WrittenSongView> _written = const [];
+  List<MemberView> _members = const [];
+  List<WrittenSongView> _guest = const [];
   IncomeBreakdown? _income;
   CatalogOfferView? _catalog;
   int _loadedRevision = -1;
@@ -52,6 +55,8 @@ class _CareerScreenState extends State<CareerScreen> {
     final songs = await career.read(Cmd.songs());
     final honors = await career.read(Cmd.honors());
     final written = await career.read(Cmd.writtenForOthers());
+    final members = await career.read(Cmd.members());
+    final guest = await career.read(Cmd.guestSongs());
     final income = await career.read(Cmd.careerIncome());
     final catalog = await career.read(Cmd.catalogOffer());
     if (mounted) {
@@ -59,6 +64,8 @@ class _CareerScreenState extends State<CareerScreen> {
         _years = years;
         _honors = honors;
         _written = written;
+        _members = members;
+        _guest = guest;
         _income = income;
         _catalog = catalog;
         final fmt = context.fmt;
@@ -68,6 +75,29 @@ class _CareerScreenState extends State<CareerScreen> {
               fmt.songMainValue(b, week).compareTo(fmt.songMainValue(a, week)));
       });
     }
+  }
+
+  /// A song the player is on under another name, or wrote (K143, K158).
+  Widget _creditTile(WrittenSongView w, CareerState career) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(w.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+      subtitle: Text([
+        w.artistName,
+        if (!w.released) l.writtenComing,
+        if (w.peak > 0) l.writtenPeak(w.peak),
+        if (w.streams >= 1) l.streamsValue(fmt.compact(w.streams)),
+      ].join(' · ')),
+      trailing: Text(fmt.money(w.earnedCents.round()),
+          style: const TextStyle(fontWeight: FontWeight.w800)),
+      onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) =>
+                  SongDetailScreen(songId: w.songId, state: career))),
+    );
   }
 
   /// Picks how an independent's music gets out (docs K157).
@@ -249,6 +279,46 @@ class _CareerScreenState extends State<CareerScreen> {
                     icon: const Icon(Icons.sell_outlined),
                     label: Text(l.catalogSell(fmt.money(c.offerCents))),
                   ),
+                ]),
+          ),
+        ],
+        // Members' solo records and the player's features (docs K158).
+        if (_members.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Section(
+            title: l.membersSection,
+            icon: Icons.groups_outlined,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.membersHint,
+                      style: TextStyle(color: AppColors.textMuted)),
+                  for (final m in _members) ...[
+                    const SizedBox(height: 10),
+                    Text(m.name,
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
+                    Text(
+                        m.artistId < 0
+                            ? l.membersNoSolo
+                            : l.memberFans(fmt.compact(m.fans)),
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                    for (final w in m.songs) _creditTile(w, career),
+                  ],
+                ]),
+          ),
+        ],
+        if (_guest.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Section(
+            title: l.guestSection,
+            icon: Icons.mic_external_on_outlined,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.guestHint((Credits.guestShare * 100).round()),
+                      style: TextStyle(color: AppColors.textMuted)),
+                  for (final w in _guest) _creditTile(w, career),
                 ]),
           ),
         ],

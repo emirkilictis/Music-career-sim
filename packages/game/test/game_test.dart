@@ -1400,6 +1400,77 @@ void main() {
       g.close();
     });
 
+    test('a member\'s solo single and the player\'s verses (K158)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true,
+              kind: ArtistKind.vocalGroup,
+              members: ['Ari', 'Bo', 'Cy']));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      expect(g.members.map((m) => m.name), ['Ari', 'Bo', 'Cy']);
+      expect(g.members.first.artistId, -1);
+      p.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      expect(() => g.releaseMemberSolo(5, id), _code('noMember'));
+      final cost = g.memberSoloCost(1, Campaign.standard);
+      final money = p.moneyCents;
+      g.releaseMemberSolo(1, id);
+      expect(money - p.moneyCents, cost);
+      expect(g.vault.map((s) => s.id), isNot(contains(id)));
+      final bo = g.members[1];
+      expect(bo.artistId, greaterThanOrEqualTo(0));
+      final member = g.world.artists[bo.artistId];
+      expect(member.managedBy, p.id);
+      expect(member.coreFans, lessThan(p.coreFans));
+      final solo = bo.songs.single;
+      expect(g.world.activeSongIds, contains(solo.songId));
+      // The member makes no plans of their own and is not a rival.
+      g.advanceWeeks(6, stop: SkipStop.never);
+      expect(g.world.songs.where((s) => s.primaryArtistId == member.id),
+          hasLength(1));
+      expect(member.isRetired, isFalse);
+      expect(g.members[1].songs.single.earnedCents, greaterThan(0));
+      expect(g.song(solo.songId).credit, ChartCredit.member);
+      // A rival puts the player on their song: on the charts as theirs,
+      // with the featured share paid to the player.
+      final rival = g.world.artists.firstWhere((a) =>
+          a.tier == ArtistTier.a && !a.isRetired && a.managedBy < 0);
+      final song = Credits.guestOn(g.world, rival, p, producerSkill: 85);
+      expect(g.guestSongs.single.songId, song.id);
+      expect(g.guestSongs.single.released, isFalse);
+      g.advanceWeeks(Credits.guestReleaseAfter + 3, stop: SkipStop.never);
+      expect(song.releasedWeek, greaterThanOrEqualTo(0));
+      expect(song.primaryArtistId, rival.id);
+      expect(song.featuredArtistIds, contains(p.id));
+      expect(song.guestCents, greaterThan(0));
+      final row = g
+          .chart(Charts.globalSongs)
+          .rows
+          .where((r) => r.entityId == song.id)
+          .firstOrNull;
+      if (row != null) {
+        expect(row.credit, ChartCredit.guest);
+        expect(row.isOurs, isTrue);
+        expect(row.featuring, contains(p.name));
+      }
+      final slot = g.slotId;
+      final guest = song.guestCents;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.guestSongs.single.earnedCents, guest);
+      expect(g.members[1].artistId, bo.artistId);
+      expect(g.world.artists[bo.artistId].managedBy, g.world.playerArtistId);
+      expect(g.members[1].songs.single.songId, solo.songId);
+      g.advanceWeek();
+      expect(g.world.songs[song.id].guestCents, greaterThan(guest));
+      g.close();
+    });
+
     test('monthly listener and album stream milestones (K156)', () {
       var g = GameSession.start(
           slots,

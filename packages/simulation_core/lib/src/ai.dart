@@ -40,7 +40,13 @@ abstract final class AiPlanner {
     final clashes = <RivalClash>[];
     for (final id in w.activeArtistIds) {
       final a = w.artists[id];
+      // The player and their members' solo names (docs K158) plan
+      // nothing; songs given to a member are still released.
       if (a.tier == ArtistTier.player) continue;
+      if (a.managedBy >= 0) {
+        _executeDue(w, a);
+        continue;
+      }
       if (a.plan.isEmpty && w.week >= a.nextEraWeek) _planEra(w, a);
       final clash = _avoidClash(w, a);
       if (clash != null) clashes.add(clash);
@@ -263,7 +269,9 @@ abstract final class AiPlanner {
     final c = w.config;
     // Retirements.
     for (final a in w.artists) {
-      if (a.tier == ArtistTier.player || a.isRetired) continue;
+      if (a.tier == ArtistTier.player || a.isRetired || a.managedBy >= 0) {
+        continue;
+      }
       final r = RandomStream.keyed(w.seed, w.week, a.id, RngPurpose.newArtists);
       final yearsActive = (w.week - a.debutWeek) / GameTime.weeksPerYear;
       // A real star's label push helps them break through, then their
@@ -285,7 +293,8 @@ abstract final class AiPlanner {
     // so a 100-year career does not grow the world (docs/simulation.md §8).
     final target = c.tierACount + c.tierBCount;
     final alive = w.artists
-        .where((a) => a.tier != ArtistTier.player && !a.isRetired)
+        .where((a) =>
+            a.tier != ArtistTier.player && !a.isRetired && a.managedBy < 0)
         .toList()
       ..sort((x, y) {
         final f = x.fame.compareTo(y.fame);
@@ -307,7 +316,8 @@ abstract final class AiPlanner {
     }
     // Re-rank tiers by fame: top N non-player artists are Tier A.
     final ai = w.artists
-        .where((a) => a.tier != ArtistTier.player && !a.isRetired)
+        .where((a) =>
+            a.tier != ArtistTier.player && !a.isRetired && a.managedBy < 0)
         .toList()
       ..sort((x, y) {
         final f = y.fame.compareTo(x.fame);

@@ -254,6 +254,16 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // Members' solo records and the player's features (docs K158).
+  static SessionCmd<List<MemberView>> members() => (s) => s.members;
+  static SessionCmd<List<int>> memberSoloCosts(int member) => (s) => [
+        for (final c in Campaign.values) s.memberSoloCost(member, c),
+      ];
+  static SessionCmd<void> releaseMemberSolo(
+          int member, int songId, Campaign campaign) =>
+      (s) => s.releaseMemberSolo(member, songId, campaign: campaign);
+  static SessionCmd<List<WrittenSongView>> guestSongs() =>
+      (s) => s.guestSongs;
   static SessionCmd<DistributionView> distribution() =>
       (s) => s.distribution;
   static SessionCmd<void> chooseDistributor(Distributor d) =>

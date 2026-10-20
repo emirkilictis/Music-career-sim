@@ -113,7 +113,8 @@ abstract final class Income {
     final out = <IncomeSource, double>{};
     final p = w.player;
     if (p == null) return IncomeBreakdown(out);
-    for (final id in w.playerSongIds) {
+    // Members' solo songs pay the group (docs K158).
+    for (final id in [...w.playerSongIds, ...w.managedSongIds]) {
       for (final e in ofSong(w, w.songs[id]).cents.entries) {
         out[e.key] = (out[e.key] ?? 0) + e.value;
       }

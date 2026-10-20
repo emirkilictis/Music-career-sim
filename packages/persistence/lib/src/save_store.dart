@@ -158,6 +158,13 @@ class SaveStore {
       w.songs.add(s);
       if (s.primaryArtistId == w.playerArtistId) w.playerSongIds.add(s.id);
       if (s.writerId >= 0) w.writtenSongIds.add(s.id);
+      // Members' solo songs and the player's verses (docs K158).
+      if (w.artists[s.primaryArtistId].managedBy >= 0) {
+        w.managedSongIds.add(s.id);
+      } else if (s.primaryArtistId != w.playerArtistId &&
+          s.featuredArtistIds.contains(w.playerArtistId)) {
+        w.guestSongIds.add(s.id);
+      }
       if (s.status == SongStatus.active) w.activeSongIds.add(s.id);
       if (s.status == SongStatus.dormant) {
         w.artists[s.primaryArtistId].dormantSongIds.add(s.id);

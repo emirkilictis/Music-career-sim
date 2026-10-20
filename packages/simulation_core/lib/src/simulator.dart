@@ -11,6 +11,7 @@ import 'songwriting.dart';
 import 'streaming_tools.dart';
 import 'cloud.dart';
 import 'config/charts.dart';
+import 'credits.dart';
 import 'contracts.dart';
 import 'config/era_table.dart';
 import 'config/regions.dart';
@@ -1746,7 +1747,11 @@ class Simulator {
     var cents = 0.0;
     for (final id in world.activeSongIds) {
       final s = world.songs[id];
-      if (s.primaryArtistId != p.id) continue;
+      // Members' solo songs pay the group (docs K158).
+      if (s.primaryArtistId != p.id &&
+          world.artists[s.primaryArtistId].managedBy != p.id) {
+        continue;
+      }
       final songCents = (s.weekStreams * 0.35 * s.autoplay.royalty +
               s.weekDownloads * 70 +
               s.weekPhysical * 100) *
@@ -1769,7 +1774,7 @@ class Simulator {
     }
     // Catalog songs keep streaming (and paying) after they leave the active
     // set.
-    for (final id in world.playerSongIds) {
+    for (final id in [...world.playerSongIds, ...world.managedSongIds]) {
       final s = world.songs[id];
       if (s.status != SongStatus.dormant) continue;
       var songCents = 0.0;
@@ -1801,6 +1806,26 @@ class Simulator {
       s.writerCents += royalty;
       // Publishing money: the label recoups none of it.
       p.moneyCents += p.manager.net(royalty).round();
+      world.dirtySongs.add(id);
+    }
+    // Verses on rivals' songs pay the featured artist's share (K158).
+    for (final id in world.guestSongIds) {
+      final s = world.songs[id];
+      if (s.releasedWeek < 0 || !s.featuredArtistIds.contains(p.id)) continue;
+      var songCents = 0.0;
+      if (s.status == SongStatus.active) {
+        songCents = s.weekStreams * 0.35 +
+            s.weekDownloads * 70 +
+            s.weekPhysical * 100;
+      } else if (s.status == SongStatus.dormant) {
+        for (var r = 0; r < regionCount; r++) {
+          songCents += world.songWeekStreamsRegion(s, r) * 0.35;
+        }
+      }
+      final share = songCents * Credits.guestShare;
+      if (share <= 0) continue;
+      s.guestCents += share;
+      cents += share;
       world.dirtySongs.add(id);
     }
     for (final id in world.activeAlbumIds) {

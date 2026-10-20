@@ -964,6 +964,15 @@ class Fmt {
       WrittenSongHit(:final position) => position == 1
           ? l.eventWrittenNo1(t, line.artistName)
           : l.eventWrittenTop10(t, line.artistName, position),
+      CreditSongHit(:final position, :final credit) => switch ((
+          credit == ChartCredit.member,
+          position == 1
+        )) {
+          (true, true) => l.eventMemberNo1(t, line.artistName),
+          (true, false) => l.eventMemberTop10(t, line.artistName, position),
+          (false, true) => l.eventGuestNo1(t, line.artistName),
+          (false, false) => l.eventGuestTop10(t, line.artistName, position),
+        },
       AllTimeBestSeller(:final rank) => rank == 1
           ? l.eventAllTimeTop
           : l.eventAllTimeTop10(rank),

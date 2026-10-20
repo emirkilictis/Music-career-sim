@@ -224,6 +224,65 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
+  /// Puts the vault song out as a member's solo single (docs K158); it
+  /// leaves the group's vault, so the page closes.
+  Future<void> _memberSolo(SongView s) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = widget.state;
+    final members = await career.read(Cmd.members());
+    if (!mounted) return;
+    final pick = await showModalBottomSheet<MemberView>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: ListView(shrinkWrap: true, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: Text(l.memberSoloTitle,
+                style: Theme.of(c).textTheme.titleLarge),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.memberSoloHint,
+                style: Theme.of(c).textTheme.bodySmall),
+          ),
+          for (final m in members)
+            ListTile(
+              leading: ArtistAvatar(name: m.name, seed: m.artistId + m.index),
+              title: Text(m.name),
+              subtitle: Text(m.artistId < 0
+                  ? l.memberFirstSolo
+                  : l.memberFans(fmt.compact(m.fans))),
+              onTap: () => Navigator.pop(c, m),
+            ),
+        ]),
+      ),
+    );
+    if (pick == null || !mounted) return;
+    try {
+      final costs = await career.read(Cmd.memberSoloCosts(pick.index));
+      if (!mounted) return;
+      final campaign = await pickCampaign(context, career,
+          costs: costs,
+          header: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(l.memberSoloCampaign(pick.name),
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+          ));
+      if (campaign == null || !mounted) return;
+      await career.act(Cmd.releaseMemberSolo(pick.index, s.id, campaign));
+      if (mounted) {
+        showInfo(context, l.memberSoloDone(s.title, pick.name),
+            icon: Icons.person_outline_rounded);
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _shootVideo(SongView s) async {
     final l = context.l10n;
     final fmt = context.fmt;
@@ -723,6 +782,29 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       icon: const Icon(Icons.handshake_outlined),
                       label: Text(l.sellButton),
                     ),
+                  // A group member's solo single (docs K158).
+                  if (s.isPlayer &&
+                      s.inVault &&
+                      widget.state.player.kind.isGroup &&
+                      s.rerecordOf < 0 &&
+                      s.scheduledSingleWeek < 0 &&
+                      s.scheduledAlbumWeek < 0)
+                    TextButton.icon(
+                      onPressed: () => _memberSolo(s),
+                      icon: const Icon(Icons.person_outline_rounded),
+                      label: Text(l.memberSoloButton),
+                    ),
+                  if (s.credit != ChartCredit.none) ...[
+                    const SizedBox(height: 8),
+                    Tag(
+                        s.credit == ChartCredit.member
+                            ? l.memberSoloTag(fmt.money(s.revenueCents))
+                            : l.guestTag(fmt.money(s.guestCents.round())),
+                        icon: s.credit == ChartCredit.member
+                            ? Icons.person_outline_rounded
+                            : Icons.mic_external_on_outlined,
+                        color: AppColors.lilac),
+                  ],
                   if (s.writerName.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Tag(

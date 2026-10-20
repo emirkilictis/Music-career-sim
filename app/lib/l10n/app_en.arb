@@ -5321,5 +5321,127 @@
         "type": "String"
       }
     }
+  },
+  "memberSoloButton": "Release as a member's solo",
+  "memberSoloTitle": "Whose solo single?",
+  "memberSoloHint": "It comes out under the member's own name and charts on its own. The group pays for the campaign and keeps the money.",
+  "memberFirstSolo": "First solo record",
+  "memberFans": "{fans} fans of their own",
+  "@memberFans": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "memberSoloCampaign": "Campaign for {name}'s solo",
+  "@memberSoloCampaign": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "memberSoloDone": "“{title}” is out as {name}'s solo single.",
+  "@memberSoloDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "membersSection": "Members' solo records",
+  "membersHint": "Put out a vault song as a member's solo single from its page.",
+  "membersNoSolo": "No solo record yet",
+  "guestSection": "Your features",
+  "guestHint": "Your verses on others' songs chart under their name; {share}% of what they earn comes to you.",
+  "@guestHint": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "chartFeat": "{artist} feat. {featuring}",
+  "@chartFeat": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "featuring": {
+        "type": "String"
+      }
+    }
+  },
+  "creditMember": "Your member",
+  "creditGuest": "Your feature",
+  "memberSoloTag": "Your member's solo · {earned} to the group",
+  "@memberSoloTag": {
+    "placeholders": {
+      "earned": {
+        "type": "String"
+      }
+    }
+  },
+  "guestTag": "Your feature · {earned} to you",
+  "@guestTag": {
+    "placeholders": {
+      "earned": {
+        "type": "String"
+      }
+    }
+  },
+  "eventMemberTop10": "{artist}'s solo “{title}” is #{position} in the US.",
+  "@eventMemberTop10": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "eventMemberNo1": "{artist}'s solo “{title}” is #1 in the US!",
+  "@eventMemberNo1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "eventGuestTop10": "Your feature on {artist}'s “{title}” is #{position} in the US.",
+  "@eventGuestTop10": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "eventGuestNo1": "Your feature on {artist}'s “{title}” is #1 in the US!",
+  "@eventGuestNo1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
   }
 }

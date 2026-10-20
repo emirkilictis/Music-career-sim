@@ -57,8 +57,8 @@ abstract final class Codec {
     // Added in schema v16, v21.
     'manager',
     'dealAdvance', 'dealAlbums', 'unrecouped',
-    // Added in schema v24, v41, v42.
-    'surpriseWeek', 'markets', 'distributor',
+    // Added in schema v24, v41, v42, v43.
+    'surpriseWeek', 'markets', 'distributor', 'managedBy', 'memberIds',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -105,6 +105,8 @@ abstract final class Codec {
             ? null
             : jsonEncode([for (final x in a.marketBonus) x]),
         a.distributor.index,
+        a.managedBy,
+        a.memberArtistIds.isEmpty ? null : jsonEncode(a.memberArtistIds),
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -183,6 +185,10 @@ abstract final class Codec {
     a.unrecoupedCents = r['unrecouped'] as int? ?? 0;
     a.surpriseWeek = r['surpriseWeek'] as int? ?? -1000;
     a.distributor = Distributor.values[r['distributor'] as int? ?? 0];
+    a.managedBy = r['managedBy'] as int? ?? -1;
+    if (r['memberIds'] case final String m when m.isNotEmpty) {
+      a.memberArtistIds.addAll((jsonDecode(m) as List).cast<int>());
+    }
     if (r['markets'] case final String m when m.isNotEmpty) {
       final j = jsonDecode(m) as List;
       for (var i = 0; i < j.length && i < a.marketBonus.length; i++) {
@@ -246,8 +252,8 @@ abstract final class Codec {
     'creator', 'radioFormat', 'holiday',
     'rerecordOf', 'replacedWeek', 'masterShare',
     'leakedWeek',
-    // Added in schema v32, v34, v35, v36, v39, v41.
-    'writer', 'liveOf', 'promo', 'cloud', 'snippet', 'langs',
+    // Added in schema v32, v34, v35, v36, v39, v41, v43.
+    'writer', 'liveOf', 'promo', 'cloud', 'snippet', 'langs', 'guestCents',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -317,6 +323,7 @@ abstract final class Codec {
             : jsonEncode([s.cloudWeek, s.cloudOnly ? 1 : 0, s.cloudPlays]),
         s.snippetWeek < 0 ? null : jsonEncode([s.snippetWeek, s.snippetScore]),
         s.languages,
+        s.guestCents,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -380,6 +387,7 @@ abstract final class Codec {
       s.cloudPlays = (j[2] as num).toDouble();
     }
     s.languages = r['langs'] as int? ?? 0;
+    s.guestCents = (r['guestCents'] as num?)?.toDouble() ?? 0;
     if (r['snippet'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       s.snippetWeek = j[0] as int;

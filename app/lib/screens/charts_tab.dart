@@ -1121,7 +1121,7 @@ class _ChartLine extends StatelessWidget {
         fontSize: 17,
         color: PaperColors.ink);
     return Material(
-      color: r.isPlayer ? const Color(0xFFE6EAFF) : PaperColors.card,
+      color: r.isOurs ? const Color(0xFFE6EAFF) : PaperColors.card,
       child: InkWell(
         onTap: onTap,
         child: Container(
@@ -1168,18 +1168,29 @@ class _ChartLine extends StatelessWidget {
                           height: 1.15,
                           color: PaperColors.ink)),
                   const SizedBox(height: 2),
-                  Text(r.artistName,
+                  Text(
+                      r.featuring.isEmpty
+                          ? r.artistName
+                          : l.chartFeat(r.artistName, r.featuring),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 13.5,
                           color: PaperColors.muted)),
-                  if (r.isPlayer || gain >= 10) ...[
+                  if (r.isOurs || gain >= 10) ...[
                     const SizedBox(height: 5),
                     Wrap(spacing: 6, children: [
                       if (r.isPlayer)
                         _Badge(l.you, AppColors.lilac, const Color(0xFF241A45)),
+                      // On it under another name (docs K158).
+                      if (r.credit != ChartCredit.none)
+                        _Badge(
+                            r.credit == ChartCredit.member
+                                ? l.creditMember
+                                : l.creditGuest,
+                            AppColors.lilac,
+                            const Color(0xFF241A45)),
                       if (gain >= 10)
                         _Badge(l.chartGainer, const Color(0xFFDDF3E6),
                             PaperColors.up),

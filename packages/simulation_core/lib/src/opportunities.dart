@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'audience.dart';
 import 'awards.dart';
 import 'brands.dart';
+import 'credits.dart';
 import 'model.dart';
 import 'rng.dart';
 import 'time.dart';
@@ -254,6 +255,11 @@ abstract final class Opportunities {
       case (OpportunityKind.feature, OpportunityChoice.accept):
         spendEnergy(featureEnergy);
         final partner = w.artists[o.partnerArtistId];
+        // A real song with the player on it, out in two weeks (K158).
+        if (!partner.isRetired) {
+          Credits.guestOn(w, partner, p,
+              producerSkill: partner.tier == ArtistTier.a ? 85 : 60);
+        }
         money = o.feeCents;
         fans = partner.coreFans * (0.01 + 0.02 * s.vocals / 100);
         Audience.addCasual(w, p, partner.casual * 0.02);

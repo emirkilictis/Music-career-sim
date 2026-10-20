@@ -924,7 +924,11 @@ abstract final class RivalTours {
     }
     for (final id in w.activeArtistIds) {
       final a = w.artists[id];
-      if (a.tier == ArtistTier.player || a.coreFans < minFans) continue;
+      if (a.tier == ArtistTier.player ||
+          a.managedBy >= 0 ||
+          a.coreFans < minFans) {
+        continue;
+      }
       if (a.lastReleaseWeek < w.week - 78) continue;
       if ((lastTour[id] ?? -1000) > w.week - 2 * GameTime.weeksPerYear) {
         continue;

@@ -759,6 +759,14 @@ void main() {
         s.releaseSingle(id);
         s.advanceWeeks(3, stop: SkipStop.never);
       }
+      // Yuna's solo single and a verse on a star's song (docs K158).
+      final p = s.world.player!..creativeEnergy = 100;
+      final solo = s.writeSong(budget: BudgetTier.high, title: 'Blue Hour').id;
+      s.releaseMemberSolo(0, solo);
+      final star = s.world.artists.firstWhere((a) =>
+          a.tier == ArtistTier.a && !a.isRetired && a.managedBy < 0);
+      Credits.guestOn(s.world, star, p, producerSkill: 85);
+      s.advanceWeeks(4, stop: SkipStop.never);
     });
     await c.exec(Cmd.closeCareer());
 
@@ -775,6 +783,13 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('Music Peak'));
     await shot(tester, '08g_music_show');
+    await tab(tester, 'Career');
+    final members = _ci("Members' solo records");
+    await tester.scrollUntilVisible(members, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(members), alignment: 0.05);
+    await tester.pumpAndSettle();
+    await shot(tester, '15s_member_solos');
   });
 }
 

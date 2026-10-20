@@ -1953,6 +1953,56 @@ class GameSession {
             WrittenSongView.of(world, world.songs[id]),
       ];
 
+  // -------------------------------------------------------- credits (K158)
+
+  /// A group's members and their solo records (empty for a solo artist).
+  List<MemberView> get members => [
+        if (_p.kind.isGroup)
+          for (var i = 0; i < _p.members.length; i++)
+            MemberView.of(world, _p, i),
+      ];
+
+  /// What a solo single by member [member] costs the group with
+  /// [campaign] (docs K158).
+  int memberSoloCost(int member, Campaign campaign) {
+    _checkMember(member);
+    return Credits.soloCostCents(world, _p, member, campaign);
+  }
+
+  /// Puts out vault song [songId] as member [member]'s solo single
+  /// (docs K158): under the member's own name, on the charts on its own,
+  /// paid for by the group, and its money comes to the group.
+  void releaseMemberSolo(int member, int songId,
+      {Campaign campaign = Campaign.standard}) {
+    _checkMember(member);
+    final s = _ownSong(songId);
+    if (s.status != SongStatus.vault ||
+        _p.scheduled.any((sr) => sr.songIds.contains(songId))) {
+      throw GameException('notInVault', 'Only unreleased songs');
+    }
+    if (campaign.index > Distribution.maxCampaign(_p).index) {
+      throw GameException('campaignLocked', 'The label cannot run this');
+    }
+    _requireMoney(Credits.soloCostCents(world, _p, member, campaign));
+    Credits.releaseMemberSolo(world, _p, member, s, campaign: campaign);
+    _saveNow();
+  }
+
+  void _checkMember(int member) {
+    if (!_p.kind.isGroup) throw GameException('notGroup', 'Only a group');
+    if (member < 0 || member >= _p.members.length) {
+      throw GameException('noMember', 'No such member');
+    }
+  }
+
+  /// Rivals' songs with the player's verse, newest first (docs K158).
+  List<WrittenSongView> get guestSongs => [
+        for (final id in world.guestSongIds.reversed)
+          if (world.songs[id].featuredArtistIds.contains(world.playerArtistId))
+            WrittenSongView.of(world, world.songs[id],
+                earnedCents: world.songs[id].guestCents),
+      ];
+
   /// Monthly listeners the news reports (docs K156).
   static const listenerMilestones = [
     1e6, 5e6, 10e6, 25e6, 50e6, 75e6, 100e6 //
@@ -1991,14 +2041,18 @@ class GameSession {
   }
 
   /// The player's songs on others' records reaching the US top 10 for
-  /// the first time, or #1 (docs K143).
+  /// the first time, or #1 (docs K143), and the songs they are on under
+  /// another name: members' solos and verses on rivals' songs (K158).
   List<GameEvent> _writtenHits(WeekResult r) {
     final out = <GameEvent>[];
     final me = world.playerArtistId;
     for (final row in r.charts[Charts.usSongs]) {
       if (row.position > 10) break;
       final s = world.songs[row.entityId];
-      if (s.writerId != me || s.primaryArtistId == me) continue;
+      if (s.primaryArtistId == me) continue;
+      final credit =
+          ChartCredit.of(world, s.primaryArtistId, s.featuredArtistIds);
+      if (s.writerId != me && credit == ChartCredit.none) continue;
       final before = _store.db.select(
           'SELECT MIN(position) AS p FROM chartEntry '
           'WHERE chartId = ? AND entityId = ? AND week < ?',
@@ -2007,7 +2061,9 @@ class GameSession {
       final first10 = best == null || best > 10;
       final firstNo1 = row.position == 1 && (best == null || best > 1);
       if (first10 || firstNo1) {
-        out.add(WrittenSongHit(s.id, s.primaryArtistId, row.position));
+        out.add(credit == ChartCredit.none
+            ? WrittenSongHit(s.id, s.primaryArtistId, row.position)
+            : CreditSongHit(s.id, s.primaryArtistId, row.position, credit));
       }
     }
     return out;

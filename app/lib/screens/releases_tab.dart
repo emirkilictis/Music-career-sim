@@ -671,11 +671,11 @@ Future<(bool, AutoplayLevel)?> pickStreamingOptions(
 
 /// Campaign choice with prices (docs/game-design.md §9).
 Future<Campaign?> pickCampaign(BuildContext context, CareerState career,
-    {int extraCents = 0, Widget? header}) {
+    {int extraCents = 0, Widget? header, List<int>? costs}) {
   final l = context.l10n;
   final fmt = context.fmt;
   final money = career.player.moneyCents;
-  int cost(Campaign k) => career.player.campaignCosts[k.index];
+  int cost(Campaign k) => (costs ?? career.player.campaignCosts)[k.index];
   return showModalBottomSheet<Campaign>(
     context: context,
     showDragHandle: true,

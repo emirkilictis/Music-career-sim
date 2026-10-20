@@ -627,6 +627,12 @@ class Artist {
   /// How an independent gets their music out (docs K157).
   Distributor distributor = Distributor.selfRelease;
 
+  /// A member's solo name run by this artist (their group; -1: on their
+  /// own), and a group's members' solo names by member (-1: none yet;
+  /// docs K158).
+  int managedBy = -1;
+  final List<int> memberArtistIds = [];
+
   /// Per-region accounting, layout [ArtistReg]. Catalog indices and their
   /// settle markers drive lazy accrual (retired artists settle lazily, so a
   /// long history of retired artists costs nothing per week).
@@ -867,6 +873,9 @@ class Song with Charted {
 
   /// The song this is a live recording of (-1: a studio song; docs K146).
   int liveOf = -1;
+
+  /// The player's share as a featured artist so far (docs K158).
+  double guestCents = 0;
 
   /// Writing for others (docs K143): who wrote it when it is not its
   /// artist (-1), the song it became when sold (-1: not sold), and the

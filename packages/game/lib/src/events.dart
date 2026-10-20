@@ -2,7 +2,7 @@ import 'package:simulation_core/simulation_core.dart';
 
 import 'milestones.dart';
 import 'platforms.dart';
-import 'views.dart' show RecordKind, WrappedStory;
+import 'views.dart' show ChartCredit, RecordKind, WrappedStory;
 
 /// Something worth telling the player after a week (docs/game-design.md §15).
 /// Events carry ids and numbers only; the UI builds the localized text.
@@ -221,6 +221,19 @@ class WrittenSongHit extends GameEvent {
   final int songId;
   final int artistId;
   final int position;
+  @override
+  bool get isMajor => true;
+}
+
+/// A song with the player on it under another name reached the US top
+/// 10 for the first time, or #1 (docs K158): a member's solo song
+/// ([credit] member) or a rival's song with the player's verse (guest).
+class CreditSongHit extends GameEvent {
+  const CreditSongHit(this.songId, this.artistId, this.position, this.credit);
+  final int songId;
+  final int artistId;
+  final int position;
+  final ChartCredit credit;
   @override
   bool get isMajor => true;
 }

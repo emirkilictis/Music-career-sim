@@ -13,6 +13,7 @@ export 'src/cloud.dart';
 export 'src/ai.dart' show AiPlanner, RivalClash;
 export 'src/bot.dart';
 export 'src/contracts.dart';
+export 'src/credits.dart';
 export 'src/critics.dart';
 export 'src/distribution.dart';
 export 'src/config/charts.dart';
