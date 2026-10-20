@@ -1726,6 +1726,66 @@ class GameSession {
     _saveNow();
   }
 
+  /// How many tracks the next single pick shows (docs K182).
+  static const singlePickCount = 3;
+
+  /// The player's album [albumId]'s tracks that are not singles yet,
+  /// ranked for the next single by what listeners do with them (docs
+  /// K182): how much they are played, how few skip them, the radio, the
+  /// short-video app and word of mouth.
+  List<SinglePickView> singlePicks(int albumId) {
+    final w = world;
+    if (albumId < 0 || albumId >= w.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = w.albums[albumId];
+    if (al.artistId != _p.id || al.type == AlbumType.mixtape) return const [];
+    final year = GameTime.yearOf(w.week);
+    final tracks = [
+      for (final id in al.songIds)
+        if (!w.songs[id].isSingle &&
+            w.songs[id].releasedWeek >= 0 &&
+            w.songs[id].status != SongStatus.scrapped &&
+            !_p.scheduled.any((sr) => !sr.isAlbum && sr.songIds.contains(id)))
+          w.songs[id]
+    ];
+    if (tracks.isEmpty) return const [];
+    var total = 0.0, most = 0.0;
+    for (final s in tracks) {
+      total += s.lastAttention;
+      if (s.lastAttention > most) most = s.lastAttention;
+    }
+    final out = <SinglePickView>[];
+    for (final s in tracks) {
+      final skip = StreamingTools.skipRate(s);
+      final age = w.week - s.releasedWeek;
+      final growing = WordOfMouth.lift(w, s, age) >= WordOfMouth.noticed / 2;
+      final video = year >= 2019 ? s.virality : 0.0;
+      final played = most > 0 ? s.lastAttention / most : 0.0;
+      out.add(SinglePickView(
+        songId: s.id,
+        title: s.title,
+        share: total > 0 ? s.lastAttention / total : 0,
+        skipRate: skip,
+        score: 0.5 * played +
+            0.25 * (1 - skip) +
+            0.15 * s.radioAppeal +
+            0.1 * video +
+            (growing ? 0.1 : 0),
+        reasons: [
+          if (most > 0 && s.lastAttention == most)
+            SinglePickReason.mostPlayed,
+          if (skip <= 0.25) SinglePickReason.fewSkips,
+          if (s.radioAppeal >= 0.6) SinglePickReason.radio,
+          if (video >= 0.6) SinglePickReason.shortVideo,
+          if (growing) SinglePickReason.growing,
+        ],
+      ));
+    }
+    out.sort((x, y) => y.score.compareTo(x.score));
+    return out.take(singlePickCount).toList();
+  }
+
   /// Records album [albumId] again under the player's own name (docs
   /// K139): its songs go into the vault as new versions, kept together
   /// as a draft called [title] with up to [Actions.maxDeluxeTracks]

@@ -3383,6 +3383,48 @@ void main() {
       g.close();
     });
 
+    test('the next single picked from what listeners do (K182)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2020,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final al = g.releaseAlbum('Picks', ids);
+      for (var i = 0; i < 3; i++) {
+        g.advanceWeek();
+      }
+      final picks = g.singlePicks(al.id);
+      expect(picks.length, GameSession.singlePickCount);
+      for (var i = 1; i < picks.length; i++) {
+        expect(picks[i].score, lessThanOrEqualTo(picks[i - 1].score));
+      }
+      expect(picks.every((x) => ids.contains(x.songId)), isTrue);
+      // The most played track is flagged wherever it ranks.
+      final top = ids
+          .map((id) => g.world.songs[id])
+          .reduce((a, b) => a.lastAttention >= b.lastAttention ? a : b);
+      for (final x in picks) {
+        expect(x.reasons.contains(SinglePickReason.mostPlayed),
+            x.songId == top.id);
+      }
+      g.releaseSingle(picks.first.songId);
+      expect(g.singlePicks(al.id).map((x) => x.songId),
+          isNot(contains(picks.first.songId)));
+      // Only the player's own albums.
+      final rival = g.world.albums.firstWhere((a) => a.artistId != p.id);
+      expect(g.singlePicks(rival.id), isEmpty);
+      g.close();
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;

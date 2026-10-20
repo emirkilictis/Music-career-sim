@@ -4587,6 +4587,25 @@
       }
     }
   },
+  "pickTitle": "Next single",
+  "pickHint": "What listeners do with the album's other tracks this week, the way labels pick singles from streaming data.",
+  "pickLine": "{share}% of the album's plays · {skip}% skip it",
+  "@pickLine": {
+    "placeholders": {
+      "share": {
+        "type": "int"
+      },
+      "skip": {
+        "type": "int"
+      }
+    }
+  },
+  "pickRelease": "Make it a single",
+  "pickMostPlayed": "Most played",
+  "pickFewSkips": "Few skips",
+  "pickRadio": "Radio-ready",
+  "pickShortVideo": "Short-video potential",
+  "pickGrowing": "Growing by word of mouth",
   "tourFit": "Fit to demand",
   "sessTitle": "Streamify Sessions",
   "sessInvite": "Streamify invites you to its studio",

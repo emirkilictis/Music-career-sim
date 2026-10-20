@@ -2516,6 +2516,43 @@ class DocumentaryView {
       })> docs;
 }
 
+/// Why the listening data likes a track for the next single (docs K182).
+enum SinglePickReason {
+  /// The album's most played track that is not a single yet.
+  mostPlayed,
+
+  /// Few listeners skip it.
+  fewSkips,
+
+  /// Made for the radio.
+  radio,
+
+  /// Could take off on the short-video app (2019+).
+  shortVideo,
+
+  /// More people find it every week (word of mouth).
+  growing,
+}
+
+/// An album track the listening data suggests as the next single.
+class SinglePickView {
+  SinglePickView(
+      {required this.songId,
+      required this.title,
+      required this.share,
+      required this.skipRate,
+      required this.score,
+      required this.reasons});
+  final int songId;
+  final String title;
+
+  /// Its share of the album's non-single listening this week.
+  final double share;
+  final double skipRate;
+  final double score;
+  final List<SinglePickReason> reasons;
+}
+
 /// Streamify Sessions (docs K178): the invitation, the player's songs
 /// that could be recorded, the hits that could be covered and the
 /// sessions so far.

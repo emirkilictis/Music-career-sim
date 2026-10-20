@@ -39,6 +39,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   List<AlbumSalesWeek> _sales = const [];
   List<ChartWeek> _run = const [];
 
+  /// Tracks the listening data suggests for the next single (docs K182).
+  List<SinglePickView> _picks = const [];
+
   @override
   void initState() {
     super.initState();
@@ -57,8 +60,10 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     final history = await st.read(Cmd.albumHistory(widget.albumId));
     final sales = await st.read(Cmd.albumSales(widget.albumId));
     final run = await st.read(Cmd.chartRun(EntityKind.album, widget.albumId));
+    final picks = await st.read(Cmd.singlePicks(widget.albumId));
     if (mounted) {
       setState(() {
+        _picks = picks;
         _album = album;
         _tracks = tracks;
         _hits = hits;
@@ -67,6 +72,61 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         _run = run;
       });
     }
+  }
+
+  Widget _picksSection() {
+    final l = context.l10n;
+    final career = widget.state;
+    String reason(SinglePickReason r) => switch (r) {
+          SinglePickReason.mostPlayed => l.pickMostPlayed,
+          SinglePickReason.fewSkips => l.pickFewSkips,
+          SinglePickReason.radio => l.pickRadio,
+          SinglePickReason.shortVideo => l.pickShortVideo,
+          SinglePickReason.growing => l.pickGrowing,
+        };
+    return Section(
+      title: l.pickTitle,
+      icon: Icons.insights_rounded,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(l.pickHint, style: TextStyle(color: AppColors.textMuted)),
+        for (final x in _picks) ...[
+          const SizedBox(height: 10),
+          Row(children: [
+            Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(x.title,
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
+                    Text(
+                        l.pickLine((x.share * 100).round(),
+                            (x.skipRate * 100).round()),
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                  ]),
+            ),
+            TextButton(
+              onPressed: career.busy
+                  ? null
+                  : () async {
+                      final song = _tracks
+                          .where((s) => s.id == x.songId)
+                          .firstOrNull;
+                      if (song == null) return;
+                      if (await releaseSingleFlow(context, career, song)) {
+                        _load();
+                      }
+                    },
+              child: Text(l.pickRelease),
+            ),
+          ]),
+          if (x.reasons.isNotEmpty)
+            Wrap(spacing: 6, runSpacing: 4, children: [
+              for (final r in x.reasons) Tag(reason(r)),
+            ]),
+        ],
+      ]),
+    );
   }
 
   String _priceLabel(AppLocalizations l, PriceCut c) => switch (c) {
@@ -367,6 +427,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     style: TextStyle(color: AppColors.textMuted)),
               ),
             ]),
+          ],
+          // The next single, from the listening data (docs K182).
+          if (a.isPlayer && _picks.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _picksSection(),
           ],
           // How it was rolled out (docs K165).
           if (a.isPlayer && a.rollout.count > 0) ...[

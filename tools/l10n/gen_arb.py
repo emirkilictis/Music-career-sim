@@ -1298,6 +1298,17 @@ k('radioFormatOption','{format} · {play}% · run {run}%','{format} · %{play} �
 k('exclusiveTitle','Fruit Music exclusive','Fruit Music özel yayını')
 k('exclusiveHint','Fruit Music pays {fee} now to stream it alone for its first {weeks} weeks. Most people cannot stream it there yet: fewer streams and chart units at first, sales are not affected.','Fruit Music ilk {weeks} hafta sadece kendisinde olması için şimdi {fee} öder. Çoğu kişi orada dinleyemez: ilk haftalarda daha az stream ve liste birimi, satışlar etkilenmez.', fee='String', weeks='int')
 # Holding an album off streaming (K174)
+# Next single from listening data (K182)
+k('pickTitle','Next single','Sonraki single')
+k('pickHint','What listeners do with the album\'s other tracks this week, the way labels pick singles from streaming data.','Albümün diğer şarkılarıyla dinleyicilerin bu hafta ne yaptığı; plak şirketleri single\'ları streaming verisine bakarak böyle seçer.')
+k('pickLine','{share}% of the album\'s plays · {skip}% skip it','Albüm dinlenmesinin %{share}\'i · %{skip} atlıyor', share='int', skip='int')
+k('pickRelease','Make it a single','Single yap')
+k('pickMostPlayed','Most played','En çok dinlenen')
+k('pickFewSkips','Few skips','Az atlanıyor')
+k('pickRadio','Radio-ready','Radyoya uygun')
+k('pickShortVideo','Short-video potential','Kısa video potansiyeli')
+k('pickGrowing','Growing by word of mouth','Kulaktan kulağa büyüyor')
+
 # Tour legs sized to demand (K181)
 k('tourFit','Fit to demand','Talebe göre')
 
