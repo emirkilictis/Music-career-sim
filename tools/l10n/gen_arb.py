@@ -1656,6 +1656,18 @@ k('clubOpened','Your fan club is open.','Hayran kulübün açıldı.')
 k('eventClubMembers','Your fan club passed {count} members.','Hayran kulübün {count} üyeyi geçti.', count='String')
 k('errorNoFanClub','A fan club is not possible now.','Şu an hayran kulübü kurulamaz.')
 
+
+# Album rollouts (docs K165).
+k('rolloutTitle','Rollout {done}/{count}','Çıkış planı {done}/{count}', done='int', count='int')
+k('rolloutHint','Every step tells more people the record is coming: a full rollout opens it with up to +{pct}% hype.','Her adım albümün geldiğini daha çok kişiye duyurur: eksiksiz bir plan albümü %{pct}\'e kadar daha fazla heyecanla açar.', pct='int')
+k('rolloutLeadSingle','Lead single a month ahead','Bir ay önceden ilk single')
+k('rolloutSecondSingle','A second single','İkinci single')
+k('rolloutAnnounced','Announced a month ahead','Bir ay önceden duyuru')
+k('rolloutVideo','A music video','Klip')
+k('rolloutTeaser','A TikTak teaser','TikTak tanıtımı')
+k('rolloutPitch','Pitched to the editors','Editörlere öneri')
+k('rolloutResult','Rolled out {done}/{count}: +{pct}% hype at release','Çıkış planı {done}/{count}: çıkışta +%{pct} heyecan', done='int', count='int', pct='int')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

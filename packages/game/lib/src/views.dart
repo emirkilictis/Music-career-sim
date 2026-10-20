@@ -712,6 +712,7 @@ class AlbumView {
         bundle = al.bundle,
         isLive = al.isLive,
         hitTrackIds = List.unmodifiable(al.hitIds),
+        rollout = RolloutStatus(al.rolloutApplicable, al.rolloutDone),
         priceCutWeek = al.priceCutWeek,
         priceCut = al.priceCut,
         priceCutBlocks = {
@@ -846,6 +847,8 @@ class AlbumView {
 
   /// A greatest hits album's released songs ([trackIds] are its new
   /// ones; docs K161).
+  /// How it was rolled out (no steps counted: none scored; docs K165).
+  final RolloutStatus rollout;
   final List<int> hitTrackIds;
   bool get isCompilation => hitTrackIds.isNotEmpty;
 
@@ -1705,10 +1708,19 @@ class ScheduledView {
         preSaves = sr.preSaves,
         preOrders = sr.preOrders,
         buzzCap = Actions.announceCap(
-            w, w.player!, sr.type, w.week - 1 - sr.announceWeek);
+            w, w.player!, sr.type, w.week - 1 - sr.announceWeek),
+        rollout = sr.isAlbum && !sr.isDraft && Rollouts.counts(sr.type)
+            ? Rollouts.status(w, w.player!, sr.songIds, sr.releaseWeek,
+                sr.isSurprise ? -1 : sr.announceWeek,
+                planned: true)
+            : null;
 
   final int id;
   final AlbumType type;
+
+  /// How an album's rollout stands, with singles set for later (null: a
+  /// single or a draft; docs K165).
+  final RolloutStatus? rollout;
 
   /// The album title, or the single's song title.
   final String title;

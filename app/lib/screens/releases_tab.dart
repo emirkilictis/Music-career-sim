@@ -10,6 +10,7 @@ import '../core/images.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/rollout_checklist.dart';
 import '../widgets/image_pickers.dart';
 import '../widgets/media_tile.dart';
 import '../widgets/release_timing.dart';
@@ -605,6 +606,19 @@ class _ReleasesTabState extends State<ReleasesTab> {
                       '${s.isSurprise ? l.announceSurprise : s.announced ? '${l.statusAnnounced} · ${l.buzzLabel} ${(100 * s.buzz / s.buzzCap).round()}%${s.preSaves >= 1 ? ' · ${l.preSavesValue(fmt.compact(s.preSaves))}' : ''}${s.preOrders >= 1 ? ' · ${l.preOrdersValue(fmt.compact(s.preOrders))}' : ''}' : l.announceDate(fmt.week(s.announceWeek))}',
                   onTap: career.busy ? null : () => _editScheduled(s),
                 ),
+              // How the album's rollout stands (docs K165).
+              for (final s in dated)
+                if (s.rollout case final r?) ...[
+                  const SizedBox(height: 4),
+                  Text('${s.title} · ${l.rolloutTitle(r.doneCount, r.count)}',
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
+                  Text(
+                      l.rolloutHint(
+                          (Rollouts.fullHype * 100).round()),
+                      style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: 6),
+                  RolloutChecklist(status: r),
+                ],
             ]),
           ),
           const SizedBox(height: 12),

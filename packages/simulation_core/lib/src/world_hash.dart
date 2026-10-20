@@ -171,6 +171,7 @@ int worldHash(World w) {
     addAll(al.reg);
     addInt(al.hitIds.length);
     addInt(al.priceCutWeek);
+    addInt(al.rolloutDone);
     addInt(al.campaign.index);
     addDouble(al.campaignReturnCents);
     addDouble(al.preOrders);

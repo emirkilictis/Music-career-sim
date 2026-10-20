@@ -1630,5 +1630,14 @@
   "clubChangePrice": "Ücreti değiştir",
   "clubOpened": "Hayran kulübün açıldı.",
   "eventClubMembers": "Hayran kulübün {count} üyeyi geçti.",
-  "errorNoFanClub": "Şu an hayran kulübü kurulamaz."
+  "errorNoFanClub": "Şu an hayran kulübü kurulamaz.",
+  "rolloutTitle": "Çıkış planı {done}/{count}",
+  "rolloutHint": "Her adım albümün geldiğini daha çok kişiye duyurur: eksiksiz bir plan albümü %{pct}'e kadar daha fazla heyecanla açar.",
+  "rolloutLeadSingle": "Bir ay önceden ilk single",
+  "rolloutSecondSingle": "İkinci single",
+  "rolloutAnnounced": "Bir ay önceden duyuru",
+  "rolloutVideo": "Klip",
+  "rolloutTeaser": "TikTak tanıtımı",
+  "rolloutPitch": "Editörlere öneri",
+  "rolloutResult": "Çıkış planı {done}/{count}: çıkışta +%{pct} heyecan"
 }

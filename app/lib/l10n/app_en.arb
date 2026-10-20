@@ -5867,5 +5867,44 @@
       }
     }
   },
-  "errorNoFanClub": "A fan club is not possible now."
+  "errorNoFanClub": "A fan club is not possible now.",
+  "rolloutTitle": "Rollout {done}/{count}",
+  "@rolloutTitle": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rolloutHint": "Every step tells more people the record is coming: a full rollout opens it with up to +{pct}% hype.",
+  "@rolloutHint": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "rolloutLeadSingle": "Lead single a month ahead",
+  "rolloutSecondSingle": "A second single",
+  "rolloutAnnounced": "Announced a month ahead",
+  "rolloutVideo": "A music video",
+  "rolloutTeaser": "A TikTak teaser",
+  "rolloutPitch": "Pitched to the editors",
+  "rolloutResult": "Rolled out {done}/{count}: +{pct}% hype at release",
+  "@rolloutResult": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "pct": {
+        "type": "int"
+      }
+    }
+  }
 }

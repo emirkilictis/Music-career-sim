@@ -1042,6 +1042,11 @@ class Album with Charted {
   /// entry (docs K149).
   int anniversaries = 0;
 
+  /// Its rollout (docs K165): bits of [RolloutStep] that counted and of
+  /// those done, scored when it came out.
+  int rolloutApplicable = 0;
+  int rolloutDone = 0;
+
   /// The last week its download price was cut and how far (-1: never;
   /// docs K163).
   int priceCutWeek = -1;

@@ -487,6 +487,8 @@ abstract final class Codec {
     'masterShare',
     // Added in schema v33, v34, v37, v38, v40, v45, v46.
     'bundle', 'liveTour', 'anniv', 'partner', 'visual', 'hits', 'priceCut',
+    // Added in schema v47.
+    'rollout',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -520,6 +522,9 @@ abstract final class Codec {
         al.priceCutWeek < 0
             ? null
             : jsonEncode([al.priceCutWeek, al.priceCut.index]),
+        al.rolloutApplicable == 0
+            ? null
+            : jsonEncode([al.rolloutApplicable, al.rolloutDone]),
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -558,6 +563,12 @@ abstract final class Codec {
           ? PriceCut
               .values[(jsonDecode(r['priceCut'] as String) as List)[1] as int]
           : PriceCut.sale
+      ..rolloutApplicable = r['rollout'] is String
+          ? (jsonDecode(r['rollout'] as String) as List)[0] as int
+          : 0
+      ..rolloutDone = r['rollout'] is String
+          ? (jsonDecode(r['rollout'] as String) as List)[1] as int
+          : 0
       ..hitIds.addAll([
         if (r['hits'] case final String x when x.isNotEmpty)
           for (final id in jsonDecode(x) as List) id as int

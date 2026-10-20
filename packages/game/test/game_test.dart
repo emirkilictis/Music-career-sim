@@ -1404,6 +1404,60 @@ void main() {
       g.close();
     });
 
+    test('an album rollout (K165)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2020,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      List<int> songs(int n) {
+        final ids = <int>[];
+        for (var i = 0; i < n; i++) {
+          p.creativeEnergy = 100;
+          ids.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        return ids;
+      }
+
+      // A record dropped with nothing ahead of it.
+      final bare = g.releaseAlbum('Out of Nowhere', songs(8));
+      expect(bare.rollout.count, greaterThanOrEqualTo(5));
+      expect(bare.rollout.doneCount, 0);
+      g.advanceWeeks(30, stop: SkipStop.never);
+      // A full rollout.
+      final ids = songs(10);
+      g.releaseSingle(ids[0]);
+      g.shootVideo(ids[0], VideoBudget.values.first);
+      g.pitchSong(ids[1]);
+      g.teaseSnippet(ids[2]);
+      g.advanceWeek();
+      final now = g.world.week;
+      final sv = g.scheduleAlbum('The Era', ids,
+          releaseWeek: now + 8, announceWeek: now);
+      expect(sv.rollout!.has(RolloutStep.leadSingle), isTrue);
+      expect(sv.rollout!.has(RolloutStep.secondSingle), isFalse);
+      expect(sv.rollout!.has(RolloutStep.announced), isTrue);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      g.releaseSingle(ids[1]);
+      final view = g.scheduled.firstWhere((s) => s.id == sv.id);
+      expect(view.rollout!.has(RolloutStep.secondSingle), isTrue);
+      g.advanceWeeks(5, stop: SkipStop.never);
+      final al = g.world.albums.lastWhere((a) => a.artistId == p.id);
+      expect(al.title, 'The Era');
+      final r = g.album(al.id).rollout;
+      expect(r.doneCount, r.count);
+      expect(r.share, 1.0);
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.album(al.id).rollout.share, 1.0);
+      g.close();
+    });
+
     test('a paid fan club (K164)', () {
       var g = GameSession.start(slots, _setup(startYear: 2016));
       expect(g.fanClub.canOpen, isFalse);

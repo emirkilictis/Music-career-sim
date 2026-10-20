@@ -7,6 +7,7 @@ import 'config/charts.dart';
 import 'critics.dart';
 import 'distribution.dart';
 import 'fan_club.dart';
+import 'rollouts.dart';
 import 'contracts.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
@@ -730,7 +731,8 @@ abstract final class Actions {
       bool exclusive = false,
       AlbumBundle bundle = AlbumBundle.none,
       int liveTour = -1,
-      List<int> hits = const []}) {
+      List<int> hits = const [],
+      int announceWeek = -1}) {
     final paid = prepaid ? paidCents : _payCampaign(a, campaign);
     _comeback(w, a);
     // A live album or a best-of leaves the anticipation for the next
@@ -840,6 +842,11 @@ abstract final class Actions {
       }
     }
     album.liveTour = liveTour;
+    // How well it was rolled out opens it bigger (docs K165).
+    if (a.tier == ArtistTier.player &&
+        Rollouts.counts(type, live: liveTour >= 0, hits: hits.isNotEmpty)) {
+      Rollouts.apply(w, a, album, announceWeek);
+    }
     // The fan club orders every new record ahead (docs K164).
     if (a.tier == ArtistTier.player && liveTour < 0 && hits.isEmpty) {
       album.preOrders += FanClubs.albumCopies(w, type);
@@ -997,7 +1004,8 @@ abstract final class Actions {
             buzz: sr.buzz,
             announced: !sr.isSurprise,
             exclusive: sr.exclusive,
-            bundle: sr.bundle)
+            bundle: sr.bundle,
+            announceWeek: sr.isSurprise ? -1 : sr.announceWeek)
           ..preOrders += sr.preOrders;
         out.add((scheduleId: sr.id, isAlbum: true, id: al.id));
       } else {

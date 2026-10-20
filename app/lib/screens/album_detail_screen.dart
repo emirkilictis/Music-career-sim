@@ -13,6 +13,7 @@ import '../core/images.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/rollout_checklist.dart';
 import '../widgets/artist_link.dart';
 import '../widgets/history_tables.dart';
 import '../widgets/line_chart.dart';
@@ -343,6 +344,18 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     style: TextStyle(color: AppColors.textMuted)),
               ),
             ]),
+          ],
+          // How it was rolled out (docs K165).
+          if (a.isPlayer && a.rollout.count > 0) ...[
+            const SizedBox(height: 10),
+            _Line(
+                icon: Icons.flag_outlined,
+                text: l.rolloutResult(
+                    a.rollout.doneCount,
+                    a.rollout.count,
+                    (Rollouts.fullHype * a.rollout.share * 100).round())),
+            const SizedBox(height: 6),
+            RolloutChecklist(status: a.rollout),
           ],
           // A week's price cut on the download store (docs K163).
           if (a.priceCutBlocks.isNotEmpty &&
