@@ -552,8 +552,8 @@ void main() {
       expect(top, isNotEmpty);
       expect(top.first.rank, 1);
       expect(top.first.grossCents, greaterThanOrEqualTo(top.last.grossCents));
-      // Stadiums need a fandom the superstar start has to grow into (K127).
-      g.world.player!.coreFans = 6e6;
+      // Stadiums need a fandom of a few million (K127, F81).
+      g.world.player!.coreFans = 3e6;
       g.startTour(const TourRequest(
           name: 'Big Night',
           legs: [TourLeg(TourMarket.usa, TourKind.stadium, 6)]));
@@ -3010,6 +3010,22 @@ void main() {
       expect(g.album(out.id).masterShare, 1.0);
       expect(g.album(out.id).rerecordBlock, RerecordBlock.isRerecord);
       expect(() => g.rerecordAlbum(album.id, 'Again'), _code('cannotRerecord'));
+      // A long album can be re-recorded too (F81).
+      final long = <int>[];
+      for (var i = 0; i < 16; i++) {
+        p.creativeEnergy = 100;
+        long.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      Actions.signLabel(g.world, p, Label.major);
+      final big = g.releaseAlbum('Long', long);
+      while (g.week < big.releaseWeek + Rerecords.waitWeeks) {
+        g.advanceWeeks(26, stop: SkipStop.never);
+      }
+      p.creativeEnergy = 100;
+      expect(Rerecords.energyCost(g.world.albums[big.id]),
+          lessThanOrEqualTo(Rerecords.maxEnergy));
+      expect(g.rerecordAlbum(big.id, "Long (Nova's Version)").songIds.length,
+          16);
       final slot = g.slotId;
       g.close();
       g = GameSession.resume(slots, slot);

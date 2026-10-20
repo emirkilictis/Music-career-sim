@@ -179,8 +179,15 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         if (s.rerecordOf < 0) s
     ];
     if (!mounted) return;
-    final name =
-        TextEditingController(text: l.rerecordDefault(a.title, a.artistName));
+    // The suggested name fits the 60-character limit (F81).
+    var suggested = l.rerecordDefault(a.title, a.artistName);
+    if (suggested.length > 60) {
+      final cut = a.title.length - (suggested.length - 60);
+      suggested = cut > 0
+          ? l.rerecordDefault(a.title.substring(0, cut).trim(), a.artistName)
+          : suggested.substring(0, 60);
+    }
+    final name = TextEditingController(text: suggested);
     final picked = await showModalBottomSheet<(String, List<int>)>(
       context: context,
       showDragHandle: true,

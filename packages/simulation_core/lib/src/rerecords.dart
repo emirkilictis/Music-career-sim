@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'actions.dart';
 import 'lifecycle.dart';
 import 'model.dart';
@@ -144,14 +146,16 @@ abstract final class Rerecords {
   /// to the public, and radio and playlists move over slowly.
   static const reachFresh = 0.4;
 
-  /// Studio creativity per song: less than writing one.
-  static const energyPerTrack = 8.0;
+  /// Studio creativity per song: less than writing one, and at most
+  /// [maxEnergy] for a whole album, so a long one can be done too (F81).
+  static const energyPerTrack = 5.0, maxEnergy = 60.0;
 
   static double fanFactor(Song s) => s.rerecordOf >= 0 ? fanFresh : 1.0;
   static double reachFactor(Song s) => s.rerecordOf >= 0 ? reachFresh : 1.0;
 
   /// Creativity re-recording [al] takes.
-  static double energyCost(Album al) => energyPerTrack * al.songIds.length;
+  static double energyCost(Album al) =>
+      math.min(maxEnergy, energyPerTrack * al.songIds.length);
 
   /// Listening [s] keeps against its re-recording.
   static double keep(Song s) => s.replacedWeek >= 0 ? oldKeep : 1.0;

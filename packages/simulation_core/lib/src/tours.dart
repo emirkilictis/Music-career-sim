@@ -38,7 +38,9 @@ enum TourKind {
       freightCents: 30000000,
       maxNights: 5),
   stadium(
-      minFans: 5e6,
+      // Within reach of the biggest stars (F81): fandoms grow slowly past
+      // a few million since K127.
+      minFans: 3e6,
       minCapacity: 40000,
       maxCapacity: 80000,
       priceCents: 14000,
