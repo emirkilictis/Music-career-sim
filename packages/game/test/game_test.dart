@@ -1362,6 +1362,55 @@ void main() {
       g.close();
     });
 
+    test('a free upload to the audio site, then out for real (K148)', () {
+      (GameSession, int) start(int year) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: year, money: StartMoney.millionaire, premium: true));
+        final p = g.world.player!;
+        p.moneyCents = 1 << 40;
+        p.creativeEnergy = 100;
+        return (g, g.writeSong(budget: BudgetTier.high).id);
+      }
+
+      var (g, id) = start(2007);
+      expect(g.song(id).canCloud, isFalse);
+      expect(() => g.uploadToCloud(id), _code('cannotCloud'));
+      g.close();
+      final (plain, _) = start(2016);
+      (g, id) = start(2016);
+      expect(g.song(id).canCloud, isTrue);
+      g.uploadToCloud(id);
+      expect(g.song(id).cloudOnly, isTrue);
+      expect(g.vault.map((s) => s.id), isNot(contains(id)));
+      g.advanceWeeks(6, stop: SkipStop.never);
+      plain.advanceWeeks(6, stop: SkipStop.never);
+      final s = g.world.songs[id];
+      expect(g.song(id).cloudPlays, greaterThan(0));
+      // It never charts while it is only there.
+      for (final ch in Charts.mainSongCharts) {
+        expect(s.statsOrNull(ch)?.weeksOn ?? 0, 0);
+      }
+      // Its listeners became fans: an unknown is found there.
+      expect(g.player.coreFans, greaterThan(plain.player.coreFans));
+      plain.close();
+      final plays = g.song(id).cloudPlays;
+      final boost = s.versionBoost;
+      g.releaseSingle(id, campaign: Campaign.none);
+      expect(s.cloudOnly, isFalse);
+      expect(s.releasedWeek, g.week);
+      expect(s.cloudPlays, closeTo(plays, plays * 0.01));
+      expect(s.versionBoost - boost,
+          closeTo(Cloud.officialBoost(s.cloudPlays), 1e-9));
+      final slot = g.slotId;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.song(id).cloudWeek, greaterThanOrEqualTo(0));
+      expect(g.song(id).cloudOnly, isFalse);
+      g.close();
+    });
+
     test('the streaming app\'s Marquee and Showcase (K147)', () {
       (GameSession, List<int>) start(int year) {
         final g = GameSession.start(

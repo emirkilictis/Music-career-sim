@@ -336,6 +336,10 @@ class SongView {
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
         masterShare = Rerecords.songShare(w.artists[s.primaryArtistId], s),
+        cloudWeek = s.cloudWeek,
+        cloudOnly = s.cloudOnly,
+        cloudPlays = s.cloudOnly ? w.songLifetimeStreams(s) : s.cloudPlays,
+        canCloud = w.player != null && Cloud.canUpload(w, w.player!, s),
         marqueeWeek = s.marqueeWeek,
         marqueeCostCents = StreamingTools.canMarquee(w, s)
             ? StreamingTools.marqueeCostCents(w.player!)
@@ -459,6 +463,13 @@ class SongView {
   final CreatorCampaign creatorTier;
   final CreatorResult creatorResult;
   final Map<CreatorCampaign, int> creatorCosts;
+
+  /// A free upload to the audio-sharing site (docs K148): when, whether
+  /// it is still only there, its plays there, and whether it can go up.
+  final int cloudWeek;
+  final bool cloudOnly;
+  final double cloudPlays;
+  final bool canCloud;
 
   /// The streaming app's Marquee and Showcase (docs K147): when the song
   /// got them (-1: never) and what they cost now (null: not possible).

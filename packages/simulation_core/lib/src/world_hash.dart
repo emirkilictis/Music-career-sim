@@ -122,6 +122,8 @@ int worldHash(World w) {
     addInt(s.writerId);
     addInt(s.liveOf);
     addInt(s.marqueeWeek);
+    addInt(s.cloudWeek);
+    addInt(s.cloudOnly ? 1 : 0);
     addInt(s.showcaseWeek);
     addInt(s.soldTo);
     addDouble(s.writerCents);

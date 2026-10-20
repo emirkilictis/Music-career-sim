@@ -110,8 +110,12 @@ abstract final class StreamingTools {
   }
 
   /// Chart weight of [s] this week (half while filtered).
-  static double chartWeight(World w, Song s) =>
-      w.week < s.chartFilterUntil ? 0.5 : 1.0;
+  /// A free upload does not chart (docs K148).
+  static double chartWeight(World w, Song s) => s.cloudOnly
+      ? 0.0
+      : w.week < s.chartFilterUntil
+          ? 0.5
+          : 1.0;
 
   // -------------------------------------------------------------- autoplay
 

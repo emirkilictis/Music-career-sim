@@ -1342,6 +1342,17 @@ class GameSession {
   }
 
   /// Pays creators on the short-video app to use a song's sound (K131).
+  /// Puts vault song [songId] up for free on the audio-sharing site
+  /// (docs K148).
+  void uploadToCloud(int songId) {
+    final s = _ownSong(songId);
+    if (!Cloud.canUpload(world, _p, s)) {
+      throw GameException('cannotCloud', 'Only unreleased songs, from 2008');
+    }
+    Cloud.upload(world, _p, s);
+    _saveNow();
+  }
+
   /// The streaming app's Marquee for a new release, a song or a whole
   /// album, and a Showcase for a catalog song (docs K147).
   void runMarquee(int songId) {

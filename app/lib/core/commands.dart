@@ -247,6 +247,10 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
 
+  /// A free upload to the audio site (docs K148).
+  static SessionCmd<void> uploadToCloud(int songId) =>
+      (s) => s.uploadToCloud(songId);
+
   /// The streaming app's Marquee and Showcase (docs K147).
   static SessionCmd<void> runMarquee(int songId) =>
       (s) => s.runMarquee(songId);

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'audience.dart';
 import 'bundles.dart';
+import 'cloud.dart';
 import 'config/charts.dart';
 import 'critics.dart';
 import 'contracts.dart';
@@ -683,6 +684,8 @@ abstract final class Actions {
     a.hype += buzz;
     s.isSingle = true;
     s.singleWeek = w.week;
+    // A free upload comes out officially (docs K148).
+    Cloud.goOfficial(w, s);
     if (s.status == SongStatus.vault) {
       s.releasedWeek = w.week;
       Lifecycle.activateSong(w, s);
@@ -788,6 +791,7 @@ abstract final class Actions {
     for (final id in songIds) {
       final s = w.songs[id];
       s.albumId = album.id;
+      Cloud.goOfficial(w, s);
       w.dirtySongs.add(s.id);
       if (s.status == SongStatus.vault) {
         s.releasedWeek = w.week;

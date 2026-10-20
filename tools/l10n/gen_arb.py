@@ -1439,6 +1439,16 @@ k('showcaseTitle','Streamify Showcase','Streamify Showcase')
 k('showcaseHint','A banner on listeners\' home screens for an older song: it is played again for a while. Once a year.','Eski bir şarkı için dinleyicilerin ana ekranında afiş: bir süre yeniden dinlenir. Yılda bir.')
 k('showcaseRun','Run a Showcase','Showcase başlat')
 
+# Free uploads to the audio site (docs K148).
+k('errorCannotCloud','Only unreleased songs can go up there, from 2008.','Oraya sadece çıkmamış şarkılar yüklenebilir, 2008\'den itibaren.')
+k('cloudButton','Upload free to NoiseCloud','NoiseCloud\'a ücretsiz yükle')
+k('cloudHint','The song goes up for free on NoiseCloud only: it pays almost nothing and does not chart, but unknowns get discovered there and songs catch on (most of all 2014–2019). Release it officially later: the more it was played there, the bigger its wave.','Şarkı ücretsiz olarak sadece NoiseCloud\'a yüklenir: neredeyse hiç para getirmez ve listelere girmez, ama bilinmeyenler orada keşfedilir ve şarkılar tutar (en çok 2014–2019). Sonra resmi olarak çıkar: orada ne kadar dinlendiyse dalgası o kadar büyük olur.')
+k('cloudGo','Upload','Yükle')
+k('cloudDone','“{title}” is up on NoiseCloud.','“{title}” NoiseCloud\'da.', title='String')
+k('cloudOnlyTag','Only on NoiseCloud · {plays} plays','Sadece NoiseCloud\'da · {plays} dinlenme', plays='String')
+k('cloudOfficialHint','Release it as a single or on a record to put it everywhere and on the charts.','Her yere ve listelere çıkması için single ya da albümle çıkar.')
+k('cloudFromTag','Broke on NoiseCloud · {plays} plays there','NoiseCloud\'da patladı · orada {plays} dinlenme', plays='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

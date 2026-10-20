@@ -11,6 +11,7 @@ import '../core/images.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/event_icon.dart' show platformColor;
 import '../widgets/income_card.dart';
 import '../widgets/artist_link.dart';
 import '../widgets/history_tables.dart';
@@ -119,6 +120,35 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
       if (mounted) {
         showInfo(context, l.featureDone(pick.name, s.title),
             icon: Icons.group_add_rounded);
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  /// Puts the vault song up for free on the audio site (docs K148).
+  Future<void> _cloud(SongView s) async {
+    final l = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l.cloudButton),
+        content: Text(l.cloudHint),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(c, false), child: Text(l.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(c, true),
+              child: Text(l.cloudGo)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await widget.state.act(Cmd.uploadToCloud(s.id));
+      if (mounted) {
+        showInfo(context, l.cloudDone(s.title), icon: Icons.cloud_rounded);
       }
       _load();
     } catch (e) {
@@ -598,7 +628,9 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     Tag(l.scheduledSingleTag(fmt.week(s.scheduledSingleWeek)),
                         icon: Icons.event_rounded),
                   ] else if (s.isPlayer &&
-                      (s.inVault || (!s.isSingle && s.albumId >= 0))) ...[
+                      (s.inVault ||
+                          s.cloudOnly ||
+                          (!s.isSingle && s.albumId >= 0))) ...[
                     const SizedBox(height: 12),
                     GradientButton(
                       onPressed: () => _release(s),
@@ -636,6 +668,28 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           s.inVault ? l.featureButton : l.remixFeatureButton),
                     ),
                   ],
+                  // A free upload to the audio site (docs K148).
+                  if (s.cloudOnly) ...[
+                    const SizedBox(height: 8),
+                    Tag(l.cloudOnlyTag(fmt.compact(s.cloudPlays)),
+                        icon: Icons.cloud_rounded,
+                        color: platformColor(MusicPlatform.noiseCloud)),
+                    const SizedBox(height: 4),
+                    Text(l.cloudOfficialHint,
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                  ] else if (s.cloudWeek >= 0 && s.cloudPlays >= 1) ...[
+                    const SizedBox(height: 8),
+                    Tag(l.cloudFromTag(fmt.compact(s.cloudPlays)),
+                        icon: Icons.cloud_done_rounded,
+                        color: platformColor(MusicPlatform.noiseCloud)),
+                  ],
+                  if (s.canCloud)
+                    TextButton.icon(
+                      onPressed: () => _cloud(s),
+                      icon: const Icon(Icons.cloud_upload_outlined),
+                      label: Text(l.cloudButton),
+                    ),
                   // Writing for others (docs K143).
                   if (s.isPlayer &&
                       s.inVault &&

@@ -9,6 +9,7 @@ import 'brands.dart';
 import 'social.dart';
 import 'songwriting.dart';
 import 'streaming_tools.dart';
+import 'cloud.dart';
 import 'config/charts.dart';
 import 'contracts.dart';
 import 'config/era_table.dart';
@@ -322,6 +323,7 @@ class Simulator {
           ? math.max(ownReach, s.creatorTier.reach)
           : ownReach;
       if (r.chance(c.viralWeeklyChance *
+          (s.cloudOnly ? Cloud.viralFactor(year) : 1.0) *
           p.kind.viral *
           viralEra *
           (0.3 + 2 * s.virality) *
@@ -461,7 +463,9 @@ class Simulator {
           noise *
           trackShare *
           exclusive *
-          keep;
+          keep *
+          // A free upload is heard on one site only (docs K148).
+          Cloud.attention(w, s);
       s.lastAttention = a;
       songAttention[i] = a;
       // Where the player's listening came from (docs K120).
@@ -1741,9 +1745,11 @@ class Simulator {
     for (final id in world.activeSongIds) {
       final s = world.songs[id];
       if (s.primaryArtistId != p.id) continue;
-      final songCents = s.weekStreams * 0.35 * s.autoplay.royalty +
-          s.weekDownloads * 70 +
-          s.weekPhysical * 100;
+      final songCents = (s.weekStreams * 0.35 * s.autoplay.royalty +
+              s.weekDownloads * 70 +
+              s.weekPhysical * 100) *
+          // Free uploads pay next to nothing (docs K148).
+          (s.cloudOnly ? Cloud.payFactor : 1.0);
       // The deal it came out under keeps its cut (docs K139).
       final share = s.masterShare ??= p.artistShare;
       cents += songCents * share;

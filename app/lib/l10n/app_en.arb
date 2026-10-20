@@ -5045,5 +5045,34 @@
   },
   "showcaseTitle": "Streamify Showcase",
   "showcaseHint": "A banner on listeners' home screens for an older song: it is played again for a while. Once a year.",
-  "showcaseRun": "Run a Showcase"
+  "showcaseRun": "Run a Showcase",
+  "errorCannotCloud": "Only unreleased songs can go up there, from 2008.",
+  "cloudButton": "Upload free to NoiseCloud",
+  "cloudHint": "The song goes up for free on NoiseCloud only: it pays almost nothing and does not chart, but unknowns get discovered there and songs catch on (most of all 2014–2019). Release it officially later: the more it was played there, the bigger its wave.",
+  "cloudGo": "Upload",
+  "cloudDone": "“{title}” is up on NoiseCloud.",
+  "@cloudDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudOnlyTag": "Only on NoiseCloud · {plays} plays",
+  "@cloudOnlyTag": {
+    "placeholders": {
+      "plays": {
+        "type": "String"
+      }
+    }
+  },
+  "cloudOfficialHint": "Release it as a single or on a record to put it everywhere and on the charts.",
+  "cloudFromTag": "Broke on NoiseCloud · {plays} plays there",
+  "@cloudFromTag": {
+    "placeholders": {
+      "plays": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1455,5 +1455,13 @@
   "marqueeOn": "{title} Marquee'de.",
   "showcaseTitle": "Streamify Showcase",
   "showcaseHint": "Eski bir şarkı için dinleyicilerin ana ekranında afiş: bir süre yeniden dinlenir. Yılda bir.",
-  "showcaseRun": "Showcase başlat"
+  "showcaseRun": "Showcase başlat",
+  "errorCannotCloud": "Oraya sadece çıkmamış şarkılar yüklenebilir, 2008'den itibaren.",
+  "cloudButton": "NoiseCloud'a ücretsiz yükle",
+  "cloudHint": "Şarkı ücretsiz olarak sadece NoiseCloud'a yüklenir: neredeyse hiç para getirmez ve listelere girmez, ama bilinmeyenler orada keşfedilir ve şarkılar tutar (en çok 2014–2019). Sonra resmi olarak çıkar: orada ne kadar dinlendiyse dalgası o kadar büyük olur.",
+  "cloudGo": "Yükle",
+  "cloudDone": "“{title}” NoiseCloud'da.",
+  "cloudOnlyTag": "Sadece NoiseCloud'da · {plays} dinlenme",
+  "cloudOfficialHint": "Her yere ve listelere çıkması için single ya da albümle çıkar.",
+  "cloudFromTag": "NoiseCloud'da patladı · orada {plays} dinlenme"
 }

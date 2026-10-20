@@ -836,6 +836,13 @@ class Song with Charted {
   /// The week it leaked before release (-1: never; docs K140).
   int leakedWeek = -1;
 
+  /// A free upload to the audio-sharing site (docs K148): when it went up
+  /// (-1: never), whether it is still only there, and its plays there
+  /// when it came out officially.
+  int cloudWeek = -1;
+  bool cloudOnly = false;
+  double cloudPlays = 0;
+
   /// The streaming app's paid recommendations (docs K147): when the song
   /// went on the Marquee and got a Showcase (-1: never).
   int marqueeWeek = -1;
