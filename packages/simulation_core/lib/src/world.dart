@@ -11,6 +11,7 @@ import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'model.dart';
 import 'fan_club.dart';
+import 'imprints.dart';
 import 'own_playlist.dart';
 import 'music_show.dart';
 import 'tours.dart';
@@ -73,6 +74,9 @@ class World {
 
   /// The player's paid fan club (docs K164).
   FanClub? fanClub;
+
+  /// The player's own label (docs K169).
+  Imprint? imprint;
 
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();

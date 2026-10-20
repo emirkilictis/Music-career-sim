@@ -1470,6 +1470,51 @@ void main() {
       g.close();
     });
 
+    test('the player\'s own label (K169)', () {
+      var g = GameSession.start(slots, _setup(startYear: 2016));
+      expect(g.imprint.canFound, isFalse);
+      expect(() => g.foundImprint('Nope'), _code('noImprint'));
+      g.close();
+      g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      expect(g.imprintCandidates, isEmpty);
+      final money = p.moneyCents;
+      g.foundImprint('Night Shift Records');
+      expect(money - p.moneyCents, Imprints.foundCents);
+      expect(() => g.foundImprint('Again'), _code('noImprint'));
+      final list = g.imprintCandidates;
+      expect(list.length, greaterThanOrEqualTo(2));
+      for (final c in list) {
+        expect(c.fame, lessThanOrEqualTo(Imprints.maxSigneeFame));
+      }
+      final before = p.moneyCents;
+      g.signToImprint(list[0].artistId);
+      g.signToImprint(list[1].artistId);
+      expect(before - p.moneyCents, list[0].advanceCents + list[1].advanceCents);
+      expect(() => g.signToImprint(list[0].artistId), _code('notSignable'));
+      g.advanceWeeks(16, stop: SkipStop.never);
+      final v = g.imprint;
+      expect(v.roster, hasLength(2));
+      expect(v.earnedCents, greaterThan(0));
+      g.dropFromImprint(list[1].artistId);
+      expect(g.imprint.roster, hasLength(1));
+      final slot = g.slotId;
+      final earned = g.imprint.earnedCents;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.imprint.name, 'Night Shift Records');
+      expect(g.imprint.roster.single.artistId, list[0].artistId);
+      expect(g.imprint.earnedCents, closeTo(earned, 1));
+      g.close();
+    });
+
     test('an album rollout (K165)', () {
       var g = GameSession.start(
           slots,

@@ -112,6 +112,8 @@ class SaveStore {
     w.ownPlaylist = OwnPlaylist.decode(meta['playlist'] as String?);
     // The player's fan club (docs K164).
     w.fanClub = FanClub.decode(meta['fanClub'] as String?);
+    // The player's own label (docs K169).
+    w.imprint = Imprint.decode(meta['imprint'] as String?);
     w.playerPeakListeners =
         (meta['listenersPeak'] as num?)?.toDouble() ?? -1;
     if (meta['artistChart'] case final String s when s.isNotEmpty) {
@@ -372,6 +374,7 @@ class SaveStore {
       'channel': ChannelVideo.encode(w.channelVideos),
       'playlist': OwnPlaylist.encode(w.ownPlaylist),
       'fanClub': w.fanClub?.encode() ?? '',
+      'imprint': w.imprint?.encode() ?? '',
       'listenersPeak': w.playerPeakListeners,
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],

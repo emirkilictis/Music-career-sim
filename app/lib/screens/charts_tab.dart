@@ -1194,9 +1194,11 @@ class _ChartLine extends StatelessWidget {
                       // On it under another name (docs K158).
                       if (r.credit != ChartCredit.none)
                         _Badge(
-                            r.credit == ChartCredit.member
-                                ? l.creditMember
-                                : l.creditGuest,
+                            switch (r.credit) {
+                              ChartCredit.member => l.creditMember,
+                              ChartCredit.imprint => l.creditImprint,
+                              _ => l.creditGuest,
+                            },
                             AppColors.lilac,
                             const Color(0xFF241A45)),
                       if (gain >= 10)

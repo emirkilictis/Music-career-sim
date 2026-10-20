@@ -16,6 +16,7 @@ export 'src/contracts.dart';
 export 'src/compilations.dart';
 export 'src/credits.dart';
 export 'src/fan_club.dart';
+export 'src/imprints.dart';
 export 'src/master_buyback.dart';
 export 'src/price_cuts.dart';
 export 'src/rollouts.dart';

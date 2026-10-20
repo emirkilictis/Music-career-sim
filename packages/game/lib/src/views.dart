@@ -1016,13 +1016,21 @@ enum ChartCredit {
   member,
 
   /// The player is featured on it.
-  guest;
+  guest,
+
+  /// By an artist on the player's label (docs K169).
+  imprint;
 
   static ChartCredit of(World w, int artistId, List<int> featured) {
     final me = w.playerArtistId;
     if (me < 0 || artistId == me) return none;
     if (w.artists[artistId].managedBy == me) return member;
-    return featured.contains(me) ? guest : none;
+    if (featured.contains(me)) return guest;
+    final label = w.imprint;
+    if (label != null && label.roster.any((s) => s.artistId == artistId)) {
+      return imprint;
+    }
+    return none;
   }
 }
 
@@ -2468,6 +2476,71 @@ class WrittenSongView {
   final int peak;
   final double streams;
   final double earnedCents;
+}
+
+/// The player's own label, or what founding one takes (docs K169).
+class ImprintView {
+  ImprintView.of(World w, Artist a)
+      : founded = w.imprint != null,
+        canFound = Imprints.canFound(w, a),
+        name = w.imprint?.name ?? '',
+        foundedWeek = w.imprint?.foundedWeek ?? -1,
+        roster = [
+          for (final s in w.imprint?.roster ?? const <Signing>[])
+            SigneeView.of(w, s)
+        ];
+  final bool founded;
+  final bool canFound;
+  final String name;
+  final int foundedWeek;
+  final List<SigneeView> roster;
+  double get earnedCents => roster.fold(0.0, (t, s) => t + s.earnedCents);
+}
+
+/// An artist on the player's label.
+class SigneeView {
+  SigneeView.of(World w, Signing s)
+      : artistId = s.artistId,
+        name = w.artists[s.artistId].name,
+        genre = w.artists[s.artistId].genre,
+        fame = w.artists[s.artistId].fame,
+        fans = w.artists[s.artistId].coreFans,
+        signedWeek = s.signedWeek,
+        advanceCents = s.advanceCents,
+        earnedCents = s.earnedCents,
+        retired = w.artists[s.artistId].isRetired,
+        bestPeak = Imprints.bestPeak(w, s, Charts.usSongs);
+  final int artistId;
+  final String name;
+  final int genre;
+  final double fame;
+  final double fans;
+  final int signedWeek;
+  final int advanceCents;
+  final double earnedCents;
+  final bool retired;
+
+  /// Best US songs chart place since signing (0: none).
+  final int bestPeak;
+}
+
+/// A newcomer the player's label could sign.
+class SigneeCandidateView {
+  SigneeCandidateView.of(World w, Artist r)
+      : artistId = r.id,
+        name = r.name,
+        genre = r.genre,
+        fame = r.fame,
+        fans = r.coreFans,
+        debutYear = GameTime.yearOf(r.debutWeek),
+        advanceCents = Imprints.advanceCents(r);
+  final int artistId;
+  final String name;
+  final int genre;
+  final double fame;
+  final double fans;
+  final int debutYear;
+  final int advanceCents;
 }
 
 /// The player's paid fan club, or what opening one takes (docs K164).

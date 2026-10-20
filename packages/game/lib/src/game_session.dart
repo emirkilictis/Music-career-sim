@@ -1996,6 +1996,55 @@ class GameSession {
             WrittenSongView.of(world, world.songs[id]),
       ];
 
+  // -------------------------------------------------- own label (K169)
+
+  ImprintView get imprint => ImprintView.of(world, _p);
+
+  List<SigneeCandidateView> get imprintCandidates => [
+        if (world.imprint != null)
+          for (final r in Imprints.candidates(world, _p))
+            SigneeCandidateView.of(world, r)
+      ];
+
+  void foundImprint(String name) {
+    if (!Imprints.canFound(world, _p)) {
+      throw GameException('noImprint', 'Not now');
+    }
+    if (name.trim().isEmpty || name.trim().length > 40) {
+      throw GameException('invalidName', 'Name it');
+    }
+    _requireMoney(Imprints.foundCents);
+    Imprints.found(world, _p, name);
+    _saveNow();
+  }
+
+  void signToImprint(int artistId) {
+    final label = world.imprint;
+    if (label == null) throw GameException('noImprint', 'No label');
+    if (label.roster.length >= Imprints.maxRoster) {
+      throw GameException('rosterFull', 'Roster full');
+    }
+    if (artistId < 0 || artistId >= world.artists.length) {
+      throw GameException('noArtist', 'No such artist');
+    }
+    final r = world.artists[artistId];
+    if (!Imprints.candidates(world, _p).contains(r)) {
+      throw GameException('notSignable', 'Not signable');
+    }
+    _requireMoney(Imprints.advanceCents(r));
+    Imprints.sign(world, _p, r);
+    _saveNow();
+  }
+
+  void dropFromImprint(int artistId) {
+    final label = world.imprint;
+    if (label == null || !label.roster.any((s) => s.artistId == artistId)) {
+      throw GameException('notSignable', 'Not on the label');
+    }
+    Imprints.drop(world, artistId);
+    _saveNow();
+  }
+
   // ------------------------------------------------- fan club (K164)
 
   FanClubView get fanClub => FanClubView.of(world, _p);

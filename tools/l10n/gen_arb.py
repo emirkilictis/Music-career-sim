@@ -1676,6 +1676,29 @@ k('rolloutTeaser','A TikTak teaser','TikTak tanıtımı')
 k('rolloutPitch','Pitched to the editors','Editörlere öneri')
 k('rolloutResult','Rolled out {done}/{count}: +{pct}% hype at release','Çıkış planı {done}/{count}: çıkışta +%{pct} heyecan', done='int', count='int', pct='int')
 
+
+# The player's own label (docs K169).
+k('imprintTitle','Your label','Plak şirketin')
+k('imprintHint','Sign newcomers to your own label: their records come out under their names, your push takes them further, and the label keeps {pct}% of what they release with you.','Yeni sanatçıları kendi şirketine imzala: kayıtları kendi adlarıyla çıkar, şirketinin tanıtımı onları daha ileri taşır ve seninle çıkardıklarının %{pct}\'i şirkete kalır.', pct='int')
+k('imprintNeedFame','A label of your own needs a name the business knows ({pct}% fame).','Kendi şirketin için sektörün tanıdığı bir isim olmalısın (%{pct} ünlülük).', pct='int')
+k('imprintFound','Found a label · {cost}','Şirket kur · {cost}', cost='String')
+k('imprintName','Label name','Şirket adı')
+k('imprintDefaultName','{name} Records','{name} Records', name='String')
+k('imprintRoster','{count} of {max} artists · {earned} earned','{max} sanatçıdan {count} · {earned} kazanıldı', count='int', max='int', earned='String')
+k('imprintSign','Sign an artist','Sanatçı imzala')
+k('imprintSignTitle','Newcomers to sign','İmzalanabilecek yeni sanatçılar')
+k('imprintCandidate','{genre} · since {year} · {fans} fans','{genre} · {year}\'den beri · {fans} hayran', genre='String', year='int', fans='String')
+k('imprintSignee','{earned} earned · signed {when}','{earned} kazanıldı · imza: {when}', earned='String', when='String')
+k('imprintSigneePeak','US peak #{peak} on your label','Şirketinle ABD zirvesi #{peak}', peak='int')
+k('imprintDrop','Let go','Bırak')
+k('imprintSigned','{name} is on your label.','{name} artık senin şirketinde.', name='String')
+k('creditImprint','Your label','Şirketin')
+k('eventImprintTop10','{artist}, on your label, is #{position} in the US with “{title}”.','Şirketindeki {artist}, “{title}” ile ABD\'de #{position}.', title='String', artist='String', position='int')
+k('eventImprintNo1','{artist}, on your label, is #1 in the US with “{title}”!','Şirketindeki {artist}, “{title}” ile ABD\'de #1!', title='String', artist='String')
+k('errorNoImprint','A label of your own is not possible now.','Şu an kendi şirketini kuramazsın.')
+k('errorRosterFull','Your label is full.','Şirketin dolu.')
+k('errorNotSignable','That artist cannot be signed.','Bu sanatçı imzalanamaz.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

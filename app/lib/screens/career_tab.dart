@@ -9,6 +9,7 @@ import '../widgets/manager_section.dart';
 import '../widgets/festival_section.dart';
 import '../widgets/tour_section.dart';
 import '../widgets/milestones_section.dart';
+import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/income_card.dart';
 import '../widgets/image_pickers.dart';
@@ -35,6 +36,7 @@ class _CareerScreenState extends State<CareerScreen> {
   List<WrittenSongView> _written = const [];
   List<MemberView> _members = const [];
   FanClubView? _club;
+  ImprintView? _label;
   List<WrittenSongView> _guest = const [];
   IncomeBreakdown? _income;
   CatalogOfferView? _catalog;
@@ -58,6 +60,7 @@ class _CareerScreenState extends State<CareerScreen> {
     final written = await career.read(Cmd.writtenForOthers());
     final members = await career.read(Cmd.members());
     final club = await career.read(Cmd.fanClub());
+    final label = await career.read(Cmd.imprint());
     final guest = await career.read(Cmd.guestSongs());
     final income = await career.read(Cmd.careerIncome());
     final catalog = await career.read(Cmd.catalogOffer());
@@ -68,6 +71,7 @@ class _CareerScreenState extends State<CareerScreen> {
         _written = written;
         _members = members;
         _club = club;
+        _label = label;
         _guest = guest;
         _income = income;
         _catalog = catalog;
@@ -77,6 +81,151 @@ class _CareerScreenState extends State<CareerScreen> {
           ..sort((a, b) =>
               fmt.songMainValue(b, week).compareTo(fmt.songMainValue(a, week)));
       });
+    }
+  }
+
+  Widget _labelSection(ImprintView v) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final muted = TextStyle(color: AppColors.textMuted, fontSize: 12.5);
+    return Section(
+      title: v.founded ? v.name : l.imprintTitle,
+      icon: Icons.business_rounded,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(l.imprintHint((Imprints.share * 100).round()), style: muted),
+        const SizedBox(height: 8),
+        if (!v.founded) ...[
+          if (!v.canFound)
+            Text(l.imprintNeedFame((Imprints.minFame * 100).round()),
+                style: const TextStyle(fontWeight: FontWeight.w700))
+          else
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FilledButton.icon(
+                onPressed: _foundLabel,
+                icon: const Icon(Icons.business_rounded),
+                label: Text(l.imprintFound(fmt.money(Imprints.foundCents))),
+              ),
+            ),
+        ] else ...[
+          Text(
+              l.imprintRoster(v.roster.length, Imprints.maxRoster,
+                  fmt.money(v.earnedCents.round())),
+              style: const TextStyle(fontWeight: FontWeight.w800)),
+          for (final s in v.roster)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: ArtistAvatar(
+                  name: s.name, seed: s.artistId, artistId: s.artistId),
+              title: Text(s.name,
+                  style: const TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text([
+                l.imprintSignee(
+                    fmt.money(s.earnedCents.round()), fmt.week(s.signedWeek)),
+                if (s.bestPeak > 0) l.imprintSigneePeak(s.bestPeak),
+              ].join('\n')),
+              trailing: TextButton(
+                onPressed: () async {
+                  try {
+                    await career.act(Cmd.dropFromImprint(s.artistId));
+                  } catch (e) {
+                    if (mounted) showError(context, e);
+                  }
+                },
+                child: Text(l.imprintDrop),
+              ),
+            ),
+          if (v.roster.length < Imprints.maxRoster)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: _signArtist,
+                icon: const Icon(Icons.person_add_alt_rounded),
+                label: Text(l.imprintSign),
+              ),
+            ),
+        ],
+      ]),
+    );
+  }
+
+  Future<void> _foundLabel() async {
+    final l = context.l10n;
+    final career = context.careerRead;
+    final ctrl =
+        TextEditingController(text: l.imprintDefaultName(career.player.name));
+    final name = await showDialog<String>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l.imprintName),
+        content: TextField(controller: ctrl, autofocus: true, maxLength: 40),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d), child: Text(l.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, ctrl.text),
+              child: Text(l.ok)),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (name == null || !mounted) return;
+    try {
+      await career.act(Cmd.foundImprint(name));
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  Future<void> _signArtist() async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final list = await career.read(Cmd.imprintCandidates());
+    if (!mounted) return;
+    final money = career.player.moneyCents;
+    final pick = await showModalBottomSheet<SigneeCandidateView>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (s) => SafeArea(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.of(s).size.height * 0.8),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(l.imprintSignTitle,
+                  style: Theme.of(s).textTheme.titleLarge),
+            ),
+            Flexible(
+              child: ListView(shrinkWrap: true, children: [
+                for (final c in list)
+                  ListTile(
+                    enabled: c.advanceCents <= money,
+                    leading: ArtistAvatar(
+                        name: c.name, seed: c.artistId, artistId: c.artistId),
+                    title: Text(c.name),
+                    subtitle: Text(l.imprintCandidate(fmt.genre(c.genre),
+                        c.debutYear, fmt.compact(c.fans))),
+                    trailing: Text(fmt.money(c.advanceCents)),
+                    onTap: () => Navigator.pop(s, c),
+                  ),
+              ]),
+            ),
+          ]),
+        ),
+      ),
+    );
+    if (pick == null || !mounted) return;
+    try {
+      await career.act(Cmd.signToImprint(pick.artistId));
+      if (mounted) {
+        showInfo(context, l.imprintSigned(pick.name),
+            icon: Icons.business_rounded);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
     }
   }
 
@@ -375,6 +524,11 @@ class _CareerScreenState extends State<CareerScreen> {
                   ),
                 ]),
           ),
+        ],
+        // The player's own label (docs K169).
+        if (_label case final label?) ...[
+          const SizedBox(height: 12),
+          _labelSection(label),
         ],
         // The paid fan club (docs K164).
         if (_club case final club?) ...[

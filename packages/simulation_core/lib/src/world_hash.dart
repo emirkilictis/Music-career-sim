@@ -153,6 +153,12 @@ int worldHash(World w) {
     addInt(v.kind.index * 100000 + v.week);
     addDouble(v.baseViews);
   }
+  if (w.imprint case final label?) {
+    for (final s in label.roster) {
+      addInt(s.artistId);
+      addDouble(s.earnedCents);
+    }
+  }
   if (w.fanClub case final club?) {
     addDouble(club.members);
     addInt(club.price.index);

@@ -254,6 +254,17 @@ abstract final class Cmd {
       (s) => s.writtenForOthers;
 
   /// Distribution for independents (docs K157).
+  // The player's own label (docs K169).
+  static SessionCmd<ImprintView> imprint() => (s) => s.imprint;
+  static SessionCmd<List<SigneeCandidateView>> imprintCandidates() =>
+      (s) => s.imprintCandidates;
+  static SessionCmd<void> foundImprint(String name) =>
+      (s) => s.foundImprint(name);
+  static SessionCmd<void> signToImprint(int artistId) =>
+      (s) => s.signToImprint(artistId);
+  static SessionCmd<void> dropFromImprint(int artistId) =>
+      (s) => s.dropFromImprint(artistId);
+
   // The paid fan club (docs K164).
   static SessionCmd<FanClubView> fanClub() => (s) => s.fanClub;
   static SessionCmd<void> openFanClub(ClubPrice price) =>

@@ -562,6 +562,11 @@ void main() {
     await c.run(_fiveAlbums());
     await c.run((s) {
       // A playlist of the week's hits and two of her own (docs K159).
+      // Her own label with two newcomers (docs K169).
+      s.foundImprint('Reyes Records');
+      for (final c in s.imprintCandidates.take(2)) {
+        s.signToImprint(c.artistId);
+      }
       s.createPlaylist('Sunday Drive');
       final picks = s.playlistCandidates;
       for (final x in picks.where((x) => !x.isPlayer).take(12)) {
@@ -784,6 +789,17 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(sign);
     await shot(tester, '15p_record_deal');
+    // Her label (docs K169).
+    await tester.tapAt(const Offset(200, 60));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    final label = _ci('Reyes Records');
+    await tester.scrollUntilVisible(label, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(label), alignment: 0.05);
+    await tester.pumpAndSettle();
+    await shot(tester, '15u_own_label');
   });
   testWidgets('screenshots: a greatest hits album', skip: !enabled,
       (tester) async {

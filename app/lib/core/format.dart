@@ -823,6 +823,9 @@ class Fmt {
       'noMasters' => l.errorNoMasters,
       'noPriceCut' => l.errorNoPriceCut,
       'noFanClub' => l.errorNoFanClub,
+      'noImprint' => l.errorNoImprint,
+      'rosterFull' => l.errorRosterFull,
+      'notSignable' => l.errorNotSignable,
       'noPlaylists' ||
       'hasPlaylist' ||
       'noPlaylist' ||
@@ -993,13 +996,17 @@ class Fmt {
       PlaylistMilestone(:final followers) =>
         l.eventPlaylistFollowers(t, compact(followers)),
       CreditSongHit(:final position, :final credit) => switch ((
-          credit == ChartCredit.member,
+          credit,
           position == 1
         )) {
-          (true, true) => l.eventMemberNo1(t, line.artistName),
-          (true, false) => l.eventMemberTop10(t, line.artistName, position),
-          (false, true) => l.eventGuestNo1(t, line.artistName),
-          (false, false) => l.eventGuestTop10(t, line.artistName, position),
+          (ChartCredit.member, true) => l.eventMemberNo1(t, line.artistName),
+          (ChartCredit.member, false) =>
+            l.eventMemberTop10(t, line.artistName, position),
+          (ChartCredit.imprint, true) => l.eventImprintNo1(t, line.artistName),
+          (ChartCredit.imprint, false) =>
+            l.eventImprintTop10(t, line.artistName, position),
+          (_, true) => l.eventGuestNo1(t, line.artistName),
+          (_, false) => l.eventGuestTop10(t, line.artistName, position),
         },
       AllTimeBestSeller(:final rank) => rank == 1
           ? l.eventAllTimeTop

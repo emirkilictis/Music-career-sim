@@ -918,7 +918,11 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       icon: const Icon(Icons.person_outline_rounded),
                       label: Text(l.memberSoloButton),
                     ),
-                  if (s.credit != ChartCredit.none) ...[
+                  if (s.credit == ChartCredit.imprint) ...[
+                    const SizedBox(height: 8),
+                    Tag(l.creditImprint,
+                        icon: Icons.business_rounded, color: AppColors.lilac),
+                  ] else if (s.credit != ChartCredit.none) ...[
                     const SizedBox(height: 8),
                     Tag(
                         s.credit == ChartCredit.member

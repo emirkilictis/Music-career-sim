@@ -5914,5 +5914,126 @@
         "type": "int"
       }
     }
-  }
+  },
+  "imprintTitle": "Your label",
+  "imprintHint": "Sign newcomers to your own label: their records come out under their names, your push takes them further, and the label keeps {pct}% of what they release with you.",
+  "@imprintHint": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "imprintNeedFame": "A label of your own needs a name the business knows ({pct}% fame).",
+  "@imprintNeedFame": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "imprintFound": "Found a label · {cost}",
+  "@imprintFound": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "imprintName": "Label name",
+  "imprintDefaultName": "{name} Records",
+  "@imprintDefaultName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "imprintRoster": "{count} of {max} artists · {earned} earned",
+  "@imprintRoster": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      },
+      "earned": {
+        "type": "String"
+      }
+    }
+  },
+  "imprintSign": "Sign an artist",
+  "imprintSignTitle": "Newcomers to sign",
+  "imprintCandidate": "{genre} · since {year} · {fans} fans",
+  "@imprintCandidate": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      },
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "imprintSignee": "{earned} earned · signed {when}",
+  "@imprintSignee": {
+    "placeholders": {
+      "earned": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "imprintSigneePeak": "US peak #{peak} on your label",
+  "@imprintSigneePeak": {
+    "placeholders": {
+      "peak": {
+        "type": "int"
+      }
+    }
+  },
+  "imprintDrop": "Let go",
+  "imprintSigned": "{name} is on your label.",
+  "@imprintSigned": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "creditImprint": "Your label",
+  "eventImprintTop10": "{artist}, on your label, is #{position} in the US with “{title}”.",
+  "@eventImprintTop10": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "position": {
+        "type": "int"
+      }
+    }
+  },
+  "eventImprintNo1": "{artist}, on your label, is #1 in the US with “{title}”!",
+  "@eventImprintNo1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoImprint": "A label of your own is not possible now.",
+  "errorRosterFull": "Your label is full.",
+  "errorNotSignable": "That artist cannot be signed."
 }

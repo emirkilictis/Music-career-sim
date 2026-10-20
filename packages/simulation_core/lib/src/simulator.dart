@@ -26,6 +26,7 @@ import 'compilations.dart';
 import 'curators.dart';
 import 'model.dart';
 import 'fan_club.dart';
+import 'imprints.dart';
 import 'own_playlist.dart';
 import 'price_cuts.dart';
 import 'music_show.dart';
@@ -222,6 +223,8 @@ class Simulator {
             : RadioFormat.factor(s.onFormat, s.genre, s.genres));
     final playlistAdds = <int>[];
     final ownLifts = OwnPlaylists.lifts(w);
+    // The player's label pushes its signees further (docs K169).
+    final signed = Imprints.signedIds(w);
 
     // 5. Raw demand for active songs, split by region.
     final ids = w.activeSongIds;
@@ -397,6 +400,7 @@ class Simulator {
               0.02 * p.buzz) *
           promo *
           p.labelReach *
+          Imprints.reach(signed, p.id) *
           (p.tier == ArtistTier.player
               ? w.difficulty.exposure
               : w.difficulty.aiExposure) *
@@ -547,6 +551,7 @@ class Simulator {
           (s.isSingle ? 1.0 : 0.03) *
           (0.2 + p.fame) *
           p.labelReach *
+          Imprints.reach(signed, p.id) *
           radioOf(s) *
           (1 + 8 * chartBoost);
 
@@ -1847,6 +1852,8 @@ class Simulator {
       p.moneyCents += p.manager.net(royalty).round();
       world.dirtySongs.add(id);
     }
+    // The player's label takes its share of its signees (docs K169).
+    p.moneyCents += p.manager.net(Imprints.weekly(world)).round();
     // The fan club pays the artist directly; no label shares it (K164).
     p.moneyCents += p.manager.net(FanClubs.weekly(world, p)).round();
     // Verses on rivals' songs pay the featured artist's share (K158).
