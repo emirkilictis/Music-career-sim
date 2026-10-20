@@ -308,6 +308,9 @@ abstract final class Cmd {
   static SessionCmd<void> upgradeRadio(int id, RadioPush to) =>
       (s) => s.upgradeRadio(id, to);
 
+  static SessionCmd<void> setRadioFormat(int id, RadioFormat f) =>
+      (s) => s.setRadioFormat(id, f);
+
   static SessionCmd<void> runCreators(int id, CreatorCampaign c) =>
       (s) => s.runCreators(id, c);
   static SessionCmd<void> pitchSong(int id) => (s) => s.pitchSong(id);

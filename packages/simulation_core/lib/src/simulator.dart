@@ -191,7 +191,10 @@ class Simulator {
     // Radio comes from the paid push; the campaign adds a little (K84).
     double radioOf(Song s) =>
         campaignRadio[s.campaign.index] *
-        s.radioPush.factorFor(w.artists[s.primaryArtistId].fame);
+        s.radioPush.factorFor(w.artists[s.primaryArtistId].fame) *
+        (s.radioFormat == null
+            ? 1.0
+            : RadioFormat.factor(s.onFormat, s.genre, s.genres));
     final playlistAdds = <int>[];
 
     // 5. Raw demand for active songs, split by region.
@@ -454,8 +457,7 @@ class Simulator {
       }
       final all = fanPart + casPart + pubPart + viralPart;
       fanFrac[i] = all > 0 ? fanPart / all : 0;
-      s.lastReach =
-          (casPart + pubPart + viralPart) * hit * qMult * trackShare;
+      s.lastReach = (casPart + pubPart + viralPart) * hit * qMult * trackShare;
       // What the campaign added over none at all, for the player's
       // profit/loss (docs K57).
       if (p.tier == ArtistTier.player) {
@@ -842,9 +844,7 @@ class Simulator {
         final pure = al.isMixtape
             ? 0.0
             : bought * noise * tracklist * demand +
-                (age == 0
-                    ? al.preOrders * share * Actions.preOrderExtra
-                    : 0.0);
+                (age == 0 ? al.preOrders * share * Actions.preOrderExtra : 0.0);
         final streams = sea[k] +
             al.sumDormantRate *
                 p.catalogFactor *
@@ -1276,7 +1276,8 @@ class Simulator {
   /// A single's run on the radio: builds over its first weeks, then fades.
   static double _radioLife(Song s, int promoAge) =>
       (1 - math.exp(-(promoAge + 1) / (s.riseWeeks + 3))) *
-      math.exp(-promoAge / (s.lifeWeeks + 10));
+      math.exp(-promoAge /
+          ((s.lifeWeeks + 10) * RadioFormat.lifeFactor(s.onFormat, s.genre)));
 
   /// A song's promotion run (new listeners), before its catalog tail.
   static double _promoLife(Song s, int promoAge) =>
@@ -1576,7 +1577,8 @@ class Simulator {
               1;
           final x = reach / rest;
           if (dbg != null) {
-            final key = p.tier == ArtistTier.player ? 'songX$k' : 'rivalSongX$k';
+            final key =
+                p.tier == ArtistTier.player ? 'songX$k' : 'rivalSongX$k';
             dbg[key] = math.max(dbg[key] ?? 0, x * 1e6);
           }
           if (x > c.songShareKnee) {
@@ -1628,11 +1630,10 @@ class Simulator {
 
   /// How much [s] connects with listeners beyond its fans (docs K127):
   /// a hidden draw per song, so quality makes a hit likely, not certain.
-  static double resonance(World w, Song s) =>
-      (w.config.resonanceMedian *
-              RandomStream.keyed(w.seed, 0, s.id, RngPurpose.resonance)
-                  .logNormal(w.config.resonanceSigma))
-          .clamp(0.2, 2.5);
+  static double resonance(World w, Song s) => (w.config.resonanceMedian *
+          RandomStream.keyed(w.seed, 0, s.id, RngPurpose.resonance)
+              .logNormal(w.config.resonanceSigma))
+      .clamp(0.2, 2.5);
 
   /// How well [al] holds on after its first week, around 1.
   double _albumLegs(Album al) =>
@@ -1672,9 +1673,7 @@ class Simulator {
     for (final id in world.activeSongIds) {
       final s = world.songs[id];
       if (s.primaryArtistId != p.id) continue;
-      final songCents = s.weekStreams *
-              0.35 *
-              s.autoplay.royalty +
+      final songCents = s.weekStreams * 0.35 * s.autoplay.royalty +
           s.weekDownloads * 70 +
           s.weekPhysical * 100;
       cents += songCents;
@@ -1696,9 +1695,8 @@ class Simulator {
       if (s.status != SongStatus.dormant) continue;
       var songCents = 0.0;
       for (var r = 0; r < regionCount; r++) {
-        songCents += world.songWeekStreamsRegion(s, r) *
-            0.35 *
-            s.autoplay.royalty;
+        songCents +=
+            world.songWeekStreamsRegion(s, r) * 0.35 * s.autoplay.royalty;
       }
       cents += songCents;
       s.revenueCents += songCents * p.artistShare;

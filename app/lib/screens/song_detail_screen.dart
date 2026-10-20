@@ -461,6 +461,31 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       ),
                     ]),
                   ],
+                  // The format it is worked to (docs K134).
+                  if (s.isSingle && s.releasedWeek >= 0) ...[
+                    const SizedBox(height: 8),
+                    Text(l.radioFormatLine(fmt.radioFormat(s.radioFormat)),
+                        style: TextStyle(color: AppColors.textMuted)),
+                  ],
+                  if (s.radioFormatOptions.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(l.radioFormatHint,
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                    const SizedBox(height: 6),
+                    Wrap(spacing: 8, runSpacing: 8, children: [
+                      for (final e in s.radioFormatOptions.entries)
+                        ChoiceChip(
+                          label: Text(l.radioFormatOption(
+                              fmt.radioFormat(e.key),
+                              (e.value.$1 * 100).round(),
+                              (e.value.$2 * 100).round())),
+                          selected: e.key == s.radioFormat,
+                          onSelected: (_) =>
+                              _tool(Cmd.setRadioFormat(s.id, e.key)),
+                        ),
+                    ]),
+                  ],
                   if (s.radioUpgradeCosts.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(l.radioUpgradeHint,

@@ -4536,5 +4536,35 @@
   "tracklistTitle": "Tracklist",
   "tracklistHint": "Listeners start at the top and drift off: the opener gets about 30% more plays than the album average, the closer 30% less. Put the songs you want heard early.",
   "moveUp": "Move up",
-  "moveDown": "Move down"
+  "moveDown": "Move down",
+  "formatTop40": "Top 40",
+  "formatRhythmic": "Rhythmic",
+  "formatUrban": "Urban",
+  "formatHotAc": "Hot AC",
+  "formatCountry": "Country",
+  "formatAlternative": "Alternative",
+  "formatLatin": "Latin",
+  "radioFormatLine": "Worked to {format} radio.",
+  "@radioFormatLine": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "radioFormatHint": "Pick the stations to work it to while they decide: a bigger format that plays your sound means more play, a niche one keeps it longer. Off-genre, few spins.",
+  "radioFormatOption": "{format} · {play}% · run {run}%",
+  "@radioFormatOption": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      },
+      "play": {
+        "type": "int"
+      },
+      "run": {
+        "type": "int"
+      }
+    }
+  }
 }

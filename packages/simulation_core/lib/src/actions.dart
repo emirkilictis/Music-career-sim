@@ -513,6 +513,18 @@ abstract final class Actions {
       w.week - s.singleWeek < radioUpgradeWeeks &&
       s.radioPush.rank < maxRadioPush(a.label).rank;
 
+  /// Works a released single to another radio format (docs K134), free
+  /// while stations are still deciding.
+  static void setRadioFormat(World w, Artist a, Song s, RadioFormat f) {
+    if (!s.isSingle ||
+        s.status != SongStatus.active ||
+        w.week - s.singleWeek >= radioUpgradeWeeks) {
+      throw ActionException('Radio format not possible');
+    }
+    s.radioFormat = f;
+    w.dirtySongs.add(s.id);
+  }
+
   /// Raises a released single's radio push (docs K128).
   static void upgradeRadio(World w, Artist a, Song s, RadioPush to) {
     if (!canUpgradeRadio(w, a, s) ||

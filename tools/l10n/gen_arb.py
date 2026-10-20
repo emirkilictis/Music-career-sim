@@ -1274,6 +1274,18 @@ k('tracklistHint','Listeners start at the top and drift off: the opener gets abo
 k('moveUp','Move up','Yukarı taşı')
 k('moveDown','Move down','Aşağı taşı')
 
+# Radio formats (K134)
+k('formatTop40','Top 40','Top 40')
+k('formatRhythmic','Rhythmic','Rhythmic')
+k('formatUrban','Urban','Urban')
+k('formatHotAc','Hot AC','Hot AC')
+k('formatCountry','Country','Country')
+k('formatAlternative','Alternative','Alternative')
+k('formatLatin','Latin','Latin')
+k('radioFormatLine','Worked to {format} radio.','{format} radyolarına çalışılıyor.', format='String')
+k('radioFormatHint','Pick the stations to work it to while they decide: a bigger format that plays your sound means more play, a niche one keeps it longer. Off-genre, few spins.','İstasyonlar karar verirken hangi formata çalışılacağını seç: senin sesini çalan büyük bir format daha çok çalınma, niş bir format daha uzun ömür demek. Türün dışında az çalınır.')
+k('radioFormatOption','{format} · {play}% · run {run}%','{format} · %{play} · süre %{run}', format='String', play='int', run='int')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

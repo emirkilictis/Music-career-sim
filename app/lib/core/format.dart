@@ -317,6 +317,17 @@ class Fmt {
         RadioPush.blitz => l.radioBlitzHint,
       };
 
+  /// A radio format's name (docs K134).
+  String radioFormat(RadioFormat f) => switch (f) {
+        RadioFormat.top40 => l.formatTop40,
+        RadioFormat.rhythmic => l.formatRhythmic,
+        RadioFormat.urban => l.formatUrban,
+        RadioFormat.hotAc => l.formatHotAc,
+        RadioFormat.country => l.formatCountry,
+        RadioFormat.alternative => l.formatAlternative,
+        RadioFormat.latin => l.formatLatin,
+      };
+
   /// An autoplay level's name (docs K128).
   String autoplayLevel(AutoplayLevel a) => switch (a) {
         AutoplayLevel.off => l.autoplayOff,

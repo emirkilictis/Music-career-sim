@@ -207,6 +207,61 @@ enum RadioPush {
   }
 }
 
+/// The radio formats a single is worked to (docs K134): how many people
+/// listen ([reach]), which genres they play, and how long stations keep a
+/// song ([life]: Top 40 burns through hits, country holds them). Index
+/// order is stored in saves: only append.
+enum RadioFormat {
+  top40(reach: 1.0, life: 0.8, genres: [0, 1, 2, 5, 6, 17, 18]),
+  rhythmic(reach: 0.65, life: 1.0, genres: [1, 2, 5, 6, 16, 17]),
+  urban(reach: 0.6, life: 1.15, genres: [1, 2, 10, 11, 19]),
+  hotAc(reach: 0.8, life: 1.2, genres: [0, 3, 7, 10, 15]),
+  country(reach: 0.75, life: 1.3, genres: [4, 15]),
+  alternative(reach: 0.45, life: 1.3, genres: [3, 7, 8, 9]),
+  latin(reach: 0.5, life: 1.2, genres: [6, 16]);
+
+  const RadioFormat(
+      {required this.reach, required this.life, required this.genres});
+  final double reach;
+  final double life;
+  final List<int> genres;
+
+  /// How well a song with [songGenres] fits: its sound, or a stretch.
+  double fit(List<int> songGenres) {
+    for (final g in songGenres) {
+      if (genres.contains(g)) return 1;
+    }
+    return 0.25;
+  }
+
+  /// The format a song is worked to by default: the biggest that plays it.
+  static RadioFormat best(List<int> songGenres) {
+    var best = top40;
+    for (final f in values) {
+      if (f.reach * f.fit(songGenres) > best.reach * best.fit(songGenres)) {
+        best = f;
+      }
+    }
+    return best;
+  }
+
+  /// Radio play on [f] against the best format for the song's main genre
+  /// alone (the calibrated level): a crossover onto a bigger format adds
+  /// up to 30%, the wrong format takes most of it away.
+  static double factor(RadioFormat f, int genre, List<int> songGenres) {
+    var base = 0.0;
+    for (final x in values) {
+      base = math.max(base, x.reach * x.fit([genre]));
+    }
+    return math.min(1.3, f.reach * f.fit(songGenres) / base);
+  }
+
+  /// How long stations keep a song on [f] against its main genre's own
+  /// format (the calibrated run).
+  static double lifeFactor(RadioFormat f, int genre) =>
+      f.life / best([genre]).life;
+}
+
 /// Paid creator campaigns on the short-video app (docs K131): creators
 /// are paid to use a song's sound. For [CreatorCampaign.weeks] the song is
 /// far likelier to start a real trend ([chanceFactor]), and the paid
@@ -756,6 +811,14 @@ class Song with Charted {
 
   /// Week the player pitched it to the playlist editors (docs K97), -1.
   int pitchWeek = -1;
+
+  /// The radio format the player works it to (docs K134; null: the best
+  /// fit).
+  RadioFormat? radioFormat;
+
+  /// The format it is on the radio in: by default its main genre's own
+  /// (the calibrated play; a crossover is the player's call).
+  RadioFormat get onFormat => radioFormat ?? RadioFormat.best([genre]);
 
   /// A paid creator campaign on the short-video app (docs K131): when it
   /// started (-1: none), how big, and how it went.

@@ -1318,5 +1318,15 @@
   "tracklistTitle": "Şarkı sırası",
   "tracklistHint": "Dinleyiciler baştan başlar ve yavaş yavaş bırakır: açılış şarkısı albüm ortalamasından yaklaşık %30 fazla, kapanış %30 az dinlenir. Duyulmasını istediğin şarkıları başa koy.",
   "moveUp": "Yukarı taşı",
-  "moveDown": "Aşağı taşı"
+  "moveDown": "Aşağı taşı",
+  "formatTop40": "Top 40",
+  "formatRhythmic": "Rhythmic",
+  "formatUrban": "Urban",
+  "formatHotAc": "Hot AC",
+  "formatCountry": "Country",
+  "formatAlternative": "Alternative",
+  "formatLatin": "Latin",
+  "radioFormatLine": "{format} radyolarına çalışılıyor.",
+  "radioFormatHint": "İstasyonlar karar verirken hangi formata çalışılacağını seç: senin sesini çalan büyük bir format daha çok çalınma, niş bir format daha uzun ömür demek. Türün dışında az çalınır.",
+  "radioFormatOption": "{format} · %{play} · süre %{run}"
 }

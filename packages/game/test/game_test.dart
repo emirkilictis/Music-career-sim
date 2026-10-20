@@ -1362,6 +1362,27 @@ void main() {
       g.close();
     });
 
+    test('a single worked to another radio format (K134)', () {
+      var g = GameSession.start(slots, _setup());
+      final slot = g.slotId;
+      g.world.player!.moneyCents = 1 << 40;
+      g.world.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.low, genres: [0]).id;
+      g.releaseSingle(id, radio: RadioPush.standard);
+      expect(g.song(id).radioFormat, RadioFormat.top40);
+      expect(g.song(id).radioFormatOptions[RadioFormat.hotAc]!.$2,
+          closeTo(1.5, 1e-9));
+      g.setRadioFormat(id, RadioFormat.hotAc);
+      expect(g.song(id).radioFormat, RadioFormat.hotAc);
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.song(id).radioFormat, RadioFormat.hotAc);
+      g.advanceWeeks(Actions.radioUpgradeWeeks, stop: SkipStop.never);
+      expect(g.song(id).radioFormatOptions, isEmpty);
+      expect(() => g.setRadioFormat(id, RadioFormat.top40), _code('radioLocked'));
+      g.close();
+    });
+
     test('autoplay levels and a radio push raised after release (K128)', () {
       var g = GameSession.start(
           slots,

@@ -1327,6 +1327,18 @@ class GameSession {
     _saveNow();
   }
 
+  /// Works a released single to a radio format (docs K134).
+  void setRadioFormat(int songId, RadioFormat f) {
+    final s = _ownSong(songId);
+    if (!s.isSingle ||
+        s.status != SongStatus.active ||
+        world.week - s.singleWeek >= Actions.radioUpgradeWeeks) {
+      throw GameException('radioLocked', 'The stations have decided');
+    }
+    Actions.setRadioFormat(world, _p, s, f);
+    _saveNow();
+  }
+
   /// Raises a released single's radio push (docs K128).
   void upgradeRadio(int songId, RadioPush to) {
     final s = _ownSong(songId);

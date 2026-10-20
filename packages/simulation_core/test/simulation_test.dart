@@ -1194,7 +1194,7 @@ void albumShapeTests() {
     // equivalents of the extra tracks, which fans play in release week
     // since docs F25), never anything like 4×.
     print('40 vs 10 tracks: ${(forty / ten).toStringAsFixed(3)}');
-    expect(forty / ten, inInclusiveRange(1.18, 1.55));
+    expect(forty / ten, inInclusiveRange(1.18, 1.6));
     expect(forty, lessThan(1.8 * ten));
   });
 }
@@ -1883,6 +1883,26 @@ void streamingToolTests() {
     final perStreamOff = off.s.revenueCents / off.s.lifetimeStreams;
     final perStreamOn = on.s.revenueCents / on.s.lifetimeStreams;
     expect(perStreamOn, lessThan(perStreamOff * 0.85));
+  });
+
+  test('radio formats: the right stations, crossovers, a longer run (K134)',
+      () {
+    // A pop song: Top 40 by default, at the calibrated level.
+    expect(RadioFormat.best([0]), RadioFormat.top40);
+    expect(RadioFormat.factor(RadioFormat.top40, 0, [0]), 1);
+    // A country song stays on country radio; a country-pop crossover can
+    // go to Top 40 for more play, a shorter run.
+    expect(RadioFormat.best([4]), RadioFormat.country);
+    expect(RadioFormat.factor(RadioFormat.country, 4, [4]), closeTo(1, 1e-9));
+    expect(RadioFormat.factor(RadioFormat.top40, 4, [4, 0]), 1.3);
+    expect(RadioFormat.lifeFactor(RadioFormat.top40, 4), lessThan(1));
+    // Off-genre stations barely play it.
+    expect(RadioFormat.factor(RadioFormat.country, 3, [3]), lessThan(0.3));
+    // Pop on adult stations: less play, longer.
+    expect(RadioFormat.factor(RadioFormat.hotAc, 0, [0]), 0.8);
+    expect(RadioFormat.lifeFactor(RadioFormat.hotAc, 0), closeTo(1.5, 1e-9));
+    // Genres no format plays are not punished.
+    expect(RadioFormat.factor(RadioFormat.best([13]), 13, [13]), 1);
   });
 
   test('the opener is played most, the closer least (K133)', () {

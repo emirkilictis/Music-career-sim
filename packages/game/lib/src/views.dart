@@ -303,6 +303,19 @@ class SongView {
         autoplayLevel = s.autoplay,
         radioSpins = Radio.spins(s.weekRadio),
         radioStations = Radio.stations(s.weekRadio),
+        radioFormat = s.onFormat,
+        radioFormatOptions = s.primaryArtistId != w.playerArtistId ||
+                !s.isSingle ||
+                s.status != SongStatus.active ||
+                w.week - s.singleWeek >= Actions.radioUpgradeWeeks
+            ? const {}
+            : {
+                for (final f in RadioFormat.values)
+                  f: (
+                    RadioFormat.factor(f, s.genre, s.genres),
+                    RadioFormat.lifeFactor(f, s.genre)
+                  ),
+              },
         radioUpgradeCosts = s.primaryArtistId != w.playerArtistId ||
                 !Actions.canUpgradeRadio(w, w.player!, s)
             ? const {}
@@ -398,6 +411,11 @@ class SongView {
   final CreatorCampaign creatorTier;
   final CreatorResult creatorResult;
   final Map<CreatorCampaign, int> creatorCosts;
+
+  /// The radio format it is worked to (docs K134), and while it can still
+  /// change, each format's play and run against the calibrated ones.
+  final RadioFormat radioFormat;
+  final Map<RadioFormat, (double play, double run)> radioFormatOptions;
 
   /// Last week on the radio (docs K128): plays and stations playing it.
   final double radioSpins;
