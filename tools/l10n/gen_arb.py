@@ -1298,6 +1298,9 @@ k('radioFormatOption','{format} · {play}% · run {run}%','{format} · %{play} �
 k('exclusiveTitle','Fruit Music exclusive','Fruit Music özel yayını')
 k('exclusiveHint','Fruit Music pays {fee} now to stream it alone for its first {weeks} weeks. Most people cannot stream it there yet: fewer streams and chart units at first, sales are not affected.','Fruit Music ilk {weeks} hafta sadece kendisinde olması için şimdi {fee} öder. Çoğu kişi orada dinleyemez: ilk haftalarda daha az stream ve liste birimi, satışlar etkilenmez.', fee='String', weeks='int')
 # Holding an album off streaming (K174)
+# Tour legs sized to demand (K181)
+k('tourFit','Fit to demand','Talebe göre')
+
 # Streamify Sessions (K178)
 k('sessTitle','Streamify Sessions','Streamify Sessions')
 k('sessInvite','Streamify invites you to its studio','Streamify seni stüdyosuna davet ediyor')

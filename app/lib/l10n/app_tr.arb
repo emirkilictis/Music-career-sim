@@ -1339,6 +1339,7 @@
   "radioFormatOption": "{format} · %{play} · süre %{run}",
   "exclusiveTitle": "Fruit Music özel yayını",
   "exclusiveHint": "Fruit Music ilk {weeks} hafta sadece kendisinde olması için şimdi {fee} öder. Çoğu kişi orada dinleyemez: ilk haftalarda daha az stream ve liste birimi, satışlar etkilenmez.",
+  "tourFit": "Talebe göre",
   "sessTitle": "Streamify Sessions",
   "sessInvite": "Streamify seni stüdyosuna davet ediyor",
   "sessNotKnown": "Streamify {need} aylık dinleyicisi olan sanatçıları davet ediyor (sende {now}).",

@@ -211,6 +211,10 @@ abstract final class Cmd {
   static SessionCmd<List<MilestoneView>> milestones() => (s) => s.milestones;
   static SessionCmd<List<PlatformView>> platforms() => (s) => s.platforms;
   static SessionCmd<void> hireManager(Manager m) => (s) => s.hireManager(m);
+  /// Nights a tour leg can fill (docs K181).
+  static SessionCmd<int> suggestTourShows(TourRequest r, TourMarket m) =>
+      (s) => s.suggestTourShows(r, m);
+
   /// Streamify Sessions (docs K178).
   static SessionCmd<SessionsView> sessions() => (s) => s.sessions;
   static SessionCmd<void> recordSession(int songId, int coverSongId) =>

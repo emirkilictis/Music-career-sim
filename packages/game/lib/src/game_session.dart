@@ -504,6 +504,27 @@ class GameSession {
 
   /// What a tour of each size would do over [regions], as planned now
   /// (docs K63).
+  /// Fill a suggested run of nights should reach (docs K181).
+  static const suggestedFill = 0.9;
+
+  /// The most nights [r]'s leg in [m] can take and still fill about
+  /// [suggestedFill] of the seats, at [r]'s prices, production and
+  /// support act (at least one; docs K181).
+  int suggestTourShows(TourRequest r, TourMarket m) {
+    final leg = r.legs.where((l) => l.market == m).firstOrNull;
+    if (leg == null) throw GameException('tourMarkets', 'No such leg');
+    var best = 1;
+    for (var n = 1; n <= Tours.maxShows(m, leg.kind); n++) {
+      final v = tourPreview(TourRequest(
+          legs: [TourLeg(m, leg.kind, n)],
+          priceFactor: r.priceFactor,
+          production: r.production,
+          openerId: r.openerId));
+      if (v.legs.single.fill >= suggestedFill) best = n;
+    }
+    return best;
+  }
+
   /// A tour as it would go if it started this week (docs K76): each
   /// night's expected turnout, the money, and what stops it.
   TourPlanView tourPreview(TourRequest r) {

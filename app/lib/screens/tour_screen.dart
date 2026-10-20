@@ -48,6 +48,16 @@ class _TourScreenState extends State<TourScreen> {
     };
     _legs[home] = _defaultLeg(home);
     _load();
+    _fit(home);
+  }
+
+  /// Sizes [m]'s leg to the nights its fans can fill (docs K181).
+  Future<void> _fit(TourMarket m) async {
+    if (_legs[m] == null) return;
+    final n = await widget.state.read(Cmd.suggestTourShows(_request, m));
+    if (!mounted) return;
+    final d = _legs[m];
+    if (d != null) _change(() => d.shows = n);
   }
 
   @override
@@ -190,15 +200,22 @@ class _TourScreenState extends State<TourScreen> {
                       estimate: plan?.legs
                           .where((v) => v.leg.market == m)
                           .firstOrNull,
-                      onToggle: (on) => _change(() {
-                        on ? _legs[m] = _defaultLeg(m) : _legs.remove(m);
-                      }),
-                      onKind: (k) => _change(() {
-                        final d = _legs[m]!;
-                        d.kind = k;
-                        d.shows = d.shows.clamp(1, Tours.maxShows(m, k));
-                      }),
+                      onToggle: (on) {
+                        _change(() {
+                          on ? _legs[m] = _defaultLeg(m) : _legs.remove(m);
+                        });
+                        if (on) _fit(m);
+                      },
+                      onKind: (k) {
+                        _change(() {
+                          final d = _legs[m]!;
+                          d.kind = k;
+                          d.shows = d.shows.clamp(1, Tours.maxShows(m, k));
+                        });
+                        _fit(m);
+                      },
                       onShows: (n) => _change(() => _legs[m]!.shows = n),
+                      onFit: () => _fit(m),
                     ),
                 ]),
           ),
@@ -317,6 +334,7 @@ class _MarketTile extends StatelessWidget {
     required this.onToggle,
     required this.onKind,
     required this.onShows,
+    required this.onFit,
   });
   final TourMarket market;
   final _LegDraft? draft;
@@ -325,6 +343,9 @@ class _MarketTile extends StatelessWidget {
   final ValueChanged<bool> onToggle;
   final ValueChanged<TourKind> onKind;
   final ValueChanged<int> onShows;
+
+  /// Sizes the leg to its demand (docs K181).
+  final VoidCallback onFit;
 
   @override
   Widget build(BuildContext context) {
@@ -383,16 +404,24 @@ class _MarketTile extends StatelessWidget {
           if (e != null)
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 6, 0, 0),
-              child: Text(
-                  l.tourLegEstimate((e.fill * 100).round(),
-                      fmt.compact(e.tickets), fmt.money(e.priceCents)),
-                  style: TextStyle(
-                      color: e.fill >= 0.8
-                          ? AppColors.mint
-                          : e.fill >= 0.5
-                              ? AppColors.textMuted
-                              : AppColors.coral,
-                      fontWeight: FontWeight.w600)),
+              child: Row(children: [
+                Expanded(
+                    child: Text(
+                        l.tourLegEstimate((e.fill * 100).round(),
+                            fmt.compact(e.tickets), fmt.money(e.priceCents)),
+                        style: TextStyle(
+                            color: e.fill >= 0.8
+                                ? AppColors.mint
+                                : e.fill >= 0.5
+                                    ? AppColors.textMuted
+                                    : AppColors.coral,
+                            fontWeight: FontWeight.w600))),
+                TextButton.icon(
+                  onPressed: onFit,
+                  icon: const Icon(Icons.auto_fix_high_rounded, size: 18),
+                  label: Text(context.l10n.tourFit),
+                ),
+              ]),
             ),
         ],
       ]),

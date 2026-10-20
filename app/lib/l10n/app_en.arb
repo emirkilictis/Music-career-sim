@@ -4587,6 +4587,7 @@
       }
     }
   },
+  "tourFit": "Fit to demand",
   "sessTitle": "Streamify Sessions",
   "sessInvite": "Streamify invites you to its studio",
   "sessNotKnown": "Streamify invites artists with {need} monthly listeners (you: {now}).",

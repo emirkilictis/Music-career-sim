@@ -3345,6 +3345,44 @@ void main() {
       g.close();
     });
 
+    test('tour legs sized to what the fans fill (K181)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      g.world.player!.coreFans = 4e6;
+      for (final kind in [TourKind.arena, TourKind.stadium]) {
+        const m = TourMarket.usa;
+        final n = g.suggestTourShows(
+            TourRequest(legs: [TourLeg(m, kind, 1)]), m);
+        expect(n, inInclusiveRange(1, Tours.maxShows(m, kind)));
+        double fill(int shows) => g
+            .tourPreview(TourRequest(legs: [TourLeg(m, kind, shows)]))
+            .legs
+            .single
+            .fill;
+        expect(fill(n), greaterThanOrEqualTo(GameSession.suggestedFill));
+        if (n < Tours.maxShows(m, kind)) {
+          expect(fill(Tours.maxShows(m, kind)),
+              lessThan(GameSession.suggestedFill));
+        }
+      }
+      // Pricier tickets: fewer nights.
+      final cheap = g.suggestTourShows(
+          const TourRequest(
+              legs: [TourLeg(TourMarket.usa, TourKind.stadium, 1)]),
+          TourMarket.usa);
+      final dear = g.suggestTourShows(
+          const TourRequest(
+              legs: [TourLeg(TourMarket.usa, TourKind.stadium, 1)],
+              priceFactor: 1.8),
+          TourMarket.usa);
+      expect(dear, lessThanOrEqualTo(cheap));
+      g.close();
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;
