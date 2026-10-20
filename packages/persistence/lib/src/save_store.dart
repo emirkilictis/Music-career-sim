@@ -121,9 +121,11 @@ class SaveStore {
         w.playerWeeksTopArtist = j[3] as int;
       }
     }
+    // Arrays grow with new charts and regions: a save from before them
+    // keeps the defaults for the entries it lacks.
     for (final (key, arr) in _metaArrays(w)) {
       for (var i = 0; i < arr.length; i++) {
-        arr[i] = _d(meta['$key$i']);
+        if (meta['$key$i'] case final num v) arr[i] = v.toDouble();
       }
     }
 

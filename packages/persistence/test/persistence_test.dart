@@ -116,6 +116,20 @@ void main() {
     expect(worldHash(loaded), worldHash(w));
   });
 
+  test('a save from before newer charts still opens', () {
+    final w = WorldGen.create(seed: 11, startYear: 2016);
+    WorldGen.addPlayer(w, name: 'Old', genre: 0);
+    final store = SaveStore.create('${tmp.path}/old.sqlite', w);
+    // Older saves have fewer per-chart values (the radio chart and the
+    // ones after it came later).
+    store.db.execute("DELETE FROM meta WHERE key LIKE 'chartCutoff%' "
+        "AND CAST(substr(key, 12) AS INTEGER) >= 8");
+    final loaded = store.load();
+    store.close();
+    expect(loaded.player!.name, 'Old');
+    expect(loaded.chartCutoff.length, w.chartCutoff.length);
+  });
+
   test('difficulty and side income survive save/load', () {
     final w = _newWorld(5, difficulty: Difficulty.hard);
     final p = w.player!;
