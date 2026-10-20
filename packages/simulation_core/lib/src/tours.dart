@@ -20,7 +20,8 @@ enum TourKind {
       priceCents: 2500,
       showCostCents: 150000,
       freightCents: 500000,
-      maxNights: 2),
+      maxNights: 2,
+      draw: 2.2),
   theater(
       minFans: 1e5,
       minCapacity: 1500,
@@ -28,7 +29,8 @@ enum TourKind {
       priceCents: 6000,
       showCostCents: 2500000,
       freightCents: 4000000,
-      maxNights: 3),
+      maxNights: 3,
+      draw: 1.1),
   arena(
       minFans: 1e6,
       minCapacity: 10000,
@@ -36,7 +38,8 @@ enum TourKind {
       priceCents: 11000,
       showCostCents: 20000000,
       freightCents: 30000000,
-      maxNights: 5),
+      maxNights: 5,
+      draw: 1.25),
   stadium(
       // Within reach of the biggest stars (F81): fandoms grow slowly past
       // a few million since K127.
@@ -46,7 +49,8 @@ enum TourKind {
       priceCents: 14000,
       showCostCents: 200000000,
       freightCents: 200000000,
-      maxNights: 6);
+      maxNights: 6,
+      draw: 1.4);
 
   const TourKind({
     required this.minFans,
@@ -56,6 +60,7 @@ enum TourKind {
     required this.showCostCents,
     required this.freightCents,
     required this.maxNights,
+    required this.draw,
   });
 
   final double minFans;
@@ -71,6 +76,11 @@ enum TourKind {
 
   /// Most nights one city can take at this size.
   final int maxNights;
+
+  /// How many more people a night of this size draws than the fandom
+  /// alone (F82): small clubs fill with the local scene and walk-ups,
+  /// arena and stadium shows are events people go to with their fans.
+  final double draw;
 
   /// A typical venue's seats.
   int get capacity => (minCapacity + maxCapacity) ~/ 2;
@@ -649,6 +659,7 @@ abstract final class Tours {
     }
     final reach = visitedWeight / m.totalWeight;
     final pool = marketDemand(w, a, m, t.priceFactor, opener) *
+        t.legs[s.leg].kind.draw *
         (reach + 0.25 * (1 - reach));
     final nights = legShows.where((x) => x.city == s.city).length;
     final demand =
@@ -946,7 +957,7 @@ abstract final class RivalTours {
         gross = 0;
         legs = 0;
         for (final m in TourMarket.values) {
-          final demand = Tours.marketDemand(w, a, m, 1.0, null);
+          final demand = Tours.marketDemand(w, a, m, 1.0, null) * kind.draw;
           final n = (demand / (kind.capacity * 0.85))
               .round()
               .clamp(0, Tours.maxShows(m, kind))
