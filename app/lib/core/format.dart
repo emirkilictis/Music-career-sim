@@ -813,6 +813,7 @@ class Fmt {
       'cannotCloud' => l.errorCannotCloud,
       'noAnniversary' => l.errorNoAnniversary,
       'noPartner' => l.errorNoPartner,
+      'noWindow' || 'invalidWindow' => l.errorNoWindow,
       'noSnippet' => l.errorNoSnippet,
       'noOffer' => l.errorNoOffer,
       'noVisual' => l.errorNoVisual,

@@ -345,6 +345,22 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               ),
             ]),
           ],
+          // Held off streaming at first (docs K174).
+          if (a.windowUntil > a.releaseWeek) ...[
+            const SizedBox(height: 10),
+            Row(children: [
+              Icon(Icons.shopping_bag_outlined,
+                  size: 18, color: AppColors.textMuted),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                    widget.state.week < a.windowUntil
+                        ? l.windowLineHeld(fmt.week(a.windowUntil))
+                        : l.windowLineDone(fmt.week(a.windowUntil)),
+                    style: TextStyle(color: AppColors.textMuted)),
+              ),
+            ]),
+          ],
           // How it was rolled out (docs K165).
           if (a.isPlayer && a.rollout.count > 0) ...[
             const SizedBox(height: 10),

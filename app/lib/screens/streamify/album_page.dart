@@ -157,6 +157,15 @@ class _StreamifyAlbumPageState extends State<StreamifyAlbumPage> {
               Text('${fmt.albumType(al.type)} · $year',
                   style: const TextStyle(
                       color: StreamifyColors.muted, fontSize: 13)),
+              // Not on the app yet (docs K174).
+              if (career.week < al.windowUntil) ...[
+                const SizedBox(height: 4),
+                Text(l.windowStreamify(fmt.week(al.windowUntil)),
+                    style: const TextStyle(
+                        color: StreamifyColors.accent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700)),
+              ],
               const SizedBox(height: 8),
               Row(children: [
                 const Icon(Icons.add_circle_outline_rounded,

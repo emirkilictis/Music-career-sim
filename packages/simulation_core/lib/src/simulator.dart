@@ -33,6 +33,7 @@ import 'price_cuts.dart';
 import 'music_show.dart';
 import 'opportunities.dart';
 import 'rerecords.dart';
+import 'stream_windows.dart';
 import 'tours.dart';
 import 'word_of_mouth.dart';
 import 'rng.dart';
@@ -471,6 +472,8 @@ class Simulator {
               w.week < w.albums[s.albumId].exclusiveUntil
           ? StreamingTools.exclusiveKeep(year)
           : 1.0;
+      // A held album's tracks are only sold, not streamed (docs K174).
+      final onApps = StreamWindows.songHeld(w, s) ? 0.0 : 1.0;
       // Holiday songs: little played most of the year, everywhere in
       // December (docs K136).
       final season = Holidays.season(s, w.week);
@@ -490,7 +493,7 @@ class Simulator {
       songAttention[i] = a;
       // Where the player's listening came from (docs K120).
       if (p.tier == ArtistTier.player) {
-        final m = qMult * noise * trackShare;
+        final m = qMult * noise * trackShare * onApps;
         final liftPart = pubPart * (1 - 1 / stacked);
         double of(double x) => lifts > 0 ? liftPart * x / lifts : 0.0;
         final mh = m * hit;
@@ -561,7 +564,7 @@ class Simulator {
       for (var k = 0; k < _r; k++) {
         final share = p.regionShare[k];
         final j = i * _r + k;
-        att[j] = a * share;
+        att[j] = a * share * onApps;
         dl[j] = d * share;
         radio[j] = rd * share;
         sumA[k] += att[j];
@@ -951,7 +954,9 @@ class Simulator {
                     keep *
                     leaked *
                     // A cut download price (docs K163).
-                    PriceCuts.salesFactor(w, al) +
+                    PriceCuts.salesFactor(w, al) *
+                    // Held off streaming, the fans buy (docs K174).
+                    StreamWindows.salesFactor(w, al) +
                 (age == 0 ? al.preOrders * share * Actions.preOrderExtra : 0.0) +
                 // Bundled copies (docs K144).
                 (age == 0 ? al.bundleUnits * share : 0.0);

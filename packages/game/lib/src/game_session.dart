@@ -986,11 +986,13 @@ class GameSession {
     required int releaseWeek,
     required int announceWeek,
     bool exclusive = false,
+    int windowWeeks = 0,
     AlbumBundle bundle = AlbumBundle.none,
   }) {
     final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
     _checkDates(releaseWeek, announceWeek);
     _checkBundle(type, bundle);
+    _checkWindow(type, windowWeeks, exclusive);
     final formats = _formats(variantFormats);
     final cost = _campaignCost(campaign) +
         Actions.editionsCostCents(variantWeeks.length, formats);
@@ -1009,8 +1011,24 @@ class GameSession {
       paidCents: cost,
     )
       ..exclusive = exclusive
+      ..windowWeeks = windowWeeks
       ..bundle = bundle);
   }
+
+  /// Checks a streaming window (docs K174): one of the offered lengths,
+  /// on an album or EP, in the streaming years, not with an exclusive.
+  void _checkWindow(AlbumType type, int windowWeeks, bool exclusive) {
+    if (windowWeeks == 0) return;
+    if (!StreamWindows.weeks.contains(windowWeeks)) {
+      throw GameException('invalidWindow', 'No such window');
+    }
+    if (!StreamWindows.can(world, type) || exclusive) {
+      throw GameException('noWindow', 'Not for this record');
+    }
+  }
+
+  /// Whether a record of [type] can be kept off streaming now (K174).
+  bool canWindow(AlbumType type) => StreamWindows.can(world, type);
 
   /// The partner of a joint album (docs K150), checked; null for none.
   Artist? _jointPartner(int partnerId, AlbumType type) {
@@ -1231,11 +1249,13 @@ class GameSession {
     List<EditionFormat?> variantFormats = const [],
     Campaign campaign = Campaign.standard,
     bool exclusive = false,
+    int windowWeeks = 0,
     AlbumBundle bundle = AlbumBundle.none,
     int partnerId = -1,
   }) {
     final t = _checkAlbum(title, songIds, type, variantWeeks, variantFormats);
     _checkBundle(type, bundle);
+    _checkWindow(type, windowWeeks, exclusive);
     final formats = _formats(variantFormats);
     final partner = _jointPartner(partnerId, type);
     _requireMoney(_campaignCost(campaign) +
@@ -1248,6 +1268,7 @@ class GameSession {
         payForVariants: true,
         campaign: campaign,
         exclusive: exclusive,
+        windowWeeks: windowWeeks,
         bundle: bundle);
     if (partner != null) JointAlbums.join(world, _p, al, partner);
     _saveNow();

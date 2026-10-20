@@ -4587,6 +4587,48 @@
       }
     }
   },
+  "windowTitle": "Streaming release",
+  "windowHint": "Keep it off the streaming apps at first: fans who would stream it buy it ({lift}% more copies while it is held), but its tracks are not streamed or found on the apps until it arrives.",
+  "@windowHint": {
+    "placeholders": {
+      "lift": {
+        "type": "int"
+      }
+    }
+  },
+  "windowNone": "From day one",
+  "windowWeeks": "After {weeks} weeks",
+  "@windowWeeks": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "windowLineHeld": "Only sold for now; on the streaming apps from {week}.",
+  "@windowLineHeld": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "windowStreamify": "Coming to Streamify on {week}",
+  "@windowStreamify": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "windowLineDone": "Kept off streaming until {week}.",
+  "@windowLineDone": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
   "exclusiveLine": "Fruit Music exclusive until {week}, paid {fee}.",
   "@exclusiveLine": {
     "placeholders": {
@@ -5115,6 +5157,7 @@
       }
     }
   },
+  "errorNoWindow": "This record cannot be held off streaming now.",
   "errorNoPartner": "That artist cannot make a record with you.",
   "jointTitle": "Joint album",
   "jointHint": "Make it together with a rival: they are on every track and half their fans buy it like their own. Their fee is three verses. A joint album comes out now.",

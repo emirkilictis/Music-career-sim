@@ -15,6 +15,7 @@ import 'holidays.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
+import 'stream_windows.dart';
 import 'streaming_tools.dart';
 import 'tours.dart';
 import 'names.dart';
@@ -729,6 +730,7 @@ abstract final class Actions {
       double buzz = 0,
       bool announced = false,
       bool exclusive = false,
+      int windowWeeks = 0,
       AlbumBundle bundle = AlbumBundle.none,
       int liveTour = -1,
       List<int> hits = const [],
@@ -827,6 +829,12 @@ abstract final class Actions {
         ..exclusiveUntil = w.week + StreamingTools.exclusiveWeeks
         ..exclusiveFeeCents = fee
         ..revenueCents += fee;
+    }
+    // Off the streaming services for its first weeks (docs K174).
+    if (windowWeeks > 0 &&
+        album.exclusiveUntil < 0 &&
+        StreamWindows.can(w, type)) {
+      album.windowUntil = w.week + windowWeeks;
     }
     // Bundles (docs K144): copies counted in the first week; merch pays
     // its margin now, ticket copies pay nothing.
@@ -1004,6 +1012,7 @@ abstract final class Actions {
             buzz: sr.buzz,
             announced: !sr.isSurprise,
             exclusive: sr.exclusive,
+            windowWeeks: sr.windowWeeks,
             bundle: sr.bundle,
             announceWeek: sr.isSurprise ? -1 : sr.announceWeek)
           ..preOrders += sr.preOrders;

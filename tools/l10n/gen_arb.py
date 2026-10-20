@@ -1297,6 +1297,14 @@ k('radioFormatOption','{format} · {play}% · run {run}%','{format} · %{play} �
 # Streaming exclusives (K135)
 k('exclusiveTitle','Fruit Music exclusive','Fruit Music özel yayını')
 k('exclusiveHint','Fruit Music pays {fee} now to stream it alone for its first {weeks} weeks. Most people cannot stream it there yet: fewer streams and chart units at first, sales are not affected.','Fruit Music ilk {weeks} hafta sadece kendisinde olması için şimdi {fee} öder. Çoğu kişi orada dinleyemez: ilk haftalarda daha az stream ve liste birimi, satışlar etkilenmez.', fee='String', weeks='int')
+# Holding an album off streaming (K174)
+k('windowTitle','Streaming release','Streaming\'e çıkış')
+k('windowHint','Keep it off the streaming apps at first: fans who would stream it buy it ({lift}% more copies while it is held), but its tracks are not streamed or found on the apps until it arrives.','İlk haftalarda streaming uygulamalarına koyma: dinleyecek hayranlar satın alır (beklerken %{lift} daha fazla kopya), ama şarkıları gelene kadar uygulamalarda dinlenmez ve keşfedilmez.', lift='int')
+k('windowNone','From day one','İlk günden')
+k('windowWeeks','After {weeks} weeks','{weeks} hafta sonra', weeks='int')
+k('windowLineHeld','Only sold for now; on the streaming apps from {week}.','Şimdilik sadece satışta; {week} tarihinde streaming\'e gelir.', week='String')
+k('windowStreamify','Coming to Streamify on {week}','{week} tarihinde Streamify\'da', week='String')
+k('windowLineDone','Kept off streaming until {week}.','{week} tarihine kadar streaming\'den uzak tutuldu.', week='String')
 k('exclusiveLine','Fruit Music exclusive until {week}, paid {fee}.','{week} tarihine kadar Fruit Music özel yayını, {fee} ödendi.', fee='String', week='String')
 
 # Holiday songs (K136)
@@ -1465,6 +1473,7 @@ k('anniversaryDone','The {years}th anniversary edition of {title} is out.','{tit
 k('anniversaryLine','{years}th anniversary edition out','{years}. yıl dönümü baskısı çıktı', years='int')
 
 # Joint albums (docs K150).
+k('errorNoWindow','This record cannot be held off streaming now.','Bu kayıt şu an streaming\'den uzak tutulamaz.')
 k('errorNoPartner','That artist cannot make a record with you.','Bu sanatçı seninle albüm yapamaz.')
 k('jointTitle','Joint album','Ortak albüm')
 k('jointHint','Make it together with a rival: they are on every track and half their fans buy it like their own. Their fee is three verses. A joint album comes out now.','Bir rakiple birlikte yap: her parçada yer alır, hayranlarının yarısı kendi albümleri gibi alır. Ücreti üç verse kadar. Ortak albüm hemen çıkar.')

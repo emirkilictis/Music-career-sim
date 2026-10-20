@@ -998,6 +998,10 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
   int? _exclusiveOffer;
   bool _exclusive = false;
 
+  /// Weeks the album stays off streaming (docs K174), and whether it can.
+  int _window = 0;
+  bool _canWindow = false;
+
   /// Album bundles on offer and the one picked (docs K144).
   Map<AlbumBundle, double> _bundles = const {};
   AlbumBundle _bundle = AlbumBundle.none;
@@ -1011,6 +1015,9 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
     super.initState();
     widget.state.read(Cmd.exclusiveOffer()).then((fee) {
       if (mounted) setState(() => _exclusiveOffer = fee);
+    });
+    widget.state.read(Cmd.canWindow()).then((ok) {
+      if (mounted) setState(() => _canWindow = ok);
     });
     widget.state.read(Cmd.bundleOptions()).then((b) {
       if (mounted) setState(() => _bundles = b);
@@ -1027,6 +1034,11 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
 
   bool get _goExclusive =>
       _exclusive && _exclusiveOffer != null && _type == AlbumType.album;
+
+  bool get _windowFits =>
+      _canWindow && (_type == AlbumType.album || _type == AlbumType.ep);
+
+  int get _goWindow => _windowFits && !_goExclusive ? _window : 0;
 
   @override
   void dispose() {
@@ -1102,6 +1114,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           variantFormats: _variantFormats,
           campaign: campaign,
           exclusive: _goExclusive,
+          windowWeeks: _goWindow,
           bundle: _goBundle,
           partnerId: _type == AlbumType.mixtape ? -1 : _partner,
         ));
@@ -1124,6 +1137,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
           releaseWeek: when.releaseWeek,
           announceWeek: when.announceWeek,
           exclusive: _goExclusive,
+          windowWeeks: _goWindow,
           bundle: _goBundle,
         ));
         _saveCovers(images, ImageStore.scheduledKey(s.id));
@@ -1211,12 +1225,38 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               value: _exclusive,
-              onChanged: (v) => setState(() => _exclusive = v),
+              onChanged: (v) => setState(() {
+                _exclusive = v;
+                if (v) _window = 0;
+              }),
               title: Text(l.exclusiveTitle,
                   style: const TextStyle(fontWeight: FontWeight.w700)),
               subtitle: Text(l.exclusiveHint(
                   fmt.money(_exclusiveOffer!), StreamingTools.exclusiveWeeks)),
             ),
+          ],
+          // Held off streaming at first (docs K174).
+          if (_windowFits) ...[
+            const SizedBox(height: 12),
+            Text(l.windowTitle,
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            Text(
+                l.windowHint(
+                    ((StreamWindows.buyLift(year) - 1) * 100).round()),
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+            const SizedBox(height: 6),
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final wk in [0, ...StreamWindows.weeks])
+                ChoiceChip(
+                  label: Text(wk == 0 ? l.windowNone : l.windowWeeks(wk)),
+                  selected: _window == wk,
+                  onSelected: (_) => setState(() {
+                    _window = wk;
+                    if (wk > 0) _exclusive = false;
+                  }),
+                ),
+            ]),
           ],
           // A joint album with a rival (docs K150).
           if (_partners.isNotEmpty && _type != AlbumType.mixtape) ...[

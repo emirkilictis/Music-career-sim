@@ -3152,6 +3152,65 @@ void main() {
       expect(onlySea, lessThan(openSea * 0.6));
     });
 
+    test('an album kept off streaming sells more, streams later (K174)',
+        () {
+      ({double pure, double sea, double after, int until}) run(int window) {
+        var g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2016,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire,
+                premium: true));
+        final slot = g.slotId;
+        g.world.player!.moneyCents = 1 << 40;
+        final songs = <int>[];
+        for (var i = 0; i < 8; i++) {
+          g.world.player!.creativeEnergy = 100;
+          songs.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        expect(g.canWindow(AlbumType.album), isTrue);
+        expect(g.canWindow(AlbumType.mixtape), isFalse);
+        expect(
+            () => g.releaseAlbum('X', songs, windowWeeks: 5),
+            throwsA(isA<GameException>()
+                .having((e) => e.code, 'code', 'invalidWindow')));
+        expect(
+            () => g.releaseAlbum('X', songs, windowWeeks: 4, exclusive: true),
+            throwsA(isA<GameException>()));
+        final al = g.releaseAlbum('X', songs, windowWeeks: window);
+        var pure = 0.0, sea = 0.0;
+        for (var i = 0; i < 4; i++) {
+          g.advanceWeek();
+          pure += g.world.albums[al.id].weekPure;
+          sea += g.world.albums[al.id].weekSea;
+          if (window > 0) {
+            for (final id in songs) {
+              expect(g.world.songs[id].weekStreams, 0);
+            }
+          }
+        }
+        // A save keeps it.
+        g.close();
+        g = GameSession.resume(slots, slot);
+        final until = g.albums.firstWhere((a) => a.id == al.id).windowUntil;
+        g.advanceWeek();
+        final after = songs.fold(
+            0.0, (sum, id) => sum + g.world.songs[id].weekStreams);
+        g.close();
+        return (pure: pure, sea: sea, after: after, until: until);
+      }
+
+      final open = run(0);
+      final held = run(4);
+      expect(open.until, -1);
+      expect(held.until, greaterThan(0));
+      expect(held.sea, lessThan(open.sea * 0.2));
+      expect(held.pure, greaterThan(open.pure * 1.2));
+      // Out on the apps once the window ends.
+      expect(held.after, greaterThan(0));
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;

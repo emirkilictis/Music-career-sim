@@ -487,8 +487,8 @@ abstract final class Codec {
     'masterShare',
     // Added in schema v33, v34, v37, v38, v40, v45, v46.
     'bundle', 'liveTour', 'anniv', 'partner', 'visual', 'hits', 'priceCut',
-    // Added in schema v47.
-    'rollout',
+    // Added in schema v47, v48.
+    'rollout', 'windowUntil',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -525,6 +525,7 @@ abstract final class Codec {
         al.rolloutApplicable == 0
             ? null
             : jsonEncode([al.rolloutApplicable, al.rolloutDone]),
+        al.windowUntil,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -551,6 +552,7 @@ abstract final class Codec {
       ..preOrders = (r['preOrders'] as num?)?.toDouble() ?? 0
       ..exclusiveUntil = r['exclusiveUntil'] as int? ?? -1
       ..exclusiveFeeCents = r['exclusiveFee'] as int? ?? 0
+      ..windowUntil = r['windowUntil'] as int? ?? -1
       ..masterShare = (r['masterShare'] as num?)?.toDouble()
       ..liveTour = r['liveTour'] as int? ?? -1
       ..anniversaries = r['anniv'] as int? ?? 0
@@ -678,6 +680,7 @@ abstract final class Codec {
             'ps': sr.preSaves,
             'po': sr.preOrders,
             'ex': sr.exclusive,
+            if (sr.windowWeeks > 0) 'win': sr.windowWeeks,
             'bd': sr.bundle.index,
           }
       ]);
@@ -705,6 +708,7 @@ abstract final class Codec {
               ..preSaves = (m['ps'] as num?)?.toDouble() ?? 0
               ..preOrders = (m['po'] as num?)?.toDouble() ?? 0
               ..exclusive = m['ex'] as bool? ?? false
+              ..windowWeeks = m['win'] as int? ?? 0
               ..bundle = AlbumBundle.values[m['bd'] as int? ?? 0],
       ];
 }

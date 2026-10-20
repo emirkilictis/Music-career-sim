@@ -84,6 +84,7 @@ int worldHash(World w) {
       addDouble(sr.preSaves);
       addDouble(sr.preOrders);
       addInt(sr.exclusive ? 1 : 0);
+      addInt(sr.windowWeeks);
     }
     addDouble(a.creativeEnergy);
     addInt(a.kind.index);
@@ -191,6 +192,7 @@ int worldHash(World w) {
     addDouble(al.campaignReturnCents);
     addDouble(al.preOrders);
     addInt(al.exclusiveUntil);
+    addInt(al.windowUntil);
     addDouble(al.masterShare ?? -1);
     addInt(al.bundle.index);
     addInt(al.liveTour);

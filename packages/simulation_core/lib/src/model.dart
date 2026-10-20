@@ -1027,6 +1027,10 @@ class Album with Charted {
   int exclusiveUntil = -1;
   int exclusiveFeeCents = 0;
 
+  /// Kept off the streaming services until this week (docs K174; -1:
+  /// streaming from the start).
+  int windowUntil = -1;
+
   /// What it came bundled with and the copies that added to its first
   /// week (docs K144).
   AlbumBundle bundle = AlbumBundle.none;
@@ -1318,6 +1322,9 @@ class ScheduledRelease {
 
   /// Out as a streaming exclusive (docs K135).
   bool exclusive = false;
+
+  /// Weeks kept off the streaming services (docs K174; 0: none).
+  int windowWeeks = 0;
 
   /// Bundled with merch or tickets (docs K144).
   AlbumBundle bundle = AlbumBundle.none;

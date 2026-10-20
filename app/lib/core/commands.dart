@@ -109,6 +109,7 @@ abstract final class Cmd {
     List<EditionFormat?> variantFormats = const [],
     required Campaign campaign,
     bool exclusive = false,
+    int windowWeeks = 0,
     AlbumBundle bundle = AlbumBundle.none,
     int partnerId = -1,
   }) =>
@@ -118,6 +119,7 @@ abstract final class Cmd {
           variantFormats: variantFormats,
           campaign: campaign,
           exclusive: exclusive,
+          windowWeeks: windowWeeks,
           bundle: bundle,
           partnerId: partnerId);
 
@@ -131,6 +133,10 @@ abstract final class Cmd {
 
   /// The exclusive fee on offer for an album now (docs K135).
   static SessionCmd<int?> exclusiveOffer() => (s) => s.exclusiveOffer;
+
+  /// Whether an album can be kept off streaming now (docs K174).
+  static SessionCmd<bool> canWindow() =>
+      (s) => s.canWindow(AlbumType.album);
 
   static SessionCmd<ScheduledView> scheduleSingle(
           int songId, Campaign campaign, int releaseWeek, int announceWeek,
@@ -151,6 +157,7 @@ abstract final class Cmd {
     required int releaseWeek,
     required int announceWeek,
     bool exclusive = false,
+    int windowWeeks = 0,
     AlbumBundle bundle = AlbumBundle.none,
   }) =>
       (s) => s.scheduleAlbum(title, songIds,
@@ -161,6 +168,7 @@ abstract final class Cmd {
           releaseWeek: releaseWeek,
           announceWeek: announceWeek,
           exclusive: exclusive,
+          windowWeeks: windowWeeks,
           bundle: bundle);
 
   static SessionCmd<ScheduledView> saveDraft({

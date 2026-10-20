@@ -709,6 +709,7 @@ class AlbumView {
         preOrders = al.preOrders,
         exclusiveUntil = al.exclusiveUntil,
         exclusiveFeeCents = al.exclusiveFeeCents,
+        windowUntil = al.windowUntil,
         bundle = al.bundle,
         isLive = al.isLive,
         hitTrackIds = List.unmodifiable(al.hitIds),
@@ -837,6 +838,9 @@ class AlbumView {
   /// A streaming exclusive until this week (-1: none) and its fee (K135).
   final int exclusiveUntil;
   final int exclusiveFeeCents;
+
+  /// Off the streaming services until this week (-1: never held; K174).
+  final int windowUntil;
 
   /// What it came bundled with and the copies that added (docs K144).
   final AlbumBundle bundle;
