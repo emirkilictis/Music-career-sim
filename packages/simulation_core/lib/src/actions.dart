@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'artist_pick.dart';
 import 'audience.dart';
 import 'bundles.dart';
 import 'cloud.dart';
@@ -1126,7 +1127,10 @@ abstract final class Actions {
         sr.preSaves = math.min(
             most,
             sr.preSaves +
-                (a.coreFans * 0.05 + a.casual * 0.003) * (0.5 + sr.buzz));
+                (a.coreFans * 0.05 + a.casual * 0.003) *
+                    (0.5 + sr.buzz) *
+                    // A countdown page on the profile (docs K185).
+                    ArtistPicks.preSaveFactor(w, sr.id));
       }
     }
   }

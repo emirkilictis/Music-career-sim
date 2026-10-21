@@ -219,6 +219,11 @@ abstract final class Cmd {
   static SessionCmd<int> suggestTourShows(TourRequest r, TourMarket m) =>
       (s) => s.suggestTourShows(r, m);
 
+  /// The Artist Pick (docs K185).
+  static SessionCmd<PickView> artistPick() => (s) => s.artistPick;
+  static SessionCmd<void> setArtistPick(PickKind kind, int id) =>
+      (s) => s.setArtistPick(kind, id);
+
   /// Streamify Sessions (docs K178).
   static SessionCmd<SessionsView> sessions() => (s) => s.sessions;
   static SessionCmd<void> recordSession(int songId, int coverSongId) =>

@@ -27,6 +27,9 @@ class _ArtistPageState extends State<ArtistPage> {
   ArtistPageView? _page;
   bool _showAll = false;
 
+  /// The player's Artist Pick (docs K185; null on others' pages).
+  PickView? _pick;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -34,8 +37,116 @@ class _ArtistPageState extends State<ArtistPage> {
   }
 
   Future<void> _load() async {
-    final page = await context.careerRead.read(Cmd.artistPage(widget.artistId));
-    if (mounted) setState(() => _page = page);
+    final career = context.careerRead;
+    final page = await career.read(Cmd.artistPage(widget.artistId));
+    final pick = widget.artistId == career.player.id
+        ? await career.read(Cmd.artistPick())
+        : null;
+    if (mounted) {
+      setState(() {
+        _page = page;
+        _pick = pick;
+      });
+    }
+  }
+
+  Future<void> _choosePick(PickView v) async {
+    final l = context.l10n;
+    final career = context.careerRead;
+    final picked = await showModalBottomSheet<(PickKind, int)>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      backgroundColor: StreamifyColors.surface,
+      builder: (c) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        builder: (c, scroll) => ListView(controller: scroll, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: Text(l.pickTitleStreamify,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.pickChooseHint,
+                style: const TextStyle(color: StreamifyColors.muted)),
+          ),
+          for (final (kind, label, items) in [
+            (PickKind.upcoming, l.pickUpcoming, v.upcoming),
+            (PickKind.album, l.pickAlbums, v.albums),
+            (PickKind.song, l.pickSongs, v.songs),
+          ])
+            if (items.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                child: Text(label,
+                    style: const TextStyle(fontWeight: FontWeight.w800)),
+              ),
+              for (final x in items)
+                ListTile(
+                  title: Text(x.title),
+                  trailing: v.current?.kind == kind && v.current?.id == x.id
+                      ? const Icon(Icons.push_pin_rounded,
+                          color: StreamifyColors.accent)
+                      : null,
+                  onTap: () => Navigator.pop(c, (kind, x.id)),
+                ),
+            ],
+        ]),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    try {
+      await career.act(Cmd.setArtistPick(picked.$1, picked.$2));
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  Widget _pickTile(PickView v) {
+    final l = context.l10n;
+    final p = v.current;
+    return InkWell(
+      onTap: () => _choosePick(v),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+            color: StreamifyColors.surfaceHigh,
+            borderRadius: BorderRadius.circular(8)),
+        child: Row(children: [
+          Icon(
+              p?.kind == PickKind.upcoming
+                  ? Icons.hourglass_top_rounded
+                  : Icons.push_pin_rounded,
+              color: StreamifyColors.accent),
+          const SizedBox(width: 10),
+          Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(
+                  p?.kind == PickKind.upcoming
+                      ? l.pickCountdown
+                      : l.pickTitleStreamify,
+                  style: const TextStyle(
+                      color: StreamifyColors.muted, fontSize: 12.5)),
+              Text(p == null ? l.pickNone : v.title,
+                  style: const TextStyle(fontWeight: FontWeight.w800)),
+              if (p != null && p.kind != PickKind.upcoming)
+                Text(l.pickFresh((v.freshness * 100).round()),
+                    style: const TextStyle(
+                        color: StreamifyColors.muted, fontSize: 12)),
+            ]),
+          ),
+          Text(l.pickChange,
+              style: const TextStyle(
+                  color: StreamifyColors.accent, fontWeight: FontWeight.w700)),
+        ]),
+      ),
+    );
   }
 
   @override
@@ -229,6 +340,8 @@ class _ArtistPageState extends State<ArtistPage> {
                 ),
               ]),
               const SizedBox(height: 18),
+              // The player's pinned release (docs K185).
+              if (_pick case final v? when v.open) _pickTile(v),
               Text(l.popular,
                   style: const TextStyle(
                       fontSize: 21, fontWeight: FontWeight.w900)),

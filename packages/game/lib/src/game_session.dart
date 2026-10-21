@@ -2131,6 +2131,19 @@ class GameSession {
 
   DocumentaryView get documentary => DocumentaryView.of(world, _p);
 
+  /// The Artist Pick (docs K185).
+  PickView get artistPick => PickView.of(world, _p);
+
+  /// Pins a release on the player's profile (docs K185).
+  void setArtistPick(PickKind kind, int id) {
+    try {
+      ArtistPicks.pin(world, _p, kind, id);
+    } on ActionException catch (e) {
+      throw GameException('noPick', e.message);
+    }
+    _saveNow();
+  }
+
   /// Streamify Sessions (docs K178).
   SessionsView get sessions => SessionsView.of(
       world, _p, Streamify.monthlyListeners(_fourWeekStreams()));

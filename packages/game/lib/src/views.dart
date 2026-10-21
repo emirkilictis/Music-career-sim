@@ -2524,6 +2524,58 @@ class DocumentaryView {
       })> docs;
 }
 
+/// The Artist Pick on the player's profile and what could be pinned
+/// (docs K185).
+class PickView {
+  PickView.of(World w, Artist a)
+      : open = ArtistPicks.open(w),
+        countdownOpen = ArtistPicks.countdownOpen(w),
+        current = ArtistPicks.current(w),
+        songs = [
+          for (final id in w.playerSongIds.reversed)
+            if (w.songs[id].releasedWeek >= 0 &&
+                w.songs[id].status != SongStatus.scrapped)
+              (id: id, title: w.songs[id].title)
+        ].take(15).toList(),
+        albums = [
+          for (final al in w.albums.reversed)
+            if (al.artistId == a.id) (id: al.id, title: al.title)
+        ],
+        upcoming = ArtistPicks.countdownOpen(w)
+            ? [
+                for (final sr in a.scheduled)
+                  if (sr.isAlbum && sr.announcedBy(w.week))
+                    (id: sr.id, title: sr.title)
+              ]
+            : const [],
+        title = _title(w, a, ArtistPicks.current(w)),
+        freshness = switch (ArtistPicks.current(w)) {
+          final p? => math.exp(-(w.week - p.sinceWeek) / ArtistPicks.fadeWeeks),
+          null => 0.0,
+        };
+
+  final bool open;
+  final bool countdownOpen;
+  final ArtistPick? current;
+
+  /// The pinned release's title ('' for none).
+  final String title;
+
+  /// How much of a fresh pick's lift it still has (1: just pinned).
+  final double freshness;
+  final List<({int id, String title})> songs;
+  final List<({int id, String title})> albums;
+  final List<({int id, String title})> upcoming;
+
+  static String _title(World w, Artist a, ArtistPick? p) => switch (p) {
+        null => '',
+        ArtistPick(kind: PickKind.song, :final id) => w.songs[id].title,
+        ArtistPick(kind: PickKind.album, :final id) => w.albums[id].title,
+        ArtistPick(kind: PickKind.upcoming, :final id) =>
+          a.scheduled.where((sr) => sr.id == id).firstOrNull?.title ?? '',
+      };
+}
+
 /// Why the listening data likes a track for the next single (docs K182).
 enum SinglePickReason {
   /// The album's most played track that is not a single yet.

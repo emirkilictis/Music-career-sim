@@ -178,6 +178,10 @@ int worldHash(World w) {
     addDouble(club.members);
     addInt(club.price.index);
   }
+  if (w.artistPick case final pick?) {
+    addInt(pick.kind.index * 1000000 + pick.id);
+    addInt(pick.sinceWeek);
+  }
   final own = w.ownPlaylist;
   if (own != null) {
     addInt(own.songIds.length);

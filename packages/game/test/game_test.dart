@@ -3462,6 +3462,67 @@ void main() {
       expect(Ringtones.eraFactor(2015), 0);
     });
 
+    test('the Artist Pick and a countdown page (K185)', () {
+      (double, GameSession) run(bool pin) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2022,
+                premium: true,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire));
+        final p = g.world.player!;
+        p.moneyCents = 1 << 40;
+        final ids = <int>[];
+        for (var i = 0; i < 9; i++) {
+          p.creativeEnergy = 100;
+          ids.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        final sr = g.scheduleAlbum('Soon', ids.take(8).toList(),
+            releaseWeek: g.week + 6, announceWeek: g.week);
+        if (pin) g.setArtistPick(PickKind.upcoming, sr.id);
+        for (var i = 0; i < 4; i++) {
+          g.advanceWeek();
+        }
+        final saves = g.scheduled.firstWhere((x) => x.id == sr.id).preSaves;
+        return (saves, g);
+      }
+
+      final (plain, g0) = run(false);
+      g0.close();
+      final (pinned, g) = run(true);
+      expect(pinned, greaterThan(plain * 1.2));
+      expect(g.artistPick.current!.kind, PickKind.upcoming);
+      expect(g.artistPick.title, 'Soon');
+      // Once out, the countdown is the album.
+      for (var i = 0; i < 3; i++) {
+        g.advanceWeek();
+      }
+      final now = g.artistPick.current!;
+      expect(now.kind, PickKind.album);
+      expect(g.world.albums[now.id].title, 'Soon');
+      expect(ArtistPicks.lifts(g.world).keys,
+          containsAll(g.world.albums[now.id].songIds));
+      // A song; unreleased songs cannot be pinned.
+      final vault = g.world.playerSongIds
+          .firstWhere((id) => g.world.songs[id].releasedWeek < 0);
+      expect(() => g.setArtistPick(PickKind.song, vault), _code('noPick'));
+      final out = g.world.albums[now.id].songIds.first;
+      g.setArtistPick(PickKind.song, out);
+      expect(ArtistPicks.lifts(g.world)[out],
+          closeTo(ArtistPicks.songLift, 1e-9));
+      final slot = g.slotId;
+      g.close();
+      final again = GameSession.resume(slots, slot);
+      expect(again.artistPick.current!.id, out);
+      // Stale pins fade.
+      for (var i = 0; i < 26; i++) {
+        again.advanceWeek();
+      }
+      expect(again.artistPick.freshness, lessThan(0.4));
+      again.close();
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;
