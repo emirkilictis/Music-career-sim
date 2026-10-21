@@ -2917,13 +2917,32 @@ void main() {
       p.fame = 0;
       expect(Leaks.chance(g.world, p, s0), 0);
       p.fame = fame;
-      SongLeaked? leak;
-      for (var i = 0; i < 104 && leak == null; i++) {
+      // A big vault leaks now and then, not every week (F83).
+      final leaks = <SongLeaked>[];
+      for (var i = 0; i < 156; i++) {
         p.fame = 1;
-        leak = g.advanceWeek().events.whereType<SongLeaked>().firstOrNull;
+        leaks.addAll(g.advanceWeek().events.whereType<SongLeaked>());
+      }
+      expect(leaks, isNotEmpty);
+      expect(leaks.length, lessThanOrEqualTo(156 ~/ Leaks.quietWeeks));
+      expect(Leaks.weeklyOdds(10), closeTo(Leaks.maxWeekly, 1e-9));
+      expect(Leaks.weeklyOdds(0.001), closeTo(0.001, 0.0001));
+      final leak = leaks.last;
+      // The next one waits.
+      final w = g.world;
+      for (final l in leaks.skip(1)) {
+        final before = leaks[leaks.indexOf(l) - 1];
+        expect(w.songs[l.songId].leakedWeek - w.songs[before.songId].leakedWeek,
+            greaterThanOrEqualTo(Leaks.quietWeeks));
+      }
+      SongLeaked? fresh;
+      for (var i = 0; i < 104 && fresh == null; i++) {
+        p.fame = 1;
+        fresh = g.advanceWeek().events.whereType<SongLeaked>().firstOrNull;
       }
       expect(leak, isNotNull);
-      final id = leak!.songId;
+      expect(fresh, isNotNull);
+      final id = fresh!.songId;
       expect(g.song(id).leakedWeek, g.week - 1);
       expect(g.song(id).canAnswerLeak, isTrue);
       g.releaseSingle(id);
@@ -2938,8 +2957,10 @@ void main() {
       final al = g.releaseAlbum('Leaked', tracks);
       expect(g.song(late.id).leakHurts, isTrue);
       expect(Leaks.fanFactor(late), Leaks.fanKeep);
+      final hurt = tracks.where((t) => Leaks.hurts(g.world.songs[t])).length;
+      expect(hurt, greaterThanOrEqualTo(1));
       expect(Leaks.albumKeep(g.world, g.world.albums[al.id]),
-          closeTo(1 - Leaks.albumCutStreamingEra, 1e-9));
+          closeTo(1 - Leaks.albumCutStreamingEra * hurt, 1e-9));
       g.close();
     });
 

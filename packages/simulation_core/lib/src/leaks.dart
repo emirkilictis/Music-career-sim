@@ -34,7 +34,8 @@ abstract final class Leaks {
   static const albumMaxCut = 0.25;
 
   /// Weekly chance that vault song [s] of [a] leaks: more the more famous,
-  /// the longer it waits and once a release with it is announced.
+  /// the longer it waits and once a release with it is announced. A whole
+  /// vault's chance is capped by [weeklyOdds].
   static double chance(World w, Artist a, Song s, {bool announced = false}) {
     if (GameTime.yearOf(w.week) < fromYear) return 0;
     final waited = math.min(2.0, (w.week - s.writtenWeek) / 26);
@@ -47,6 +48,21 @@ abstract final class Leaks {
         (s.snippetWeek >= 0 ? Snippets.leakFactor : 1);
   }
 
+  /// Most an artist's vault leaks a week, however many songs wait in it
+  /// (about once a year), and with a release announced (F83).
+  static const maxWeekly = 0.02, maxWeeklyAnnounced = 0.04;
+
+  /// No new leak this soon after the last one.
+  static const quietWeeks = 26;
+
+  /// This week's chance that something of [a]'s leaks: the songs' chances
+  /// add up, but a big vault does not leak every week (F83).
+  static double weeklyOdds(double total, {bool announced = false}) {
+    if (total <= 0) return 0;
+    final cap = announced ? maxWeeklyAnnounced : maxWeekly;
+    return cap * (1 - math.exp(-total / cap));
+  }
+
   /// Rolls this week's leak among the player's vault songs; returns the
   /// song that leaked, if any (one a week at most).
   static Song? weekly(World w) {
@@ -56,18 +72,34 @@ abstract final class Leaks {
       for (final sr in p.scheduled)
         if (!sr.isDraft && sr.announcedBy(w.week)) ...sr.songIds
     };
+    final ids = <int>[];
+    final odds = <double>[];
+    var last = -1 << 30;
     for (final id in w.playerSongIds) {
       final s = w.songs[id];
+      if (s.leakedWeek > last) last = s.leakedWeek;
       if (s.status != SongStatus.vault || s.leakedWeek >= 0) continue;
-      final odds = chance(w, p, s, announced: announced.contains(id));
-      if (odds <= 0) continue;
-      if (keyedUnit(w.seed, w.week, id, RngPurpose.leak) < odds) {
-        s.leakedWeek = w.week;
-        w.dirtySongs.add(id);
-        return s;
-      }
+      final o = chance(w, p, s, announced: announced.contains(id));
+      if (o <= 0) continue;
+      ids.add(id);
+      odds.add(o);
     }
-    return null;
+    if (ids.isEmpty || w.week - last < quietWeeks) return null;
+    final total = odds.fold(0.0, (t, o) => t + o);
+    final r = RandomStream.keyed(w.seed, w.week, p.id, RngPurpose.leak);
+    if (!r.chance(weeklyOdds(total, announced: announced.isNotEmpty))) {
+      return null;
+    }
+    // Which one: the likelier a song is to leak, the likelier it is this.
+    var pick = r.nextDouble() * total;
+    var i = 0;
+    while (i < ids.length - 1 && pick >= odds[i]) {
+      pick -= odds[i];
+      i++;
+    }
+    final s = w.songs[ids[i]]..leakedWeek = w.week;
+    w.dirtySongs.add(s.id);
+    return s;
   }
 
   /// Out officially soon enough after leaking.
