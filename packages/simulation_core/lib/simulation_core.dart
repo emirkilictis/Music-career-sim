@@ -52,6 +52,7 @@ export 'src/social.dart';
 export 'src/songwriting.dart';
 export 'src/streaming_tools.dart';
 export 'src/simulator.dart';
+export 'src/this_is.dart';
 export 'src/time.dart';
 export 'src/tours.dart';
 export 'src/ringtones.dart';

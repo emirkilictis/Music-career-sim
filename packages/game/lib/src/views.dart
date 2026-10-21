@@ -2591,6 +2591,50 @@ class PickView {
       };
 }
 
+/// An artist's This Is list on the streaming app (docs K189).
+class ThisIsView {
+  ThisIsView.of(World w, Artist a, this.listeners)
+      : open = ThisIs.open(w),
+        made = a.tier == ArtistTier.player
+            ? w.thisIsWeek >= 0
+            : ThisIs.qualifies(w, a, listeners),
+        madeWeek = a.tier == ArtistTier.player ? w.thisIsWeek : -1,
+        eligible = ThisIs.eligible(w, a).length,
+        artistName = a.name,
+        isPlayer = a.tier == ArtistTier.player {
+    if (!made) return;
+    final list = ThisIs.songs(w, a);
+    for (var i = 0; i < list.length; i++) {
+      final s = list[i];
+      songs.add(SongView.of(w, s));
+      if (ThisIs.isNew(w, s)) newIds.add(s.id);
+      if (isPlayer) lifts.add(ThisIs.liftAt(w, s, i));
+    }
+  }
+
+  /// The app has these lists yet.
+  final bool open;
+  final bool made;
+
+  /// When the editors made the player's list (-1 for others).
+  final int madeWeek;
+  final String artistName;
+  final bool isPlayer;
+
+  /// Songs the list could take, against [ThisIs.minSongs].
+  final int eligible;
+
+  /// Monthly listeners, against [ThisIs.minListeners].
+  final double listeners;
+  final List<SongView> songs = [];
+
+  /// Songs on it because they are new.
+  final Set<int> newIds = {};
+
+  /// The listening each of the player's songs gets from being on it.
+  final List<double> lifts = [];
+}
+
 /// Why the listening data likes a track for the next single (docs K182).
 enum SinglePickReason {
   /// The album's most played track that is not a single yet.

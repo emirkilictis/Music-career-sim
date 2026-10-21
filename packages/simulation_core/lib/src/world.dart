@@ -94,6 +94,10 @@ class World {
   /// The player's Streamify Sessions (docs K178).
   final List<StreamifySession> streamifySessions = [];
 
+  /// The week the editors made the player's This Is list, or -1 (docs
+  /// K189).
+  int thisIsWeek = -1;
+
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();
 

@@ -124,6 +124,8 @@ class SaveStore {
         .addAll(StreamifySession.decode(meta['sessions'] as String?));
     w.playerPeakListeners =
         (meta['listenersPeak'] as num?)?.toDouble() ?? -1;
+    // The player's This Is list (docs K189).
+    w.thisIsWeek = (meta['thisIs'] as num?)?.toInt() ?? -1;
     if (meta['artistChart'] case final String s when s.isNotEmpty) {
       final j = jsonDecode(s) as List;
       w.artistChartPrev = List.unmodifiable((j[0] as List).cast<int>());
@@ -388,6 +390,7 @@ class SaveStore {
       'docs': Documentary.encode(w.documentaries),
       'sessions': StreamifySession.encode(w.streamifySessions),
       'listenersPeak': w.playerPeakListeners,
+      'thisIs': w.thisIsWeek,
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

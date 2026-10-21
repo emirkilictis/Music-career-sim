@@ -284,6 +284,15 @@ class ListenersMilestone extends GameEvent {
   bool get isMajor => listeners >= 10e6;
 }
 
+/// The streaming app's editors made the player's This Is list, with
+/// [songs] songs on it (docs K189).
+class ThisIsMade extends GameEvent {
+  const ThisIsMade(this.songs);
+  final int songs;
+  @override
+  bool get isMajor => true;
+}
+
 /// A player album's tracks passed [streams] streams together (docs K156).
 class AlbumStreamMilestone extends GameEvent {
   const AlbumStreamMilestone(this.albumId, this.streams);

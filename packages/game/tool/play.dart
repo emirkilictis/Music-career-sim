@@ -260,6 +260,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       PlaylistMilestone() => 'playlist passed ${e.followers} followers',
       CreditSongHit() => '${e.credit.name} song ${e.songId} by ${e.artistId} at #${e.position}',
       ListenersMilestone() => 'monthly listeners passed ${e.listeners}',
+      ThisIsMade() => 'editors made a This Is list (${e.songs} songs)',
       AlbumStreamMilestone() => 'album ${e.albumId} passed ${e.streams} streams',
       SongOfSummer() => 'summer ${e.year}: #1 ${e.topSongId}, you #${e.playerRank}',
       BrandDealBroken() => 'brand deal broken: ${e.brand.name}',

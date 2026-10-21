@@ -11,6 +11,7 @@ import '../../widgets/common.dart';
 import '../../widgets/line_chart.dart';
 import '../song_detail_screen.dart';
 import 'album_page.dart';
+import 'this_is_page.dart';
 import '../game_shell.dart';
 
 /// Streamify artist page, laid out like a big streaming app's: large header,
@@ -30,6 +31,9 @@ class _ArtistPageState extends State<ArtistPage> {
   /// The player's Artist Pick (docs K185; null on others' pages).
   PickView? _pick;
 
+  /// The artist's This Is list (docs K189).
+  ThisIsView? _thisIs;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -42,10 +46,12 @@ class _ArtistPageState extends State<ArtistPage> {
     final pick = widget.artistId == career.player.id
         ? await career.read(Cmd.artistPick())
         : null;
+    final thisIs = await career.read(Cmd.thisIs(widget.artistId));
     if (mounted) {
       setState(() {
         _page = page;
         _pick = pick;
+        _thisIs = thisIs;
       });
     }
   }
@@ -166,6 +172,47 @@ class _ArtistPageState extends State<ArtistPage> {
                 child: CircularProgressIndicator(color: StreamifyColors.accent))
             : _content(context, page),
       ),
+    );
+  }
+
+  Widget _thisIsTile(BuildContext context, ThisIsView t, int seed) {
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(l.thisIsFeaturing,
+            style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: () =>
+              pushInCareer(context, ThisIsPage(view: t, seed: seed)),
+          child: Row(children: [
+            ThisIsCover(
+                name: t.artistName, seed: seed, size: 96, locked: !t.made),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l.thisIsTitle(t.artistName),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800, fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(
+                        t.made
+                            ? l.thisIsSongs(t.songs.length)
+                            : l.thisIsLockedShort,
+                        style: const TextStyle(
+                            color: StreamifyColors.muted, fontSize: 13)),
+                  ]),
+            ),
+            const Icon(Icons.chevron_right_rounded,
+                color: StreamifyColors.muted),
+          ]),
+        ),
+      ]),
     );
   }
 
@@ -478,6 +525,9 @@ class _ArtistPageState extends State<ArtistPage> {
           ),
         ),
       ],
+      // The editors' This Is list (docs K189).
+      if (_thisIs case final t? when t.open && (t.made || t.isPlayer))
+        SliverToBoxAdapter(child: _thisIsTile(context, t, a.id)),
       SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),

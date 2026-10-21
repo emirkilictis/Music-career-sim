@@ -4734,6 +4734,68 @@
     }
   },
   "sessHint": "Record one of your songs stripped back and a cover of someone else's hit. Streamify features your new version and the cover reaches the other artist's listeners. Once a year.",
+  "eventThisIsMade": "Streamify's editors made \"This Is\" for you: {songs} of your songs in one list. Your deeper songs get played now too.",
+  "@eventThisIsMade": {
+    "placeholders": {
+      "songs": {
+        "type": "int"
+      }
+    }
+  },
+  "thisIsTitle": "This Is {name}",
+  "@thisIsTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "thisIsBlurb": "The essential tracks, all in one playlist.",
+  "thisIsFeaturing": "Featuring",
+  "thisIsLocked": "The editors make one once you have {needSongs} songs out ({songs} now) and {needListeners} monthly listeners ({listeners} now).",
+  "@thisIsLocked": {
+    "placeholders": {
+      "songs": {
+        "type": "int"
+      },
+      "needSongs": {
+        "type": "int"
+      },
+      "listeners": {
+        "type": "String"
+      },
+      "needListeners": {
+        "type": "String"
+      }
+    }
+  },
+  "thisIsLockedShort": "Not made yet",
+  "thisIsSince": "Made {week}",
+  "@thisIsSince": {
+    "placeholders": {
+      "week": {
+        "type": "String"
+      }
+    }
+  },
+  "thisIsNew": "NEW",
+  "thisIsLift": "+{pct}% listening",
+  "@thisIsLift": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "thisIsHint": "The list keeps itself up to date: your biggest song first, new releases right after it. Deeper songs gain the most from it.",
+  "thisIsSongs": "{count} songs",
+  "@thisIsSongs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "sessRecord": "Record the session",
   "sessDone": "{title} (Streamify Session) + {cover} ({artist}) cover",
   "@sessDone": {

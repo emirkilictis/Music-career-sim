@@ -1003,6 +1003,7 @@ class Fmt {
       SalesMilestone(:final copies) => l.eventSalesMilestone(compact(copies)),
       ListenersMilestone(:final listeners) =>
         l.eventListenersMilestone(compact(listeners)),
+      ThisIsMade(:final songs) => l.eventThisIsMade(songs),
       AlbumStreamMilestone(:final streams) =>
         l.eventAlbumStreams(t, compact(streams)),
       WrittenSongHit(:final position) => position == 1

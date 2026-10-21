@@ -219,6 +219,8 @@ void main(List<String> args) {
           g.singlePicks(album());
         }
         g.artistPage(_pick(r, rivals));
+        g.thisIs(p.id);
+        g.thisIs(_pick(r, rivals));
         for (final role in CollaboratorRole.values) {
           g.collaborators(role);
         }

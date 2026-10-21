@@ -2193,6 +2193,25 @@ class GameSession {
   /// The Artist Pick (docs K185).
   PickView get artistPick => PickView.of(world, _p);
 
+  /// [artistId]'s This Is list (docs K189).
+  ThisIsView thisIs(int artistId) {
+    final w = world;
+    final a = w.artists[artistId];
+    final double weekly;
+    if (artistId == _p.id) {
+      weekly = _fourWeekStreams();
+    } else {
+      var t = 0.0;
+      for (final s in w.songs) {
+        if (s.primaryArtistId == artistId && s.releasedWeek >= 0) {
+          t += w.songWeekStreamsIn(s, ChartMarket.global);
+        }
+      }
+      weekly = t;
+    }
+    return ThisIsView.of(w, a, Streamify.monthlyListeners(weekly));
+  }
+
   /// Pins a release on the player's profile (docs K185).
   void setArtistPick(PickKind kind, int id) {
     try {
@@ -2559,6 +2578,12 @@ class GameSession {
       }
     }
     if (listeners > peak) w.playerPeakListeners = listeners;
+    // The editors make a This Is list once the artist is listened to
+    // (docs K189).
+    if (w.thisIsWeek < 0 && ThisIs.qualifies(w, _p, listeners)) {
+      w.thisIsWeek = w.week;
+      out.add(ThisIsMade(ThisIs.songs(w, _p).length));
+    }
     for (final id in w.activeAlbumIds) {
       final al = w.albums[id];
       if (al.artistId != w.playerArtistId) continue;

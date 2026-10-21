@@ -13,6 +13,7 @@ import 'package:music_career_sim/core/event_lines.dart';
 import 'package:music_career_sim/core/scope.dart';
 import 'package:music_career_sim/screens/charts_tab.dart';
 import 'package:music_career_sim/screens/streamify/editorial_page.dart';
+import 'package:music_career_sim/screens/streamify/this_is_page.dart';
 import 'package:music_career_sim/widgets/art.dart';
 import 'package:music_career_sim/widgets/celebration.dart';
 import 'package:music_career_sim/widgets/media_tile.dart';
@@ -659,6 +660,16 @@ void main() {
     await Scrollable.ensureVisible(tester.element(cities), alignment: 0.4);
     await tester.pumpAndSettle();
     await shot(tester, '10c_my_audience');
+    // The editors' This Is list (docs K189).
+    final featuring = _ci('Featuring');
+    await tester.scrollUntilVisible(featuring, -300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ThisIsCover));
+    await tester.pumpAndSettle();
+    await shot(tester, '10d_this_is');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.pageBack();
     await tester.pumpAndSettle();
     await tester.pageBack();

@@ -3618,6 +3618,95 @@ void main() {
       g.close();
     });
 
+    test('the editors\' This Is list (K189)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final slot = g.slotId;
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      expect(g.thisIs(p.id).made, isFalse);
+      final ids = <int>[];
+      final events = <GameEvent>[];
+      for (var i = 0; i < ThisIs.minSongs; i++) {
+        p.creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.high).id;
+        ids.add(id);
+        g.releaseSingle(id);
+        events.addAll(g.advanceWeek().events);
+      }
+      for (var i = 0; i < 4 && g.world.thisIsWeek < 0; i++) {
+        events.addAll(g.advanceWeek().events);
+      }
+      final v = g.thisIs(p.id);
+      expect(v.listeners, greaterThan(ThisIs.minListeners));
+      expect(v.made, isTrue);
+      expect(events.whereType<ThisIsMade>().single.songs, ThisIs.minSongs);
+      expect(v.songs.map((s) => s.id).toSet(), ids.toSet());
+      // The biggest song first, then the newest ones, the rest by streams.
+      final k = v.newIds.length < ThisIs.newSlots
+          ? v.newIds.length
+          : ThisIs.newSlots;
+      final top = v.songs.sublist(1, 1 + k);
+      for (var i = 0; i < k; i++) {
+        expect(v.newIds, contains(top[i].id));
+        if (i > 0) {
+          expect(top[i].releasedWeek, lessThanOrEqualTo(top[i - 1].releasedWeek));
+        }
+      }
+      final rest = [v.songs.first, ...v.songs.skip(1 + k)];
+      for (var i = 1; i < rest.length; i++) {
+        expect(rest[i].lifetimeStreams.total,
+            lessThanOrEqualTo(rest[i - 1].lifetimeStreams.total));
+      }
+      final lifts = ThisIs.lifts(g.world);
+      expect(lifts.keys.toSet(), ids.toSet());
+      // A new single goes in near the top.
+      p.creativeEnergy = 100;
+      final fresh = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(fresh);
+      g.advanceWeek();
+      expect(g.thisIs(p.id).songs[1].id, fresh);
+      expect(ThisIs.lifts(g.world)[fresh], ThisIs.newLift);
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.world.thisIsWeek, greaterThanOrEqualTo(0));
+      expect(g.thisIs(p.id).made, isTrue);
+      // Rivals have theirs on their pages.
+      for (final id in g.world.activeArtistIds.take(30)) {
+        if (id == p.id) continue;
+        final r = g.thisIs(id);
+        expect(r.made,
+            r.eligible >= ThisIs.minSongs && r.listeners >= ThisIs.minListeners);
+        expect(r.lifts, isEmpty);
+      }
+      g.close();
+    });
+
+    test('This Is waits for 2016 (K189)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2012,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final p = g.world.player!;
+      for (var i = 0; i < ThisIs.minSongs + 2; i++) {
+        p.creativeEnergy = 100;
+        g.releaseSingle(g.writeSong(budget: BudgetTier.high).id);
+        g.advanceWeek();
+      }
+      expect(g.world.thisIsWeek, -1);
+      expect(g.thisIs(p.id).open, isFalse);
+      expect(ThisIs.lifts(g.world), isEmpty);
+      g.close();
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;

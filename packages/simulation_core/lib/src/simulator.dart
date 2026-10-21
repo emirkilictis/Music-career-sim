@@ -40,6 +40,7 @@ import 'stream_windows.dart';
 import 'tours.dart';
 import 'word_of_mouth.dart';
 import 'rng.dart';
+import 'this_is.dart';
 import 'time.dart';
 import 'world.dart';
 
@@ -234,6 +235,8 @@ class Simulator {
     final pickLifts = ArtistPicks.lifts(w);
     // Mood playlists keep catalog songs going (docs K186).
     final moodLifts = MoodPlaylists.lifts(w);
+    // The player's This Is list plays their catalog (docs K189).
+    final thisIsLifts = ThisIs.lifts(w);
     // The player's label pushes its signees further (docs K169).
     final signed = Imprints.signedIds(w);
 
@@ -398,7 +401,8 @@ class Simulator {
           s.playlistBoost +
           (ownLifts[s.id] ?? 0) +
           (pickLifts[s.id] ?? 0) +
-          (moodLifts[s.id] ?? 0);
+          (moodLifts[s.id] ?? 0) +
+          (thisIsLifts[s.id] ?? 0);
       final versionLift = s.versionBoost;
       final algoLift =
           s.autoplay.lift * StreamingTools.autoplayLift(c, s, promoAge) +
