@@ -1317,6 +1317,11 @@ k('pickGrowing','Growing by word of mouth','Kulaktan kulağa büyüyor')
 # Tour legs sized to demand (K181)
 k('tourFit','Fit to demand','Talebe göre')
 
+# Critics' albums of the year (K187)
+k('criticsList','Critics\' picks','Eleştirmenlerin seçimi')
+k('criticsLine','Metascore {score} · best #{peak}','Metascore {score} · en iyi #{peak}', score='int', peak='int')
+k('eventCriticsList','The critics\' albums of {year}: {title} is #{rank} (Metascore {score}).','{year} yılının eleştirmen listesi: {title} #{rank} (Metascore {score}).', title='String', year='int', rank='int', score='int')
+
 # Mood playlists (K186)
 k('moodButton','Pitch to a mood playlist','Ruh hali listesine öner')
 k('moodTitle','Mood playlists','Ruh hali listeleri')

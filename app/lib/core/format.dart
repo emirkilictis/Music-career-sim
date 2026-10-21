@@ -989,6 +989,7 @@ class Fmt {
       BotsCaught() => l.eventBotsCaught(t, compact(e.removed)),
       RivalBotsCaught() =>
         l.eventRivalBotsCaught(line.artistName, t, compact(e.removed)),
+      CriticsList() => l.eventCriticsList(t, e.year, e.rank, e.metascore),
       RivalAlbumMove() => switch (e.move) {
           RivalMove.surprise => l.eventRivalSurprise(line.artistName, t),
           RivalMove.exclusive =>

@@ -4611,6 +4611,35 @@
   "pickShortVideo": "Short-video potential",
   "pickGrowing": "Growing by word of mouth",
   "tourFit": "Fit to demand",
+  "criticsList": "Critics' picks",
+  "criticsLine": "Metascore {score} · best #{peak}",
+  "@criticsLine": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      },
+      "peak": {
+        "type": "int"
+      }
+    }
+  },
+  "eventCriticsList": "The critics' albums of {year}: {title} is #{rank} (Metascore {score}).",
+  "@eventCriticsList": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      },
+      "rank": {
+        "type": "int"
+      },
+      "score": {
+        "type": "int"
+      }
+    }
+  },
   "moodButton": "Pitch to a mood playlist",
   "moodTitle": "Mood playlists",
   "moodHint": "Lists people put on for hours: they take songs already out and keep them playing for about a year. One pitch per song.",

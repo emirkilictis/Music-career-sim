@@ -78,6 +78,7 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         BotsCaught() => release(e, EntityKind.song, e.songId),
         RivalBotsCaught() => EventLine(e,
             title: song(e.songId), artistName: w.artists[e.artistId].name),
+        CriticsList() => release(e, EntityKind.album, e.albumId),
         RivalAlbumMove() => EventLine(e,
             title: album(e.albumId),
             albumId: e.albumId,
@@ -240,6 +241,7 @@ List<EventLine> sortLines(List<EventLine> lines) {
         BrandDealBroken() => 2,
         RivalBotsCaught() => 9,
         RivalAlbumMove() => 4,
+        CriticsList() => 1,
         AwardNominated() => 1,
         AwardWinners() => 9,
       };

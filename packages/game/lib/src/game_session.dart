@@ -2061,6 +2061,7 @@ class GameSession {
   /// albums), not how long it stayed (F73), with its best position and
   /// weeks on.
   List<YearEndRow> yearEnd(int chartId, int year, {int limit = YearEnd.size}) {
+    if (chartId == YearEnd.critics) return _criticsList(year, limit);
     // The songs of the summer: the US songs chart over the summer weeks
     // (docs K137).
     final summer = chartId == YearEnd.summer;
@@ -2085,6 +2086,39 @@ class GameSession {
             points: r['pts'] as int,
             peak: r['peak'] as int,
             weeksOn: r['weeks'] as int),
+    ];
+  }
+
+  /// [year]'s albums ranked by the critics (docs K187): albums and EPs out
+  /// in the year-end tracking year with reviews, by Metascore (ties: the
+  /// better record). Points are the Metascore.
+  List<YearEndRow> _criticsList(int year, int limit) {
+    final w = world;
+    final (from, to) = YearEnd.tracking(year);
+    final albums = [
+      for (final al in w.albums)
+        if (al.releaseWeek >= from &&
+            al.releaseWeek <= to &&
+            al.criticScore >= 0 &&
+            (al.type == AlbumType.album || al.type == AlbumType.ep) &&
+            al.hitIds.isEmpty &&
+            al.liveTour < 0)
+          (al, Critics.metascore(w, al))
+    ]..sort((x, y) {
+        final d = y.$2.compareTo(x.$2);
+        if (d != 0) return d;
+        final q = y.$1.quality.compareTo(x.$1.quality);
+        return q != 0 ? q : x.$1.id.compareTo(y.$1.id);
+      });
+    var rank = 0;
+    return [
+      for (final (al, score) in albums.take(math.min(limit, YearEnd.criticsSize)))
+        YearEndRow.of(w, EntityKind.album,
+            rank: ++rank,
+            entityId: al.id,
+            points: score,
+            peak: al.statsOrNull(Charts.usAlbums)?.peak ?? 0,
+            weeksOn: al.statsOrNull(Charts.usAlbums)?.weeksOn ?? 0),
     ];
   }
 
@@ -3688,6 +3722,12 @@ class GameSession {
       final y = GameTime.yearOf(r.week);
       if (yearEndYears.contains(y)) {
         final songs = yearEnd(Charts.usSongs, y);
+        // The critics' albums of the year (docs K187).
+        final critics = yearEnd(YearEnd.critics, y);
+        final best = critics.where((e) => e.isPlayer).firstOrNull;
+        if (best != null) {
+          events.add(CriticsList(y, best.rank, best.entityId, best.points));
+        }
         events.add(YearEndCharts(y,
             songs: [
               for (final e in songs)

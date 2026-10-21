@@ -328,6 +328,17 @@ class YearEndCharts extends GameEvent {
   bool get isIndustry => !hasPlayer;
 }
 
+/// The player's album is on the critics' albums of the year (docs K187).
+class CriticsList extends GameEvent {
+  const CriticsList(this.year, this.rank, this.albumId, this.metascore);
+  final int year;
+  final int rank;
+  final int albumId;
+  final int metascore;
+  @override
+  bool get isMajor => rank <= 10;
+}
+
 /// The player's album or EP came out with no announcement and made
 /// headlines (docs K124).
 class SurpriseDrop extends GameEvent {

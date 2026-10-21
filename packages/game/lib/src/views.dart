@@ -1173,6 +1173,12 @@ abstract final class YearEnd {
   /// The songs of the summer (docs K137): a pseudo chart id for the US
   /// songs chart from late May to early September, out in mid-September.
   static const summer = -100;
+
+  /// The critics' albums of the year (docs K187): a pseudo chart id for
+  /// the year's reviewed albums ranked by their Metascore, out with the
+  /// year-end charts.
+  static const critics = -101;
+  static const criticsSize = 50;
   static const summerFromWeekOfYear = 22, summerToWeekOfYear = 36;
 
   static (int, int) summerTracking(int year) => (

@@ -3579,6 +3579,45 @@ void main() {
       expect(listed, greaterThan(plain * 1.05));
     });
 
+    test('the critics\' albums of the year (K187)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2015,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final al = g.releaseAlbum('Reviewed', ids);
+      final events = <GameEvent>[];
+      while (GameTime.weekOfYear(g.week - 1) != YearEnd.publishWeekOfYear) {
+        events.addAll(g.advanceWeek().events);
+      }
+      final year = GameTime.yearOf(g.week - 1);
+      final list = g.yearEnd(YearEnd.critics, year);
+      expect(list, isNotEmpty);
+      expect(list.length, lessThanOrEqualTo(YearEnd.criticsSize));
+      for (var i = 1; i < list.length; i++) {
+        expect(list[i].points, lessThanOrEqualTo(list[i - 1].points));
+      }
+      final mine = list.where((r) => r.entityId == al.id).firstOrNull;
+      final news = events.whereType<CriticsList>().toList();
+      if (mine != null) {
+        expect(news.single.rank, mine.rank);
+        expect(news.single.metascore,
+            Critics.metascore(g.world, g.world.albums[al.id]));
+      } else {
+        expect(news, isEmpty);
+      }
+      g.close();
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;
