@@ -818,6 +818,8 @@ class Fmt {
       'noAnniversary' => l.errorNoAnniversary,
       'noPartner' => l.errorNoPartner,
       'noMood' => l.errorNoMood,
+      'noCanvas' => l.errorNoCanvas,
+      'onTour' => l.errorOnTour,
       'noPick' => l.errorNoPick,
       'noDeluxe' => l.errorNoDeluxe,
       'noSession' => l.errorNoSession,

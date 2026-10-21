@@ -98,6 +98,13 @@ class World {
   /// K189).
   int thisIsWeek = -1;
 
+  /// After the player went solo (docs K191): the group they left (-1:
+  /// never did), the week they became the player's artist, and what the
+  /// career had streamed before them, so the career's streams run on.
+  int formerGroupId = -1;
+  int playerSinceWeek = 0;
+  double careerStreamsBase = 0;
+
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();
 
@@ -168,6 +175,31 @@ class World {
   List<ChartEntry> get albumChart => charts[Charts.usAlbums];
 
   Artist? get player => playerArtistId >= 0 ? artists[playerArtistId] : null;
+
+  /// Everything the player's career has streamed, the group's years
+  /// included after going solo (docs K191).
+  double get playerCareerStreams {
+    final p = player;
+    return p == null ? 0 : careerStreamsBase + artistLifetimeStreams(p);
+  }
+
+  /// Fills [playerSongIds], [managedSongIds] and [guestSongIds] again
+  /// from the songs, as a load does (after the player's artist changed).
+  void rebuildPlayerSongLists() {
+    playerSongIds.clear();
+    managedSongIds.clear();
+    guestSongIds.clear();
+    for (final s in songs) {
+      if (s.primaryArtistId == playerArtistId) playerSongIds.add(s.id);
+      if (artists[s.primaryArtistId].managedBy == playerArtistId &&
+          playerArtistId >= 0) {
+        managedSongIds.add(s.id);
+      } else if (s.primaryArtistId != playerArtistId &&
+          s.featuredArtistIds.contains(playerArtistId)) {
+        guestSongIds.add(s.id);
+      }
+    }
+  }
 
   Artist primaryOf(Song s) => artists[s.primaryArtistId];
 

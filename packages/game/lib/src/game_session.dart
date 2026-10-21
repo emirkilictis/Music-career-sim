@@ -326,11 +326,23 @@ class GameSession {
   }
 
   double _fourWeekStreams() {
-    final now = world.artistLifetimeStreams(_p);
+    final now = world.playerCareerStreams;
+    // A solo artist's listeners start when they went solo (docs K191).
+    final since = world.playerSinceWeek - 1;
     final rows = _store.db.select(
         'SELECT week, lifetimeStreams FROM playerWeek WHERE week <= ? '
-        'ORDER BY week DESC LIMIT 1',
-        [world.week - 5]);
+        'AND week >= ? ORDER BY week DESC LIMIT 1',
+        [world.week - 5, since]);
+    if (rows.isEmpty && world.formerGroupId >= 0) {
+      final first = _store.db.select(
+          'SELECT week, lifetimeStreams FROM playerWeek WHERE week >= ? '
+          'ORDER BY week LIMIT 1',
+          [since]);
+      if (first.isEmpty) return 0;
+      final weeks = world.week - 1 - (first.first['week'] as int);
+      if (weeks <= 0) return 0;
+      return (now - (first.first['lifetimeStreams'] as num).toDouble()) / weeks;
+    }
     if (rows.isEmpty) {
       final first = _store.db.select(
           'SELECT week, lifetimeStreams FROM playerWeek ORDER BY week LIMIT 1');
@@ -2494,6 +2506,54 @@ class GameSession {
   // -------------------------------------------------------- credits (K158)
 
   /// A group's members and their solo records (empty for a solo artist).
+  /// What happens if member [member] leaves the group and the player goes
+  /// on as them (docs K191).
+  GoSoloView goSoloPreview(int member) {
+    final g = _p;
+    if (!g.kind.isGroup || member < 0 || member >= g.members.length) {
+      throw GameException('noMember', 'No such member');
+    }
+    final known = Credits.memberIdOf(g, member);
+    final m = known >= 0 ? world.artists[known] : null;
+    return GoSoloView(
+      name: g.members[member],
+      block: GoSolo.block(world),
+      fans: math.max(m?.coreFans ?? 0, g.coreFans * GoSolo.takeFans),
+      casual: math.max(m?.casual ?? 0, g.casual * GoSolo.takeCasual),
+      fame: math.max(m?.fame ?? 0, g.fame * GoSolo.takeFame),
+      groupFans: g.coreFans * GoSolo.keepFans,
+      groupBreaksUp: GoSolo.breaksUp(g),
+      scheduled: g.scheduled.length,
+      fanClub: world.fanClub != null,
+    );
+  }
+
+  /// The group the player left, and whether it broke up (docs K191).
+  (ArtistView, bool)? get formerGroup {
+    final id = world.formerGroupId;
+    if (id < 0) return null;
+    final g = world.artists[id];
+    return (ArtistView.of(world, g), g.isRetired);
+  }
+
+  /// Member [member] leaves the group and the player goes on as them
+  /// (docs K191).
+  void goSolo(int member) {
+    switch (GoSolo.block(world)) {
+      case GoSoloBlock.notGroup:
+        throw GameException('notGroup', 'Only a group can split');
+      case GoSoloBlock.onTour:
+        throw GameException('onTour', 'Not while on tour');
+      case null:
+    }
+    if (member < 0 || member >= _p.members.length) {
+      throw GameException('noMember', 'No such member');
+    }
+    GoSolo.split(world, member);
+    _rivalSales = null;
+    _saveNow();
+  }
+
   List<MemberView> get members => [
         if (_p.kind.isGroup)
           for (var i = 0; i < _p.members.length; i++)

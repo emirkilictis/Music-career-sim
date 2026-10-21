@@ -955,6 +955,28 @@ void main() {
     await Scrollable.ensureVisible(tester.element(club), alignment: 0.05);
     await tester.pumpAndSettle();
     await shot(tester, '15t_fan_club');
+    // Mira leaves the group and the career goes on as her (docs K191).
+    final leave = _ci('Leave the group, go solo');
+    await tester.scrollUntilVisible(leave.at(1), 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(leave.at(1)),
+        alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(leave.at(1));
+    await tester.pumpAndSettle();
+    await shot(tester, '15u_go_solo');
+    await tester.tap(_ci('Go solo'));
+    await tester.pumpAndSettle();
+    expect(find.text('You are Mira now, on your own.'), findsOneWidget);
+    final former = _ci('Your former group');
+    await tester.scrollUntilVisible(former, -300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(former), alignment: 0.2);
+    await tester.pumpAndSettle();
+    await shot(tester, '15v_former_group');
+    expect(find.text('Starlight'), findsWidgets);
+    await tab(tester, 'Home');
+    await shot(tester, '15w_solo_home');
   });
 }
 

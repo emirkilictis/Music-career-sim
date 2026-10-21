@@ -766,7 +766,9 @@ class Song with Charted {
   final int genre;
   final List<int> extraGenres;
   List<int> get genres => [genre, ...extraGenres];
-  final int primaryArtistId;
+  /// Changes only for an unreleased song that goes with a member leaving
+  /// the player's group (docs K191).
+  int primaryArtistId;
   final List<int> featuredArtistIds;
   final int writtenWeek;
 

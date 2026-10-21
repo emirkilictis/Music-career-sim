@@ -126,6 +126,10 @@ class SaveStore {
         (meta['listenersPeak'] as num?)?.toDouble() ?? -1;
     // The player's This Is list (docs K189).
     w.thisIsWeek = (meta['thisIs'] as num?)?.toInt() ?? -1;
+    // Going solo (docs K191).
+    w.formerGroupId = (meta['formerGroup'] as num?)?.toInt() ?? -1;
+    w.playerSinceWeek = (meta['playerSince'] as num?)?.toInt() ?? 0;
+    w.careerStreamsBase = (meta['careerBase'] as num?)?.toDouble() ?? 0;
     if (meta['artistChart'] case final String s when s.isNotEmpty) {
       final j = jsonDecode(s) as List;
       w.artistChartPrev = List.unmodifiable((j[0] as List).cast<int>());
@@ -176,8 +180,9 @@ class SaveStore {
       w.songs.add(s);
       if (s.primaryArtistId == w.playerArtistId) w.playerSongIds.add(s.id);
       if (s.writerId >= 0) w.writtenSongIds.add(s.id);
-      // Members' solo songs and the player's verses (docs K158).
-      if (w.artists[s.primaryArtistId].managedBy >= 0) {
+      // Members' solo songs and the player's verses (docs K158); a group
+      // the player left keeps its members' (K191).
+      if (w.artists[s.primaryArtistId].managedBy == w.playerArtistId) {
         w.managedSongIds.add(s.id);
       } else if (s.primaryArtistId != w.playerArtistId &&
           s.featuredArtistIds.contains(w.playerArtistId)) {
@@ -391,6 +396,9 @@ class SaveStore {
       'sessions': StreamifySession.encode(w.streamifySessions),
       'listenersPeak': w.playerPeakListeners,
       'thisIs': w.thisIsWeek,
+      'formerGroup': w.formerGroupId,
+      'playerSince': w.playerSinceWeek,
+      'careerBase': w.careerStreamsBase,
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };
@@ -568,7 +576,8 @@ class SaveStore {
         p.casual,
         p.devotion,
         p.moneyCents,
-        w.artistLifetimeStreams(p),
+        // Runs on across going solo (docs K191).
+        w.playerCareerStreams,
       ]);
     }
   }

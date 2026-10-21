@@ -35,6 +35,7 @@ export 'src/config/regions.dart';
 export 'src/config/sim_config.dart';
 export 'src/features.dart';
 export 'src/festivals.dart';
+export 'src/go_solo.dart';
 export 'src/holidays.dart';
 export 'src/joint_albums.dart';
 export 'src/leaks.dart';

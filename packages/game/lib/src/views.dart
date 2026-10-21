@@ -2959,6 +2959,36 @@ class PlaylistTrackView {
 }
 
 /// A group member and their solo records (docs K158).
+/// What going solo as a member would bring (docs K191).
+class GoSoloView {
+  const GoSoloView({
+    required this.name,
+    required this.block,
+    required this.fans,
+    required this.casual,
+    required this.fame,
+    required this.groupFans,
+    required this.groupBreaksUp,
+    required this.scheduled,
+    required this.fanClub,
+  });
+  final String name;
+
+  /// Why it cannot happen now (null: it can).
+  final GoSoloBlock? block;
+
+  /// The member's audience after the split.
+  final double fans, casual, fame;
+
+  /// The group's fans after the split, and whether it breaks up.
+  final double groupFans;
+  final bool groupBreaksUp;
+
+  /// Scheduled releases that are called off, and whether a fan club closes.
+  final int scheduled;
+  final bool fanClub;
+}
+
 class MemberView {
   MemberView.of(World w, Artist group, this.index)
       : name = group.members[index],

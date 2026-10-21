@@ -174,6 +174,10 @@ void main(List<String> args) {
         },
         'scrap': () => g.scrapSong(song()),
         'canvas': () => g.addCanvas(song()),
+        'goSolo': () {
+          // Rarely: a split changes the whole career (docs K191).
+          if (r.nextInt(6) == 0) g.goSolo(r.nextInt(4));
+        },
         'albumMarquee': () => g.runAlbumMarquee(album()),
         'memberSolo': () => g.releaseMemberSolo(r.nextInt(4), song()),
         'memberAlbum': () => g.releaseMemberAlbum(r.nextInt(4), 'M$wk',
@@ -221,6 +225,7 @@ void main(List<String> args) {
         }
         g.artistPage(_pick(r, rivals));
         g.thisIs(p.id);
+        g.goSoloPreview(r.nextInt(4));
         g.thisIs(_pick(r, rivals));
         for (final role in CollaboratorRole.values) {
           g.collaborators(role);

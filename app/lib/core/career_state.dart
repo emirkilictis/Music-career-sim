@@ -53,6 +53,9 @@ class CareerState extends ChangeNotifier {
   Future<void> refresh() async {
     slotId ??= await controller.run(Cmd.slotId());
     final (p, w, d) = await controller.run(Cmd.snapshot());
+    // After going solo the player is someone else: no "what changed" from
+    // the group (docs K191).
+    if (_player != null && _player!.id != p.id) before = null;
     _player = p;
     week = w;
     difficulty = d;

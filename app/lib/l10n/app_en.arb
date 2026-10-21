@@ -4813,6 +4813,102 @@
       }
     }
   },
+  "errorNoCanvas": "This song cannot get a Canvas now.",
+  "errorOnTour": "Not while you are on tour.",
+  "goSoloButton": "Leave the group, go solo",
+  "goSoloTitle": "{name} leaves the group?",
+  "@goSoloTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goSoloIntro": "You carry on as {name}, under their own name. Your money, skills, creativity, team, label deal and unreleased songs come along.",
+  "@goSoloIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goSoloFans": "{name} starts with {fans} fans and {fame}% fame.",
+  "@goSoloFans": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "fans": {
+        "type": "String"
+      },
+      "fame": {
+        "type": "int"
+      }
+    }
+  },
+  "goSoloGroupOn": "{group} carries on without them with {fans} fans: after a half-year break it is back, as your rival.",
+  "@goSoloGroupOn": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "goSoloGroupEnds": "{group} breaks up.",
+  "@goSoloGroupEnds": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "goSoloRecords": "The group's released songs and albums stay the group's.",
+  "goSoloScheduled": "{count} planned releases are called off; what you paid comes back.",
+  "@goSoloScheduled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "goSoloClub": "The group's fan club closes.",
+  "goSoloConfirm": "Go solo",
+  "goSoloDone": "You are {name} now, on your own.",
+  "@goSoloDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "formerGroupSection": "Your former group",
+  "formerGroupLine": "{fans} fans · fame {fame}%",
+  "@formerGroupLine": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      },
+      "fame": {
+        "type": "int"
+      }
+    }
+  },
+  "formerGroupEnded": "Broke up",
+  "formerGroupPage": "Streamify page",
+  "formerGroupTotals": "With the group: {streams} streams · {units} units",
+  "@formerGroupTotals": {
+    "placeholders": {
+      "streams": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
   "sessRecord": "Record the session",
   "sessDone": "{title} (Streamify Session) + {cover} ({artist}) cover",
   "@sessDone": {

@@ -18,7 +18,9 @@ import 'discography_screen.dart';
 import 'album_detail_screen.dart';
 import 'labels_screen.dart';
 import 'member_album_screen.dart';
+import 'game_shell.dart';
 import 'song_detail_screen.dart';
+import 'streamify/artist_page.dart';
 
 /// Career summary: totals by region, #1s, year by year, all songs.
 class CareerScreen extends StatefulWidget {
@@ -40,6 +42,9 @@ class _CareerScreenState extends State<CareerScreen> {
   HonorsView? _honors;
   List<WrittenSongView> _written = const [];
   List<MemberView> _members = const [];
+
+  /// The group the player left (docs K191).
+  (ArtistView, bool)? _former;
   FanClubView? _club;
   ImprintView? _label;
   FycView? _fyc;
@@ -66,6 +71,7 @@ class _CareerScreenState extends State<CareerScreen> {
     final honors = await career.read(Cmd.honors());
     final written = await career.read(Cmd.writtenForOthers());
     final members = await career.read(Cmd.members());
+    final former = await career.read(Cmd.formerGroup());
     final club = await career.read(Cmd.fanClub());
     final label = await career.read(Cmd.imprint());
     final fyc = await career.read(Cmd.fyc());
@@ -79,6 +85,7 @@ class _CareerScreenState extends State<CareerScreen> {
         _honors = honors;
         _written = written;
         _members = members;
+        _former = former;
         _club = club;
         _label = label;
         _fyc = fyc;
@@ -156,8 +163,7 @@ class _CareerScreenState extends State<CareerScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(d), child: Text(l.cancel)),
           FilledButton(
-              onPressed: () => Navigator.pop(d, ctrl.text),
-              child: Text(l.ok)),
+              onPressed: () => Navigator.pop(d, ctrl.text), child: Text(l.ok)),
         ],
       ),
     );
@@ -296,8 +302,7 @@ class _CareerScreenState extends State<CareerScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(d), child: Text(l.cancel)),
           FilledButton(
-              onPressed: () => Navigator.pop(d, ctrl.text),
-              child: Text(l.ok)),
+              onPressed: () => Navigator.pop(d, ctrl.text), child: Text(l.ok)),
         ],
       ),
     );
@@ -340,8 +345,8 @@ class _CareerScreenState extends State<CareerScreen> {
                     leading: ArtistAvatar(
                         name: c.name, seed: c.artistId, artistId: c.artistId),
                     title: Text(c.name),
-                    subtitle: Text(l.imprintCandidate(fmt.genre(c.genre),
-                        c.debutYear, fmt.compact(c.fans))),
+                    subtitle: Text(l.imprintCandidate(
+                        fmt.genre(c.genre), c.debutYear, fmt.compact(c.fans))),
                     trailing: Text(fmt.money(c.advanceCents)),
                     onTap: () => Navigator.pop(s, c),
                   ),
@@ -387,9 +392,7 @@ class _CareerScreenState extends State<CareerScreen> {
               ),
             ),
         ] else ...[
-          Text(
-              l.clubMembers(
-                  fmt.compact(c.members), fmt.compact(c.target)),
+          Text(l.clubMembers(fmt.compact(c.members), fmt.compact(c.target)),
               style: const TextStyle(fontWeight: FontWeight.w800)),
           Text(
               l.clubMoney(fmt.money(c.weekCents.round()),
@@ -427,15 +430,15 @@ class _CareerScreenState extends State<CareerScreen> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Text(l.clubPriceTitle,
-                style: Theme.of(s).textTheme.titleLarge),
+            child:
+                Text(l.clubPriceTitle, style: Theme.of(s).textTheme.titleLarge),
           ),
           for (final p in ClubPrice.values)
             ListTile(
               selected: c.open && p == c.price,
               leading: const Icon(Icons.card_membership_rounded),
-              title: Text(l.clubPriceLine(fmt.money(p.monthCents),
-                  fmt.compact(c.estimates[p] ?? 0))),
+              title: Text(l.clubPriceLine(
+                  fmt.money(p.monthCents), fmt.compact(c.estimates[p] ?? 0))),
               onTap: () => Navigator.pop(s, p),
             ),
           const SizedBox(height: 8),
@@ -444,8 +447,8 @@ class _CareerScreenState extends State<CareerScreen> {
     );
     if (pick == null || !mounted) return;
     try {
-      await career.act(
-          opening ? Cmd.openFanClub(pick) : Cmd.setClubPrice(pick));
+      await career
+          .act(opening ? Cmd.openFanClub(pick) : Cmd.setClubPrice(pick));
       if (mounted && opening) {
         showInfo(context, l.clubOpened, icon: Icons.card_membership_rounded);
       }
@@ -502,8 +505,8 @@ class _CareerScreenState extends State<CareerScreen> {
               title: Text(fmt.distributor(d)),
               subtitle: Text([
                 fmt.distributorHint(d),
-                l.distributorTerms((d.share * 100).round(),
-                    (d.reach * 100).round()),
+                l.distributorTerms(
+                    (d.share * 100).round(), (d.reach * 100).round()),
                 if (d == Distributor.deal)
                   l.distributorAdvance(fmt.money(v.dealAdvanceCents)),
                 if (v.year < d.fromYear) l.distributorFrom(d.fromYear),
@@ -516,8 +519,7 @@ class _CareerScreenState extends State<CareerScreen> {
           if (v.current == Distributor.deal && v.unrecoupedCents > 0)
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(
-                  l.distributorRecoup(fmt.money(v.unrecoupedCents)),
+              child: Text(l.distributorRecoup(fmt.money(v.unrecoupedCents)),
                   style: Theme.of(c).textTheme.bodySmall),
             ),
         ]),
@@ -536,6 +538,102 @@ class _CareerScreenState extends State<CareerScreen> {
   }
 
   /// Sells the catalog after asking (docs K153).
+  /// A member leaves and the player goes on as them (docs K191).
+  Future<void> _goSolo(MemberView m) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final GoSoloView v;
+    try {
+      v = await career.read(Cmd.goSoloPreview(m.index));
+    } catch (e) {
+      if (mounted) showError(context, e);
+      return;
+    }
+    if (!mounted) return;
+    if (v.block == GoSoloBlock.onTour) {
+      showInfo(context, l.errorOnTour, icon: Icons.tour_outlined);
+      return;
+    }
+    final group = career.player.name;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l.goSoloTitle(v.name)),
+        content: SingleChildScrollView(
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final line in [
+                  l.goSoloIntro(v.name),
+                  l.goSoloFans(
+                      v.name, fmt.compact(v.fans), (v.fame * 100).round()),
+                  v.groupBreaksUp
+                      ? l.goSoloGroupEnds(group)
+                      : l.goSoloGroupOn(group, fmt.compact(v.groupFans)),
+                  l.goSoloRecords,
+                  if (v.scheduled > 0) l.goSoloScheduled(v.scheduled),
+                  if (v.fanClub) l.goSoloClub,
+                ])
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(line),
+                  ),
+              ]),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(d, false), child: Text(l.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, true),
+              child: Text(l.goSoloConfirm)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await career.act(Cmd.goSolo(m.index));
+      if (mounted) {
+        showInfo(context, l.goSoloDone(v.name), icon: Icons.person_rounded);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  Widget _formerSection((ArtistView, bool) former) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final (g, ended) = former;
+    return Section(
+      title: l.formerGroupSection,
+      icon: Icons.groups_2_outlined,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(g.name, style: const TextStyle(fontWeight: FontWeight.w800)),
+        Text(
+            ended
+                ? l.formerGroupEnded
+                : l.formerGroupLine(
+                    fmt.compact(g.coreFans), (g.fame * 100).round()),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+        const SizedBox(height: 4),
+        Text(
+            l.formerGroupTotals(fmt.compact(g.lifetimeStreams.total),
+                fmt.compact(g.lifetimeTotalUnits.total)),
+            style: const TextStyle(fontWeight: FontWeight.w600)),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            icon: const Icon(Icons.graphic_eq_rounded, size: 18),
+            label: Text(l.formerGroupPage),
+            onPressed: () => pushInCareer(context, ArtistPage(artistId: g.id)),
+          ),
+        ),
+      ]),
+    );
+  }
+
   Future<void> _sellCatalog(CatalogOfferView c) async {
     final l = context.l10n;
     final fmt = context.fmt;
@@ -675,6 +773,10 @@ class _CareerScreenState extends State<CareerScreen> {
           const SizedBox(height: 12),
           _clubSection(club),
         ],
+        if (_former case final f?) ...[
+          const SizedBox(height: 12),
+          _formerSection(f),
+        ],
         // Members' solo records and the player's features (docs K158).
         if (_members.isNotEmpty) ...[
           const SizedBox(height: 12),
@@ -704,8 +806,8 @@ class _CareerScreenState extends State<CareerScreen> {
                             style:
                                 const TextStyle(fontWeight: FontWeight.w700)),
                         subtitle: Text([
-                          l.memberAlbumLine(fmt.albumType(a.type),
-                              fmt.compact(a.firstWeek)),
+                          l.memberAlbumLine(
+                              fmt.albumType(a.type), fmt.compact(a.firstWeek)),
                           if (a.peak > 0) l.memberAlbumPeak(a.peak),
                         ].join(' · ')),
                         onTap: () => Navigator.push(
@@ -729,6 +831,16 @@ class _CareerScreenState extends State<CareerScreen> {
                                         state: career,
                                         member: m,
                                         songs: _vault))),
+                      ),
+                    ),
+                    // Leaving the group (docs K191).
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        icon:
+                            const Icon(Icons.person_outline_rounded, size: 18),
+                        label: Text(l.goSoloButton),
+                        onPressed: career.busy ? null : () => _goSolo(m),
                       ),
                     ),
                   ],
@@ -771,8 +883,8 @@ class _CareerScreenState extends State<CareerScreen> {
                   onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (_) =>
-                              SongDetailScreen(songId: w.songId, state: career))),
+                          builder: (_) => SongDetailScreen(
+                              songId: w.songId, state: career))),
                 ),
             ]),
           ),
@@ -905,8 +1017,8 @@ class _CareerScreenState extends State<CareerScreen> {
                   for (final t in FycTier.values)
                     OutlinedButton(
                       onPressed: () => _runFyc(t),
-                      child: Text(
-                          l.fycTier(_fycName(t), fmt.money(t.costCents))),
+                      child:
+                          Text(l.fycTier(_fycName(t), fmt.money(t.costCents))),
                     ),
                 ]),
             ],

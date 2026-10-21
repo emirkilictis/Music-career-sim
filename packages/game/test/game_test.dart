@@ -3618,6 +3618,143 @@ void main() {
       g.close();
     });
 
+    test('a member leaves the group and the player goes solo (K191)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2015,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              kind: ArtistKind.vocalGroup,
+              members: const ['Yuna', 'Mira', 'Jin', 'Sora']));
+      final slot = g.slotId;
+      final group = g.world.player!;
+      group.moneyCents = 1 << 36;
+      final released = <int>[];
+      for (var i = 0; i < 3; i++) {
+        group.creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.high).id;
+        g.releaseSingle(id);
+        released.add(id);
+        g.advanceWeeks(3, stop: SkipStop.never);
+      }
+      final vault = <int>[];
+      for (var i = 0; i < 3; i++) {
+        group.creativeEnergy = 100;
+        vault.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      // A single set for later: called off, its money back.
+      final sr = g.scheduleSingle(vault.last,
+          releaseWeek: g.week + 6, announceWeek: g.week);
+      g.openFanClub(ClubPrice.mid);
+      g.advanceWeek();
+      expect(g.members, hasLength(4));
+
+      final preview = g.goSoloPreview(1);
+      expect(preview.name, 'Mira');
+      expect(preview.block, isNull);
+      expect(preview.groupBreaksUp, isFalse);
+      expect(preview.scheduled, 1);
+      expect(preview.fanClub, isTrue);
+      final money = group.moneyCents + sr.paidCents;
+      final fans = group.coreFans, fame = group.fame;
+      final skills = group.skills.songwriting;
+      final energy = group.creativeEnergy;
+      final streamsBefore = g.world.playerCareerStreams;
+
+      g.goSolo(1);
+      final w = g.world;
+      final solo = w.player!;
+      expect(solo.id, isNot(group.id));
+      expect(solo.name, 'Mira');
+      expect(solo.kind, ArtistKind.solo);
+      expect(solo.tier, ArtistTier.player);
+      expect(solo.managedBy, -1);
+      expect(solo.moneyCents, money);
+      expect(solo.skills.songwriting, skills);
+      expect(solo.creativeEnergy, energy);
+      expect(solo.coreFans, closeTo(fans * GoSolo.takeFans, 1));
+      expect(solo.fame, closeTo(fame * GoSolo.takeFame, 1e-9));
+      expect(preview.fans, closeTo(solo.coreFans, 1));
+      expect(w.playerCareerStreams, closeTo(streamsBefore, 1));
+      expect(w.formerGroupId, group.id);
+      // The group goes on without her, as a rival after a break.
+      expect(group.tier, isNot(ArtistTier.player));
+      expect(group.members, ['Yuna', 'Jin', 'Sora']);
+      expect(group.coreFans, closeTo(fans * GoSolo.keepFans, 1));
+      expect(group.moneyCents, 0);
+      expect(group.isRetired, isFalse);
+      expect(group.nextEraWeek, w.week + GoSolo.groupBreakWeeks);
+      // Unreleased songs go with her; the group's records stay its own.
+      expect(w.playerSongIds.toSet(), vault.toSet());
+      for (final id in released) {
+        expect(w.songs[id].primaryArtistId, group.id);
+      }
+      expect(solo.scheduled, isEmpty);
+      expect(w.fanClub, isNull);
+      expect(g.members, isEmpty);
+      expect(() => g.goSolo(0), _code('notGroup'));
+      expect(() => g.goSoloPreview(0), _code('noMember'));
+
+      // Her first single, and the group back after its break.
+      solo.creativeEnergy = 100;
+      g.releaseSingle(vault.first);
+      final mid = solo.moneyCents;
+      g.advanceWeeks(GoSolo.groupBreakWeeks + 8, stop: SkipStop.never);
+      expect(solo.moneyCents, isNot(mid));
+      expect(w.songs[vault.first].lifetimeStreams, greaterThan(0));
+      expect(
+          w.albums.any((al) =>
+              al.artistId == group.id && al.releaseWeek > w.week - 20) ||
+              w.songs.any((s) =>
+                  s.primaryArtistId == group.id &&
+                  s.releasedWeek > w.week - 20),
+          isTrue);
+      for (final y in g.careerByYear()) {
+        expect(y.streams, greaterThanOrEqualTo(0));
+      }
+      final listeners = g.artistPage(solo.id).listenerStreams;
+      expect(listeners, greaterThan(0));
+      final ids = w.playerSongIds.toList();
+
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.world.playerArtistId, solo.id);
+      expect(g.world.formerGroupId, group.id);
+      expect(g.world.playerSongIds, ids);
+      expect(g.world.managedSongIds, isEmpty);
+      expect(g.world.playerCareerStreams,
+          closeTo(w.playerCareerStreams, 1));
+      expect(g.artistPage(solo.id).listenerStreams, closeTo(listeners, 1));
+      g.advanceWeek();
+      g.close();
+    });
+
+    test('a duo breaks up when one goes solo (K191)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2012,
+              kind: ArtistKind.band,
+              members: const ['Ana', 'Leo']));
+      final duo = g.world.player!;
+      expect(g.goSoloPreview(0).groupBreaksUp, isTrue);
+      g.goSolo(0);
+      expect(g.world.player!.name, 'Ana');
+      expect(duo.isRetired, isTrue);
+      expect(g.world.activeArtistIds, isNot(contains(duo.id)));
+      g.advanceWeeks(4, stop: SkipStop.never);
+      g.close();
+    });
+
+    test('nobody leaves a solo career (K191)', () {
+      final g = GameSession.start(slots, _setup());
+      expect(() => g.goSolo(0), _code('notGroup'));
+      expect(() => g.goSoloPreview(0), _code('noMember'));
+      g.close();
+    });
+
     test('the editors\' This Is list (K189)', () {
       var g = GameSession.start(
           slots,
