@@ -2105,12 +2105,16 @@ class TourRequest {
     this.priceFactor = 1.0,
     this.production = TourProduction.standard,
     this.openerId = -1,
+    this.reunion = false,
   });
   final List<TourLeg> legs;
   final String name;
   final double priceFactor;
   final TourProduction production;
   final int openerId;
+
+  /// Played as the old group on its reunion (docs K196).
+  final bool reunion;
 }
 
 /// One leg as planned: its expected turnout.
@@ -2166,7 +2170,7 @@ class TourPlanView {
   final TourRequest request;
 
   /// Why it cannot start: 'onTour', 'tourMarkets', 'tourTooBig',
-  /// 'tourShows' (empty = ready).
+  /// 'tourShows', 'noReunion', 'reunionTourLong' (empty = ready).
   final List<String> problems;
   final TourWeek estimate;
 

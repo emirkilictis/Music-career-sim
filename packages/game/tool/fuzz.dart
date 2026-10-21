@@ -189,6 +189,10 @@ void main(List<String> args) {
           }
           g.startReunion();
         },
+        'reunionTour': () => g.startTour(TourRequest(legs: [
+              TourLeg(_pick(r, TourMarket.values), _pick(r, TourKind.values),
+                  1 + r.nextInt(20))
+            ], reunion: true)),
         'reunionSingle': () => g.releaseReunionSingle(song()),
         'reunionAlbum': () => g.releaseReunionAlbum('R$wk',
             (vault..shuffle(r)).take(3 + r.nextInt(6)).toList(),

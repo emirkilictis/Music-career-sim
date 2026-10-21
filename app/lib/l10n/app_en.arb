@@ -6290,6 +6290,24 @@
     }
   },
   "reunionAlbumButton": "Release as the group",
+  "reunionTourButton": "Reunion tour",
+  "reunionTourTitle": "{group} Reunion Tour",
+  "@reunionTourTitle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionTourHint": "You go on the road as {group}. The group's fans buy the tickets, and a reunion is an event: people who drifted away come back for one night. You keep the money; most fans won go to the group. The tour has to finish within the reunion's year.",
+  "@reunionTourHint": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "tourProblemReunionLong": "The tour would run past the end of the reunion. Play fewer nights.",
   "guestSection": "Your features",
   "guestHint": "Your verses on others' songs chart under their name; {share}% of what they earn comes to you.",
   "@guestHint": {

@@ -1010,6 +1010,10 @@ void main() {
     await Scrollable.ensureVisible(tester.element(on), alignment: 0.3);
     await tester.pumpAndSettle();
     await shot(tester, '15z_reunion_on');
+    // The reunion tour (docs K196).
+    await tester.tap(_ci('Reunion tour'));
+    await tester.pumpAndSettle();
+    await shot(tester, '15za_reunion_tour');
   });
 }
 

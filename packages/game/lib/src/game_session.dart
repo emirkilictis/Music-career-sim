@@ -531,7 +531,8 @@ class GameSession {
           legs: [TourLeg(m, leg.kind, n)],
           priceFactor: r.priceFactor,
           production: r.production,
-          openerId: r.openerId));
+          openerId: r.openerId,
+          reunion: r.reunion));
       if (v.legs.single.fill >= suggestedFill) best = n;
     }
     return best;
@@ -551,7 +552,8 @@ class GameSession {
         name: r.name,
         priceFactor: r.priceFactor,
         production: r.production,
-        openerId: opener?.id ?? -1);
+        openerId: opener?.id ?? -1,
+        reunionOf: _reunionOf(r));
     final (e, each) = Tours.estimate(world, _p, t);
     final legViews = <TourLegView>[];
     for (var i = 0; i < legs.length; i++) {
@@ -586,16 +588,33 @@ class GameSession {
     );
   }
 
-  List<String> _tourProblems(TourRequest r) => [
-        if (_p.tour != null) 'onTour',
-        if (r.legs.isEmpty ||
-            r.legs.map((l) => l.market).toSet().length != r.legs.length)
-          'tourMarkets',
-        if (r.legs.any((l) => _p.coreFans < l.kind.minFans)) 'tourTooBig',
-        if (r.legs.any(
-            (l) => l.shows < 1 || l.shows > Tours.maxShows(l.market, l.kind)))
-          'tourShows',
-      ];
+  List<String> _tourProblems(TourRequest r) {
+    final reunionOn = r.reunion && Reunions.active(world);
+    final fans =
+        reunionOn ? Reunions.group(world)!.coreFans : _p.coreFans;
+    final showsOk = r.legs.every(
+        (l) => l.shows >= 1 && l.shows <= Tours.maxShows(l.market, l.kind));
+    return [
+      if (_p.tour != null) 'onTour',
+      if (r.reunion && !reunionOn) 'noReunion',
+      if (r.legs.isEmpty ||
+          r.legs.map((l) => l.market).toSet().length != r.legs.length)
+        'tourMarkets',
+      if (r.legs.any((l) => fans < l.kind.minFans)) 'tourTooBig',
+      if (!showsOk) 'tourShows',
+      // A reunion tour plays within the reunion's year (docs K196).
+      if (reunionOn &&
+          showsOk &&
+          r.legs.isNotEmpty &&
+          Tours.schedule(world, r.legs, world.week, r.priceFactor).last.week >=
+              world.reunionEndWeek)
+        'reunionTourLong',
+    ];
+  }
+
+  /// The group a reunion tour plays as (-1: the player's own).
+  int _reunionOf(TourRequest r) =>
+      r.reunion && Reunions.active(world) ? world.formerGroupId : -1;
 
   // ------------------------------------------------------------ festivals
 
@@ -905,12 +924,16 @@ class GameSession {
         !Tours.openerCandidates(world, _p).any((o) => o.id == r.openerId)) {
       throw GameException('tourOpener', 'That act cannot open for you');
     }
+    final reunionOf = _reunionOf(r);
     final t = Tours.plan(world, _p,
         legs: r.legs,
-        name: r.name,
+        name: r.name.trim().isEmpty && reunionOf >= 0
+            ? '${world.artists[reunionOf].name} Reunion Tour'
+            : r.name,
         priceFactor: r.priceFactor,
         production: r.production,
-        openerId: r.openerId);
+        openerId: r.openerId,
+        reunionOf: reunionOf);
     Tours.start(world, _p, t);
     Milestone.firstTour.mark(world, _p);
     if (t.kind == TourKind.stadium) Milestone.stadiumTour.mark(world, _p);

@@ -1143,7 +1143,8 @@ class Simulator {
       toured = Tours.playWeek(w, me);
       if (toured != null) {
         w.tourRecords.add(TourRecord(
-          artistId: me.id,
+          // A reunion tour goes down as the group's (docs K196).
+          artistId: toured.reunionOf >= 0 ? toured.reunionOf : me.id,
           name: toured.name,
           startWeek: toured.startWeek,
           endWeek: toured.endWeek,

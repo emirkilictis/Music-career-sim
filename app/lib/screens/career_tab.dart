@@ -22,6 +22,7 @@ import 'releases_tab.dart';
 import 'game_shell.dart';
 import 'song_detail_screen.dart';
 import 'streamify/artist_page.dart';
+import 'tour_screen.dart';
 
 /// Career summary: totals by region, #1s, year by year, all songs.
 class CareerScreen extends StatefulWidget {
@@ -849,6 +850,17 @@ class _CareerScreenState extends State<CareerScreen> {
             icon: const Icon(Icons.music_note_rounded, size: 18),
             label: Text(l.reunionSingle(r.groupName)),
             onPressed: career.busy ? null : () => _reunionSingle(r),
+          ),
+          // The reunion tour (docs K196).
+          TextButton.icon(
+            icon: const Icon(Icons.stadium_rounded, size: 18),
+            label: Text(l.reunionTourButton),
+            onPressed: career.busy || career.player.tour != null
+                ? null
+                : () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => TourScreen(state: career, reunion: r))),
           ),
           TextButton.icon(
             icon: const Icon(Icons.album_outlined, size: 18),

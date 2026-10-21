@@ -4052,6 +4052,47 @@ void main() {
       g.close();
     });
 
+    test('the reunion tour sells on the old group\'s fans (K196)', () {
+      final g = newGroup();
+      final band = g.world.player!;
+      g.goSolo(1);
+      final w = g.world;
+      final solo = w.player!;
+      const legs = [TourLeg(TourMarket.usa, TourKind.arena, 12)];
+      final own = g.tourPreview(const TourRequest(legs: legs));
+      // Not without a reunion on.
+      expect(g.tourPreview(const TourRequest(legs: legs, reunion: true))
+          .problems, contains('noReunion'));
+      w.playerSinceWeek -= Reunions.gapWeeks + 5 * 52;
+      g.startReunion();
+      final reunion =
+          g.tourPreview(const TourRequest(legs: legs, reunion: true));
+      expect(reunion.problems, isEmpty);
+      expect(reunion.estimate.tickets, greaterThan(own.estimate.tickets));
+      // It has to fit in the reunion's year.
+      expect(
+          g.tourPreview(TourRequest(legs: [
+            for (final m in TourMarket.values)
+              TourLeg(m, TourKind.arena, Tours.maxShows(m, TourKind.arena))
+          ], reunion: true)).problems,
+          contains('reunionTourLong'));
+
+      final money = solo.moneyCents;
+      final groupFans = band.coreFans;
+      g.startTour(const TourRequest(legs: legs, reunion: true));
+      expect(solo.tour!.reunionOf, band.id);
+      expect(solo.tour!.name, '${band.name} Reunion Tour');
+      while (solo.tour != null) {
+        g.advanceWeek();
+      }
+      expect(solo.moneyCents, greaterThan(money));
+      expect(band.coreFans, greaterThan(groupFans * 0.98));
+      final record = w.tourRecords.last;
+      expect(record.artistId, band.id);
+      expect(record.tickets, greaterThan(0));
+      g.close();
+    });
+
     test('a group that ended comes back for the reunion only (K194)', () {
       final g = GameSession.start(
           slots,

@@ -11,8 +11,11 @@ import '../widgets/common.dart';
 /// shows each, ticket price, production, an opening act, a name; then the
 /// expected numbers and the schedule night by night.
 class TourScreen extends StatefulWidget {
-  const TourScreen({super.key, required this.state});
+  const TourScreen({super.key, required this.state, this.reunion});
   final CareerState state;
+
+  /// Planning the reunion tour with the old group (docs K196).
+  final ReunionView? reunion;
 
   @override
   State<TourScreen> createState() => _TourScreenState();
@@ -68,7 +71,7 @@ class _TourScreenState extends State<TourScreen> {
 
   /// The biggest venues the player can fill, about a third of the market.
   _LegDraft _defaultLeg(TourMarket m) {
-    final fans = widget.state.player.coreFans;
+    final fans = _fans;
     final kind = TourKind.values
         .lastWhere((k) => fans >= k.minFans, orElse: () => TourKind.club);
     return _LegDraft(kind, _defaultShows(m, kind));
@@ -77,7 +80,12 @@ class _TourScreenState extends State<TourScreen> {
   int _defaultShows(TourMarket m, TourKind k) =>
       (Tours.maxShows(m, k) / 3).round().clamp(1, Tours.maxShows(m, k));
 
+  /// The fans who buy the tickets: the group's on a reunion tour.
+  double get _fans =>
+      widget.reunion?.audience.fans ?? widget.state.player.coreFans;
+
   TourRequest get _request => TourRequest(
+        reunion: widget.reunion != null,
         name: _name.text,
         legs: [
           for (final e in _legs.entries)
@@ -161,6 +169,8 @@ class _TourScreenState extends State<TourScreen> {
       'onTour' => l.tourProblemOnTour,
       'tourMarkets' => l.tourProblemMarkets,
       'tourTooBig' => l.tourProblemTooBig,
+      'reunionTourLong' => l.tourProblemReunionLong,
+      'noReunion' => l.errorNoReunion,
       _ => l.tourProblemShows,
     };
   }
@@ -170,12 +180,22 @@ class _TourScreenState extends State<TourScreen> {
     final l = context.l10n;
     final fmt = context.fmt;
     final plan = _plan;
-    final fans = widget.state.player.coreFans;
+    final fans = _fans;
+    final reunion = widget.reunion;
     return Scaffold(
-      appBar: AppBar(title: Text(l.tourPlan)),
+      appBar: AppBar(
+          title: Text(reunion == null
+              ? l.tourPlan
+              : l.reunionTourTitle(reunion.groupName))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (reunion != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(l.reunionTourHint(reunion.groupName),
+                  style: TextStyle(color: AppColors.textMuted)),
+            ),
           TextField(
             controller: _name,
             maxLength: 40,

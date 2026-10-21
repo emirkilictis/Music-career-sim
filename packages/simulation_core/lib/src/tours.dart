@@ -280,6 +280,7 @@ class Tour {
     this.production = TourProduction.standard,
     this.openerId = -1,
     this.cut = Tours.artistCut,
+    this.reunionOf = -1,
     List<TourShow>? shows,
     this.tickets = 0,
     this.grossCents = 0,
@@ -303,6 +304,10 @@ class Tour {
 
   /// The artist's share of ticket money (better with a manager; K68).
   final double cut;
+
+  /// The group a reunion tour plays as (-1: the player's own tour; docs
+  /// K196).
+  final int reunionOf;
 
   /// Every night, in order.
   final List<TourShow> shows;
@@ -342,6 +347,7 @@ class Tour {
         'pr': production.index,
         'op': openerId,
         'cut': cut,
+        if (reunionOf >= 0) 'ro': reunionOf,
         'sh': [for (final s in shows) s.toJson()],
         't': tickets,
         'g': grossCents,
@@ -390,6 +396,7 @@ class Tour {
       production: TourProduction.values[j['pr'] as int],
       openerId: j['op'] as int,
       cut: d('cut'),
+      reunionOf: j['ro'] as int? ?? -1,
       shows: [
         for (final s in j['sh'] as List) TourShow.fromJson(s as List),
       ],
@@ -604,6 +611,7 @@ abstract final class Tours {
     double priceFactor = 1.0,
     TourProduction production = TourProduction.standard,
     int openerId = -1,
+    int reunionOf = -1,
   }) {
     final pf = priceFactor.clamp(minPriceFactor, maxPriceFactor).toDouble();
     return Tour(
@@ -614,9 +622,23 @@ abstract final class Tours {
       production: production,
       openerId: openerId,
       cut: cutFor(a),
+      reunionOf: reunionOf,
       shows: schedule(w, legs, w.week, pf),
     );
   }
+
+  /// A reunion tour is an event (docs K196): fans who drifted away buy a
+  /// ticket for one night with the old lineup.
+  static const reunionDraw = 1.6;
+
+  /// Of the fans a reunion tour makes, the player's own share; the rest
+  /// are the group's.
+  static const reunionSoloFans = 0.3;
+
+  /// Whose fans buy the tickets: the group on a reunion tour, else the
+  /// artist.
+  static Artist drawOf(World w, Artist a, Tour t) =>
+      t.reunionOf >= 0 ? w.artists[t.reunionOf] : a;
 
   /// People in [m] who would buy a ticket on this tour, over all its nights
   /// there: core fans most, casual listeners some (both fewer when tickets
@@ -658,8 +680,9 @@ abstract final class Tours {
       visitedWeight += m.cities[c].weight;
     }
     final reach = visitedWeight / m.totalWeight;
-    final pool = marketDemand(w, a, m, t.priceFactor, opener) *
+    final pool = marketDemand(w, drawOf(w, a, t), m, t.priceFactor, opener) *
         t.legs[s.leg].kind.draw *
+        (t.reunionOf >= 0 ? reunionDraw : 1) *
         (reach + 0.25 * (1 - reach));
     final nights = legShows.where((x) => x.city == s.city).length;
     final demand =
@@ -704,7 +727,7 @@ abstract final class Tours {
       gross += r.grossCents;
       merch += r.sold *
           merchPerHeadCents(GameTime.yearOf(s.week)) *
-          a.kind.merch *
+          drawOf(w, a, t).kind.merch *
           merchKeep;
       fans += fansFrom(a, t, r.sold);
       production += c.production;
@@ -738,7 +761,7 @@ abstract final class Tours {
       throw ArgumentError('Pick each market once');
     }
     for (final l in t.legs) {
-      if (a.coreFans < l.kind.minFans) {
+      if (drawOf(w, a, t).coreFans < l.kind.minFans) {
         throw StateError('Not enough fans for ${l.kind.name} venues');
       }
       if (l.shows < 1 || l.shows > maxShows(l.market, l.kind)) {
@@ -773,7 +796,7 @@ abstract final class Tours {
         final cost = c.production + c.opener + c.freight;
         final merch = r.sold *
             merchPerHeadCents(GameTime.yearOf(w.week)) *
-            a.kind.merch *
+            drawOf(w, a, t).kind.merch *
             merchKeep;
         final fans = fansFrom(a, t, r.sold);
         s.sold = r.sold;
@@ -784,7 +807,15 @@ abstract final class Tours {
         t.costCents += cost;
         t.merchCents += merch;
         t.fans += fans;
-        Audience.addFans(w, a, fans);
+        if (t.reunionOf >= 0) {
+          // A reunion night wins fans for the group, a few for the player.
+          final g = w.artists[t.reunionOf];
+          Audience.addFans(w, g, fans * (1 - reunionSoloFans));
+          Audience.addFans(w, a, fans * reunionSoloFans);
+          w.dirtyArtists.add(g.id);
+        } else {
+          Audience.addFans(w, a, fans);
+        }
         net += r.grossCents * t.cut + merch - cost;
         fill += r.sold / s.capacity;
         // The support act wins some of the crowd.
