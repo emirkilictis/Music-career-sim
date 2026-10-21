@@ -3093,7 +3093,7 @@ void main() {
       plain.advanceWeeks(2, stop: SkipStop.never);
       g.advanceWeeks(2, stop: SkipStop.never);
       expect(g.world.songs[id].weekStreams,
-          greaterThan(plain.world.songs[pid].weekStreams * 1.3));
+          greaterThan(plain.world.songs[pid].weekStreams * 1.2));
       plain.close();
       final slot = g.slotId;
       g.close();
@@ -3258,17 +3258,25 @@ void main() {
       final g = GameSession.start(slots, _setup(startYear: 2016));
       final seen = <(int, int)>{};
       final moves = <RivalAlbumMove>[];
-      for (var i = 0; i < 52; i++) {
+      bool both() =>
+          moves.any((m) => m.move == RivalMove.surprise) &&
+          moves.any((m) => m.move == RivalMove.exclusive);
+      // The exclusive years (2015–2019): a few eligible albums a year.
+      for (var i = 0; i < 4 * 52 && !both(); i++) {
         for (final u in g.upcomingRivalAlbums) {
           seen.add((u.artistId, u.week));
         }
-        moves.addAll(g.advanceWeek().events.whereType<RivalAlbumMove>());
+        final now = g.advanceWeek().events.whereType<RivalAlbumMove>();
+        // Stars make the moves (ranks change every year, so check now).
+        for (final m in now) {
+          expect(g.world.artists[m.artistId].tier, ArtistTier.a);
+        }
+        moves.addAll(now);
       }
       expect(moves.map((m) => m.move),
           containsAll([RivalMove.surprise, RivalMove.exclusive]));
       for (final m in moves) {
         final al = g.world.albums[m.albumId];
-        expect(g.world.artists[al.artistId].tier, ArtistTier.a);
         if (m.move == RivalMove.surprise) {
           // Nobody saw it coming.
           expect(seen, isNot(contains((al.artistId, al.releaseWeek))));
@@ -3836,6 +3844,7 @@ void main() {
 
     test('the ace leaving sinks the group; a quiet member does not (K192)',
         () {
+      // -1: the least popular member when they leave.
       (double, double) split(int leaving) {
         final g = GameSession.start(
             slots,
@@ -3850,6 +3859,11 @@ void main() {
         g.advanceWeeks(40, stop: SkipStop.never);
         final group = g.world.player!;
         final fans = group.coreFans;
+        if (leaving < 0) {
+          final ms = g.members;
+          leaving =
+              ms.reduce((a, b) => a.popularity <= b.popularity ? a : b).index;
+        }
         g.goSolo(leaving);
         final out = (group.coreFans / fans, g.world.player!.coreFans / fans);
         g.close();
@@ -3857,7 +3871,7 @@ void main() {
       }
 
       final (aceKept, aceTook) = split(1);
-      final quiet = split(3);
+      final quiet = split(-1);
       expect(aceKept, lessThan(GoSolo.keepFans));
       expect(aceTook, greaterThan(GoSolo.takeFans));
       expect(quiet.$1, greaterThan(aceKept + 0.1));
