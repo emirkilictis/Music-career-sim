@@ -4796,6 +4796,23 @@
       }
     }
   },
+  "canvasHint": "Canvas: a few seconds of looping video behind the song in Streamify. People skip it less and share it more, so the algorithm plays it more too.",
+  "canvasButton": "Add a Canvas ({cost})",
+  "@canvasButton": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "canvasOn": "Canvas on · {pct}% fewer skips",
+  "@canvasOn": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
   "sessRecord": "Record the session",
   "sessDone": "{title} (Streamify Session) + {cover} ({artist}) cover",
   "@sessDone": {

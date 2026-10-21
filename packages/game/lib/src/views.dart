@@ -302,6 +302,9 @@ class SongView {
         mood = s.mood < 0 ? null : Mood.values[s.mood],
         moodIn = s.moodIn,
         canMood = w.player != null && MoodPlaylists.can(w, w.player!, s),
+        canvas = s.canvasWeek >= 0,
+        canvasOpen = SongCanvas.open(w),
+        canCanvas = w.player != null && SongCanvas.can(w, w.player!, s),
         lifetimeRadio = s.lifetimeRadio,
         isPlayer = s.primaryArtistId == w.playerArtistId,
         video = s.videoBudget < 0 ? null : VideoBudget.values[s.videoBudget],
@@ -680,6 +683,11 @@ class SongView {
   final Mood? mood;
   final bool moodIn;
   final bool canMood;
+
+  /// Has a Canvas, the app has them, and it can get one now (docs K190).
+  final bool canvas;
+  final bool canvasOpen;
+  final bool canCanvas;
 
   /// Radio audience (listener impressions).
   final double lifetimeRadio;

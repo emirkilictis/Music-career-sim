@@ -341,8 +341,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           for (final o in options)
             ListTile(
               title: Text(_moodName(o.mood)),
-              subtitle: Text(l.moodOdds(
-                  (o.fit * 100).round(), (o.chance * 100).round())),
+              subtitle: Text(
+                  l.moodOdds((o.fit * 100).round(), (o.chance * 100).round())),
               onTap: () => Navigator.pop(c, o.mood),
             ),
         ]),
@@ -1222,6 +1222,33 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                             : l.moodPassed(_moodName(m))),
                       ),
                     ],
+                    // A looping visual in the app (docs K190).
+                    if (s.canvas) ...[
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Tag(l.canvasOn((SongCanvas.skipCut * 100).round()),
+                            icon: Icons.slow_motion_video_rounded,
+                            color: AppColors.mint),
+                      ),
+                    ] else if (s.canCanvas) ...[
+                      const SizedBox(height: 10),
+                      Text(l.canvasHint,
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 13)),
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: widget.state.busy
+                              ? null
+                              : () => _tool(Cmd.addCanvas(s.id)),
+                          icon: const Icon(Icons.slow_motion_video_rounded),
+                          label:
+                              Text(l.canvasButton(fmt.money(SongCanvas.costCents))),
+                        ),
+                      ),
+                    ],
                     // Independent curators (docs K160).
                     if (s.curatorWeek >= 0) ...[
                       const SizedBox(height: 10),
@@ -1551,7 +1578,8 @@ class _SongNumbersState extends State<_SongNumbers> {
               row(fmt.region(r), s.lifetimeStreams[r]),
           row(l.downloads, s.lifetimeDownloads),
           if (s.lifetimePhysical >= 1) row(l.cdSingles, s.lifetimePhysical),
-          if (s.lifetimeRingtones >= 1) row(l.ringtonesSold, s.lifetimeRingtones),
+          if (s.lifetimeRingtones >= 1)
+            row(l.ringtonesSold, s.lifetimeRingtones),
           if (!widget.salesFirst && hasStreams)
             row(l.radioAudience, s.lifetimeRadio),
           if (widget.salesFirst && hasStreams)

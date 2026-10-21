@@ -5,8 +5,13 @@ import 'codec.dart';
 /// (v1 has not shipped yet, so it is still being shaped.)
 final List<String> migrations = [
   _v1(), _v2, _v3, _v4, _v5, _v6, _v7, _v8, _v9, _v10, _v11, _v12, _v13,
-  _v14, _v15, _v16, _v17, _v18, _v19, _v20, _v21, _v22, _v23, _v24, _v25, _v26, _v27, _v28, _v29, _v30, _v31, _v32, _v33, _v34, _v35, _v36, _v37, _v38, _v39, _v40, _v41, _v42, _v43, _v44, _v45, _v46, _v47, _v48, _v49, _v50, //
+  _v14, _v15, _v16, _v17, _v18, _v19, _v20, _v21, _v22, _v23, _v24, _v25, _v26, _v27, _v28, _v29, _v30, _v31, _v32, _v33, _v34, _v35, _v36, _v37, _v38, _v39, _v40, _v41, _v42, _v43, _v44, _v45, _v46, _v47, _v48, _v49, _v50, _v51, //
 ];
+
+/// v51: Canvas (docs K190).
+const _v51 = '''
+ALTER TABLE song ADD COLUMN canvas INTEGER;
+''';
 
 /// v50: mood playlists (docs K186).
 const _v50 = '''

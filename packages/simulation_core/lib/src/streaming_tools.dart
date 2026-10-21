@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'actions.dart';
+import 'canvas.dart';
 import 'config/charts.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
@@ -325,7 +326,9 @@ abstract final class StreamingTools {
   /// Share of listeners who skip [s] early: good, catchy songs are
   /// played through (docs K119).
   static double skipRate(Song s) =>
-      (0.6 - 0.45 * s.quality / 100 - 0.15 * s.commercial).clamp(0.1, 0.7);
+      (0.6 - 0.45 * s.quality / 100 - 0.15 * s.commercial -
+              SongCanvas.skipCutOf(s))
+          .clamp(0.1, 0.7);
 
   /// Autoplay's lift for [s] [age] weeks after release: it plays songs
   /// people finish, and less as they get old (docs K96, K119).

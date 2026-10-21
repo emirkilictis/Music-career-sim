@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'actions.dart';
 import 'ai.dart';
 import 'audience.dart';
+import 'canvas.dart';
 import 'awards.dart';
 import 'brands.dart';
 import 'social.dart';
@@ -408,7 +409,8 @@ class Simulator {
           s.autoplay.lift * StreamingTools.autoplayLift(c, s, promoAge) +
               StreamingTools.releaseRadarLift(year, promoAge) +
               StreamingTools.discoverLift(w, s, w.week) +
-              StreamingTools.preSaveLift(s, p, promoAge);
+              StreamingTools.preSaveLift(s, p, promoAge) +
+              SongCanvas.liftOf(s);
       final videoLift = s.videoPower * videoEra;
       final lifts =
           hypeLift + womLift + listLift + versionLift + algoLift + videoLift;

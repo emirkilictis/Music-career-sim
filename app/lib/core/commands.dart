@@ -227,6 +227,8 @@ abstract final class Cmd {
 
   /// The Artist Pick (docs K185).
   static SessionCmd<PickView> artistPick() => (s) => s.artistPick;
+  static SessionCmd<void> addCanvas(int songId) =>
+      (s) => s.addCanvas(songId);
   static SessionCmd<ThisIsView> thisIs(int artistId) =>
       (s) => s.thisIs(artistId);
   static SessionCmd<void> setArtistPick(PickKind kind, int id) =>

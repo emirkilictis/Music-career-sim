@@ -2190,6 +2190,17 @@ class GameSession {
     return inList;
   }
 
+  /// Gives song [songId] a Canvas (docs K190).
+  void addCanvas(int songId) {
+    final s = _ownSong(songId);
+    if (!SongCanvas.can(world, _p, s)) {
+      throw GameException('noCanvas', 'Not this song now');
+    }
+    _requireMoney(SongCanvas.costCents);
+    SongCanvas.add(world, _p, s);
+    _saveNow();
+  }
+
   /// The Artist Pick (docs K185).
   PickView get artistPick => PickView.of(world, _p);
 

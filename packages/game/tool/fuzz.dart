@@ -173,6 +173,7 @@ void main(List<String> args) {
           if (d.isNotEmpty) g.releaseDraft(_pick(r, d).id);
         },
         'scrap': () => g.scrapSong(song()),
+        'canvas': () => g.addCanvas(song()),
         'albumMarquee': () => g.runAlbumMarquee(album()),
         'memberSolo': () => g.releaseMemberSolo(r.nextInt(4), song()),
         'memberAlbum': () => g.releaseMemberAlbum(r.nextInt(4), 'M$wk',

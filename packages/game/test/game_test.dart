@@ -3707,6 +3707,56 @@ void main() {
       g.close();
     });
 
+    test('a Canvas makes a song skipped less and played more (K190)', () {
+      (double, GameSession, int) run({bool canvas = false}) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2020,
+                premium: true,
+                tier: StartTier.risingStar,
+                money: StartMoney.millionaire));
+        g.world.player!.creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.high, genres: [0]).id;
+        final skip = g.song(id).skipRate;
+        expect(g.song(id).canCanvas, isTrue);
+        if (canvas) {
+          final money = g.world.player!.moneyCents;
+          g.addCanvas(id);
+          expect(g.world.player!.moneyCents, money - SongCanvas.costCents);
+          expect(g.song(id).canvas, isTrue);
+          expect(g.song(id).canCanvas, isFalse);
+          expect(g.song(id).skipRate, closeTo(skip - SongCanvas.skipCut, 1e-9));
+          expect(() => g.addCanvas(id), _code('noCanvas'));
+        }
+        g.setAutoplayLevel(id, AutoplayLevel.standard);
+        g.releaseSingle(id);
+        var streams = 0.0;
+        for (var i = 0; i < 8; i++) {
+          g.advanceWeek();
+          streams += g.world.songs[id].weekStreams;
+        }
+        return (streams, g, id);
+      }
+
+      final (plain, g1, _) = run();
+      g1.close();
+      final (withCanvas, g2, id) = run(canvas: true);
+      final slot = g2.slotId;
+      g2.close();
+      expect(withCanvas, greaterThan(plain * 1.015));
+      final again = GameSession.resume(slots, slot);
+      expect(again.song(id).canvas, isTrue);
+      again.close();
+      // Not before the app had them.
+      final old = GameSession.start(slots, _setup(startYear: 2017));
+      old.world.player!.creativeEnergy = 100;
+      final o = old.writeSong(budget: BudgetTier.low).id;
+      expect(old.song(o).canvasOpen, isFalse);
+      expect(() => old.addCanvas(o), _code('noCanvas'));
+      old.close();
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;
