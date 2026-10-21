@@ -24,6 +24,9 @@ import 'song_detail_screen.dart';
 import 'streamify/artist_page.dart';
 import 'tour_screen.dart';
 
+/// The career tab's parts.
+enum _CareerPage { me, business, stage, group, records }
+
 /// Career summary: totals by region, #1s, year by year, all songs.
 class CareerScreen extends StatefulWidget {
   const CareerScreen({super.key, this.embedded = false});
@@ -36,6 +39,51 @@ class CareerScreen extends StatefulWidget {
 }
 
 class _CareerScreenState extends State<CareerScreen> {
+  /// Which part of the career is on screen (the tab was one long page).
+  _CareerPage _page = _CareerPage.me;
+
+  bool get _hasGroup => _members.isNotEmpty || _former != null;
+
+  List<Widget> _on(_CareerPage page, List<Widget> items) {
+    var shown = _page;
+    if (shown == _CareerPage.group && !_hasGroup) shown = _CareerPage.me;
+    return shown == page ? items : const [];
+  }
+
+  /// The career's parts: me, business, stage, group, records.
+  Widget _pageBar() {
+    final l = context.l10n;
+    final pages = [
+      (_CareerPage.me, l.careerPageMe, Icons.person_outline_rounded),
+      (_CareerPage.business, l.careerPageBusiness, Icons.work_outline_rounded),
+      (_CareerPage.stage, l.careerPageStage, Icons.stadium_outlined),
+      if (_hasGroup)
+        (_CareerPage.group, l.careerPageGroup, Icons.groups_outlined),
+      (_CareerPage.records, l.careerPageRecords, Icons.album_outlined),
+    ];
+    final shown =
+        _page == _CareerPage.group && !_hasGroup ? _CareerPage.me : _page;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(children: [
+          for (final (page, label, icon) in pages)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                avatar: Icon(icon, size: 18),
+                label: Text(label),
+                visualDensity: VisualDensity.compact,
+                selected: shown == page,
+                onSelected: (_) => setState(() => _page = page),
+              ),
+            ),
+        ]),
+      ),
+    );
+  }
+
   List<CareerYear> _years = const [];
   List<SongView> _songs = const [];
 
@@ -1032,492 +1080,513 @@ class _CareerScreenState extends State<CareerScreen> {
     final list = ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const SkillsSection(),
-        const SizedBox(height: 12),
-        const MilestonesSection(),
-        const SizedBox(height: 12),
-        const TourSection(),
-        const SizedBox(height: 12),
-        const FestivalSection(),
-        const SizedBox(height: 12),
-        const ManagerSection(),
-        const SizedBox(height: 12),
-        Section(
-          title: l.labelSection,
-          icon: Icons.album_outlined,
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(fmt.labelName(p.label),
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-            Text(
-                p.label == Label.independent
-                    ? fmt.labelKind(p.label)
-                    : p.contractAlbumsLeft > 0
-                        ? l.labelOwed(
-                            fmt.labelName(p.label), p.contractAlbumsLeft)
-                        : l.labelFree,
-                style: TextStyle(color: AppColors.textMuted)),
-            // How an independent's music gets out (docs K157).
-            if (p.label == Label.independent) ...[
-              const SizedBox(height: 6),
-              Text(l.distributorLine(fmt.distributor(p.distributor)),
-                  style: const TextStyle(fontWeight: FontWeight.w700)),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: _distribution,
-                  icon: const Icon(Icons.local_shipping_outlined),
-                  label: Text(l.distributorChange),
-                ),
-              ),
-            ],
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => LabelsScreen(state: career))),
-                icon: const Icon(Icons.handshake_outlined),
-                label: Text(l.labelsButton),
-              ),
-            ),
-          ]),
-        ),
-        // Record money by source (docs K145).
-        if (_income case final income? when income.total >= 100) ...[
+        _pageBar(),
+        ..._on(_CareerPage.me, [
+          const SkillsSection(),
           const SizedBox(height: 12),
-          IncomeCard(income: income, title: l.incomeCareerTitle),
-        ],
-        // Selling the catalog (docs K153).
-        if (_catalog case final c? when c.open && c.offerCents > 0) ...[
+          const MilestonesSection(),
+          const SizedBox(height: 12),
           const SizedBox(height: 12),
           Section(
-            title: l.catalogTitle,
-            icon: Icons.account_balance_outlined,
+            title: l.artistPhotos,
+            child: ArtistPhotosSection(artistId: p.id, name: p.name),
+          ),
+        ]),
+        ..._on(_CareerPage.business, [
+          const ManagerSection(),
+          const SizedBox(height: 12),
+          Section(
+            title: l.labelSection,
+            icon: Icons.album_outlined,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(fmt.labelName(p.label),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w800)),
+                  Text(
+                      p.label == Label.independent
+                          ? fmt.labelKind(p.label)
+                          : p.contractAlbumsLeft > 0
+                              ? l.labelOwed(
+                                  fmt.labelName(p.label), p.contractAlbumsLeft)
+                              : l.labelFree,
+                      style: TextStyle(color: AppColors.textMuted)),
+                  // How an independent's music gets out (docs K157).
+                  if (p.label == Label.independent) ...[
+                    const SizedBox(height: 6),
+                    Text(l.distributorLine(fmt.distributor(p.distributor)),
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: _distribution,
+                        icon: const Icon(Icons.local_shipping_outlined),
+                        label: Text(l.distributorChange),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => LabelsScreen(state: career))),
+                      icon: const Icon(Icons.handshake_outlined),
+                      label: Text(l.labelsButton),
+                    ),
+                  ),
+                ]),
+          ),
+          // Record money by source (docs K145).
+          if (_income case final income? when income.total >= 100) ...[
+            const SizedBox(height: 12),
+            IncomeCard(income: income, title: l.incomeCareerTitle),
+          ],
+          // Selling the catalog (docs K153).
+          if (_catalog case final c? when c.open && c.offerCents > 0) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.catalogTitle,
+              icon: Icons.account_balance_outlined,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                        l.catalogLine(c.songs, fmt.money(c.yearCents.round()),
+                            c.multiple.round()),
+                        style: TextStyle(color: AppColors.textMuted)),
+                    const SizedBox(height: 8),
+                    FilledButton.icon(
+                      onPressed: () => _sellCatalog(c),
+                      icon: const Icon(Icons.sell_outlined),
+                      label: Text(l.catalogSell(fmt.money(c.offerCents))),
+                    ),
+                  ]),
+            ),
+          ],
+          // Documentaries (docs K172).
+          if (_doc case final doc?
+              when doc.block != DocBlock.tooEarly || doc.docs.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _docSection(doc),
+          ],
+          // The player's own label (docs K169).
+          if (_label case final label?) ...[
+            const SizedBox(height: 12),
+            _labelSection(label),
+          ],
+          // The paid fan club (docs K164).
+          if (_club case final club?) ...[
+            const SizedBox(height: 12),
+            _clubSection(club),
+          ],
+        ]),
+        ..._on(_CareerPage.stage, [
+          const TourSection(),
+          const SizedBox(height: 12),
+          const FestivalSection(),
+          const SizedBox(height: 12),
+        ]),
+        ..._on(_CareerPage.group, [
+          if (_former case final f?) ...[
+            const SizedBox(height: 12),
+            _formerSection(f),
+          ],
+          // Members' solo records and the player's features (docs K158).
+          if (_members.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.membersSection,
+              icon: Icons.groups_outlined,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(l.membersHint,
+                        style: TextStyle(color: AppColors.textMuted)),
+                    const SizedBox(height: 6),
+                    Text(l.lineupHint,
+                        style: TextStyle(color: AppColors.textMuted)),
+                    if (_lineup case final v?) ..._lineSplit(v),
+                    for (final m in _members) ...[
+                      const SizedBox(height: 14),
+                      Text(m.name,
+                          style: const TextStyle(fontWeight: FontWeight.w800)),
+                      ..._lineupLines(m),
+                      Text(
+                          m.artistId < 0
+                              ? l.membersNoSolo
+                              : l.memberFans(fmt.compact(m.fans)),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5)),
+                      for (final a in m.albums)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.album_outlined),
+                          title: Text(a.title,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700)),
+                          subtitle: Text([
+                            l.memberAlbumLine(fmt.albumType(a.type),
+                                fmt.compact(a.firstWeek)),
+                            if (a.peak > 0) l.memberAlbumPeak(a.peak),
+                          ].join(' · ')),
+                          onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => AlbumDetailScreen(
+                                      albumId: a.id, state: career))),
+                        ),
+                      for (final w in m.songs) _creditTile(w, career),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          icon: const Icon(Icons.album_outlined, size: 18),
+                          label: Text(l.memberAlbumButton),
+                          onPressed: career.busy
+                              ? null
+                              : () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (c) => SideAlbumScreen.member(c,
+                                          state: career,
+                                          member: m,
+                                          songs: _vault))),
+                        ),
+                      ),
+                      // The label's push and the member's roles (docs K192).
+                      Wrap(spacing: 4, children: [
+                        TextButton.icon(
+                          icon: Icon(
+                              m.focused
+                                  ? Icons.star_rounded
+                                  : Icons.star_outline_rounded,
+                              size: 18),
+                          label:
+                              Text(m.focused ? l.memberUnfocus : l.memberFocus),
+                          onPressed: career.busy
+                              ? null
+                              : () => _act(
+                                  Cmd.setMemberFocus(m.focused ? -1 : m.index)),
+                        ),
+                        TextButton.icon(
+                          icon: const Icon(Icons.badge_outlined, size: 18),
+                          label: Text(l.memberRolesButton),
+                          onPressed: career.busy ? null : () => _editRoles(m),
+                        ),
+                        // A morale bonus (docs K195).
+                        if (_lineup case final v?)
+                          TextButton.icon(
+                            icon: const Icon(Icons.favorite_outline_rounded,
+                                size: 18),
+                            label: Text(l.memberCheer(fmt.money(v.cheerCents))),
+                            onPressed: career.busy || !v.canCheer
+                                ? null
+                                : () => _cheer(m),
+                          ),
+                      ]),
+                      // Leaving the group (docs K191).
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          icon: const Icon(Icons.person_outline_rounded,
+                              size: 18),
+                          label: Text(l.goSoloButton),
+                          onPressed: career.busy ? null : () => _goSolo(m),
+                        ),
+                      ),
+                    ],
+                  ]),
+            ),
+          ],
+        ]),
+        ..._on(_CareerPage.records, [
+          const SizedBox(height: 12),
+          Section(
+            title: l.careerTotals,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  StatGrid(tiles: [
+                    if (hasStreams)
+                      StatTile(
+                          label: l.streams,
+                          value: fmt.compact(p.lifetimeStreams.total)),
+                    StatTile(
+                        label: l.singleSales,
+                        value: fmt.compact(p.lifetimeSingleSales)),
+                    if (hasStreams)
+                      StatTile(
+                          label: l.singleUnits,
+                          value: fmt.compact(p.lifetimeSingleSales +
+                              p.lifetimeStreams.total / 150)),
+                    StatTile(
+                        label: l.totalUnits,
+                        value: fmt.compact(p.lifetimeTotalUnits.total)),
+                    StatTile(
+                        label: l.pureSales,
+                        value: fmt.compact(p.lifetimePure.total)),
+                    if (era == SalesEra.physical || !hasStreams)
+                      StatTile(
+                          label: l.radioAudience,
+                          value: fmt.compact(p.lifetimeRadio)),
+                    StatTile(label: l.coreFans, value: fmt.compact(p.coreFans)),
+                  ]),
+                  const SizedBox(height: 16),
+                  Text(l.byRegion, style: t.titleSmall),
+                  const SizedBox(height: 6),
+                  Table(
+                    columnWidths: const {0: FlexColumnWidth(1.4)},
+                    children: [
+                      TableRow(children: [
+                        const SizedBox(),
+                        if (hasStreams) Text(l.streams, style: t.labelSmall),
+                        Text(l.totalUnits, style: t.labelSmall),
+                      ]),
+                      for (final r in Region.values)
+                        TableRow(children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(fmt.region(r)),
+                          ),
+                          if (hasStreams)
+                            Text(fmt.compact(p.lifetimeStreams[r])),
+                          Text(fmt.compact(p.lifetimeTotalUnits[r])),
+                        ]),
+                    ],
+                  ),
+                ]),
+          ),
+          const SizedBox(height: 12),
+          Section(
+            title: l.discography,
+            icon: Icons.bar_chart_rounded,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(l.discographyHint,
+                      style: TextStyle(color: AppColors.textMuted)),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) =>
+                                  DiscographyScreen(state: career))),
+                      icon: const Icon(Icons.library_music_outlined),
+                      label: Text(l.discographyButton),
+                    ),
+                  ),
+                ]),
+          ),
+          const SizedBox(height: 12),
+          Section(
+            title: l.awardsSection,
+            icon: Icons.emoji_events_outlined,
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                      l.catalogLine(c.songs, fmt.money(c.yearCents.round()),
-                          c.multiple.round()),
-                      style: TextStyle(color: AppColors.textMuted)),
+                      p.awardNominations > 0
+                          ? l.awardsTally(p.awardWins, p.awardNominations)
+                          : l.awardsHint,
+                      style: TextStyle(
+                          color: p.awardNominations > 0
+                              ? AppColors.text
+                              : AppColors.textMuted,
+                          fontWeight: p.awardNominations > 0
+                              ? FontWeight.w700
+                              : FontWeight.w400)),
                   const SizedBox(height: 8),
-                  FilledButton.icon(
-                    onPressed: () => _sellCatalog(c),
-                    icon: const Icon(Icons.sell_outlined),
-                    label: Text(l.catalogSell(fmt.money(c.offerCents))),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => AwardsScreen(state: career))),
+                      icon: const Icon(Icons.emoji_events_outlined),
+                      label: Text(l.awardsButton),
+                    ),
                   ),
-                ]),
-          ),
-        ],
-        // Documentaries (docs K172).
-        if (_doc case final doc?
-            when doc.block != DocBlock.tooEarly || doc.docs.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          _docSection(doc),
-        ],
-        // The player's own label (docs K169).
-        if (_label case final label?) ...[
-          const SizedBox(height: 12),
-          _labelSection(label),
-        ],
-        // The paid fan club (docs K164).
-        if (_club case final club?) ...[
-          const SizedBox(height: 12),
-          _clubSection(club),
-        ],
-        if (_former case final f?) ...[
-          const SizedBox(height: 12),
-          _formerSection(f),
-        ],
-        // Members' solo records and the player's features (docs K158).
-        if (_members.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Section(
-            title: l.membersSection,
-            icon: Icons.groups_outlined,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(l.membersHint,
-                      style: TextStyle(color: AppColors.textMuted)),
-                  const SizedBox(height: 6),
-                  Text(l.lineupHint,
-                      style: TextStyle(color: AppColors.textMuted)),
-                  if (_lineup case final v?) ..._lineSplit(v),
-                  for (final m in _members) ...[
-                    const SizedBox(height: 14),
-                    Text(m.name,
+                  // For Your Consideration (docs K171).
+                  if (_fyc case final f? when f.phase != FycPhase.closed) ...[
+                    const Divider(height: 24),
+                    Text(l.fycTitle,
                         style: const TextStyle(fontWeight: FontWeight.w800)),
-                    ..._lineupLines(m),
                     Text(
-                        m.artistId < 0
-                            ? l.membersNoSolo
-                            : l.memberFans(fmt.compact(m.fans)),
+                        f.phase == FycPhase.nominations
+                            ? l.fycNominations(f.year)
+                            : l.fycVoting(f.year),
                         style: TextStyle(
                             color: AppColors.textMuted, fontSize: 12.5)),
-                    for (final a in m.albums)
+                    const SizedBox(height: 6),
+                    if (f.running case final r?)
+                      Text(l.fycRunning(_fycName(r)),
+                          style: const TextStyle(fontWeight: FontWeight.w700))
+                    else
+                      Wrap(spacing: 8, runSpacing: 8, children: [
+                        for (final t in FycTier.values)
+                          OutlinedButton(
+                            onPressed: () => _runFyc(t),
+                            child: Text(
+                                l.fycTier(_fycName(t), fmt.money(t.costCents))),
+                          ),
+                      ]),
+                  ],
+                ]),
+          ),
+          if (_honors case final h?) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.honorsSection,
+              icon: Icons.military_tech_outlined,
+              child: h.isEmpty
+                  ? EmptyNote(l.honorsEmpty)
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                          for (final line in [
+                            if (h.recordsHeld.isNotEmpty)
+                              l.honorsRecords(h.recordsHeld
+                                  .map((k) => fmt.recordName(k))
+                                  .join(' · ')),
+                            if (h.bestYearEndSong
+                                case (final r, final y, final t))
+                              l.honorsYearEndSong(r, y, t),
+                            if (h.bestYearEndAlbum
+                                case (final r, final y, final t))
+                              l.honorsYearEndAlbum(r, y, t),
+                            if (h.musicShowWins > 0)
+                              l.honorsMusicShow(
+                                  h.musicShowWins, h.tripleCrowns),
+                            if (h.bestArtistRank > 0)
+                              l.honorsArtistRank(
+                                  h.bestArtistRank, h.weeksTopArtist),
+                          ])
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 3),
+                              child: Text(line,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w600)),
+                            ),
+                        ]),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Section(
+            title: l.numberOnes,
+            child: Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final c in Charts.mainSongCharts)
+                Chip(
+                    label:
+                        Text('${fmt.chartShort(c)}: ${p.numberOneSingles[c]}')),
+              for (final c in Charts.mainAlbumCharts)
+                Chip(
+                    label:
+                        Text('${fmt.chartShort(c)}: ${p.numberOneAlbums[c]}')),
+            ]),
+          ),
+          const SizedBox(height: 12),
+          Section(
+            title: l.yearByYear,
+            child: _years.isEmpty
+                ? EmptyNote(l.yearByYearEmpty)
+                : Table(
+                    columnWidths: const {0: FlexColumnWidth(0.8)},
+                    children: [
+                      TableRow(children: [
+                        Text(l.year, style: t.labelSmall),
+                        if (hasStreams) Text(l.streams, style: t.labelSmall),
+                        Text(l.singleSales, style: t.labelSmall),
+                        Text(l.albumUnits, style: t.labelSmall),
+                        Text(l.fame, style: t.labelSmall),
+                      ]),
+                      for (final y in _years.reversed)
+                        TableRow(children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text('${y.year}'),
+                          ),
+                          if (hasStreams) Text(fmt.compact(y.streams)),
+                          Text(fmt.compact(y.singleSales)),
+                          Text(fmt.compact(y.units)),
+                          Text(fmt.percent(y.fame)),
+                        ]),
+                    ],
+                  ),
+          ),
+          const SizedBox(height: 12),
+          Section(
+            title: l.topSongs,
+            child: _songs.isEmpty
+                ? EmptyNote(l.noReleasesYet)
+                : Column(children: [
+                    for (final s in _songs.take(30))
                       ListTile(
+                        dense: true,
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.album_outlined),
-                        title: Text(a.title,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w700)),
+                        title: Text(s.title),
                         subtitle: Text([
-                          l.memberAlbumLine(
-                              fmt.albumType(a.type), fmt.compact(a.firstWeek)),
-                          if (a.peak > 0) l.memberAlbumPeak(a.peak),
-                        ].join(' · ')),
+                          fmt.songStatus(s),
+                          fmt.songSecondary(s, career.week),
+                        ].where((x) => x.isNotEmpty).join(' · ')),
+                        trailing: Text(fmt.songMain(s, career.week)),
                         onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => AlbumDetailScreen(
-                                    albumId: a.id, state: career))),
+                                builder: (_) => SongDetailScreen(
+                                    songId: s.id, state: career))),
                       ),
-                    for (final w in m.songs) _creditTile(w, career),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        icon: const Icon(Icons.album_outlined, size: 18),
-                        label: Text(l.memberAlbumButton),
-                        onPressed: career.busy
-                            ? null
-                            : () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (c) => SideAlbumScreen.member(c,
-                                        state: career,
-                                        member: m,
-                                        songs: _vault))),
-                      ),
-                    ),
-                    // The label's push and the member's roles (docs K192).
-                    Wrap(spacing: 4, children: [
-                      TextButton.icon(
-                        icon: Icon(
-                            m.focused
-                                ? Icons.star_rounded
-                                : Icons.star_outline_rounded,
-                            size: 18),
-                        label:
-                            Text(m.focused ? l.memberUnfocus : l.memberFocus),
-                        onPressed: career.busy
-                            ? null
-                            : () => _act(
-                                Cmd.setMemberFocus(m.focused ? -1 : m.index)),
-                      ),
-                      TextButton.icon(
-                        icon: const Icon(Icons.badge_outlined, size: 18),
-                        label: Text(l.memberRolesButton),
-                        onPressed: career.busy ? null : () => _editRoles(m),
-                      ),
-                      // A morale bonus (docs K195).
-                      if (_lineup case final v?)
-                        TextButton.icon(
-                          icon: const Icon(Icons.favorite_outline_rounded,
-                              size: 18),
-                          label: Text(l.memberCheer(fmt.money(v.cheerCents))),
-                          onPressed: career.busy || !v.canCheer
-                              ? null
-                              : () => _cheer(m),
-                        ),
-                    ]),
-                    // Leaving the group (docs K191).
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        icon:
-                            const Icon(Icons.person_outline_rounded, size: 18),
-                        label: Text(l.goSoloButton),
-                        onPressed: career.busy ? null : () => _goSolo(m),
-                      ),
-                    ),
-                  ],
-                ]),
-          ),
-        ],
-        if (_guest.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Section(
-            title: l.guestSection,
-            icon: Icons.mic_external_on_outlined,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(l.guestHint((Credits.guestShare * 100).round()),
-                      style: TextStyle(color: AppColors.textMuted)),
-                  for (final w in _guest) _creditTile(w, career),
-                ]),
-          ),
-        ],
-        // Songs written for others (docs K143).
-        if (_written.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Section(
-            title: l.writtenSection,
-            icon: Icons.edit_note_rounded,
-            child: Column(children: [
-              for (final w in _written)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(w.title,
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
-                  subtitle: Text([
-                    w.artistName,
-                    if (!w.released) l.writtenComing,
-                    if (w.peak > 0) l.writtenPeak(w.peak),
-                  ].join(' · ')),
-                  trailing: Text(fmt.money(w.earnedCents.round()),
-                      style: const TextStyle(fontWeight: FontWeight.w800)),
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => SongDetailScreen(
-                              songId: w.songId, state: career))),
-                ),
-            ]),
-          ),
-        ],
-        const SizedBox(height: 12),
-        Section(
-          title: l.artistPhotos,
-          child: ArtistPhotosSection(artistId: p.id, name: p.name),
-        ),
-        const SizedBox(height: 12),
-        Section(
-          title: l.careerTotals,
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            StatGrid(tiles: [
-              if (hasStreams)
-                StatTile(
-                    label: l.streams,
-                    value: fmt.compact(p.lifetimeStreams.total)),
-              StatTile(
-                  label: l.singleSales,
-                  value: fmt.compact(p.lifetimeSingleSales)),
-              if (hasStreams)
-                StatTile(
-                    label: l.singleUnits,
-                    value: fmt.compact(
-                        p.lifetimeSingleSales + p.lifetimeStreams.total / 150)),
-              StatTile(
-                  label: l.totalUnits,
-                  value: fmt.compact(p.lifetimeTotalUnits.total)),
-              StatTile(
-                  label: l.pureSales, value: fmt.compact(p.lifetimePure.total)),
-              if (era == SalesEra.physical || !hasStreams)
-                StatTile(
-                    label: l.radioAudience,
-                    value: fmt.compact(p.lifetimeRadio)),
-              StatTile(label: l.coreFans, value: fmt.compact(p.coreFans)),
-            ]),
-            const SizedBox(height: 16),
-            Text(l.byRegion, style: t.titleSmall),
-            const SizedBox(height: 6),
-            Table(
-              columnWidths: const {0: FlexColumnWidth(1.4)},
-              children: [
-                TableRow(children: [
-                  const SizedBox(),
-                  if (hasStreams) Text(l.streams, style: t.labelSmall),
-                  Text(l.totalUnits, style: t.labelSmall),
-                ]),
-                for (final r in Region.values)
-                  TableRow(children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text(fmt.region(r)),
-                    ),
-                    if (hasStreams) Text(fmt.compact(p.lifetimeStreams[r])),
-                    Text(fmt.compact(p.lifetimeTotalUnits[r])),
                   ]),
-              ],
-            ),
-          ]),
-        ),
-        const SizedBox(height: 12),
-        Section(
-          title: l.discography,
-          icon: Icons.bar_chart_rounded,
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(l.discographyHint,
-                style: TextStyle(color: AppColors.textMuted)),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => DiscographyScreen(state: career))),
-                icon: const Icon(Icons.library_music_outlined),
-                label: Text(l.discographyButton),
-              ),
-            ),
-          ]),
-        ),
-        const SizedBox(height: 12),
-        Section(
-          title: l.awardsSection,
-          icon: Icons.emoji_events_outlined,
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Text(
-                p.awardNominations > 0
-                    ? l.awardsTally(p.awardWins, p.awardNominations)
-                    : l.awardsHint,
-                style: TextStyle(
-                    color: p.awardNominations > 0
-                        ? AppColors.text
-                        : AppColors.textMuted,
-                    fontWeight: p.awardNominations > 0
-                        ? FontWeight.w700
-                        : FontWeight.w400)),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => AwardsScreen(state: career))),
-                icon: const Icon(Icons.emoji_events_outlined),
-                label: Text(l.awardsButton),
-              ),
-            ),
-            // For Your Consideration (docs K171).
-            if (_fyc case final f? when f.phase != FycPhase.closed) ...[
-              const Divider(height: 24),
-              Text(l.fycTitle,
-                  style: const TextStyle(fontWeight: FontWeight.w800)),
-              Text(
-                  f.phase == FycPhase.nominations
-                      ? l.fycNominations(f.year)
-                      : l.fycVoting(f.year),
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
-              const SizedBox(height: 6),
-              if (f.running case final r?)
-                Text(l.fycRunning(_fycName(r)),
-                    style: const TextStyle(fontWeight: FontWeight.w700))
-              else
-                Wrap(spacing: 8, runSpacing: 8, children: [
-                  for (final t in FycTier.values)
-                    OutlinedButton(
-                      onPressed: () => _runFyc(t),
-                      child:
-                          Text(l.fycTier(_fycName(t), fmt.money(t.costCents))),
-                    ),
-                ]),
-            ],
-          ]),
-        ),
-        if (_honors case final h?) ...[
-          const SizedBox(height: 12),
-          Section(
-            title: l.honorsSection,
-            icon: Icons.military_tech_outlined,
-            child: h.isEmpty
-                ? EmptyNote(l.honorsEmpty)
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                        for (final line in [
-                          if (h.recordsHeld.isNotEmpty)
-                            l.honorsRecords(h.recordsHeld
-                                .map((k) => fmt.recordName(k))
-                                .join(' · ')),
-                          if (h.bestYearEndSong
-                              case (final r, final y, final t))
-                            l.honorsYearEndSong(r, y, t),
-                          if (h.bestYearEndAlbum
-                              case (final r, final y, final t))
-                            l.honorsYearEndAlbum(r, y, t),
-                          if (h.musicShowWins > 0)
-                            l.honorsMusicShow(h.musicShowWins, h.tripleCrowns),
-                          if (h.bestArtistRank > 0)
-                            l.honorsArtistRank(
-                                h.bestArtistRank, h.weeksTopArtist),
-                        ])
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 3),
-                            child: Text(line,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600)),
-                          ),
-                      ]),
           ),
-        ],
-        const SizedBox(height: 12),
-        Section(
-          title: l.numberOnes,
-          child: Wrap(spacing: 8, runSpacing: 8, children: [
-            for (final c in Charts.mainSongCharts)
-              Chip(
-                  label:
-                      Text('${fmt.chartShort(c)}: ${p.numberOneSingles[c]}')),
-            for (final c in Charts.mainAlbumCharts)
-              Chip(
-                  label: Text('${fmt.chartShort(c)}: ${p.numberOneAlbums[c]}')),
-          ]),
-        ),
-        const SizedBox(height: 12),
-        Section(
-          title: l.yearByYear,
-          child: _years.isEmpty
-              ? EmptyNote(l.yearByYearEmpty)
-              : Table(
-                  columnWidths: const {0: FlexColumnWidth(0.8)},
+          if (_guest.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.guestSection,
+              icon: Icons.mic_external_on_outlined,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TableRow(children: [
-                      Text(l.year, style: t.labelSmall),
-                      if (hasStreams) Text(l.streams, style: t.labelSmall),
-                      Text(l.singleSales, style: t.labelSmall),
-                      Text(l.albumUnits, style: t.labelSmall),
-                      Text(l.fame, style: t.labelSmall),
-                    ]),
-                    for (final y in _years.reversed)
-                      TableRow(children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Text('${y.year}'),
-                        ),
-                        if (hasStreams) Text(fmt.compact(y.streams)),
-                        Text(fmt.compact(y.singleSales)),
-                        Text(fmt.compact(y.units)),
-                        Text(fmt.percent(y.fame)),
-                      ]),
-                  ],
-                ),
-        ),
-        const SizedBox(height: 12),
-        Section(
-          title: l.topSongs,
-          child: _songs.isEmpty
-              ? EmptyNote(l.noReleasesYet)
-              : Column(children: [
-                  for (final s in _songs.take(30))
-                    ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(s.title),
-                      subtitle: Text([
-                        fmt.songStatus(s),
-                        fmt.songSecondary(s, career.week),
-                      ].where((x) => x.isNotEmpty).join(' · ')),
-                      trailing: Text(fmt.songMain(s, career.week)),
-                      onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => SongDetailScreen(
-                                  songId: s.id, state: career))),
-                    ),
-                ]),
-        ),
+                    Text(l.guestHint((Credits.guestShare * 100).round()),
+                        style: TextStyle(color: AppColors.textMuted)),
+                    for (final w in _guest) _creditTile(w, career),
+                  ]),
+            ),
+          ],
+          // Songs written for others (docs K143).
+          if (_written.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.writtenSection,
+              icon: Icons.edit_note_rounded,
+              child: Column(children: [
+                for (final w in _written)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(w.title,
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    subtitle: Text([
+                      w.artistName,
+                      if (!w.released) l.writtenComing,
+                      if (w.peak > 0) l.writtenPeak(w.peak),
+                    ].join(' · ')),
+                    trailing: Text(fmt.money(w.earnedCents.round()),
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => SongDetailScreen(
+                                songId: w.songId, state: career))),
+                  ),
+              ]),
+            ),
+          ],
+        ]),
       ],
     );
     if (widget.embedded) return list;

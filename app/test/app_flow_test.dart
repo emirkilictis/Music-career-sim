@@ -102,6 +102,11 @@ void main() {
 
     await tester.tap(_ci('Career'));
     await tester.pumpAndSettle();
+    // The career's totals are under its track record.
+    tester
+        .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Track record'))
+        .onSelected!(true);
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(_ci('By region'), 300,
         scrollable: find.byType(Scrollable).first);
     expect(_ci('By region'), findsOneWidget);
@@ -136,6 +141,13 @@ void main() {
 
     // A skill point every week, spent on the Career tab.
     await tester.tap(_ci('Career'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+        find.widgetWithText(ChoiceChip, 'Me'), -300,
+        scrollable: find.byType(Scrollable).first);
+    tester
+        .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, 'Me'))
+        .onSelected!(true);
     await tester.pumpAndSettle();
     final left = RegExp(r'^(\d+) skill points to spend$');
     await tester.scrollUntilVisible(find.textContaining(left), -300,

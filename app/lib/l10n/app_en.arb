@@ -5931,6 +5931,11 @@
       }
     }
   },
+  "careerPageMe": "Me",
+  "careerPageBusiness": "Business",
+  "careerPageStage": "Stage",
+  "careerPageGroup": "Group",
+  "careerPageRecords": "Track record",
   "membersSection": "Members' solo records",
   "membersHint": "Put out a vault song as a member's solo single from its page, or a solo EP or album here.",
   "memberAlbumButton": "Solo EP or album",

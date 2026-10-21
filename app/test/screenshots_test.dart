@@ -47,6 +47,20 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Opens a part of the Career tab (its chips at the top).
+  Future<void> careerPage(WidgetTester tester, String name) async {
+    await tester.scrollUntilVisible(
+        find.widgetWithText(ChoiceChip, name), -300,
+        scrollable: find.byType(Scrollable).first);
+    tester
+        .widget<ChoiceChip>(find.widgetWithText(ChoiceChip, name))
+        .onSelected!(true);
+    await tester.pumpAndSettle();
+    // Back to the top of the new part.
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('screenshots', skip: !enabled, (tester) async {
     await tester.runAsync(loadFonts);
     phoneView(tester);
@@ -197,6 +211,7 @@ void main() {
 
     await tab(tester, 'Career');
     await shot(tester, '15_career');
+    await careerPage(tester, 'Business');
     await tester.scrollUntilVisible(_ci('See labels'), 300,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
@@ -205,6 +220,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     // Discography and the sales chart of covers (K86).
+    await careerPage(tester, 'Track record');
     final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,
         scrollable: find.byType(Scrollable).first);
@@ -216,7 +232,8 @@ void main() {
     await shot(tester, '15j_discography_list');
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(_ci('Plan a tour'), -200,
+    await careerPage(tester, 'Stage');
+    await tester.scrollUntilVisible(_ci('Plan a tour'), 200,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
     await tester.tap(_ci('Plan a tour'));
@@ -253,6 +270,7 @@ void main() {
     await tester.tap(_ci('TOURS'));
     await shot(tester, '08b_top_tours');
     await tab(tester, 'Career');
+    await careerPage(tester, 'Me');
     await tester.scrollUntilVisible(_ci('Skills'), -300,
         scrollable: find.byType(Scrollable).first);
     await tester.tap(_ci('Skip'));
@@ -752,12 +770,14 @@ void main() {
     await shot(tester, '08n_album_sales_chart');
     await tab(tester, 'Career');
     // Record money by source (docs K145).
+    await careerPage(tester, 'Business');
     final income = _ci('Record money by source');
     await tester.scrollUntilVisible(income, 300,
         scrollable: find.byType(Scrollable).first);
     await Scrollable.ensureVisible(tester.element(income), alignment: 0.1);
     await tester.pumpAndSettle();
     await shot(tester, '15r_income');
+    await careerPage(tester, 'Track record');
     final disco = _ci('Discography & sales chart');
     await tester.scrollUntilVisible(disco, 300,
         scrollable: find.byType(Scrollable).first);
@@ -793,9 +813,9 @@ void main() {
     await shot(tester, '15q_honours');
 
     // A record deal: three shapes with their terms (docs K107).
+    await careerPage(tester, 'Business');
     final labels = _ci('See labels');
-    // Above the awards: scroll back up.
-    await tester.scrollUntilVisible(labels, -300,
+    await tester.scrollUntilVisible(labels, 300,
         scrollable: find.byType(Scrollable).first);
     await Scrollable.ensureVisible(tester.element(labels), alignment: 0.5);
     await tester.pumpAndSettle();
@@ -920,8 +940,8 @@ void main() {
       final p = s.world.player!..creativeEnergy = 100;
       final solo = s.writeSong(budget: BudgetTier.high, title: 'Blue Hour').id;
       s.releaseMemberSolo(0, solo);
-      final star = s.world.artists.firstWhere((a) =>
-          a.tier == ArtistTier.a && !a.isRetired && a.managedBy < 0);
+      final star = s.world.artists.firstWhere(
+          (a) => a.tier == ArtistTier.a && !a.isRetired && a.managedBy < 0);
       Credits.guestOn(s.world, star, p, producerSkill: 85);
       // The fan club (docs K164).
       s.openFanClub(ClubPrice.mid);
@@ -943,6 +963,7 @@ void main() {
     await tester.tap(_ci('Music Peak'));
     await shot(tester, '08g_music_show');
     await tab(tester, 'Career');
+    await careerPage(tester, 'Group');
     final members = _ci("Members' solo records");
     await tester.scrollUntilVisible(members, 300,
         scrollable: find.byType(Scrollable).first);
@@ -958,18 +979,19 @@ void main() {
     await tester.tap(star);
     await tester.pumpAndSettle();
     await shot(tester, '15x_line_split');
+    await careerPage(tester, 'Business');
     final club = _ci('Fan club');
-    await tester.scrollUntilVisible(club, -300,
+    await tester.scrollUntilVisible(club, 300,
         scrollable: find.byType(Scrollable).first);
     await Scrollable.ensureVisible(tester.element(club), alignment: 0.05);
     await tester.pumpAndSettle();
     await shot(tester, '15t_fan_club');
     // Mira leaves the group and the career goes on as her (docs K191).
+    await careerPage(tester, 'Group');
     final leave = _ci('Leave the group, go solo');
     await tester.scrollUntilVisible(leave.at(1), 300,
         scrollable: find.byType(Scrollable).first);
-    await Scrollable.ensureVisible(tester.element(leave.at(1)),
-        alignment: 0.5);
+    await Scrollable.ensureVisible(tester.element(leave.at(1)), alignment: 0.5);
     await tester.pumpAndSettle();
     await tester.tap(leave.at(1));
     await tester.pumpAndSettle();
@@ -978,7 +1000,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('You are Mira now, on your own.'), findsOneWidget);
     final former = _ci('Your former group');
-    await tester.scrollUntilVisible(former, -300,
+    await tester.scrollUntilVisible(former, 300,
         scrollable: find.byType(Scrollable).first);
     await Scrollable.ensureVisible(tester.element(former), alignment: 0.2);
     await tester.pumpAndSettle();
@@ -993,6 +1015,7 @@ void main() {
     await careerState.refresh();
     await tester.pumpAndSettle();
     await tab(tester, 'Career');
+    await careerPage(tester, 'Group');
     final reunite = _ci('Get back together');
     await tester.scrollUntilVisible(reunite, 300,
         scrollable: find.byType(Scrollable).first);
