@@ -701,7 +701,9 @@ class GameSession {
     if (kind == PostKind.teaser && !Social.hasTeaser(world, _p)) {
       throw GameException('nothingToTease', 'Nothing unreleased');
     }
-    if (kind == PostKind.promote) _ownSong(songId);
+    if (kind == PostKind.promote && _ownSong(songId).releasedWeek < 0) {
+      throw GameException('notReleased', 'Only released songs');
+    }
     final out = Social.post(world, _p, kind, songId: songId);
     _saveNow();
     return out;
@@ -1860,6 +1862,13 @@ class GameSession {
     }
     final al = world.albums[albumId];
     if (al.artistId != _p.id) throw GameException('notYours', 'Not yours');
+    // As the album page allows: not a mixtape or a best-of, and out
+    // (K184).
+    if (al.type == AlbumType.mixtape ||
+        al.hitIds.isNotEmpty ||
+        world.week <= al.releaseWeek) {
+      throw GameException('noDeluxe', 'Not for this record now');
+    }
     if (Actions.hasDeluxe(al)) {
       throw GameException('deluxeOut', 'Already re-released');
     }
@@ -2101,7 +2110,10 @@ class GameSession {
       throw GameException('noArtist', 'No such artist');
     }
     final rival = world.artists[artistId];
-    if (!Songwriting.wants(rival, s)) {
+    // Not oneself or a retired artist (K184).
+    if (rival.id == _p.id ||
+        rival.isRetired ||
+        !Songwriting.wants(rival, s)) {
       throw GameException('songRefused', 'Not for them');
     }
     Songwriting.sell(world, _p, s, rival);

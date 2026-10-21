@@ -1535,6 +1535,7 @@ k('anniversaryDone','The {years}th anniversary edition of {title} is out.','{tit
 k('anniversaryLine','{years}th anniversary edition out','{years}. yıl dönümü baskısı çıktı', years='int')
 
 # Joint albums (docs K150).
+k('errorNoDeluxe','This record cannot get a deluxe edition now.','Bu kayda şu an deluxe sürüm yapılamaz.')
 k('errorNoWindow','This record cannot be held off streaming now.','Bu kayıt şu an streaming\'den uzak tutulamaz.')
 k('errorNoPartner','That artist cannot make a record with you.','Bu sanatçı seninle albüm yapamaz.')
 k('jointTitle','Joint album','Ortak albüm')

@@ -5396,6 +5396,7 @@
       }
     }
   },
+  "errorNoDeluxe": "This record cannot get a deluxe edition now.",
   "errorNoWindow": "This record cannot be held off streaming now.",
   "errorNoPartner": "That artist cannot make a record with you.",
   "jointTitle": "Joint album",

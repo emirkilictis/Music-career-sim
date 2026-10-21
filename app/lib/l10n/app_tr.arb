@@ -1536,6 +1536,7 @@
   "anniversaryHint": "Yeniden mastering ve koleksiyonluk plak: eski hayranlar yeniden alır, şarkıları bir süre yeniden dinlenir.",
   "anniversaryDone": "{title} albümünün {years}. yıl dönümü baskısı çıktı.",
   "anniversaryLine": "{years}. yıl dönümü baskısı çıktı",
+  "errorNoDeluxe": "Bu kayda şu an deluxe sürüm yapılamaz.",
   "errorNoWindow": "Bu kayıt şu an streaming'den uzak tutulamaz.",
   "errorNoPartner": "Bu sanatçı seninle albüm yapamaz.",
   "jointTitle": "Ortak albüm",
