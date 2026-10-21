@@ -104,6 +104,7 @@ int worldHash(World w) {
     addInt(s.radioPush.index);
     addDouble(s.dormantRate);
     addDouble(s.lifetimePhysical);
+    addDouble(s.lifetimeRingtones);
     for (final g in s.genres) {
       addInt(g);
     }

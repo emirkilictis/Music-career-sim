@@ -33,6 +33,7 @@ import 'price_cuts.dart';
 import 'music_show.dart';
 import 'opportunities.dart';
 import 'rerecords.dart';
+import 'ringtones.dart';
 import 'stream_windows.dart';
 import 'tours.dart';
 import 'word_of_mouth.dart';
@@ -702,6 +703,9 @@ class Simulator {
         botsCaught.add(s.id);
       }
       s.weekDownloads = tD;
+      // Ringtones follow the downloads (docs K183).
+      s.weekRingtones = Ringtones.sold(s, tD, year);
+      s.lifetimeRingtones += s.weekRingtones;
       s.weekRadio = tR;
       s.weekPhysical = tP;
       s.lifetimeRadio += tR;
@@ -733,6 +737,8 @@ class Simulator {
       // The Hot 100's parts (docs K166).
       songPts[Charts.usStreaming][i] = us * st[na];
       songPts[Charts.usDigital][i] = us * dw[na];
+      songPts[Charts.usRingtones][i] =
+          us * Ringtones.sold(s, dw[na], GameTime.yearOf(w.week));
       // A song caught with bought streams counts half for a while.
       final weight = StreamingTools.chartWeight(w, s);
       if (weight < 1) {
@@ -1806,6 +1812,7 @@ class Simulator {
       }
       final songCents = (s.weekStreams * 0.35 * s.autoplay.royalty +
               s.weekDownloads * 70 +
+              s.weekRingtones * Ringtones.payCents +
               s.weekPhysical * 100) *
           // Free uploads pay next to nothing (docs K148).
           (s.cloudOnly ? Cloud.payFactor : 1.0);

@@ -217,6 +217,7 @@ class Fmt {
         Charts.usDigital => l.chartUsDigital,
         Charts.usAlbumSales => l.chartUsAlbumSales,
         Charts.usStreamingAlbums => l.chartUsStreamingAlbums,
+        Charts.usRingtones => l.chartUsRingtones,
         _ => '?',
       };
 
@@ -239,6 +240,7 @@ class Fmt {
         Charts.usDigital => l.chartShortUsDigital,
         Charts.usAlbumSales => l.chartShortUsAlbumSales,
         Charts.usStreamingAlbums => l.chartShortUsStreamingAlbums,
+        Charts.usRingtones => l.chartShortUsRingtones,
         _ => chart(id),
       };
 
@@ -339,6 +341,7 @@ class Fmt {
         IncomeSource.noiseCloud => MusicPlatform.noiseCloud.displayName,
         IncomeSource.downloads => l.incomeDownloads,
         IncomeSource.physical => l.incomePhysical,
+        IncomeSource.ringtones => l.incomeRingtones,
         IncomeSource.albumSales => l.incomeAlbums,
       };
 

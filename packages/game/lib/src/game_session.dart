@@ -3312,6 +3312,7 @@ class GameSession {
     Charts.usRadio,
     Charts.usStreaming,
     Charts.usDigital,
+    Charts.usRingtones,
   ];
   static const _albumCharts = [
     Charts.usAlbums,

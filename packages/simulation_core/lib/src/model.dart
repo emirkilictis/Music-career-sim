@@ -797,6 +797,10 @@ class Song with Charted {
   double weekPhysical = 0;
   double weekRadio = 0;
 
+  /// Ringtones sold this week and in all (docs K183).
+  double weekRingtones = 0;
+  double lifetimeRingtones = 0;
+
   /// US song chart points from radio and in all this week (not saved;
   /// for chart breakdowns and probes).
   double weekRadioPtsUs = 0;

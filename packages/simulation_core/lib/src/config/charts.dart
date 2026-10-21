@@ -22,6 +22,9 @@ enum ChartMarket {
   /// US album copies sold, and US album streams (docs K168).
   usAlbumSales,
   usStreamingAlbums,
+
+  /// US ringtone sales (docs K183).
+  usRingtones,
 }
 
 /// A chart definition. Names are fictional (no real chart or platform
@@ -35,6 +38,7 @@ class ChartDef {
     required this.size,
     this.recurrent = false,
     this.startYear = 0,
+    this.endYear = 9999,
   });
 
   /// Stable id (stored in saves). Never renumber.
@@ -50,12 +54,18 @@ class ChartDef {
   /// The chart exists from this year (e.g. streaming platform charts).
   final int startYear;
 
+  /// ...and up to this year (the ringtone chart, docs K183).
+  final int endYear;
+
   bool get isPlatform =>
       market == ChartMarket.platformGlobal ||
       market == ChartMarket.platformNorthAmerica ||
       market == ChartMarket.platformEurope;
 
-  bool activeIn(int week) => GameTime.yearOf(week) >= startYear;
+  bool activeIn(int week) {
+    final y = GameTime.yearOf(week);
+    return y >= startYear && y <= endYear;
+  }
 }
 
 abstract final class Charts {
@@ -80,6 +90,9 @@ abstract final class Charts {
   /// alone.
   static const usAlbumSales = 12;
   static const usStreamingAlbums = 13;
+
+  /// Ringtone sales (docs K183), 2004–2010.
+  static const usRingtones = 14;
 
   static const all = <ChartDef>[
     ChartDef(
@@ -175,9 +188,17 @@ abstract final class Charts {
         market: ChartMarket.usStreamingAlbums,
         size: 50,
         startYear: 2015),
+    ChartDef(
+        id: usRingtones,
+        key: 'chart.us.ringtones',
+        kind: ChartKind.songs,
+        market: ChartMarket.usRingtones,
+        size: 50,
+        startYear: 2004,
+        endYear: 2010),
   ];
 
-  static const count = 14;
+  static const count = 15;
 
   /// Song charts whose positions feed back into exposure and dormancy.
   static const mainSongCharts = [usSongs, ukSongs, globalSongs];

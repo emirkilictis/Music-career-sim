@@ -1475,6 +1475,7 @@ class _SongNumbersState extends State<_SongNumbers> {
               row(fmt.region(r), s.lifetimeStreams[r]),
           row(l.downloads, s.lifetimeDownloads),
           if (s.lifetimePhysical >= 1) row(l.cdSingles, s.lifetimePhysical),
+          if (s.lifetimeRingtones >= 1) row(l.ringtonesSold, s.lifetimeRingtones),
           if (!widget.salesFirst && hasStreams)
             row(l.radioAudience, s.lifetimeRadio),
           if (widget.salesFirst && hasStreams)

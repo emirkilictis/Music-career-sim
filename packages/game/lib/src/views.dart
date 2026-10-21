@@ -298,6 +298,7 @@ class SongView {
         lifetimeStreams = _regional((r) => w.songLifetimeStreams(s, r)),
         lifetimeDownloads = w.songLifetimeDownloads(s),
         lifetimePhysical = s.lifetimePhysical,
+        lifetimeRingtones = s.lifetimeRingtones,
         lifetimeRadio = s.lifetimeRadio,
         isPlayer = s.primaryArtistId == w.playerArtistId,
         video = s.videoBudget < 0 ? null : VideoBudget.values[s.videoBudget],
@@ -667,6 +668,9 @@ class SongView {
 
   /// CD singles sold.
   final double lifetimePhysical;
+
+  /// Ringtones sold (docs K183).
+  final double lifetimeRingtones;
 
   /// Radio audience (listener impressions).
   final double lifetimeRadio;
@@ -1069,7 +1073,8 @@ class ChartView {
           ChartMarket.usStreaming ||
           ChartMarket.usDigital ||
           ChartMarket.usAlbumSales ||
-          ChartMarket.usStreamingAlbums =>
+          ChartMarket.usStreamingAlbums ||
+          ChartMarket.usRingtones =>
             CountryShares.usOfNorthAmerica(artist.homeCountry) *
                 byRegion(Region.northAmerica.index),
           ChartMarket.uk => CountryShares.ukOfEurope(artist.homeCountry) *
@@ -1104,7 +1109,10 @@ class ChartView {
       sea: sea,
       tea: tea,
       albumId: kind == EntityKind.song ? coverAlbumOf(w, w.songs[id]) : id,
-      weekValue: kind == EntityKind.song
+      // The ringtone chart ranks ringtones sold (docs K183).
+      weekValue: market == ChartMarket.usRingtones
+          ? points
+          : kind == EntityKind.song
           ? w.songWeekStreamsIn(w.songs[id], market)
           // What the album chart ranked: pure sales before 2015, units
           // after (docs K49).

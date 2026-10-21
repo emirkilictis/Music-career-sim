@@ -255,6 +255,8 @@ abstract final class Codec {
     // Added in schema v32, v34, v35, v36, v39, v41, v43, v44.
     'writer', 'liveOf', 'promo', 'cloud', 'snippet', 'langs', 'guestCents',
     'curators',
+    // Added in schema v49.
+    'ringtones', 'weekRingtones',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -333,6 +335,8 @@ abstract final class Codec {
                 s.curatorAdds,
                 s.curatorReach
               ]),
+        s.lifetimeRingtones,
+        s.weekRingtones,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -397,6 +401,9 @@ abstract final class Codec {
     }
     s.languages = r['langs'] as int? ?? 0;
     s.guestCents = (r['guestCents'] as num?)?.toDouble() ?? 0;
+    s
+      ..lifetimeRingtones = (r['ringtones'] as num?)?.toDouble() ?? 0
+      ..weekRingtones = (r['weekRingtones'] as num?)?.toDouble() ?? 0;
     if (r['curators'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       s.curatorWeek = j[0] as int;

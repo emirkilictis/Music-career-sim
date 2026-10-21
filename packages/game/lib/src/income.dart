@@ -11,6 +11,9 @@ enum IncomeSource {
   downloads,
   physical,
   albumSales,
+
+  /// Ringtones, 2004–2010 (docs K183).
+  ringtones,
 }
 
 /// Record income split by source (docs K145). The simulation pays a song's
@@ -103,6 +106,8 @@ abstract final class Income {
     if (dl > 0) out[IncomeSource.downloads] = dl;
     final ph = s.lifetimePhysical * 100 * share;
     if (ph > 0) out[IncomeSource.physical] = ph;
+    final rt = s.lifetimeRingtones * Ringtones.payCents * share;
+    if (rt > 0) out[IncomeSource.ringtones] = rt;
     out.removeWhere((_, v) => v <= 0);
     return IncomeBreakdown(out);
   }

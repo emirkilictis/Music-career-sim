@@ -53,6 +53,7 @@ export 'src/streaming_tools.dart';
 export 'src/simulator.dart';
 export 'src/time.dart';
 export 'src/tours.dart';
+export 'src/ringtones.dart';
 export 'src/rival_moves.dart';
 export 'src/stream_windows.dart';
 export 'src/streamify_sessions.dart';

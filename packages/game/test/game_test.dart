@@ -3425,6 +3425,43 @@ void main() {
       g.close();
     });
 
+    test('ringtones sell in their years and chart (K183)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2006,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final slot = g.slotId;
+      g.world.player!.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high, genres: [1]).id;
+      g.releaseSingle(id);
+      for (var i = 0; i < 3; i++) {
+        g.advanceWeek();
+      }
+      final s = g.world.songs[id];
+      expect(s.weekRingtones, greaterThan(0));
+      expect(s.weekRingtones, lessThan(s.weekDownloads * 2));
+      expect(s.lifetimeRingtones, greaterThan(s.weekRingtones));
+      expect(g.songIncome(id).cents[IncomeSource.ringtones], greaterThan(0));
+      final chart = g.chart(Charts.usRingtones);
+      expect(chart.rows, isNotEmpty);
+      for (var i = 1; i < chart.rows.length; i++) {
+        expect(chart.rows[i].weekValue,
+            lessThanOrEqualTo(chart.rows[i - 1].weekValue));
+      }
+      final total = s.lifetimeRingtones;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.world.songs[id].lifetimeRingtones, closeTo(total, 1e-6));
+      g.close();
+      // Gone by the streaming years.
+      expect(Charts.all[Charts.usRingtones].activeIn(GameTime.firstWeekOf(2011)),
+          isFalse);
+      expect(Ringtones.eraFactor(2015), 0);
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;

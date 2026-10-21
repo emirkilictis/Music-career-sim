@@ -347,6 +347,7 @@ class World {
       ChartMarket.usDigital ||
       ChartMarket.usAlbumSales ||
       ChartMarket.usStreamingAlbums ||
+      ChartMarket.usRingtones ||
       ChartMarket.platformNorthAmerica =>
         (market != ChartMarket.platformNorthAmerica
                 ? CountryShares.usOfNorthAmerica(home)

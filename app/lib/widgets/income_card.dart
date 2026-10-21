@@ -19,6 +19,7 @@ class IncomeCard extends StatelessWidget {
         IncomeSource.noiseCloud => platformColor(MusicPlatform.noiseCloud),
         IncomeSource.downloads => platformColor(MusicPlatform.fruitTunes),
         IncomeSource.physical => AppColors.gold,
+        IncomeSource.ringtones => AppColors.coral,
         IncomeSource.albumSales => AppColors.textMuted,
       };
 
