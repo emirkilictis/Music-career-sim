@@ -2959,6 +2959,67 @@ class PlaylistTrackView {
 }
 
 /// A group member and their solo records (docs K158).
+/// The player's group's line split, morale bonus and contracts (docs
+/// K193, K195).
+class LineupView {
+  LineupView.of(World w, Artist a)
+      : split = Lineups.splitOf(a),
+        center = Lineups.center(a),
+        lift = Lineups.lineLift(w, a),
+        cheerCents = Lineups.cheerCostCents(a),
+        canCheer = Lineups.canCheer(w, a),
+        nextCheerWeek = a.cheerWeek + Lineups.cheerEveryWeeks,
+        renewalWeek = MemberMorale.nextRenewal(w, a),
+        atRisk = [for (final i in MemberMorale.atRisk(a)) a.members[i]];
+  final LineSplit split;
+
+  /// The member the songs are built around, and what the split adds to
+  /// the songs' listening.
+  final int center;
+  final double lift;
+
+  /// A morale bonus: its cost, and whether one can be paid now (else
+  /// from when).
+  final int cheerCents;
+  final bool canCheer;
+  final int nextCheerWeek;
+
+  /// When the contracts come up, and who would not sign again now.
+  final int renewalWeek;
+  final List<String> atRisk;
+}
+
+/// The reunion with the group the player left (docs K194).
+class ReunionView {
+  ReunionView.of(World w, Artist g)
+      : groupId = g.id,
+        groupName = g.name,
+        block = Reunions.block(w),
+        active = Reunions.active(w),
+        openWeek = Reunions.openWeek(w),
+        endWeek = w.reunionEndWeek,
+        yearsApart = (w.week - w.playerSinceWeek) / 52,
+        audience = Reunions.audience(w),
+        done = w.reunionStartWeek >= 0;
+  final int groupId;
+  final String groupName;
+
+  /// Why it cannot start now (null: it can).
+  final ReunionBlock? block;
+  final bool active;
+
+  /// From when it can start, and when the running one ends.
+  final int openWeek;
+  final int endWeek;
+  final double yearsApart;
+
+  /// The group's audience with the reunion's nostalgia.
+  final ({double fans, double casual, double fame}) audience;
+
+  /// There has been a reunion before.
+  final bool done;
+}
+
 /// What going solo as a member would bring (docs K191).
 class GoSoloView {
   const GoSoloView({
@@ -3012,6 +3073,10 @@ class MemberView {
             ? Lineups.share(group, index)
             : 0,
         focused = group.focusMember == index,
+        morale = index < group.memberMorale.length
+            ? group.memberMorale[index]
+            : Lineups.moraleRest,
+        center = group.memberPop.isNotEmpty && Lineups.center(group) == index,
         focusWeeks =
             group.focusMember == index ? w.week - group.focusSinceWeek : 0,
         artistId = Credits.memberIdOf(group, index),
@@ -3045,6 +3110,11 @@ class MemberView {
   final double share;
   final bool focused;
   final int focusWeeks;
+
+  /// Their morale (0–100; docs K195) and whether the songs are built
+  /// around them (docs K193).
+  final double morale;
+  final bool center;
 
   /// Their solo name's artist id (-1: no solo record yet).
   final int artistId;

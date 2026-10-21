@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:io';
 
 import 'package:game/game.dart';
@@ -3871,6 +3872,203 @@ void main() {
           g.world.songs.any((s) =>
               s.primaryArtistId == group.id && s.releasedWeek > g.week - 30),
           isFalse);
+      g.close();
+    });
+
+    GameSession newGroup(
+            {int year = 2016, StartTier tier = StartTier.superstar}) =>
+        GameSession.start(
+            slots,
+            _setup(
+                startYear: year,
+                premium: true,
+                tier: tier,
+                money: StartMoney.millionaire,
+                kind: ArtistKind.vocalGroup,
+                members: const ['Yuna', 'Mira', 'Jin', 'Sora']));
+
+    test('a song built around its center plays more (K193)', () {
+      (double, GameSession, int) run(LineSplit split) {
+        final g = newGroup();
+        g.setLineSplit(split);
+        g.world.player!.creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.high).id;
+        g.releaseSingle(id);
+        var streams = 0.0;
+        for (var i = 0; i < 8; i++) {
+          g.advanceWeek();
+          streams += g.world.songs[id].weekStreams;
+        }
+        return (streams, g, id);
+      }
+
+      final (even, g1, _) = run(LineSplit.even);
+      expect(g1.lineup!.split, LineSplit.even);
+      expect(g1.lineup!.lift, 0);
+      final devotionEven = g1.world.player!.devotion;
+      g1.close();
+      final (center, g2, _) = run(LineSplit.center);
+      final v = g2.lineup!;
+      expect(v.split, LineSplit.center);
+      expect(v.lift, greaterThan(0));
+      final ms = g2.members;
+      expect(ms[v.center].center, isTrue);
+      // The center rises; the others sing less and like it less.
+      for (final m in ms) {
+        if (m.index == v.center) continue;
+        expect(m.morale, lessThan(ms[v.center].morale));
+      }
+      expect(g2.world.player!.devotion, lessThan(devotionEven));
+      g2.close();
+      expect(center, greaterThan(even * 1.005));
+    });
+
+    test('unhappy members talk, get a bonus, or walk out (K195)', () {
+      final g = newGroup(tier: StartTier.risingStar);
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      var ms = g.members;
+      for (final m in ms) {
+        expect(m.morale, Lineups.moraleRest);
+      }
+      // A bonus lifts one member, then not again for a while.
+      p.memberMorale[2] = 40;
+      final money = p.moneyCents;
+      final cost = g.lineup!.cheerCents;
+      g.cheerMember(2);
+      expect(p.memberMorale[2], 40 + Lineups.cheerMorale);
+      expect(p.moneyCents, money - cost);
+      expect(g.lineup!.canCheer, isFalse);
+      expect(() => g.cheerMember(1), _code('cheerSoon'));
+
+      // Pushing one member and building every song around them.
+      g.setMemberFocus(0);
+      g.setLineSplit(LineSplit.center);
+      final events = <GameEvent>[];
+      for (var i = 0; i < 160 && events.whereType<MemberQuit>().isEmpty; i++) {
+        events.addAll(g.advanceWeek().events);
+      }
+      expect(events.whereType<MemberUnhappy>(), isNotEmpty);
+      final quit = events.whereType<MemberQuit>().single;
+      expect(quit.name, isNot('Yuna'));
+      expect(quit.fansLost, greaterThan(0));
+      expect(p.members, hasLength(3));
+      expect(p.members, isNot(contains(quit.name)));
+      expect(p.memberMorale, hasLength(3));
+      final gone = g.world.artists.firstWhere((a) => a.name == quit.name);
+      expect(gone.managedBy, -1);
+      expect(gone.tier, ArtistTier.b);
+      expect(gone.isRetired, isFalse);
+      g.close();
+    });
+
+    test('the contracts come up every seven years (K195)', () {
+      final g = newGroup(year: 2005, tier: StartTier.unknown);
+      final p = g.world.player!;
+      final at = g.lineup!.renewalWeek;
+      expect(at, p.debutWeek + MemberMorale.renewalWeeks);
+      g.advanceWeeks(at - MemberMorale.warnWeeks - 1 - g.week,
+          stop: SkipStop.never);
+      // Sora is fed up just before.
+      p.memberMorale[3] = 5;
+      final events = <GameEvent>[];
+      while (g.week <= at) {
+        events.addAll(g.advanceWeek().events);
+        if (p.memberMorale.length > 3) {
+          p.memberMorale[3] = math.min(p.memberMorale[3], 20);
+        }
+      }
+      final soon = events.whereType<RenewalSoon>().single;
+      expect(soon.atRisk, contains('Sora'));
+      final done = events.whereType<RenewalDone>().single;
+      expect(done.left, ['Sora']);
+      expect(done.stayed, 3);
+      expect(p.members, ['Yuna', 'Mira', 'Jin']);
+      expect(g.lineup!.renewalWeek, at + MemberMorale.renewalWeeks);
+      g.close();
+    });
+
+    test('a reunion with the group, years later (K194)', () {
+      var g = newGroup();
+      final slot = g.slotId;
+      final band = g.world.player!..creativeEnergy = 100;
+      final hit = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(hit);
+      g.advanceWeek();
+      g.goSolo(1);
+      final w = g.world;
+      final solo = w.player!;
+      var v = g.reunion!;
+      expect(v.groupName, band.name);
+      expect(v.block, ReunionBlock.tooSoon);
+      expect(v.openWeek, w.playerSinceWeek + Reunions.gapWeeks);
+      expect(() => g.startReunion(), _code('reunionSoon'));
+      // Years apart.
+      w.playerSinceWeek -= Reunions.gapWeeks + 5 * 52;
+      v = g.reunion!;
+      expect(v.block, isNull);
+      expect(v.audience.fans, greaterThan(band.coreFans));
+      final fans = v.audience.fans;
+      g.startReunion();
+      expect(band.managedBy, solo.id);
+      expect(band.members.last, 'Mira');
+      expect(band.coreFans, closeTo(fans, 1));
+      expect(g.reunion!.active, isTrue);
+      expect(() => g.startReunion(), _code('reunionOn'));
+      expect(w.managedSongIds, isNotEmpty);
+
+      // A single under the group's name, paid by the player.
+      solo
+        ..creativeEnergy = 100
+        ..moneyCents = 1 << 40;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      final money = solo.moneyCents;
+      final cost = g.reunionCosts[Campaign.standard.index];
+      g.releaseReunionSingle(id);
+      expect(solo.moneyCents, money - cost);
+      final song = w.songs.last;
+      expect(song.primaryArtistId, band.id);
+      expect(song.releasedWeek, greaterThanOrEqualTo(0));
+      expect(w.managedSongIds, contains(song.id));
+      g.advanceWeeks(4, stop: SkipStop.never);
+      expect(w.songs[song.id].lifetimeStreams, greaterThan(0));
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.reunion!.active, isTrue);
+      expect(g.world.artists[band.id].managedBy, solo.id);
+
+      final events = <GameEvent>[];
+      while (g.reunion!.active) {
+        events.addAll(g.advanceWeek().events);
+      }
+      final over = events.whereType<ReunionOver>().single;
+      expect(over.groupId, band.id);
+      expect(over.ended, isFalse);
+      final b = g.world.artists[band.id];
+      expect(b.managedBy, -1);
+      expect(b.members, isNot(contains('Mira')));
+      expect(g.world.managedSongIds, isEmpty);
+      expect(g.reunion!.block, ReunionBlock.tooSoon);
+      g.close();
+    });
+
+    test('a group that ended comes back for the reunion only (K194)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2014,
+              kind: ArtistKind.band,
+              members: const ['Ana', 'Leo']));
+      final duo = g.world.player!;
+      g.goSolo(0);
+      expect(duo.isRetired, isTrue);
+      g.world.playerSinceWeek -= Reunions.gapWeeks;
+      g.startReunion();
+      expect(duo.isRetired, isFalse);
+      expect(g.world.activeArtistIds, contains(duo.id));
+      g.advanceWeeks(Reunions.weeks + 1, stop: SkipStop.never);
+      expect(duo.isRetired, isTrue);
+      expect(duo.managedBy, -1);
       g.close();
     });
 

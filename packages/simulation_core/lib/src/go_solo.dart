@@ -89,8 +89,13 @@ abstract final class GoSolo {
     group.opportunity = null;
 
     final ends = endsGroup(group, k);
+    // What a reunion can bring back one day (docs K194).
+    w
+      ..formerFans = group.coreFans
+      ..formerCasual = group.casual
+      ..formerFame = group.fame;
     _takeOver(group, solo);
-    _splitAudience(group, solo, k);
+    shareAudience(group, solo, k);
 
     // The songs no one has heard go with the member.
     for (final s in w.songs) {
@@ -181,7 +186,9 @@ abstract final class GoSolo {
       ..unrecoupedCents = 0;
   }
 
-  static void _splitAudience(Artist group, Artist solo, double k) {
+  /// [solo] leaves [group] with their part of its audience, by their
+  /// importance [k].
+  static void shareAudience(Artist group, Artist solo, double k) {
     solo
       ..fame = math.max(solo.fame, group.fame * fameTaken(k))
       ..popularity = math.max(solo.popularity, group.popularity * fameTaken(k))

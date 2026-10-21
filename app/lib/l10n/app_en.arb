@@ -6048,6 +6048,248 @@
       }
     }
   },
+  "lineSplitTitle": "Line split",
+  "lineEven": "Even",
+  "lineFeatured": "Featured",
+  "lineCenter": "One star",
+  "lineSplitHint": "How the songs share their lines. Built around a popular member they play more and lift that member, but the others resent it and fans of the rest cool off. An even split keeps everyone happy.",
+  "lineSplitNow": "Songs +{pct}% listening · built around {name}",
+  "@lineSplitNow": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "lineSplitEvenNow": "Everyone sings: members and fans are happy.",
+  "memberMorale": "Morale {m}",
+  "@memberMorale": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "memberUnhappyTag": "Unhappy",
+  "memberCenterTag": "Center",
+  "memberCheer": "Bonus · {cost}",
+  "@memberCheer": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "memberCheerDone": "{name} feels heard.",
+  "@memberCheerDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "memberCheerWait": "Next bonus {date}",
+  "@memberCheerWait": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "renewalLine": "Contracts come up {date} (every {years} years).",
+  "@renewalLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "renewalRisk": "Would not sign again now: {names}",
+  "@renewalRisk": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "errorCheerSoon": "A bonus only every few weeks.",
+  "errorNoReunion": "There is no reunion on.",
+  "errorReunionSoon": "Not long enough apart yet.",
+  "errorReunionOn": "The reunion is already on.",
+  "eventMemberUnhappy": "Word is out: {name} is unhappy and thinking of leaving the group.",
+  "@eventMemberUnhappy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "eventMemberQuit": "{name} left the group for a career of their own; {pct}% of the fans went too.",
+  "@eventMemberQuit": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "eventRenewalSoon": "The contracts come up in a few weeks. Not happy enough to sign again: {names}.",
+  "@eventRenewalSoon": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "eventRenewalSafe": "The contracts come up in a few weeks; everyone looks set to sign again.",
+  "eventRenewalDone": "Contracts renewed: all {count} members signed again.",
+  "@eventRenewalDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "eventRenewalLeft": "Contracts renewed, but {names} did not sign and left; {pct}% of the fans went too.",
+  "@eventRenewalLeft": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "eventReunionOver": "The {group} reunion is over.",
+  "@eventReunionOver": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionTitle": "Reunion",
+  "reunionHint": "Get back together with {group} for a year. Nostalgia brings fans back, more the longer you have been apart. You put out records under the group's name, and its old songs earn for you that year.",
+  "@reunionHint": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionOpens": "Possible from {date}.",
+  "@reunionOpens": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionButton": "Get back together",
+  "reunionConfirm": "{group} comes back for a year with {fans} fans and {fame}% fame.",
+  "@reunionConfirm": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "fans": {
+        "type": "String"
+      },
+      "fame": {
+        "type": "int"
+      }
+    }
+  },
+  "reunionStart": "Reunite",
+  "reunionStarted": "{group} is back together!",
+  "@reunionStarted": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionActive": "Reunion on · {weeks} weeks left",
+  "@reunionActive": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "reunionSingle": "Single as {group}",
+  "@reunionSingle": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionAlbum": "EP or album as {group}",
+  "@reunionAlbum": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionSongTitle": "Which song?",
+  "reunionSingleDone": "“{title}” is out as a {group} single.",
+  "@reunionSingleDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionAlbumScreen": "{group} reunion record",
+  "@reunionAlbumScreen": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionAlbumHint": "Vault songs come out under {group}'s name. You pay the campaign and keep the money.",
+  "@reunionAlbumHint": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionCampaign": "Campaign for {group}",
+  "@reunionCampaign": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionAlbumDone": "“{title}” is out as a {group} record.",
+  "@reunionAlbumDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "reunionAlbumButton": "Release as the group",
   "guestSection": "Your features",
   "guestHint": "Your verses on others' songs chart under their name; {share}% of what they earn comes to you.",
   "@guestHint": {

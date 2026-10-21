@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'awards.dart';
@@ -104,6 +105,14 @@ class World {
   int formerGroupId = -1;
   int playerSinceWeek = 0;
   double careerStreamsBase = 0;
+
+  /// The group's audience just before the player left it (docs K194).
+  double formerFans = 0, formerCasual = 0, formerFame = 0;
+
+  /// The player's reunion with that group (docs K194): when it started
+  /// and ends (-1: none yet), and whether the group had ended before.
+  int reunionStartWeek = -1, reunionEndWeek = -1;
+  bool reunionWasRetired = false;
 
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();
@@ -224,6 +233,21 @@ class World {
       retiredDormantAttention[r] +=
           a.sumDormantRate * a.catalogFactor * a.regionShare[r];
     }
+    dirtyArtists.add(a.id);
+  }
+
+  /// Brings a retired artist back (docs K194): their catalog accrues week
+  /// by week again.
+  void unretire(Artist a) {
+    if (!a.isRetired) return;
+    settleRetired(a);
+    for (var r = 0; r < regionCount; r++) {
+      retiredDormantAttention[r] = math.max(0.0,
+          retiredDormantAttention[r] -
+              a.sumDormantRate * a.catalogFactor * a.regionShare[r]);
+    }
+    a.retiredWeek = -1;
+    insertSorted(activeArtistIds, a.id);
     dirtyArtists.add(a.id);
   }
 

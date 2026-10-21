@@ -835,6 +835,10 @@ class Fmt {
       'noMood' => l.errorNoMood,
       'noCanvas' => l.errorNoCanvas,
       'onTour' => l.errorOnTour,
+      'cheerSoon' => l.errorCheerSoon,
+      'noReunion' => l.errorNoReunion,
+      'reunionSoon' => l.errorReunionSoon,
+      'reunionOn' => l.errorReunionOn,
       'noPick' => l.errorNoPick,
       'noDeluxe' => l.errorNoDeluxe,
       'noSession' => l.errorNoSession,
@@ -1021,6 +1025,16 @@ class Fmt {
       ListenersMilestone(:final listeners) =>
         l.eventListenersMilestone(compact(listeners)),
       ThisIsMade(:final songs) => l.eventThisIsMade(songs),
+      MemberUnhappy(:final name) => l.eventMemberUnhappy(name),
+      MemberQuit(:final name, :final fansLost) =>
+        l.eventMemberQuit(name, (fansLost * 100).round()),
+      RenewalSoon(:final atRisk) => atRisk.isEmpty
+          ? l.eventRenewalSafe
+          : l.eventRenewalSoon(atRisk.join(', ')),
+      RenewalDone(:final stayed, :final left, :final fansLost) => left.isEmpty
+          ? l.eventRenewalDone(stayed)
+          : l.eventRenewalLeft(left.join(', '), (fansLost * 100).round()),
+      ReunionOver() => l.eventReunionOver(t),
       AlbumStreamMilestone(:final streams) =>
         l.eventAlbumStreams(t, compact(streams)),
       WrittenSongHit(:final position) => position == 1

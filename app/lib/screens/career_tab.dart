@@ -18,6 +18,7 @@ import 'discography_screen.dart';
 import 'album_detail_screen.dart';
 import 'labels_screen.dart';
 import 'member_album_screen.dart';
+import 'releases_tab.dart';
 import 'game_shell.dart';
 import 'song_detail_screen.dart';
 import 'streamify/artist_page.dart';
@@ -45,6 +46,11 @@ class _CareerScreenState extends State<CareerScreen> {
 
   /// The group the player left (docs K191).
   (ArtistView, bool)? _former;
+
+  /// The group's line split and contracts (docs K193, K195), and the
+  /// reunion with the group the player left (docs K194).
+  LineupView? _lineup;
+  ReunionView? _reunion;
   FanClubView? _club;
   ImprintView? _label;
   FycView? _fyc;
@@ -72,6 +78,8 @@ class _CareerScreenState extends State<CareerScreen> {
     final written = await career.read(Cmd.writtenForOthers());
     final members = await career.read(Cmd.members());
     final former = await career.read(Cmd.formerGroup());
+    final lineup = await career.read(Cmd.lineup());
+    final reunion = await career.read(Cmd.reunion());
     final club = await career.read(Cmd.fanClub());
     final label = await career.read(Cmd.imprint());
     final fyc = await career.read(Cmd.fyc());
@@ -86,6 +94,8 @@ class _CareerScreenState extends State<CareerScreen> {
         _written = written;
         _members = members;
         _former = former;
+        _lineup = lineup;
+        _reunion = reunion;
         _club = club;
         _label = label;
         _fyc = fyc;
@@ -563,7 +573,101 @@ class _CareerScreenState extends State<CareerScreen> {
             if (m.focused) l.memberFocused(m.focusWeeks),
           ].join(' · '),
           style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+      // Morale (docs K195).
+      const SizedBox(height: 4),
+      Row(children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: m.morale / 100,
+              minHeight: 3,
+              color: _moraleColor(m.morale),
+              backgroundColor: AppColors.textMuted.withValues(alpha: 0.2),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(l.memberMorale(m.morale.round()),
+            style: TextStyle(
+                color: _moraleColor(m.morale),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700)),
+      ]),
+      if (m.center || m.morale < MemberMorale.unhappyAt) ...[
+        const SizedBox(height: 4),
+        Wrap(spacing: 6, children: [
+          if (m.center)
+            Tag(l.memberCenterTag,
+                icon: Icons.mic_rounded, color: AppColors.gold),
+          if (m.morale < MemberMorale.unhappyAt)
+            Tag(l.memberUnhappyTag,
+                icon: Icons.sentiment_dissatisfied_rounded,
+                color: AppColors.coral),
+        ]),
+      ],
     ];
+  }
+
+  Color _moraleColor(double m) => m < MemberMorale.unhappyAt
+      ? AppColors.coral
+      : m < MemberMorale.renewAt
+          ? AppColors.peach
+          : AppColors.mint;
+
+  /// How the songs share their lines, and the contracts (docs K193, K195).
+  List<Widget> _lineSplit(LineupView v) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final center = v.center < _members.length ? _members[v.center].name : '';
+    return [
+      const SizedBox(height: 14),
+      Text(l.lineSplitTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800)),
+      const SizedBox(height: 6),
+      SegmentedButton<LineSplit>(
+        showSelectedIcon: false,
+        segments: [
+          ButtonSegment(value: LineSplit.even, label: Text(l.lineEven)),
+          ButtonSegment(value: LineSplit.featured, label: Text(l.lineFeatured)),
+          ButtonSegment(value: LineSplit.center, label: Text(l.lineCenter)),
+        ],
+        selected: {v.split},
+        onSelectionChanged:
+            career.busy ? null : (sel) => _act(Cmd.setLineSplit(sel.first)),
+      ),
+      const SizedBox(height: 6),
+      Text(
+          v.split == LineSplit.even
+              ? l.lineSplitEvenNow
+              : l.lineSplitNow((v.lift * 100).round(), center),
+          style: const TextStyle(fontWeight: FontWeight.w600)),
+      Text(l.lineSplitHint,
+          style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+      const SizedBox(height: 8),
+      Text(l.renewalLine(fmt.week(v.renewalWeek), MemberMorale.renewalYears),
+          style: const TextStyle(fontSize: 13)),
+      if (v.atRisk.isNotEmpty)
+        Text(l.renewalRisk(v.atRisk.join(', ')),
+            style: TextStyle(color: AppColors.coral, fontSize: 13)),
+      if (!v.canCheer)
+        Text(l.memberCheerWait(fmt.week(v.nextCheerWeek)),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+    ];
+  }
+
+  Future<void> _cheer(MemberView m) async {
+    final l = context.l10n;
+    try {
+      await context.careerRead.act(Cmd.cheerMember(m.index));
+      if (mounted) {
+        showInfo(context, l.memberCheerDone(m.name),
+            icon: Icons.favorite_rounded);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
   }
 
   Future<void> _act(SessionCmd<void> cmd) async {
@@ -723,8 +827,155 @@ class _CareerScreenState extends State<CareerScreen> {
             onPressed: () => pushInCareer(context, ArtistPage(artistId: g.id)),
           ),
         ),
+        if (_reunion case final r?) ..._reunionLines(r),
       ]),
     );
+  }
+
+  /// Getting back together with the old group (docs K194).
+  List<Widget> _reunionLines(ReunionView r) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    return [
+      const SizedBox(height: 10),
+      Text(l.reunionTitle, style: const TextStyle(fontWeight: FontWeight.w800)),
+      if (r.active) ...[
+        Text(l.reunionActive(r.endWeek - career.week),
+            style:
+                TextStyle(color: AppColors.gold, fontWeight: FontWeight.w700)),
+        Wrap(spacing: 4, children: [
+          TextButton.icon(
+            icon: const Icon(Icons.music_note_rounded, size: 18),
+            label: Text(l.reunionSingle(r.groupName)),
+            onPressed: career.busy ? null : () => _reunionSingle(r),
+          ),
+          TextButton.icon(
+            icon: const Icon(Icons.album_outlined, size: 18),
+            label: Text(l.reunionAlbum(r.groupName)),
+            onPressed: career.busy
+                ? null
+                : () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => SideAlbumScreen(
+                              state: career,
+                              songs: _vault,
+                              title: l.reunionAlbumScreen(r.groupName),
+                              hint: l.reunionAlbumHint(r.groupName),
+                              campaignHeader: l.reunionCampaign(r.groupName),
+                              costs: Cmd.reunionCosts(),
+                              release: Cmd.releaseReunionAlbum,
+                              done: (al) =>
+                                  l.reunionAlbumDone(al.title, r.groupName),
+                              button: l.reunionAlbumButton,
+                            ))),
+          ),
+        ]),
+      ] else ...[
+        Text(l.reunionHint(r.groupName),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+        if (r.block == ReunionBlock.tooSoon)
+          Text(l.reunionOpens(fmt.week(r.openWeek)),
+              style: const TextStyle(fontSize: 13))
+        else
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.icon(
+              icon: const Icon(Icons.groups_rounded),
+              label: Text(l.reunionButton),
+              onPressed: career.busy ? null : () => _startReunion(r),
+            ),
+          ),
+      ],
+    ];
+  }
+
+  Future<void> _startReunion(ReunionView r) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l.reunionTitle),
+        content: Text([
+          l.reunionConfirm(r.groupName, fmt.compact(r.audience.fans),
+              (r.audience.fame * 100).round()),
+          l.reunionHint(r.groupName),
+        ].join('\n\n')),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(d, false), child: Text(l.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(d, true),
+              child: Text(l.reunionStart)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await context.careerRead.act(Cmd.startReunion());
+      if (mounted) {
+        showInfo(context, l.reunionStarted(r.groupName),
+            icon: Icons.groups_rounded);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  /// A vault song out as the old group's single (docs K194).
+  Future<void> _reunionSingle(ReunionView r) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.careerRead;
+    final songs = [..._vault]
+      ..sort((a, b) => b.estimatedGrade.compareTo(a.estimatedGrade));
+    final id = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: ListView(shrinkWrap: true, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.reunionSongTitle,
+                style: Theme.of(c).textTheme.titleLarge),
+          ),
+          if (songs.isEmpty)
+            Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(l.noSongsToRelease)),
+          for (final s in songs)
+            ListTile(
+              title: Text(s.title),
+              subtitle: Text('${fmt.songGrade(s)} · ${fmt.genres(s.genres)}'),
+              onTap: () => Navigator.pop(c, s.id),
+            ),
+        ]),
+      ),
+    );
+    if (id == null || !mounted) return;
+    try {
+      final costs = await career.read(Cmd.reunionCosts());
+      if (!mounted) return;
+      final campaign = await pickCampaign(context, career,
+          costs: costs,
+          header: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(l.reunionCampaign(r.groupName),
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+          ));
+      if (campaign == null || !mounted) return;
+      await career.act(Cmd.releaseReunionSingle(id, campaign));
+      if (mounted) {
+        final title = songs.firstWhere((s) => s.id == id).title;
+        showInfo(context, l.reunionSingleDone(title, r.groupName),
+            icon: Icons.music_note_rounded);
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
   }
 
   Future<void> _sellCatalog(CatalogOfferView c) async {
@@ -884,6 +1135,7 @@ class _CareerScreenState extends State<CareerScreen> {
                   const SizedBox(height: 6),
                   Text(l.lineupHint,
                       style: TextStyle(color: AppColors.textMuted)),
+                  if (_lineup case final v?) ..._lineSplit(v),
                   for (final m in _members) ...[
                     const SizedBox(height: 14),
                     Text(m.name,
@@ -924,7 +1176,7 @@ class _CareerScreenState extends State<CareerScreen> {
                             : () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) => MemberAlbumScreen(
+                                    builder: (c) => SideAlbumScreen.member(c,
                                         state: career,
                                         member: m,
                                         songs: _vault))),
@@ -950,6 +1202,16 @@ class _CareerScreenState extends State<CareerScreen> {
                         label: Text(l.memberRolesButton),
                         onPressed: career.busy ? null : () => _editRoles(m),
                       ),
+                      // A morale bonus (docs K195).
+                      if (_lineup case final v?)
+                        TextButton.icon(
+                          icon: const Icon(Icons.favorite_outline_rounded,
+                              size: 18),
+                          label: Text(l.memberCheer(fmt.money(v.cheerCents))),
+                          onPressed: career.busy || !v.canCheer
+                              ? null
+                              : () => _cheer(m),
+                        ),
                     ]),
                     // Leaving the group (docs K191).
                     Align(

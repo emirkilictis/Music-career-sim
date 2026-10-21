@@ -130,6 +130,8 @@ class SaveStore {
     w.formerGroupId = (meta['formerGroup'] as num?)?.toInt() ?? -1;
     w.playerSinceWeek = (meta['playerSince'] as num?)?.toInt() ?? 0;
     w.careerStreamsBase = (meta['careerBase'] as num?)?.toDouble() ?? 0;
+    // The reunion (docs K194).
+    Reunions.decode(w, meta['reunion'] as String?);
     if (meta['artistChart'] case final String s when s.isNotEmpty) {
       final j = jsonDecode(s) as List;
       w.artistChartPrev = List.unmodifiable((j[0] as List).cast<int>());
@@ -399,6 +401,7 @@ class SaveStore {
       'formerGroup': w.formerGroupId,
       'playerSince': w.playerSinceWeek,
       'careerBase': w.careerStreamsBase,
+      'reunion': Reunions.encode(w),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

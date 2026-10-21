@@ -47,6 +47,59 @@ enum MemberRole {
         ];
 }
 
+/// How the player's group splits a song's lines (docs K193). Index order
+/// is stored.
+enum LineSplit {
+  /// Everyone sings about as much: fans of every member are happy.
+  even,
+
+  /// The center sings more.
+  featured,
+
+  /// The center carries the song; the others get a line or two.
+  center;
+
+  /// What the songs gain from the center carrying them, at a center of
+  /// 70 popularity.
+  double get lift => switch (this) {
+        even => 0,
+        featured => 0.03,
+        center => 0.07,
+      };
+
+  /// What the center gains a week, and what the others lose.
+  double get centerGain => switch (this) {
+        even => 0,
+        featured => 0.25,
+        center => 0.5,
+      };
+  double get othersLoss => switch (this) {
+        even => 0,
+        featured => 0.05,
+        center => 0.1,
+      };
+
+  /// Morale a week for the center and for the others (docs K195).
+  double get centerMorale => switch (this) {
+        even => 0.4,
+        featured => 0.15,
+        center => 0.3,
+      };
+  double get othersMorale => switch (this) {
+        even => 0.4,
+        featured => -0.25,
+        center => -0.6,
+      };
+
+  /// What the fandom's devotion does a week: fans of every member like a
+  /// fair split and resent a one-person group.
+  double get devotion => switch (this) {
+        even => 0.0003,
+        featured => 0,
+        center => -0.0006,
+      };
+}
+
 /// The player's group's lineup (docs K192): each member's roles and their
 /// own popularity, which the label can push for one member at a time. A
 /// popular member draws the group's fans: their solo records start
@@ -68,6 +121,17 @@ abstract final class Lineups {
   /// A member this much more popular than the average is the group's ace.
   static const aceAt = 1.5;
 
+  /// Morale (docs K195): where it settles on its own and how fast, what
+  /// the label's push does to it, what a solo record and a bonus give,
+  /// and how often a bonus can be paid.
+  static const moraleRest = 70.0, moraleDrift = 0.02;
+  static const focusMorale = 0.4, focusResent = 0.8;
+  static const lowPopAt = 30.0, lowPopMorale = 0.3;
+  static const soloMorale = 10.0, cheerMorale = 25.0, cheerEveryWeeks = 8;
+
+  /// A morale bonus: a fixed part and a part that grows with the fandom.
+  static int cheerCostCents(Artist a) => 5000000 + (a.coreFans * 2).round();
+
   /// The popularity [roles] give a member.
   static double target(int roles) {
     var t = basePop;
@@ -87,6 +151,11 @@ abstract final class Lineups {
   static void ensure(World w, Artist a) {
     final n = a.members.length;
     if (!a.kind.isGroup || n == 0) return;
+    if (a.memberMorale.length != n) {
+      a.memberMorale
+        ..clear()
+        ..addAll(List.filled(n, moraleRest));
+    }
     if (a.memberRoles.length == n && a.memberPop.length == n) return;
     a.memberRoles
       ..clear()
@@ -145,12 +214,40 @@ abstract final class Lineups {
     return (x * x).clamp(0.3, 2.5);
   }
 
-  /// The week for the player's group: the pushed member rises, the rest
-  /// drift back to what their roles give them.
+  static LineSplit splitOf(Artist a) => LineSplit.values[a.lineSplit];
+
+  /// The member the songs are built around: the one the label pushes, or
+  /// else the most popular.
+  static int center(Artist a) {
+    if (a.focusMember >= 0 && a.focusMember < a.memberPop.length) {
+      return a.focusMember;
+    }
+    var best = 0;
+    for (var i = 1; i < a.memberPop.length; i++) {
+      if (a.memberPop[i] > a.memberPop[best]) best = i;
+    }
+    return best;
+  }
+
+  /// What the player's group's songs gain from their line split (docs
+  /// K193): more with a popular center.
+  static double lineLift(World w, Artist a) {
+    if (!a.kind.isGroup || a.memberPop.isEmpty) return 0;
+    final split = splitOf(a);
+    if (split == LineSplit.even) return 0;
+    final pop = a.memberPop[center(a)];
+    return split.lift * (pop / 70).clamp(0.3, 1.4);
+  }
+
+  /// The week for the player's group: the pushed member and the center
+  /// rise, the rest drift back to what their roles give them; morale
+  /// follows how fairly they are treated (docs K193, K195).
   static void weekly(World w, Artist a) {
     if (!a.kind.isGroup || a.members.isEmpty) return;
     ensure(w, a);
     final f = a.focusMember;
+    final split = splitOf(a);
+    final c = center(a);
     for (var i = 0; i < a.memberPop.length; i++) {
       var p = a.memberPop[i];
       final t = target(a.memberRoles[i]);
@@ -160,8 +257,45 @@ abstract final class Lineups {
       } else if (f >= 0) {
         p -= focusLoss;
       }
+      p += i == c ? split.centerGain * (1 - p / 100) : -split.othersLoss;
       a.memberPop[i] = p.clamp(0.0, 100.0);
+
+      var m = a.memberMorale[i];
+      m += moraleDrift * (moraleRest - m);
+      if (f >= 0) m += f == i ? focusMorale : -focusResent;
+      m += i == c ? split.centerMorale : split.othersMorale;
+      if (a.memberPop[i] < lowPopAt) m -= lowPopMorale;
+      a.memberMorale[i] = m.clamp(0.0, 100.0);
     }
+    a.devotion = (a.devotion + split.devotion).clamp(0.0, 1.0);
+    w.dirtyArtists.add(a.id);
+  }
+
+  /// Sets how the group's songs split their lines (docs K193).
+  static void setLineSplit(World w, Artist a, LineSplit split) {
+    if (!a.kind.isGroup) throw ActionException('Not a group');
+    a.lineSplit = split.index;
+    w.dirtyArtists.add(a.id);
+  }
+
+  /// Whether a morale bonus can be paid now.
+  static bool canCheer(World w, Artist a) =>
+      a.kind.isGroup && w.week - a.cheerWeek >= cheerEveryWeeks;
+
+  /// Pays [member] a bonus and listens to them (docs K195).
+  static void cheer(World w, Artist a, int member) {
+    if (member < 0 || member >= a.members.length) {
+      throw ActionException('No such member');
+    }
+    if (!canCheer(w, a)) throw ActionException('Too soon');
+    final cost = cheerCostCents(a);
+    if (a.moneyCents < cost) throw ActionException('Not enough money');
+    ensure(w, a);
+    a
+      ..moneyCents -= cost
+      ..cheerWeek = w.week;
+    a.memberMorale[member] =
+        math.min(100.0, a.memberMorale[member] + cheerMorale);
     w.dirtyArtists.add(a.id);
   }
 
@@ -207,13 +341,25 @@ abstract final class Lineups {
     ensure(w, a);
     if (member < 0 || member >= a.memberPop.length) return;
     a.memberPop[member] = math.min(100.0, a.memberPop[member] + soloGain);
+    a.memberMorale[member] =
+        math.min(100.0, a.memberMorale[member] + soloMorale);
     w.dirtyArtists.add(a.id);
+  }
+
+  /// A member joins at the end of the lineup (a reunion, docs K194).
+  static void addMember(Artist a,
+      {int roles = 0, double pop = 50, double morale = moraleRest}) {
+    if (a.memberRoles.isEmpty) return;
+    a.memberRoles.add(roles);
+    a.memberPop.add(pop);
+    if (a.memberMorale.isNotEmpty) a.memberMorale.add(morale);
   }
 
   /// [member] left: their place in the lineup goes.
   static void remove(Artist a, int member) {
     if (member < a.memberRoles.length) a.memberRoles.removeAt(member);
     if (member < a.memberPop.length) a.memberPop.removeAt(member);
+    if (member < a.memberMorale.length) a.memberMorale.removeAt(member);
     if (a.focusMember == member) {
       a
         ..focusMember = -1
@@ -230,6 +376,10 @@ abstract final class Lineups {
           'p': [for (final p in a.memberPop) (p * 100).round() / 100],
           'f': a.focusMember,
           'fw': a.focusSinceWeek,
+          'ls': a.lineSplit,
+          'm': [for (final m in a.memberMorale) (m * 100).round() / 100],
+          'cw': a.cheerWeek,
+          'rw': a.rumorWeek,
         });
 
   static void decode(Artist a, String? s) {
@@ -239,6 +389,11 @@ abstract final class Lineups {
     a.memberPop.addAll([for (final p in j['p'] as List) (p as num).toDouble()]);
     a
       ..focusMember = j['f'] as int
-      ..focusSinceWeek = j['fw'] as int;
+      ..focusSinceWeek = j['fw'] as int
+      ..lineSplit = j['ls'] as int? ?? 0
+      ..cheerWeek = j['cw'] as int? ?? -1000
+      ..rumorWeek = j['rw'] as int? ?? -1000;
+    a.memberMorale.addAll(
+        [for (final m in j['m'] as List? ?? const []) (m as num).toDouble()]);
   }
 }

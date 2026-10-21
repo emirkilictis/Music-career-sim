@@ -93,7 +93,7 @@ abstract final class Credits {
     if (group.moneyCents < cost) throw ActionException('Not enough money');
     final m = memberArtist(w, group, member);
     group.moneyCents -= cost;
-    final song = _transfer(w, group, m, s);
+    final song = transfer(w, group, m, s);
     Lineups.onSolo(w, group, member);
     Actions.releaseSingle(w, m, song,
         campaign: campaign, prepaid: true, paidCents: cost);
@@ -101,8 +101,9 @@ abstract final class Credits {
   }
 
   /// Moves [group]'s vault song [s] to member [m]: the member's own
-  /// recording of it; the group's version is gone.
-  static Song _transfer(World w, Artist group, Artist m, Song s) {
+  /// recording of it; the group's version is gone. Also takes a solo
+  /// player's song to their old group for a reunion (docs K194).
+  static Song transfer(World w, Artist group, Artist m, Song s) {
     final song = Song(
       id: w.songs.length,
       title: s.title,
@@ -151,7 +152,7 @@ abstract final class Credits {
     if (group.moneyCents < cost) throw ActionException('Not enough money');
     final m = memberArtist(w, group, member);
     group.moneyCents -= cost;
-    final ids = [for (final s in songs) _transfer(w, group, m, s).id];
+    final ids = [for (final s in songs) transfer(w, group, m, s).id];
     Lineups.onSolo(w, group, member);
     return Actions.releaseAlbum(w, m, title, ids,
         type: type, campaign: campaign, prepaid: true, paidCents: cost);

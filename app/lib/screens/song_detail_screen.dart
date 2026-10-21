@@ -328,8 +328,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     final picked = await showModalBottomSheet<Mood>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (c) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
+        child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
             child: Text(l.moodTitle, style: Theme.of(c).textTheme.titleLarge),
@@ -345,7 +347,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   l.moodOdds((o.fit * 100).round(), (o.chance * 100).round())),
               onTap: () => Navigator.pop(c, o.mood),
             ),
-        ]),
+        ])),
       ),
     );
     if (picked == null || !mounted) return;
@@ -423,8 +425,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     final v = await showModalBottomSheet<SongVersion>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (c) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
+        child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Text(l.newVersion, style: Theme.of(c).textTheme.titleLarge),
@@ -456,7 +460,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                 onTap: () => Navigator.pop(c, v),
               ),
           const SizedBox(height: 8),
-        ]),
+        ])),
       ),
     );
     if (v == null || !mounted) return;
@@ -1227,7 +1231,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Tag(l.canvasOn((SongCanvas.skipCut * 100).round()),
+                        child: Tag(
+                            l.canvasOn((SongCanvas.skipCut * 100).round()),
                             icon: Icons.slow_motion_video_rounded,
                             color: AppColors.mint),
                       ),
@@ -1244,8 +1249,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                               ? null
                               : () => _tool(Cmd.addCanvas(s.id)),
                           icon: const Icon(Icons.slow_motion_video_rounded),
-                          label:
-                              Text(l.canvasButton(fmt.money(SongCanvas.costCents))),
+                          label: Text(
+                              l.canvasButton(fmt.money(SongCanvas.costCents))),
                         ),
                       ),
                     ],

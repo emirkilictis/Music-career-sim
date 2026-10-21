@@ -81,6 +81,11 @@ class EventIcon extends StatelessWidget {
       SalesMilestone() => (Icons.album_rounded, AppColors.gold),
       ListenersMilestone() =>
         (Icons.headphones_rounded, platformColor(MusicPlatform.streamify)),
+      MemberUnhappy() => (Icons.sentiment_dissatisfied_rounded, AppColors.peach),
+      MemberQuit() => (Icons.person_remove_rounded, AppColors.coral),
+      RenewalSoon() => (Icons.event_note_rounded, AppColors.gold),
+      RenewalDone() => (Icons.assignment_turned_in_rounded, AppColors.mint),
+      ReunionOver() => (Icons.groups_rounded, AppColors.lilac),
       ThisIsMade() =>
         (Icons.queue_music_rounded, platformColor(MusicPlatform.streamify)),
       AlbumStreamMilestone() =>

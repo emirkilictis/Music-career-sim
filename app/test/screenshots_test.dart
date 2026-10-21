@@ -949,6 +949,15 @@ void main() {
     await Scrollable.ensureVisible(tester.element(members), alignment: 0.05);
     await tester.pumpAndSettle();
     await shot(tester, '15s_member_solos');
+    // Songs built around one member (docs K193).
+    final star = _ci('One star');
+    await tester.scrollUntilVisible(star, -300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(star), alignment: 0.3);
+    await tester.pumpAndSettle();
+    await tester.tap(star);
+    await tester.pumpAndSettle();
+    await shot(tester, '15x_line_split');
     final club = _ci('Fan club');
     await tester.scrollUntilVisible(club, -300,
         scrollable: find.byType(Scrollable).first);
@@ -977,6 +986,30 @@ void main() {
     expect(find.text('Starlight'), findsWidgets);
     await tab(tester, 'Home');
     await shot(tester, '15w_solo_home');
+    // Years later, the reunion (docs K194).
+    await c.run((s) => s.world.playerSinceWeek -= Reunions.gapWeeks + 5 * 52);
+    final careerState =
+        Scope.read<CareerState>(tester.element(find.text('Next week')));
+    await careerState.refresh();
+    await tester.pumpAndSettle();
+    await tab(tester, 'Career');
+    final reunite = _ci('Get back together');
+    await tester.scrollUntilVisible(reunite, 300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(reunite), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(reunite);
+    await tester.pumpAndSettle();
+    await shot(tester, '15y_reunion');
+    await tester.tap(_ci('Reunite'));
+    await tester.pumpAndSettle();
+    expect(find.text('Starlight is back together!'), findsOneWidget);
+    final on = find.textContaining('Reunion on');
+    await tester.scrollUntilVisible(on, -300,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(on), alignment: 0.3);
+    await tester.pumpAndSettle();
+    await shot(tester, '15z_reunion_on');
   });
 }
 

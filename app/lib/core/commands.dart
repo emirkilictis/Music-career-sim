@@ -232,6 +232,21 @@ abstract final class Cmd {
       (s) => s.setMemberFocus(member);
   static SessionCmd<void> setMemberRoles(int member, Set<MemberRole> roles) =>
       (s) => s.setMemberRoles(member, roles);
+  static SessionCmd<LineupView?> lineup() => (s) => s.lineup;
+  static SessionCmd<void> setLineSplit(LineSplit split) =>
+      (s) => s.setLineSplit(split);
+  static SessionCmd<void> cheerMember(int member) =>
+      (s) => s.cheerMember(member);
+  static SessionCmd<ReunionView?> reunion() => (s) => s.reunion;
+  static SessionCmd<void> startReunion() => (s) => s.startReunion();
+  static SessionCmd<List<int>> reunionCosts() => (s) => s.reunionCosts;
+  static SessionCmd<void> releaseReunionSingle(
+          int songId, Campaign campaign) =>
+      (s) => s.releaseReunionSingle(songId, campaign: campaign);
+  static SessionCmd<AlbumView> releaseReunionAlbum(String title,
+          List<int> songIds, AlbumType type, Campaign campaign) =>
+      (s) => s.releaseReunionAlbum(title, songIds,
+          type: type, campaign: campaign);
   static SessionCmd<GoSoloView> goSoloPreview(int member) =>
       (s) => s.goSoloPreview(member);
   static SessionCmd<void> goSolo(int member) => (s) => s.goSolo(member);

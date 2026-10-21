@@ -2532,6 +2532,122 @@ class GameSession {
     );
   }
 
+  /// The week's news from the player's group's members (docs K195) and
+  /// the end of a reunion (docs K194).
+  List<GameEvent> _groupNews() {
+    final out = <GameEvent>[
+      for (final n in MemberMorale.weekly(world, _p))
+        switch (n.kind) {
+          MemberNewsKind.unhappy => MemberUnhappy(n.names.first),
+          MemberNewsKind.quit => MemberQuit(n.names.first, n.fansLost),
+          MemberNewsKind.renewalSoon => RenewalSoon(n.names),
+          MemberNewsKind.renewalDone =>
+            RenewalDone(n.stayed, n.names, n.fansLost),
+        }
+    ];
+    if (Reunions.endIfDue(world)) {
+      final g = Reunions.group(world)!;
+      out.add(ReunionOver(g.id, g.isRetired));
+    }
+    return out;
+  }
+
+  /// How the player's group splits its lines, the members' morale and
+  /// the contracts (docs K193, K195); null for a solo artist.
+  LineupView? get lineup {
+    if (!_p.kind.isGroup || _p.members.isEmpty) return null;
+    Lineups.ensure(world, _p);
+    return LineupView.of(world, _p);
+  }
+
+  /// Sets how the group's songs split their lines (docs K193).
+  void setLineSplit(LineSplit split) {
+    if (!_p.kind.isGroup) throw GameException('notGroup', 'Not a group');
+    Lineups.setLineSplit(world, _p, split);
+    _saveNow();
+  }
+
+  /// Pays member [member] a bonus to lift their morale (docs K195).
+  void cheerMember(int member) {
+    if (!_p.kind.isGroup) throw GameException('notGroup', 'Not a group');
+    if (member < 0 || member >= _p.members.length) {
+      throw GameException('noMember', 'No such member');
+    }
+    if (!Lineups.canCheer(world, _p)) {
+      throw GameException('cheerSoon', 'A bonus every few weeks');
+    }
+    _requireMoney(Lineups.cheerCostCents(_p));
+    Lineups.cheer(world, _p, member);
+    _saveNow();
+  }
+
+  /// The reunion with the group the player left (docs K194); null if
+  /// they never left one.
+  ReunionView? get reunion {
+    final g = Reunions.group(world);
+    if (g == null) return null;
+    return ReunionView.of(world, g);
+  }
+
+  void startReunion() {
+    switch (Reunions.block(world)) {
+      case ReunionBlock.noGroup:
+        throw GameException('noReunion', 'No group to get back together');
+      case ReunionBlock.tooSoon:
+        throw GameException('reunionSoon', 'Not long enough apart');
+      case ReunionBlock.active:
+        throw GameException('reunionOn', 'The reunion is on');
+      case null:
+    }
+    Reunions.start(world);
+    _rivalSales = null;
+    _saveNow();
+  }
+
+  /// What each campaign costs on a reunion record.
+  List<int> get reunionCosts => [
+        for (final c in Campaign.values) Reunions.costCents(world, _p, c),
+      ];
+
+  void releaseReunionSingle(int songId,
+      {Campaign campaign = Campaign.standard}) {
+    final s = _ownSong(songId);
+    _reunionCheck([s], campaign);
+    Reunions.releaseSingle(world, _p, s, campaign: campaign);
+    _saveNow();
+  }
+
+  AlbumView releaseReunionAlbum(String title, List<int> songIds,
+      {AlbumType type = AlbumType.album,
+      Campaign campaign = Campaign.standard}) {
+    if (!Credits.memberAlbumTypes.contains(type)) {
+      throw GameException('invalidType', 'An EP or an album');
+    }
+    final t = _checkAlbum(title, songIds, type, const [0]);
+    final songs = [for (final id in songIds) world.songs[id]];
+    _reunionCheck(songs, campaign);
+    final al = Reunions.releaseAlbum(world, _p, t, songs,
+        type: type, campaign: campaign);
+    _saveNow();
+    return AlbumView.of(world, al);
+  }
+
+  void _reunionCheck(List<Song> songs, Campaign campaign) {
+    if (!Reunions.active(world)) {
+      throw GameException('noReunion', 'No reunion on');
+    }
+    for (final s in songs) {
+      if (s.status != SongStatus.vault ||
+          _p.scheduled.any((sr) => sr.songIds.contains(s.id))) {
+        throw GameException('notInVault', 'Only unreleased songs');
+      }
+    }
+    if (campaign.index > Distribution.maxCampaign(_p).index) {
+      throw GameException('campaignLocked', 'The label cannot run this');
+    }
+    _requireMoney(Reunions.costCents(world, _p, campaign));
+  }
+
   /// The group the player left, and whether it broke up (docs K191).
   (ArtistView, bool)? get formerGroup {
     final id = world.formerGroupId;
@@ -3748,6 +3864,7 @@ class GameSession {
       }
     }
     events.addAll(_streamingNews());
+    events.addAll(_groupNews());
     // The discovery mixes (docs K119).
     for (final id in w.playerSongIds) {
       final s = w.songs[id];

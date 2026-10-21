@@ -241,6 +241,8 @@ class Simulator {
     final thisIsLifts = ThisIs.lifts(w);
     // The player's label pushes its signees further (docs K169).
     final signed = Imprints.signedIds(w);
+    // A group's songs built around a popular center (docs K193).
+    final lineLift = w.player == null ? 0.0 : Lineups.lineLift(w, w.player!);
 
     // 5. Raw demand for active songs, split by region.
     final ids = w.activeSongIds;
@@ -413,8 +415,13 @@ class Simulator {
               StreamingTools.preSaveLift(s, p, promoAge) +
               SongCanvas.liftOf(s);
       final videoLift = s.videoPower * videoEra;
-      final lifts =
-          hypeLift + womLift + listLift + versionLift + algoLift + videoLift;
+      final lifts = hypeLift +
+          womLift +
+          listLift +
+          versionLift +
+          algoLift +
+          videoLift +
+          (p.tier == ArtistTier.player ? lineLift : 0);
       final stacked = c.stackedLift(lifts);
       final exposure = (c.baseExposure +
               c.fameExposure * p.fame +

@@ -8,24 +8,57 @@ import '../ui/palette.dart';
 import '../widgets/common.dart';
 import 'releases_tab.dart';
 
-/// A member's solo EP or album from the group's vault (docs K173).
-class MemberAlbumScreen extends StatefulWidget {
-  const MemberAlbumScreen(
+/// An EP or album from the vault under another name: a member's solo
+/// record (docs K173), or the old group's on a reunion (docs K194).
+class SideAlbumScreen extends StatefulWidget {
+  const SideAlbumScreen(
       {super.key,
       required this.state,
-      required this.member,
-      required this.songs});
+      required this.songs,
+      required this.title,
+      required this.hint,
+      required this.campaignHeader,
+      required this.costs,
+      required this.release,
+      required this.done,
+      required this.button});
+
+  /// A member's solo EP or album (docs K173).
+  factory SideAlbumScreen.member(BuildContext context,
+      {required CareerState state,
+      required MemberView member,
+      required List<SongView> songs}) {
+    final l = context.l10n;
+    return SideAlbumScreen(
+      state: state,
+      songs: songs,
+      title: l.memberAlbumScreen(member.name),
+      hint: l.memberAlbumHint(member.name),
+      campaignHeader: l.memberSoloCampaign(member.name),
+      costs: Cmd.memberSoloCosts(member.index),
+      release: (title, ids, type, campaign) =>
+          Cmd.releaseMemberAlbum(member.index, title, ids, type, campaign),
+      done: (al) => l.memberAlbumDone(al.title, member.name),
+      button: l.memberAlbumButton,
+    );
+  }
+
   final CareerState state;
-  final MemberView member;
 
   /// Vault songs not set for a release.
   final List<SongView> songs;
+  final String title, hint, campaignHeader, button;
+  final SessionCmd<List<int>> costs;
+  final SessionCmd<AlbumView> Function(
+          String title, List<int> songIds, AlbumType type, Campaign campaign)
+      release;
+  final String Function(AlbumView album) done;
 
   @override
-  State<MemberAlbumScreen> createState() => _MemberAlbumScreenState();
+  State<SideAlbumScreen> createState() => _SideAlbumScreenState();
 }
 
-class _MemberAlbumScreenState extends State<MemberAlbumScreen> {
+class _SideAlbumScreenState extends State<SideAlbumScreen> {
   final _title = TextEditingController();
   final List<int> _picked = [];
   AlbumType _type = AlbumType.ep;
@@ -37,26 +70,23 @@ class _MemberAlbumScreenState extends State<MemberAlbumScreen> {
   }
 
   Future<void> _release() async {
-    final l = context.l10n;
     final career = widget.state;
-    final m = widget.member;
     try {
-      final costs = await career.read(Cmd.memberSoloCosts(m.index));
+      final costs = await career.read(widget.costs);
       if (!mounted) return;
       final campaign = await pickCampaign(context, career,
           costs: costs,
           header: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(l.memberSoloCampaign(m.name),
+            child: Text(widget.campaignHeader,
                 style: const TextStyle(fontWeight: FontWeight.w700)),
           ));
       if (campaign == null || !mounted) return;
-      final al = await career.act(Cmd.releaseMemberAlbum(
-          m.index, _title.text, List.of(_picked), _type, campaign));
+      final al = await career
+          .act(widget.release(_title.text, List.of(_picked), _type, campaign));
       if (!mounted) return;
       Navigator.pop(context);
-      showInfo(context, l.memberAlbumDone(al.title, m.name),
-          icon: Icons.person_outline_rounded);
+      showInfo(context, widget.done(al), icon: Icons.person_outline_rounded);
     } catch (e) {
       if (mounted) showError(context, e);
     }
@@ -72,12 +102,11 @@ class _MemberAlbumScreenState extends State<MemberAlbumScreen> {
     final songs = [...widget.songs]
       ..sort((a, b) => b.estimatedGrade.compareTo(a.estimatedGrade));
     return Scaffold(
-      appBar: AppBar(title: Text(l.memberAlbumScreen(widget.member.name))),
+      appBar: AppBar(title: Text(widget.title)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(l.memberAlbumHint(widget.member.name),
-              style: TextStyle(color: AppColors.textMuted)),
+          Text(widget.hint, style: TextStyle(color: AppColors.textMuted)),
           const SizedBox(height: 12),
           TextField(
             controller: _title,
@@ -116,7 +145,7 @@ class _MemberAlbumScreenState extends State<MemberAlbumScreen> {
           const SizedBox(height: 16),
           FilledButton(
             onPressed: ok && !widget.state.busy ? _release : null,
-            child: Text(l.memberAlbumButton),
+            child: Text(widget.button),
           ),
         ],
       ),

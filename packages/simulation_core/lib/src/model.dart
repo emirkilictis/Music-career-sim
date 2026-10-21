@@ -651,6 +651,14 @@ class Artist {
   int focusMember = -1;
   int focusSinceWeek = -1;
 
+  /// How the group's songs split their lines ([LineSplit] index; docs
+  /// K193), each member's morale (0–100; docs K195), and the weeks of the
+  /// last morale bonus and of the last rumour about someone leaving.
+  int lineSplit = 0;
+  final List<double> memberMorale = [];
+  int cheerWeek = -1000;
+  int rumorWeek = -1000;
+
   /// Per-region accounting, layout [ArtistReg]. Catalog indices and their
   /// settle markers drive lazy accrual (retired artists settle lazily, so a
   /// long history of retired artists costs nothing per week).

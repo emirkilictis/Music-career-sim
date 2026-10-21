@@ -180,6 +180,19 @@ void main(List<String> args) {
                 if (r.nextInt(4) == 0) x
             }),
         'members': () => g.members,
+        'lineSplit': () => g.setLineSplit(_pick(r, LineSplit.values)),
+        'cheer': () => g.cheerMember(r.nextInt(4)),
+        'reunion': () {
+          // Years apart, sometimes (docs K194).
+          if (w.formerGroupId >= 0 && r.nextInt(4) == 0) {
+            w.playerSinceWeek -= Reunions.gapWeeks;
+          }
+          g.startReunion();
+        },
+        'reunionSingle': () => g.releaseReunionSingle(song()),
+        'reunionAlbum': () => g.releaseReunionAlbum('R$wk',
+            (vault..shuffle(r)).take(3 + r.nextInt(6)).toList(),
+            type: _pick(r, Credits.memberAlbumTypes)),
         'goSolo': () {
           // Rarely: a split changes the whole career (docs K191).
           if (r.nextInt(6) == 0) g.goSolo(r.nextInt(4));
@@ -232,6 +245,8 @@ void main(List<String> args) {
         g.artistPage(_pick(r, rivals));
         g.thisIs(p.id);
         g.goSoloPreview(r.nextInt(4));
+        g.lineup;
+        g.reunion;
         g.thisIs(_pick(r, rivals));
         for (final role in CollaboratorRole.values) {
           g.collaborators(role);

@@ -293,6 +293,55 @@ class ThisIsMade extends GameEvent {
   bool get isMajor => true;
 }
 
+/// Word is out that member [name] wants to leave the group (docs K195).
+class MemberUnhappy extends GameEvent {
+  const MemberUnhappy(this.name);
+  final String name;
+  @override
+  bool get isMajor => true;
+}
+
+/// Member [name] left the group for a career of their own, taking
+/// [fansLost] of its fans (docs K195).
+class MemberQuit extends GameEvent {
+  const MemberQuit(this.name, this.fansLost);
+  final String name;
+  final double fansLost;
+  @override
+  bool get isMajor => true;
+}
+
+/// The members' contracts come up in a few weeks; [atRisk] may not sign
+/// again (docs K195).
+class RenewalSoon extends GameEvent {
+  const RenewalSoon(this.atRisk);
+  final List<String> atRisk;
+  @override
+  bool get isMajor => atRisk.isNotEmpty;
+}
+
+/// The contracts were renewed: [stayed] members signed, [left] did not,
+/// taking [fansLost] of the fans (docs K195).
+class RenewalDone extends GameEvent {
+  const RenewalDone(this.stayed, this.left, this.fansLost);
+  final int stayed;
+  final List<String> left;
+  final double fansLost;
+  @override
+  bool get isMajor => true;
+}
+
+/// The reunion with group [groupId] is over (docs K194).
+class ReunionOver extends GameEvent {
+  const ReunionOver(this.groupId, this.ended);
+  final int groupId;
+
+  /// The group goes back to being over (it had ended before).
+  final bool ended;
+  @override
+  bool get isMajor => true;
+}
+
 /// A player album's tracks passed [streams] streams together (docs K156).
 class AlbumStreamMilestone extends GameEvent {
   const AlbumStreamMilestone(this.albumId, this.streams);
