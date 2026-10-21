@@ -4796,6 +4796,9 @@
       }
     }
   },
+  "toolsPlaylists": "Playlists",
+  "toolsAlgorithm": "The algorithm",
+  "toolsPromotion": "Ads and creators",
   "canvasHint": "Canvas: a few seconds of looping video behind the song in Streamify. People skip it less and share it more, so the algorithm plays it more too.",
   "canvasButton": "Add a Canvas ({cost})",
   "@canvasButton": {

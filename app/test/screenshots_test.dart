@@ -411,12 +411,27 @@ void main() {
     await Scrollable.ensureVisible(tester.element(tools), alignment: 0.15);
     await tester.pumpAndSettle();
     await shot(tester, '14f_streaming_tools');
-    await tester.tap(_ci('Buy streams'));
+    // The tools sit in groups (docs K198).
+    await tester.tap(find.widgetWithText(ExpansionTile, 'Ads and creators'));
+    await tester.pumpAndSettle();
+    final buy = _ci('Buy streams');
+    await tester.scrollUntilVisible(buy, 200,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(buy), alignment: 0.5);
+    await tester.pumpAndSettle();
+    await tester.tap(buy);
     await tester.pumpAndSettle();
     await shot(tester, '14g_buy_streams');
     await tester.tapAt(const Offset(200, 60));
     await tester.pumpAndSettle();
     // What independent curators said (docs K160).
+    final lists = find.widgetWithText(ExpansionTile, 'Playlists');
+    await tester.scrollUntilVisible(lists, -200,
+        scrollable: find.byType(Scrollable).first);
+    await Scrollable.ensureVisible(tester.element(lists), alignment: 0.3);
+    await tester.pumpAndSettle();
+    await tester.tap(lists);
+    await tester.pumpAndSettle();
     final answers = _ci('See their answers');
     await tester.scrollUntilVisible(answers, 300,
         scrollable: find.byType(Scrollable).first);

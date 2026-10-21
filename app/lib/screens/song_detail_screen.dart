@@ -1171,215 +1171,6 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           label: Text(l.mastersBuyButton(fmt.money(price))),
                         ),
                       ),
-                    // On the editorial playlists (docs K125).
-                    if (_playlists.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      Text(l.edOnPlaylists,
-                          style: const TextStyle(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 6),
-                      Wrap(spacing: 8, runSpacing: 8, children: [
-                        for (final pl in _playlists)
-                          ActionChip(
-                            avatar: Container(
-                                width: 14,
-                                height: 14,
-                                color: editorialColor(pl.playlist)),
-                            label: Text(
-                                '${pl.playlist.displayName} #${pl.position}'),
-                            onPressed: () => pushInCareer(
-                                context, EditorialPage(playlist: pl.playlist)),
-                          ),
-                      ]),
-                    ],
-                    if (s.canPitch) ...[
-                      const SizedBox(height: 8),
-                      Text(l.pitchHint,
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 13)),
-                      const SizedBox(height: 6),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: OutlinedButton.icon(
-                          onPressed: () => _tool(Cmd.pitchSong(s.id)),
-                          icon: const Icon(Icons.playlist_add_rounded),
-                          label: Text(l.pitchSong),
-                        ),
-                      ),
-                    ],
-                    // Mood playlists for songs already out (docs K186).
-                    if (s.canMood) ...[
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: OutlinedButton.icon(
-                          onPressed: () => _pitchMood(s),
-                          icon: const Icon(Icons.queue_music_rounded),
-                          label: Text(l.moodButton),
-                        ),
-                      ),
-                    ] else if (s.mood case final m?) ...[
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Tag(s.moodIn
-                            ? l.moodOnList(_moodName(m))
-                            : l.moodPassed(_moodName(m))),
-                      ),
-                    ],
-                    // A looping visual in the app (docs K190).
-                    if (s.canvas) ...[
-                      const SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Tag(
-                            l.canvasOn((SongCanvas.skipCut * 100).round()),
-                            icon: Icons.slow_motion_video_rounded,
-                            color: AppColors.mint),
-                      ),
-                    ] else if (s.canCanvas) ...[
-                      const SizedBox(height: 10),
-                      Text(l.canvasHint,
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 13)),
-                      const SizedBox(height: 6),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: OutlinedButton.icon(
-                          onPressed: widget.state.busy
-                              ? null
-                              : () => _tool(Cmd.addCanvas(s.id)),
-                          icon: const Icon(Icons.slow_motion_video_rounded),
-                          label: Text(
-                              l.canvasButton(fmt.money(SongCanvas.costCents))),
-                        ),
-                      ),
-                    ],
-                    // Independent curators (docs K160).
-                    if (s.curatorWeek >= 0) ...[
-                      const SizedBox(height: 10),
-                      if (!s.curatorAnswered)
-                        Tag(l.curatorsPending(s.curatorSent),
-                            icon: Icons.schedule_rounded)
-                      else ...[
-                        Text(
-                            l.curatorsResult(s.curatorAdds, s.curatorSent,
-                                fmt.compact(s.curatorReach)),
-                            style:
-                                const TextStyle(fontWeight: FontWeight.w700)),
-                        if (s.curatorStreams >= 1)
-                          Text(l.curatorsPlays(fmt.compact(s.curatorStreams)),
-                              style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 13)),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
-                            onPressed: () => _curatorAnswers(s),
-                            icon: const Icon(Icons.forum_outlined),
-                            label: Text(l.curatorsSeeAnswers),
-                          ),
-                        ),
-                      ],
-                    ],
-                    if (s.canCurators) ...[
-                      const SizedBox(height: 8),
-                      Text(l.curatorsHint,
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 13)),
-                      const SizedBox(height: 6),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: OutlinedButton.icon(
-                          onPressed: () => _curators(s),
-                          icon: const Icon(Icons.queue_music_rounded),
-                          label: Text(l.curatorsButton),
-                        ),
-                      ),
-                    ],
-                    // Creators on the short-video app (docs K131).
-                    if (s.creatorWeek >= 0) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                          switch (s.creatorResult) {
-                            CreatorResult.running => l.creatorsRunning(
-                                s.creatorTier.creators,
-                                widget.state.week - s.creatorWeek + 1,
-                                CreatorCampaign.weeks),
-                            CreatorResult.caughtOn => l.creatorsCaughtOn,
-                            CreatorResult.flopped => l.creatorsFlopped,
-                          },
-                          style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              color: s.creatorResult == CreatorResult.caughtOn
-                                  ? AppColors.mint
-                                  : null)),
-                    ] else if (s.creatorCosts.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      Text(l.creatorsTitle,
-                          style: const TextStyle(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 4),
-                      Text(l.creatorsHint,
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 12.5)),
-                      const SizedBox(height: 6),
-                      Wrap(spacing: 8, runSpacing: 8, children: [
-                        for (final e in s.creatorCosts.entries)
-                          ActionChip(
-                            avatar:
-                                const Icon(Icons.videocam_outlined, size: 16),
-                            label: Text(
-                                '${l.creatorsCount(e.key.creators)} · ${fmt.money(e.value)}'),
-                            onPressed: e.value > widget.state.player.moneyCents
-                                ? null
-                                : () => _tool(Cmd.runCreators(s.id, e.key)),
-                          ),
-                      ]),
-                    ],
-                    // The app's Marquee and Showcase (docs K147).
-                    if (s.marqueeCostCents case final cost?) ...[
-                      const SizedBox(height: 10),
-                      Text(l.marqueeTitle,
-                          style: const TextStyle(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 4),
-                      Text(l.marqueeHint(StreamingTools.marqueeWeeks),
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 12.5)),
-                      const SizedBox(height: 6),
-                      ActionChip(
-                        avatar: const Icon(Icons.campaign_outlined, size: 16),
-                        label: Text('${l.marqueeRun} · ${fmt.money(cost)}'),
-                        onPressed: cost > widget.state.player.moneyCents
-                            ? null
-                            : () => _tool(Cmd.runMarquee(s.id)),
-                      ),
-                    ] else if (s.marqueeWeek >= 0) ...[
-                      const SizedBox(height: 10),
-                      Text(l.marqueeRan(fmt.week(s.marqueeWeek)),
-                          style: TextStyle(color: AppColors.textMuted)),
-                    ],
-                    if (s.showcaseCostCents case final cost?) ...[
-                      const SizedBox(height: 10),
-                      Text(l.showcaseTitle,
-                          style: const TextStyle(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 4),
-                      Text(l.showcaseHint,
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 12.5)),
-                      const SizedBox(height: 6),
-                      ActionChip(
-                        avatar: const Icon(Icons.history_rounded, size: 16),
-                        label: Text('${l.showcaseRun} · ${fmt.money(cost)}'),
-                        onPressed: cost > widget.state.player.moneyCents
-                            ? null
-                            : () => _tool(Cmd.runShowcase(s.id)),
-                      ),
-                    ],
-                    if (s.autoplayOpen) ...[
-                      const SizedBox(height: 10),
-                      AutoplayLevelPicker(
-                          value: s.autoplayLevel,
-                          onChanged: (a) =>
-                              _tool(Cmd.setAutoplayLevel(s.id, a))),
-                    ],
                     if (s.preSaves >= 1)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
@@ -1399,20 +1190,261 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                               (s.autoplayLift * 100).round()),
                           style: TextStyle(
                               color: AppColors.textMuted, fontSize: 12.5)),
-                    if (s.streamingOpen &&
-                        s.releasedWeek >= 0 &&
-                        s.botStatus != BotStatus.caught &&
-                        s.botWeeksLeft == 0)
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton.icon(
-                          style: TextButton.styleFrom(
-                              foregroundColor: AppColors.coral),
-                          onPressed: () => _buyStreams(s),
-                          icon: const Icon(Icons.smart_toy_outlined),
-                          label: Text(l.buyStreams),
-                        ),
-                      ),
+                    // Grouped so the page is not one long list (docs K198).
+                    _ToolGroup(
+                      title: l.toolsPlaylists,
+                      icon: Icons.queue_music_rounded,
+                      children: [
+                        // On the editorial playlists (docs K125).
+                        if (_playlists.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Text(l.edOnPlaylists,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 6),
+                          Wrap(spacing: 8, runSpacing: 8, children: [
+                            for (final pl in _playlists)
+                              ActionChip(
+                                avatar: Container(
+                                    width: 14,
+                                    height: 14,
+                                    color: editorialColor(pl.playlist)),
+                                label: Text(
+                                    '${pl.playlist.displayName} #${pl.position}'),
+                                onPressed: () => pushInCareer(context,
+                                    EditorialPage(playlist: pl.playlist)),
+                              ),
+                          ]),
+                        ],
+                        if (s.canPitch) ...[
+                          const SizedBox(height: 8),
+                          Text(l.pitchHint,
+                              style: TextStyle(
+                                  color: AppColors.textMuted, fontSize: 13)),
+                          const SizedBox(height: 6),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _tool(Cmd.pitchSong(s.id)),
+                              icon: const Icon(Icons.playlist_add_rounded),
+                              label: Text(l.pitchSong),
+                            ),
+                          ),
+                        ],
+                        // Mood playlists for songs already out (docs K186).
+                        if (s.canMood) ...[
+                          const SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _pitchMood(s),
+                              icon: const Icon(Icons.queue_music_rounded),
+                              label: Text(l.moodButton),
+                            ),
+                          ),
+                        ] else if (s.mood case final m?) ...[
+                          const SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Tag(s.moodIn
+                                ? l.moodOnList(_moodName(m))
+                                : l.moodPassed(_moodName(m))),
+                          ),
+                        ],
+                        // Independent curators (docs K160).
+                        if (s.curatorWeek >= 0) ...[
+                          const SizedBox(height: 10),
+                          if (!s.curatorAnswered)
+                            Tag(l.curatorsPending(s.curatorSent),
+                                icon: Icons.schedule_rounded)
+                          else ...[
+                            Text(
+                                l.curatorsResult(s.curatorAdds, s.curatorSent,
+                                    fmt.compact(s.curatorReach)),
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700)),
+                            if (s.curatorStreams >= 1)
+                              Text(
+                                  l.curatorsPlays(
+                                      fmt.compact(s.curatorStreams)),
+                                  style: TextStyle(
+                                      color: AppColors.textMuted,
+                                      fontSize: 13)),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton.icon(
+                                onPressed: () => _curatorAnswers(s),
+                                icon: const Icon(Icons.forum_outlined),
+                                label: Text(l.curatorsSeeAnswers),
+                              ),
+                            ),
+                          ],
+                        ],
+                        if (s.canCurators) ...[
+                          const SizedBox(height: 8),
+                          Text(l.curatorsHint,
+                              style: TextStyle(
+                                  color: AppColors.textMuted, fontSize: 13)),
+                          const SizedBox(height: 6),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: OutlinedButton.icon(
+                              onPressed: () => _curators(s),
+                              icon: const Icon(Icons.queue_music_rounded),
+                              label: Text(l.curatorsButton),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    // Grouped so the page is not one long list (docs K198).
+                    _ToolGroup(
+                      title: l.toolsAlgorithm,
+                      icon: Icons.auto_awesome_rounded,
+                      children: [
+                        // A looping visual in the app (docs K190).
+                        if (s.canvas) ...[
+                          const SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Tag(
+                                l.canvasOn((SongCanvas.skipCut * 100).round()),
+                                icon: Icons.slow_motion_video_rounded,
+                                color: AppColors.mint),
+                          ),
+                        ] else if (s.canCanvas) ...[
+                          const SizedBox(height: 10),
+                          Text(l.canvasHint,
+                              style: TextStyle(
+                                  color: AppColors.textMuted, fontSize: 13)),
+                          const SizedBox(height: 6),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: OutlinedButton.icon(
+                              onPressed: widget.state.busy
+                                  ? null
+                                  : () => _tool(Cmd.addCanvas(s.id)),
+                              icon: const Icon(Icons.slow_motion_video_rounded),
+                              label: Text(l.canvasButton(
+                                  fmt.money(SongCanvas.costCents))),
+                            ),
+                          ),
+                        ],
+                        if (s.autoplayOpen) ...[
+                          const SizedBox(height: 10),
+                          AutoplayLevelPicker(
+                              value: s.autoplayLevel,
+                              onChanged: (a) =>
+                                  _tool(Cmd.setAutoplayLevel(s.id, a))),
+                        ],
+                      ],
+                    ),
+                    // Grouped so the page is not one long list (docs K198).
+                    _ToolGroup(
+                      title: l.toolsPromotion,
+                      icon: Icons.campaign_rounded,
+                      children: [
+                        // Creators on the short-video app (docs K131).
+                        if (s.creatorWeek >= 0) ...[
+                          const SizedBox(height: 10),
+                          Text(
+                              switch (s.creatorResult) {
+                                CreatorResult.running => l.creatorsRunning(
+                                    s.creatorTier.creators,
+                                    widget.state.week - s.creatorWeek + 1,
+                                    CreatorCampaign.weeks),
+                                CreatorResult.caughtOn => l.creatorsCaughtOn,
+                                CreatorResult.flopped => l.creatorsFlopped,
+                              },
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color:
+                                      s.creatorResult == CreatorResult.caughtOn
+                                          ? AppColors.mint
+                                          : null)),
+                        ] else if (s.creatorCosts.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Text(l.creatorsTitle,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 4),
+                          Text(l.creatorsHint,
+                              style: TextStyle(
+                                  color: AppColors.textMuted, fontSize: 12.5)),
+                          const SizedBox(height: 6),
+                          Wrap(spacing: 8, runSpacing: 8, children: [
+                            for (final e in s.creatorCosts.entries)
+                              ActionChip(
+                                avatar: const Icon(Icons.videocam_outlined,
+                                    size: 16),
+                                label: Text(
+                                    '${l.creatorsCount(e.key.creators)} · ${fmt.money(e.value)}'),
+                                onPressed: e.value >
+                                        widget.state.player.moneyCents
+                                    ? null
+                                    : () => _tool(Cmd.runCreators(s.id, e.key)),
+                              ),
+                          ]),
+                        ],
+                        // The app's Marquee and Showcase (docs K147).
+                        if (s.marqueeCostCents case final cost?) ...[
+                          const SizedBox(height: 10),
+                          Text(l.marqueeTitle,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 4),
+                          Text(l.marqueeHint(StreamingTools.marqueeWeeks),
+                              style: TextStyle(
+                                  color: AppColors.textMuted, fontSize: 12.5)),
+                          const SizedBox(height: 6),
+                          ActionChip(
+                            avatar:
+                                const Icon(Icons.campaign_outlined, size: 16),
+                            label: Text('${l.marqueeRun} · ${fmt.money(cost)}'),
+                            onPressed: cost > widget.state.player.moneyCents
+                                ? null
+                                : () => _tool(Cmd.runMarquee(s.id)),
+                          ),
+                        ] else if (s.marqueeWeek >= 0) ...[
+                          const SizedBox(height: 10),
+                          Text(l.marqueeRan(fmt.week(s.marqueeWeek)),
+                              style: TextStyle(color: AppColors.textMuted)),
+                        ],
+                        if (s.showcaseCostCents case final cost?) ...[
+                          const SizedBox(height: 10),
+                          Text(l.showcaseTitle,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700)),
+                          const SizedBox(height: 4),
+                          Text(l.showcaseHint,
+                              style: TextStyle(
+                                  color: AppColors.textMuted, fontSize: 12.5)),
+                          const SizedBox(height: 6),
+                          ActionChip(
+                            avatar: const Icon(Icons.history_rounded, size: 16),
+                            label:
+                                Text('${l.showcaseRun} · ${fmt.money(cost)}'),
+                            onPressed: cost > widget.state.player.moneyCents
+                                ? null
+                                : () => _tool(Cmd.runShowcase(s.id)),
+                          ),
+                        ],
+                        if (s.streamingOpen &&
+                            s.releasedWeek >= 0 &&
+                            s.botStatus != BotStatus.caught &&
+                            s.botWeeksLeft == 0)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.coral),
+                              onPressed: () => _buyStreams(s),
+                              icon: const Icon(Icons.smart_toy_outlined),
+                              label: Text(l.buyStreams),
+                            ),
+                          ),
+                      ],
+                    ),
                   ]),
             ),
           ],
@@ -1760,5 +1792,32 @@ class _SourcesBar extends StatelessWidget {
             ]),
       ]),
     ]);
+  }
+}
+
+/// A collapsible group of streaming tools on the song page (docs K198):
+/// closed by default, hidden when it has nothing to offer.
+class _ToolGroup extends StatelessWidget {
+  const _ToolGroup(
+      {required this.title, required this.icon, required this.children});
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    if (children.isEmpty) return const SizedBox.shrink();
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+        leading: Icon(icon, size: 20),
+        title: Text(title,
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+        children: children,
+      ),
+    );
   }
 }
