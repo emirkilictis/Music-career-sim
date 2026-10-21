@@ -538,6 +538,93 @@ class _CareerScreenState extends State<CareerScreen> {
   }
 
   /// Sells the catalog after asking (docs K153).
+  /// A member's roles, popularity and the label's push (docs K192).
+  List<Widget> _lineupLines(MemberView m) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    return [
+      if (m.roles.isNotEmpty)
+        Text(m.roles.map(fmt.memberRole).join(' · '),
+            style: const TextStyle(fontSize: 13)),
+      const SizedBox(height: 4),
+      ClipRRect(
+        borderRadius: BorderRadius.circular(2),
+        child: LinearProgressIndicator(
+          value: m.popularity / 100,
+          minHeight: 5,
+          color: m.focused ? AppColors.gold : AppColors.mint,
+          backgroundColor: AppColors.textMuted.withValues(alpha: 0.2),
+        ),
+      ),
+      const SizedBox(height: 2),
+      Text(
+          [
+            l.memberPopularity(m.popularity.round(), (m.share * 100).round()),
+            if (m.focused) l.memberFocused(m.focusWeeks),
+          ].join(' · '),
+          style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+    ];
+  }
+
+  Future<void> _act(SessionCmd<void> cmd) async {
+    try {
+      await context.careerRead.act(cmd);
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  /// Picks [m]'s roles (docs K192).
+  Future<void> _editRoles(MemberView m) async {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final kind = context.careerRead.player.kind;
+    final picked = await showModalBottomSheet<Set<MemberRole>>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) {
+        final chosen = {...m.roles};
+        return StatefulBuilder(
+          builder: (c, set) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l.memberRolesTitle(m.name),
+                        style: Theme.of(c).textTheme.titleLarge),
+                    const SizedBox(height: 4),
+                    Text(l.memberRolesHint(m.name),
+                        style: Theme.of(c).textTheme.bodySmall),
+                    const SizedBox(height: 12),
+                    Wrap(spacing: 8, runSpacing: 8, children: [
+                      for (final r in MemberRole.forKind(kind))
+                        FilterChip(
+                          label: Text(fmt.memberRole(r)),
+                          selected: chosen.contains(r),
+                          onSelected: (on) =>
+                              set(() => on ? chosen.add(r) : chosen.remove(r)),
+                        ),
+                    ]),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton(
+                        onPressed: () => Navigator.pop(c, chosen),
+                        child: Text(l.save),
+                      ),
+                    ),
+                  ]),
+            ),
+          ),
+        );
+      },
+    );
+    if (picked == null || !mounted) return;
+    await _act(Cmd.setMemberRoles(m.index, picked));
+  }
+
   /// A member leaves and the player goes on as them (docs K191).
   Future<void> _goSolo(MemberView m) async {
     final l = context.l10n;
@@ -569,9 +656,15 @@ class _CareerScreenState extends State<CareerScreen> {
                   l.goSoloIntro(v.name),
                   l.goSoloFans(
                       v.name, fmt.compact(v.fans), (v.fame * 100).round()),
-                  v.groupBreaksUp
-                      ? l.goSoloGroupEnds(group)
-                      : l.goSoloGroupOn(group, fmt.compact(v.groupFans)),
+                  v.hiatus
+                      ? l.goSoloHiatus(group, v.name)
+                      : v.groupBreaksUp
+                          ? l.goSoloGroupEnds(group)
+                          : l.goSoloGroupOn(group, fmt.compact(v.groupFans)),
+                  if (v.ace)
+                    l.goSoloAce(v.name)
+                  else if (v.importance < 0.7)
+                    l.goSoloQuiet(v.name),
                   l.goSoloRecords,
                   if (v.scheduled > 0) l.goSoloScheduled(v.scheduled),
                   if (v.fanClub) l.goSoloClub,
@@ -788,10 +881,14 @@ class _CareerScreenState extends State<CareerScreen> {
                 children: [
                   Text(l.membersHint,
                       style: TextStyle(color: AppColors.textMuted)),
+                  const SizedBox(height: 6),
+                  Text(l.lineupHint,
+                      style: TextStyle(color: AppColors.textMuted)),
                   for (final m in _members) ...[
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 14),
                     Text(m.name,
                         style: const TextStyle(fontWeight: FontWeight.w800)),
+                    ..._lineupLines(m),
                     Text(
                         m.artistId < 0
                             ? l.membersNoSolo
@@ -833,6 +930,27 @@ class _CareerScreenState extends State<CareerScreen> {
                                         songs: _vault))),
                       ),
                     ),
+                    // The label's push and the member's roles (docs K192).
+                    Wrap(spacing: 4, children: [
+                      TextButton.icon(
+                        icon: Icon(
+                            m.focused
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            size: 18),
+                        label:
+                            Text(m.focused ? l.memberUnfocus : l.memberFocus),
+                        onPressed: career.busy
+                            ? null
+                            : () => _act(
+                                Cmd.setMemberFocus(m.focused ? -1 : m.index)),
+                      ),
+                      TextButton.icon(
+                        icon: const Icon(Icons.badge_outlined, size: 18),
+                        label: Text(l.memberRolesButton),
+                        onPressed: career.busy ? null : () => _editRoles(m),
+                      ),
+                    ]),
                     // Leaving the group (docs K191).
                     Align(
                       alignment: Alignment.centerLeft,

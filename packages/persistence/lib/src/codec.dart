@@ -59,6 +59,8 @@ abstract final class Codec {
     'dealAdvance', 'dealAlbums', 'unrecouped',
     // Added in schema v24, v41, v42, v43.
     'surpriseWeek', 'markets', 'distributor', 'managedBy', 'memberIds',
+    // Added in schema v52.
+    'lineup',
   ];
 
   static List<Object?> artistRow(Artist a) => [
@@ -107,6 +109,7 @@ abstract final class Codec {
         a.distributor.index,
         a.managedBy,
         a.memberArtistIds.isEmpty ? null : jsonEncode(a.memberArtistIds),
+        Lineups.encode(a),
       ];
 
   static Artist artistFrom(Map<String, Object?> r) {
@@ -189,6 +192,7 @@ abstract final class Codec {
     if (r['memberIds'] case final String m when m.isNotEmpty) {
       a.memberArtistIds.addAll((jsonDecode(m) as List).cast<int>());
     }
+    Lineups.decode(a, r['lineup'] as String?);
     if (r['markets'] case final String m when m.isNotEmpty) {
       final j = jsonDecode(m) as List;
       for (var i = 0; i < j.length && i < a.marketBonus.length; i++) {

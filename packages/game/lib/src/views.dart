@@ -2968,7 +2968,10 @@ class GoSoloView {
     required this.casual,
     required this.fame,
     required this.groupFans,
+    required this.importance,
+    required this.ace,
     required this.groupBreaksUp,
+    required this.hiatus,
     required this.scheduled,
     required this.fanClub,
   });
@@ -2984,6 +2987,14 @@ class GoSoloView {
   final double groupFans;
   final bool groupBreaksUp;
 
+  /// The group ends because its star leaves, not for want of members.
+  final bool hiatus;
+
+  /// How much the member matters to the fans (1: average) and whether
+  /// they are the group's ace (docs K192).
+  final double importance;
+  final bool ace;
+
   /// Scheduled releases that are called off, and whether a fan club closes.
   final int scheduled;
   final bool fanClub;
@@ -2992,6 +3003,17 @@ class GoSoloView {
 class MemberView {
   MemberView.of(World w, Artist group, this.index)
       : name = group.members[index],
+        roles = index < group.memberRoles.length
+            ? Lineups.rolesOf(group.memberRoles[index])
+            : const [],
+        popularity =
+            index < group.memberPop.length ? group.memberPop[index] : 0,
+        share = index < group.memberPop.length
+            ? Lineups.share(group, index)
+            : 0,
+        focused = group.focusMember == index,
+        focusWeeks =
+            group.focusMember == index ? w.week - group.focusSinceWeek : 0,
         artistId = Credits.memberIdOf(group, index),
         fans = _memberOrNull(w, group, index)?.coreFans ?? 0,
         fame = _memberOrNull(w, group, index)?.fame ?? 0,
@@ -3015,6 +3037,14 @@ class MemberView {
         ];
   final int index;
   final String name;
+
+  /// Their roles, popularity (0–100) and share of the group's, and
+  /// whether the label pushes them, for how many weeks (docs K192).
+  final List<MemberRole> roles;
+  final double popularity;
+  final double share;
+  final bool focused;
+  final int focusWeeks;
 
   /// Their solo name's artist id (-1: no solo record yet).
   final int artistId;

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'actions.dart';
 import 'credits.dart';
+import 'lineups.dart';
 import 'model.dart';
 import 'world.dart';
 
@@ -21,11 +22,33 @@ enum GoSoloBlock {
 /// on without them as a rival after a break (or breaks up if one member
 /// would be left). The group's records stay the group's.
 abstract final class GoSolo {
-  /// What the member takes of the group's audience.
+  /// What an average member takes of the group's audience.
   static const takeFans = 0.35, takeCasual = 0.3, takeFame = 0.8;
 
-  /// What the group keeps of its own.
+  /// What the group keeps of its own when an average member leaves.
   static const keepFans = 0.75, keepCasual = 0.85, keepFame = 0.9;
+
+  // A member's weight in the split is their importance [k] (1: average;
+  // docs K192): a popular member takes more, and the group loses more.
+  static double fansTaken(double k) => (takeFans * k).clamp(0.1, 0.7);
+  static double casualTaken(double k) => (takeCasual * k).clamp(0.08, 0.6);
+  static double fameTaken(double k) =>
+      math.min(0.95, takeFame * (0.75 + 0.25 * k));
+  static double fansKept(double k) =>
+      (1 - (1 - keepFans) * k).clamp(0.35, 0.95);
+  static double casualKept(double k) =>
+      (1 - (1 - keepCasual) * k).clamp(0.5, 0.97);
+  static double fameKept(double k) => (1 - (1 - keepFame) * k).clamp(0.7, 0.98);
+
+  /// The group's ace leaving shakes the fandom too.
+  static bool isAce(double k) => k >= Lineups.aceAt;
+
+  /// Without a star this far above the rest, the group goes on a hiatus
+  /// it never comes back from (the way a boy band ends when its frontman
+  /// goes solo).
+  static const hiatusAt = 2.0;
+  static bool endsGroup(Artist group, double k) =>
+      breaksUp(group) || k >= hiatusAt;
 
   /// The talk a split makes, for the new solo artist.
   static const splitBuzz = 0.3;
@@ -55,6 +78,7 @@ abstract final class GoSolo {
     if (member < 0 || member >= group.members.length) {
       throw ActionException('No such member');
     }
+    final k = Lineups.importance(w, group, member);
     final solo = Credits.memberArtist(w, group, member);
 
     // Plans made as a group are off; what was paid comes back.
@@ -64,8 +88,9 @@ abstract final class GoSolo {
     group.scheduled.clear();
     group.opportunity = null;
 
+    final ends = endsGroup(group, k);
     _takeOver(group, solo);
-    _splitAudience(group, solo);
+    _splitAudience(group, solo, k);
 
     // The songs no one has heard go with the member.
     for (final s in w.songs) {
@@ -93,13 +118,14 @@ abstract final class GoSolo {
     if (member < group.memberArtistIds.length) {
       group.memberArtistIds.removeAt(member);
     }
+    Lineups.remove(group, member);
     group
       ..tier = group.fame >= 0.4 ? ArtistTier.a : ArtistTier.b
       ..nextEraWeek = w.week + groupBreakWeeks
       ..moneyCents = 0;
     group.plan.clear();
     group.pendingAlbumSongIds.clear();
-    if (breaksUp(group)) w.retire(group);
+    if (ends) w.retire(group);
 
     // What belonged to the group's page.
     w.fanClub = null;
@@ -155,22 +181,22 @@ abstract final class GoSolo {
       ..unrecoupedCents = 0;
   }
 
-  static void _splitAudience(Artist group, Artist solo) {
+  static void _splitAudience(Artist group, Artist solo, double k) {
     solo
-      ..fame = math.max(solo.fame, group.fame * takeFame)
-      ..popularity = math.max(solo.popularity, group.popularity * takeFame)
-      ..coreFans = math.max(solo.coreFans, group.coreFans * takeFans)
-      ..casual = math.max(solo.casual, group.casual * takeCasual)
+      ..fame = math.max(solo.fame, group.fame * fameTaken(k))
+      ..popularity = math.max(solo.popularity, group.popularity * fameTaken(k))
+      ..coreFans = math.max(solo.coreFans, group.coreFans * fansTaken(k))
+      ..casual = math.max(solo.casual, group.casual * casualTaken(k))
       ..devotion = math.max(solo.devotion, group.devotion * 0.9)
       ..hype = math.max(solo.hype, group.hype * 0.5)
       ..buzz = solo.buzz + splitBuzz;
     group
-      ..fame = group.fame * keepFame
-      ..popularity = group.popularity * keepFame
-      ..coreFans = group.coreFans * keepFans
-      ..casual = group.casual * keepCasual
-      ..devotion = math.max(0.0, group.devotion - 0.05)
-      ..hype = group.hype * 0.5;
+      ..fame = group.fame * fameKept(k)
+      ..popularity = group.popularity * fameKept(k)
+      ..coreFans = group.coreFans * fansKept(k)
+      ..casual = group.casual * casualKept(k)
+      ..devotion = math.max(0.0, group.devotion - (isAce(k) ? 0.15 : 0.05))
+      ..hype = isAce(k) ? 0 : group.hype * 0.5;
     solo.updateRegionShare();
     group.updateRegionShare();
   }

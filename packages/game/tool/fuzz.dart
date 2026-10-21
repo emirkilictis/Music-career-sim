@@ -174,6 +174,12 @@ void main(List<String> args) {
         },
         'scrap': () => g.scrapSong(song()),
         'canvas': () => g.addCanvas(song()),
+        'focus': () => g.setMemberFocus(r.nextInt(5) - 1),
+        'roles': () => g.setMemberRoles(r.nextInt(4), {
+              for (final x in MemberRole.values)
+                if (r.nextInt(4) == 0) x
+            }),
+        'members': () => g.members,
         'goSolo': () {
           // Rarely: a split changes the whole career (docs K191).
           if (r.nextInt(6) == 0) g.goSolo(r.nextInt(4));

@@ -643,6 +643,14 @@ class Artist {
   int managedBy = -1;
   final List<int> memberArtistIds = [];
 
+  /// The player's group's lineup by member (docs K192): roles as bits of
+  /// [MemberRole] indexes, popularity 0–100, and the member the label
+  /// pushes (-1: nobody) since when.
+  final List<int> memberRoles = [];
+  final List<double> memberPop = [];
+  int focusMember = -1;
+  int focusSinceWeek = -1;
+
   /// Per-region accounting, layout [ArtistReg]. Catalog indices and their
   /// settle markers drive lazy accrual (retired artists settle lazily, so a
   /// long history of retired artists costs nothing per week).
@@ -766,6 +774,7 @@ class Song with Charted {
   final int genre;
   final List<int> extraGenres;
   List<int> get genres => [genre, ...extraGenres];
+
   /// Changes only for an unreleased song that goes with a member leaving
   /// the player's group (docs K191).
   int primaryArtistId;

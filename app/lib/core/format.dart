@@ -258,6 +258,22 @@ class Fmt {
         HomeCountry.other => l.homeOther,
       };
 
+  /// A group member's role (docs K192).
+  String memberRole(MemberRole r) => switch (r) {
+        MemberRole.leader => l.roleLeader,
+        MemberRole.mainVocal => l.roleMainVocal,
+        MemberRole.leadVocal => l.roleLeadVocal,
+        MemberRole.mainDancer => l.roleMainDancer,
+        MemberRole.mainRapper => l.roleMainRapper,
+        MemberRole.visual => l.roleVisual,
+        MemberRole.maknae => l.roleMaknae,
+        MemberRole.frontman => l.roleFrontman,
+        MemberRole.guitar => l.roleGuitar,
+        MemberRole.bass => l.roleBass,
+        MemberRole.drums => l.roleDrums,
+        MemberRole.keys => l.roleKeys,
+      };
+
   String kind(ArtistKind k) => switch (k) {
         ArtistKind.solo => l.kindSolo,
         ArtistKind.band => l.kindBand,
@@ -330,8 +346,7 @@ class Fmt {
 
   /// A radio format's name (docs K134).
   /// A per-play payout in dollars (cents in): \$0.0035.
-  String perStream(double cents) =>
-      '\$${(cents / 100).toStringAsFixed(4)}';
+  String perStream(double cents) => '\$${(cents / 100).toStringAsFixed(4)}';
 
   /// Where record money comes from (docs K145).
   String incomeSource(IncomeSource s) => switch (s) {
@@ -1031,9 +1046,8 @@ class Fmt {
           (_, true) => l.eventGuestNo1(t, line.artistName),
           (_, false) => l.eventGuestTop10(t, line.artistName, position),
         },
-      AllTimeBestSeller(:final rank) => rank == 1
-          ? l.eventAllTimeTop
-          : l.eventAllTimeTop10(rank),
+      AllTimeBestSeller(:final rank) =>
+        rank == 1 ? l.eventAllTimeTop : l.eventAllTimeTop10(rank),
       SongOfSummer(:final playerRank, :final year) => playerRank == 1
           ? l.eventSummerMine(year, t)
           : playerRank > 0

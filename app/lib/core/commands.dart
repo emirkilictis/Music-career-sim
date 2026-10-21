@@ -135,8 +135,7 @@ abstract final class Cmd {
   static SessionCmd<int?> exclusiveOffer() => (s) => s.exclusiveOffer;
 
   /// Whether an album can be kept off streaming now (docs K174).
-  static SessionCmd<bool> canWindow() =>
-      (s) => s.canWindow(AlbumType.album);
+  static SessionCmd<bool> canWindow() => (s) => s.canWindow(AlbumType.album);
 
   static SessionCmd<ScheduledView> scheduleSingle(
           int songId, Campaign campaign, int releaseWeek, int announceWeek,
@@ -211,6 +210,7 @@ abstract final class Cmd {
   static SessionCmd<List<MilestoneView>> milestones() => (s) => s.milestones;
   static SessionCmd<List<PlatformView>> platforms() => (s) => s.platforms;
   static SessionCmd<void> hireManager(Manager m) => (s) => s.hireManager(m);
+
   /// Album tracks for the next single (docs K182).
   static SessionCmd<List<SinglePickView>> singlePicks(int albumId) =>
       (s) => s.singlePicks(albumId);
@@ -220,20 +220,23 @@ abstract final class Cmd {
       (s) => s.suggestTourShows(r, m);
 
   /// Mood playlists (docs K186).
-  static SessionCmd<List<({Mood mood, double fit, double chance})>>
-      moodOptions(int songId) => (s) => s.moodOptions(songId);
+  static SessionCmd<List<({Mood mood, double fit, double chance})>> moodOptions(
+          int songId) =>
+      (s) => s.moodOptions(songId);
   static SessionCmd<bool> pitchMood(int songId, Mood m) =>
       (s) => s.pitchMood(songId, m);
 
   /// The Artist Pick (docs K185).
   static SessionCmd<PickView> artistPick() => (s) => s.artistPick;
+  static SessionCmd<void> setMemberFocus(int member) =>
+      (s) => s.setMemberFocus(member);
+  static SessionCmd<void> setMemberRoles(int member, Set<MemberRole> roles) =>
+      (s) => s.setMemberRoles(member, roles);
   static SessionCmd<GoSoloView> goSoloPreview(int member) =>
       (s) => s.goSoloPreview(member);
   static SessionCmd<void> goSolo(int member) => (s) => s.goSolo(member);
-  static SessionCmd<(ArtistView, bool)?> formerGroup() =>
-      (s) => s.formerGroup;
-  static SessionCmd<void> addCanvas(int songId) =>
-      (s) => s.addCanvas(songId);
+  static SessionCmd<(ArtistView, bool)?> formerGroup() => (s) => s.formerGroup;
+  static SessionCmd<void> addCanvas(int songId) => (s) => s.addCanvas(songId);
   static SessionCmd<ThisIsView> thisIs(int artistId) =>
       (s) => s.thisIs(artistId);
   static SessionCmd<void> setArtistPick(PickKind kind, int id) =>
@@ -284,8 +287,8 @@ abstract final class Cmd {
       (s) => s.releaseDeluxe(albumId, songIds);
 
   /// Records an album again into a vault draft (docs K139).
-  static SessionCmd<void> rerecordAlbum(int albumId, String title,
-          List<int> vaultSongIds) =>
+  static SessionCmd<void> rerecordAlbum(
+          int albumId, String title, List<int> vaultSongIds) =>
       (s) => s.rerecordAlbum(albumId, title, vaultSongIds: vaultSongIds);
 
   /// Writing for others (docs K143).
@@ -343,8 +346,7 @@ abstract final class Cmd {
       (s) => s.compilationCandidates;
   static SessionCmd<AlbumView> releaseGreatestHits(String title,
           List<int> hitIds, List<int> newIds, Campaign campaign) =>
-      (s) =>
-          s.releaseGreatestHits(title, hitIds, newIds, campaign: campaign);
+      (s) => s.releaseGreatestHits(title, hitIds, newIds, campaign: campaign);
 
   // Independent curators (docs K160).
   static SessionCmd<Map<CuratorPack, int>> curatorCosts() =>
@@ -380,10 +382,8 @@ abstract final class Cmd {
           List<int> songIds, AlbumType type, Campaign campaign) =>
       (s) => s.releaseMemberAlbum(member, title, songIds,
           type: type, campaign: campaign);
-  static SessionCmd<List<WrittenSongView>> guestSongs() =>
-      (s) => s.guestSongs;
-  static SessionCmd<DistributionView> distribution() =>
-      (s) => s.distribution;
+  static SessionCmd<List<WrittenSongView>> guestSongs() => (s) => s.guestSongs;
+  static SessionCmd<DistributionView> distribution() => (s) => s.distribution;
   static SessionCmd<void> chooseDistributor(Distributor d) =>
       (s) => s.chooseDistributor(d);
 
@@ -397,8 +397,7 @@ abstract final class Cmd {
       (s) => s.makeVisualAlbum(albumId);
 
   /// Selling the catalog (docs K153).
-  static SessionCmd<CatalogOfferView> catalogOffer() =>
-      (s) => s.catalogOffer;
+  static SessionCmd<CatalogOfferView> catalogOffer() => (s) => s.catalogOffer;
   static SessionCmd<int> sellCatalog() => (s) => s.sellCatalog();
 
   /// A snippet test (docs K152).
@@ -414,8 +413,7 @@ abstract final class Cmd {
       (s) => s.uploadToCloud(songId);
 
   /// The streaming app's Marquee and Showcase (docs K147).
-  static SessionCmd<void> runMarquee(int songId) =>
-      (s) => s.runMarquee(songId);
+  static SessionCmd<void> runMarquee(int songId) => (s) => s.runMarquee(songId);
   static SessionCmd<void> runAlbumMarquee(int albumId) =>
       (s) => s.runAlbumMarquee(albumId);
   static SessionCmd<void> runShowcase(int songId) =>
@@ -424,10 +422,10 @@ abstract final class Cmd {
   /// Live albums (docs K146).
   static SessionCmd<List<LiveTourView>> liveAlbumTours() =>
       (s) => s.liveAlbumTours;
-  static SessionCmd<AlbumView> releaseLiveAlbum(int tourStartWeek,
-          String title, List<int> songIds, Campaign campaign) =>
-      (s) => s.releaseLiveAlbum(tourStartWeek, title, songIds,
-          campaign: campaign);
+  static SessionCmd<AlbumView> releaseLiveAlbum(int tourStartWeek, String title,
+          List<int> songIds, Campaign campaign) =>
+      (s) =>
+          s.releaseLiveAlbum(tourStartWeek, title, songIds, campaign: campaign);
 
   /// Record money by source (docs K145).
   static SessionCmd<IncomeBreakdown> songIncome(int songId) =>
@@ -514,8 +512,7 @@ abstract final class Cmd {
         );
       };
 
-  static SessionCmd<List<BillionsRow>> billionsClub() =>
-      (s) => s.billionsClub;
+  static SessionCmd<List<BillionsRow>> billionsClub() => (s) => s.billionsClub;
 
   /// The streaming app's editorial playlists open last week (docs K125).
   static SessionCmd<List<EditorialPlaylist>> editorialPlaylists() =>

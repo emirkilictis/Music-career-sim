@@ -3662,6 +3662,8 @@ void main() {
       final skills = group.skills.songwriting;
       final energy = group.creativeEnergy;
       final streamsBefore = g.world.playerCareerStreams;
+      final k = Lineups.importance(g.world, group, 1);
+      expect(preview.importance, closeTo(k, 1e-9));
 
       g.goSolo(1);
       final w = g.world;
@@ -3674,15 +3676,15 @@ void main() {
       expect(solo.moneyCents, money);
       expect(solo.skills.songwriting, skills);
       expect(solo.creativeEnergy, energy);
-      expect(solo.coreFans, closeTo(fans * GoSolo.takeFans, 1));
-      expect(solo.fame, closeTo(fame * GoSolo.takeFame, 1e-9));
+      expect(solo.coreFans, closeTo(fans * GoSolo.fansTaken(k), 1));
+      expect(solo.fame, closeTo(fame * GoSolo.fameTaken(k), 1e-9));
       expect(preview.fans, closeTo(solo.coreFans, 1));
       expect(w.playerCareerStreams, closeTo(streamsBefore, 1));
       expect(w.formerGroupId, group.id);
       // The group goes on without her, as a rival after a break.
       expect(group.tier, isNot(ArtistTier.player));
       expect(group.members, ['Yuna', 'Jin', 'Sora']);
-      expect(group.coreFans, closeTo(fans * GoSolo.keepFans, 1));
+      expect(group.coreFans, closeTo(fans * GoSolo.fansKept(k), 1));
       expect(group.moneyCents, 0);
       expect(group.isRetired, isFalse);
       expect(group.nextEraWeek, w.week + GoSolo.groupBreakWeeks);
@@ -3728,6 +3730,164 @@ void main() {
           closeTo(w.playerCareerStreams, 1));
       expect(g.artistPage(solo.id).listenerStreams, closeTo(listeners, 1));
       g.advanceWeek();
+      g.close();
+    });
+
+    test('members have roles and their own popularity (K192)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2018,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              kind: ArtistKind.vocalGroup,
+              members: const ['Yuna', 'Mira', 'Jin', 'Sora']));
+      final slot = g.slotId;
+      var ms = g.members;
+      expect(ms, hasLength(4));
+      int holders(MemberRole r) => ms.where((m) => m.roles.contains(r)).length;
+      for (final r in [
+        MemberRole.leader,
+        MemberRole.mainVocal,
+        MemberRole.visual,
+        MemberRole.maknae
+      ]) {
+        expect(holders(r), 1, reason: r.name);
+      }
+      expect(ms.last.roles, contains(MemberRole.maknae));
+      for (final m in ms) {
+        expect(m.popularity, inInclusiveRange(0.0, 100.0));
+        expect(m.roles.every(MemberRole.forKind(ArtistKind.vocalGroup).contains),
+            isTrue);
+      }
+      expect(ms.fold(0.0, (t, m) => t + m.share), closeTo(1, 1e-9));
+
+      // A role only one can hold moves; a band's role is not theirs.
+      g.setMemberRoles(0, {MemberRole.visual, MemberRole.leadVocal});
+      ms = g.members;
+      expect(holders(MemberRole.visual), 1);
+      expect(ms[0].roles, contains(MemberRole.visual));
+      expect(() => g.setMemberRoles(0, {MemberRole.drums}), _code('noRole'));
+      expect(() => g.setMemberFocus(4), _code('noMember'));
+
+      // The label pushes its least popular member for a year.
+      final before = [for (final m in ms) m.popularity];
+      final low = ms.reduce((a, b) => a.popularity <= b.popularity ? a : b).index;
+      g.setMemberFocus(low);
+      g.advanceWeeks(52, stop: SkipStop.never);
+      ms = g.members;
+      expect(ms[low].focused, isTrue);
+      expect(ms[low].focusWeeks, 52);
+      expect(ms[low].popularity, greaterThan(before[low] + 15));
+      for (final m in ms) {
+        if (m.index != low) expect(m.popularity, lessThan(before[m.index]));
+      }
+      expect(ms.reduce((a, b) => a.share >= b.share ? a : b).index, low);
+      expect(g.goSoloPreview(low).ace, isTrue);
+      final other = (low + 1) % 4;
+      expect(g.goSoloPreview(low).importance,
+          greaterThan(g.goSoloPreview(other).importance));
+
+      // A solo single gets a member noticed.
+      final p = g.world.player!..creativeEnergy = 100;
+      final song = g.writeSong(budget: BudgetTier.high).id;
+      final pop3 = p.memberPop[3];
+      g.releaseMemberSolo(3, song);
+      expect(p.memberPop[3], closeTo(pop3 + Lineups.soloGain, 1e-9));
+
+      g.close();
+      g = GameSession.resume(slots, slot);
+      ms = g.members;
+      expect(ms[low].focused, isTrue);
+      expect(ms[0].roles, contains(MemberRole.visual));
+      expect(ms[3].popularity, closeTo(pop3 + Lineups.soloGain, 0.01));
+      g.setMemberFocus(-1);
+      expect(g.members.any((m) => m.focused), isFalse);
+      g.close();
+    });
+
+    test('the ace leaving sinks the group; a quiet member does not (K192)',
+        () {
+      (double, double) split(int leaving) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2018,
+                premium: true,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire,
+                kind: ArtistKind.vocalGroup,
+                members: const ['Yuna', 'Mira', 'Jin', 'Sora']));
+        g.setMemberFocus(1);
+        g.advanceWeeks(40, stop: SkipStop.never);
+        final group = g.world.player!;
+        final fans = group.coreFans;
+        g.goSolo(leaving);
+        final out = (group.coreFans / fans, g.world.player!.coreFans / fans);
+        g.close();
+        return out;
+      }
+
+      final (aceKept, aceTook) = split(1);
+      final quiet = split(3);
+      expect(aceKept, lessThan(GoSolo.keepFans));
+      expect(aceTook, greaterThan(GoSolo.takeFans));
+      expect(quiet.$1, greaterThan(aceKept + 0.1));
+      expect(quiet.$2, lessThan(aceTook));
+    });
+
+    test('the star leaves and the group never comes back (K192)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2000,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              kind: ArtistKind.vocalGroup,
+              members: const ['Justin', 'JC', 'Chris', 'Joey', 'Lance']));
+      final group = g.world.player!;
+      // The label makes him the face of the group for years.
+      g.setMemberRoles(0, {
+        MemberRole.leader,
+        MemberRole.mainVocal,
+        MemberRole.mainDancer,
+        MemberRole.visual
+      });
+      g.setMemberFocus(0);
+      g.advanceWeeks(104, stop: SkipStop.never);
+      final v = g.goSoloPreview(0);
+      expect(v.ace, isTrue);
+      expect(v.importance, greaterThanOrEqualTo(GoSolo.hiatusAt));
+      expect(v.hiatus, isTrue);
+      expect(v.groupBreaksUp, isTrue);
+      final fans = group.coreFans;
+      g.goSolo(0);
+      expect(group.isRetired, isTrue);
+      expect(g.world.player!.coreFans, greaterThan(fans * 0.5));
+      g.advanceWeeks(30, stop: SkipStop.never);
+      expect(
+          g.world.songs.any((s) =>
+              s.primaryArtistId == group.id && s.releasedWeek > g.week - 30),
+          isFalse);
+      g.close();
+    });
+
+    test('a band has band roles (K192)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2005,
+              kind: ArtistKind.band,
+              members: const ['Ana', 'Leo', 'Max']));
+      final ms = g.members;
+      expect(ms[0].roles, contains(MemberRole.frontman));
+      expect(ms[1].roles, contains(MemberRole.guitar));
+      expect(ms[2].roles, contains(MemberRole.bass));
+      // The singer is the face of a band.
+      expect(Lineups.target(MemberRole.frontman.bit),
+          greaterThan(Lineups.target(MemberRole.bass.bit)));
       g.close();
     });
 

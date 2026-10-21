@@ -2515,14 +2515,18 @@ class GameSession {
     }
     final known = Credits.memberIdOf(g, member);
     final m = known >= 0 ? world.artists[known] : null;
+    final k = Lineups.importance(world, g, member);
     return GoSoloView(
       name: g.members[member],
       block: GoSolo.block(world),
-      fans: math.max(m?.coreFans ?? 0, g.coreFans * GoSolo.takeFans),
-      casual: math.max(m?.casual ?? 0, g.casual * GoSolo.takeCasual),
-      fame: math.max(m?.fame ?? 0, g.fame * GoSolo.takeFame),
-      groupFans: g.coreFans * GoSolo.keepFans,
-      groupBreaksUp: GoSolo.breaksUp(g),
+      fans: math.max(m?.coreFans ?? 0, g.coreFans * GoSolo.fansTaken(k)),
+      casual: math.max(m?.casual ?? 0, g.casual * GoSolo.casualTaken(k)),
+      fame: math.max(m?.fame ?? 0, g.fame * GoSolo.fameTaken(k)),
+      groupFans: g.coreFans * GoSolo.fansKept(k),
+      importance: k,
+      ace: GoSolo.isAce(k),
+      groupBreaksUp: GoSolo.endsGroup(g, k),
+      hiatus: !GoSolo.breaksUp(g) && k >= GoSolo.hiatusAt,
       scheduled: g.scheduled.length,
       fanClub: world.fanClub != null,
     );
@@ -2554,11 +2558,36 @@ class GameSession {
     _saveNow();
   }
 
-  List<MemberView> get members => [
-        if (_p.kind.isGroup)
-          for (var i = 0; i < _p.members.length; i++)
-            MemberView.of(world, _p, i),
-      ];
+  List<MemberView> get members {
+    if (!_p.kind.isGroup) return const [];
+    Lineups.ensure(world, _p);
+    return [
+      for (var i = 0; i < _p.members.length; i++) MemberView.of(world, _p, i),
+    ];
+  }
+
+  /// The label pushes member [member] (-1: nobody; docs K192).
+  void setMemberFocus(int member) {
+    if (!_p.kind.isGroup) throw GameException('notGroup', 'Not a group');
+    if (member < -1 || member >= _p.members.length) {
+      throw GameException('noMember', 'No such member');
+    }
+    Lineups.focus(world, _p, member);
+    _saveNow();
+  }
+
+  /// Gives member [member] [roles] (docs K192).
+  void setMemberRoles(int member, Set<MemberRole> roles) {
+    if (!_p.kind.isGroup) throw GameException('notGroup', 'Not a group');
+    if (member < 0 || member >= _p.members.length) {
+      throw GameException('noMember', 'No such member');
+    }
+    if (roles.any((r) => !MemberRole.forKind(_p.kind).contains(r))) {
+      throw GameException('noRole', 'Not a role of this group');
+    }
+    Lineups.setRoles(world, _p, member, roles);
+    _saveNow();
+  }
 
   /// What a solo single by member [member] costs the group with
   /// [campaign] (docs K158).

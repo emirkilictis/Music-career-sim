@@ -4865,6 +4865,17 @@
       }
     }
   },
+  "goSoloHiatus": "Without {name}, {group} goes on an indefinite hiatus: it never puts out another record.",
+  "@goSoloHiatus": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "goSoloRecords": "The group's released songs and albums stay the group's.",
   "goSoloScheduled": "{count} planned releases are called off; what you paid comes back.",
   "@goSoloScheduled": {
@@ -5970,6 +5981,73 @@
     }
   },
   "membersNoSolo": "No solo record yet",
+  "roleLeader": "Leader",
+  "roleMainVocal": "Main vocal",
+  "roleLeadVocal": "Lead vocal",
+  "roleMainDancer": "Main dancer",
+  "roleMainRapper": "Main rapper",
+  "roleVisual": "Visual",
+  "roleMaknae": "Maknae",
+  "roleFrontman": "Lead singer",
+  "roleGuitar": "Guitar",
+  "roleBass": "Bass",
+  "roleDrums": "Drums",
+  "roleKeys": "Keys",
+  "lineupHint": "Each member has roles and a popularity of their own. The label can push one member: they rise, the others slip. A popular member's solo records start bigger, but if they leave, the group takes a hard hit.",
+  "memberPopularity": "Popularity {pop} · {share}% of the group",
+  "@memberPopularity": {
+    "placeholders": {
+      "pop": {
+        "type": "int"
+      },
+      "share": {
+        "type": "int"
+      }
+    }
+  },
+  "memberFocused": "The label is pushing them · {weeks} wk",
+  "@memberFocused": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "memberFocus": "Push this member",
+  "memberUnfocus": "Stop pushing",
+  "memberRolesButton": "Change roles",
+  "memberRolesTitle": "{name}'s roles",
+  "@memberRolesTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "memberRolesHint": "Roles held by one member at a time move to {name}. Popularity slowly follows the new roles.",
+  "@memberRolesHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goSoloAce": "{name} is the group's star: the group loses a big part of its fans and the fandom is shaken.",
+  "@goSoloAce": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "goSoloQuiet": "{name} is one of the less known members: the group hardly feels it.",
+  "@goSoloQuiet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "guestSection": "Your features",
   "guestHint": "Your verses on others' songs chart under their name; {share}% of what they earn comes to you.",
   "@guestHint": {

@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'actions.dart';
+import 'lineups.dart';
 import 'model.dart';
 import 'world.dart';
 
@@ -38,6 +41,8 @@ abstract final class Credits {
 
   static Artist _newMember(World w, Artist group, int member) {
     final s = group.skills;
+    // A popular member brings more of the group's fans (docs K192).
+    final k = Lineups.importance(w, group, member);
     return Artist(
       id: w.artists.length,
       name: group.members[member],
@@ -50,9 +55,9 @@ abstract final class Credits {
           production: s.production * 0.9,
           performance: s.performance,
           charisma: s.charisma),
-      fame: group.fame * memberFame,
-      coreFans: group.coreFans * memberFans,
-      casual: group.casual * memberCasual,
+      fame: math.min(0.95, group.fame * memberFame * (0.75 + 0.25 * k)),
+      coreFans: group.coreFans * memberFans * k,
+      casual: group.casual * memberCasual * k,
       homeCountry: group.homeCountry,
       labelReach: group.labelReach,
       artistShare: group.artistShare,
@@ -89,6 +94,7 @@ abstract final class Credits {
     final m = memberArtist(w, group, member);
     group.moneyCents -= cost;
     final song = _transfer(w, group, m, s);
+    Lineups.onSolo(w, group, member);
     Actions.releaseSingle(w, m, song,
         campaign: campaign, prepaid: true, paidCents: cost);
     return song;
@@ -131,8 +137,8 @@ abstract final class Credits {
   /// Puts out [group]'s vault songs [songs] as member [member]'s solo
   /// EP or album [title] (docs K173): under the member's name, paid for
   /// by the group, earning for it. Returns the album.
-  static Album releaseMemberAlbum(World w, Artist group, int member,
-      String title, List<Song> songs,
+  static Album releaseMemberAlbum(
+      World w, Artist group, int member, String title, List<Song> songs,
       {AlbumType type = AlbumType.album,
       Campaign campaign = Campaign.standard}) {
     if (!memberAlbumTypes.contains(type)) throw ActionException('EP or album');
@@ -146,6 +152,7 @@ abstract final class Credits {
     final m = memberArtist(w, group, member);
     group.moneyCents -= cost;
     final ids = [for (final s in songs) _transfer(w, group, m, s).id];
+    Lineups.onSolo(w, group, member);
     return Actions.releaseAlbum(w, m, title, ids,
         type: type, campaign: campaign, prepaid: true, paidCents: cost);
   }

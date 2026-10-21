@@ -23,6 +23,7 @@ import 'joint_albums.dart';
 import 'leaks.dart';
 import 'live_albums.dart';
 import 'lifecycle.dart';
+import 'lineups.dart';
 import 'compilations.dart';
 import 'curators.dart';
 import 'model.dart';
@@ -1130,6 +1131,8 @@ class Simulator {
     Social.weekly(w);
     final dealsBroken = Brands.weekly(w);
     if (me != null) {
+      // The group's members' own popularity (docs K192).
+      Lineups.weekly(w, me);
       toured = Tours.playWeek(w, me);
       if (toured != null) {
         w.tourRecords.add(TourRecord(

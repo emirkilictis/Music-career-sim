@@ -41,6 +41,7 @@ export 'src/joint_albums.dart';
 export 'src/leaks.dart';
 export 'src/languages.dart';
 export 'src/lifecycle.dart';
+export 'src/lineups.dart';
 export 'src/live_albums.dart';
 export 'src/model.dart';
 export 'src/music_show.dart';
