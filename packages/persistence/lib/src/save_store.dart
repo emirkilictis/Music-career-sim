@@ -132,6 +132,7 @@ class SaveStore {
     w.careerStreamsBase = (meta['careerBase'] as num?)?.toDouble() ?? 0;
     // The reunion (docs K194).
     Reunions.decode(w, meta['reunion'] as String?);
+    w.rivalSplits.addAll(RivalSplit.decode(meta['rivalSplits'] as String?));
     if (meta['artistChart'] case final String s when s.isNotEmpty) {
       final j = jsonDecode(s) as List;
       w.artistChartPrev = List.unmodifiable((j[0] as List).cast<int>());
@@ -402,6 +403,7 @@ class SaveStore {
       'playerSince': w.playerSinceWeek,
       'careerBase': w.careerStreamsBase,
       'reunion': Reunions.encode(w),
+      'rivalSplits': RivalSplit.encode(w.rivalSplits),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

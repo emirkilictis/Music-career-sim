@@ -1717,6 +1717,8 @@
   "eventRenewalDone": "Sözleşmeler yenilendi: {count} üyenin hepsi yeniden imzaladı.",
   "eventRenewalLeft": "Sözleşmeler yenilendi ama {names} imzalamayıp ayrıldı; hayranların %{pct}'i de gitti.",
   "eventReunionOver": "{group} reunion'ı sona erdi.",
+  "eventRivalSplit": "{name}, solo kariyer için {group} grubundan ayrıldı.",
+  "eventRivalSplitEnded": "{name}, solo kariyer için {group} grubundan ayrıldı; grup dağıldı.",
   "reunionTitle": "Reunion",
   "reunionHint": "{group} ile bir yıllığına yeniden bir araya gel. Nostalji hayranları geri getirir; ne kadar uzun ayrı kaldıysanız o kadar çok. Grubun adıyla kayıt çıkarırsın, eski şarkıları da o yıl sana kazandırır.",
   "reunionOpens": "{date} itibarıyla mümkün.",

@@ -3,6 +3,7 @@ import 'model.dart';
 import 'names.dart';
 import 'real_artists.dart';
 import 'rival_moves.dart';
+import 'rival_splits.dart';
 import 'rng.dart';
 import 'streaming_tools.dart';
 import 'time.dart';
@@ -276,6 +277,8 @@ abstract final class AiPlanner {
 
   static void _yearlyUpkeep(World w) {
     final c = w.config;
+    // Rival groups lose members to solo careers (docs K199).
+    RivalSplits.yearly(w);
     // Retirements.
     for (final a in w.artists) {
       if (a.tier == ArtistTier.player || a.isRetired || a.managedBy >= 0) {

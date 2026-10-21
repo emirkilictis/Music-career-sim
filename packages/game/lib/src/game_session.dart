@@ -2555,6 +2555,9 @@ class GameSession {
     );
   }
 
+  /// How known a rival group must be for its split to make the news.
+  static const rivalSplitNewsFame = 0.3;
+
   /// The week's news from the player's group's members (docs K195) and
   /// the end of a reunion (docs K194).
   List<GameEvent> _groupNews() {
@@ -3888,6 +3891,15 @@ class GameSession {
     }
     events.addAll(_streamingNews());
     events.addAll(_groupNews());
+    // Known rival groups losing members (docs K199).
+    for (final x in w.rivalSplits.reversed) {
+      if (x.week < r.week) break;
+      if (x.week != r.week) continue;
+      final g = w.artists[x.groupId];
+      if (g.fame >= rivalSplitNewsFame || g.tier == ArtistTier.a) {
+        events.add(RivalGroupSplit(x.groupId, x.soloId, x.ended));
+      }
+    }
     // The discovery mixes (docs K119).
     for (final id in w.playerSongIds) {
       final s = w.songs[id];

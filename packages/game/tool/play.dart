@@ -266,6 +266,7 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       RenewalSoon() => 'contracts soon; at risk: ${e.atRisk.join(', ')}',
       RenewalDone() => 'contracts renewed; left: ${e.left.join(', ')}',
       ReunionOver() => 'the reunion is over',
+      RivalGroupSplit() => 'a member left group ${e.groupId}',
       AlbumStreamMilestone() => 'album ${e.albumId} passed ${e.streams} streams',
       SongOfSummer() => 'summer ${e.year}: #1 ${e.topSongId}, you #${e.playerRank}',
       BrandDealBroken() => 'brand deal broken: ${e.brand.name}',

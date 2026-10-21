@@ -623,8 +623,13 @@ void main() {
               tier: StartTier.superstar,
               money: StartMoney.millionaire));
       final w = g.world;
-      final rival = w.artists.firstWhere(
-          (a) => a.tier == ArtistTier.a && !a.isRetired && a.plan.isEmpty);
+      // A star whose next album is announced, not dropped by surprise
+      // (docs K175).
+      final rival = w.artists.firstWhere((a) =>
+          a.tier == ArtistTier.a &&
+          !a.isRetired &&
+          a.plan.isEmpty &&
+          !RivalMoves.surprise(w, a, w.week + 3));
       // Known two months ahead.
       rival.plan.add(PlannedRelease(week: w.week + 3, kind: PlannedKind.album));
       rival.pendingAlbumTitle = 'Big Return';
@@ -4131,6 +4136,49 @@ void main() {
       g.advanceWeeks(Reunions.weeks + 1, stop: SkipStop.never);
       expect(duo.isRetired, isTrue);
       expect(duo.managedBy, -1);
+      g.close();
+    });
+
+    test('rival groups lose members to solo careers (K199)', () {
+      var g = GameSession.start(slots, _setup(startYear: 2005));
+      final slot = g.slotId;
+      final events = <GameEvent>[];
+      for (var y = 0; y < 8; y++) {
+        events.addAll(g.advanceWeeks(52, stop: SkipStop.never).events);
+      }
+      final w = g.world;
+      expect(w.rivalSplits, isNotEmpty);
+      // A few a year at most.
+      expect(w.rivalSplits.length, lessThanOrEqualTo(8 * RivalSplits.maxPerYear));
+      for (final x in w.rivalSplits) {
+        final group = w.artists[x.groupId];
+        final solo = w.artists[x.soloId];
+        expect(solo.managedBy, -1);
+        expect(solo.tier, isNot(ArtistTier.player));
+        expect(solo.kind, ArtistKind.solo);
+        if (x.ended) expect(group.isRetired, isTrue);
+        expect(w.week - group.debutWeek,
+            greaterThanOrEqualTo(RivalSplits.minYears * 52));
+      }
+      final news = events.whereType<RivalGroupSplit>().toList();
+      for (final e in news) {
+        expect(w.rivalSplits.any((x) => x.soloId == e.soloId), isTrue);
+      }
+      // Some of the new solo artists have put records out by now.
+      final early = [
+        for (final x in w.rivalSplits)
+          if (w.week - x.week > 52) x.soloId
+      ];
+      if (early.isNotEmpty) {
+        expect(
+            w.songs.any((s) =>
+                early.contains(s.primaryArtistId) && s.releasedWeek >= 0),
+            isTrue);
+      }
+      final n = w.rivalSplits.length;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.world.rivalSplits, hasLength(n));
       g.close();
     });
 

@@ -1035,6 +1035,9 @@ class Fmt {
           ? l.eventRenewalDone(stayed)
           : l.eventRenewalLeft(left.join(', '), (fansLost * 100).round()),
       ReunionOver() => l.eventReunionOver(t),
+      RivalGroupSplit(:final ended) => ended
+          ? l.eventRivalSplitEnded(line.artistName, t)
+          : l.eventRivalSplit(line.artistName, t),
       AlbumStreamMilestone(:final streams) =>
         l.eventAlbumStreams(t, compact(streams)),
       WrittenSongHit(:final position) => position == 1

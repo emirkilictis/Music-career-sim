@@ -331,6 +331,17 @@ class RenewalDone extends GameEvent {
   bool get isMajor => true;
 }
 
+/// A known rival group's member [soloId] left [groupId] for a solo career
+/// (docs K199); [ended]: the group did not go on.
+class RivalGroupSplit extends GameEvent {
+  const RivalGroupSplit(this.groupId, this.soloId, this.ended);
+  final int groupId;
+  final int soloId;
+  final bool ended;
+  @override
+  bool get isMajor => ended;
+}
+
 /// The reunion with group [groupId] is over (docs K194).
 class ReunionOver extends GameEvent {
   const ReunionOver(this.groupId, this.ended);

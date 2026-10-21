@@ -373,11 +373,12 @@ abstract final class Lineups {
       ? null
       : jsonEncode({
           'r': a.memberRoles,
-          'p': [for (final p in a.memberPop) (p * 100).round() / 100],
+          // Full precision: a save must not change how a career goes.
+          'p': a.memberPop,
           'f': a.focusMember,
           'fw': a.focusSinceWeek,
           'ls': a.lineSplit,
-          'm': [for (final m in a.memberMorale) (m * 100).round() / 100],
+          'm': a.memberMorale,
           'cw': a.cheerWeek,
           'rw': a.rumorWeek,
         });

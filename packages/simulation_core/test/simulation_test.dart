@@ -1390,28 +1390,18 @@ void difficultyTests() {
   });
 
   test('difficulty scales the player; only legend holds the AI back', () {
-    final runs = {
-      for (final d in Difficulty.values)
-        d: () {
-          final w = WorldGen.create(seed: 8, startYear: 2012, difficulty: d);
-          final sim = Simulator(w);
-          while (w.week < GameTime.firstWeekOf(2012)) {
-            sim.step();
-          }
-          final p = WorldGen.addPlayer(w,
-              name: 'D', genre: 0, money: StartMoney.millionaire);
-          final song = Actions.writeSong(w, p, budget: BudgetTier.high);
-          Actions.releaseSingle(w, p, song);
-          for (var i = 0; i < 12; i++) {
-            sim.step();
-          }
-          var aiFans = 0.0;
-          for (final a in w.artists) {
-            if (a.tier != ArtistTier.player) aiFans += a.coreFans;
-          }
-          return (fans: p.coreFans, aiFans: aiFans);
-        }(),
-    };
+    // Summed over a few worlds: one single in one world is mostly luck.
+    ({double fans, double aiFans}) run(Difficulty d) {
+      var fans = 0.0, aiFans = 0.0;
+      for (final seed in const [8, 9, 10]) {
+        final r = runOne(d, seed);
+        fans += r.fans;
+        aiFans += r.aiFans;
+      }
+      return (fans: fans, aiFans: aiFans);
+    }
+
+    final runs = {for (final d in Difficulty.values) d: run(d)};
     final easy = runs[Difficulty.legend]!, normal = runs[Difficulty.normal]!;
     final hard = runs[Difficulty.hard]!;
     expect(easy.fans, greaterThan(normal.fans));
@@ -1421,6 +1411,28 @@ void difficultyTests() {
     expect((normal.aiFans - hard.aiFans).abs() / normal.aiFans, lessThan(1e-3));
     expect(easy.aiFans, lessThan(normal.aiFans));
   });
+}
+
+/// A player's first single in one world at difficulty [d]: their fans
+/// and the AI's after 12 weeks.
+({double fans, double aiFans}) runOne(Difficulty d, int seed) {
+  final w = WorldGen.create(seed: seed, startYear: 2012, difficulty: d);
+  final sim = Simulator(w);
+  while (w.week < GameTime.firstWeekOf(2012)) {
+    sim.step();
+  }
+  final p =
+      WorldGen.addPlayer(w, name: 'D', genre: 0, money: StartMoney.millionaire);
+  final song = Actions.writeSong(w, p, budget: BudgetTier.high);
+  Actions.releaseSingle(w, p, song);
+  for (var i = 0; i < 12; i++) {
+    sim.step();
+  }
+  var aiFans = 0.0;
+  for (final a in w.artists) {
+    if (a.tier != ArtistTier.player) aiFans += a.coreFans;
+  }
+  return (fans: p.coreFans, aiFans: aiFans);
 }
 
 /// Bands and vocal groups (docs/game-design.md §2.4).
@@ -2199,8 +2211,8 @@ void albumClashTests() {
         announceWeek: w.week,
         createdWeek: w.week,
         title: 'Mine'));
-    final rival = w.artists.firstWhere((a) =>
-        a.tier == ArtistTier.a && !a.isRetired && a.id != me.id);
+    final rival = w.artists.firstWhere(
+        (a) => a.tier == ArtistTier.a && !a.isRetired && a.id != me.id);
     rival
       ..fame = fame
       ..nextEraWeek = 1 << 30
@@ -2235,11 +2247,8 @@ void albumClashTests() {
     final (:w, :sim, :me, :rival) = setup(0.95);
     final week = w.week + 4;
     sim.step();
-    final clash = sim
-        .step()
-        .rivalClashes
-        .where((c) => c.artistId == rival.id)
-        .single;
+    final clash =
+        sim.step().rivalClashes.where((c) => c.artistId == rival.id).single;
     expect(clash.moved, isFalse);
     expect(clash.playerWeek, week);
     expect(rival.plan.first.week, week);
@@ -2335,8 +2344,8 @@ void musicShowTests() {
     for (final s in shows) {
       expect(s.score, inInclusiveRange(0, 10000));
       expect(s.runnerUpScore, lessThanOrEqualTo(s.score));
-      expect(w.artists[w.songs[s.songId].primaryArtistId].genre,
-          MusicShow.genre);
+      expect(
+          w.artists[w.songs[s.songId].primaryArtistId].genre, MusicShow.genre);
     }
     // A superstar's single wins, and after three in a row it is crowned
     // and leaves the show.
@@ -2411,8 +2420,8 @@ void featureTests() {
         .where((a) => !a.isRetired && a.tier != ArtistTier.player)
         .reduce((x, y) => x.fame >= y.fame ? x : y);
     expect(Features.willing(star, p), isFalse);
-    expect(() => Features.request(w, p, s, star),
-        throwsA(isA<ActionException>()));
+    expect(
+        () => Features.request(w, p, s, star), throwsA(isA<ActionException>()));
     // Willing ones come first.
     final ok = list.firstWhere((a) => Features.willing(a, p));
     expect(Features.willing(list.first, p), isTrue);
@@ -2422,8 +2431,8 @@ void featureTests() {
     expect(s.featuredArtistIds, [ok.id]);
     expect(Features.feeCents(star), greaterThan(Features.feeCents(ok)));
     // Their fans hear it: more listening than the same song alone.
-    expect(() => Features.request(w, p, s, ok),
-        throwsA(isA<ActionException>()));
+    expect(
+        () => Features.request(w, p, s, ok), throwsA(isA<ActionException>()));
   });
 }
 

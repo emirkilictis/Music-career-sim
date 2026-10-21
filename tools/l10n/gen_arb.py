@@ -1738,6 +1738,8 @@ k('eventRenewalSafe','The contracts come up in a few weeks; everyone looks set t
 k('eventRenewalDone','Contracts renewed: all {count} members signed again.','Sözleşmeler yenilendi: {count} üyenin hepsi yeniden imzaladı.', count='int')
 k('eventRenewalLeft','Contracts renewed, but {names} did not sign and left; {pct}% of the fans went too.','Sözleşmeler yenilendi ama {names} imzalamayıp ayrıldı; hayranların %{pct}\'i de gitti.', names='String', pct='int')
 k('eventReunionOver','The {group} reunion is over.','{group} reunion\'ı sona erdi.', group='String')
+k('eventRivalSplit','{name} left {group} for a solo career.','{name}, solo kariyer için {group} grubundan ayrıldı.', name='String', group='String')
+k('eventRivalSplitEnded','{name} left {group} for a solo career, and the group is over.','{name}, solo kariyer için {group} grubundan ayrıldı; grup dağıldı.', name='String', group='String')
 k('reunionTitle','Reunion','Reunion')
 k('reunionHint','Get back together with {group} for a year. Nostalgia brings fans back, more the longer you have been apart. You put out records under the group\'s name, and its old songs earn for you that year.','{group} ile bir yıllığına yeniden bir araya gel. Nostalji hayranları geri getirir; ne kadar uzun ayrı kaldıysanız o kadar çok. Grubun adıyla kayıt çıkarırsın, eski şarkıları da o yıl sana kazandırır.', group='String')
 k('reunionOpens','Possible from {date}.','{date} itibarıyla mümkün.', date='String')

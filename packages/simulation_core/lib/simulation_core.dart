@@ -51,6 +51,7 @@ export 'src/opportunities.dart';
 export 'src/real_artists.dart';
 export 'src/rerecords.dart';
 export 'src/reunions.dart';
+export 'src/rival_splits.dart';
 export 'src/rng.dart';
 export 'src/snippets.dart';
 export 'src/social.dart';

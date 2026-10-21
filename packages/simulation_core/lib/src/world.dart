@@ -19,6 +19,7 @@ import 'fan_club.dart';
 import 'imprints.dart';
 import 'own_playlist.dart';
 import 'music_show.dart';
+import 'rival_splits.dart';
 import 'tours.dart';
 
 /// The hot, in-memory simulation state ("current world").
@@ -113,6 +114,9 @@ class World {
   /// and ends (-1: none yet), and whether the group had ended before.
   int reunionStartWeek = -1, reunionEndWeek = -1;
   bool reunionWasRetired = false;
+
+  /// Rival groups' members who went solo (docs K199).
+  final List<RivalSplit> rivalSplits = [];
 
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();

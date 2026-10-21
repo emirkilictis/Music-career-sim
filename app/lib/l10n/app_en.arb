@@ -6185,6 +6185,28 @@
       }
     }
   },
+  "eventRivalSplit": "{name} left {group} for a solo career.",
+  "@eventRivalSplit": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
+  "eventRivalSplitEnded": "{name} left {group} for a solo career, and the group is over.",
+  "@eventRivalSplitEnded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "group": {
+        "type": "String"
+      }
+    }
+  },
   "reunionTitle": "Reunion",
   "reunionHint": "Get back together with {group} for a year. Nostalgia brings fans back, more the longer you have been apart. You put out records under the group's name, and its old songs earn for you that year.",
   "@reunionHint": {
