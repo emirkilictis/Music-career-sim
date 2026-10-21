@@ -868,20 +868,6 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       label: l.releaseAsSingle,
                     ),
                   ],
-                  // Mood playlists for songs already out (docs K186).
-                  if (s.isPlayer && s.canMood) ...[
-                    const SizedBox(height: 8),
-                    OutlinedButton.icon(
-                      onPressed: () => _pitchMood(s),
-                      icon: const Icon(Icons.queue_music_rounded),
-                      label: Text(l.moodButton),
-                    ),
-                  ] else if (s.mood case final m?) ...[
-                    const SizedBox(height: 8),
-                    Tag(s.moodIn
-                        ? l.moodOnList(_moodName(m))
-                        : l.moodPassed(_moodName(m))),
-                  ],
                   if (s.isPlayer && s.video == null) ...[
                     const SizedBox(height: 8),
                     OutlinedButton.icon(
@@ -1214,6 +1200,26 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           icon: const Icon(Icons.playlist_add_rounded),
                           label: Text(l.pitchSong),
                         ),
+                      ),
+                    ],
+                    // Mood playlists for songs already out (docs K186).
+                    if (s.canMood) ...[
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _pitchMood(s),
+                          icon: const Icon(Icons.queue_music_rounded),
+                          label: Text(l.moodButton),
+                        ),
+                      ),
+                    ] else if (s.mood case final m?) ...[
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Tag(s.moodIn
+                            ? l.moodOnList(_moodName(m))
+                            : l.moodPassed(_moodName(m))),
                       ),
                     ],
                     // Independent curators (docs K160).
