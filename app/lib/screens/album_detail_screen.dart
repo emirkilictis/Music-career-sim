@@ -321,7 +321,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         );
       },
     );
-    name.dispose();
+    // Not disposed here: the closing animation still builds with it, and
+    // nothing holds it once the route is gone (K188).
     if (picked == null || !mounted) return;
     try {
       await widget.state.act(Cmd.rerecordAlbum(a.id, picked.$1, picked.$2));

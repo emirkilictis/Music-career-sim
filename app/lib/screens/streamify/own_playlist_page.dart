@@ -66,7 +66,9 @@ Future<String?> askPlaylistName(BuildContext context, String initial) {
             onPressed: () => Navigator.pop(d, ctrl.text), child: Text(l.ok)),
       ],
     ),
-  ).whenComplete(ctrl.dispose);
+  );
+  // [ctrl] is not disposed: the closing animation still builds with it,
+  // and nothing holds it once the dialog is gone (K188).
 }
 
 /// The player's own playlist: its following, what draws people to it and

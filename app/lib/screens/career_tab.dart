@@ -161,7 +161,8 @@ class _CareerScreenState extends State<CareerScreen> {
         ],
       ),
     );
-    ctrl.dispose();
+    // Not disposed here: the closing animation still builds with it, and
+    // nothing holds it once the route is gone (K188).
     if (title == null || !mounted) return;
     try {
       await career.act(Cmd.startDocumentary(deal, title));
@@ -300,7 +301,8 @@ class _CareerScreenState extends State<CareerScreen> {
         ],
       ),
     );
-    ctrl.dispose();
+    // Not disposed here: the closing animation still builds with it, and
+    // nothing holds it once the route is gone (K188).
     if (name == null || !mounted) return;
     try {
       await career.act(Cmd.foundImprint(name));

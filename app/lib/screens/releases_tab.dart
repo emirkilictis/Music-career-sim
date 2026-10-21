@@ -183,7 +183,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
         );
       },
     );
-    name.dispose();
+    // Not disposed here: the closing animation still builds with it, and
+    // nothing holds it once the route is gone (K188).
     if (picked == null || !mounted) return;
     final campaign = await pickCampaign(context, career);
     if (campaign == null || !mounted) return;
@@ -277,7 +278,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
         );
       },
     );
-    name.dispose();
+    // Not disposed here: the closing animation still builds with it, and
+    // nothing holds it once the route is gone (K188).
     if (picked == null || !mounted) return;
     final campaign = await pickCampaign(context, career,
         extraCents: LiveAlbums.costCents(picked.$2.length));
