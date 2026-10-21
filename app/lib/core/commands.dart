@@ -219,6 +219,12 @@ abstract final class Cmd {
   static SessionCmd<int> suggestTourShows(TourRequest r, TourMarket m) =>
       (s) => s.suggestTourShows(r, m);
 
+  /// Mood playlists (docs K186).
+  static SessionCmd<List<({Mood mood, double fit, double chance})>>
+      moodOptions(int songId) => (s) => s.moodOptions(songId);
+  static SessionCmd<bool> pitchMood(int songId, Mood m) =>
+      (s) => s.pitchMood(songId, m);
+
   /// The Artist Pick (docs K185).
   static SessionCmd<PickView> artistPick() => (s) => s.artistPick;
   static SessionCmd<void> setArtistPick(PickKind kind, int id) =>

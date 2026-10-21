@@ -4611,6 +4611,61 @@
   "pickShortVideo": "Short-video potential",
   "pickGrowing": "Growing by word of mouth",
   "tourFit": "Fit to demand",
+  "moodButton": "Pitch to a mood playlist",
+  "moodTitle": "Mood playlists",
+  "moodHint": "Lists people put on for hours: they take songs already out and keep them playing for about a year. One pitch per song.",
+  "moodOdds": "Fit {fit}% · chance {chance}%",
+  "@moodOdds": {
+    "placeholders": {
+      "fit": {
+        "type": "int"
+      },
+      "chance": {
+        "type": "int"
+      }
+    }
+  },
+  "moodIn": "“{title}” is on {list}.",
+  "@moodIn": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "moodOut": "{list} passed on it.",
+  "@moodOut": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "moodOnList": "On {list}",
+  "@moodOnList": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "moodPassed": "{list} passed",
+  "@moodPassed": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "moodChill": "Chill Mode",
+  "moodWorkout": "Workout",
+  "moodParty": "Party",
+  "moodSad": "Sad Songs",
+  "moodFocus": "Deep Focus",
+  "errorNoMood": "This song cannot be pitched to a mood playlist now.",
   "pickTitleStreamify": "Artist Pick",
   "pickCountdown": "Countdown page",
   "pickNone": "Pin a release on top of your profile",

@@ -3523,6 +3523,62 @@ void main() {
       again.close();
     });
 
+    test('mood playlists keep a catalog song going (K186)', () {
+      (double, GameSession, int) run({bool pitch = false, bool force = false}) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2016,
+                premium: true,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire));
+        g.world.player!.creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.high, genres: [0]).id;
+        g.releaseSingle(id);
+        for (var i = 0; i < MoodPlaylists.minAgeWeeks; i++) {
+          g.advanceWeek();
+        }
+        expect(g.song(id).canMood, isTrue);
+        if (pitch) {
+          final best = g.moodOptions(id).reduce((a, b) =>
+              a.chance >= b.chance ? a : b);
+          expect(best.fit, inInclusiveRange(0.0, 1.0));
+          expect(best.chance, inInclusiveRange(0.1, 0.7));
+          final inList = g.pitchMood(id, best.mood);
+          expect(g.song(id).moodIn, inList);
+          expect(g.song(id).mood, best.mood);
+          expect(g.song(id).canMood, isFalse);
+          expect(() => g.pitchMood(id, Mood.chill), _code('noMood'));
+        }
+        if (force) {
+          g.world.songs[id]
+            ..moodWeek = g.week
+            ..mood = Mood.sad.index
+            ..moodIn = true;
+        }
+        var streams = 0.0;
+        for (var i = 0; i < 4; i++) {
+          g.advanceWeek();
+          streams += g.world.songs[id].weekStreams;
+        }
+        return (streams, g, id);
+      }
+
+      final (_, g1, id1) = run(pitch: true);
+      final slot = g1.slotId;
+      final mood = g1.song(id1).mood;
+      g1.close();
+      final again = GameSession.resume(slots, slot);
+      expect(again.song(id1).mood, mood);
+      again.close();
+      final (plain, g2, _) = run();
+      g2.close();
+      final (listed, g3, id3) = run(force: true);
+      expect(MoodPlaylists.lifts(g3.world)[id3], greaterThan(0));
+      g3.close();
+      expect(listed, greaterThan(plain * 1.05));
+    });
+
     test('a single worked to another radio format (K134)', () {
       var g = GameSession.start(slots, _setup());
       final slot = g.slotId;

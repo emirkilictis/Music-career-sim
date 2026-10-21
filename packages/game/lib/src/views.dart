@@ -299,6 +299,9 @@ class SongView {
         lifetimeDownloads = w.songLifetimeDownloads(s),
         lifetimePhysical = s.lifetimePhysical,
         lifetimeRingtones = s.lifetimeRingtones,
+        mood = s.mood < 0 ? null : Mood.values[s.mood],
+        moodIn = s.moodIn,
+        canMood = w.player != null && MoodPlaylists.can(w, w.player!, s),
         lifetimeRadio = s.lifetimeRadio,
         isPlayer = s.primaryArtistId == w.playerArtistId,
         video = s.videoBudget < 0 ? null : VideoBudget.values[s.videoBudget],
@@ -671,6 +674,12 @@ class SongView {
 
   /// Ringtones sold (docs K183).
   final double lifetimeRingtones;
+
+  /// The mood playlist it was pitched to (null: none) and whether it got
+  /// in, and whether it can be pitched now (docs K186).
+  final Mood? mood;
+  final bool moodIn;
+  final bool canMood;
 
   /// Radio audience (listener impressions).
   final double lifetimeRadio;

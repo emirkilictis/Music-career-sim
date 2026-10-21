@@ -33,6 +33,7 @@ import 'price_cuts.dart';
 import 'music_show.dart';
 import 'opportunities.dart';
 import 'rerecords.dart';
+import 'mood_playlists.dart';
 import 'artist_pick.dart';
 import 'ringtones.dart';
 import 'stream_windows.dart';
@@ -231,6 +232,8 @@ class Simulator {
     final ownLifts = OwnPlaylists.lifts(w);
     // The player's pinned release (docs K185).
     final pickLifts = ArtistPicks.lifts(w);
+    // Mood playlists keep catalog songs going (docs K186).
+    final moodLifts = MoodPlaylists.lifts(w);
     // The player's label pushes its signees further (docs K169).
     final signed = Imprints.signedIds(w);
 
@@ -392,7 +395,10 @@ class Simulator {
       final womLift = WordOfMouth.lift(w, s, promoAge);
       // Editors' adds and the player's own playlist (docs K159).
       final listLift =
-          s.playlistBoost + (ownLifts[s.id] ?? 0) + (pickLifts[s.id] ?? 0);
+          s.playlistBoost +
+          (ownLifts[s.id] ?? 0) +
+          (pickLifts[s.id] ?? 0) +
+          (moodLifts[s.id] ?? 0);
       final versionLift = s.versionBoost;
       final algoLift =
           s.autoplay.lift * StreamingTools.autoplayLift(c, s, promoAge) +

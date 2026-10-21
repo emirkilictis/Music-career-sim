@@ -255,8 +255,8 @@ abstract final class Codec {
     // Added in schema v32, v34, v35, v36, v39, v41, v43, v44.
     'writer', 'liveOf', 'promo', 'cloud', 'snippet', 'langs', 'guestCents',
     'curators',
-    // Added in schema v49.
-    'ringtones', 'weekRingtones',
+    // Added in schema v49, v50.
+    'ringtones', 'weekRingtones', 'mood',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -337,6 +337,9 @@ abstract final class Codec {
               ]),
         s.lifetimeRingtones,
         s.weekRingtones,
+        s.moodWeek < 0
+            ? null
+            : jsonEncode([s.moodWeek, s.mood, s.moodIn ? 1 : 0]),
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -401,6 +404,13 @@ abstract final class Codec {
     }
     s.languages = r['langs'] as int? ?? 0;
     s.guestCents = (r['guestCents'] as num?)?.toDouble() ?? 0;
+    if (r['mood'] case final String x when x.isNotEmpty) {
+      final j = jsonDecode(x) as List;
+      s
+        ..moodWeek = j[0] as int
+        ..mood = j[1] as int
+        ..moodIn = j[2] == 1;
+    }
     s
       ..lifetimeRingtones = (r['ringtones'] as num?)?.toDouble() ?? 0
       ..weekRingtones = (r['weekRingtones'] as num?)?.toDouble() ?? 0;

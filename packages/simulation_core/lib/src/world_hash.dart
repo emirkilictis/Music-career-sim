@@ -105,6 +105,8 @@ int worldHash(World w) {
     addDouble(s.dormantRate);
     addDouble(s.lifetimePhysical);
     addDouble(s.lifetimeRingtones);
+    addInt(s.moodWeek);
+    addInt(s.moodIn ? 1 : 0);
     for (final g in s.genres) {
       addInt(g);
     }

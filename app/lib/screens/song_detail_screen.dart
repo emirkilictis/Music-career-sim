@@ -308,6 +308,62 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
+  String _moodName(Mood m) {
+    final l = context.l10n;
+    return switch (m) {
+      Mood.chill => l.moodChill,
+      Mood.workout => l.moodWorkout,
+      Mood.party => l.moodParty,
+      Mood.sad => l.moodSad,
+      Mood.focus => l.moodFocus,
+    };
+  }
+
+  /// Pitches the song to a mood playlist (docs K186).
+  Future<void> _pitchMood(SongView s) async {
+    final l = context.l10n;
+    final career = widget.state;
+    final options = await career.read(Cmd.moodOptions(s.id));
+    if (!mounted) return;
+    final picked = await showModalBottomSheet<Mood>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+            child: Text(l.moodTitle, style: Theme.of(c).textTheme.titleLarge),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(l.moodHint, style: Theme.of(c).textTheme.bodySmall),
+          ),
+          for (final o in options)
+            ListTile(
+              title: Text(_moodName(o.mood)),
+              subtitle: Text(l.moodOdds(
+                  (o.fit * 100).round(), (o.chance * 100).round())),
+              onTap: () => Navigator.pop(c, o.mood),
+            ),
+        ]),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    try {
+      final inList = await career.act(Cmd.pitchMood(s.id, picked));
+      if (!mounted) return;
+      showInfo(
+          context,
+          inList
+              ? l.moodIn(s.title, _moodName(picked))
+              : l.moodOut(_moodName(picked)),
+          icon: Icons.queue_music_rounded);
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _shootVideo(SongView s) async {
     final l = context.l10n;
     final fmt = context.fmt;
@@ -811,6 +867,20 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                       icon: Icons.music_note_rounded,
                       label: l.releaseAsSingle,
                     ),
+                  ],
+                  // Mood playlists for songs already out (docs K186).
+                  if (s.isPlayer && s.canMood) ...[
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: () => _pitchMood(s),
+                      icon: const Icon(Icons.queue_music_rounded),
+                      label: Text(l.moodButton),
+                    ),
+                  ] else if (s.mood case final m?) ...[
+                    const SizedBox(height: 8),
+                    Tag(s.moodIn
+                        ? l.moodOnList(_moodName(m))
+                        : l.moodPassed(_moodName(m))),
                   ],
                   if (s.isPlayer && s.video == null) ...[
                     const SizedBox(height: 8),

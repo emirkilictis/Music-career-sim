@@ -2131,6 +2131,31 @@ class GameSession {
 
   DocumentaryView get documentary => DocumentaryView.of(world, _p);
 
+  /// Each mood playlist's fit for song [songId] and the chance it gets
+  /// in (docs K186).
+  List<({Mood mood, double fit, double chance})> moodOptions(int songId) {
+    final s = _ownSong(songId);
+    return [
+      for (final m in Mood.values)
+        (
+          mood: m,
+          fit: MoodPlaylists.fit(s, m),
+          chance: MoodPlaylists.chance(s, m)
+        )
+    ];
+  }
+
+  /// Pitches song [songId] to mood playlist [m]; true if it got in.
+  bool pitchMood(int songId, Mood m) {
+    final s = _ownSong(songId);
+    if (!MoodPlaylists.can(world, _p, s)) {
+      throw GameException('noMood', 'Not this song now');
+    }
+    final inList = MoodPlaylists.pitch(world, _p, s, m);
+    _saveNow();
+    return inList;
+  }
+
   /// The Artist Pick (docs K185).
   PickView get artistPick => PickView.of(world, _p);
 

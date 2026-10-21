@@ -843,6 +843,12 @@ class Song with Charted {
   /// Week the player pitched it to the playlist editors (docs K97), -1.
   int pitchWeek = -1;
 
+  /// Pitched to a mood playlist (docs K186): the week (-1: not), the
+  /// [Mood] index and whether it got in.
+  int moodWeek = -1;
+  int mood = -1;
+  bool moodIn = false;
+
   /// Sent to independent curators (docs K160): the week (-1: not), how
   /// many, and how many added it with how many followers in all.
   int curatorWeek = -1;
