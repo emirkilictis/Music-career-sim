@@ -18,6 +18,10 @@ void main() {
   final enabled = Platform.environment['MONKEY'] == '1';
   final steps = int.parse(Platform.environment['MONKEY_STEPS'] ?? '400');
   final seed = int.parse(Platform.environment['MONKEY_SEED'] ?? '1');
+  final env = Platform.environment;
+  final year = int.parse(env['MONKEY_YEAR'] ?? '2018');
+  final kind = ArtistKind.values.byName(env['MONKEY_KIND'] ?? 'vocalGroup');
+  final tier = StartTier.values.byName(env['MONKEY_TIER'] ?? 'superstar');
 
   testWidgets('monkey', skip: !enabled, (tester) async {
     // Real fonts: overflows depend on text widths.
@@ -31,10 +35,10 @@ void main() {
         CareerSetup(
           name: 'Monkey',
           genre: 0,
-          kind: ArtistKind.vocalGroup,
-          members: const ['A', 'B', 'C', 'D'],
-          startYear: 2018,
-          tier: StartTier.superstar,
+          kind: kind,
+          members: kind.isGroup ? const ['A', 'B', 'C', 'D'] : const [],
+          startYear: year,
+          tier: tier,
           money: StartMoney.millionaire,
           premium: true,
           seed: seed,
@@ -52,8 +56,11 @@ void main() {
               Cmd.writeSong(budget: BudgetTier.high, genres: const [0])))
           .id);
     }
-    await c.run(Cmd.signLabel(Label.major));
-    await c.run(Cmd.releaseSingle(songs.first, Campaign.intensive));
+    // A label that runs every campaign, when it will have the artist.
+    try {
+      await c.run(Cmd.signLabel(Label.major));
+    } catch (_) {}
+    await c.run(Cmd.releaseSingle(songs.first, Campaign.standard));
     for (var i = 0; i < 3; i++) {
       await c.run(Cmd.nextWeek());
     }
@@ -62,7 +69,7 @@ void main() {
         songIds: songs.sublist(0, 10),
         type: AlbumType.album,
         variantWeeks: const [0],
-        campaign: Campaign.global));
+        campaign: Campaign.standard));
     for (var i = 0; i < 3; i++) {
       await c.run(Cmd.nextWeek());
     }
