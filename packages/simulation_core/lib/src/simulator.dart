@@ -38,6 +38,7 @@ import 'rerecords.dart';
 import 'mood_playlists.dart';
 import 'artist_pick.dart';
 import 'ringtones.dart';
+import 'song_market.dart';
 import 'stream_windows.dart';
 import 'tours.dart';
 import 'word_of_mouth.dart';
@@ -1844,7 +1845,8 @@ class Simulator {
           // Free uploads pay next to nothing (docs K148).
           (s.cloudOnly ? Cloud.payFactor : 1.0);
       // The deal it came out under keeps its cut (docs K139).
-      final share = s.masterShare ??= p.artistShare;
+      // A bought song pays its writer their share (docs K205).
+      final share = (s.masterShare ??= p.artistShare) * SongMarket.keep(s);
       cents += songCents * share;
       s.revenueCents += songCents * share;
       world.dirtySongs.add(id);
@@ -1868,7 +1870,8 @@ class Simulator {
         songCents +=
             world.songWeekStreamsRegion(s, r) * 0.35 * s.autoplay.royalty;
       }
-      final share = s.masterShare ??= p.artistShare;
+      // A bought song pays its writer their share (docs K205).
+      final share = (s.masterShare ??= p.artistShare) * SongMarket.keep(s);
       cents += songCents * share;
       s.revenueCents += songCents * share;
       world.dirtySongs.add(id);

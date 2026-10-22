@@ -496,6 +496,19 @@ void main() {
     await shot(tester, '15c_skip_summary');
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
     await shot(tester, '15d_skip_summary_more');
+    await tester.scrollUntilVisible(_ci('Back to the game'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(_ci('Back to the game'));
+    await tester.pumpAndSettle();
+    // Finished songs from songwriters (docs K205).
+    await tab(tester, 'Studio');
+    final market = _ci('See the demos');
+    await tester.scrollUntilVisible(market, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(market);
+    await tester.pumpAndSettle();
+    await shot(tester, '05k_song_market');
   });
 
   testWidgets('screenshots: early 2000s career', skip: !enabled,

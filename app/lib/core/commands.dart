@@ -313,6 +313,8 @@ abstract final class Cmd {
       (s) => s.sellSong(songId, artistId);
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
+  static SessionCmd<SongMarketView> songMarket() => (s) => s.songMarket;
+  static SessionCmd<SongView> buySong(int index) => (s) => s.buySong(index);
 
   /// Distribution for independents (docs K157).
   // Documentaries (docs K172).

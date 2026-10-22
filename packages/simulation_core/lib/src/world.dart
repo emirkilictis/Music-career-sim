@@ -150,6 +150,9 @@ class World {
   /// Songs the player wrote for other artists (docs K143).
   final List<int> writtenSongIds = [];
 
+  /// Song market offers bought (docs K205): month × offers + index.
+  final Set<int> boughtPitches = {};
+
   /// The player's members' solo songs, and rivals' songs the player is
   /// featured on (docs K158).
   final List<int> managedSongIds = [];

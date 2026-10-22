@@ -854,6 +854,7 @@ class Fmt {
       'cannotRerecord' => l.errorCannotRerecord,
       'cannotUpload' => l.errorCannotUpload,
       'songRefused' => l.errorSongRefused,
+      'noPitch' || 'pitchGone' => l.errorPitchGone,
       'cannotBundle' => l.errorCannotBundle,
       'noMarquee' => l.errorNoMarquee,
       'cannotCloud' => l.errorCannotCloud,

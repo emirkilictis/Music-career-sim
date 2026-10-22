@@ -419,6 +419,53 @@
   },
   "summaryFame": "Fame",
   "summaryBack": "Back to the game",
+  "songMarket": "Song market",
+  "songMarketHint": "Songwriters send you finished demos every month. A song you buy goes to your vault recorded, without using creativity; how good it is depends on the demo and your voice. Its writer keeps {cut}% of what it earns.",
+  "@songMarketHint": {
+    "placeholders": {
+      "cut": {
+        "type": "int"
+      }
+    }
+  },
+  "songMarketCard": "Finished songs from songwriters, every month: no creativity needed.",
+  "songMarketOpen": "See the demos",
+  "songMarketNext": "New demos in {weeks} weeks",
+  "@songMarketNext": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "songMarketBuy": "Buy · {price}",
+  "@songMarketBuy": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "songMarketBought": "In your vault",
+  "songMarketTaken": "Another artist bought it",
+  "songMarketDone": "“{title}” is in your vault.",
+  "@songMarketDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "songMarketEmpty": "No songwriter sends you demos yet: they want more fans first.",
+  "songBoughtFrom": "by {name}",
+  "@songBoughtFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorPitchGone": "That demo is no longer on offer.",
   "dailyBonus": "Daily Premium bonus: {amount}",
   "@dailyBonus": {
     "placeholders": {

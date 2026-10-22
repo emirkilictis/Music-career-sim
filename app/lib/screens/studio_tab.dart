@@ -7,7 +7,9 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/media_tile.dart';
+import 'game_shell.dart' show pushInCareer;
 import 'song_detail_screen.dart';
+import 'song_market_screen.dart';
 
 /// Studio: write a song (one screen, smart defaults) and see the vault.
 class StudioTab extends StatefulWidget {
@@ -362,6 +364,28 @@ class _StudioTabState extends State<StudioTab> {
           ),
         ),
         const SizedBox(height: 12),
+        // Finished songs from songwriters (docs K205).
+        Section(
+          title: l.songMarket,
+          icon: Icons.storefront_rounded,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(l.songMarketCard,
+                  style: TextStyle(color: AppColors.textMuted)),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: OutlinedButton.icon(
+                  onPressed: () => pushInCareer(context, const SongMarketScreen()),
+                  icon: const Icon(Icons.storefront_rounded),
+                  label: Text(l.songMarketOpen),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
         Section(
           title: l.vaultCount(_vault.length),
           icon: Icons.lock_outline_rounded,
@@ -374,7 +398,9 @@ class _StudioTabState extends State<StudioTab> {
                       songId: s.id,
                       albumId: s.coverAlbumId,
                       title: s.title,
-                      subtitle: fmt.genres(s.genres),
+                      subtitle: s.boughtFrom == null
+                          ? fmt.genres(s.genres)
+                          : '${fmt.genres(s.genres)} · ${l.songBoughtFrom(s.boughtFrom!)}',
                       badge: GradeTag(fmt.songGrade(s)),
                       onTap: () => Navigator.push(
                           context,

@@ -54,6 +54,7 @@ export 'src/reunions.dart';
 export 'src/rival_splits.dart';
 export 'src/rng.dart';
 export 'src/snippets.dart';
+export 'src/song_market.dart';
 export 'src/social.dart';
 export 'src/songwriting.dart';
 export 'src/streaming_tools.dart';

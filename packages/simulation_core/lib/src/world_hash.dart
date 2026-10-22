@@ -130,6 +130,7 @@ int worldHash(World w) {
     addInt(s.replacedWeek);
     addInt(s.leakedWeek);
     addInt(s.writerId);
+    addInt(s.boughtFrom);
     addDouble(s.guestCents);
     addInt(s.liveOf);
     addInt(s.marqueeWeek);

@@ -1422,6 +1422,66 @@ void main() {
       g.close();
     });
 
+    test('songwriters sell finished demos on the song market (K205)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2018,
+              tier: StartTier.risingStar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      final p = g.world.player!;
+      final m = g.songMarket;
+      expect(m.pitches, isNotEmpty);
+      expect(m.pitches.length, lessThanOrEqualTo(SongMarket.size));
+      expect(m.cutPct, 15);
+      expect(m.weeksToNext, inInclusiveRange(1, SongMarket.periodWeeks));
+      // Only writers who would work with the player pitch.
+      for (final x in m.pitches) {
+        final c = g.world.collaborators.firstWhere((c) => c.name == x.writerName);
+        expect(c.role, CollaboratorRole.songwriter);
+        expect(Actions.collaboratorAvailable(c, p), isTrue);
+        expect(x.gradeLow, lessThan(x.gradeHigh));
+      }
+      // The month's offers stay the same within it.
+      expect(g.songMarket.pitches.map((x) => x.title),
+          m.pitches.map((x) => x.title));
+      final x = m.pitches.firstWhere((x) => x.open);
+      final money = p.moneyCents;
+      final energy = p.creativeEnergy;
+      final vault = g.vault.length;
+      final s = g.buySong(x.index);
+      expect(p.moneyCents, money - x.priceCents);
+      // No creativity spent: the song was written already.
+      expect(p.creativeEnergy, energy);
+      expect(g.vault.length, vault + 1);
+      expect(s.title, x.title);
+      expect(s.boughtFrom, x.writerName);
+      expect(g.world.songs[s.id].quality,
+          inInclusiveRange(x.gradeLow - 10, x.gradeHigh + 10));
+      expect(g.songMarket.pitches[x.index].bought, isTrue);
+      expect(() => g.buySong(x.index), _code('pitchGone'));
+      expect(() => g.buySong(99), _code('noPitch'));
+      // The writer keeps a share of what it earns.
+      expect(SongMarket.keep(g.world.songs[s.id]), closeTo(0.85, 1e-9));
+      // Saved with the game.
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.songMarket.pitches[x.index].bought, isTrue);
+      expect(g.world.songs[s.id].boughtFrom, greaterThanOrEqualTo(0));
+      // Rivals take some demos over the month; next month brings new ones.
+      final period = SongMarket.period(g.world.week);
+      var taken = false;
+      while (SongMarket.period(g.world.week) == period) {
+        taken |= g.songMarket.pitches.any((x) => x.taken);
+        g.advanceWeek();
+      }
+      expect(taken, isTrue);
+      expect(g.songMarket.pitches.any((x) => x.bought), isFalse);
+      g.close();
+    });
+
     test('a skip tells what happened over it (K203)', () {
       final g = GameSession.start(
           slots,

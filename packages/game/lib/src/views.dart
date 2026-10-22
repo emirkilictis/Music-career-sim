@@ -346,6 +346,8 @@ class SongView {
         leakedWeek = s.leakedWeek,
         writerName = s.writerId >= 0 ? w.artists[s.writerId].name : '',
         writtenByPlayer = s.writerId >= 0 && s.writerId == w.playerArtistId,
+        boughtFrom =
+            s.boughtFrom < 0 ? null : w.collaborators[s.boughtFrom].name,
         writerCents = s.writerCents,
         credit = ChartCredit.of(w, s.primaryArtistId, s.featuredArtistIds),
         guestCents = s.guestCents,
@@ -494,6 +496,9 @@ class SongView {
   /// royalties from it.
   final String writerName;
   final bool writtenByPlayer;
+
+  /// The songwriter it was bought from on the song market (docs K205).
+  final String? boughtFrom;
   final double writerCents;
 
   /// The player on it under another name (docs K158): a member's solo
@@ -1886,6 +1891,61 @@ bool _charted(Charted e) {
     if ((e.statsOrNull(c)?.weeksOn ?? 0) > 0) return true;
   }
   return false;
+}
+
+/// A demo on the song market (docs K205): the record's likely grade with
+/// the player's voice, what it costs, and whether it is still there.
+class SongPitchView {
+  SongPitchView.of(World w, Artist a, SongPitch x)
+      : index = x.index,
+        title = x.title,
+        genre = x.genre,
+        writerName = x.writer.name,
+        writerSkill = x.writer.skill.round(),
+        writerGenre = x.writer.genre,
+        priceCents = x.priceCents,
+        gradeLow = (SongMarket.expected(w, a, x.demo) - SongMarket.spread)
+            .round()
+            .clamp(1, 100),
+        gradeHigh = (SongMarket.expected(w, a, x.demo) + SongMarket.spread)
+            .round()
+            .clamp(1, 100),
+        bought = w.boughtPitches.contains(_pitchKey(w, x)),
+        taken = w.week >= x.takenWeek &&
+            !w.boughtPitches.contains(_pitchKey(w, x));
+  final int index;
+  final String title;
+  final int genre;
+  final String writerName;
+  final int writerSkill;
+  final int writerGenre;
+  final int priceCents;
+  final int gradeLow, gradeHigh;
+
+  /// The player bought it; another artist did.
+  final bool bought, taken;
+  bool get open => !bought && !taken;
+
+  static int _pitchKey(World w, SongPitch x) =>
+      SongMarket.period(w.week) * SongMarket.size + x.index;
+}
+
+/// The month's song market (docs K205).
+class SongMarketView {
+  SongMarketView.of(World w, Artist a)
+      : pitches = [
+          for (final x in SongMarket.pitches(w, a)) SongPitchView.of(w, a, x)
+        ],
+        weeksToNext =
+            SongMarket.periodWeeks - w.week % SongMarket.periodWeeks,
+        cutPct = (SongMarket.writerCut * 100).round();
+  final List<SongPitchView> pitches;
+
+  /// Weeks until next month's demos.
+  final int weeksToNext;
+
+  /// The writer's share of what a bought song earns, in per cent.
+  final int cutPct;
 }
 
 /// An offer waiting for the player's answer (docs K59).

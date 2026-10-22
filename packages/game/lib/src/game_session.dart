@@ -2291,6 +2291,25 @@ class GameSession {
     _saveNow();
   }
 
+  /// This month's demos on the song market (docs K205).
+  SongMarketView get songMarket => SongMarketView.of(world, _p);
+
+  /// Buys demo [index] of this month's song market (docs K205): it goes
+  /// to the vault, recorded.
+  SongView buySong(int index) {
+    final all = SongMarket.pitches(world, _p);
+    if (index < 0 || index >= all.length) {
+      throw GameException('noPitch', 'No such demo');
+    }
+    if (!SongMarket.open(world, all[index])) {
+      throw GameException('pitchGone', 'Bought or taken');
+    }
+    _requireMoney(all[index].priceCents);
+    final s = SongMarket.buy(world, _p, index);
+    _saveNow();
+    return SongView.of(world, s);
+  }
+
   /// Songs the player wrote for others, newest first (docs K143).
   List<WrittenSongView> get writtenForOthers => [
         for (final id in world.writtenSongIds.reversed)

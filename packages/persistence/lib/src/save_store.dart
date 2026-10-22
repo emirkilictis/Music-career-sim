@@ -133,6 +133,10 @@ class SaveStore {
     // The reunion (docs K194).
     Reunions.decode(w, meta['reunion'] as String?);
     w.rivalSplits.addAll(RivalSplit.decode(meta['rivalSplits'] as String?));
+    // The song market's bought offers (docs K205).
+    if (meta['songMarket'] case final String s when s.isNotEmpty) {
+      w.boughtPitches.addAll((jsonDecode(s) as List).cast<int>());
+    }
     if (meta['artistChart'] case final String s when s.isNotEmpty) {
       final j = jsonDecode(s) as List;
       w.artistChartPrev = List.unmodifiable((j[0] as List).cast<int>());
@@ -404,6 +408,7 @@ class SaveStore {
       'careerBase': w.careerStreamsBase,
       'reunion': Reunions.encode(w),
       'rivalSplits': RivalSplit.encode(w.rivalSplits),
+      'songMarket': jsonEncode(w.boughtPitches.toList()..sort()),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

@@ -933,6 +933,10 @@ class Song with Charted {
   int soldTo = -1;
   double writerCents = 0;
 
+  /// The songwriter (collaborator id) it was bought from on the song
+  /// market (docs K205; -1: the artist's own). They keep a share.
+  int boughtFrom = -1;
+
   /// The artist's share of what it earns, fixed by the deal it came out
   /// under (docs K139): a label owns the masters for good. Null until
   /// it first earns.
