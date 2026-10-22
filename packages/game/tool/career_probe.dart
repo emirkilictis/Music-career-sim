@@ -323,6 +323,7 @@ int _week(GameSession s, void Function(int) setSingle, int Function() single,
       setSingle(s.week);
     } on GameException {/* skip */}
   }
+  if (tools) spent += _tools(s);
   // An album a year, once there are enough songs.
   final free = s.songs
       .where((x) =>
@@ -392,6 +393,55 @@ RadioPush _radio(GameSession s, int budget) {
 }
 
 final heavy = Platform.environment['PROBE_HEAVY'] == '1';
+
+/// A player who works every streaming tool on each single (docs K204).
+final tools = Platform.environment['PROBE_TOOLS'] == '1';
+
+void _try(void Function() f) {
+  try {
+    f();
+  } on GameException {/* not open, not affordable, already done */}
+}
+
+/// Every streaming tool a single can get, at the right time after it
+/// came out; catalog songs get mood playlists and a Canvas.
+int _tools(GameSession s) {
+  final before = s.player.moneyCents;
+  for (final x in s.songs) {
+    if (x.releasedWeek < 0) continue;
+    final age = s.week - x.releasedWeek;
+    if (x.isSingle && x.singleWeek >= 0) {
+      final a = s.week - x.singleWeek;
+      if (a == 0) {
+        _try(() => s.addCanvas(x.id));
+        _try(() => s.pitchSong(x.id));
+        _try(() => s.setAutoplayLevel(x.id, AutoplayLevel.standard));
+        _try(() => s.submitToCurators(x.id, CuratorPack.large));
+        _try(() => s.runMarquee(x.id));
+        _try(() => s.runShowcase(x.id));
+        _try(() => s.runCreators(x.id, CreatorCampaign.medium));
+        _try(() => s.setArtistPick(PickKind.song, x.id));
+      }
+      if (a == 3) {
+        _try(() => s.releaseVersion(
+            x.id, s.year >= 2018 ? SongVersion.spedUp : SongVersion.remix));
+      }
+      if (a == 7) {
+        _try(() => s.releaseVersion(
+            x.id, s.year >= 2018 ? SongVersion.slowed : SongVersion.acapella));
+      }
+    }
+    if (age == 30) {
+      _try(() => s.addCanvas(x.id));
+      final m = s.moodOptions(x.id);
+      if (m.isNotEmpty) {
+        m.sort((a, b) => b.chance.compareTo(a.chance));
+        _try(() => s.pitchMood(x.id, m.first.mood));
+      }
+    }
+  }
+  return before - s.player.moneyCents;
+}
 
 String _k(double v) => v.abs() >= 1e6
     ? '${(v / 1e6).toStringAsFixed(1)}M'
