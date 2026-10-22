@@ -6227,6 +6227,32 @@
       }
     }
   },
+  "eventRivalVersion": "{artist} put out a new version of {title} ({version}): #{pos} on the chart, up against your {mine} at #{myPos}.",
+  "@eventRivalVersion": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      },
+      "pos": {
+        "type": "int"
+      },
+      "mine": {
+        "type": "String"
+      },
+      "myPos": {
+        "type": "int"
+      }
+    }
+  },
+  "rivalToolsSection": "Their team's tools",
+  "rivalToolsHint": "What the artist's team has done for the song on the streaming apps.",
+  "rivalCanvas": "Canvas",
   "eventRivalSplitEnded": "{name} left {group} for a solo career, and the group is over.",
   "@eventRivalSplitEnded": {
     "placeholders": {

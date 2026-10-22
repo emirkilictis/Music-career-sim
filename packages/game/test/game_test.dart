@@ -4196,6 +4196,70 @@ void main() {
       g.close();
     });
 
+    test('rivals work their hits with streaming tools (K201)', () {
+      var g = GameSession.start(slots, _setup(startYear: 2017));
+      final slot = g.slotId;
+      final events = <GameEvent>[];
+      for (var y = 0; y < 5; y++) {
+        events.addAll(g.advanceWeeks(52, stop: SkipStop.never).events);
+      }
+      final w = g.world;
+      final me = w.playerArtistId;
+      final rival = [
+        for (final s in w.songs)
+          if (s.primaryArtistId != me && s.releasedWeek >= 0) s
+      ];
+      // Canvases only once the app had them.
+      final canvases = [
+        for (final s in rival)
+          if (s.canvasWeek >= 0) s
+      ];
+      expect(canvases, isNotEmpty);
+      for (final s in canvases) {
+        expect(GameTime.yearOf(s.canvasWeek),
+            greaterThanOrEqualTo(SongCanvas.fromYear));
+        // On release, or when the album it is on came out.
+        expect(s.canvasWeek, greaterThanOrEqualTo(s.releasedWeek));
+      }
+      // Versions for hits, a few weeks into the single, a couple at most.
+      final versioned = [
+        for (final s in rival)
+          if (s.versions.isNotEmpty) s
+      ];
+      expect(versioned, isNotEmpty);
+      for (final s in versioned) {
+        expect(s.isSingle, isTrue);
+        expect(s.versions.length, lessThanOrEqualTo(RivalTools.maxVersions));
+        expect(s.peakOn(Charts.usSongs),
+            inInclusiveRange(1, RivalTools.topPosition));
+        for (final (v, wk) in s.versions) {
+          expect(wk - s.singleWeek,
+              inInclusiveRange(RivalTools.fromWeek, RivalTools.toWeek));
+          if (GameTime.yearOf(wk) < 2018) expect(v, SongVersion.remix);
+          expect(v.onOffer, isTrue);
+        }
+      }
+      // Sped-up versions once short videos made them a thing.
+      expect(
+          versioned.any((s) => s.versions.any((x) => x.$1 == SongVersion.spedUp)),
+          isTrue);
+      for (final e in events.whereType<RivalVersionOut>()) {
+        expect(e.position, inInclusiveRange(1, 10));
+        expect(e.playerPosition, inInclusiveRange(1, 10));
+        expect(w.songs[e.songId].versions.any((x) => x.$1 == e.version), isTrue);
+      }
+      final n = versioned.length;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(
+          g.world.songs.where((s) =>
+              s.primaryArtistId != me &&
+              s.releasedWeek >= 0 &&
+              s.versions.isNotEmpty),
+          hasLength(n));
+      g.close();
+    });
+
     test('features are announced the year they open (K200)', () {
       // Every feature opens within the game's years, and each is named once.
       for (final f in GameFeature.values) {

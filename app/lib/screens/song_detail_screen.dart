@@ -1021,6 +1021,29 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             const SizedBox(height: 12),
             IncomeCard(income: income, title: l.incomeSongTitle),
           ],
+          // What a rival's team did for the song (docs K201).
+          if (!s.isPlayer && (s.versions.isNotEmpty || s.canvas)) ...[
+            const SizedBox(height: 12),
+            Section(
+              title: l.rivalToolsSection,
+              icon: Icons.graphic_eq_rounded,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(l.rivalToolsHint,
+                        style: TextStyle(color: AppColors.textMuted)),
+                    const SizedBox(height: 8),
+                    Wrap(spacing: 8, runSpacing: 8, children: [
+                      for (final (v, wk) in s.versions)
+                        Tag('${fmt.songVersion(v)} · ${fmt.weekInMonth(wk)}',
+                            icon: Icons.graphic_eq_rounded),
+                      if (s.canvas)
+                        Tag(l.rivalCanvas,
+                            icon: Icons.motion_photos_on_rounded),
+                    ]),
+                  ]),
+            ),
+          ],
           if (s.isPlayer && s.releasedWeek >= 0) ...[
             const SizedBox(height: 12),
             Section(

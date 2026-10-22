@@ -351,6 +351,22 @@ class RivalGroupSplit extends GameEvent {
   bool get isMajor => ended;
 }
 
+/// A rival put out [version] of their hit [songId], at [position] on the
+/// US chart, while the player's [playerSongId] is up there at
+/// [playerPosition] (docs K201).
+class RivalVersionOut extends GameEvent {
+  const RivalVersionOut(this.songId, this.artistId, this.version, this.position,
+      this.playerSongId, this.playerPosition);
+  final int songId;
+  final int artistId;
+  final SongVersion version;
+  final int position;
+  final int playerSongId;
+  final int playerPosition;
+  @override
+  bool get isMajor => false;
+}
+
 /// The reunion with group [groupId] is over (docs K194).
 class ReunionOver extends GameEvent {
   const ReunionOver(this.groupId, this.ended);

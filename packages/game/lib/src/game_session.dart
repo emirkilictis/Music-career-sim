@@ -4089,6 +4089,32 @@ class GameSession {
         }
       }
     }
+    // A rival works a hit that is up there with the player's (docs K201).
+    Song? myTop;
+    for (final id in w.playerSongIds) {
+      final pos = w.songs[id].lastPosOn(Charts.usSongs);
+      if (pos > 0 &&
+          pos <= 10 &&
+          (myTop == null || pos < myTop.lastPosOn(Charts.usSongs))) {
+        myTop = w.songs[id];
+      }
+    }
+    if (myTop != null) {
+      final myPos = myTop.lastPosOn(Charts.usSongs);
+      for (final sid in w.activeSongIds) {
+        final s = w.songs[sid];
+        final pos = s.lastPosOn(Charts.usSongs);
+        if (s.primaryArtistId == p.id ||
+            s.versions.isEmpty ||
+            s.versions.last.$2 != r.week ||
+            pos == 0 ||
+            pos > 10) {
+          continue;
+        }
+        events.add(RivalVersionOut(s.id, s.primaryArtistId,
+            s.versions.last.$1, pos, myTop.id, myPos));
+      }
+    }
     // Chart battles: the player's release against the biggest rival one out
     // the same week (docs K69).
     for (final id in debutAlbums) {

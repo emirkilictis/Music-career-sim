@@ -1064,6 +1064,9 @@ class Fmt {
       ReunionOver() => l.eventReunionOver(t),
       FeatureOpened(:final feature) =>
         l.eventFeatureOpened(gameFeature(feature)),
+      RivalVersionOut(:final version, :final position, :final playerPosition) =>
+        l.eventRivalVersion(line.artistName, t, songVersion(version), position,
+            line.title2, playerPosition),
       RivalGroupSplit(:final ended) => ended
           ? l.eventRivalSplitEnded(line.artistName, t)
           : l.eventRivalSplit(line.artistName, t),

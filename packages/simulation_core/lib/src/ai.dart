@@ -4,6 +4,7 @@ import 'names.dart';
 import 'real_artists.dart';
 import 'rival_moves.dart';
 import 'rival_splits.dart';
+import 'rival_tools.dart';
 import 'rng.dart';
 import 'streaming_tools.dart';
 import 'time.dart';
@@ -54,6 +55,8 @@ abstract final class AiPlanner {
       if (clash != null) clashes.add(clash);
       _executeDue(w, a);
     }
+    // Their teams work the hits with the player's tools (docs K201).
+    RivalTools.weekly(w);
     return clashes;
   }
 
@@ -120,6 +123,7 @@ abstract final class AiPlanner {
               radio: star && p.kind == PlannedKind.leadSingle
                   ? RadioPush.heavy
                   : RadioPush.standard);
+          RivalTools.onSingle(w, a, w.songs[p.songId]);
           // Their fans stream in parties; some teams buy streams (K95).
           if (star && p.kind == PlannedKind.leadSingle) {
             StreamingTools.starRelease(w, a, w.songs[p.songId]);
@@ -137,11 +141,13 @@ abstract final class AiPlanner {
           // Stars use the streaming-era moves too (docs K175).
           final type = a.pendingAlbumType;
           final exclusive = RivalMoves.exclusive(w, a, type);
-          Actions.releaseAlbum(w, a, a.pendingAlbumTitle, a.pendingAlbumSongIds,
+          final al = Actions.releaseAlbum(
+              w, a, a.pendingAlbumTitle, a.pendingAlbumSongIds,
               type: type,
               variantWeeks: a.pendingVariantWeeks,
               exclusive: exclusive,
               windowWeeks: exclusive ? 0 : RivalMoves.window(w, a, type));
+          RivalTools.onAlbum(w, a, al);
           a.pendingAlbumSongIds.clear();
       }
     }
