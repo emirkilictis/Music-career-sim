@@ -4918,6 +4918,10 @@ void main() {
         songs.add(g.writeSong(budget: BudgetTier.high).id);
       }
       expect(g.player.everCharted, isFalse);
+      // The best song leads (a weak one may miss the Hot 100 even for a
+      // star).
+      songs.sort((a, b) =>
+          g.world.songs[b].quality.compareTo(g.world.songs[a].quality));
       // Big campaigns need a label that can run them (K54).
       if (g.player.label != Label.giant) g.signLabel(Label.giant);
       g.releaseSingle(songs.first, campaign: Campaign.global);

@@ -1196,7 +1196,9 @@ void albumShapeTests() {
     // equivalents of the extra tracks, which fans play in release week
     // since docs F25), never anything like 4×.
     print('40 vs 10 tracks: ${(forty / ten).toStringAsFixed(3)}');
-    expect(forty / ten, inInclusiveRange(1.18, 1.6));
+    // Up to 1.65 since docs K204: with less reach in the playlist era the
+    // first week leans more on fans, who play the long tracklist.
+    expect(forty / ten, inInclusiveRange(1.18, 1.65));
     expect(forty, lessThan(1.8 * ten));
   });
 }
@@ -1249,7 +1251,9 @@ void viralTests() {
   test('viral strength is weak before short-video platforms', () {
     final c = SimConfig();
     expect(c.viralEraFactor(2008), lessThan(0.2));
-    expect(c.viralEraFactor(2022), greaterThan(1.0));
+    // Strongest in the short-video era, halved since docs K204.
+    expect(c.viralEraFactor(2022), greaterThan(c.viralEraFactor(2015)));
+    expect(c.viralEraFactor(2022), closeTo(0.6, 1e-9));
   });
 }
 

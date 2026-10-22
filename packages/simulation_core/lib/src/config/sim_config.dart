@@ -227,12 +227,17 @@ class SimConfig {
           : 0.05 + 0.85 * (year - 2010) / 8;
 
   /// How much of the player's reach to new listeners is left in [year]
-  /// (docs K204): the playlist era gave the player tools and lifts the
-  /// rivals do not have, and an unknown became the world's second-biggest
-  /// artist in six years. Full drag once playlists lead (2018), none in
-  /// the radio era.
-  double playerReach(int year) =>
-      1 - (1 - playerStreamingReach) * playlistShare(year) / 0.9;
+  /// at [fame] (docs K204): the playlist era gave the player tools and
+  /// lifts the rivals do not have, and an unknown became the world's
+  /// second-biggest artist in six years. Full drag once playlists lead
+  /// (2018), none in the radio era; it is the climb it slows, so it
+  /// fades as the player becomes known.
+  double playerReach(int year, double fame) =>
+      1 -
+      (1 - playerStreamingReach) *
+          playlistShare(year) /
+          0.9 *
+          (1 - fame.clamp(0.0, 1.0));
 
   /// The player's reach at full playlist era (docs K204).
   final double playerStreamingReach;
