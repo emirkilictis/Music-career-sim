@@ -137,6 +137,8 @@ void main() {
     expect(_ci('4 weeks played'), findsOneWidget);
     await tester.scrollUntilVisible(_ci('Back to the game'), 300,
         scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(_ci('Back to the game'));
+    await tester.pumpAndSettle();
     await tester.tap(_ci('Back to the game'));
     await tester.pumpAndSettle();
 

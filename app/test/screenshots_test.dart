@@ -498,6 +498,8 @@ void main() {
     await shot(tester, '15d_skip_summary_more');
     await tester.scrollUntilVisible(_ci('Back to the game'), 300,
         scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(_ci('Back to the game'));
+    await tester.pumpAndSettle();
     await tester.tap(_ci('Back to the game'));
     await tester.pumpAndSettle();
     // Finished songs from songwriters (docs K205).
