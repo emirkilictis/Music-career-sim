@@ -17,6 +17,7 @@ CareerSetup _setup({
   List<String> members = const [],
   Skills? skills,
   CareerPath path = CareerPath.independent,
+  int seed = 4242,
 }) =>
     CareerSetup(
       name: name,
@@ -29,7 +30,7 @@ CareerSetup _setup({
       members: members,
       skills: skills,
       path: path,
-      seed: 4242,
+      seed: seed,
     );
 
 Matcher _code(String code) =>
@@ -818,13 +819,14 @@ void main() {
     });
 
     test('an announced album opens bigger than a surprise drop', () {
-      double firstWeek(bool announce) {
+      double firstWeek(bool announce, int seed) {
         final g = GameSession.start(
             slots,
             _setup(
                 premium: true,
                 tier: StartTier.superstar,
-                money: StartMoney.millionaire));
+                money: StartMoney.millionaire,
+                seed: seed));
         g.world.player!.moneyCents = 1 << 40;
         final songs = <int>[];
         while (songs.length < 8) {
@@ -845,8 +847,13 @@ void main() {
         return fw.globalUnits;
       }
 
-      final surprise = firstWeek(false);
-      final announced = firstWeek(true);
+      // Two worlds: in one, a star's album may land on the same week
+      // (docs K175, K201).
+      var surprise = 0.0, announced = 0.0;
+      for (final seed in const [4242, 77]) {
+        surprise += firstWeek(false, seed);
+        announced += firstWeek(true, seed);
+      }
       expect(announced, greaterThan(surprise * 1.1));
     });
 
@@ -3384,7 +3391,13 @@ void main() {
       final p = g.world.player!;
       p.creativeEnergy = 100;
       final id = g.writeSong(budget: BudgetTier.high).id;
+      // Known enough to be invited: a few singles out (with rivals working
+      // their hits too, docs K201, one plain release is not enough).
       g.releaseSingle(id);
+      for (var k = 0; k < 2; k++) {
+        p.creativeEnergy = 100;
+        g.releaseSingle(g.writeSong(budget: BudgetTier.high).id);
+      }
       for (var i = 0; i < 6; i++) {
         g.advanceWeek();
       }

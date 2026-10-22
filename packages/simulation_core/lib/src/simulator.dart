@@ -432,7 +432,7 @@ class Simulator {
           p.labelReach *
           Imprints.reach(signed, p.id) *
           (p.tier == ArtistTier.player
-              ? w.difficulty.exposure
+              ? w.difficulty.exposure * c.playerReach(year)
               : w.difficulty.aiExposure) *
           campExp *
           // Hype, word of mouth, playlists, a new version, autoplay and the

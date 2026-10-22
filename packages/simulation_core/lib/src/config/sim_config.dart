@@ -44,6 +44,7 @@ class SimConfig {
     this.songShareCap = 0.004,
     // 2.0 until docs K127: the player's tools stacked to ×2.4 on reach.
     this.liftCeiling = 1.2,
+    this.playerStreamingReach = 0.65,
     this.momentumSigma = 0.12,
     this.albumLegsSigma = 0.3,
     this.longAlbumBonus = 0.08,
@@ -179,7 +180,8 @@ class SimConfig {
   /// Strength of online virality by year: nothing before video sites
   /// (2005; a pre-internet hit grows on radio instead), a little on video
   /// sites, more with early short-video apps, then the full short-video
-  /// era.
+  /// era. Halved from 2018 (docs K204): a newcomer's viral #1 within two
+  /// years was the rule, not the lucky exception.
   double viralEraFactor(int year) => year < 2005
       ? 0.0
       : year < 2013
@@ -187,8 +189,8 @@ class SimConfig {
           : year < 2018
               ? 0.4
               : year < 2020
-                  ? 1.0
-                  : 1.2;
+                  ? 0.5
+                  : 0.6;
 
   /// How much a music video does by year: music TV (2000–04), music TV
   /// plus video sites (2005–12), then video sites in the streaming era.
@@ -223,6 +225,17 @@ class SimConfig {
       : year >= 2018
           ? 0.9
           : 0.05 + 0.85 * (year - 2010) / 8;
+
+  /// How much of the player's reach to new listeners is left in [year]
+  /// (docs K204): the playlist era gave the player tools and lifts the
+  /// rivals do not have, and an unknown became the world's second-biggest
+  /// artist in six years. Full drag once playlists lead (2018), none in
+  /// the radio era.
+  double playerReach(int year) =>
+      1 - (1 - playerStreamingReach) * playlistShare(year) / 0.9;
+
+  /// The player's reach at full playlist era (docs K204).
+  final double playerStreamingReach;
 
   /// Campaign multiplier on a song's exposure (new listeners) in [year].
   double campaignExposure(Campaign k, int year) =>
