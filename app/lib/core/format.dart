@@ -258,6 +258,33 @@ class Fmt {
         HomeCountry.other => l.homeOther,
       };
 
+  /// What a feature opening this year does, and where (docs K200).
+  String gameFeature(GameFeature f) => switch (f) {
+        GameFeature.ringtones => l.feature_ringtones,
+        GameFeature.priceCuts => l.feature_priceCuts,
+        GameFeature.visualAlbum => l.feature_visualAlbum,
+        GameFeature.channel => l.feature_channel,
+        GameFeature.cloud => l.feature_cloud,
+        GameFeature.streamWindow => l.feature_streamWindow,
+        GameFeature.ownPlaylist => l.feature_ownPlaylist,
+        GameFeature.moodPlaylists => l.feature_moodPlaylists,
+        GameFeature.bundles => l.feature_bundles,
+        GameFeature.curators => l.feature_curators,
+        GameFeature.documentary => l.feature_documentary,
+        GameFeature.exclusives => l.feature_exclusives,
+        GameFeature.autoplay => l.feature_autoplay,
+        GameFeature.artistPick => l.feature_artistPick,
+        GameFeature.preSaves => l.feature_preSaves,
+        GameFeature.sessions => l.feature_sessions,
+        GameFeature.catalogSale => l.feature_catalogSale,
+        GameFeature.creators => l.feature_creators,
+        GameFeature.canvas => l.feature_canvas,
+        GameFeature.snippets => l.feature_snippets,
+        GameFeature.marquee => l.feature_marquee,
+        GameFeature.countdown => l.feature_countdown,
+        GameFeature.showcase => l.feature_showcase,
+      };
+
   /// A group member's role (docs K192).
   String memberRole(MemberRole r) => switch (r) {
         MemberRole.leader => l.roleLeader,
@@ -1035,6 +1062,8 @@ class Fmt {
           ? l.eventRenewalDone(stayed)
           : l.eventRenewalLeft(left.join(', '), (fansLost * 100).round()),
       ReunionOver() => l.eventReunionOver(t),
+      FeatureOpened(:final feature) =>
+        l.eventFeatureOpened(gameFeature(feature)),
       RivalGroupSplit(:final ended) => ended
           ? l.eventRivalSplitEnded(line.artistName, t)
           : l.eventRivalSplit(line.artistName, t),

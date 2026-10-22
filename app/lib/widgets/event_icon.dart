@@ -87,6 +87,7 @@ class EventIcon extends StatelessWidget {
       RenewalDone() => (Icons.assignment_turned_in_rounded, AppColors.mint),
       ReunionOver() => (Icons.groups_rounded, AppColors.lilac),
       RivalGroupSplit() => (Icons.call_split_rounded, AppColors.sky),
+      FeatureOpened() => (Icons.new_releases_rounded, AppColors.gold),
       ThisIsMade() =>
         (Icons.queue_music_rounded, platformColor(MusicPlatform.streamify)),
       AlbumStreamMilestone() =>

@@ -7,6 +7,7 @@ import 'best_sellers.dart';
 import 'calendar.dart';
 import 'career_setup.dart';
 import 'events.dart';
+import 'feature_news.dart';
 import 'income.dart';
 import 'social_feed.dart';
 import 'milestones.dart';
@@ -3891,6 +3892,12 @@ class GameSession {
     }
     events.addAll(_streamingNews());
     events.addAll(_groupNews());
+    // What opens this year (docs K200); not for a career that just began.
+    if (GameTime.weekOfYear(r.week) == 1 && r.week > p.debutWeek) {
+      for (final f in GameFeature.opening(GameTime.yearOf(r.week))) {
+        events.add(FeatureOpened(f));
+      }
+    }
     // Known rival groups losing members (docs K199).
     for (final x in w.rivalSplits.reversed) {
       if (x.week < r.week) break;

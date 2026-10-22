@@ -6185,6 +6185,37 @@
       }
     }
   },
+  "feature_ringtones": "Ringtones go on sale: hit singles sell as ringtones too, and there is a Hot Ringtones chart (Charts).",
+  "feature_priceCuts": "Digital stores take price cuts: an album can be put on sale from its page.",
+  "feature_visualAlbum": "Visual albums: an album can get a film of its own, from its page.",
+  "feature_channel": "ViewTube opens: you can run a channel and upload videos (Home → platforms).",
+  "feature_cloud": "NoiseCloud opens: a song can go up free before its real release (song page).",
+  "feature_streamWindow": "Streaming windows: an album can stay off the streaming apps for a few weeks (album builder).",
+  "feature_ownPlaylist": "Your own Streamify playlist: make one and add songs (Streamify).",
+  "feature_moodPlaylists": "Mood playlists: a song out for a while can be pitched to one (song page → Playlists).",
+  "feature_bundles": "Bundles: an album can come with merch or tickets (album builder).",
+  "feature_curators": "Independent curators: send a song to their playlists (song page → Playlists).",
+  "feature_documentary": "Documentaries: streaming services want your story (Career → Business).",
+  "feature_exclusives": "Streaming exclusives: a known name's album can go to one service first, for a fee (album builder).",
+  "feature_autoplay": "Autoplay: put a song in the algorithm's programme for a smaller royalty (song page → The algorithm).",
+  "feature_artistPick": "Artist Pick: pin a release on top of your Streamify page.",
+  "feature_preSaves": "Pre-saves: fans save an announced release ahead of time; announce early.",
+  "feature_sessions": "Streamify Sessions: once you are listened to, the app may invite you to its studio (Streamify).",
+  "feature_catalogSale": "Catalog funds buy masters: you can sell your catalog (Career → Business).",
+  "feature_creators": "TikTak creators: pay creators to use a song's sound (song page → Ads and creators).",
+  "feature_canvas": "Canvas: a looping video behind a song on Streamify (song page → The algorithm).",
+  "feature_snippets": "Snippets: tease an unreleased song on TikTak and see how people react (song page).",
+  "feature_marquee": "Marquee: a full-screen Streamify ad for a new release (song page → Ads and creators).",
+  "feature_countdown": "Countdown pages: pin an announced album on Streamify and pre-saves come faster.",
+  "feature_showcase": "Showcase: a Streamify banner for a catalog song (song page → Ads and creators).",
+  "eventFeatureOpened": "New this year · {what}",
+  "@eventFeatureOpened": {
+    "placeholders": {
+      "what": {
+        "type": "String"
+      }
+    }
+  },
   "eventRivalSplit": "{name} left {group} for a solo career.",
   "@eventRivalSplit": {
     "placeholders": {

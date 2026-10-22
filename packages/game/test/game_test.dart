@@ -4196,6 +4196,24 @@ void main() {
       g.close();
     });
 
+    test('features are announced the year they open (K200)', () {
+      // Every feature opens within the game's years, and each is named once.
+      for (final f in GameFeature.values) {
+        expect(f.year, inInclusiveRange(1999, 2026), reason: f.name);
+      }
+      final g = GameSession.start(slots, _setup(startYear: 2018));
+      // Nothing for the year the career began in.
+      expect(g.advanceWeek().events.whereType<FeatureOpened>(), isEmpty);
+      final events = <GameEvent>[];
+      while (GameTime.yearOf(g.week) < 2020) {
+        events.addAll(g.advanceWeek().events);
+      }
+      expect(events.whereType<FeatureOpened>().map((e) => e.feature).toSet(),
+          GameFeature.opening(2019).toSet());
+      expect(GameFeature.opening(2019), contains(GameFeature.canvas));
+      g.close();
+    });
+
     test('a band has band roles (K192)', () {
       final g = GameSession.start(
           slots,

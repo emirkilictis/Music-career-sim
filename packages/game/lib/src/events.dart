@@ -1,5 +1,6 @@
 import 'package:simulation_core/simulation_core.dart';
 
+import 'feature_news.dart';
 import 'milestones.dart';
 import 'platforms.dart';
 import 'views.dart' show ChartCredit, RecordKind, WrappedStory;
@@ -327,6 +328,14 @@ class RenewalDone extends GameEvent {
   final int stayed;
   final List<String> left;
   final double fansLost;
+  @override
+  bool get isMajor => true;
+}
+
+/// [feature] opens this year (docs K200).
+class FeatureOpened extends GameEvent {
+  const FeatureOpened(this.feature);
+  final GameFeature feature;
   @override
   bool get isMajor => true;
 }

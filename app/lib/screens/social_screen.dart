@@ -765,8 +765,15 @@ class FeedPost extends StatelessWidget {
             Icon(icon, size: 17, color: color ?? skin.muted),
             const SizedBox(width: 4),
             if (n > 0)
-              Text(fmt.compact(n.toDouble()),
-                  style: TextStyle(color: color ?? skin.muted, fontSize: 13)),
+              // Big counts on a narrow phone: cut, not overflow.
+              Flexible(
+                child: Text(fmt.compact(n.toDouble()),
+                    maxLines: 1,
+                    overflow: TextOverflow.clip,
+                    softWrap: false,
+                    style:
+                        TextStyle(color: color ?? skin.muted, fontSize: 13)),
+              ),
           ]),
         );
     return Container(
