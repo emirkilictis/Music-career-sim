@@ -39,6 +39,7 @@ class ChartDef {
     this.recurrent = false,
     this.startYear = 0,
     this.endYear = 9999,
+    this.retired = false,
   });
 
   /// Stable id (stored in saves). Never renumber.
@@ -57,12 +58,17 @@ class ChartDef {
   /// ...and up to this year (the ringtone chart, docs K183).
   final int endYear;
 
+  /// No longer kept (docs K202): too many charts, and nobody follows the
+  /// side ones. The id stays so old saves still read.
+  final bool retired;
+
   bool get isPlatform =>
       market == ChartMarket.platformGlobal ||
       market == ChartMarket.platformNorthAmerica ||
       market == ChartMarket.platformEurope;
 
   bool activeIn(int week) {
+    if (retired) return false;
     final y = GameTime.yearOf(week);
     return y >= startYear && y <= endYear;
   }
@@ -159,35 +165,40 @@ abstract final class Charts {
         key: 'chart.us.radio',
         kind: ChartKind.songs,
         market: ChartMarket.usRadio,
-        size: 50),
+        size: 50,
+        retired: true),
     ChartDef(
         id: usStreaming,
         key: 'chart.us.streaming',
         kind: ChartKind.songs,
         market: ChartMarket.usStreaming,
         size: 50,
-        startYear: 2013),
+        startYear: 2013,
+        retired: true),
     ChartDef(
         id: usDigital,
         key: 'chart.us.digital',
         kind: ChartKind.songs,
         market: ChartMarket.usDigital,
         size: 50,
-        startYear: 2005),
+        startYear: 2005,
+        retired: true),
     ChartDef(
         id: usAlbumSales,
         key: 'chart.us.albumSales',
         kind: ChartKind.albums,
         market: ChartMarket.usAlbumSales,
         size: 50,
-        startYear: 2015),
+        startYear: 2015,
+        retired: true),
     ChartDef(
         id: usStreamingAlbums,
         key: 'chart.us.streamingAlbums',
         kind: ChartKind.albums,
         market: ChartMarket.usStreamingAlbums,
         size: 50,
-        startYear: 2015),
+        startYear: 2015,
+        retired: true),
     ChartDef(
         id: usRingtones,
         key: 'chart.us.ringtones',
@@ -195,7 +206,8 @@ abstract final class Charts {
         market: ChartMarket.usRingtones,
         size: 50,
         startYear: 2004,
-        endYear: 2010),
+        endYear: 2010,
+        retired: true),
   ];
 
   static const count = 15;

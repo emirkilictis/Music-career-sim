@@ -74,6 +74,10 @@ class YearReport {
     required this.coreFansDelta,
     required this.fameBefore,
     required this.fameAfter,
+    this.weeklyStreams = const [],
+    this.weeklySales = const [],
+    this.topSongs = const [],
+    this.releases = const [],
   });
 
   final int fromWeek;
@@ -99,6 +103,47 @@ class YearReport {
   final double fameAfter;
 
   List<NumberOne> get numberOnes => events.whereType<NumberOne>().toList();
+
+  /// The player's streams and single sales (downloads + CD singles) each
+  /// week played (docs K203).
+  final List<double> weeklyStreams;
+  final List<double> weeklySales;
+
+  /// The player's most played songs over the skip, most first.
+  final List<SkipSong> topSongs;
+
+  /// What the player put out over the skip, in order.
+  final List<SkipRelease> releases;
+}
+
+/// One of the player's songs over a skip (docs K203): what it gained and
+/// where it stands on the US chart now (0: off it).
+class SkipSong {
+  const SkipSong(this.songId, this.title, this.streams, this.sales,
+      this.position, this.coverAlbumId);
+  final int songId;
+  final String title;
+  final double streams;
+  final double sales;
+  final int position;
+
+  /// The album whose cover it shows (-1: its own).
+  final int coverAlbumId;
+}
+
+/// A single or album the player put out during a skip (docs K203), with
+/// its best US chart spot so far (0: none).
+class SkipRelease {
+  const SkipRelease(this.kind, this.id, this.title, this.week, this.peak,
+      [this.coverAlbumId = -1]);
+  final EntityKind kind;
+  final int id;
+  final String title;
+  final int week;
+  final int peak;
+
+  /// A single's cover album (-1: its own).
+  final int coverAlbumId;
 }
 
 /// One weekly point of a release's history graph.
@@ -2020,13 +2065,27 @@ class GameSession {
     final units0 = world.artistLifetimeUnits(p);
     final money0 = p.moneyCents, fans0 = p.coreFans, fame0 = p.fame;
     final singles0 = _singleSales();
+    double songStreams(Song s) => [
+          for (var r = 0; r < regionCount; r++) world.songLifetimeStreams(s, r)
+        ].fold(0.0, (t, x) => t + x);
+    double songSales(Song s) =>
+        world.songLifetimeDownloads(s) + s.lifetimePhysical;
+    final before = {
+      for (final id in world.playerSongIds)
+        id: (songStreams(world.songs[id]), songSales(world.songs[id]))
+    };
     final events = <GameEvent>[];
+    final weeklyStreams = <double>[], weeklySales = <double>[];
     var weeks = 0;
     var stopped = false;
     while (weeks < count) {
+      final streamsBefore = world.artistLifetimeStreams(p);
+      final salesBefore = _singleSales();
       final r = advanceWeek();
       weeks++;
       events.addAll(r.events);
+      weeklyStreams.add(world.artistLifetimeStreams(p) - streamsBefore);
+      weeklySales.add(_singleSales() - salesBefore);
       onWeek?.call(r);
       if (r.events.any(stop.stopsOn) || (cancel?.call() ?? false)) {
         stopped = weeks < count;
@@ -2047,7 +2106,49 @@ class GameSession {
       coreFansDelta: p.coreFans - fans0,
       fameBefore: fame0,
       fameAfter: p.fame,
+      weeklyStreams: weeklyStreams,
+      weeklySales: weeklySales,
+      topSongs: _skipSongs(before, songStreams, songSales),
+      releases: [
+        for (final id in world.playerSongIds)
+          if (world.songs[id] case final s
+              when s.isSingle && s.singleWeek >= from)
+            SkipRelease(EntityKind.song, id, s.title, s.singleWeek,
+                s.peakOn(Charts.usSongs), coverAlbumOf(world, s)),
+        for (final al in world.albums)
+          if (al.artistId == p.id && al.releaseWeek >= from)
+            SkipRelease(EntityKind.album, al.id, al.title, al.releaseWeek,
+                al.peakOn(Charts.usAlbums)),
+      ]..sort((a, b) => a.week.compareTo(b.week)),
     );
+  }
+
+  /// The player's five most played songs over a skip (docs K203): by
+  /// streams, or by sales before streaming counted.
+  List<SkipSong> _skipSongs(
+      Map<int, (double, double)> before,
+      double Function(Song) streams,
+      double Function(Song) sales) {
+    final rows = [
+      for (final id in world.playerSongIds)
+        if (world.songs[id] case final s when s.releasedWeek >= 0)
+          SkipSong(
+              id,
+              s.title,
+              streams(s) - (before[id]?.$1 ?? 0),
+              sales(s) - (before[id]?.$2 ?? 0),
+              s.lastPosOn(Charts.usSongs),
+              coverAlbumOf(world, s)),
+    ];
+    final byStreams = rows.fold(0.0, (t, x) => t + x.streams) >=
+        rows.fold(0.0, (t, x) => t + x.sales);
+    rows.sort((a, b) => byStreams
+        ? b.streams.compareTo(a.streams)
+        : b.sales.compareTo(a.sales));
+    return [
+      for (final x in rows.take(5))
+        if (x.streams + x.sales >= 1) x
+    ];
   }
 
   // --------------------------------------------------------------- history
@@ -2059,7 +2160,7 @@ class GameSession {
         'ORDER BY week',
         songId,
         Charts.all
-            .where((c) => c.kind == ChartKind.songs)
+            .where((c) => c.kind == ChartKind.songs && !c.retired)
             .map((c) => c.id)
             .toList(),
       );
@@ -2070,7 +2171,7 @@ class GameSession {
         'ORDER BY week',
         albumId,
         Charts.all
-            .where((c) => c.kind == ChartKind.albums)
+            .where((c) => c.kind == ChartKind.albums && !c.retired)
             .map((c) => c.id)
             .toList(),
       );
@@ -3508,7 +3609,9 @@ class GameSession {
   List<ChartWeek> chartRun(EntityKind kind, int id) {
     final ids = [
       for (final c in Charts.all)
-        if ((c.kind == ChartKind.songs) == (kind == EntityKind.song)) c.id
+        if (!c.retired &&
+            (c.kind == ChartKind.songs) == (kind == EntityKind.song))
+          c.id
     ];
     final weeks = <int, Map<int, ({int position, double points})>>{};
     for (final r in _store.db.select(
@@ -3661,17 +3764,11 @@ class GameSession {
     Charts.usSongs,
     Charts.ukSongs,
     Charts.globalSongs,
-    Charts.usRadio,
-    Charts.usStreaming,
-    Charts.usDigital,
-    Charts.usRingtones,
   ];
   static const _albumCharts = [
     Charts.usAlbums,
     Charts.ukAlbums,
     Charts.globalAlbums,
-    Charts.usAlbumSales,
-    Charts.usStreamingAlbums,
   ];
 
   List<GameEvent> _events(WeekResult r, _Snapshot before) {

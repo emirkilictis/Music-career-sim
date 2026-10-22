@@ -16,6 +16,7 @@ import 'career_tab.dart';
 import 'charts_tab.dart';
 import 'dashboard_tab.dart';
 import 'releases_tab.dart';
+import 'skip_summary_screen.dart';
 import 'studio_tab.dart';
 
 /// Pushes [page] with the open career available to it.
@@ -112,11 +113,11 @@ class _GameShellState extends State<GameShell> {
     }
   }
 
-  /// Feedback B2: skip a few weeks, until the next news, or a year.
+  /// Feedback B2: skip a few weeks or a year. A skip never stops; what
+  /// happened is told at the end (docs K203).
   Future<void> _skipMenu() async {
     final l = context.l10n;
-    Widget option(
-            IconData icon, String title, String hint, (int, SkipStop) value) =>
+    Widget option(IconData icon, String title, String hint, int value) =>
         ListTile(
           leading: IconBubble(icon, color: AppColors.lilac),
           title:
@@ -124,7 +125,7 @@ class _GameShellState extends State<GameShell> {
           subtitle: Text(hint),
           onTap: () => Navigator.pop(context, value),
         );
-    final choice = await showModalBottomSheet<(int, SkipStop)>(
+    final choice = await showModalBottomSheet<int>(
       context: context,
       builder: (c) => SafeArea(
         child: ListView(
@@ -137,29 +138,25 @@ class _GameShellState extends State<GameShell> {
                   style: const TextStyle(
                       fontSize: 22, fontWeight: FontWeight.w900)),
             ),
-            for (final n in const [2, 4, 8])
+            for (final n in const [2, 4, 8, 26])
               option(Icons.fast_forward_rounded, l.skipWeeksOption(n),
-                  l.skipWeeksHint, (n, SkipStop.major)),
-            option(Icons.notifications_active_outlined, l.skipUntilNews,
-                l.skipUntilNewsHint, (GameTime.weeksPerYear, SkipStop.anyNews)),
+                  l.skipWeeksHint, n),
             option(Icons.event_repeat_rounded, l.skipYearOption, l.skipYearHint,
-                (GameTime.weeksPerYear, SkipStop.major)),
+                GameTime.weeksPerYear),
           ],
         ),
       ),
     );
-    if (choice != null && mounted) await _skip(choice.$1, choice.$2);
+    if (choice != null && mounted) await _skip(choice);
   }
 
-  Future<void> _skip(int weeks, SkipStop stop) async {
+  Future<void> _skip(int weeks) async {
     final state = widget.state;
     final l = context.l10n;
     final progress = ValueNotifier<int>(0);
-    final title = stop == SkipStop.anyNews
-        ? l.skippingUntilNews
-        : weeks == GameTime.weeksPerYear
-            ? l.skippingYear
-            : l.skippingWeeks(weeks);
+    final title = weeks == GameTime.weeksPerYear
+        ? l.skippingYear
+        : l.skippingWeeks(weeks);
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -179,14 +176,14 @@ class _GameShellState extends State<GameShell> {
     );
     try {
       final (report, lines) =
-          await state.skip(weeks, stop, (n) => progress.value = n);
+          await state.skip(weeks, SkipStop.never, (n) => progress.value = n);
       if (!mounted) return;
       Navigator.of(context).pop();
-      await showDialog<void>(
-        context: context,
-        builder: (c) => _YearSummaryDialog(
-            report: report, lines: playerNews(lines), week: state.week),
-      );
+      await Navigator.of(context).push(MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (c) => SkipSummaryScreen(
+            report: report, lines: playerNews(lines), state: state),
+      ));
     } catch (e) {
       if (mounted) {
         Navigator.of(context).pop();
@@ -375,82 +372,3 @@ class MoneyPill extends StatelessWidget {
       );
 }
 
-/// Summary after a skip: a year, a few weeks, or until the next news.
-class _YearSummaryDialog extends StatelessWidget {
-  const _YearSummaryDialog(
-      {required this.report, required this.lines, required this.week});
-  final YearReport report;
-  final List<EventLine> lines;
-
-  /// Current week, for the era's main number (docs K38).
-  final int week;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final fmt = context.fmt;
-    final highlights =
-        report.isYear ? lines.where((x) => x.event.isMajor).toList() : lines;
-    final streaming = SalesEra.of(GameTime.yearOf(week)) == SalesEra.streaming;
-    return AlertDialog(
-      title: Text(report.stoppedEarly
-          ? l.yearStoppedTitle(report.weeks)
-          : report.isYear
-              ? l.yearSummaryTitle(GameTime.yearOf(report.fromWeek))
-              : l.weeksPlayed(report.weeks)),
-      content: SizedBox(
-        width: 420,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              StatGrid(tiles: [
-                streaming
-                    ? StatTile(
-                        label: l.streams,
-                        value: fmt.compact(report.streamsGained))
-                    : StatTile(
-                        label: l.singleSales,
-                        value: fmt.compact(report.singleSalesGained)),
-                StatTile(
-                    label: l.albumUnits,
-                    value: fmt.compact(report.unitsGained)),
-                StatTile(
-                    label: l.money,
-                    value: fmt.signedMoney(report.moneyDeltaCents),
-                    color: report.moneyDeltaCents >= 0
-                        ? AppColors.mint
-                        : AppColors.coral),
-                StatTile(
-                    label: l.coreFans,
-                    value:
-                        '${report.coreFansDelta >= 0 ? '+' : ''}${fmt.compact(report.coreFansDelta)}'),
-              ]),
-              if (highlights.isNotEmpty) ...[
-                const SizedBox(height: 18),
-                Text(l.highlights,
-                    style: const TextStyle(fontWeight: FontWeight.w800)),
-                for (final line in highlights.take(12))
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          EventIcon(line.event, size: 32),
-                          const SizedBox(width: 10),
-                          Expanded(child: Text(fmt.event(line))),
-                        ]),
-                  ),
-              ],
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        FilledButton(
-            onPressed: () => Navigator.pop(context), child: Text(l.ok)),
-      ],
-    );
-  }
-}

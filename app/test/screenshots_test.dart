@@ -488,6 +488,14 @@ void main() {
     await shot(tester, '25b_streams_removed');
     await tester.tap(_ci('Continue'));
     await tester.pumpAndSettle();
+    // A skip plays on and tells what happened at the end (docs K203).
+    await tester.tap(_ci('Skip'));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('8 weeks'));
+    await tester.pumpAndSettle();
+    await shot(tester, '15c_skip_summary');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
+    await shot(tester, '15d_skip_summary_more');
   });
 
   testWidgets('screenshots: early 2000s career', skip: !enabled,
@@ -755,34 +763,6 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('Artists'));
     await shot(tester, '08f_top_artists');
-    // US radio airplay (docs K129).
-    await tester.scrollUntilVisible(_ci('US Radio'), -200,
-        scrollable: find
-            .byWidgetPredicate((w) =>
-                w is Scrollable && w.axisDirection == AxisDirection.right)
-            .first);
-    await tester.pumpAndSettle();
-    await tester.tap(_ci('US Radio'));
-    await shot(tester, '08i_radio_chart');
-    // The Hot 100's parts (docs K166).
-    final streamingTab = _ci('US Streaming');
-    await tester.scrollUntilVisible(streamingTab, 200,
-        scrollable: find
-            .byWidgetPredicate((w) =>
-                w is Scrollable && w.axisDirection == AxisDirection.right)
-            .first);
-    await tester.pumpAndSettle();
-    await tester.tap(streamingTab);
-    await shot(tester, '08m_streaming_chart');
-    final albumSales = _ci('US Album Sales');
-    await tester.scrollUntilVisible(albumSales, 200,
-        scrollable: find
-            .byWidgetPredicate((w) =>
-                w is Scrollable && w.axisDirection == AxisDirection.right)
-            .first);
-    await tester.pumpAndSettle();
-    await tester.tap(albumSales);
-    await shot(tester, '08n_album_sales_chart');
     await tab(tester, 'Career');
     // Record money by source (docs K145).
     await careerPage(tester, 'Business');

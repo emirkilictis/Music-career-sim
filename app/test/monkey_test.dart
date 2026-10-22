@@ -141,6 +141,8 @@ void main() {
           s.contains('whole year') ||
           s.contains('until something') ||
           s.contains('4 weeks') ||
+          s.contains('26 weeks') ||
+          s.contains('26 hafta') ||
           s.contains('bütün bir yıl') ||
           s.contains('skip year') ||
           s.contains('yıl atla') ||

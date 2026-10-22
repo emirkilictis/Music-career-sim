@@ -8,8 +8,15 @@ import 'common.dart';
 /// (docs K60): the latest [values] last, labelled by weeks ago.
 class WeeklyBars extends StatelessWidget {
   const WeeklyBars(
-      {super.key, required this.values, this.slots = 12, this.height = 120});
+      {super.key,
+      required this.values,
+      this.slots = 12,
+      this.height = 120,
+      this.labels});
   final List<double> values;
+
+  /// Text under each bar (default: weeks ago).
+  final List<String>? labels;
 
   /// Columns drawn; weeks before the first value stay empty, so a new
   /// release's bars keep their width.
@@ -78,7 +85,8 @@ class WeeklyBars extends StatelessWidget {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                      i == n - 1 ? l.nowShort : l.weeksAgoShort(n - 1 - i),
+                      labels?[i] ??
+                          (i == n - 1 ? l.nowShort : l.weeksAgoShort(n - 1 - i)),
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,

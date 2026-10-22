@@ -128,15 +128,16 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
 
-    // Skip menu: four weeks, then a summary.
+    // Skip menu: four weeks without stopping, then the summary page (K203).
     await tester.tap(_ci('Skip'));
     await tester.pumpAndSettle();
-    expect(_ci('Until something happens'), findsOneWidget);
+    expect(_ci('26 weeks'), findsOneWidget);
     await tester.tap(_ci('4 weeks'));
     await tester.pumpAndSettle();
-    expect(find.textContaining(RegExp(r'^(4 weeks played|Stopped after)')),
-        findsOneWidget);
-    await tester.tap(_ci('OK'));
+    expect(_ci('4 weeks played'), findsOneWidget);
+    await tester.scrollUntilVisible(_ci('Back to the game'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(_ci('Back to the game'));
     await tester.pumpAndSettle();
 
     // A skill point every week, spent on the Career tab.

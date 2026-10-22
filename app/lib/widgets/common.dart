@@ -260,9 +260,13 @@ class Tag extends StatelessWidget {
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 5),
           ],
-          Text(text,
-              style: TextStyle(
-                  color: color, fontWeight: FontWeight.w700, fontSize: 12.5)),
+          // Long labels end in "…" rather than overflow a narrow screen.
+          Flexible(
+            child: Text(text,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    color: color, fontWeight: FontWeight.w700, fontSize: 12.5)),
+          ),
         ]),
       );
 }

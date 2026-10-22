@@ -35,7 +35,8 @@ class ChartRecord {
 
 List<ChartRecord> _records(Charted e) => [
       for (var c = 0; c < Charts.count; c++)
-        if (e.statsOrNull(c) case final s? when s.weeksOn > 0)
+        if (e.statsOrNull(c) case final s?
+            when s.weeksOn > 0 && !Charts.all[c].retired)
           ChartRecord(c, s),
     ];
 
@@ -1881,6 +1882,7 @@ enum SalesEra {
 
 bool _charted(Charted e) {
   for (var c = 0; c < Charts.count; c++) {
+    if (Charts.all[c].retired) continue;
     if ((e.statsOrNull(c)?.weeksOn ?? 0) > 0) return true;
   }
   return false;

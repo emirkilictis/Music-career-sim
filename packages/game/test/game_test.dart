@@ -1356,21 +1356,6 @@ void main() {
       g.close();
     });
 
-    test('the radio chart ranks US airplay (K129)', () {
-      final g = GameSession.start(slots, _setup());
-      g.advanceWeeks(3, stop: SkipStop.never);
-      final radio = g.chart(Charts.usRadio);
-      expect(radio.rows.length, 50);
-      for (var i = 1; i < radio.rows.length; i++) {
-        expect(
-            radio.rows[i].points, lessThanOrEqualTo(radio.rows[i - 1].points));
-      }
-      // The audience it counts is the song's US radio.
-      final top = g.world.songs[radio.rows.first.entityId];
-      expect(top.weekRadio, greaterThan(0));
-      g.close();
-    });
-
     test('an independent picks a distributor (K157)', () {
       var g = GameSession.start(
           slots,
@@ -1410,69 +1395,62 @@ void main() {
       g.close();
     });
 
-    test('US streaming and download charts (K166)', () {
-      var g = GameSession.start(slots, _setup(startYear: 2010));
+    test('the side charts are gone (K202)', () {
+      const gone = [
+        Charts.usRadio,
+        Charts.usStreaming,
+        Charts.usDigital,
+        Charts.usAlbumSales,
+        Charts.usStreamingAlbums,
+        Charts.usRingtones,
+      ];
+      final g = GameSession.start(slots, _setup(startYear: 2008));
+      g.advanceWeeks(3, stop: SkipStop.never);
       final ids = [for (final c in g.activeCharts) c.id];
-      expect(ids, contains(Charts.usDigital));
-      expect(ids, isNot(contains(Charts.usStreaming)));
-      g.close();
-      g = GameSession.start(
-          slots,
-          _setup(
-              startYear: 2015,
-              tier: StartTier.superstar,
-              money: StartMoney.millionaire,
-              premium: true));
-      final p = g.world.player!;
-      p.moneyCents = 1 << 40;
-      p.creativeEnergy = 100;
-      final id = g.writeSong(budget: BudgetTier.high).id;
-      g.releaseSingle(id);
-      g.advanceWeeks(2, stop: SkipStop.never);
-      final streaming = g.chart(Charts.usStreaming).rows;
-      final digital = g.chart(Charts.usDigital).rows;
-      expect(streaming, hasLength(50));
-      expect(digital, hasLength(50));
-      // Ranked by US streams alone.
-      for (var i = 1; i < streaming.length; i++) {
-        expect(streaming[i].points, lessThanOrEqualTo(streaming[i - 1].points));
+      for (final c in gone) {
+        expect(ids, isNot(contains(c)));
+        expect(g.chart(c).rows, isEmpty);
       }
-      // Its points are its US streams.
-      final top = streaming.first;
-      expect(top.points, closeTo(top.streams, top.streams * 0.01));
+      // The main charts are all still there.
+      expect(ids, containsAll(const [Charts.usSongs, Charts.usAlbums]));
+      // Nothing charts on them any more.
+      for (final s in g.world.songs) {
+        for (final c in gone) {
+          expect(s.statsOrNull(c), isNull);
+        }
+      }
       g.close();
     });
 
-    test('US album sales and streaming albums charts (K168)', () {
-      var g = GameSession.start(slots, _setup(startYear: 2012));
-      final ids = [for (final c in g.activeCharts) c.id];
-      expect(ids, isNot(contains(Charts.usAlbumSales)));
-      g.close();
-      g = GameSession.start(
+    test('a skip tells what happened over it (K203)', () {
+      final g = GameSession.start(
           slots,
           _setup(
-              startYear: 2017,
+              startYear: 2019,
               tier: StartTier.superstar,
               money: StartMoney.millionaire,
               premium: true));
       final p = g.world.player!;
-      p.moneyCents = 1 << 40;
-      final songs = <int>[];
-      for (var i = 0; i < 10; i++) {
-        p.creativeEnergy = 100;
-        songs.add(g.writeSong(budget: BudgetTier.high).id);
+      p.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id);
+      final y = g.advanceWeeks(8, stop: SkipStop.never);
+      expect(y.weeks, 8);
+      expect(y.stoppedEarly, isFalse);
+      expect(y.weeklyStreams, hasLength(8));
+      expect(y.weeklySales, hasLength(8));
+      expect(y.weeklyStreams.fold(0.0, (t, x) => t + x),
+          closeTo(y.streamsGained, y.streamsGained * 1e-6 + 1));
+      // The new single is out in this time and among the most played.
+      expect(y.releases.map((x) => x.id), contains(id));
+      expect(y.releases.first.kind, EntityKind.song);
+      expect(y.topSongs, isNotEmpty);
+      expect(y.topSongs.length, lessThanOrEqualTo(5));
+      expect(y.topSongs.map((x) => x.songId), contains(id));
+      for (var i = 1; i < y.topSongs.length; i++) {
+        expect(y.topSongs[i].streams,
+            lessThanOrEqualTo(y.topSongs[i - 1].streams));
       }
-      final al = g.releaseAlbum('Two Charts', songs);
-      g.advanceWeek();
-      final sales = g.chart(Charts.usAlbumSales).rows;
-      final streaming = g.chart(Charts.usStreamingAlbums).rows;
-      expect(sales, hasLength(50));
-      expect(streaming, hasLength(50));
-      // Ranked by US copies sold alone.
-      for (final r in sales) {
-        expect(r.points, closeTo(r.pure, r.pure * 0.01 + 1));
-      }
-      expect(sales.any((r) => r.entityId == al.id), isTrue);
       g.close();
     });
 
@@ -3460,7 +3438,7 @@ void main() {
       g.close();
     });
 
-    test('ringtones sell in their years and chart (K183)', () {
+    test('ringtones sell in their years (K183)', () {
       var g = GameSession.start(
           slots,
           _setup(
@@ -3480,20 +3458,12 @@ void main() {
       expect(s.weekRingtones, lessThan(s.weekDownloads * 2));
       expect(s.lifetimeRingtones, greaterThan(s.weekRingtones));
       expect(g.songIncome(id).cents[IncomeSource.ringtones], greaterThan(0));
-      final chart = g.chart(Charts.usRingtones);
-      expect(chart.rows, isNotEmpty);
-      for (var i = 1; i < chart.rows.length; i++) {
-        expect(chart.rows[i].weekValue,
-            lessThanOrEqualTo(chart.rows[i - 1].weekValue));
-      }
       final total = s.lifetimeRingtones;
       g.close();
       g = GameSession.resume(slots, slot);
       expect(g.world.songs[id].lifetimeRingtones, closeTo(total, 1e-6));
       g.close();
       // Gone by the streaming years.
-      expect(Charts.all[Charts.usRingtones].activeIn(GameTime.firstWeekOf(2011)),
-          isFalse);
       expect(Ringtones.eraFactor(2015), 0);
     });
 

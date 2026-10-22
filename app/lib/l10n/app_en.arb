@@ -304,11 +304,9 @@
       }
     }
   },
-  "skipWeeksHint": "Stops early if something big happens.",
-  "skipUntilNews": "Until something happens",
-  "skipUntilNewsHint": "Stops at your next news: a chart entry, a playlist, a new peak…",
+  "skipWeeksHint": "Plays every week without stopping; a summary at the end.",
   "skipYearOption": "A whole year",
-  "skipYearHint": "Stops at a #1, a top-10 debut or a viral hit.",
+  "skipYearHint": "All 52 weeks without stopping; the year's summary at the end.",
   "skippingWeeks": "Skipping {count} weeks…",
   "@skippingWeeks": {
     "placeholders": {
@@ -317,7 +315,6 @@
       }
     }
   },
-  "skippingUntilNews": "Playing until something happens…",
   "weekShort": "{month}, week {week}",
   "@weekShort": {
     "placeholders": {
@@ -379,6 +376,49 @@
     }
   },
   "highlights": "Highlights",
+  "summaryPeriod": "{start} – {end}",
+  "@summaryPeriod": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryWeekly": "Week by week",
+  "summaryMonthly": "Month by month",
+  "summaryTopStreams": "Your most played",
+  "summaryTopSales": "Your best sellers",
+  "summaryReleases": "Out in this time",
+  "summaryAllNews": "All news ({count})",
+  "@summaryAllNews": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryQuiet": "A quiet stretch: no news.",
+  "summaryNowAt": "US chart #{pos} now",
+  "@summaryNowAt": {
+    "placeholders": {
+      "pos": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryPeak": "Peak #{pos}",
+  "@summaryPeak": {
+    "placeholders": {
+      "pos": {
+        "type": "int"
+      }
+    }
+  },
+  "summaryFame": "Fame",
+  "summaryBack": "Back to the game",
   "dailyBonus": "Daily Premium bonus: {amount}",
   "@dailyBonus": {
     "placeholders": {
