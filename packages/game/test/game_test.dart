@@ -2854,9 +2854,12 @@ void main() {
       expect(g.song(ids.first).showcaseCostCents, isNull);
       g.advanceWeeks(StreamingTools.showcaseAge, stop: SkipStop.never);
       expect(g.song(ids.first).showcaseCostCents, isNotNull);
-      final boost = g.world.songs[ids.first].versionBoost;
+      final boost =
+          StreamingTools.playerToolLift(g.world, g.world.songs[ids.first]);
       g.runShowcase(ids.first);
-      expect(g.world.songs[ids.first].versionBoost, greaterThan(boost));
+      // Its wave counts with the player's tools (docs K216).
+      expect(StreamingTools.playerToolLift(g.world, g.world.songs[ids.first]),
+          greaterThan(boost));
       expect(g.world.songs[ids.first].status, SongStatus.active);
       expect(() => g.runShowcase(ids.first), _code('noShowcase'));
       final slot = g.slotId;

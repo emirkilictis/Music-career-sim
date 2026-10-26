@@ -48,7 +48,8 @@ abstract final class Curators {
   /// Weeks a curator keeps a song on their playlist, the weekly plays per
   /// follower and how they fade.
   static const playWeeks = 10;
-  static const playsPerFollower = 0.08;
+  // 0.08 until docs K216: paid lists had become a sure road to a hit.
+  static const playsPerFollower = 0.04;
   static const fade = 0.85;
 
   /// Followers who become listeners of the artist.

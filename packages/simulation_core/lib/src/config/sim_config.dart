@@ -44,7 +44,8 @@ class SimConfig {
     this.songShareCap = 0.004,
     // 2.0 until docs K127: the player's tools stacked to ×2.4 on reach.
     this.liftCeiling = 1.2,
-    this.toolCeiling = 0.35,
+    // 0.35 at first: tools still broke a newcomer a year or two early.
+    this.toolCeiling = 0.25,
     this.playerStreamingReach = 0.65,
     this.momentumSigma = 0.12,
     this.albumLegsSigma = 0.3,

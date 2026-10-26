@@ -277,19 +277,20 @@ enum CreatorCampaign {
   small(
       costCents: 1000000,
       creators: 25,
-      chanceFactor: 4,
+      // Halved in docs K216 (4, 10, 25).
+      chanceFactor: 2,
       seed: 0.004,
       reach: 0.3),
   medium(
       costCents: 5000000,
       creators: 120,
-      chanceFactor: 10,
+      chanceFactor: 5,
       seed: 0.008,
       reach: 0.5),
   large(
       costCents: 20000000,
       creators: 500,
-      chanceFactor: 25,
+      chanceFactor: 12,
       seed: 0.014,
       reach: 0.8);
 

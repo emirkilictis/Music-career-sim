@@ -225,7 +225,8 @@ abstract final class StreamingTools {
   static const marqueeWindow = 4, marqueeWeeks = 2;
 
   /// How much more the artist's casual listeners play a song on Marquee.
-  static const marqueeLift = 1.5;
+  /// 1.5 until docs K216.
+  static const marqueeLift = 0.5;
 
   /// A catalog song is half a year out; a Showcase once a year.
   static const showcaseAge = 26, showcaseEvery = 52;
