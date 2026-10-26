@@ -1,4 +1,5 @@
 import 'actions.dart';
+import 'audience.dart';
 import 'features.dart';
 import 'model.dart';
 import 'world.dart';
@@ -49,6 +50,6 @@ abstract final class JointAlbums {
   static double extraFans(World w, Album al, int region) {
     if (al.partnerId < 0) return 0;
     final p = w.artists[al.partnerId];
-    return partnerFans * p.coreFans * p.regionShare[region];
+    return partnerFans * Audience.engaged(p) * p.regionShare[region];
   }
 }

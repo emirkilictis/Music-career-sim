@@ -1,3 +1,4 @@
+import 'audience.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -93,7 +94,10 @@ abstract final class FanClubs {
 
   /// Members the club can hold now.
   static double target(World w, Artist a, FanClub c) =>
-      a.coreFans * (0.4 + a.devotion) * c.price.joinRate * activity(w, a);
+      Audience.engaged(a) *
+      (0.4 + a.devotion) *
+      c.price.joinRate *
+      activity(w, a);
 
   /// The week's membership: members come and go, pay, and keep the
   /// fandom warm. Returns this week's money.
@@ -102,8 +106,8 @@ abstract final class FanClubs {
     if (c == null) return 0;
     c.members += (target(w, a, c) - c.members) * pull;
     if (c.members < 1) c.members = 0;
-    final share =
-        a.coreFans <= 0 ? 0.0 : math.min(1.0, c.members / a.coreFans * 50);
+    final fans = Audience.engaged(a);
+    final share = fans <= 0 ? 0.0 : math.min(1.0, c.members / fans * 50);
     a.devotion = math.min(1.0, a.devotion + devotionLift * share);
     final cents = c.members * c.price.monthCents * 12 / GameTime.weeksPerYear;
     c.revenueCents += cents;

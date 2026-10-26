@@ -471,7 +471,7 @@ abstract final class Actions {
   /// How much more a campaign costs for a big audience (docs K57): reaching
   /// a superstar's ~9M listeners costs about 4× a newcomer's, 18M about 7×.
   static double campaignSizeFactor(Artist a) => math
-      .pow(math.max(1.0, (a.coreFans + 0.25 * a.casual) / 1.5e6), 0.8)
+      .pow(math.max(1.0, (Audience.engaged(a) + 0.25 * a.casual) / 1.5e6), 0.8)
       .toDouble();
 
   /// Craft beyond 80 counts half (docs K81): a master writes great songs,
@@ -620,7 +620,8 @@ abstract final class Actions {
     final albums = a.contractAlbums > 0 ? a.contractAlbums : l.contractAlbums;
     final advance =
         a.contractAlbums > 0 ? a.contractAdvanceCents : l.advanceCents;
-    final perAlbum = advance / albums + (1 - a.artistShare) * a.coreFans * 50;
+    final perAlbum =
+        advance / albums + (1 - a.artistShare) * Audience.engaged(a) * 50;
     final scale = w.difficulty == Difficulty.legend ? 0.5 : 1.0;
     return (a.contractAlbumsLeft * perAlbum * scale).round();
   }
@@ -1082,7 +1083,7 @@ abstract final class Actions {
     final c = w.config;
     var sum = 0.0;
     for (var k = 0; k < eras.length; k++) {
-      sum += a.coreFans * a.regionShare[k] * eras[k].superfanFactor;
+      sum += Audience.engaged(a) * a.regionShare[k] * eras[k].superfanFactor;
     }
     return sum *
         c.superfanBuyRate *
@@ -1123,11 +1124,12 @@ abstract final class Actions {
       // Pre-saves on the streaming apps (docs K121): fans first, more as
       // the buzz grows, up to most of the fans and some listeners.
       if (GameTime.yearOf(w.week) >= preSaveYear) {
-        final most = a.coreFans * 0.6 + a.casual * 0.05;
+        final fans = Audience.engaged(a);
+        final most = fans * 0.6 + a.casual * 0.05;
         sr.preSaves = math.min(
             most,
             sr.preSaves +
-                (a.coreFans * 0.05 + a.casual * 0.003) *
+                (fans * 0.05 + a.casual * 0.003) *
                     (0.5 + sr.buzz) *
                     // A countdown page on the profile (docs K185).
                     ArtistPicks.preSaveFactor(w, sr.id));
@@ -1167,7 +1169,7 @@ abstract final class Eras {
     var baseline = 2000.0;
     for (var k = 0; k < eras.length; k++) {
       final share = a.regionShare[k];
-      baseline += a.coreFans *
+      baseline += Audience.engaged(a) *
               share *
               c.superfanBuyRate *
               math.sqrt(a.devotionBuyFactor) *

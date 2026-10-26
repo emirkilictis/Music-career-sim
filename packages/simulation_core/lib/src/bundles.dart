@@ -1,3 +1,4 @@
+import 'audience.dart';
 import 'model.dart';
 import 'time.dart';
 import 'world.dart';
@@ -42,7 +43,7 @@ abstract final class Bundles {
   static double units(World w, Artist a, AlbumBundle bundle) =>
       switch (bundle) {
         AlbumBundle.none => 0,
-        AlbumBundle.merch => a.coreFans * merchRate * (1 + a.hype),
+        AlbumBundle.merch => Audience.engaged(a) * merchRate * (1 + a.hype),
         AlbumBundle.tickets => upcomingSeats(w, a) * ticketRedeem,
       };
 

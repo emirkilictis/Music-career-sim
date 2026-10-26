@@ -397,6 +397,10 @@ final heavy = Platform.environment['PROBE_HEAVY'] == '1';
 /// A player who works every streaming tool on each single (docs K204).
 final tools = Platform.environment['PROBE_TOOLS'] == '1';
 
+/// Tools the tools bot leaves out, to see what each one is worth:
+/// PROBE_SKIP=creators,marquee,curators,versions,app.
+final skip = (Platform.environment['PROBE_SKIP'] ?? '').split(',').toSet();
+
 void _try(void Function() f) {
   try {
     f();
@@ -413,25 +417,33 @@ int _tools(GameSession s) {
     if (x.isSingle && x.singleWeek >= 0) {
       final a = s.week - x.singleWeek;
       if (a == 0) {
-        _try(() => s.addCanvas(x.id));
-        _try(() => s.pitchSong(x.id));
-        _try(() => s.setAutoplayLevel(x.id, AutoplayLevel.standard));
-        _try(() => s.submitToCurators(x.id, CuratorPack.large));
-        _try(() => s.runMarquee(x.id));
-        _try(() => s.runShowcase(x.id));
-        _try(() => s.runCreators(x.id, CreatorCampaign.medium));
-        _try(() => s.setArtistPick(PickKind.song, x.id));
+        if (!skip.contains('app')) {
+          _try(() => s.addCanvas(x.id));
+          _try(() => s.setAutoplayLevel(x.id, AutoplayLevel.standard));
+          _try(() => s.setArtistPick(PickKind.song, x.id));
+        }
+        if (!skip.contains('curators')) {
+          _try(() => s.pitchSong(x.id));
+          _try(() => s.submitToCurators(x.id, CuratorPack.large));
+        }
+        if (!skip.contains('marquee')) {
+          _try(() => s.runMarquee(x.id));
+          _try(() => s.runShowcase(x.id));
+        }
+        if (!skip.contains('creators')) {
+          _try(() => s.runCreators(x.id, CreatorCampaign.medium));
+        }
       }
-      if (a == 3) {
+      if (a == 3 && !skip.contains('versions')) {
         _try(() => s.releaseVersion(
             x.id, s.year >= 2018 ? SongVersion.spedUp : SongVersion.remix));
       }
-      if (a == 7) {
+      if (a == 7 && !skip.contains('versions')) {
         _try(() => s.releaseVersion(
             x.id, s.year >= 2018 ? SongVersion.slowed : SongVersion.acapella));
       }
     }
-    if (age == 30) {
+    if (age == 30 && !skip.contains('app')) {
       _try(() => s.addCanvas(x.id));
       final m = s.moodOptions(x.id);
       if (m.isNotEmpty) {

@@ -1,3 +1,4 @@
+import 'audience.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -167,7 +168,8 @@ abstract final class OwnPlaylists {
   /// whatever they post, the rest come for the songs.
   static double target(World w, Artist a, OwnPlaylist p) {
     final pull = appeal(w, p);
-    return (a.coreFans * 0.25 + a.casual * 0.04 + 3e6 * a.fame) * pull;
+    return (Audience.engaged(a) * 0.25 + a.casual * 0.04 + 3e6 * a.fame) *
+        pull;
   }
 
   /// The lift each song on [p] gets this week.

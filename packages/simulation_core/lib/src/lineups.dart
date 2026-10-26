@@ -1,3 +1,4 @@
+import 'audience.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -130,7 +131,8 @@ abstract final class Lineups {
   static const soloMorale = 10.0, cheerMorale = 25.0, cheerEveryWeeks = 8;
 
   /// A morale bonus: a fixed part and a part that grows with the fandom.
-  static int cheerCostCents(Artist a) => 5000000 + (a.coreFans * 2).round();
+  static int cheerCostCents(Artist a) =>
+      5000000 + (Audience.engaged(a) * 2).round();
 
   /// The popularity [roles] give a member.
   static double target(int roles) {

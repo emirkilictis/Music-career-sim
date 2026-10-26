@@ -675,13 +675,15 @@ abstract final class Tours {
     final share = a.regionShare[m.region.index] * m.share;
     final hot = math.max(1 + a.hype + 0.5 * a.popularity, 1 + legacyHot * a.fame);
     final live = 0.6 + 0.8 * a.skills.performance / 100;
-    final core =
-        a.coreFans * share * 0.18 * math.pow(priceFactor, -0.5).toDouble();
+    final core = Audience.engaged(a) *
+        share *
+        0.18 *
+        math.pow(priceFactor, -0.5).toDouble();
     final casual =
         a.casual * share * 0.007 * math.pow(priceFactor, -1.6).toDouble();
     final support = opener == null
         ? 0.0
-        : opener.coreFans *
+        : Audience.engaged(opener) *
             opener.regionShare[m.region.index] *
             m.share *
             0.03 /

@@ -1,3 +1,4 @@
+import 'audience.dart';
 import 'model.dart';
 import 'world.dart';
 
@@ -37,7 +38,7 @@ abstract final class Contracts {
   static double leverage(World w, Artist a, Label l) {
     if (l == Label.independent) return 0;
     final ask = l.minFans > 0 ? l.minFans.toDouble() : 50000.0;
-    return ((a.coreFans / ask - 1) / 3).clamp(0.0, 1.0);
+    return ((Audience.engaged(a) / ask - 1) / 3).clamp(0.0, 1.0);
   }
 
   /// The terms of [deal] with [l] for [a].

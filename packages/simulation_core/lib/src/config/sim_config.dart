@@ -44,6 +44,7 @@ class SimConfig {
     this.songShareCap = 0.004,
     // 2.0 until docs K127: the player's tools stacked to ×2.4 on reach.
     this.liftCeiling = 1.2,
+    this.toolCeiling = 0.35,
     this.playerStreamingReach = 0.65,
     this.momentumSigma = 0.12,
     this.albumLegsSigma = 0.3,
@@ -302,11 +303,19 @@ class SimConfig {
   double stackedLift(double x) =>
       x <= 0 ? 1.0 : 1 + liftCeiling * (1 - math.exp(-x / liftCeiling));
 
+  /// Most that the streaming app's tools together can add to a song's
+  /// exposure (docs K216): every tool used at once earned ×2.5.
+  final double toolCeiling;
+
+  /// Exposure multiplier for tool lifts adding up to [x].
+  double toolStack(double x) =>
+      x <= 0 ? 1.0 : 1 + toolCeiling * (1 - math.exp(-x / toolCeiling));
+
   /// Share of new fans an artist with [fans] core fans can still win
   /// (docs K127): it shrinks with the square of the fandom's size, so a
   /// star's fandom grows by years, not weeks (linear until K127).
-  double fanRoom(double fans) {
-    final x = fans / fanCap;
+  double fanRoom(double fans, {double? cap}) {
+    final x = fans / (cap ?? fanCap);
     if (x >= 1) return 0;
     return (1 - x) * (1 - x);
   }

@@ -333,9 +333,10 @@ class Simulator {
             : trackPositionFactor(ids.indexOf(s.id), tracks) * count / sum;
       }
 
-      var fans = p.coreFans, cas = p.casual;
+      // The fans who play the songs (docs K215).
+      var fans = Audience.engaged(p), cas = p.casual;
       for (final f in s.featuredArtistIds) {
-        fans += 0.4 * w.artists[f].coreFans;
+        fans += 0.4 * Audience.engaged(w.artists[f]);
         cas += 0.4 * w.artists[f].casual;
       }
 
@@ -402,19 +403,21 @@ class Simulator {
       final hypeLift = 0.5 * p.hype;
       final womLift = WordOfMouth.lift(w, s, promoAge);
       // Editors' adds and the player's own playlist (docs K159).
-      final listLift =
-          s.playlistBoost +
-          (ownLifts[s.id] ?? 0) +
-          (pickLifts[s.id] ?? 0) +
-          (moodLifts[s.id] ?? 0) +
-          (thisIsLifts[s.id] ?? 0);
+      final listLift = s.playlistBoost + (thisIsLifts[s.id] ?? 0);
       final versionLift = s.versionBoost;
-      final algoLift =
+      final algoLift = StreamingTools.releaseRadarLift(year, promoAge) +
+          StreamingTools.discoverLift(w, s, w.week) +
+          StreamingTools.preSaveLift(s, p, promoAge);
+      // The tools the artist sets up in the app (autoplay, Canvas, the
+      // Pick, mood playlists, an own playlist) share one small ceiling of
+      // their own (docs K216): each helps, all of them at once are no
+      // road to the top.
+      final appLift =
           s.autoplay.lift * StreamingTools.autoplayLift(c, s, promoAge) +
-              StreamingTools.releaseRadarLift(year, promoAge) +
-              StreamingTools.discoverLift(w, s, w.week) +
-              StreamingTools.preSaveLift(s, p, promoAge) +
-              SongCanvas.liftOf(s);
+              SongCanvas.liftOf(s) +
+              (ownLifts[s.id] ?? 0) +
+              (pickLifts[s.id] ?? 0) +
+              (moodLifts[s.id] ?? 0);
       final videoLift = s.videoPower * videoEra;
       final lifts = hypeLift +
           womLift +
@@ -423,7 +426,7 @@ class Simulator {
           algoLift +
           videoLift +
           (p.tier == ArtistTier.player ? lineLift : 0);
-      final stacked = c.stackedLift(lifts);
+      final stacked = c.stackedLift(lifts) * c.toolStack(appLift);
       final exposure = (c.baseExposure +
               c.fameExposure * p.fame +
               chartBoost +
@@ -521,12 +524,13 @@ class Simulator {
       if (p.tier == ArtistTier.player) {
         final m = qMult * noise * trackShare * onApps;
         final liftPart = pubPart * (1 - 1 / stacked);
-        double of(double x) => lifts > 0 ? liftPart * x / lifts : 0.0;
+        final allLifts = lifts + appLift;
+        double of(double x) => allLifts > 0 ? liftPart * x / allLifts : 0.0;
         final mh = m * hit;
         s.streamSources = Float64List.fromList([
           fanPart * m,
           casPart * mh,
-          of(algoLift + womLift) * mh,
+          of(algoLift + womLift + appLift) * mh,
           of(listLift) * mh,
           (viralPart + of(videoLift)) * mh,
           (pubPart - liftPart + of(hypeLift + versionLift)) * mh,
@@ -903,7 +907,8 @@ class Simulator {
         final era = eras[k];
         final share = p.regionShare[k];
         // A joint album sells to its partner's fans too (docs K150).
-        final fans = p.coreFans * share + JointAlbums.extraFans(w, al, k);
+        final fans =
+            Audience.engaged(p) * share + JointAlbums.extraFans(w, al, k);
         final casual = p.casual * share;
         // A best-of: fans have the songs, people who know the hits buy
         // it (docs K161).
@@ -1092,7 +1097,7 @@ class Simulator {
       }
       // Growth saturates: you cannot convert people who are already fans.
       final casualRoom = math.max(0.0, 1 - a.casual / c.casualCap);
-      final fanRoom = c.fanRoom(a.coreFans);
+      final fanRoom = Audience.room(w, a);
       // Charisma: likeable artists turn listeners into fans more easily
       // (×0.8 at 0, ×1.0 at 50, ×1.2 at 100).
       final charm = 0.8 + 0.4 * a.skills.charisma / 100;
@@ -1104,7 +1109,11 @@ class Simulator {
           (1 - 0.5 * a.fame) *
           a.kind.fanConversion *
           (a.tier == ArtistTier.player ? w.difficulty.fanConversion : 1);
-      a.coreFans += c.fanConversion * conv * a.weekReach * fanRoom -
+      a.coreFans += c.fanConversion *
+              conv *
+              Audience.growth(a) *
+              a.weekReach *
+              fanRoom -
           c.coreFanDecay *
               a.kind.fanDecay *
               c.rivalAgeFade(a, w.week) *
@@ -1214,7 +1223,7 @@ class Simulator {
     }
     if (sum == 0) return;
     for (var k = 0; k < _r; k++) {
-      out[k] = p.coreFans *
+      out[k] = Audience.engaged(p) *
           p.regionShare[k] *
           w.config.singleCollectorRate *
           p.kind.collector *

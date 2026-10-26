@@ -1,3 +1,4 @@
+import 'audience.dart';
 import 'dart:math' as math;
 
 import 'actions.dart';
@@ -348,7 +349,9 @@ abstract final class StreamingTools {
           age < 0 ||
           age >= 2
       ? 0
-      : 0.5 * math.min(1.0, s.preSaves / (a.coreFans + 0.05 * a.casual + 1));
+      : 0.5 *
+          math.min(
+              1.0, s.preSaves / (Audience.engaged(a) + 0.05 * a.casual + 1));
 
   /// Whether the discovery mixes picked [s] in [week]: songs few people
   /// skip, a few weeks out (docs K119).

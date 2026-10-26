@@ -144,7 +144,8 @@ abstract final class Channel {
   }
 
   /// The audience a channel video reaches before views from the song.
-  static double reach(Artist a) => 0.6 * a.coreFans + 0.06 * a.casual;
+  static double reach(Artist a) =>
+      0.6 * Audience.engaged(a) + 0.06 * a.casual;
 
   /// What stops [a] making [kind] (for [s]) now, or null.
   static VideoBlock? block(World w, Artist a, VideoKind kind, Song? s) {

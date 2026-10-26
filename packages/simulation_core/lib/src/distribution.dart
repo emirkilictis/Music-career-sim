@@ -1,4 +1,5 @@
 import 'actions.dart';
+import 'audience.dart';
 import 'model.dart';
 import 'time.dart';
 import 'world.dart';
@@ -52,7 +53,7 @@ abstract final class Distribution {
 
   /// A deal's advance: more for a bigger audience.
   static int advanceCents(Artist a) =>
-      (5000000 + a.coreFans * 50).round();
+      (5000000 + Audience.engaged(a) * 50).round();
 
   /// Whether [a] can go with [d] now.
   static bool can(World w, Artist a, Distributor d) =>

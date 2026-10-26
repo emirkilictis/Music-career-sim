@@ -1,3 +1,4 @@
+import 'audience.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 
@@ -128,7 +129,7 @@ abstract final class MusicShow {
     double broadcast(Song s) => s.weekRadio;
     double vote(Song s) {
       final a = w.artists[s.primaryArtistId];
-      return a.coreFans * (0.3 + a.devotion);
+      return Audience.engaged(a) * (0.3 + a.devotion);
     }
 
     double top(double Function(Song) f) =>
