@@ -1,12 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Directory;
 import 'dart:typed_data';
 
 import 'package:simulation_core/simulation_core.dart';
-import 'package:sqlite3/sqlite3.dart';
+import 'package:sqlite3/common.dart';
 
 import 'binary.dart';
 import 'codec.dart';
+import 'save_fs.dart';
+import 'save_fs_stub.dart' if (dart.library.io) 'save_fs_io.dart';
 import 'schema.dart';
 
 /// One career = one SQLite file. The hot world lives in memory; each week is
@@ -16,17 +18,21 @@ import 'schema.dart';
 ///   - meta.currentWeek in the same transaction, so a crash leaves the
 ///     previous week intact.
 class SaveStore {
-  SaveStore._(this.db);
+  SaveStore._(this.db, this.fs);
 
-  final Database db;
+  final CommonDatabase db;
+
+  /// Where the save lives (docs K218).
+  final SaveFs fs;
   static const simulationVersion = 1;
 
   /// Creates a new save file for [world] (fails if the file exists).
-  static SaveStore create(String path, World world) {
-    if (File(path).existsSync()) {
+  static SaveStore create(String path, World world, {SaveFs? fs}) {
+    fs ??= defaultSaveFs();
+    if (fs.exists(path)) {
       throw StateError('Save already exists: $path');
     }
-    final store = SaveStore._(_open(path));
+    final store = SaveStore._(fs.openDatabase(path), fs);
     store._migrate();
     store._transaction(() {
       store._writeMeta(world);
@@ -42,22 +48,12 @@ class SaveStore {
   }
 
   /// Opens an existing save.
-  static SaveStore open(String path) {
-    if (!File(path).existsSync()) throw StateError('No save at $path');
-    final store = SaveStore._(_open(path));
+  static SaveStore open(String path, {SaveFs? fs}) {
+    fs ??= defaultSaveFs();
+    if (!fs.exists(path)) throw StateError('No save at $path');
+    final store = SaveStore._(fs.openDatabase(path), fs);
     store._migrate();
     return store;
-  }
-
-  static Database _open(String path) {
-    final db = sqlite3.open(path);
-    db.execute('PRAGMA journal_mode = WAL');
-    db.execute('PRAGMA synchronous = NORMAL');
-    // Checkpoint the WAL ourselves every few weeks instead of on random
-    // commits (each checkpoint syncs the database file).
-    db.execute('PRAGMA wal_autocheckpoint = 0');
-    db.execute('PRAGMA foreign_keys = OFF');
-    return db;
   }
 
   void _migrate() {
@@ -73,6 +69,7 @@ class SaveStore {
   void close() {
     _checkpoint();
     db.dispose();
+    fs.saved();
   }
 
   // ------------------------------------------------------------------ load
@@ -383,6 +380,7 @@ class SaveStore {
     try {
       body();
       db.execute('COMMIT');
+      fs.saved();
     } catch (_) {
       db.execute('ROLLBACK');
       rethrow;
@@ -620,20 +618,22 @@ class SaveStore {
 /// Save slots: one folder per career, each with its database and a small
 /// summary.json so the slot list never has to open large databases.
 class SaveSlots {
-  SaveSlots(this.root);
+  /// Slots in [root] on the device.
+  SaveSlots(Directory root) : this.on(defaultSaveFs(), root.path);
 
-  final Directory root;
+  /// Slots under [rootPath] in [fs] (the browser's on the web; docs K218).
+  SaveSlots.on(this.fs, this.rootPath);
 
-  String dbPath(String slotId) => '${root.path}/$slotId/career.sqlite';
+  final SaveFs fs;
+  final String rootPath;
+
+  String dbPath(String slotId) => '$rootPath/$slotId/career.sqlite';
 
   List<Map<String, Object?>> list() {
-    if (!root.existsSync()) return [];
     final out = <Map<String, Object?>>[];
-    for (final d in root.listSync().whereType<Directory>()) {
-      final f = File('${d.path}/summary.json');
-      if (f.existsSync()) {
-        out.add(jsonDecode(f.readAsStringSync()) as Map<String, Object?>);
-      }
+    for (final slot in fs.folders(rootPath)) {
+      final text = fs.readText('$rootPath/$slot/summary.json');
+      if (text != null) out.add(jsonDecode(text) as Map<String, Object?>);
     }
     out.sort(
         (a, b) => (a['slotId'] as String).compareTo(b['slotId'] as String));
@@ -641,32 +641,31 @@ class SaveSlots {
   }
 
   SaveStore create(String slotId, World world) {
-    Directory('${root.path}/$slotId').createSync(recursive: true);
-    final store = SaveStore.create(dbPath(slotId), world);
+    fs.makeFolder('$rootPath/$slotId');
+    final store = SaveStore.create(dbPath(slotId), world, fs: fs);
     writeSummary(slotId, world);
     return store;
   }
 
-  SaveStore open(String slotId) => SaveStore.open(dbPath(slotId));
+  SaveStore open(String slotId) => SaveStore.open(dbPath(slotId), fs: fs);
 
   /// Premium daily login bonus: true at most once per local calendar day for
   /// the whole account (not per slot), and records the claim. The caller
   /// checks Premium and then credits it with `Actions.grantDailyBonus`.
   bool claimDailyBonus(DateTime now) {
-    final f = File('${root.path}/account.json');
-    final account = f.existsSync()
-        ? jsonDecode(f.readAsStringSync()) as Map<String, Object?>
+    final path = '$rootPath/account.json';
+    final text = fs.readText(path);
+    final account = text != null
+        ? jsonDecode(text) as Map<String, Object?>
         : <String, Object?>{};
     final today = '${now.year.toString().padLeft(4, '0')}-'
         '${now.month.toString().padLeft(2, '0')}-'
         '${now.day.toString().padLeft(2, '0')}';
     if (account['lastDailyBonus'] == today) return false;
     account['lastDailyBonus'] = today;
-    root.createSync(recursive: true);
-    f.writeAsStringSync(jsonEncode(account));
+    fs.writeText(path, jsonEncode(account));
     return true;
   }
-
   void writeSummary(String slotId, World w) {
     final p = w.player;
     // The latest album and the biggest US hit, for the career list (E9).
@@ -683,7 +682,7 @@ class SaveSlots {
         hitPeak = peak;
       }
     }
-    File('${root.path}/$slotId/summary.json').writeAsStringSync(jsonEncode({
+    fs.writeText('$rootPath/$slotId/summary.json', jsonEncode({
       'slotId': slotId,
       'artistName': p?.name,
       'kind': p?.kind.name,
@@ -702,8 +701,5 @@ class SaveSlots {
     }));
   }
 
-  void delete(String slotId) {
-    final d = Directory('${root.path}/$slotId');
-    if (d.existsSync()) d.deleteSync(recursive: true);
-  }
+  void delete(String slotId) => fs.deleteFolder('$rootPath/$slotId');
 }
