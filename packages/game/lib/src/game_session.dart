@@ -863,6 +863,55 @@ class GameSession {
     return _rank(rows, limit);
   }
 
+  /// The player's finished tours, newest first (docs K208): their own,
+  /// their group's before going solo and reunion tours.
+  List<TourHistoryView> get tourHistory {
+    final w = world;
+    final me = w.playerArtistId, former = w.formerGroupId;
+    final done = [
+      for (final r in w.tourRecords)
+        if (r.endWeek <= w.week) r
+    ]..sort((a, b) => b.grossCents.compareTo(a.grossCents));
+    final rank = {for (final (i, r) in done.indexed) r: i + 1};
+    final out = <TourHistoryView>[];
+    for (final r in done) {
+      Tour? t;
+      for (final x in w.pastTours) {
+        if (x.startWeek == r.startWeek && x.name == r.name) t = x;
+      }
+      final mine = r.artistId == me ||
+          (former >= 0 && r.artistId == former) ||
+          (t != null && t.reunionOf == r.artistId);
+      if (!mine) continue;
+      out.add(TourHistoryView(
+        startWeek: r.startWeek,
+        endWeek: r.endWeek,
+        name: r.name,
+        artistName: w.artists[r.artistId].name,
+        reunion: t != null && t.reunionOf >= 0,
+        shows: r.shows,
+        tickets: r.tickets,
+        grossCents: r.grossCents,
+        allTimeRank: rank[r]!,
+        kind: t?.kind,
+        markets: t == null ? const [] : [for (final l in t.legs) l.market],
+        soldOut: t?.soldOut ?? 0,
+        netCents: t?.netCents.round() ?? 0,
+        fans: t?.fans ?? 0,
+      ));
+    }
+    out.sort((a, b) => b.startWeek.compareTo(a.startWeek));
+    return out;
+  }
+
+  /// A finished tour night by night (docs K208), by its first week.
+  TourView? pastTour(int startWeek) {
+    for (final t in world.pastTours) {
+      if (t.startWeek == startWeek) return TourView.of(world, t);
+    }
+    return null;
+  }
+
   /// First year with tours on the books.
   int get firstTourYear => world.tourRecords.isEmpty
       ? year

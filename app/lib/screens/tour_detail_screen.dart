@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game/game.dart';
 
 import '../core/career_state.dart';
 import '../core/scope.dart';
@@ -7,10 +8,12 @@ import '../widgets/common.dart';
 import 'tour_screen.dart';
 
 /// The tour on the road (docs K76): its numbers so far and every night,
-/// played ones with their box office.
+/// played ones with their box office; or a finished one from the tour
+/// history (docs K208).
 class TourDetailScreen extends StatelessWidget {
-  const TourDetailScreen({super.key, required this.state});
+  const TourDetailScreen({super.key, required this.state, this.past});
   final CareerState state;
+  final TourView? past;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +22,7 @@ class TourDetailScreen extends StatelessWidget {
     return Scope<CareerState>(
       value: state,
       child: Builder(builder: (context) {
-        final t = context.career.player.tour;
+        final t = past ?? context.career.player.tour;
         if (t == null) {
           return Scaffold(appBar: AppBar(title: Text(l.tourDetails)));
         }

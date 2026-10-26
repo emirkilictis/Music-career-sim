@@ -1489,6 +1489,44 @@ void main() {
       g.close();
     });
 
+    test('finished tours are kept in the tour history (K208)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      expect(g.tourHistory, isEmpty);
+      g.startTour(const TourRequest(legs: [
+        TourLeg(TourMarket.usa, TourKind.arena, 6),
+        TourLeg(TourMarket.ukIreland, TourKind.arena, 3),
+      ]));
+      final start = g.world.player!.tour!.startWeek;
+      while (g.world.player!.tour != null) {
+        g.advanceWeek();
+      }
+      final h = g.tourHistory.single;
+      expect(h.detailed, isTrue);
+      expect(h.startWeek, start);
+      expect(h.shows, 9);
+      expect(h.markets, [TourMarket.usa, TourMarket.ukIreland]);
+      expect(h.tickets, greaterThan(0));
+      expect(h.soldOut, inInclusiveRange(0, 9));
+      expect(h.allTimeRank, greaterThanOrEqualTo(1));
+      expect(h.artistName, g.player.name);
+      final v = g.pastTour(start)!;
+      expect(v.shows, hasLength(9));
+      expect(v.shows.every((s) => s.played), isTrue);
+      expect(v.tickets, closeTo(h.tickets, 1e-6));
+      // Saved with the game.
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.tourHistory.single.startWeek, start);
+      expect(g.pastTour(start)!.shows, hasLength(9));
+      g.close();
+    });
+
     test('a skip tells what happened over it (K203)', () {
       final g = GameSession.start(
           slots,

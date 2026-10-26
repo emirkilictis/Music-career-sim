@@ -603,6 +603,63 @@ void main() {
     await shot(tester, '29_studio_soft');
     app.settings.setSharpCorners(true);
   });
+  testWidgets('screenshots: tour history', skip: !enabled, (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2018,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 208,
+        ),
+        port.sendPort));
+    port.close();
+    // Two tours played (docs K208).
+    await c.run((s) {
+      for (final legs in const [
+        [
+          TourLeg(TourMarket.usa, TourKind.arena, 12),
+          TourLeg(TourMarket.ukIreland, TourKind.arena, 4),
+        ],
+        [
+          TourLeg(TourMarket.usa, TourKind.stadium, 20),
+          TourLeg(TourMarket.europe, TourKind.stadium, 10),
+          TourLeg(TourMarket.latinAmerica, TourKind.stadium, 6),
+        ],
+      ]) {
+        s.startTour(TourRequest(legs: legs));
+        while (s.world.player!.tour != null) {
+          s.advanceWeek();
+        }
+        s.advanceWeeks(8, stop: SkipStop.never);
+      }
+    });
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Career');
+    await careerPage(tester, 'Stage');
+    final history = _ci('Tour history');
+    await tester.scrollUntilVisible(history, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(history);
+    await tester.pumpAndSettle();
+    await shot(tester, '15zc_tour_history');
+    await tester.tap(find.textContaining('All-time').first);
+    await tester.pumpAndSettle();
+    await shot(tester, '15zd_tour_history_detail');
+  });
   testWidgets('screenshots: a discography', skip: !enabled, (tester) async {
     await tester.runAsync(loadFonts);
     phoneView(tester);

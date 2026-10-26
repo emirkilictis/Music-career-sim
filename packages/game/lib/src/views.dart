@@ -2117,6 +2117,46 @@ class TourView {
   int get played => shows.where((s) => s.played).length;
 }
 
+/// One of the player's finished tours (docs K208). Tours from before the
+/// history was kept have only the box-office numbers ([detailed] false).
+class TourHistoryView {
+  TourHistoryView({
+    required this.startWeek,
+    required this.endWeek,
+    required this.name,
+    required this.artistName,
+    required this.reunion,
+    required this.shows,
+    required this.tickets,
+    required this.grossCents,
+    required this.allTimeRank,
+    this.kind,
+    this.markets = const [],
+    this.soldOut = 0,
+    this.netCents = 0,
+    this.fans = 0,
+  });
+  final int startWeek, endWeek;
+  final String name;
+
+  /// Who it went down as: the player, their group, or the reunited group.
+  final String artistName;
+  final bool reunion;
+  final int shows;
+  final double tickets;
+  final double grossCents;
+
+  /// Its place among every tour ever played in this world, by gross.
+  final int allTimeRank;
+  final TourKind? kind;
+  final List<TourMarket> markets;
+  final int soldOut;
+  final int netCents;
+  final double fans;
+
+  bool get detailed => kind != null;
+}
+
 /// One night of a tour (docs K76): where, when, how big, and its tickets
 /// (sold once played, else expected when planning).
 class TourShowView {

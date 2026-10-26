@@ -314,6 +314,10 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
   static SessionCmd<SongMarketView> songMarket() => (s) => s.songMarket;
+  static SessionCmd<List<TourHistoryView>> tourHistory() =>
+      (s) => s.tourHistory;
+  static SessionCmd<TourView?> pastTour(int startWeek) =>
+      (s) => s.pastTour(startWeek);
   static SessionCmd<SongView> buySong(int index) => (s) => s.buySong(index);
 
   /// Distribution for independents (docs K157).

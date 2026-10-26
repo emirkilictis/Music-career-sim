@@ -1143,6 +1143,8 @@ class Simulator {
       Lineups.weekly(w, me);
       toured = Tours.playWeek(w, me);
       if (toured != null) {
+        // Kept night by night for the tour history (docs K208).
+        w.pastTours.add(toured);
         w.tourRecords.add(TourRecord(
           // A reunion tour goes down as the group's (docs K196).
           artistId: toured.reunionOf >= 0 ? toured.reunionOf : me.id,

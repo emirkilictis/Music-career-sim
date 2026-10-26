@@ -1410,6 +1410,31 @@
   "tourPickOpener": "Pick an opening act",
   "tourExpected": "Expected",
   "tourStatShows": "Shows",
+  "tourHistory": "Tour history",
+  "tourHistoryEmpty": "No finished tours yet. Your tours land here, night by night.",
+  "tourHistoryTours": "Tours",
+  "tourHistorySoldOut": "Sold out",
+  "tourHistoryRank": "All-time #{rank}",
+  "@tourHistoryRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "tourHistoryReunion": "Reunion",
+  "tourHistoryNet": "{net} for you · {fans} new fans",
+  "@tourHistoryNet": {
+    "placeholders": {
+      "net": {
+        "type": "String"
+      },
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "tourHistoryOld": "From before the history was kept: box-office numbers only.",
   "tourStatWeeks": "Weeks",
   "tourStatTickets": "Tickets",
   "tourStatFill": "Full",

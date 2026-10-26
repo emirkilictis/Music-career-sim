@@ -133,6 +133,13 @@ class SaveStore {
     // The reunion (docs K194).
     Reunions.decode(w, meta['reunion'] as String?);
     w.rivalSplits.addAll(RivalSplit.decode(meta['rivalSplits'] as String?));
+    // The player's finished tours (docs K208).
+    if (meta['pastTours'] case final String s when s.isNotEmpty) {
+      w.pastTours.addAll([
+        for (final x in jsonDecode(s) as List)
+          Tour.fromJson(x as Map<String, Object?>)
+      ]);
+    }
     // The song market's bought offers (docs K205).
     if (meta['songMarket'] case final String s when s.isNotEmpty) {
       w.boughtPitches.addAll((jsonDecode(s) as List).cast<int>());
@@ -409,6 +416,7 @@ class SaveStore {
       'reunion': Reunions.encode(w),
       'rivalSplits': RivalSplit.encode(w.rivalSplits),
       'songMarket': jsonEncode(w.boughtPitches.toList()..sort()),
+      'pastTours': jsonEncode([for (final t in w.pastTours) t.toJson()]),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };

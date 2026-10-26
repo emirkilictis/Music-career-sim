@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/scope.dart';
 import '../screens/tour_detail_screen.dart';
+import '../screens/tour_history_screen.dart';
 import '../screens/tour_screen.dart';
 import '../ui/palette.dart';
 import 'common.dart';
@@ -21,9 +22,8 @@ class TourSection extends StatelessWidget {
       title: l.tourSection,
       icon: Icons.stadium_outlined,
       child: t == null
-          ? Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
+          ? Wrap(spacing: 8, runSpacing: 8, children: [
+              OutlinedButton.icon(
                 onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -31,7 +31,16 @@ class TourSection extends StatelessWidget {
                 icon: const Icon(Icons.map_outlined),
                 label: Text(l.tourPlan),
               ),
-            )
+              // Every tour so far (docs K208).
+              TextButton.icon(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => TourHistoryScreen(state: career))),
+                icon: const Icon(Icons.history_rounded),
+                label: Text(l.tourHistory),
+              ),
+            ])
           : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               Text(fmt.tourName(t.name, t.kind),
                   style: const TextStyle(

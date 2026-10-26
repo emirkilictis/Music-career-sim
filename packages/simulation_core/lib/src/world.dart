@@ -56,6 +56,10 @@ class World {
   /// ones (docs K77).
   final List<TourRecord> tourRecords = [];
 
+  /// The player's finished tours, night by night, oldest first (docs
+  /// K208; tours before it are only in [tourRecords]).
+  final List<Tour> pastTours = [];
+
   /// The player's festival slots to come (docs K77).
   final List<FestivalBooking> festivalBookings = [];
 
