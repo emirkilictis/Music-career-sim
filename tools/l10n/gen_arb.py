@@ -8,6 +8,9 @@ def k(key, en, tr, **ph):
     S[key] = (en, tr, ph)
 
 k('appTitle','Music Career Simulator','Müzik Kariyeri Simülatörü')
+k('brandTop','Music Career','Müzik Kariyeri')
+k('brandBottom','Simulator','Simülatörü')
+k('brandTagline','From 2000 to today: write it, release it, top the charts.','2000’den bugüne: yaz, çıkar, listelerin zirvesine çık.')
 k('settings','Settings','Ayarlar')
 k('newCareer','New career','Yeni kariyer')
 k('noCareersTitle','No careers yet','Henüz kariyer yok')

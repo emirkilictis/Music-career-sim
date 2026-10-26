@@ -1,6 +1,9 @@
 {
   "@@locale": "tr",
   "appTitle": "Müzik Kariyeri Simülatörü",
+  "brandTop": "Müzik Kariyeri",
+  "brandBottom": "Simülatörü",
+  "brandTagline": "2000’den bugüne: yaz, çıkar, listelerin zirvesine çık.",
   "settings": "Ayarlar",
   "newCareer": "Yeni kariyer",
   "noCareersTitle": "Henüz kariyer yok",

@@ -1,6 +1,9 @@
 {
   "@@locale": "en",
   "appTitle": "Music Career Simulator",
+  "brandTop": "Music Career",
+  "brandBottom": "Simulator",
+  "brandTagline": "From 2000 to today: write it, release it, top the charts.",
   "settings": "Settings",
   "newCareer": "New career",
   "noCareersTitle": "No careers yet",

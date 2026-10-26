@@ -8,6 +8,7 @@ import '../core/commands.dart';
 import '../core/scope.dart';
 import '../core/images.dart';
 import '../widgets/art.dart';
+import '../widgets/brand.dart';
 import '../ui/palette.dart';
 import '../widgets/common.dart';
 import 'game_shell.dart';
@@ -70,8 +71,8 @@ class _SlotsScreenState extends State<SlotsScreen> {
                 Text(l.loadFailedBody),
                 const SizedBox(height: 12),
                 SelectableText(detail,
-                    style: const TextStyle(
-                        fontFamily: 'monospace', fontSize: 12)),
+                    style:
+                        const TextStyle(fontFamily: 'monospace', fontSize: 12)),
               ]),
         ),
         actions: [
@@ -115,7 +116,16 @@ class _SlotsScreenState extends State<SlotsScreen> {
     final slots = _slots;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l.appTitle),
+        toolbarHeight: 84,
+        titleSpacing: 16,
+        // The game's own mark and name (docs K214).
+        title: Row(children: [
+          const BrandMark(size: 48),
+          const SizedBox(width: 12),
+          Flexible(
+              child: Semantics(
+                  label: l.appTitle, child: const BrandWordmark(size: 25))),
+        ]),
         actions: [
           IconButton(
             tooltip: l.settings,
@@ -141,8 +151,8 @@ class _SlotsScreenState extends State<SlotsScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(32),
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.graphic_eq, size: 64),
-                      const SizedBox(height: 16),
+                      const BrandMark(size: 96),
+                      const SizedBox(height: 20),
                       Text(l.noCareersTitle,
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 8),
@@ -151,11 +161,19 @@ class _SlotsScreenState extends State<SlotsScreen> {
                   ),
                 )
               : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-                  itemCount: slots.length,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+                  itemCount: slots.length + 1,
                   separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, i) {
-                    final s = slots[i];
+                    if (i == 0) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(l.brandTagline,
+                            style: TextStyle(
+                                color: AppColors.textMuted, fontSize: 14)),
+                      );
+                    }
+                    final s = slots[i - 1];
                     final id = s['slotId'] as String;
                     final name = s['artistName'] as String? ?? '?';
                     final fame = (s['fame'] as num?)?.toDouble() ?? 0;

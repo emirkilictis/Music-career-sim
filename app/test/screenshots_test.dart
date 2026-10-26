@@ -149,8 +149,11 @@ void main() {
         .removeCurrentSnackBar();
     await shot(tester, '04_home');
     // What fame means and the numbers behind it (E7).
-    await tester
-        .tap(find.textContaining(RegExp('^fame\$', caseSensitive: false)));
+    final fame = find.textContaining(RegExp('^fame\$', caseSensitive: false));
+    await tester.scrollUntilVisible(fame, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(fame);
     await shot(tester, '04c_fame_info');
     await tester.tapAt(const Offset(200, 80));
     await tester.pumpAndSettle();
