@@ -69,7 +69,9 @@ class WebSaveFs extends SaveFs {
         _db.transaction(_store.toJS).objectStore(_store).get(path.toJS));
     if (value == null) return;
     final bytes = (value as JSArrayBuffer).toDart.asUint8List();
-    _memory.fileData[path] = Uint8Buffer()..addAll(bytes);
+    // Typed copies: an element-by-element one of 25 MB takes seconds.
+    _memory.fileData[path] = Uint8Buffer(bytes.length)
+      ..setRange(0, bytes.length, bytes);
   }
 
   /// Text files under [prefix] (path → text), for the browser's image
@@ -166,7 +168,8 @@ class WebSaveFs extends SaveFs {
     for (final p in _dirty) {
       final data = _memory.fileData[p];
       if (data == null) continue;
-      final bytes = Uint8List.fromList(data);
+      final bytes = Uint8List(data.length)
+        ..setRange(0, data.length, data.buffer.asUint8List(0, data.length));
       store.put(bytes.buffer.toJS, p.toJS);
       _stored.add(p);
     }
