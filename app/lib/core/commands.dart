@@ -323,6 +323,7 @@ abstract final class Cmd {
   static SessionCmd<TourView?> pastTour(int startWeek) =>
       (s) => s.pastTour(startWeek);
   static SessionCmd<SongView> buySong(int index) => (s) => s.buySong(index);
+  static SessionCmd<Map<int, int>> groupSizes() => (s) => s.groupSizes;
   static SessionCmd<List<RivalEditRow>> rivalsToEdit(String query) =>
       (s) => s.rivalsToEdit(query: query);
   static SessionCmd<void> renameArtist(int artistId, String name) =>

@@ -7,9 +7,12 @@ import 'package:flutter/material.dart';
 /// color, clothes, glasses, an earring), so the same seed always gives
 /// the same person. Nobody real: no photos, no likenesses.
 class AvatarFacePainter extends CustomPainter {
-  AvatarFacePainter(this.seed, this.background);
+  AvatarFacePainter(this.seed, this.background, {this.members = 1});
   final int seed;
   final Color background;
+
+  /// A band or a vocal group shows up to three of its members (docs K212).
+  final int members;
 
   static const _skins = [
     Color(0xFFF6D7C3),
@@ -51,7 +54,7 @@ class AvatarFacePainter extends CustomPainter {
   ];
 
   /// Seeded traits: a different hash for each.
-  int _pick(int trait, int n) {
+  static int _pick(int seed, int trait, int n) {
     var z = (seed + trait * 0x45D9F3B) * 0x9E3779B1 + 0x7F4A7C15;
     z = (z ^ (z >> 15)) * 0x2C1B3C6D;
     z = (z ^ (z >> 12)) * 0x297A2D39;
@@ -60,23 +63,48 @@ class AvatarFacePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Offset.zero & size, Paint()..color = background);
     final s = size.width;
-    final skin = _skins[_pick(1, _skins.length)];
-    final hairColor = _hairs[_pick(2, _hairs.length)];
-    var cloth = _clothes[_pick(3, _clothes.length)];
+    if (members <= 1) {
+      _person(canvas, s, seed);
+      return;
+    }
+    // Two side by side, or two at the back and one in front.
+    void at(int k, double dx, double dy, double scale) {
+      canvas.save();
+      canvas.translate(s * (0.5 + dx - scale / 2), s * (1 + dy - scale));
+      canvas.scale(scale);
+      _person(canvas, s, seed * 31 + k);
+      canvas.restore();
+    }
+
+    if (members == 2) {
+      at(1, 0.19, -0.06, 0.7);
+      at(0, -0.19, 0.02, 0.7);
+    } else {
+      at(1, -0.25, -0.1, 0.6);
+      at(2, 0.25, -0.1, 0.6);
+      at(0, 0, 0.03, 0.66);
+    }
+  }
+
+  /// One person filling a [s]-wide square.
+  void _person(Canvas canvas, double s, int seed) {
+    int pick(int trait, int n) => _pick(seed, trait, n);
+    final skin = _skins[pick(1, _skins.length)];
+    final hairColor = _hairs[pick(2, _hairs.length)];
+    var cloth = _clothes[pick(3, _clothes.length)];
     // Clothes never vanish into the background.
     if ((cloth.computeLuminance() - background.computeLuminance()).abs() <
         0.08) {
       cloth = _clothes[(_clothes.indexOf(cloth) + 3) % _clothes.length];
     }
-    final style = _pick(4, 10);
-    final glasses = _pick(5, 9);
-    final earring = _pick(6, 5) == 0;
+    final style = pick(4, 10);
+    final glasses = pick(5, 9);
+    final earring = pick(6, 5) == 0;
     final shade = Color.lerp(skin, Colors.black, 0.18)!;
     final ink = Color.lerp(skin, Colors.black, 0.75)!;
     final hair = Paint()..color = hairColor;
-
-    canvas.drawRect(Offset.zero & size, Paint()..color = background);
 
     final head = Rect.fromCenter(
         center: Offset(0.5 * s, 0.44 * s), width: 0.36 * s, height: 0.43 * s);
@@ -111,10 +139,13 @@ class AvatarFacePainter extends CustomPainter {
     }
 
     // Shoulders and neck.
+    // Down past the bottom: a member drawn higher still has a body.
     final body = Path()
-      ..moveTo(0.10 * s, s)
+      ..moveTo(0.10 * s, 1.6 * s)
+      ..lineTo(0.10 * s, s)
       ..cubicTo(0.10 * s, 0.80 * s, 0.25 * s, 0.74 * s, 0.5 * s, 0.74 * s)
       ..cubicTo(0.75 * s, 0.74 * s, 0.90 * s, 0.80 * s, 0.90 * s, s)
+      ..lineTo(0.90 * s, 1.6 * s)
       ..close();
     canvas.drawRect(Rect.fromLTRB(0.43 * s, 0.56 * s, 0.57 * s, 0.78 * s),
         Paint()..color = shade);
@@ -253,5 +284,7 @@ class AvatarFacePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(AvatarFacePainter old) =>
-      old.seed != seed || old.background != background;
+      old.seed != seed ||
+      old.background != background ||
+      old.members != members;
 }

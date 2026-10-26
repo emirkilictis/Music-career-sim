@@ -2432,6 +2432,13 @@ class GameSession {
     return SongView.of(world, s);
   }
 
+  /// Member counts of every band and group (docs K212): their drawn
+  /// avatars show a few of them.
+  Map<int, int> get groupSizes => {
+        for (final a in world.artists)
+          if (a.kind.isGroup) a.id: a.members.isEmpty ? 3 : a.members.length
+      };
+
   // ------------------------------------------------- rival editor (K213)
 
   /// Rivals to rename (docs K213): active ones first, the most famous

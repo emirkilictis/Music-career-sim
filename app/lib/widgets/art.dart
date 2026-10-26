@@ -368,6 +368,10 @@ class ArtistAvatar extends StatelessWidget {
   /// Drawn faces (docs K212) or initials; a setting.
   static bool faces = true;
 
+  /// Member counts of the open career's bands and groups (docs K212),
+  /// kept up to date by the career.
+  static Map<int, int> groupSizes = const {};
+
   String get _initials {
     final parts = name.trim().split(RegExp(r'\s+')).where((p) =>
         p.isNotEmpty && RegExp(r'^[\p{L}\d]', unicode: true).hasMatch(p));
@@ -387,7 +391,9 @@ class ArtistAvatar extends StatelessWidget {
     final (bg, fg, _) = _schemes[_hash(seed + 7) % _schemes.length];
     if (faces) {
       final face = CustomPaint(
-          size: Size.square(size), painter: AvatarFacePainter(seed, bg));
+          size: Size.square(size),
+          painter: AvatarFacePainter(seed, bg,
+              members: artistId == null ? 1 : groupSizes[artistId] ?? 1));
       return square ? ClipRect(child: face) : ClipOval(child: face);
     }
     return Container(

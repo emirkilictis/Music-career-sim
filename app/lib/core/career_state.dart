@@ -6,6 +6,7 @@ import 'package:game/game.dart';
 import 'commands.dart';
 import 'event_lines.dart';
 import 'game_controller.dart';
+import '../widgets/art.dart';
 
 /// The open career as the UI sees it: a cached player snapshot that is
 /// refreshed after every command, plus the latest week's news.
@@ -50,9 +51,16 @@ class CareerState extends ChangeNotifier {
   int get year => GameTime.yearOf(week);
   int get weekOfYear => GameTime.weekOfYear(week);
 
+  int _groupsWeek = -1;
+
   Future<void> refresh() async {
     slotId ??= await controller.run(Cmd.slotId());
     final (p, w, d) = await controller.run(Cmd.snapshot());
+    // Bands' drawn avatars (docs K212): new groups debut now and then.
+    if (_groupsWeek < 0 || w - _groupsWeek >= 4 || w < _groupsWeek) {
+      ArtistAvatar.groupSizes = await controller.run(Cmd.groupSizes());
+      _groupsWeek = w;
+    }
     // After going solo the player is someone else: no "what changed" from
     // the group (docs K191).
     if (_player != null && _player!.id != p.id) before = null;
