@@ -1202,8 +1202,9 @@ void albumShapeTests() {
     // since docs F25), never anything like 4×.
     print('40 vs 10 tracks: ${(forty / ten).toStringAsFixed(3)}');
     // Up to 1.65 since docs K204: with less reach in the playlist era the
-    // first week leans more on fans, who play the long tracklist.
-    expect(forty / ten, inInclusiveRange(1.18, 1.65));
+    // first week leans more on fans, who play the long tracklist; 1.7
+    // since docs K217 (1.656): a star's tracks are heard at once.
+    expect(forty / ten, inInclusiveRange(1.18, 1.7));
     expect(forty, lessThan(1.8 * ten));
   });
 }
