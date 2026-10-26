@@ -6,12 +6,33 @@ import 'package:flutter/widgets.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 
+/// Where the settings are kept (docs K218): a file on the device, the
+/// browser's local storage on the web.
+abstract interface class SettingsStore {
+  String? read();
+  void write(String text);
+}
+
+class FileSettingsStore implements SettingsStore {
+  FileSettingsStore(this.file);
+  final File file;
+
+  @override
+  String? read() => file.existsSync() ? file.readAsStringSync() : null;
+
+  @override
+  void write(String text) {
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync(text);
+  }
+}
+
 /// App settings kept outside the careers: language and (until in-app
 /// purchases exist) a Premium test switch.
 class AppSettings extends ChangeNotifier {
-  AppSettings(this._file);
+  AppSettings(this._store);
 
-  final File? _file;
+  final SettingsStore? _store;
 
   /// null = follow the device language.
   String? languageCode;
@@ -34,11 +55,12 @@ class AppSettings extends ChangeNotifier {
 
   Locale? get locale => languageCode == null ? null : Locale(languageCode!);
 
-  static Future<AppSettings> load(File? file) async {
-    final s = AppSettings(file);
-    if (file != null && file.existsSync()) {
+  static Future<AppSettings> load(SettingsStore? store) async {
+    final s = AppSettings(store);
+    final text = store?.read();
+    if (text != null) {
       try {
-        final m = jsonDecode(await file.readAsString()) as Map<String, Object?>;
+        final m = jsonDecode(text) as Map<String, Object?>;
         s.languageCode = m['language'] as String?;
         s.premium = m['premium'] as bool? ?? false;
         s.weekTransition = m['weekTransition'] as bool? ?? true;
@@ -92,10 +114,7 @@ class AppSettings extends ChangeNotifier {
 
   void _save() {
     notifyListeners();
-    final f = _file;
-    if (f == null) return;
-    f.parent.createSync(recursive: true);
-    f.writeAsStringSync(jsonEncode({
+    _store?.write(jsonEncode({
       'language': languageCode,
       'premium': premium,
       'weekTransition': weekTransition,

@@ -246,6 +246,38 @@ class GameSession {
     String? slotId,
     void Function(double progress)? onProgress,
   }) {
+    final (w, sim, start) = _newWorld(setup);
+    final total = start - w.week;
+    var done = 0;
+    while (w.week < start) {
+      sim.step();
+      onProgress?.call(++done / total);
+    }
+    return _withPlayer(slots, setup, w, slotId);
+  }
+
+  /// [start], giving the event loop a turn every few weeks of the world's
+  /// past (docs K218): on the web the game shares the page's thread, and
+  /// a frozen page would not even show its progress bar.
+  static Future<GameSession> startAsync(
+    SaveSlots slots,
+    CareerSetup setup, {
+    String? slotId,
+    void Function(double progress)? onProgress,
+    int weeksPerTurn = 4,
+  }) async {
+    final (w, sim, start) = _newWorld(setup);
+    final total = start - w.week;
+    var done = 0;
+    while (w.week < start) {
+      sim.step();
+      onProgress?.call(++done / total);
+      if (done % weeksPerTurn == 0) await Future<void>.delayed(Duration.zero);
+    }
+    return _withPlayer(slots, setup, w, slotId);
+  }
+
+  static (World, Simulator, int) _newWorld(CareerSetup setup) {
     setup.validate();
     final seed =
         setup.seed ?? DateTime.now().microsecondsSinceEpoch & 0x7fffffffffff;
@@ -254,14 +286,11 @@ class GameSession {
         startYear: setup.startYear,
         difficulty: setup.difficulty,
         realNames: setup.realNames);
-    final sim = Simulator(w);
-    final start = GameTime.firstWeekOf(setup.startYear);
-    final total = start - w.week;
-    var done = 0;
-    while (w.week < start) {
-      sim.step();
-      onProgress?.call(++done / total);
-    }
+    return (w, Simulator(w), GameTime.firstWeekOf(setup.startYear));
+  }
+
+  static GameSession _withPlayer(
+      SaveSlots slots, CareerSetup setup, World w, String? slotId) {
     WorldGen.addPlayer(
       w,
       name: setup.name.trim(),
@@ -2180,69 +2209,36 @@ class GameSession {
     void Function(WeekReport week)? onWeek,
     bool Function()? cancel,
   }) {
-    final p = _p;
-    final from = world.week;
-    final streams0 = world.artistLifetimeStreams(p);
-    final pure0 = _sum(p, ArtistReg.lifePure);
-    final units0 = world.artistLifetimeUnits(p);
-    final money0 = p.moneyCents, fans0 = p.coreFans, fame0 = p.fame;
-    final singles0 = _singleSales();
-    double songStreams(Song s) => [
-          for (var r = 0; r < regionCount; r++) world.songLifetimeStreams(s, r)
-        ].fold(0.0, (t, x) => t + x);
-    double songSales(Song s) =>
-        world.songLifetimeDownloads(s) + s.lifetimePhysical;
-    final before = {
-      for (final id in world.playerSongIds)
-        id: (songStreams(world.songs[id]), songSales(world.songs[id]))
-    };
-    final events = <GameEvent>[];
-    final weeklyStreams = <double>[], weeklySales = <double>[];
-    var weeks = 0;
-    var stopped = false;
-    while (weeks < count) {
-      final streamsBefore = world.artistLifetimeStreams(p);
-      final salesBefore = _singleSales();
-      final r = advanceWeek();
-      weeks++;
-      events.addAll(r.events);
-      weeklyStreams.add(world.artistLifetimeStreams(p) - streamsBefore);
-      weeklySales.add(_singleSales() - salesBefore);
+    final run = _SkipRun(this);
+    while (run.weeks < count) {
+      final r = run.week();
       onWeek?.call(r);
       if (r.events.any(stop.stopsOn) || (cancel?.call() ?? false)) {
-        stopped = weeks < count;
+        run.stopped = run.weeks < count;
         break;
       }
     }
-    return YearReport(
-      fromWeek: from,
-      weeks: weeks,
-      requestedWeeks: count,
-      stoppedEarly: stopped,
-      events: events,
-      streamsGained: world.artistLifetimeStreams(p) - streams0,
-      singleSalesGained: _singleSales() - singles0,
-      pureGained: _sum(p, ArtistReg.lifePure) - pure0,
-      unitsGained: world.artistLifetimeUnits(p) - units0,
-      moneyDeltaCents: p.moneyCents - money0,
-      coreFansDelta: p.coreFans - fans0,
-      fameBefore: fame0,
-      fameAfter: p.fame,
-      weeklyStreams: weeklyStreams,
-      weeklySales: weeklySales,
-      topSongs: _skipSongs(before, songStreams, songSales),
-      releases: [
-        for (final id in world.playerSongIds)
-          if (world.songs[id] case final s
-              when s.isSingle && s.singleWeek >= from)
-            SkipRelease(EntityKind.song, id, s.title, s.singleWeek,
-                s.peakOn(Charts.usSongs), coverAlbumOf(world, s)),
-        for (final al in world.albums)
-          if (al.artistId == p.id && al.releaseWeek >= from)
-            SkipRelease(EntityKind.album, al.id, al.title, al.releaseWeek,
-                al.peakOn(Charts.usAlbums)),
-      ]..sort((a, b) => a.week.compareTo(b.week)),
-    );
+    return run.report(count);
+  }
+
+  /// [advanceWeeks], giving the event loop a turn after each week (docs
+  /// K218): on the web the game shares the page's thread.
+  Future<YearReport> advanceWeeksAsync(
+    int count, {
+    SkipStop stop = SkipStop.major,
+    void Function(WeekReport week)? onWeek,
+  }) async {
+    final run = _SkipRun(this);
+    while (run.weeks < count) {
+      final r = run.week();
+      onWeek?.call(r);
+      if (r.events.any(stop.stopsOn)) {
+        run.stopped = run.weeks < count;
+        break;
+      }
+      await Future<void>.delayed(Duration.zero);
+    }
+    return run.report(count);
   }
 
   /// The player's five most played songs over a skip (docs K203): by
@@ -4516,4 +4512,86 @@ class _Snapshot {
 
   /// (kind, id, chart) → (last position, peak) before the week.
   final Map<(EntityKind, int, int), (int, int)> chart = {};
+}
+
+/// One skip in progress (docs K203): what the player had when it began,
+/// and each week's streams and sales.
+class _SkipRun {
+  _SkipRun(this.g)
+      : from = g.world.week,
+        streams0 = g.world.artistLifetimeStreams(g._p),
+        pure0 = GameSession._sum(g._p, ArtistReg.lifePure),
+        units0 = g.world.artistLifetimeUnits(g._p),
+        money0 = g._p.moneyCents,
+        fans0 = g._p.coreFans,
+        fame0 = g._p.fame,
+        singles0 = g._singleSales() {
+    for (final id in g.world.playerSongIds) {
+      before[id] = (songStreams(g.world.songs[id]), songSales(g.world.songs[id]));
+    }
+  }
+
+  final GameSession g;
+  final int from;
+  final double streams0, pure0, units0, fans0, fame0, singles0;
+  final int money0;
+  final before = <int, (double, double)>{};
+  final events = <GameEvent>[];
+  final weeklyStreams = <double>[], weeklySales = <double>[];
+  var weeks = 0;
+  var stopped = false;
+
+  World get world => g.world;
+
+  double songStreams(Song s) => [
+        for (var r = 0; r < regionCount; r++) world.songLifetimeStreams(s, r)
+      ].fold(0.0, (t, x) => t + x);
+
+  double songSales(Song s) =>
+      world.songLifetimeDownloads(s) + s.lifetimePhysical;
+
+  WeekReport week() {
+    final p = g._p;
+    final streamsBefore = world.artistLifetimeStreams(p);
+    final salesBefore = g._singleSales();
+    final r = g.advanceWeek();
+    weeks++;
+    events.addAll(r.events);
+    weeklyStreams.add(world.artistLifetimeStreams(p) - streamsBefore);
+    weeklySales.add(g._singleSales() - salesBefore);
+    return r;
+  }
+
+  YearReport report(int count) {
+    final p = g._p;
+    return YearReport(
+      fromWeek: from,
+      weeks: weeks,
+      requestedWeeks: count,
+      stoppedEarly: stopped,
+      events: events,
+      streamsGained: world.artistLifetimeStreams(p) - streams0,
+      singleSalesGained: g._singleSales() - singles0,
+      pureGained: GameSession._sum(p, ArtistReg.lifePure) - pure0,
+      unitsGained: world.artistLifetimeUnits(p) - units0,
+      moneyDeltaCents: p.moneyCents - money0,
+      coreFansDelta: p.coreFans - fans0,
+      fameBefore: fame0,
+      fameAfter: p.fame,
+      weeklyStreams: weeklyStreams,
+      weeklySales: weeklySales,
+      topSongs: g._skipSongs(before, songStreams, songSales),
+      releases: [
+        for (final id in world.playerSongIds)
+          if (world.songs[id] case final s
+              when s.isSingle && s.singleWeek >= from)
+            SkipRelease(EntityKind.song, id, s.title, s.singleWeek,
+                s.peakOn(Charts.usSongs), coverAlbumOf(world, s)),
+        for (final al in world.albums)
+          if (al.artistId == p.id && al.releaseWeek >= from)
+            SkipRelease(EntityKind.album, al.id, al.title, al.releaseWeek,
+                al.peakOn(Charts.usAlbums)),
+      ]..sort((a, b) => a.week.compareTo(b.week)),
+    );
+  }
 }

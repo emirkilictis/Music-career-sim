@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
@@ -14,6 +12,7 @@ import '../widgets/rollout_checklist.dart';
 import '../widgets/image_pickers.dart';
 import '../widgets/media_tile.dart';
 import '../widgets/release_timing.dart';
+import '../widgets/stored_image.dart';
 import 'album_detail_screen.dart';
 import 'calendar_screen.dart';
 import 'song_detail_screen.dart';
@@ -1488,7 +1487,7 @@ class _EditionEditor extends StatelessWidget {
                         color: AppColors.surface,
                         child: Icon(Icons.add_photo_alternate_outlined,
                             color: AppColors.textMuted))
-                    : Image.file(File(cover), fit: BoxFit.cover),
+                    : storedImage(cover, fit: BoxFit.cover),
               ),
             ),
           ),

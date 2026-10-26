@@ -39,22 +39,32 @@ abstract final class RngPurpose {
   static const songMarket = 43;
 }
 
+/// A 64-bit constant from its two halves (docs K218): the web build's
+/// JavaScript fallback cannot spell such literals; the VM and WebAssembly
+/// compute them exactly.
+int _u64(int hi, int lo) => (hi << 32) | lo;
+
+final int _mixA = _u64(0xBF58476D, 0x1CE4E5B9);
+final int _mixB = _u64(0x94D049BB, 0x133111EB);
+final int _golden = _u64(0x9E3779B9, 0x7F4A7C15);
+final int _weekK = _u64(0x632BE59B, 0xD9B4E019);
+final int _entityK = _u64(0x85EBCA77, 0xC2B2AE63);
+final int _purposeK = _u64(0xC2B2AE3D, 0x27D4EB4F);
+
 /// SplitMix64 finalizer. Dart native ints are 64-bit and wrap on overflow.
 int mix64(int z) {
-  z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9;
-  z = (z ^ (z >>> 27)) * 0x94D049BB133111EB;
+  z = (z ^ (z >>> 30)) * _mixA;
+  z = (z ^ (z >>> 27)) * _mixB;
   return z ^ (z >>> 31);
 }
-
-const int _golden = 0x9E3779B97F4A7C15;
 
 /// One uniform draw in [0, 1) for a key: cheaper than a [RandomStream]
 /// when a single number is all that is needed (two mixes instead of five).
 double keyedUnit(int seed, int week, int entity, int purpose) {
   final k = mix64(seed * _golden ^
-      week * 0x632BE59BD9B4E019 ^
-      entity * 0x85EBCA77C2B2AE63 ^
-      purpose * 0xC2B2AE3D27D4EB4F);
+      week * _weekK ^
+      entity * _entityK ^
+      purpose * _purposeK);
   return (mix64(k + _golden) >>> 11) * (1.0 / 9007199254740992.0);
 }
 
@@ -65,9 +75,9 @@ class RandomStream {
 
   factory RandomStream.keyed(int seed, int week, int entity, int purpose) {
     var k = mix64(seed + _golden);
-    k = mix64(k ^ (week * 0x632BE59BD9B4E019));
-    k = mix64(k ^ (entity * 0x85EBCA77C2B2AE63));
-    k = mix64(k ^ (purpose * 0xC2B2AE3D27D4EB4F));
+    k = mix64(k ^ (week * _weekK));
+    k = mix64(k ^ (entity * _entityK));
+    k = mix64(k ^ (purpose * _purposeK));
     return RandomStream._(k);
   }
 

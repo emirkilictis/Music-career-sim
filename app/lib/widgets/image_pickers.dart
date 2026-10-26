@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../core/format.dart';
@@ -7,6 +5,7 @@ import '../core/images.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import 'art.dart';
+import 'stored_image.dart';
 
 /// "Choose from photos / Use the generated one" for one image [key].
 Future<void> editImage(BuildContext context, String key) async {
@@ -106,7 +105,7 @@ class PendingCoverRow extends StatelessWidget {
               ? ColoredBox(
                   color: AppColors.surfaceHigh,
                   child: Icon(Icons.image_outlined, color: AppColors.textMuted))
-              : Image.file(File(p), fit: BoxFit.cover),
+              : storedImage(p, fit: BoxFit.cover),
         ),
       ),
       title: Text(l.cover, style: const TextStyle(fontWeight: FontWeight.w700)),

@@ -7,7 +7,8 @@ import 'world.dart';
 /// Stable hash of the simulation-relevant world state, used by determinism
 /// tests ("same seed → same result", "continuous == save/load").
 int worldHash(World w) {
-  var h = 0xcbf29ce484222325;
+  // FNV-1a's 64-bit offset, from two halves (docs K218).
+  var h = (0xcbf29ce4 << 32) | 0x84222325;
   final bd = ByteData(8);
   void addInt(int v) {
     h ^= v;

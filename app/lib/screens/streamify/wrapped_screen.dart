@@ -1,10 +1,8 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart' hide Actions;
 import 'package:flutter/rendering.dart';
 import 'package:game/game.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../core/commands.dart';
@@ -70,12 +68,10 @@ class _WrappedScreenState extends State<WrappedScreen> {
         _card.currentContext!.findRenderObject()! as RenderRepaintBoundary;
     final image = await boundary.toImage(pixelRatio: 3);
     final png = await image.toByteData(format: ui.ImageByteFormat.png);
-    final dir = await getTemporaryDirectory();
-    final file = File(
-        '${dir.path}/wrapped_${v.year}_${DateTime.now().millisecondsSinceEpoch}.png')
-      ..writeAsBytesSync(png!.buffer.asUint8List());
+    // No files on the web: the image goes as bytes (docs K218).
+    final bytes = png!.buffer.asUint8List();
     await SharePlus.instance.share(ShareParams(
-      files: [XFile(file.path, mimeType: 'image/png')],
+      files: [XFile.fromData(bytes, mimeType: 'image/png', name: 'wrapped.png')],
       text: l.wrappedShareText(name, v.year),
       sharePositionOrigin: origin,
     ));

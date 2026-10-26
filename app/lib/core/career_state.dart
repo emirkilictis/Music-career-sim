@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:flutter/foundation.dart';
 import 'package:game/game.dart';
 
@@ -114,10 +112,10 @@ class CareerState extends ChangeNotifier {
       int weeks, SkipStop stop, void Function(int weeks) onProgress) async {
     _setBusy(true);
     before = _player;
-    final port = ReceivePort()..listen((m) => onProgress(m as int));
+    final progress = controller.progressChannel((m) => onProgress(m as int));
     try {
       final result =
-          await controller.run(Cmd.skipWeeks(weeks, stop, port.sendPort));
+          await controller.run(Cmd.skipWeeks(weeks, stop, progress.sink));
       final y = result.$1;
       _adoptCovers(result.$2);
       final news = playerNews(result.$2);
@@ -128,7 +126,7 @@ class CareerState extends ChangeNotifier {
       await refresh();
       return result;
     } finally {
-      port.close();
+      progress.close();
       _setBusy(false);
     }
   }

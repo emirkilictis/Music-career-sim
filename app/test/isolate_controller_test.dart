@@ -16,7 +16,7 @@ void main() {
     final port = ReceivePort()..listen((p) => progress.add(p as double));
     final slotId = await c.exec(Cmd.start(
         CareerSetup(name: 'Iso', genre: 1, startYear: 2015, seed: 5),
-        port.sendPort));
+        PortSink(port.sendPort)));
     expect(slotId, startsWith('career_'));
 
     final (p, week, _) = await c.run(Cmd.snapshot());
@@ -37,7 +37,7 @@ void main() {
     final weeks = <int>[];
     final yearPort = ReceivePort()..listen((n) => weeks.add(n as int));
     final (year, _) = await c.run(Cmd.skipWeeks(
-        GameTime.weeksPerYear, SkipStop.major, yearPort.sendPort));
+        GameTime.weeksPerYear, SkipStop.major, PortSink(yearPort.sendPort)));
     expect(year.weeks, greaterThan(0));
 
     final chart = await c.run(Cmd.chart(Charts.usSongs));

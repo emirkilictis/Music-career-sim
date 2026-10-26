@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game/game.dart' show GameException;
@@ -11,6 +9,7 @@ import '../widgets/art.dart';
 import '../widgets/brand.dart';
 import '../ui/palette.dart';
 import '../widgets/common.dart';
+import '../widgets/stored_image.dart';
 import 'game_shell.dart';
 import 'new_career_screen.dart';
 import 'settings_screen.dart';
@@ -206,7 +205,7 @@ class _SlotsScreenState extends State<SlotsScreen> {
                                     borderRadius:
                                         BorderRadius.circular(AppShape.r(10)),
                                     child: cover != null
-                                        ? Image.file(File(cover),
+                                        ? storedImage(cover,
                                             width: 64,
                                             height: 64,
                                             fit: BoxFit.cover,

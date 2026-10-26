@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
@@ -109,12 +107,11 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
       _progress = 0;
     });
     final controller = context.controller;
-    final port = ReceivePort()
-      ..listen((p) {
-        if (mounted) setState(() => _progress = (p as num).toDouble());
-      });
+    final progress = controller.progressChannel((p) {
+      if (mounted) setState(() => _progress = (p as num).toDouble());
+    });
     try {
-      await controller.exec(Cmd.start(setup, port.sendPort));
+      await controller.exec(Cmd.start(setup, progress.sink));
       if (!mounted) return;
       final nav = Navigator.of(context);
       final state = CareerState(controller);
@@ -127,7 +124,7 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
         showError(context, e);
       }
     } finally {
-      port.close();
+      progress.close();
     }
   }
 

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' show PointMode;
 
@@ -8,6 +7,7 @@ import '../core/images.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import 'avatar_face.dart';
+import 'stored_image.dart';
 
 // Flat print inks for generated covers (docs K90): no pastel gradients,
 // a background, an ink and an accent that always read against each other.
@@ -116,7 +116,7 @@ class _Photo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final px = (size * MediaQuery.devicePixelRatioOf(context)).round();
-    return Image.file(File(path),
+    return storedImage(path,
         fit: BoxFit.cover,
         width: size,
         height: size,

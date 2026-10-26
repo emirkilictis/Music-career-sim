@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Music Career Simulator: from 2000 to today, write it, release it, top the charts.">
+  <meta name="theme-color" content="#0E0E0E">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Music Career">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Music Career Simulator</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    /* The app's ink while the game loads (docs K214, K218). */
+    html, body { margin: 0; height: 100%; background: #0E0E0E; }
+    #loading { position: fixed; inset: 0; display: flex; align-items: center;
+      justify-content: center; flex-direction: column; gap: 18px;
+      font-family: system-ui, sans-serif; color: #A9A59D; font-size: 14px; }
+    #loading img { width: 96px; height: 96px; }
+  </style>
+</head>
+<body>
+  <div id="loading"><img src="icons/Icon-192.png" alt=""><div>Loading…</div></div>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

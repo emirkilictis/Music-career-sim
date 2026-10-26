@@ -1,12 +1,12 @@
-import 'dart:isolate';
+import 'dart:async';
 
 import 'package:game/game.dart';
 
 import 'event_lines.dart';
 import 'game_controller.dart';
 
-typedef HostCmd<R> = R Function(GameHost h);
-typedef SessionCmd<R> = R Function(GameSession s);
+typedef HostCmd<R> = FutureOr<R> Function(GameHost h);
+typedef SessionCmd<R> = FutureOr<R> Function(GameSession s);
 
 /// Every command sent to the game isolate is built here.
 ///
@@ -25,17 +25,23 @@ abstract final class Cmd {
   static HostCmd<void> deleteSlot(String slotId) =>
       (h) => h.slots.delete(slotId);
 
-  static HostCmd<void> resume(String slotId) => (h) {
+  static HostCmd<void> resume(String slotId) => (h) async {
         h.session?.close();
+        h.session = null;
+        // The web reads the career in first (docs K218).
+        await h.slots.prepare(slotId);
         h.session = GameSession.resume(h.slots, slotId);
       };
 
   /// Creates a career; progress (0..1) is sent to [progress].
-  static HostCmd<String> start(CareerSetup setup, SendPort progress) => (h) {
+  static HostCmd<String> start(CareerSetup setup, ProgressSink progress) =>
+      (h) async {
         h.session?.close();
         h.session = null;
         var last = -1;
-        final s = GameSession.start(h.slots, setup, onProgress: (p) {
+        // Gives the event loop turns: on the web the game shares the
+        // page's thread (docs K218).
+        final s = await GameSession.startAsync(h.slots, setup, onProgress: (p) {
           final pct = (p * 100).floor();
           if (pct != last) progress.send(p);
           last = pct;
@@ -71,10 +77,10 @@ abstract final class Cmd {
   /// Skips up to [weeks] weeks (52 = a year), stopping per [stop]; the
   /// number of weeks played is sent to [progress].
   static SessionCmd<(YearReport, List<EventLine>)> skipWeeks(
-          int weeks, SkipStop stop, SendPort progress) =>
-      (s) {
+          int weeks, SkipStop stop, ProgressSink progress) =>
+      (s) async {
         var n = 0;
-        final y = s.advanceWeeks(weeks,
+        final y = await s.advanceWeeksAsync(weeks,
             stop: stop, onWeek: (_) => progress.send(++n));
         return (y, describeEvents(s, y.events));
       };
@@ -240,13 +246,12 @@ abstract final class Cmd {
   static SessionCmd<ReunionView?> reunion() => (s) => s.reunion;
   static SessionCmd<void> startReunion() => (s) => s.startReunion();
   static SessionCmd<List<int>> reunionCosts() => (s) => s.reunionCosts;
-  static SessionCmd<void> releaseReunionSingle(
-          int songId, Campaign campaign) =>
+  static SessionCmd<void> releaseReunionSingle(int songId, Campaign campaign) =>
       (s) => s.releaseReunionSingle(songId, campaign: campaign);
-  static SessionCmd<AlbumView> releaseReunionAlbum(String title,
-          List<int> songIds, AlbumType type, Campaign campaign) =>
-      (s) => s.releaseReunionAlbum(title, songIds,
-          type: type, campaign: campaign);
+  static SessionCmd<AlbumView> releaseReunionAlbum(
+          String title, List<int> songIds, AlbumType type, Campaign campaign) =>
+      (s) =>
+          s.releaseReunionAlbum(title, songIds, type: type, campaign: campaign);
   static SessionCmd<GoSoloView> goSoloPreview(int member) =>
       (s) => s.goSoloPreview(member);
   static SessionCmd<void> goSolo(int member) => (s) => s.goSolo(member);

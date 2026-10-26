@@ -43,31 +43,35 @@ class ImageStore extends ChangeNotifier {
   final String careersRoot;
   final ImagePickSource source;
 
-  String? _slotId;
-  final Map<String, String> _files = {};
+  /// The open career and its images (key → file path, or on the web a
+  /// data URL; docs K218).
+  @protected
+  String? openSlot;
+  @protected
+  final Map<String, String> files = {};
 
   Directory? get _dir =>
-      _slotId == null ? null : Directory('$careersRoot/$_slotId/images');
+      openSlot == null ? null : Directory('$careersRoot/$openSlot/images');
 
   /// Loads the images of [slotId] (call when a career opens).
   void open(String slotId) {
-    if (_slotId == slotId) return;
-    _slotId = slotId;
-    _files.clear();
+    if (openSlot == slotId) return;
+    openSlot = slotId;
+    files.clear();
     final dir = _dir!;
     if (dir.existsSync()) {
       for (final f in dir.listSync().whereType<File>()) {
         final name = f.uri.pathSegments.last;
         final key = name.substring(0, name.lastIndexOf('_'));
-        _files[key] = f.path;
+        files[key] = f.path;
       }
     }
     notifyListeners();
   }
 
   void close() {
-    _slotId = null;
-    _files.clear();
+    openSlot = null;
+    files.clear();
   }
 
   /// [key]'s image in a career that is not open (the career list), if any.
@@ -104,19 +108,19 @@ class ImageStore extends ChangeNotifier {
           ? 'artist_$artistId'
           : 'artist_${artistId}_${kind.name}';
 
-  String? path(String key) => _files[key];
+  String? path(String key) => files[key];
 
   /// A song's cover: its own, else its album's.
   String? songCover(int songId, int albumId) =>
-      _files[songKey(songId)] ??
-      (albumId >= 0 ? _files[albumKey(albumId)] : null);
+      files[songKey(songId)] ??
+      (albumId >= 0 ? files[albumKey(albumId)] : null);
 
-  String? albumCover(int albumId) => _files[albumKey(albumId)];
+  String? albumCover(int albumId) => files[albumKey(albumId)];
 
   /// An artist photo for a place, falling back to the general one.
   String? artistPhoto(int artistId, [ArtistPhoto kind = ArtistPhoto.general]) =>
-      _files[artistKey(artistId, kind)] ??
-      _files[artistKey(artistId, ArtistPhoto.general)];
+      files[artistKey(artistId, kind)] ??
+      files[artistKey(artistId, ArtistPhoto.general)];
 
   /// Asks the device for an image and stores it under [key]; false when the
   /// player cancelled.
@@ -140,14 +144,14 @@ class ImageStore extends ChangeNotifier {
     final target =
         '${dir.path}/${key}_${DateTime.now().microsecondsSinceEpoch}$ext';
     File(sourcePath).copySync(target);
-    _files[key] = target;
+    files[key] = target;
     notifyListeners();
   }
 
   /// Moves the image of [from] to [to] (a scheduled album came out). The
   /// file is renamed too, so the link survives reopening the career.
   void adopt(String from, String to) {
-    final path = _files.remove(from);
+    final path = files.remove(from);
     if (path == null) return;
     _deleteFile(to);
     final dot = path.lastIndexOf('.');
@@ -156,9 +160,9 @@ class ImageStore extends ChangeNotifier {
         '${to}_${DateTime.now().microsecondsSinceEpoch}$ext';
     try {
       File(path).renameSync(target);
-      _files[to] = target;
+      files[to] = target;
     } on FileSystemException {
-      _files[to] = path;
+      files[to] = path;
     }
     notifyListeners();
   }
@@ -166,7 +170,7 @@ class ImageStore extends ChangeNotifier {
   /// Schedule ids whose album cover is still stored under the schedule
   /// (older versions forgot to rename it when the album came out).
   List<int> get scheduledCoverIds => [
-        for (final k in _files.keys)
+        for (final k in files.keys)
           if (k.startsWith('scheduled_') && !k.contains('_ed'))
             int.tryParse(k.substring('scheduled_'.length)) ?? -1,
       ]..removeWhere((id) => id < 0);
@@ -177,7 +181,7 @@ class ImageStore extends ChangeNotifier {
   }
 
   void _deleteFile(String key) {
-    final old = _files.remove(key);
+    final old = files.remove(key);
     if (old != null) {
       try {
         File(old).deleteSync();

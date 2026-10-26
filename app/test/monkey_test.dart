@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:game/game.dart' hide Actions;
 import 'package:music_career_sim/core/commands.dart';
+import 'package:music_career_sim/core/game_controller.dart';
 
 import 'support.dart';
 
@@ -43,7 +44,7 @@ void main() {
           premium: true,
           seed: seed,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     final songs = <int>[];
     while (songs.length < 14) {

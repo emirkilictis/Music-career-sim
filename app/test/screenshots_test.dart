@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:game/game.dart' hide Actions;
 import 'package:music_career_sim/core/career_state.dart';
 import 'package:music_career_sim/core/commands.dart';
+import 'package:music_career_sim/core/game_controller.dart';
 import 'package:music_career_sim/core/event_lines.dart';
 import 'package:music_career_sim/core/scope.dart';
 import 'package:music_career_sim/screens/charts_tab.dart';
@@ -83,7 +84,7 @@ void main() {
           premium: true,
           seed: 2024,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     final songs = <int>[];
     while (songs.length < 16) {
@@ -537,7 +538,7 @@ void main() {
           premium: true,
           seed: 2002,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     final song =
         (await c.run(Cmd.writeSong(budget: BudgetTier.high, genres: const [0])))
@@ -625,7 +626,7 @@ void main() {
           premium: true,
           seed: 209,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     // An album and its singles, half a year on (docs K209, K210).
     await c.run((s) {
@@ -694,7 +695,7 @@ void main() {
           premium: true,
           seed: 211,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     // A teaser, a single and the album after it (docs K211).
     await c.run((s) {
@@ -748,7 +749,7 @@ void main() {
           premium: true,
           seed: 213,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     await c.exec(Cmd.closeCareer());
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
@@ -796,7 +797,7 @@ void main() {
           premium: true,
           seed: 208,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     // Two tours played (docs K208).
     await c.run((s) {
@@ -855,7 +856,7 @@ void main() {
           premium: true,
           seed: 86,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     await c.run(_fiveAlbums());
     await c.run((s) {
@@ -1103,7 +1104,7 @@ void main() {
           premium: true,
           seed: 161,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     await c.run(_fiveAlbums());
     await c.run((s) {
@@ -1168,7 +1169,7 @@ void main() {
           premium: true,
           seed: 114,
         ),
-        port.sendPort));
+        PortSink(port.sendPort)));
     port.close();
     await c.run((s) {
       for (final t in ['Moonrise', 'Paper Hearts']) {

@@ -88,7 +88,8 @@ class SaveStore {
       config: config ?? SimConfig(),
       seed: meta['seed'] as int,
       week: meta['week'] as int,
-      difficulty: Difficulty.values[meta['difficulty'] as int? ?? Difficulty.normal.index],
+      difficulty: Difficulty
+          .values[meta['difficulty'] as int? ?? Difficulty.normal.index],
       realNames: (meta['realNames'] as int? ?? 0) == 1,
     );
     w.playerArtistId = meta['playerArtistId'] as int;
@@ -119,8 +120,7 @@ class SaveStore {
     // The player's Streamify Sessions (docs K178).
     w.streamifySessions
         .addAll(StreamifySession.decode(meta['sessions'] as String?));
-    w.playerPeakListeners =
-        (meta['listenersPeak'] as num?)?.toDouble() ?? -1;
+    w.playerPeakListeners = (meta['listenersPeak'] as num?)?.toDouble() ?? -1;
     // The player's This Is list (docs K189).
     w.thisIsWeek = (meta['thisIs'] as num?)?.toInt() ?? -1;
     // Going solo (docs K191).
@@ -427,8 +427,8 @@ class SaveStore {
       'songMarket': jsonEncode(w.boughtPitches.toList()..sort()),
       'pastTours': jsonEncode([for (final t in w.pastTours) t.toJson()]),
       if (w.certsTracked)
-        'certs': jsonEncode(
-            {for (final e in w.certs.entries) '${e.key}': e.value}),
+        'certs':
+            jsonEncode({for (final e in w.certs.entries) '${e.key}': e.value}),
       for (final (key, arr) in _metaArrays(w))
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };
@@ -649,6 +649,9 @@ class SaveSlots {
 
   SaveStore open(String slotId) => SaveStore.open(dbPath(slotId), fs: fs);
 
+  /// Call (and wait) before [open] (docs K218).
+  Future<void> prepare(String slotId) => fs.prepare(dbPath(slotId));
+
   /// Premium daily login bonus: true at most once per local calendar day for
   /// the whole account (not per slot), and records the claim. The caller
   /// checks Premium and then credits it with `Actions.grantDailyBonus`.
@@ -666,6 +669,7 @@ class SaveSlots {
     fs.writeText(path, jsonEncode(account));
     return true;
   }
+
   void writeSummary(String slotId, World w) {
     final p = w.player;
     // The latest album and the biggest US hit, for the career list (E9).
@@ -682,23 +686,25 @@ class SaveSlots {
         hitPeak = peak;
       }
     }
-    fs.writeText('$rootPath/$slotId/summary.json', jsonEncode({
-      'slotId': slotId,
-      'artistName': p?.name,
-      'kind': p?.kind.name,
-      'genre': p?.genre,
-      'difficulty': w.difficulty.name,
-      'year': GameTime.yearOf(w.week),
-      'weekOfYear': GameTime.weekOfYear(w.week),
-      'fame': p?.fame,
-      'coreFans': p?.coreFans,
-      'moneyCents': p?.moneyCents,
-      'lastAlbumId': lastAlbum,
-      'lastAlbumTitle': lastAlbum >= 0 ? w.albums[lastAlbum].title : null,
-      'hitTitle': hit >= 0 ? w.songs[hit].title : null,
-      'hitPeak': hitPeak,
-      'savedAt': DateTime.now().toUtc().toIso8601String(),
-    }));
+    fs.writeText(
+        '$rootPath/$slotId/summary.json',
+        jsonEncode({
+          'slotId': slotId,
+          'artistName': p?.name,
+          'kind': p?.kind.name,
+          'genre': p?.genre,
+          'difficulty': w.difficulty.name,
+          'year': GameTime.yearOf(w.week),
+          'weekOfYear': GameTime.weekOfYear(w.week),
+          'fame': p?.fame,
+          'coreFans': p?.coreFans,
+          'moneyCents': p?.moneyCents,
+          'lastAlbumId': lastAlbum,
+          'lastAlbumTitle': lastAlbum >= 0 ? w.albums[lastAlbum].title : null,
+          'hitTitle': hit >= 0 ? w.songs[hit].title : null,
+          'hitPeak': hitPeak,
+          'savedAt': DateTime.now().toUtc().toIso8601String(),
+        }));
   }
 
   void delete(String slotId) => fs.deleteFolder('$rootPath/$slotId');

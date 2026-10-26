@@ -9,6 +9,9 @@ import 'package:game/game.dart';
 class GameHost {
   GameHost(String slotsRoot) : slots = SaveSlots(Directory(slotsRoot));
 
+  /// On given slots (the browser's on the web; docs K218).
+  GameHost.on(this.slots);
+
   final SaveSlots slots;
   GameSession? session;
 
@@ -25,13 +28,40 @@ class GameHost {
 /// values (numbers, strings, lists, SendPorts) — copy widget fields into
 /// locals before building the closure.
 abstract class GameController {
-  Future<R> exec<R>(R Function(GameHost host) command);
+  Future<R> exec<R>(FutureOr<R> Function(GameHost host) command);
 
   /// Shortcut for commands on the open career.
-  Future<R> run<R>(R Function(GameSession s) command) =>
+  Future<R> run<R>(FutureOr<R> Function(GameSession s) command) =>
       exec((h) => command(h.open));
 
+  /// Where a long command (a new world, a skip) reports progress to
+  /// [onMessage]; close it when the command is done.
+  ProgressChannel progressChannel(void Function(Object? message) onMessage);
+
   Future<void> dispose();
+}
+
+/// Where a long command reports its progress (docs K218): a port back to
+/// the UI isolate, or a callback when the game runs on the UI's thread
+/// (the web).
+abstract interface class ProgressSink {
+  void send(Object? message);
+}
+
+typedef ProgressChannel = ({ProgressSink sink, void Function() close});
+
+class PortSink implements ProgressSink {
+  PortSink(this.port);
+  final SendPort port;
+  @override
+  void send(Object? message) => port.send(message);
+}
+
+class _CallbackSink implements ProgressSink {
+  _CallbackSink(this.onMessage);
+  final void Function(Object? message) onMessage;
+  @override
+  void send(Object? message) => onMessage(message);
 }
 
 /// Production controller: the game lives in a long-lived background isolate,
@@ -75,20 +105,30 @@ class IsolateGameController extends GameController {
     final host = GameHost(root);
     final inbox = ReceivePort();
     reply.send(inbox.sendPort);
+    // One command at a time, even one that waits in between (docs K218).
+    var queue = Future<void>.value();
     inbox.listen((msg) {
-      final (id, command) = msg as (int, Object? Function(GameHost));
-      try {
-        reply.send((id, true, command(host), null));
-      } on GameException catch (e, st) {
-        reply.send((id, false, e, st.toString()));
-      } catch (e, st) {
-        reply.send((id, false, StateError('$e'), st.toString()));
-      }
+      final (id, command) = msg as (int, FutureOr<Object?> Function(GameHost));
+      queue = queue.then((_) async {
+        try {
+          reply.send((id, true, await command(host), null));
+        } on GameException catch (e, st) {
+          reply.send((id, false, e, st.toString()));
+        } catch (e, st) {
+          reply.send((id, false, StateError('$e'), st.toString()));
+        }
+      });
     });
   }
 
   @override
-  Future<R> exec<R>(R Function(GameHost host) command) async {
+  ProgressChannel progressChannel(void Function(Object? message) onMessage) {
+    final port = ReceivePort()..listen(onMessage);
+    return (sink: PortSink(port.sendPort), close: port.close);
+  }
+
+  @override
+  Future<R> exec<R>(FutureOr<R> Function(GameHost host) command) async {
     final id = _next++;
     final done = Completer<Object?>();
     _pending[id] = done;
@@ -114,10 +154,18 @@ class IsolateGameController extends GameController {
 class LocalGameController extends GameController {
   LocalGameController(String slotsRoot) : host = GameHost(slotsRoot);
 
+  /// On given slots: the web runs the game on the UI's thread (docs K218).
+  LocalGameController.on(SaveSlots slots) : host = GameHost.on(slots);
+
   final GameHost host;
 
   @override
-  Future<R> exec<R>(R Function(GameHost host) command) async => command(host);
+  ProgressChannel progressChannel(void Function(Object? message) onMessage) =>
+      (sink: _CallbackSink(onMessage), close: () {});
+
+  @override
+  Future<R> exec<R>(FutureOr<R> Function(GameHost host) command) async =>
+      command(host);
 
   @override
   Future<void> dispose() async {

@@ -8,5 +8,7 @@ environment:
 dependencies:
   simulation_core: any
   sqlite3: ^2.4.0
+  typed_data: ^1.3.0
+  web: ^1.1.0
 dev_dependencies:
   test: ^1.25.0

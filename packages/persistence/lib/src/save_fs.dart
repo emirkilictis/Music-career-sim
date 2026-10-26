@@ -19,4 +19,8 @@ abstract class SaveFs {
 
   /// Called after each save; the web writes its storage out.
   void saved() {}
+
+  /// Makes [path] ready to open (the web reads a career in only when it
+  /// is opened).
+  Future<void> prepare(String path) async {}
 }
