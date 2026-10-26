@@ -46,6 +46,7 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
     for (final e in events)
       switch (e) {
         ChartDebut() => release(e, e.kind, e.entityId),
+        CertificationEarned() => release(e, e.kind, e.entityId),
         NumberOne() => release(e, e.kind, e.entityId),
         StillNumberOne() => release(e, e.kind, e.entityId),
         NewPeak() => EventLine(e, title: song(e.songId)),
@@ -233,6 +234,7 @@ List<EventLine> sortLines(List<EventLine> lines) {
         SongLeaked() => 2,
         SalesMilestone() => 3,
         ListenersMilestone() => 3,
+        CertificationEarned() => 2,
         ThisIsMade() => 3,
         MemberUnhappy() => 2,
         MemberQuit() => 1,

@@ -39,6 +39,9 @@ Future<void> loadFonts() async {
     barlow.addFont(Future.value(asset('BarlowCondensed_$w.ttf')));
   }
   await barlow.load();
+  final serif = FontLoader('LibreBaskerville')
+    ..addFont(Future.value(asset('LibreBaskerville_Variable.ttf')));
+  await serif.load();
   final icons = FontLoader('MaterialIcons')
     ..addFont(f('MaterialIcons-Regular.otf'));
   await icons.load();

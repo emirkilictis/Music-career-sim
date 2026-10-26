@@ -8,6 +8,7 @@ export 'package:persistence/persistence.dart' show SaveSlots;
 
 export 'src/best_sellers.dart';
 export 'src/calendar.dart';
+export 'src/certifications.dart';
 export 'src/career_setup.dart';
 export 'src/editorial.dart';
 export 'src/events.dart';

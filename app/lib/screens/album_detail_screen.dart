@@ -19,6 +19,7 @@ import '../widgets/history_tables.dart';
 import '../widgets/line_chart.dart';
 import 'releases_tab.dart';
 import 'song_detail_screen.dart';
+import 'stream_counter_screen.dart';
 
 /// One album or EP: first week, regional sales, charts, tracks, history.
 class AlbumDetailScreen extends StatefulWidget {
@@ -650,6 +651,26 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               title: l.salesLastWeeks(lastWeeks.length),
               icon: Icons.bar_chart_rounded,
               child: WeeklyBars(values: lastWeeks),
+            ),
+          ],
+          // The fan-account style counter (docs K210).
+          if (a.isPlayer &&
+              MusicPlatform.streamify
+                  .openIn(GameTime.yearOf(widget.state.week))) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => StreamCounterScreen(
+                            state: widget.state,
+                            kind: EntityKind.album,
+                            id: a.id))),
+                icon: const Icon(Icons.table_chart_outlined),
+                label: Text(l.counterButton),
+              ),
             ),
           ],
           if (a.criticScore >= 0) ...[

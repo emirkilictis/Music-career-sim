@@ -160,4 +160,7 @@ abstract final class AppShape {
 abstract final class AppFonts {
   static const ui = 'Figtree';
   static const condensed = 'BarlowCondensed';
+
+  /// A book serif for plaques (docs K209).
+  static const serif = 'LibreBaskerville';
 }

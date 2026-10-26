@@ -1489,6 +1489,107 @@ void main() {
       g.close();
     });
 
+    test('plaques: certifications come with their date (K209)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2018,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final songs = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        songs.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      g.releaseSingle(songs.first);
+      final al = g.releaseAlbum('Gold Rush', songs);
+      final events = <CertificationEarned>[];
+      for (var i = 0; i < 40; i++) {
+        events.addAll(g.advanceWeek().events.whereType<CertificationEarned>());
+      }
+      expect(events, isNotEmpty);
+      final c = g.certifications;
+      expect(c.plaques, isNotEmpty);
+      expect(c.gold + c.platinum + c.diamond, c.plaques.length);
+      for (final x in c.plaques) {
+        // Recorded in order, each when the units got there.
+        expect(x.usUnits, greaterThanOrEqualTo(x.topUnits));
+        for (var i = 1; i < x.levels.length; i++) {
+          expect(x.levels[i].$3, greaterThanOrEqualTo(x.levels[i - 1].$3));
+        }
+        expect(x.next.$3, greaterThan(x.topUnits));
+        expect(x.top.$3, greaterThanOrEqualTo(x.releaseWeek));
+      }
+      expect(c.plaques.any((x) => x.kind == EntityKind.album && x.id == al.id),
+          isTrue);
+      // Each level is news once.
+      final again = <CertificationEarned>[];
+      for (var i = 0; i < 2; i++) {
+        again.addAll(g.advanceWeek().events.whereType<CertificationEarned>());
+      }
+      for (final e in again) {
+        expect(
+            events.any((x) =>
+                x.kind == e.kind &&
+                x.entityId == e.entityId &&
+                x.level == e.level &&
+                x.multiple == e.multiple),
+            isFalse);
+      }
+      // An older save dates them from its history.
+      final w = g.world;
+      final kept = {for (final e in w.certs.entries) e.key: e.value.length};
+      w.certs.clear();
+      Certs.backfill(w, (kind, id) => [(w.week - 20, 0), (w.week - 5, 1e9)]);
+      for (final e in w.certs.entries) {
+        expect(e.value.length, kept[e.key]);
+        expect(e.value.every((x) => x[2] == w.week - 5), isTrue);
+      }
+      // Saved with the game.
+      final n = g.certifications.plaques.length;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.certifications.plaques, hasLength(n));
+      g.close();
+    });
+
+    test('the stream counter, song by song (K210)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2019,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final songs = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        songs.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final al = g.releaseAlbum('Counter', songs);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      final c = g.streamCounter(EntityKind.album, al.id);
+      expect(c.rows, hasLength(8));
+      expect(c.title, 'Counter');
+      for (final r in c.rows) {
+        final s = g.world.songs[r.songId];
+        expect(r.daily, closeTo(s.weekStreams * Streamify.share / 7, 1));
+        expect(r.total, greaterThan(r.daily));
+      }
+      expect(c.daily, closeTo(c.rows.fold(0.0, (t, r) => t + r.daily), 1e-6));
+      // Weeks after release, plays wind down.
+      expect(c.change, lessThan(0));
+      final single = g.streamCounter(EntityKind.song, songs.first);
+      expect(single.rows.single.songId, songs.first);
+      g.close();
+    });
+
     test('finished tours are kept in the tour history (K208)', () {
       var g = GameSession.start(
           slots,

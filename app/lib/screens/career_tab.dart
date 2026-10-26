@@ -14,6 +14,7 @@ import '../widgets/common.dart';
 import '../widgets/income_card.dart';
 import '../widgets/image_pickers.dart';
 import 'awards_screen.dart';
+import 'certifications_screen.dart';
 import 'discography_screen.dart';
 import 'album_detail_screen.dart';
 import 'labels_screen.dart';
@@ -1382,6 +1383,23 @@ class _CareerScreenState extends State<CareerScreen> {
                     ),
                   ),
                 ]),
+          ),
+          const SizedBox(height: 12),
+          // Gold, platinum and diamond records (docs K209).
+          Section(
+            title: l.plaques,
+            icon: Icons.album_rounded,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => CertificationsScreen(state: career))),
+                icon: const Icon(Icons.workspace_premium_outlined),
+                label: Text(l.plaquesButton),
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           Section(

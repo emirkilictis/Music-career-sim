@@ -60,6 +60,15 @@ class World {
   /// K208; tours before it are only in [tourRecords]).
   final List<Tour> pastTours = [];
 
+  /// The player's US certifications as they came (docs K209), by release
+  /// (a song's id × 2, an album's × 2 + 1): [level, multiple, week, label]
+  /// for each new level, in order.
+  final Map<int, List<List<int>>> certs = {};
+
+  /// Whether [certs] has been filled for this save (older saves fill it
+  /// once from their history).
+  bool certsTracked = false;
+
   /// The player's festival slots to come (docs K77).
   final List<FestivalBooking> festivalBookings = [];
 

@@ -53,6 +53,34 @@ class Fmt {
     return '${monthName(month)} ${GameTime.yearOf(week)}';
   }
 
+  /// "Gold", "3× Platinum", "Diamond" (docs K209).
+  String certLevel(Certification c, int multiple) {
+    final name = switch (c) {
+      Certification.gold => l.certGold,
+      Certification.platinum => l.certPlatinum,
+      Certification.diamond => l.certDiamond,
+    };
+    return multiple > 1 ? '$multiple× $name' : name;
+  }
+
+  String plaqueFormat(PlaqueFormat f) => switch (f) {
+        PlaqueFormat.single => l.formatSingle,
+        PlaqueFormat.track => l.formatTrack,
+        PlaqueFormat.album => l.formatAlbum,
+        PlaqueFormat.ep => l.formatEp,
+        PlaqueFormat.mixtape => l.formatMixtape,
+      };
+
+  /// The Saturday a game week ends on, as charts date it.
+  static DateTime weekDate(int week) {
+    final first = DateTime(GameTime.yearOf(week));
+    final d = first.add(Duration(days: (GameTime.weekOfYear(week) - 1) * 7));
+    return d.add(Duration(days: (DateTime.saturday - d.weekday) % 7));
+  }
+
+  /// "January 2, 2026" for a game week.
+  String date(int week) => DateFormat.yMMMMd(_locale).format(weekDate(week));
+
   String brandCategory(BrandCategory c) => switch (c) {
         BrandCategory.fashion => l.brandFashion,
         BrandCategory.beverage => l.brandBeverage,
@@ -1052,6 +1080,8 @@ class Fmt {
       SalesMilestone(:final copies) => l.eventSalesMilestone(compact(copies)),
       ListenersMilestone(:final listeners) =>
         l.eventListenersMilestone(compact(listeners)),
+      CertificationEarned(:final level, :final multiple) =>
+        l.eventCertified(t, certLevel(level, multiple)),
       ThisIsMade(:final songs) => l.eventThisIsMade(songs),
       MemberUnhappy(:final name) => l.eventMemberUnhappy(name),
       MemberQuit(:final name, :final fansLost) =>

@@ -2051,6 +2051,156 @@ enum Certification {
   }
 }
 
+/// One song on the stream counter (docs K210): Streamify plays a day
+/// (this week's average), the change from last week's and the total.
+class CounterRow {
+  const CounterRow({
+    required this.songId,
+    required this.title,
+    required this.daily,
+    required this.change,
+    required this.total,
+  });
+  final int songId;
+  final String title;
+  final double daily;
+
+  /// Plays a day more (or fewer) than last week's average.
+  final double change;
+  final double total;
+
+  /// [change] against last week's daily plays (0 with none).
+  double get changeShare =>
+      daily - change > 0 ? change / (daily - change) : 0;
+}
+
+/// A release's Streamify counter, like the fan accounts post (docs K210):
+/// daily plays, their change and the total, song by song.
+class StreamCounterView {
+  StreamCounterView({
+    required this.kind,
+    required this.id,
+    required this.title,
+    required this.artistName,
+    required this.coverAlbumId,
+    required this.week,
+    required this.rows,
+  });
+  final EntityKind kind;
+  final int id;
+  final String title;
+  final String artistName;
+
+  /// The album whose cover it shows (-1: a single's own).
+  final int coverAlbumId;
+
+  /// The week the numbers are from.
+  final int week;
+  final List<CounterRow> rows;
+
+  double get daily => rows.fold(0.0, (t, r) => t + r.daily);
+  double get change => rows.fold(0.0, (t, r) => t + r.change);
+  double get total => rows.fold(0.0, (t, r) => t + r.total);
+  double get changeShare => daily - change > 0 ? change / (daily - change) : 0;
+}
+
+/// What kind of release a plaque is for (docs K209).
+enum PlaqueFormat { single, track, album, ep, mixtape }
+
+/// One certified release (docs K209): its highest level, when and under
+/// which label it came, and how far the next one is.
+class PlaqueView {
+  PlaqueView.of(World w, EntityKind kind, int id, List<List<int>> levels)
+      : kind = kind,
+        id = id,
+        title =
+            kind == EntityKind.song ? w.songs[id].title : w.albums[id].title,
+        artistName = w
+            .artists[kind == EntityKind.song
+                ? w.songs[id].primaryArtistId
+                : w.albums[id].artistId]
+            .name,
+        coverAlbumId =
+            kind == EntityKind.song ? coverAlbumOf(w, w.songs[id]) : id,
+        format = kind == EntityKind.song
+            ? (w.songs[id].isSingle ? PlaqueFormat.single : PlaqueFormat.track)
+            : switch (w.albums[id].type) {
+                AlbumType.ep => PlaqueFormat.ep,
+                AlbumType.mixtape => PlaqueFormat.mixtape,
+                _ => PlaqueFormat.album,
+              },
+        levels = [
+          for (final x in levels)
+            (Certification.values[x[0]], x[1], x[2], Label.values[x[3]])
+        ],
+        usUnits = kind == EntityKind.song
+            ? usSingleUnits(w, w.songs[id])
+            : usAlbumUnits(w, w.albums[id]),
+        totalStreams = kind == EntityKind.song
+            ? [
+                for (var r = 0; r < regionCount; r++)
+                  w.songLifetimeStreams(w.songs[id], r)
+              ].fold(0.0, (t, x) => t + x)
+            : [
+                for (final s in w.albums[id].songIds)
+                  for (var r = 0; r < regionCount; r++)
+                    w.songLifetimeStreams(w.songs[s], r)
+              ].fold(0.0, (t, x) => t + x),
+        releaseWeek = kind == EntityKind.song
+            ? w.songs[id].releasedWeek
+            : w.albums[id].releaseWeek;
+  final EntityKind kind;
+  final int id;
+  final String title;
+  final String artistName;
+
+  /// The album whose cover it shows (-1: a single's own cover).
+  final int coverAlbumId;
+  final PlaqueFormat format;
+
+  /// Every level reached, in order: level, multiple, week, label then.
+  final List<(Certification, int, int, Label)> levels;
+  final double usUnits;
+  final double totalStreams;
+  final int releaseWeek;
+
+  (Certification, int, int, Label) get top => levels.last;
+
+  /// Units the top level stands for.
+  double get topUnits => top.$1.units * top.$2;
+
+  /// The next level and the units it needs (after 9× platinum comes
+  /// diamond).
+  (Certification, int, double) get next {
+    final (c, m, _, _) = top;
+    if (c == Certification.gold) {
+      return (Certification.platinum, 1, Certification.platinum.units);
+    }
+    if (c == Certification.platinum && m < 9) {
+      return (
+        Certification.platinum,
+        m + 1,
+        Certification.platinum.units * (m + 1)
+      );
+    }
+    final d = c == Certification.diamond ? m + 1 : 1;
+    return (Certification.diamond, d, Certification.diamond.units * d);
+  }
+}
+
+/// The player's plaques (docs K209): how many releases stand at each
+/// level, newest certification first.
+class CertificationsView {
+  CertificationsView(this.plaques)
+      : gold = plaques.where((p) => p.top.$1 == Certification.gold).length,
+        platinum =
+            plaques.where((p) => p.top.$1 == Certification.platinum).length,
+        diamond =
+            plaques.where((p) => p.top.$1 == Certification.diamond).length;
+  final List<PlaqueView> plaques;
+  final int gold, platinum, diamond;
+}
+
 /// A career milestone and how far the player is (docs K61).
 class MilestoneView {
   MilestoneView(

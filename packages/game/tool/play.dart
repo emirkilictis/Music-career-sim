@@ -260,6 +260,8 @@ String _event(GameSession s, GameEvent e) => switch (e) {
       PlaylistMilestone() => 'playlist passed ${e.followers} followers',
       CreditSongHit() => '${e.credit.name} song ${e.songId} by ${e.artistId} at #${e.position}',
       ListenersMilestone() => 'monthly listeners passed ${e.listeners}',
+      CertificationEarned() =>
+        '${e.kind.name} ${e.entityId} certified ${e.multiple}x ${e.level.name}',
       ThisIsMade() => 'editors made a This Is list (${e.songs} songs)',
       MemberUnhappy() => '${e.name} wants to leave, word is',
       MemberQuit() => '${e.name} left the group',

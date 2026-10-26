@@ -314,6 +314,10 @@ abstract final class Cmd {
   static SessionCmd<List<WrittenSongView>> writtenForOthers() =>
       (s) => s.writtenForOthers;
   static SessionCmd<SongMarketView> songMarket() => (s) => s.songMarket;
+  static SessionCmd<CertificationsView> certifications() =>
+      (s) => s.certifications;
+  static SessionCmd<StreamCounterView> streamCounter(EntityKind kind, int id) =>
+      (s) => s.streamCounter(kind, id);
   static SessionCmd<List<TourHistoryView>> tourHistory() =>
       (s) => s.tourHistory;
   static SessionCmd<TourView?> pastTour(int startWeek) =>

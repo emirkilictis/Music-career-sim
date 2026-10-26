@@ -190,6 +190,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F88 | Emir: "Legacy act olunca, belli bir başarıya sahip olunca yeni albüm tutmasa bile turne deli gibi satmalı; şu an oyuncunun turnede elde edebileceği maksimum rakamlar günümüze göre düşük. Turneye general public de geliyor, illa fanlar gelmek zorunda değil. Turneyi OP yap, kolay para yolu olsun." | ✅ K206: Genel halk talebi (şöhret³) eklendi, efsane sıcaklık tabanı getirildi, şöhret de salon açıyor. Süperstar turu 1,3 M → 6,4 M bilet; efsane 0,4 M → 4,7 M. |
 | F89 | Emir: "Spotify dışı streamler çok fazla, özellikle YouTube. Spotify'da 400M olan şarkı total 1B olmuştu; 600-700 olsun." | ✅ K207: Streamify payı %60, ViewTube payı 15 puan düşük. 400 M → ~670 M. |
 | F90 | Emir (öneri): "Fan sayısı hızlı artsa, limit yükselse ama stream çağında albüm alan fan çok az olsa; çok fan olunca dinlenmeler de uçmasın." | Konuşulacak: Turne derdini K206 hayran modeline dokunmadan çözdü. Hayran modelini baştan dengelemek K204 streaming dengesini yeniden açar; Emir'e soruldu. |
+| F91 | Emir (rakip oyunun ekranlarını gösterip): "Şu özelliklerde çok iyiymiş, benzerini yapalım": günlük stream tablosu ve plak ekranı. Önceki mesajında da "bizde touring history yok" demişti. | ✅ K208 turne geçmişi, K209 plaklar (tarihli sertifikalar, çerçeveli plak, paylaşım), K210 stream sayacı (kworb tarzı tablo, paylaşım). |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

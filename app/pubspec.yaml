@@ -41,6 +41,10 @@ flutter:
           weight: 800
         - asset: assets/fonts/Figtree_900Black.ttf
           weight: 900
+    # Plaque dedications (docs K209); a variable font, weights by axis.
+    - family: LibreBaskerville
+      fonts:
+        - asset: assets/fonts/LibreBaskerville_Variable.ttf
     - family: BarlowCondensed
       fonts:
         - asset: assets/fonts/BarlowCondensed_600SemiBold.ttf

@@ -3,7 +3,7 @@ import 'package:simulation_core/simulation_core.dart';
 import 'feature_news.dart';
 import 'milestones.dart';
 import 'platforms.dart';
-import 'views.dart' show ChartCredit, RecordKind, WrappedStory;
+import 'views.dart' show Certification, ChartCredit, RecordKind, WrappedStory;
 
 /// Something worth telling the player after a week (docs/game-design.md §15).
 /// Events carry ids and numbers only; the UI builds the localized text.
@@ -31,6 +31,18 @@ class ChartDebut extends GameEvent {
 
   /// Every entry on a main chart is news the player hears about (F67: a
   /// #45 debut on the global chart went by unnoticed).
+  @override
+  bool get isMajor => true;
+}
+
+/// A player release went gold, platinum or diamond in the US (docs K209).
+class CertificationEarned extends GameEvent {
+  const CertificationEarned(
+      this.kind, this.entityId, this.level, this.multiple);
+  final EntityKind kind;
+  final int entityId;
+  final Certification level;
+  final int multiple;
   @override
   bool get isMajor => true;
 }

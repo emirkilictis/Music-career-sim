@@ -79,6 +79,14 @@ class EventIcon extends StatelessWidget {
       HolidayReturn() => (Icons.ac_unit_rounded, AppColors.sky),
       SongLeaked() => (Icons.water_drop_rounded, AppColors.coral),
       SalesMilestone() => (Icons.album_rounded, AppColors.gold),
+      CertificationEarned(:final level) => (
+          Icons.album_rounded,
+          switch (level) {
+            Certification.gold => AppColors.gold,
+            Certification.platinum => AppColors.sky,
+            Certification.diamond => AppColors.lilac,
+          }
+        ),
       ListenersMilestone() =>
         (Icons.headphones_rounded, platformColor(MusicPlatform.streamify)),
       MemberUnhappy() => (Icons.sentiment_dissatisfied_rounded, AppColors.peach),

@@ -1705,6 +1705,134 @@
   "certGold": "Gold",
   "certPlatinum": "Platinum",
   "certDiamond": "Diamond",
+  "eventCertified": "“{title}” is certified {level} in the US.",
+  "@eventCertified": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "plaques": "Plaques",
+  "plaquesHint": "Gold, platinum and diamond records, each with its day. Certifications count US units: a single 150 US streams a unit, an album 1,500, plus sales.",
+  "plaquesButton": "My plaques",
+  "plaquesEmpty": "No certified releases yet. Gold comes at 500,000 US units.",
+  "plaqueCertified": "Certified {date}",
+  "@plaqueCertified": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "plaqueLabel": "Label: {label}",
+  "@plaqueLabel": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "plaqueFormat": "Format: {format}",
+  "@plaqueFormat": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "plaqueToNext": "{units} units to {level}",
+  "@plaqueToNext": {
+    "placeholders": {
+      "units": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "plaqueOpen": "Plaque",
+  "plaquePresented": "Presented to {artist} to commemorate the sale of more than {units} units in the United States of the {format} {title}",
+  "@plaquePresented": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "units": {
+        "type": "String"
+      },
+      "format": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "plaqueGuild": "RECORDING GUILD OF AMERICA",
+  "plaqueFooter": "{guild} · CERTIFIED {date}",
+  "@plaqueFooter": {
+    "placeholders": {
+      "guild": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "plaqueShareText": "{title} by {artist}: {level} in the US. {app}",
+  "@plaqueShareText": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      },
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "formatSingle": "single",
+  "formatTrack": "song",
+  "formatAlbum": "album",
+  "formatEp": "EP",
+  "formatMixtape": "mixtape",
+  "counterTitle": "Streamify counter",
+  "counterButton": "Stream counter",
+  "counterDaily": "Daily streams",
+  "counterChange": "Change",
+  "counterTotal": "Total streams",
+  "counterTrack": "Track",
+  "counterColDaily": "Daily",
+  "counterColChange": "Change",
+  "counterColPct": "% change",
+  "counterColTotal": "Total",
+  "counterTotalRow": "Total",
+  "counterNote": "Streamify plays a day: this week's average against last week's.",
+  "counterShareText": "{title} by {artist} on the Streamify counter. {app}",
+  "@counterShareText": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "artist": {
+        "type": "String"
+      },
+      "app": {
+        "type": "String"
+      }
+    }
+  },
   "certMultiple": "{count}× {level}",
   "@certMultiple": {
     "placeholders": {
@@ -2393,6 +2521,7 @@
   "celebrateNumberOne": "Number one!",
   "celebrateFirstChart": "Your first chart entry!",
   "share": "Share",
+  "close": "Close",
   "chartThisWeek": "This week",
   "chartStatPoints": "Chart points",
   "chartStatStreams": "Streams",

@@ -5,6 +5,7 @@ import 'package:simulation_core/simulation_core.dart';
 
 import 'best_sellers.dart';
 import 'calendar.dart';
+import 'certifications.dart';
 import 'career_setup.dart';
 import 'events.dart';
 import 'feature_news.dart';
@@ -273,6 +274,10 @@ class GameSession {
       members: [for (final m in setup.members) m.trim()],
       skills: setup.resolvedSkills,
     );
+    // Certifications are recorded as they come (docs K209); a star's
+    // records from before the career count as they are.
+    w.certsTracked = true;
+    Certs.update(w);
     final id = slotId ?? 'career_${DateTime.now().microsecondsSinceEpoch}';
     final store = slots.create(id, w);
     return GameSession._(slots, id, store, w);
@@ -294,7 +299,24 @@ class GameSession {
       p.skillPoints = Actions.skillRoom(p);
       world.dirtyArtists.add(p.id);
     }
-    return GameSession._(slots, slotId, store, world);
+    final s = GameSession._(slots, slotId, store, world);
+    // A save from before docs K209 dates its certifications once.
+    if (!world.certsTracked) s._backfillCerts();
+    return s;
+  }
+
+  /// Dates the certifications an older save already has (docs K209).
+  void _backfillCerts() {
+    Certs.backfill(world, (kind, id) {
+      var sum = 0.0;
+      return [
+        if (kind == EntityKind.song)
+          for (final h in songHistory(id))
+            (h.week, sum += h.sales + h.value / SongView.streamsPerSingleUnit)
+        else
+          for (final h in albumHistory(id)) (h.week, sum += h.value),
+      ];
+    });
   }
 
   /// Saves search tables and closes the save file. Call when the app goes to
@@ -861,6 +883,54 @@ class GameSession {
       ));
     }
     return _rank(rows, limit);
+  }
+
+  /// A player release's Streamify counter (docs K210): each song's plays
+  /// a day this week and last, and its total there.
+  StreamCounterView streamCounter(EntityKind kind, int id) {
+    final w = world;
+    final songIds =
+        kind == EntityKind.song ? [id] : List.of(w.albums[id].songIds);
+    CounterRow row(int sid) {
+      final s = w.songs[sid];
+      final h = songHistory(sid);
+      final now = h.isEmpty ? 0.0 : h.last.value;
+      final before = h.length < 2 ? 0.0 : h[h.length - 2].value;
+      final total = [
+        for (var r = 0; r < regionCount; r++) w.songLifetimeStreams(s, r)
+      ].fold(0.0, (t, x) => t + x);
+      return CounterRow(
+        songId: sid,
+        title: s.title,
+        daily: now * Streamify.share / 7,
+        change: (now - before) * Streamify.share / 7,
+        total: total * Streamify.share,
+      );
+    }
+
+    return StreamCounterView(
+      kind: kind,
+      id: id,
+      title: kind == EntityKind.song ? w.songs[id].title : w.albums[id].title,
+      artistName: _p.name,
+      coverAlbumId:
+          kind == EntityKind.song ? coverAlbumOf(w, w.songs[id]) : id,
+      week: w.week - 1,
+      rows: [for (final sid in songIds) row(sid)],
+    );
+  }
+
+  /// The player's gold, platinum and diamond records (docs K209).
+  CertificationsView get certifications {
+    final plaques = [
+      for (final e in world.certs.entries)
+        if (e.value.isNotEmpty)
+          () {
+            final (kind, id) = Certs.fromKey(e.key);
+            return PlaqueView.of(world, kind, id, e.value);
+          }(),
+    ]..sort((a, b) => b.top.$3.compareTo(a.top.$3));
+    return CertificationsView(plaques);
   }
 
   /// The player's finished tours, newest first (docs K208): their own,
@@ -2072,6 +2142,8 @@ class GameSession {
     final events = [
       ..._events(r, before),
       for (final m in milestones) MilestoneReached(m),
+      // New gold, platinum and diamond records (docs K209).
+      ...Certs.update(world),
     ];
     // Fans talk about the week (docs K93).
     SocialFeed.react(world, p, events, r.week);

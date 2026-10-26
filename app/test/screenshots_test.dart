@@ -603,6 +603,75 @@ void main() {
     await shot(tester, '29_studio_soft');
     app.settings.setSharpCorners(true);
   });
+  testWidgets('screenshots: plaques and the stream counter', skip: !enabled,
+      (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 209,
+        ),
+        port.sendPort));
+    port.close();
+    // An album and its singles, half a year on (docs K209, K210).
+    await c.run((s) {
+      final p = s.world.player!;
+      p.moneyCents = 1 << 40;
+      final songs = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        songs.add(s.writeSong(budget: BudgetTier.high, title: 'Track ${i + 1}').id);
+      }
+      s.releaseSingle(songs.first);
+      s.advanceWeeks(3, stop: SkipStop.never);
+      s.releaseAlbum('Gold Rush', songs);
+      s.advanceWeeks(30, stop: SkipStop.never);
+    });
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Career');
+    await careerPage(tester, 'Track record');
+    final plaques = _ci('My plaques');
+    await tester.scrollUntilVisible(plaques, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(plaques);
+    await tester.pumpAndSettle();
+    await shot(tester, '15ze_plaques');
+    await tester.tap(_ci('Plaque').first);
+    await tester.pumpAndSettle();
+    await shot(tester, '15zf_plaque');
+    await tester.tap(_ci('Close'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tab(tester, 'Releases');
+    final album = _ci('Gold Rush').first;
+    await tester.scrollUntilVisible(album, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(album);
+    await tester.pumpAndSettle();
+    final counter = _ci('Stream counter');
+    await tester.scrollUntilVisible(counter, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(counter);
+    await tester.pumpAndSettle();
+    await shot(tester, '14o_stream_counter');
+  });
   testWidgets('screenshots: tour history', skip: !enabled, (tester) async {
     await tester.runAsync(loadFonts);
     phoneView(tester);

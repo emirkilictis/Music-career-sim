@@ -19,6 +19,7 @@ import '../widgets/line_chart.dart';
 import 'album_detail_screen.dart' show buyMastersFlow;
 import 'game_shell.dart';
 import 'releases_tab.dart';
+import 'stream_counter_screen.dart';
 import 'streamify/editorial_page.dart';
 
 /// One song: numbers, chart records, weekly history.
@@ -765,6 +766,24 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             const SizedBox(height: 10),
             Center(child: CertificationTag(units: s.usSingleUnits)),
           ],
+          // The fan-account style counter (docs K210).
+          if (s.isPlayer &&
+              s.releasedWeek >= 0 &&
+              MusicPlatform.streamify
+                  .openIn(GameTime.yearOf(widget.state.week)))
+            Center(
+              child: TextButton.icon(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => StreamCounterScreen(
+                            state: widget.state,
+                            kind: EntityKind.song,
+                            id: s.id))),
+                icon: const Icon(Icons.table_chart_outlined),
+                label: Text(l.counterButton),
+              ),
+            ),
           const SizedBox(height: 14),
           Section(
             title: fmt.genres(s.genres),
