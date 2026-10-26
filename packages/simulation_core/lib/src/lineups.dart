@@ -1,8 +1,8 @@
-import 'audience.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 
 import 'actions.dart';
+import 'audience.dart';
 import 'model.dart';
 import 'rng.dart';
 import 'world.dart';

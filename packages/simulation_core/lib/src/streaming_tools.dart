@@ -1,13 +1,13 @@
-import 'audience.dart';
 import 'dart:math' as math;
 
 import 'actions.dart';
+import 'audience.dart';
 import 'canvas.dart';
 import 'config/charts.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
-import 'lifecycle.dart';
 import 'curators.dart';
+import 'lifecycle.dart';
 import 'model.dart';
 import 'rerecords.dart';
 import 'rng.dart';
@@ -304,7 +304,7 @@ abstract final class StreamingTools {
     s.showcaseWeek = w.week;
     if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
     s.weeksBelowCutoff = 0;
-    s.versionBoost += showcaseBoost;
+    // Its wave counts with the player's other tools (docs K216).
     w.dirtySongs.add(s.id);
     w.dirtyArtists.add(a.id);
   }
@@ -444,6 +444,36 @@ abstract final class StreamingTools {
 
   /// A pitched add's lift against an editors' own pick (docs K216).
   static const pitchLift = 0.5;
+
+  /// Whether [s]'s playlist add came from the player's pitch.
+  static bool addFromPitch(Song s) =>
+      s.pitchWeek >= 0 && s.playlistWeek == pitchAnswerWeek(s);
+
+  /// What the player's own tools are adding to [s] this week (docs K216):
+  /// a pitched playlist add, the versions they put out and a Showcase,
+  /// each fading as it would on its own. They share one ceiling with the
+  /// app's other tools, so all of them at once are no road to the top.
+  static double playerToolLift(World w, Song s) {
+    final fade = w.config.versionFade;
+    var x = addFromPitch(s) ? s.playlistBoost : 0.0;
+    final vs = s.versions;
+    for (var i = 0; i < vs.length; i++) {
+      final (v, week) = vs[i];
+      final age = w.week - week;
+      if (age < 0 || v == SongVersion.session) continue;
+      var recent = 0;
+      for (var j = 0; j < i; j++) {
+        if (week - vs[j].$2 < 8) recent++;
+      }
+      x += v.boost(GameTime.yearOf(week)) *
+          math.pow(0.5, recent) *
+          math.pow(fade, age);
+    }
+    if (s.showcaseWeek >= 0 && w.week >= s.showcaseWeek) {
+      x += showcaseBoost * math.pow(fade, w.week - s.showcaseWeek);
+    }
+    return x;
+  }
 
   // ------------------------------------------------------------------- AI
 

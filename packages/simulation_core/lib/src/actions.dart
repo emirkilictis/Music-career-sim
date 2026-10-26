@@ -5,22 +5,22 @@ import 'audience.dart';
 import 'bundles.dart';
 import 'cloud.dart';
 import 'config/charts.dart';
+import 'config/difficulty.dart';
+import 'config/regions.dart';
+import 'contracts.dart';
 import 'critics.dart';
 import 'distribution.dart';
 import 'fan_club.dart';
-import 'rollouts.dart';
-import 'contracts.dart';
-import 'config/difficulty.dart';
-import 'config/regions.dart';
 import 'holidays.dart';
 import 'lifecycle.dart';
 import 'model.dart';
+import 'names.dart';
 import 'rng.dart';
+import 'rollouts.dart';
 import 'stream_windows.dart';
 import 'streaming_tools.dart';
-import 'tours.dart';
-import 'names.dart';
 import 'time.dart';
+import 'tours.dart';
 import 'world.dart';
 
 class ActionException implements Exception {
@@ -157,8 +157,11 @@ abstract final class Actions {
     final year = GameTime.yearOf(w.week);
     // Each more version within two months brings half the last one's
     // wave (0.7 until docs K216).
+    // The player's versions count with their other tools (docs K216).
     final recent = s.versions.where((x) => w.week - x.$2 < 8).length;
-    s.versionBoost += v.boost(year) * math.pow(0.5, recent);
+    if (a.tier != ArtistTier.player) {
+      s.versionBoost += v.boost(year) * math.pow(0.5, recent);
+    }
     s.versions.add((v, w.week));
     if (v.trendy) {
       final r = RandomStream.keyed(w.seed, w.week, s.id, RngPurpose.viral + 50);

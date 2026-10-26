@@ -1,7 +1,7 @@
-import 'audience.dart';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'audience.dart';
 import 'config/regions.dart';
 import 'model.dart';
 import 'world.dart';

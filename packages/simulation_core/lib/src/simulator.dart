@@ -3,48 +3,48 @@ import 'dart:typed_data';
 
 import 'actions.dart';
 import 'ai.dart';
+import 'artist_pick.dart';
 import 'audience.dart';
-import 'canvas.dart';
 import 'awards.dart';
 import 'brands.dart';
-import 'social.dart';
-import 'songwriting.dart';
-import 'streaming_tools.dart';
+import 'canvas.dart';
 import 'cloud.dart';
+import 'compilations.dart';
 import 'config/charts.dart';
-import 'credits.dart';
-import 'contracts.dart';
 import 'config/era_table.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
-import 'festivals.dart';
-import 'holidays.dart';
-import 'joint_albums.dart';
-import 'leaks.dart';
-import 'live_albums.dart';
-import 'lifecycle.dart';
-import 'lineups.dart';
-import 'compilations.dart';
+import 'contracts.dart';
+import 'credits.dart';
 import 'curators.dart';
-import 'model.dart';
 import 'documentaries.dart';
 import 'fan_club.dart';
+import 'festivals.dart';
+import 'holidays.dart';
 import 'imprints.dart';
-import 'own_playlist.dart';
-import 'price_cuts.dart';
+import 'joint_albums.dart';
+import 'leaks.dart';
+import 'lifecycle.dart';
+import 'lineups.dart';
+import 'live_albums.dart';
+import 'model.dart';
+import 'mood_playlists.dart';
 import 'music_show.dart';
 import 'opportunities.dart';
+import 'own_playlist.dart';
+import 'price_cuts.dart';
 import 'rerecords.dart';
-import 'mood_playlists.dart';
-import 'artist_pick.dart';
 import 'ringtones.dart';
-import 'song_market.dart';
-import 'stream_windows.dart';
-import 'tours.dart';
-import 'word_of_mouth.dart';
 import 'rng.dart';
+import 'social.dart';
+import 'song_market.dart';
+import 'songwriting.dart';
+import 'stream_windows.dart';
+import 'streaming_tools.dart';
 import 'this_is.dart';
 import 'time.dart';
+import 'tours.dart';
+import 'word_of_mouth.dart';
 import 'world.dart';
 
 /// Summary of one simulated week (what the UI/CLI needs; not the whole world).
@@ -412,7 +412,10 @@ class Simulator {
       final hypeLift = 0.5 * p.hype;
       final womLift = WordOfMouth.lift(w, s, promoAge);
       // Editors' adds and the player's own playlist (docs K159).
-      final listLift = s.playlistBoost + (thisIsLifts[s.id] ?? 0);
+      final player = p.tier == ArtistTier.player;
+      final pitched = player && StreamingTools.addFromPitch(s);
+      final listLift =
+          (pitched ? 0.0 : s.playlistBoost) + (thisIsLifts[s.id] ?? 0);
       final versionLift = s.versionBoost;
       final algoLift = StreamingTools.releaseRadarLift(year, promoAge) +
           StreamingTools.discoverLift(w, s, w.week) +
@@ -426,7 +429,8 @@ class Simulator {
               SongCanvas.liftOf(s) +
               (ownLifts[s.id] ?? 0) +
               (pickLifts[s.id] ?? 0) +
-              (moodLifts[s.id] ?? 0);
+              (moodLifts[s.id] ?? 0) +
+              (player ? StreamingTools.playerToolLift(w, s) : 0);
       final videoLift = s.videoPower * videoEra;
       final lifts = hypeLift +
           womLift +
