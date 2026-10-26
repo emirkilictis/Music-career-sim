@@ -353,18 +353,20 @@ enum SongVersion {
 
   /// Extra exposure it brings the song in [year] (fading week by week).
   /// Sped-up and slowed versions are a short-video thing.
+  /// Halved in docs K216 (remix 0.35, sped up 0.45, slowed 0.35): a
+  /// version is a wave for the fans, not a second hit.
   double boost(int year) => switch (this) {
-        remix => 0.35,
+        remix => 0.18,
         spedUp => year >= 2021
-            ? 0.45
+            ? 0.22
             : year >= 2018
-                ? 0.15
-                : 0.03,
+                ? 0.08
+                : 0.02,
         slowed => year >= 2021
-            ? 0.35
+            ? 0.18
             : year >= 2018
-                ? 0.12
-                : 0.03,
+                ? 0.06
+                : 0.02,
         acapella || instrumental => 0.05,
         session => 0.2,
       };

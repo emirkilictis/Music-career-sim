@@ -155,8 +155,10 @@ abstract final class Actions {
     if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
     s.weeksBelowCutoff = 0;
     final year = GameTime.yearOf(w.week);
+    // Each more version within two months brings half the last one's
+    // wave (0.7 until docs K216).
     final recent = s.versions.where((x) => w.week - x.$2 < 8).length;
-    s.versionBoost += v.boost(year) * math.pow(0.7, recent);
+    s.versionBoost += v.boost(year) * math.pow(0.5, recent);
     s.versions.add((v, w.week));
     if (v.trendy) {
       final r = RandomStream.keyed(w.seed, w.week, s.id, RngPurpose.viral + 50);

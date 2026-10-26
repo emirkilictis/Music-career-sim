@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'audience.dart';
 import 'config/difficulty.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
@@ -337,7 +338,8 @@ abstract final class WorldGen {
       debutWeek: w.week,
       skills: skills ?? StartingStats.auto(premium: false, kind: kind),
       fame: fame,
-      coreFans: fans * w.config.globalAudienceScale,
+      // A star's bigger fandom acts like the old one (docs K215).
+      coreFans: Audience.rawFor(fans * w.config.globalAudienceScale),
       casual: casual * w.config.globalAudienceScale,
       labelReach: isLabel ? Label.small.reach : Label.independent.reach,
       artistShare:

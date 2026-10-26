@@ -20,6 +20,13 @@ abstract final class Audience {
   /// fandom is mostly people who like you and stream someone else today.
   static const engagedKnee = 2e6, engagedPower = 0.55;
 
+  /// The player's fans that act like [engaged] ones: the inverse of
+  /// [engaged], for a start that should buy and play as before (docs K215).
+  static double rawFor(double engaged) => engaged <= engagedKnee
+      ? engaged
+      : engagedKnee *
+          math.pow(engaged / engagedKnee, 1 / engagedPower).toDouble();
+
   /// How much faster the player wins fans past [engagedKnee] (docs
   /// K215): light fans are easy to win, up to half again as fast at
   /// twice the knee.

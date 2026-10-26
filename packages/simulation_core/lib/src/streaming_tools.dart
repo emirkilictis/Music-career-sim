@@ -434,11 +434,16 @@ abstract final class StreamingTools {
       s.weeksBelowCutoff = 0;
       s.playlistAdd = big ? PlaylistAdd.big : PlaylistAdd.mid;
       s.playlistWeek = w.week;
-      s.playlistBoost =
-          big ? w.config.playlistBigBoost : w.config.playlistMidBoost;
+      // A pitched song gets a smaller slot than one the editors chose
+      // (docs K216): the pitch helps, it does not make a hit.
+      s.playlistBoost = pitchLift *
+          (big ? w.config.playlistBigBoost : w.config.playlistMidBoost);
       w.dirtySongs.add(s.id);
     }
   }
+
+  /// A pitched add's lift against an editors' own pick (docs K216).
+  static const pitchLift = 0.5;
 
   // ------------------------------------------------------------------- AI
 

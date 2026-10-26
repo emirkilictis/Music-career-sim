@@ -271,7 +271,8 @@ class Simulator {
       final id = s.primaryArtistId;
       singleLoad[id] = (singleLoad[id] ?? 0) + _fanCurve(c, ageRel);
       radioLoad[id] = (radioLoad[id] ?? 0) + _radioLife(s, promoAge);
-      promoLoad[id] = (promoLoad[id] ?? 0) + _promoLife(s, promoAge);
+      promoLoad[id] = (promoLoad[id] ?? 0) +
+          _promoLife(s, promoAge, fastStart(w.artists[id]));
     }
     // A newcomer's singles each find their own small crowd; a star's all
     // go to the same stations and playlists. Full from 50% fame.
@@ -305,7 +306,7 @@ class Simulator {
       // Catalog level fades very slowly over decades (10-year time constant).
       final tail =
           c.catalogTail * (0.5 + s.longevity) * math.exp(-ageRel / 520.0);
-      final life = _promoLife(s, promoAge) + tail;
+      final life = _promoLife(s, promoAge, fastStart(p)) + tail;
       final promo = s.isSingle
           ? c.singleExposure * p.kind.singleReach
           : c.albumTrackExposure;
@@ -1449,10 +1450,19 @@ class Simulator {
       math.exp(-promoAge /
           ((s.lifeWeeks + 10) * RadioFormat.lifeFactor(s.onFormat, s.genre)));
 
-  /// A song's promotion run (new listeners), before its catalog tail.
-  static double _promoLife(Song s, int promoAge) =>
-      (1 - math.exp(-(promoAge + 1) / s.riseWeeks)) *
+  /// A song's promotion run (new listeners), before its catalog tail. A
+  /// star's song is heard everywhere the week it comes out: [fast] cuts
+  /// the rise (docs K217).
+  static double _promoLife(Song s, int promoAge, [double fast = 0]) =>
+      (1 - math.exp(-(promoAge + 1) / (s.riseWeeks * (1 - fast)))) *
       math.exp(-promoAge / s.lifeWeeks);
+
+  /// How much of a song's rise [a]'s name skips (docs K217): nothing for
+  /// a newcomer, whose songs find their crowd week by week; most of it
+  /// for a household name or an artist everyone is waiting on, whose new
+  /// single debuts at or near its peak, as stars' singles do.
+  static double fastStart(Artist a) =>
+      0.85 * (a.fame + 0.5 * a.hype).clamp(0.0, 1.0);
 
   /// Fans stream hard at release, then settle to a floor that fades over
   /// ~2 years.

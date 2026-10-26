@@ -2000,12 +2000,22 @@ void audienceLimitTests() {
   test('gains outside listening saturate near the fan cap', () {
     final w = WorldGen.create(seed: 105, startYear: 2015);
     final p = WorldGen.addPlayer(w, name: 'Cap', genre: 0);
-    final cap = Audience.fanCap(w);
+    // The player's cap is bigger than a rival's (docs K215).
+    final cap = Audience.capOf(w, p);
+    expect(cap, Audience.fanCap(w) * Audience.playerFanCapScale);
     p.coreFans = cap / 2;
     // The room shrinks with the square (docs K127).
     expect(Audience.addFans(w, p, 1000), closeTo(250, 1e-6));
     p.coreFans = cap;
     expect(Audience.addFans(w, p, 1e6), 0);
+    // Past the knee fans count less for what they do, and they keep
+    // growing (docs K215).
+    p.coreFans = Audience.engagedKnee;
+    expect(Audience.engaged(p), Audience.engagedKnee);
+    p.coreFans = Audience.engagedKnee * 4;
+    expect(Audience.engaged(p), lessThan(p.coreFans * 0.6));
+    expect(Audience.engaged(p), greaterThan(Audience.engagedKnee));
+    expect(Audience.growth(p), 1.5);
     expect(Audience.addFans(w, p, -1e6), -1e6);
     p.casual = w.config.publicPool;
     expect(Audience.addCasual(w, p, 1e6), 0);
