@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 
 import '../ui/palette.dart';
+import '../widgets/art.dart';
 
 /// App settings kept outside the careers: language and (until in-app
 /// purchases exist) a Premium test switch.
@@ -28,6 +29,9 @@ class AppSettings extends ChangeNotifier {
   /// Corner style: sharp (default since docs K88) or soft (docs F1).
   bool sharpCorners = true;
 
+  /// Drawn faces for people without a photo (docs K212) or initials.
+  bool avatarFaces = true;
+
   Locale? get locale => languageCode == null ? null : Locale(languageCode!);
 
   static Future<AppSettings> load(File? file) async {
@@ -42,12 +46,14 @@ class AppSettings extends ChangeNotifier {
         // Stored under a new key in K88: the old one held the old
         // default, so everyone starts sharp once.
         s.sharpCorners = m['cornerStyle'] != 'soft';
+        s.avatarFaces = m['avatars'] != 'initials';
       } on FormatException {
         // A broken settings file falls back to defaults.
       }
     }
     AppColors.palette = s.lightTheme ? Palette.light : Palette.ink;
     AppShape.sharp = s.sharpCorners;
+    ArtistAvatar.faces = s.avatarFaces;
     return s;
   }
 
@@ -73,6 +79,12 @@ class AppSettings extends ChangeNotifier {
     _save();
   }
 
+  void setAvatarFaces(bool on) {
+    avatarFaces = on;
+    ArtistAvatar.faces = on;
+    _save();
+  }
+
   void setWeekTransition(bool on) {
     weekTransition = on;
     _save();
@@ -89,6 +101,7 @@ class AppSettings extends ChangeNotifier {
       'weekTransition': weekTransition,
       'theme': lightTheme ? 'light' : 'ink',
       'cornerStyle': sharpCorners ? 'sharp' : 'soft',
+      'avatars': avatarFaces ? 'faces' : 'initials',
     }));
   }
 }

@@ -42,6 +42,12 @@ class SettingsScreen extends StatelessWidget {
             RadioListTile<bool>(value: true, title: Text(l.cornersSharp)),
           ]),
         ),
+        SwitchListTile(
+          title: Text(l.avatarFaces),
+          subtitle: Text(l.avatarFacesHint),
+          value: settings.avatarFaces,
+          onChanged: settings.setAvatarFaces,
+        ),
         const Divider(),
         SwitchListTile(
           title: Text(l.weekTransition),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../core/images.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
+import 'avatar_face.dart';
 
 // Flat print inks for generated covers (docs K90): no pastel gradients,
 // a background, an ink and an accent that always read against each other.
@@ -364,6 +365,9 @@ class ArtistAvatar extends StatelessWidget {
   /// A square picture (2000s profile pages) instead of a round one.
   final bool square;
 
+  /// Drawn faces (docs K212) or initials; a setting.
+  static bool faces = true;
+
   String get _initials {
     final parts = name.trim().split(RegExp(r'\s+')).where((p) =>
         p.isNotEmpty && RegExp(r'^[\p{L}\d]', unicode: true).hasMatch(p));
@@ -381,6 +385,11 @@ class ArtistAvatar extends StatelessWidget {
       return square ? ClipRect(child: photo) : ClipOval(child: photo);
     }
     final (bg, fg, _) = _schemes[_hash(seed + 7) % _schemes.length];
+    if (faces) {
+      final face = CustomPaint(
+          size: Size.square(size), painter: AvatarFacePainter(seed, bg));
+      return square ? ClipRect(child: face) : ClipOval(child: face);
+    }
     return Container(
       width: size,
       height: size,

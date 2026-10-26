@@ -149,6 +149,8 @@
   "themeNavy": "Mürekkep (koyu)",
   "themeLight": "Kâğıt (açık)",
   "cornersTitle": "Köşeler",
+  "avatarFaces": "Çizim yüzler",
+  "avatarFacesHint": "Fotoğrafı olmayan sanatçı ve hayranlara çizim yüz; kapalıyken baş harfler.",
   "cornersSoft": "Yumuşak (yuvarlak)",
   "cornersSharp": "Keskin",
   "weekTransition": "Hafta geçişi",

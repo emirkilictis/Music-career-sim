@@ -330,6 +330,8 @@
   "themeNavy": "Ink (dark)",
   "themeLight": "Paper (light)",
   "cornersTitle": "Corners",
+  "avatarFaces": "Drawn faces",
+  "avatarFacesHint": "Artists and fans without a photo get a drawn face; off shows initials.",
   "cornersSoft": "Soft (rounded)",
   "cornersSharp": "Sharp",
   "weekTransition": "Week transition",
