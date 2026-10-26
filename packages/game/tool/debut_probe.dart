@@ -58,7 +58,18 @@ void main(List<String> args) {
       streams.add((g.world.songWeekStreamsIn(s, ChartMarket.us) / 1e6)
           .toStringAsFixed(1));
     }
+    // The rivals' #1s of the last two years: where they came in.
+    final from = g.week - 104;
+    final debuts = <int>[];
+    for (final x in g.world.songs) {
+      final st = x.statsOrNull(us);
+      if (st == null || st.peak != 1 || x.primaryArtistId == p.id) continue;
+      if (x.releasedWeek < from) continue;
+      debuts.add(st.debutPos);
+    }
+    debuts.sort();
     final s = g.world.songs[id];
+    print('   rival #1s debuted at $debuts');
     print('seed $seed fame ${(p.fame * 100).round()}% hype '
         '${p.hype.toStringAsFixed(2)} q ${s.quality.round()} '
         'pos $pos US M $streams');

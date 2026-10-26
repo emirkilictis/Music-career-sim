@@ -392,6 +392,14 @@ class Simulator {
           weeksCharted = math.max(weeksCharted, s.weeksOnChart(ch));
         }
       }
+      // A star's new single gets the lists, the radio adds and the press
+      // from day one instead of earning them week by week (docs K217): it
+      // starts as high as its artist's name puts it, then its own chart
+      // run takes over.
+      if (s.isSingle && promoAge >= 0 && promoAge < 6) {
+        chartShape = math.max(
+            chartShape, fastStart(p) * math.exp(-promoAge / 3.0));
+      }
       final chartBoost = c.chartFeedback *
           chartShape *
           chartShape /
