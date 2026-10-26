@@ -4142,14 +4142,19 @@ void main() {
       final w = g.world;
       final solo = w.player!;
       const legs = [TourLeg(TourMarket.usa, TourKind.arena, 12)];
-      final own = g.tourPreview(const TourRequest(legs: legs));
+      // As many nights as the market takes, so neither sells out (since
+      // docs K206 the public fills a short run either way).
+      final long = [
+        TourLeg(TourMarket.usa, TourKind.arena,
+            Tours.maxShows(TourMarket.usa, TourKind.arena))
+      ];
+      final own = g.tourPreview(TourRequest(legs: long));
       // Not without a reunion on.
       expect(g.tourPreview(const TourRequest(legs: legs, reunion: true))
           .problems, contains('noReunion'));
       w.playerSinceWeek -= Reunions.gapWeeks + 5 * 52;
       g.startReunion();
-      final reunion =
-          g.tourPreview(const TourRequest(legs: legs, reunion: true));
+      final reunion = g.tourPreview(TourRequest(legs: long, reunion: true));
       expect(reunion.problems, isEmpty);
       expect(reunion.estimate.tickets, greaterThan(own.estimate.tickets));
       // It has to fit in the reunion's year.

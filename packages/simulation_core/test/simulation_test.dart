@@ -352,6 +352,10 @@ void main() {
         money: StartMoney.millionaire);
     expect(Tours.canStart(a, TourKind.arena), isTrue);
     a.coreFans = 2e4;
+    // A famous name books arenas without the fans (docs K206).
+    expect(Tours.canStart(a, TourKind.arena), isTrue);
+    final fame = a.fame;
+    a.fame = 0.2;
     expect(Tours.canStart(a, TourKind.arena), isFalse);
     expect(
         () => Tours.start(
@@ -360,6 +364,7 @@ void main() {
             Tours.plan(w, a,
                 legs: const [TourLeg(TourMarket.usa, TourKind.arena, 10)])),
         throwsStateError);
+    a.fame = fame;
     a.coreFans = 5e6;
     final t = Tours.start(
         w,
