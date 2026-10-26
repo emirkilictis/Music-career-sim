@@ -195,6 +195,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F93 | Emir (rakip oyunu gösterip): "Rakipleri düzenlemede güzelmiş." | ✅ K213: Rakip düzenleyici. Ad değiştirme, kendi fotoğrafını verme, arama. Kariyer → Ben sayfasından ve rakibin Streamify sayfasındaki kalemden açılıyor. |
 | F94 | Emir: "Streamingde oyuncunun 2,5 kat kazanmasını kaldır." Sonra: "Playlist pitch ve sürüm etkilerini de kıs." | ✅ K216: Araçlar tek bir %25 tavanı paylaşıyor; pitch, sürümler, Marquee, curator ve creator kampanyası kısıldı. 6 yılda araç farkı 2,5×'ten 1,4×'e indi. |
 | F95 | Emir: "Bir single çıkarıp #1 debut neredeyse imkânsız gibi ama bu yaşanan bir şey." | ✅ K217: Ünlü ya da beklenen sanatçının single'ı ilk haftadan liste, radyo ve basın desteğiyle başlıyor; #1'den giriş artık mümkün, rakiplerin #1'lerinin %15–25'i #1'den giriyor. |
+| F96 | Emir: "Oyunu web'e açalım mı bir dahaki adımda." | ✅ K218: Oyun tarayıcıda çalışıyor (Chrome/Edge/Firefox/Safari 18.2+). Kayıtlar tarayıcıda tutuluyor. `flutter build web --wasm` çıktısı herhangi bir statik sunucuya konabilir (docs/web.md). |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

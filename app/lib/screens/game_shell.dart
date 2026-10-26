@@ -39,6 +39,14 @@ class GameShell extends StatefulWidget {
 class _GameShellState extends State<GameShell> {
   int _tab = 0;
 
+  /// Tabs opened so far: a tab loads the first time it shows, not all
+  /// at once with the career (on the web the game shares the UI's
+  /// thread; docs K218).
+  final _opened = <int>{0};
+
+  Widget _lazy(int tab, Widget child) =>
+      _opened.contains(tab) ? child : const SizedBox.shrink();
+
   @override
   void initState() {
     super.initState();
@@ -227,6 +235,7 @@ class _GameShellState extends State<GameShell> {
 
   @override
   Widget build(BuildContext context) {
+    _opened.add(_tab);
     final state = widget.state;
     return Scope<CareerState>(
       value: state,
@@ -278,10 +287,10 @@ class _GameShellState extends State<GameShell> {
                     onOpenTab: (i) => setState(() => _tab = i),
                     onNextWeek: _nextWeek,
                   ),
-                  const StudioTab(),
-                  const ReleasesTab(),
-                  const ChartsTab(),
-                  const CareerScreen(embedded: true),
+                  _lazy(1, const StudioTab()),
+                  _lazy(2, const ReleasesTab()),
+                  _lazy(3, const ChartsTab()),
+                  _lazy(4, const CareerScreen(embedded: true)),
                 ]),
               ),
             ]),
@@ -371,4 +380,3 @@ class MoneyPill extends StatelessWidget {
         ),
       );
 }
-

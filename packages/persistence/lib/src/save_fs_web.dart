@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'dart:math' as math;
+
 import 'package:sqlite3/wasm.dart';
-import 'package:typed_data/typed_buffers.dart';
 import 'package:web/web.dart' as web;
 
 import 'save_fs.dart';
@@ -13,11 +14,14 @@ import 'save_fs.dart';
 /// moment after the last save and whenever the page is hidden. (SQLite's
 /// own IndexedDB file system wrote a new career block by block, for over a
 /// minute.) A career's database is read in only when it is opened.
+///
+/// The files live in the browser's own byte arrays ([_JsFiles]), so
+/// SQLite's page reads and writes are plain array copies.
 class WebSaveFs extends SaveFs {
   WebSaveFs._(this._sqlite, this._memory, this._db, this._stored);
 
   final WasmSqlite3 _sqlite;
-  final InMemoryFileSystem _memory;
+  final _JsFiles _memory;
   final web.IDBDatabase _db;
 
   /// Paths stored in IndexedDB (loaded or not).
@@ -33,7 +37,7 @@ class WebSaveFs extends SaveFs {
   static Future<WebSaveFs> open(
       {required Uri wasm, String name = 'music-career-sim'}) async {
     final sqlite = await WasmSqlite3.loadFromUrl(wasm);
-    final memory = InMemoryFileSystem();
+    final memory = _JsFiles();
     sqlite.registerVirtualFileSystem(memory, makeDefault: true);
     final request = web.window.indexedDB.open(name, 1);
     request.onupgradeneeded = ((web.Event _) {
@@ -56,8 +60,8 @@ class WebSaveFs extends SaveFs {
         ((web.Event _) {
           if (web.document.visibilityState == 'hidden') fs.persist();
         }).toJS);
-    web.window.addEventListener(
-        'pagehide', ((web.Event _) => fs.persist()).toJS);
+    web.window
+        .addEventListener('pagehide', ((web.Event _) => fs.persist()).toJS);
     return fs;
   }
 
@@ -69,9 +73,7 @@ class WebSaveFs extends SaveFs {
         _db.transaction(_store.toJS).objectStore(_store).get(path.toJS));
     if (value == null) return;
     final bytes = (value as JSArrayBuffer).toDart.asUint8List();
-    // Typed copies: an element-by-element one of 25 MB takes seconds.
-    _memory.fileData[path] = Uint8Buffer(bytes.length)
-      ..setRange(0, bytes.length, bytes);
+    _memory.fileData[path] = _JsFile(bytes, bytes.length);
   }
 
   /// Text files under [prefix] (path → text), for the browser's image
@@ -168,9 +170,8 @@ class WebSaveFs extends SaveFs {
     for (final p in _dirty) {
       final data = _memory.fileData[p];
       if (data == null) continue;
-      final bytes = Uint8List(data.length)
-        ..setRange(0, data.length, data.buffer.asUint8List(0, data.length));
-      store.put(bytes.buffer.toJS, p.toJS);
+      // A copy of the file's bytes: SQLite may change them meanwhile.
+      store.put(data.copy().buffer.toJS, p.toJS);
       _stored.add(p);
     }
     _dirty.clear();
@@ -180,8 +181,121 @@ class WebSaveFs extends SaveFs {
     final c = Completer<JSAny?>();
     request.onsuccess = ((web.Event _) => c.complete(request.result)).toJS;
     request.onerror =
-        ((web.Event _) => c.completeError(StateError('${request.error}')))
-            .toJS;
+        ((web.Event _) => c.completeError(StateError('${request.error}'))).toJS;
     return c.future;
   }
+}
+
+/// A file's bytes in a browser array, with room to grow: the first
+/// [length] bytes are the file.
+class _JsFile {
+  _JsFile(this.bytes, this.length);
+  Uint8List bytes;
+  int length;
+
+  /// A browser array, not one in Dart's memory: copies between it and
+  /// SQLite's memory (also a browser array) are one native copy each. A
+  /// copy from a Dart array to a browser one goes byte by byte (dart2wasm).
+  static Uint8List _alloc(int n) => JSUint8Array.withLength(n).toDart;
+
+  void resize(int n) {
+    if (n > bytes.length) {
+      final grown = _alloc(math.max(n, bytes.length * 2));
+      grown.setRange(0, length, bytes);
+      bytes = grown;
+    } else if (n < length) {
+      bytes.fillRange(n, length, 0);
+    }
+    length = n;
+  }
+
+  Uint8List copy() => _alloc(length)..setRange(0, length, bytes);
+}
+
+/// SQLite's files kept in memory, in browser arrays (see [_JsFile]).
+final class _JsFiles extends BaseVirtualFileSystem {
+  _JsFiles() : super(name: 'mcs-memory');
+
+  final Map<String, _JsFile> fileData = {};
+
+  @override
+  int xAccess(String path, int flags) => fileData.containsKey(path) ? 1 : 0;
+
+  @override
+  void xDelete(String path, int syncDir) => fileData.remove(path);
+
+  @override
+  String xFullPathName(String path) => path.startsWith('/') ? path : '/$path';
+
+  @override
+  XOpenResult xOpen(Sqlite3Filename path, int flags) {
+    final name = path.path ?? random.nextInt(1 << 31).toRadixString(36);
+    final full = name.startsWith('/') ? name : '/$name';
+    if (!fileData.containsKey(full)) {
+      if (flags & SqlFlag.SQLITE_OPEN_CREATE == 0) {
+        throw VfsException(SqlError.SQLITE_CANTOPEN);
+      }
+      fileData[full] = _JsFile(_JsFile._alloc(0), 0);
+    }
+    return (
+      outFlags: 0,
+      file: _JsFileHandle(
+          this, full, flags & SqlFlag.SQLITE_OPEN_DELETEONCLOSE != 0),
+    );
+  }
+
+  @override
+  void xSleep(Duration duration) {}
+}
+
+class _JsFileHandle extends BaseVfsFile {
+  _JsFileHandle(this.vfs, this.path, this.deleteOnClose);
+  final _JsFiles vfs;
+  final String path;
+  final bool deleteOnClose;
+  var _lock = SqlFileLockingLevels.SQLITE_LOCK_NONE;
+
+  @override
+  int readInto(Uint8List buffer, int offset) {
+    final f = vfs.fileData[path];
+    if (f == null || f.length <= offset) return 0;
+    final n = math.min(buffer.length, f.length - offset);
+    buffer.setRange(0, n, f.bytes, offset);
+    return n;
+  }
+
+  @override
+  void xWrite(Uint8List buffer, int fileOffset) {
+    final f =
+        vfs.fileData.putIfAbsent(path, () => _JsFile(_JsFile._alloc(0), 0));
+    final end = fileOffset + buffer.length;
+    if (end > f.length) f.resize(end);
+    f.bytes.setRange(fileOffset, end, buffer);
+  }
+
+  @override
+  void xTruncate(int size) => vfs.fileData
+      .putIfAbsent(path, () => _JsFile(_JsFile._alloc(0), 0))
+      .resize(size);
+
+  @override
+  int xFileSize() => vfs.fileData[path]?.length ?? 0;
+
+  @override
+  int xCheckReservedLock() =>
+      _lock >= SqlFileLockingLevels.SQLITE_LOCK_RESERVED ? 1 : 0;
+
+  @override
+  void xClose() {
+    if (deleteOnClose) vfs.xDelete(path, 0);
+  }
+
+  @override
+  void xLock(int mode) => _lock = mode;
+
+  @override
+  void xUnlock(int mode) => _lock = mode;
+
+  @override
+  void xSync(int flags) {}
 }

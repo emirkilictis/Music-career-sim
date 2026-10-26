@@ -68,6 +68,13 @@ UI isolate (Flutter)                         Simülasyon isolate'i (uygulama aç
   komutları sırayla işler.
 - İleri sarma / yıl atlama: her hafta ayrı commit; haftalar arasında iptal kontrolü;
   UI sadece ilerleme göstergesini günceller.
+- **Web (K218):** Tarayıcıda isolate yok; `LocalGameController.on` oyunu UI ile aynı iş
+  parçacığında çalıştırır.
+  - Uzun komutlar (`startAsync`, `advanceWeeksAsync`) birkaç haftada bir event loop'a döner.
+  - Kayıtlar `SaveFs` arkasında: cihazda dosyalar, tarayıcıda `WebSaveFs`. WebSaveFs, SQLite
+    wasm'ı bellekteki tarayıcı dizileri üzerinde çalıştırır ve dosyaları IndexedDB'ye bütün
+    olarak yazar.
+  - Ayrıntı: docs/web.md.
 
 ## 3. Persistence
 
