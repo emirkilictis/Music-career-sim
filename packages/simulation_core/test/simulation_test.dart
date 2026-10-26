@@ -1972,7 +1972,8 @@ void streamingToolTests() {
         1 - math.pow(1 - x, CreatorCampaign.weeks).toDouble();
     printOnFailure('month: ${month(without)} vs ${month(paid)}');
     expect(month(without), lessThan(0.01));
-    expect(month(paid), inInclusiveRange(0.08, 0.6));
+    // From 0.08 until docs K216 halved the creators' odds.
+    expect(month(paid), inInclusiveRange(0.04, 0.6));
     // Four weeks on, it either caught on or flopped.
     for (var i = 0; i < CreatorCampaign.weeks; i++) {
       r.sim.step();

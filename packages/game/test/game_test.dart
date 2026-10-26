@@ -1311,7 +1311,8 @@ void main() {
       expect(g.player.moneyCents, money - costs[CreatorCampaign.large]!);
       final s = g.world.songs[id];
       expect(s.viralBoost, greaterThan(0));
-      expect(StreamingTools.creatorChance(s, g.week), 25);
+      expect(StreamingTools.creatorChance(s, g.week),
+          CreatorCampaign.large.chanceFactor);
       expect(() => g.runCreators(id, CreatorCampaign.small),
           _code('cannotRunCreators'));
       // Kept through a save.
@@ -4721,7 +4722,9 @@ void main() {
       final (withCanvas, g2, id) = run(canvas: true);
       final slot = g2.slotId;
       g2.close();
-      expect(withCanvas, greaterThan(plain * 1.015));
+      // +1.5% until docs K216: the Canvas shares the tools' ceiling with
+      // the autoplay that is on in both runs.
+      expect(withCanvas, greaterThan(plain * 1.005));
       final again = GameSession.resume(slots, slot);
       expect(again.song(id).canvas, isTrue);
       again.close();
