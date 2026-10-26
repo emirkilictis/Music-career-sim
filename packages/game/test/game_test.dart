@@ -1590,6 +1590,39 @@ void main() {
       g.close();
     });
 
+    test('the rival editor renames rivals, kept in the save (K213)', () {
+      var g = GameSession.start(slots, _setup(startYear: 2015));
+      final slot = g.slotId;
+      final top = g.rivalsToEdit();
+      expect(top, isNotEmpty);
+      expect(top.any((r) => r.artistId == g.world.playerArtistId), isFalse);
+      for (var i = 1; i < top.length; i++) {
+        // Active rivals first, each group by fame.
+        if (top[i].retired == top[i - 1].retired) {
+          expect(top[i].fame, lessThanOrEqualTo(top[i - 1].fame));
+        } else {
+          expect(top[i].retired, isTrue);
+        }
+      }
+      final id = top.first.artistId;
+      g.renameArtist(id, '  Velvet Comet  ');
+      expect(g.world.artists[id].name, 'Velvet Comet');
+      expect(g.rivalsToEdit(query: 'velvet c').map((r) => r.artistId),
+          contains(id));
+      // Not the player, not empty, not the player's own name.
+      expect(() => g.renameArtist(g.world.playerArtistId, 'X'),
+          throwsA(isA<GameException>()));
+      expect(() => g.renameArtist(id, '   '), throwsA(isA<GameException>()));
+      expect(() => g.renameArtist(id, g.world.player!.name.toUpperCase()),
+          throwsA(isA<GameException>()));
+      expect(() => g.renameArtist(id, 'x' * 41), throwsA(isA<GameException>()));
+      g.advanceWeek();
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.world.artists[id].name, 'Velvet Comet');
+      g.close();
+    });
+
     test('feed posts carry pictures, one of each per release a week (K211)',
         () {
       final g = GameSession.start(

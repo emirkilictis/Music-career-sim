@@ -13,6 +13,7 @@ import '../song_detail_screen.dart';
 import 'album_page.dart';
 import 'this_is_page.dart';
 import '../game_shell.dart';
+import '../rival_editor_screen.dart';
 
 /// Streamify artist page, laid out like a big streaming app's: large header,
 /// monthly listeners, popular tracks with play counts, discography, about.
@@ -258,6 +259,18 @@ class _ArtistPageState extends State<ArtistPage> {
         pinned: true,
         backgroundColor: c2,
         foregroundColor: Colors.white,
+        actions: [
+          // The rival editor (docs K213).
+          if (!a.isPlayer)
+            IconButton(
+              tooltip: l.rivalEditTitle,
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () async {
+                await showRivalEditor(context, a.id, a.name);
+                _load();
+              },
+            ),
+        ],
         flexibleSpace: LayoutBuilder(builder: (context, box) {
           // 0 = collapsed bar, 1 = fully open header. The name grows from
           // the bar's title to a big left-aligned headline under the badge.

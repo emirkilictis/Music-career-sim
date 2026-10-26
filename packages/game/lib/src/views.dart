@@ -2780,6 +2780,23 @@ double _singleUnitsOffAlbums(World w, Artist a, int r) {
   return t;
 }
 
+/// A rival in the editor list (docs K213).
+class RivalEditRow {
+  RivalEditRow.of(Artist a)
+      : artistId = a.id,
+        name = a.name,
+        genre = a.genre,
+        fame = a.fame,
+        isGroup = a.kind.isGroup,
+        retired = a.isRetired;
+  final int artistId;
+  final String name;
+  final int genre;
+  final double fame;
+  final bool isGroup;
+  final bool retired;
+}
+
 /// One of the player's brand deals (docs K102).
 class BrandDealView {
   BrandDealView.of(World w, Artist p, this.index, BrandDeal d)

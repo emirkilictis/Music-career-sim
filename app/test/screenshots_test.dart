@@ -12,6 +12,7 @@ import 'package:music_career_sim/core/commands.dart';
 import 'package:music_career_sim/core/event_lines.dart';
 import 'package:music_career_sim/core/scope.dart';
 import 'package:music_career_sim/screens/charts_tab.dart';
+import 'package:music_career_sim/screens/rival_editor_screen.dart';
 import 'package:music_career_sim/screens/streamify/editorial_page.dart';
 import 'package:music_career_sim/screens/streamify/this_is_page.dart';
 import 'package:music_career_sim/widgets/art.dart';
@@ -725,6 +726,55 @@ void main() {
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
     await tester.pumpAndSettle();
     await shot(tester, '04j_feed_pictures_more');
+  });
+  testWidgets('screenshots: the rival editor', skip: !enabled,
+      (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 213,
+        ),
+        port.sendPort));
+    port.close();
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Career');
+    await careerPage(tester, 'Me');
+    final open = _ci('Open the rival editor');
+    await tester.scrollUntilVisible(open, 300,
+        scrollable: find.byType(Scrollable).first);
+    // The daily bonus note covers the bottom of the page for a while.
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
+    await tester.tap(open);
+    await tester.pumpAndSettle();
+    await shot(tester, '15zg_rival_editor');
+    await tester.tap(find
+        .descendant(
+            of: find.byType(RivalEditorScreen),
+            matching: find.byIcon(Icons.edit_outlined))
+        .first);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).last, 'Velvet Comet');
+    await tester.pumpAndSettle();
+    await shot(tester, '15zh_rival_edit');
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+    await shot(tester, '15zi_rival_renamed');
   });
   testWidgets('screenshots: tour history', skip: !enabled, (tester) async {
     await tester.runAsync(loadFonts);

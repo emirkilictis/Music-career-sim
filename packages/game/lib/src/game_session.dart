@@ -2432,6 +2432,45 @@ class GameSession {
     return SongView.of(world, s);
   }
 
+  // ------------------------------------------------- rival editor (K213)
+
+  /// Rivals to rename (docs K213): active ones first, the most famous
+  /// first; [query] keeps the names that contain it.
+  List<RivalEditRow> rivalsToEdit({String query = '', int limit = 60}) {
+    final q = query.trim().toLowerCase();
+    final out = [
+      for (final a in world.artists)
+        if (a.id != _p.id &&
+            a.tier != ArtistTier.player &&
+            (q.isEmpty || a.name.toLowerCase().contains(q)))
+          RivalEditRow.of(a)
+    ]..sort((a, b) => a.retired != b.retired
+        ? (a.retired ? 1 : -1)
+        : b.fame.compareTo(a.fame));
+    return out.take(limit).toList();
+  }
+
+  /// Gives rival [artistId] a new name (docs K213): the player's world,
+  /// their names. Not the player, and not the player's own name.
+  void renameArtist(int artistId, String name) {
+    if (artistId < 0 ||
+        artistId >= world.artists.length ||
+        artistId == _p.id ||
+        world.artists[artistId].tier == ArtistTier.player) {
+      throw GameException('noArtist', 'No such rival');
+    }
+    final n = name.trim();
+    if (n.isEmpty || n.length > CareerSetup.maxNameLength) {
+      throw GameException('invalidName', 'Name must be 1–40 chars');
+    }
+    if (n.toLowerCase() == _p.name.toLowerCase()) {
+      throw GameException('nameTaken', 'That is the player\'s name');
+    }
+    world.artists[artistId].name = n;
+    world.dirtyArtists.add(artistId);
+    _saveNow();
+  }
+
   /// Songs the player wrote for others, newest first (docs K143).
   List<WrittenSongView> get writtenForOthers => [
         for (final id in world.writtenSongIds.reversed)

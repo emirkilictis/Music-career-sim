@@ -19,6 +19,7 @@ import 'discography_screen.dart';
 import 'album_detail_screen.dart';
 import 'labels_screen.dart';
 import 'member_album_screen.dart';
+import 'rival_editor_screen.dart';
 import 'releases_tab.dart';
 import 'game_shell.dart';
 import 'song_detail_screen.dart';
@@ -1091,6 +1092,25 @@ class _CareerScreenState extends State<CareerScreen> {
           Section(
             title: l.artistPhotos,
             child: ArtistPhotosSection(artistId: p.id, name: p.name),
+          ),
+          const SizedBox(height: 12),
+          // The rival editor (docs K213).
+          Section(
+            title: l.rivalEditorTitle,
+            icon: Icons.people_outline_rounded,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l.rivalEditorCard,
+                      style: TextStyle(color: AppColors.textMuted)),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        pushInCareer(context, const RivalEditorScreen()),
+                    icon: const Icon(Icons.edit_outlined),
+                    label: Text(l.rivalEditorOpen),
+                  ),
+                ]),
           ),
         ]),
         ..._on(_CareerPage.business, [

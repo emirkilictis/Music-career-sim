@@ -883,6 +883,8 @@ class Fmt {
       'cannotUpload' => l.errorCannotUpload,
       'songRefused' => l.errorSongRefused,
       'noPitch' || 'pitchGone' => l.errorPitchGone,
+      'nameTaken' => l.errorNameTaken,
+      'noArtist' => l.errorNoArtist,
       'cannotBundle' => l.errorCannotBundle,
       'noMarquee' => l.errorNoMarquee,
       'cannotCloud' => l.errorCannotCloud,
