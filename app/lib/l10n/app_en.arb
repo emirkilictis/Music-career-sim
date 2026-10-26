@@ -3697,6 +3697,35 @@
   "postBacklash": "That one backfired: some fans are upset.",
   "pickSongToShare": "Which song?",
   "feedThisWeek": "this week",
+  "postMediaSingle": "Single · {name}",
+  "@postMediaSingle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "postMediaAlbum": "Album · {name}",
+  "@postMediaAlbum": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "postMediaNewNo1": "Top of the chart",
+  "postMediaTopTen": "Top 10 debut",
+  "postMediaYearEnd": "Year-end chart",
+  "postMediaFirstWeek": "First-week US units",
+  "postMediaBillions": "Streams on {platform}",
+  "@postMediaBillions": {
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
+  },
+  "postMediaSnippet": "Unreleased · snippet",
   "feedWeeksAgo": "{count} wk ago",
   "@feedWeeksAgo": {
     "placeholders": {

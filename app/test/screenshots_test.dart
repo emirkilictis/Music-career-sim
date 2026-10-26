@@ -672,6 +672,60 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '14o_stream_counter');
   });
+  testWidgets('screenshots: posts with pictures', skip: !enabled,
+      (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 211,
+        ),
+        port.sendPort));
+    port.close();
+    // A teaser, a single and the album after it (docs K211).
+    await c.run((s) {
+      final p = s.world.player!;
+      p.moneyCents = 1 << 40;
+      final songs = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        songs.add(s.writeSong(budget: BudgetTier.high, title: 'Track ${i + 1}').id);
+      }
+      s.releaseSingle(songs.first);
+      s.advanceWeeks(4, stop: SkipStop.never);
+      s.post(PostKind.teaser);
+      s.releaseAlbum('Gold Rush', songs);
+      s.advanceWeeks(2, stop: SkipStop.never);
+    });
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    final feed = _ci('Open the feed');
+    await tester.scrollUntilVisible(feed, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(feed);
+    await tester.pumpAndSettle();
+    await shot(tester, '04h_feed_pictures');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
+    await tester.pumpAndSettle();
+    await shot(tester, '04i_feed_pictures_more');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
+    await tester.pumpAndSettle();
+    await shot(tester, '04j_feed_pictures_more');
+  });
   testWidgets('screenshots: tour history', skip: !enabled, (tester) async {
     await tester.runAsync(loadFonts);
     phoneView(tester);

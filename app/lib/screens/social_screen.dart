@@ -7,6 +7,7 @@ import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/post_media.dart';
 
 /// How a network looks (docs K93, K94): Chirper is a black, X-like app;
 /// MyPlace a 2006 profile page; the fan forum an old message board.
@@ -750,6 +751,14 @@ class FeedPost extends StatelessWidget {
                       fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
               Text(text, style: TextStyle(color: skin.text, height: 1.3)),
+              // Forums before social media show no pictures (docs K211).
+              if (skin == SocialSkin.myPlace)
+                PostMediaCard(
+                    item: item,
+                    artistName: p.name,
+                    week: state.week,
+                    dark: false,
+                    round: false),
             ]),
           ),
         ]),
@@ -804,6 +813,7 @@ class FeedPost extends StatelessWidget {
             const SizedBox(height: 2),
             Text(text,
                 style: TextStyle(color: skin.text, fontSize: 15, height: 1.3)),
+            PostMediaCard(item: item, artistName: p.name, week: state.week),
             const SizedBox(height: 10),
             Row(children: [
               count(Icons.chat_bubble_outline_rounded, replies),

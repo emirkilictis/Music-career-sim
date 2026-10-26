@@ -2615,7 +2615,15 @@ class SocialItemView {
                     ? w.albums[i.albumId].title
                     : '',
         likes = i.likes,
-        number = i.number;
+        number = i.number,
+        songId = i.songId,
+        albumId = i.albumId,
+        coverAlbumId = i.albumId >= 0
+            ? i.albumId
+            : i.songId >= 0
+                ? coverAlbumOf(w, w.songs[i.songId])
+                : -1,
+        media = _mediaOf(i);
   final int week;
   final FanTopic topic;
   final int variant;
@@ -2628,7 +2636,45 @@ class SocialItemView {
   final String title;
   final int likes;
   final int number;
+
+  /// The song or album it talks about (-1: none); the cover it shows.
+  final int songId, albumId, coverAlbumId;
+  bool get isAlbum => albumId >= 0;
+
+  /// What the post shows under its text (docs K211); [SocialView] keeps
+  /// it on the first post about a release in a week only.
+  PostMedia media;
+
+  static PostMedia _mediaOf(SocialItem i) {
+    if (i.topic == FanTopic.postTeaser) return PostMedia.snippet;
+    if (i.songId < 0 && i.albumId < 0) return PostMedia.none;
+    return switch (i.topic) {
+      FanTopic.numberOne || FanTopic.topTen || FanTopic.yearEndHit =>
+        PostMedia.chart,
+      FanTopic.bigWeek || FanTopic.billionsClub => PostMedia.stat,
+      FanTopic.criticHigh || FanTopic.criticLow => PostMedia.score,
+      FanTopic.releaseLove ||
+      FanTopic.releaseMixed ||
+      FanTopic.releaseHate ||
+      FanTopic.deluxeOut ||
+      FanTopic.surpriseDrop ||
+      FanTopic.postPromote ||
+      FanTopic.catchingOn ||
+      FanTopic.viral ||
+      FanTopic.recordBroken ||
+      FanTopic.tripleCrown ||
+      FanTopic.musicShowWin ||
+      FanTopic.wrapped =>
+        PostMedia.release,
+      _ => PostMedia.none,
+    };
+  }
 }
+
+/// What a feed post shows under its text (docs K211), as posts on real
+/// networks carry a picture: the cover, a chart graphic, a big number,
+/// a review score, or a sound clip for a teaser.
+enum PostMedia { none, release, chart, stat, score, snippet }
 
 /// The player's social media page (docs K93).
 class SocialView {
@@ -2647,10 +2693,38 @@ class SocialView {
         ].take(20).toList(),
         // Newest week first; within a week in the order it happened (a
         // post above the replies to it).
-        items = [
+        items = _withMedia([
           for (final i in _newestWeeksFirst(w.social.feed).take(60))
             SocialItemView.of(w, i)
-        ];
+        ]);
+
+  /// One picture of each kind per release a week (docs K211): a chart
+  /// graphic, a big number and a score each show once; the plain cover
+  /// only when none of them does. Other posts about it only write.
+  static List<SocialItemView> _withMedia(List<SocialItemView> items) {
+    final shown = <(int, int, int, PostMedia)>{};
+    final pictured = <(int, int, int)>{};
+    for (final i in items) {
+      final m = i.media;
+      if (m == PostMedia.none ||
+          m == PostMedia.snippet ||
+          m == PostMedia.release) {
+        continue;
+      }
+      if (shown.add((i.week, i.songId, i.albumId, m))) {
+        pictured.add((i.week, i.songId, i.albumId));
+      } else {
+        i.media = PostMedia.none;
+      }
+    }
+    for (final i in items) {
+      if (i.media == PostMedia.release &&
+          !pictured.add((i.week, i.songId, i.albumId))) {
+        i.media = PostMedia.none;
+      }
+    }
+    return items;
+  }
 
   static List<SocialItem> _newestWeeksFirst(List<SocialItem> feed) {
     final order = List.generate(feed.length, (i) => i)

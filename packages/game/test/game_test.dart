@@ -1590,6 +1590,59 @@ void main() {
       g.close();
     });
 
+    test('feed posts carry pictures, one of each per release a week (K211)',
+        () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2019,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final songs = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        songs.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      g.releaseSingle(songs.first);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      g.post(PostKind.teaser);
+      g.releaseAlbum('Gold Rush', songs);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      final items = g.social.items;
+      expect(items.where((i) => i.media == PostMedia.snippet), hasLength(1));
+      final pictured = items.where((i) =>
+          i.media != PostMedia.none && i.media != PostMedia.snippet);
+      expect(pictured, isNotEmpty);
+      final kinds = <(int, int, int, PostMedia)>{};
+      final covers = <(int, int, int)>{};
+      for (final i in pictured) {
+        // Each picture is about a release, once a week.
+        expect(i.songId >= 0 || i.albumId >= 0, isTrue);
+        expect(kinds.add((i.week, i.songId, i.albumId, i.media)), isTrue);
+        if (i.media == PostMedia.release) {
+          expect(covers.add((i.week, i.songId, i.albumId)), isTrue);
+        }
+      }
+      // A plain cover only when nothing better shows that release.
+      for (final (week, song, album) in covers) {
+        expect(
+            pictured.where((i) =>
+                i.week == week && i.songId == song && i.albumId == album),
+            hasLength(1));
+      }
+      // Posts with nothing to show stay text.
+      expect(
+          items
+              .where((i) => i.songId < 0 && i.albumId < 0)
+              .every((i) => i.media == PostMedia.none ||
+                  i.media == PostMedia.snippet),
+          isTrue);
+      g.close();
+    });
+
     test('finished tours are kept in the tour history (K208)', () {
       var g = GameSession.start(
           slots,
