@@ -72,8 +72,9 @@ class _TourScreenState extends State<TourScreen> {
   /// The biggest venues the player can fill, about a third of the market.
   _LegDraft _defaultLeg(TourMarket m) {
     final fans = _fans;
-    final kind = TourKind.values
-        .lastWhere((k) => fans >= k.minFans, orElse: () => TourKind.club);
+    final kind = TourKind.values.lastWhere(
+        (k) => Tours.canPlay(fans, _fame, k),
+        orElse: () => TourKind.club);
     return _LegDraft(kind, _defaultShows(m, kind));
   }
 
@@ -83,6 +84,9 @@ class _TourScreenState extends State<TourScreen> {
   /// The fans who buy the tickets: the group's on a reunion tour.
   double get _fans =>
       widget.reunion?.audience.fans ?? widget.state.player.coreFans;
+
+  /// A famous enough name books big venues without the fans (docs K206).
+  double get _fame => widget.reunion?.audience.fame ?? widget.state.player.fame;
 
   TourRequest get _request => TourRequest(
         reunion: widget.reunion != null,
@@ -217,6 +221,7 @@ class _TourScreenState extends State<TourScreen> {
                       market: m,
                       draft: _legs[m],
                       fans: fans,
+                      fame: _fame,
                       estimate: plan?.legs
                           .where((v) => v.leg.market == m)
                           .firstOrNull,
@@ -350,6 +355,7 @@ class _MarketTile extends StatelessWidget {
     required this.market,
     required this.draft,
     required this.fans,
+    required this.fame,
     required this.estimate,
     required this.onToggle,
     required this.onKind,
@@ -359,6 +365,7 @@ class _MarketTile extends StatelessWidget {
   final TourMarket market;
   final _LegDraft? draft;
   final double fans;
+  final double fame;
   final TourLegView? estimate;
   final ValueChanged<bool> onToggle;
   final ValueChanged<TourKind> onKind;
@@ -414,8 +421,10 @@ class _MarketTile extends StatelessWidget {
                 ChoiceChip(
                   label: Text(fmt.tourKind(k)),
                   selected: d.kind == k,
-                  onSelected: fans >= k.minFans ? (_) => onKind(k) : null,
-                  tooltip: fans >= k.minFans
+                  onSelected: Tours.canPlay(fans, fame, k)
+                      ? (_) => onKind(k)
+                      : null,
+                  tooltip: Tours.canPlay(fans, fame, k)
                       ? null
                       : l.tourNeedsFans(fmt.compact(k.minFans)),
                 ),

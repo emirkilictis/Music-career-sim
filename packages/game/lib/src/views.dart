@@ -1594,13 +1594,14 @@ abstract final class Radio {
 /// The fictional streaming platform's view of an artist (Streamify artist
 /// page): its share of all streams, monthly listeners, popular tracks.
 abstract final class Streamify {
-  /// Share of all on-demand streams that happen on the platform.
-  static const share = 0.45;
+  /// Share of all on-demand streams that happen on the platform: 0.45
+  /// until docs K207, when a song with 400M plays here showed 1B in all.
+  static const share = 0.6;
 
-  /// Monthly listeners from weekly streams (about 12 plays per listener a
-  /// month on the platform).
+  /// Monthly listeners from weekly streams (about 16 plays per listener a
+  /// month on the platform; 12 at the old share gave the same listeners).
   static double monthlyListeners(double weeklyStreams) =>
-      weeklyStreams * share * 4.3 / 12;
+      weeklyStreams * share * 4.3 / 16;
 
   /// Share of a region's listeners in its big cities together.
   static const _cityShare = 0.4;

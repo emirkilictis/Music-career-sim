@@ -638,6 +638,7 @@ class GameSession {
     final reunionOn = r.reunion && Reunions.active(world);
     final fans =
         reunionOn ? Reunions.group(world)!.coreFans : _p.coreFans;
+    final fame = reunionOn ? Reunions.audience(world).fame : _p.fame;
     final showsOk = r.legs.every(
         (l) => l.shows >= 1 && l.shows <= Tours.maxShows(l.market, l.kind));
     return [
@@ -646,7 +647,7 @@ class GameSession {
       if (r.legs.isEmpty ||
           r.legs.map((l) => l.market).toSet().length != r.legs.length)
         'tourMarkets',
-      if (r.legs.any((l) => fans < l.kind.minFans)) 'tourTooBig',
+      if (r.legs.any((l) => !Tours.canPlay(fans, fame, l.kind))) 'tourTooBig',
       if (!showsOk) 'tourShows',
       // A reunion tour plays within the reunion's year (docs K196).
       if (reunionOn &&

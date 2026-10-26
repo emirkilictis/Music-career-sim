@@ -1286,7 +1286,7 @@
       }
     }
   },
-  "tourNeedsFans": "Needs {fans} fans",
+  "tourNeedsFans": "Needs {fans} fans or a bigger name",
   "@tourNeedsFans": {
     "placeholders": {
       "fans": {

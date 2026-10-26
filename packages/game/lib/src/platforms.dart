@@ -47,8 +47,9 @@ enum MusicPlatform {
   bool openIn(int year) => year >= launchYear;
 
   /// Share of all on-demand streams played here in [year]. Streamify keeps
-  /// its 45% (see [Streamify.share]); the video site carries streaming
-  /// before it and gives way to the second service after 2015.
+  /// its 60% (see [Streamify.share]); the video site carries streaming
+  /// before it and gives way to the second service after 2015. Cut by 15
+  /// points in docs K207: the video site and the rest added too much.
   double streamShare(int year) {
     if (!openIn(year)) return 0;
     final second =
@@ -62,8 +63,8 @@ enum MusicPlatform {
           : year < 2009
               ? 0.85
               : year < 2015
-                  ? 0.47
-                  : 0.5 - second,
+                  ? 0.32
+                  : 0.35 - second,
       _ => 0,
     };
   }

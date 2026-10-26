@@ -486,7 +486,7 @@
   "tourStadium": "Stadyum turnesi",
   "tourWhere": "Nerelerde çalınacak",
   "tourSpec": "{seats} kişilik · bilet {price} · {weeks} hafta",
-  "tourNeedsFans": "{fans} hayran gerekir",
+  "tourNeedsFans": "{fans} hayran ya da daha büyük bir şöhret gerekir",
   "tourEstimate": "Tahmini: %{fill} doluluk, {tickets} bilet, +{fans} hayran",
   "tourNet": "Net {money}",
   "tourStart": "Turneye çık",

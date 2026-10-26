@@ -21,7 +21,8 @@ enum TourKind {
       showCostCents: 150000,
       freightCents: 500000,
       maxNights: 2,
-      draw: 2.2),
+      draw: 2.2,
+      minFame: 0.05),
   theater(
       minFans: 1e5,
       minCapacity: 1500,
@@ -30,7 +31,8 @@ enum TourKind {
       showCostCents: 2500000,
       freightCents: 4000000,
       maxNights: 3,
-      draw: 1.1),
+      draw: 1.1,
+      minFame: 0.15),
   arena(
       minFans: 1e6,
       minCapacity: 10000,
@@ -39,7 +41,8 @@ enum TourKind {
       showCostCents: 20000000,
       freightCents: 30000000,
       maxNights: 5,
-      draw: 1.25),
+      draw: 1.25,
+      minFame: 0.35),
   stadium(
       // Within reach of the biggest stars (F81): fandoms grow slowly past
       // a few million since K127.
@@ -50,7 +53,8 @@ enum TourKind {
       showCostCents: 200000000,
       freightCents: 200000000,
       maxNights: 6,
-      draw: 1.4);
+      draw: 1.4,
+      minFame: 0.55);
 
   const TourKind({
     required this.minFans,
@@ -61,6 +65,7 @@ enum TourKind {
     required this.freightCents,
     required this.maxNights,
     required this.draw,
+    required this.minFame,
   });
 
   final double minFans;
@@ -81,6 +86,10 @@ enum TourKind {
   /// alone (F82): small clubs fill with the local scene and walk-ups,
   /// arena and stadium shows are events people go to with their fans.
   final double draw;
+
+  /// Fame that books this size without the fans (docs K206): a name
+  /// everyone knows fills arenas long after the fandom thinned.
+  final double minFame;
 
   /// A typical venue's seats.
   int get capacity => (minCapacity + maxCapacity) ~/ 2;
@@ -482,9 +491,26 @@ abstract final class Tours {
   /// Energy a tour week takes.
   static const energyPerWeek = 12.0;
 
-  /// Whether the artist can play [kind] venues: enough fans, no tour on.
+  /// Whether [fans] core fans at [fame] can play [kind] venues: enough
+  /// fans, or a famous enough name (docs K206).
+  static bool canPlay(double fans, double fame, TourKind kind) =>
+      fans >= kind.minFans || fame >= kind.minFame;
+
+  /// Whether the artist can play [kind] venues: no tour on, and the fans
+  /// or the name for it.
   static bool canStart(Artist a, TourKind kind) =>
-      a.tour == null && a.coreFans >= kind.minFans;
+      a.tour == null && canPlay(a.coreFans, a.fame, kind);
+
+  /// The general public at a show (docs K206): people who are not fans
+  /// but know the name go to a big act's show as an event, steeply more
+  /// the more famous the act. This share of the public pool turns up for
+  /// a household name at the usual price.
+  static const publicShare = 0.032;
+
+  /// How hot a legacy act stays (docs K206): a known name sells as if
+  /// it had a hit out, at up to this much over cold, whatever the new
+  /// album did.
+  static const legacyHot = 0.6;
 
   /// Ticket and merch prices against 2020 (≈0.5 in 2000, 1.15 in 2026).
   static double eraPrice(int year) =>
@@ -647,7 +673,7 @@ abstract final class Tours {
   static double marketDemand(
       World w, Artist a, TourMarket m, double priceFactor, Artist? opener) {
     final share = a.regionShare[m.region.index] * m.share;
-    final hot = 1 + a.hype + 0.5 * a.popularity;
+    final hot = math.max(1 + a.hype + 0.5 * a.popularity, 1 + legacyHot * a.fame);
     final live = 0.6 + 0.8 * a.skills.performance / 100;
     final core =
         a.coreFans * share * 0.18 * math.pow(priceFactor, -0.5).toDouble();
@@ -660,7 +686,13 @@ abstract final class Tours {
             m.share *
             0.03 /
             priceFactor;
-    return (core + casual) * hot * live * a.kind.tourDemand + support;
+    final public = w.config.publicPool *
+        share *
+        publicShare *
+        math.pow(a.fame, 3).toDouble() /
+        priceFactor;
+    return ((core + casual) * hot + public) * live * a.kind.tourDemand +
+        support;
   }
 
   /// A night's turnout: the market's demand shared by the cities on the
@@ -973,7 +1005,8 @@ abstract final class RivalTours {
           a.coreFans < minFans) {
         continue;
       }
-      if (a.lastReleaseWeek < w.week - 78) continue;
+      // Legacy acts tour without a new record (docs K206).
+      if (a.lastReleaseWeek < w.week - 78 && a.fame < 0.5) continue;
       if ((lastTour[id] ?? -1000) > w.week - 2 * GameTime.weeksPerYear) {
         continue;
       }
@@ -982,7 +1015,7 @@ abstract final class RivalTours {
       // The biggest venues they can fill a run of (at least 10 nights).
       var shows = 0, tickets = 0.0, gross = 0.0, legs = 0;
       for (final kind in TourKind.values.reversed) {
-        if (a.coreFans < kind.minFans) continue;
+        if (!Tours.canPlay(a.coreFans, a.fame, kind)) continue;
         shows = 0;
         tickets = 0;
         gross = 0;
