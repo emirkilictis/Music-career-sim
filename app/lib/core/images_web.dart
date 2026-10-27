@@ -53,6 +53,17 @@ class WebImageStore extends ImageStore {
   }
 
   @override
+  void saveBytes(String key, Uint8List bytes) {
+    final slot = openSlot;
+    if (slot == null) return;
+    final url =
+        'data:${ImageStore.mimeOf(bytes)};base64,${base64Encode(bytes)}';
+    fs.writeText('${_prefix(slot)}$key', url);
+    files[key] = url;
+    notifyListeners();
+  }
+
+  @override
   void adopt(String from, String to) {
     final slot = openSlot;
     final url = files.remove(from);

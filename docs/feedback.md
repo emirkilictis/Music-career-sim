@@ -204,6 +204,9 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F102 | Oyuncu: "Ülkelere göre popülerlik olayı da gelebilir." | ⏳ Sırada. |
 | F103 | Oyuncu: "Versiyon olayı iyi olmuş." | 👍 |
 | F104 | Emir ve oyuncu: "Oyun mass-release'e itiyor; biraz hızlı dopamin, daha yavaş ve detaylı olmalı, daha zorlaması lazım, şu an çok basit." | ⏳ Ölçülüyor: sık çıkış ile aralıklı çıkış karşılaştırılacak. |
+| F105 | Emir: "Streaming çok OP, ben 400M falan görüyordum weekly streams, nerflenmeli." Oyuncu: "Bir şarkı için haftada 200M abartı, biraz düşürebilirsin." | ⏳ Ölçüldü: dünyadaki en büyük şarkı haftada 80–120M, zirvede 207M; en büyük sanatçı 250–800M. Hedef: #1 60–80M, rekor 120M civarı. |
+| F106 | Oyuncu: "Ödül törenleri için başvuru (submission) eklenebilir." | ⏳ Sırada. |
+| F107 | Oyuncu (iPad): "Kapak için fotoğraf yükleyemiyorum, fotoğrafın sadece küçük bir kısmını alıyor." | ✅ K221: Kare olmayan bir fotoğraf seçilince kırpma ekranı açılıyor: sürükle, iki parmakla yakınlaştır, karenin içi kapak ya da fotoğraf olur (önce ortası kendiliğinden kesiliyordu). |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

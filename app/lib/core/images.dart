@@ -32,6 +32,11 @@ class DeviceImagePickSource implements ImagePickSource {
   }
 }
 
+/// A picked image's bytes: a file on the device, a blob URL on the web.
+Future<Uint8List> readPicked(String path) async => kIsWeb
+    ? await picker.XFile(path).readAsBytes()
+    : File(path).readAsBytesSync();
+
 /// The player's own images for the open career: song and album covers and
 /// artist photos. Files live next to the career's save
 /// (`<careers>/<slotId>/images/`) and never leave the device. Anything
@@ -122,13 +127,17 @@ class ImageStore extends ChangeNotifier {
       files[artistKey(artistId, kind)] ??
       files[artistKey(artistId, ArtistPhoto.general)];
 
-  /// Asks the device for an image and stores it under [key]; false when the
-  /// player cancelled.
-  Future<bool> pickFor(String key) async {
-    final picked = await source.pick();
-    if (picked == null) return false;
-    save(key, picked);
-    return true;
+  /// Stores [bytes] (a cropped photo) as the image for [key] (docs K221).
+  void saveBytes(String key, Uint8List bytes) {
+    final dir = _dir;
+    if (dir == null) return;
+    dir.createSync(recursive: true);
+    _deleteFile(key);
+    final target = '${dir.path}/${key}_${DateTime.now().microsecondsSinceEpoch}'
+        '.${mimeOf(bytes).split('/').last}';
+    File(target).writeAsBytesSync(bytes);
+    files[key] = target;
+    notifyListeners();
   }
 
   /// Copies [sourcePath] in as the image for [key] (replacing an old one).

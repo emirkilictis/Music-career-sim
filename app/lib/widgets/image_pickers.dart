@@ -5,6 +5,7 @@ import '../core/images.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import 'art.dart';
+import 'photo_crop.dart';
 import 'stored_image.dart';
 
 /// "Choose from photos / Use the generated one" for one image [key].
@@ -31,7 +32,19 @@ Future<void> editImage(BuildContext context, String key) async {
     ),
   );
   if (choice == true) {
-    await store.pickFor(key);
+    final picked = await store.source.pick();
+    if (picked == null || !context.mounted) return;
+    // A square photo goes in as it is; any other is cropped by the player
+    // (docs K221: the middle square cut off what they wanted).
+    final bytes = await readPicked(picked);
+    final size = imageSize(bytes);
+    if (size != null && (size.$1 - size.$2).abs() <= size.$1 * 0.02) {
+      store.save(key, picked);
+      return;
+    }
+    if (!context.mounted) return;
+    final square = await cropToSquare(context, bytes);
+    if (square != null) store.saveBytes(key, square);
   } else if (choice == false) {
     store.remove(key);
   }
