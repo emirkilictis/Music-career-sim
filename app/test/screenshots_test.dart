@@ -685,7 +685,8 @@ void main() {
     addTearDown(app.dispose);
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    // The world is built in turns (docs K218): in real time.
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Nova Reyes',
           genre: 0,
@@ -695,9 +696,9 @@ void main() {
           premium: true,
           seed: 225,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
-    await c.run((s) {
+    await tester.runAsync(() => c.run((s) {
       final p = s.world.player!;
       p.moneyCents = 1 << 40;
       final songs = <int>[];
@@ -712,7 +713,7 @@ void main() {
         p.creativeEnergy = 100;
         s.writeSong(budget: BudgetTier.high, title: 'Vault ${i + 1}');
       }
-    });
+    }));
     await c.exec(Cmd.closeCareer());
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
     await tester.pumpAndSettle();
@@ -759,7 +760,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     // Two versions of the new album (docs K225).
-    await c.run((s) {
+    await tester.runAsync(() => c.run((s) {
       final w = s.world;
       final gold = w.albums.lastWhere((a) => a.title == 'Gold Rush');
       final vault = s.vault;
@@ -770,7 +771,7 @@ void main() {
       s.advanceWeeks(4, stop: SkipStop.never);
       s.releaseAlbumVersion(gold.id,
           name: 'Platinum Edition', songIds: [vault[2].id]);
-    });
+    }));
     await tab(tester, 'Releases');
     final album = _ci('Gold Rush').first;
     await tester.scrollUntilVisible(album, 200,
