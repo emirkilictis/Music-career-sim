@@ -867,7 +867,9 @@ abstract final class Tours {
       throw ArgumentError('Pick each market once');
     }
     for (final l in t.legs) {
-      if (drawOf(w, a, t).coreFans < l.kind.minFans) {
+      final draw = drawOf(w, a, t);
+      // Enough fans, or a famous enough name (docs K206).
+      if (!canPlay(draw.coreFans, draw.fame, l.kind)) {
         throw StateError('Not enough fans for ${l.kind.name} venues');
       }
       if (l.shows < 1 || l.shows > maxShowsOf(l)) {
