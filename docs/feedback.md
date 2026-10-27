@@ -203,8 +203,8 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F101 | Oyuncu: "Turne şu an sadece tıklıyorsun gibi; şehir seçme, hangi arena olacağı, adı, koyacağımız şarkılar gelmeli. Turneye çıkınca albümün satışında ufak da olsa artış olmalı; seçilen şarkılar ve albümleri artmalı." | ⏳ Sırada (setlist, şehir/mekân seçimi, turnede setlist ve albüm artışı). |
 | F102 | Oyuncu: "Ülkelere göre popülerlik olayı da gelebilir." | ⏳ Sırada. |
 | F103 | Oyuncu: "Versiyon olayı iyi olmuş." | 👍 |
-| F104 | Emir ve oyuncu: "Oyun mass-release'e itiyor; biraz hızlı dopamin, daha yavaş ve detaylı olmalı, daha zorlaması lazım, şu an çok basit." | ⏳ Ölçülüyor: sık çıkış ile aralıklı çıkış karşılaştırılacak. |
-| F105 | Emir: "Streaming çok OP, ben 400M falan görüyordum weekly streams, nerflenmeli." Oyuncu: "Bir şarkı için haftada 200M abartı, biraz düşürebilirsin." | ⏳ Ölçüldü: dünyadaki en büyük şarkı haftada 80–120M, zirvede 207M; en büyük sanatçı 250–800M. Hedef: #1 60–80M, rekor 120M civarı. |
+| F104 | Emir ve oyuncu: "Oyun mass-release'e itiyor; biraz hızlı dopamin, daha yavaş ve detaylı olmalı, daha zorlaması lazım, şu an çok basit." | ✅ K222: Sık single çıkarmanın 20 katlık ödülü kalktı: taze single'lar dinleyiciyi paylaşıyor, önceki çıkıştan 6 haftadan önce gelen single daha az destek alıyor, katalog paylaşılıyor; oyun genel olarak zorlaştı. |
+| F105 | Emir: "Streaming çok OP, ben 400M falan görüyordum weekly streams, nerflenmeli." Oyuncu: "Bir şarkı için haftada 200M abartı, biraz düşürebilirsin." | ✅ K222: Stream hacmi yarıya indi: haftanın 1 numarası 80–105M (önce 120–207M); gelir ve stream sertifikaları da düştü. |
 | F106 | Oyuncu: "Ödül törenleri için başvuru (submission) eklenebilir." | ⏳ Sırada. |
 | F107 | Oyuncu (iPad): "Kapak için fotoğraf yükleyemiyorum, fotoğrafın sadece küçük bir kısmını alıyor." | ✅ K221: Kare olmayan bir fotoğraf seçilince kırpma ekranı açılıyor: sürükle, iki parmakla yakınlaştır, karenin içi kapak ya da fotoğraf olur (önce ortası kendiliğinden kesiliyordu). |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |

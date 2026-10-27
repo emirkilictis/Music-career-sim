@@ -17,8 +17,13 @@ class SimConfig {
     this.albumCatalogRate = 0.0008,
     this.fanCurveFloor = 0.12,
     this.fanCurveHalfLifeWeeks = 3.0,
-    this.fanShareExponent = 0.8,
+    this.fanShareExponent = 1.0,
     this.selfCompetitionExponent = 0.6,
+    this.releaseGapWeeks = 6,
+    this.releaseGapFloor = 0.25,
+    this.streamVolume = 0.5,
+    this.catalogSongs = 20,
+    this.catalogShareExponent = 0.6,
     this.singleExposure = 1.0,
     this.albumTrackExposure = 0.30,
     this.baseExposure = 0.0015,
@@ -137,9 +142,25 @@ class SimConfig {
   final double fanShareExponent;
 
   /// How much an artist's fresh singles take radio slots and new listeners
-  /// from each other (docs K84): load^-x each, x growing with fame (full
-  /// from 50%).
+  /// from each other (docs K84): load^-x each, at any fame (docs K222).
   final double selfCompetitionExponent;
+
+  /// A single gets the stations', playlists' and app's full push only this
+  /// many weeks after the artist's previous release; sooner, (gap/this)^0.8
+  /// of it, at least [releaseGapFloor]^0.8 (docs K222).
+  final double releaseGapWeeks;
+  final double releaseGapFloor;
+
+  /// Share of each era's stream market the simulation plays out (docs
+  /// K222): at full size the biggest songs had 100–200M streams a week,
+  /// well above real charts.
+  final double streamVolume;
+
+  /// An artist's back catalog shares listeners' time beyond this many
+  /// songs: each further one gets (songs/n)^[catalogShareExponent] of its
+  /// catalog plays (docs K222).
+  final int catalogSongs;
+  final double catalogShareExponent;
   final double singleExposure;
   final double albumTrackExposure;
   final double baseExposure;

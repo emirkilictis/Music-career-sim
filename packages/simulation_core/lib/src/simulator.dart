@@ -274,15 +274,48 @@ class Simulator {
       promoLoad[id] = (promoLoad[id] ?? 0) +
           _promoLife(s, promoAge, fastStart(w.artists[id]));
     }
-    // A newcomer's singles each find their own small crowd; a star's all
-    // go to the same stations and playlists. Full from 50% fame.
+    // A single hot on the heels of the artist's last release gets less of
+    // the stations', playlists' and app's push: they do not feature the
+    // same artist every week (docs K222). Full after a gap of
+    // [SimConfig.releaseGapWeeks]; an album counts as a release.
+    final releases = <int, List<(int, int)>>{};
+    // Each artist's songs on the charts and around them (docs K222).
+    final songCount = <int, int>{};
+    for (var i = 0; i < n; i++) {
+      final s = w.songs[ids[i]];
+      songCount[s.primaryArtistId] = (songCount[s.primaryArtistId] ?? 0) + 1;
+      if (s.isSingle) {
+        (releases[s.primaryArtistId] ??= []).add((s.singleWeek, s.id));
+      }
+    }
+    for (final id in w.activeAlbumIds) {
+      final al = w.albums[id];
+      if (al.releaseWeek >= 0 && w.week - al.releaseWeek < 26) {
+        (releases[al.artistId] ??= []).add((al.releaseWeek, -1 - al.id));
+      }
+    }
+    double gapOf(Song s) {
+      if (!s.isSingle) return 1;
+      var prev = -1 << 30;
+      for (final (week, key)
+          in releases[s.primaryArtistId] ?? const <(int, int)>[]) {
+        if (key == s.id) continue;
+        if (week < s.singleWeek || (week == s.singleWeek && key < s.id)) {
+          if (week > prev) prev = week;
+        }
+      }
+      final gap = (s.singleWeek - prev) / c.releaseGapWeeks;
+      return math.pow(gap.clamp(c.releaseGapFloor, 1.0), 0.8).toDouble();
+    }
+
+    // An artist's fresh singles go to the same stations, playlists and
+    // listeners, a newcomer's as much as a star's: a single a week was
+    // worth twenty times one every six weeks (docs K222).
     double share(Map<int, double> load, Song s, int promoAge) {
       if (!s.isSingle || promoAge >= 26) return 1;
       final l = load[s.primaryArtistId] ?? 1;
       if (l <= 1) return 1;
-      final fame = w.artists[s.primaryArtistId].fame;
-      final x = c.selfCompetitionExponent * math.min(1.0, 2 * fame);
-      return math.pow(l, -x).toDouble();
+      return math.pow(l, -c.selfCompetitionExponent).toDouble();
     }
 
     final activeIndex = <int, int>{};
@@ -304,8 +337,12 @@ class Simulator {
       final fanShare =
           load <= 1 ? 1.0 : math.pow(load, -c.fanShareExponent).toDouble();
       // Catalog level fades very slowly over decades (10-year time constant).
-      final tail =
-          c.catalogTail * (0.5 + s.longevity) * math.exp(-ageRel / 520.0);
+      // Listeners' time for the back catalog is shared (docs K222).
+      final tail = c.catalogTail *
+          (0.5 + s.longevity) *
+          math.exp(-ageRel / 520.0) *
+          Lifecycle.catalogShare(c,
+              (songCount[s.primaryArtistId] ?? 0) + p.dormantSongIds.length);
       final life = _promoLife(s, promoAge, fastStart(p)) + tail;
       final promo = s.isSingle
           ? c.singleExposure * p.kind.singleReach
@@ -489,6 +526,10 @@ class Simulator {
       // The app's Marquee shows a new release to the artist's listeners
       // (docs K147).
       final casPart = cas *
+          // The app shows listeners one of the artist's new songs at a time
+          // (docs K222).
+          share(promoLoad, s, promoAge) *
+          gapOf(s) *
           s.commercial *
           life *
           (0.05 + 0.15 * promo) *
@@ -497,7 +538,8 @@ class Simulator {
           s.commercial *
           life *
           exposure *
-          share(promoLoad, s, promoAge);
+          share(promoLoad, s, promoAge) *
+          gapOf(s);
       // A viral trend reaches people regardless of the song's age.
       final viralPart =
           c.publicPool * (0.5 + 0.5 * s.commercial) * s.viralBoost * 0.1;
@@ -597,6 +639,7 @@ class Simulator {
       final rd = s.radioAppeal *
           _radioLife(s, promoAge) *
           share(radioLoad, s, promoAge) *
+          gapOf(s) *
           (s.isSingle ? 1.0 : 0.03) *
           (0.2 + p.fame) *
           p.labelReach *
@@ -675,7 +718,10 @@ class Simulator {
         w.emaDownloadDemand[k] = sumD[k];
         w.emaRadioDemand[k] = sumR[k];
       }
-      spa[k] = era.streamsWeekly /
+      // The era's streams, cut to the scale of real charts: the top song
+      // had 100–200M a week (docs K222).
+      spa[k] = c.streamVolume *
+          era.streamsWeekly /
           (sumA[k] + rc.outsideAttention * w.emaAttention[k] + 1);
       dpa[k] = era.downloadsWeekly /
           (sumD[k] + rc.outsideDownloads * w.emaDownloadDemand[k] + 1);

@@ -310,8 +310,8 @@ int _week(GameSession s, void Function(int) setSingle, int Function() single,
 
   final vault = s.vault.toList()
     ..sort((a, b) => b.estimatedGrade.compareTo(a.estimatedGrade));
-  // A single every 6 weeks.
-  if (s.week - single() >= 6 && vault.length >= 2) {
+  // A single every 6 weeks (PROBE_EVERY: another cadence; docs F104).
+  if (s.week - single() >= singleEvery && vault.length >= singleVault) {
     final best = vault.first;
     final c = _campaign(s, s.player.moneyCents ~/ 4);
     final left = s.player.moneyCents ~/ 4 - s.player.campaignCosts[c.index];
@@ -393,6 +393,10 @@ RadioPush _radio(GameSession s, int budget) {
 }
 
 final heavy = Platform.environment['PROBE_HEAVY'] == '1';
+
+/// Weeks between singles, and songs the vault must hold first.
+final singleEvery = int.parse(Platform.environment['PROBE_EVERY'] ?? '6');
+final singleVault = singleEvery <= 1 ? 1 : 2;
 
 /// A player who works every streaming tool on each single (docs K204).
 final tools = Platform.environment['PROBE_TOOLS'] == '1';

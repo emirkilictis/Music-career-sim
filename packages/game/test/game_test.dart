@@ -1371,9 +1371,12 @@ void main() {
     });
 
     test('play milestones and the Billions Club (K132)', () {
+      // 2021: since docs K222 halved the streams, few songs had a billion
+      // plays before then.
       final g = GameSession.start(
           slots,
           _setup(
+              startYear: 2021,
               tier: StartTier.superstar,
               money: StartMoney.millionaire,
               premium: true));
@@ -4130,7 +4133,8 @@ void main() {
         if (m.index != low) expect(m.popularity, lessThan(before[m.index]));
       }
       expect(ms.reduce((a, b) => a.share >= b.share ? a : b).index, low);
-      expect(g.goSoloPreview(low).ace, isTrue);
+      // The push makes them the biggest, not always far enough above the
+      // old favourite to count as the ace (docs K222 halved the streams).
       final other = (low + 1) % 4;
       expect(g.goSoloPreview(low).importance,
           greaterThan(g.goSoloPreview(other).importance));
@@ -4412,9 +4416,10 @@ void main() {
       const legs = [TourLeg(TourMarket.usa, TourKind.arena, 12)];
       // As many nights as the market takes, so neither sells out (since
       // docs K206 the public fills a short run either way).
+      // Stadiums since docs K222: both runs filled every arena seat.
       final long = [
-        TourLeg(TourMarket.usa, TourKind.arena,
-            Tours.maxShows(TourMarket.usa, TourKind.arena))
+        TourLeg(TourMarket.usa, TourKind.stadium,
+            Tours.maxShows(TourMarket.usa, TourKind.stadium))
       ];
       final own = g.tourPreview(TourRequest(legs: long));
       // Not without a reunion on.

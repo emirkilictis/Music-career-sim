@@ -1126,8 +1126,10 @@ void megaDebutTests() {
     // (docs K58).
     // 4.2M until docs K133: fans playing albums front to back leave the
     // closers a little less, and the debut a little lower; 3.9M until
-    // docs K201: rivals' remixes and sped-up versions take some listening.
-    expect(mean(legend), greaterThan(3.8e6));
+    // docs K201: rivals' remixes and sped-up versions take some listening;
+    // 3.8M until docs K222 halved the streams (the best world still opens
+    // above 4M).
+    expect(mean(legend), greaterThan(3.5e6));
     expect(mean(legend), greaterThan(1.1 * mean(real)));
     // The rest of the world (rivals' awards, editions) moves the mean by a
     // few percent; seeds alone span 4.5–5.1M.

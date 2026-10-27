@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'config/charts.dart';
 import 'config/regions.dart';
+import 'config/sim_config.dart';
 import 'leaks.dart';
 import 'model.dart';
 import 'rerecords.dart';
@@ -74,13 +75,21 @@ abstract final class Lifecycle {
             : 0.25;
   }
 
+  /// Listeners give an artist's back catalog only so much time (docs
+  /// K222): beyond [SimConfig.catalogSongs] songs each new one gets less,
+  /// so a hundred quick releases do not pay like a hundred hits.
+  static double catalogShare(SimConfig c, int songs) => songs <= c.catalogSongs
+      ? 1.0
+      : math.pow(c.catalogSongs / songs, c.catalogShareExponent).toDouble();
+
   static void makeSongDormant(World w, Song s) {
     final a = w.primaryOf(s);
     w.settleRetired(a);
     final rate = s.lastAttention /
         a.catalogFactor *
         catalogWeight(s) *
-        w.config.catalogLevel;
+        w.config.catalogLevel *
+        catalogShare(w.config, a.dormantSongIds.length + 1);
     s.dormantRate = rate;
     for (var r = 0; r < regionCount; r++) {
       s.reg[SongReg.indexStreams + r] = a.reg[ArtistReg.indexStreams + r];
