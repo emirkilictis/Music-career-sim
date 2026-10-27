@@ -6161,7 +6161,7 @@
   "versionName": "Name of the version",
   "versionNameNeeded": "Give it a name.",
   "versionCover": "Cover",
-  "versionCoverHint": "Tap to give this version its own cover. Without one it uses the album cover.",
+  "versionCoverHint": "Tap to choose a photo for this version’s cover. Without one it gets a cover of its own drawn for it.",
   "versionCoverSet": "Its own cover is set. Tap to change it.",
   "versionTracks": "Bonus tracks ({count}/{max})",
   "@versionTracks": {

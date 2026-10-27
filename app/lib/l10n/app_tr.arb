@@ -1739,7 +1739,7 @@
   "versionName": "Versiyonun adı",
   "versionNameNeeded": "Bir ad ver.",
   "versionCover": "Kapak",
-  "versionCoverHint": "Bu versiyona kendi kapağını vermek için dokun. Vermezsen albüm kapağını kullanır.",
+  "versionCoverHint": "Bu versiyonun kapağı için fotoğraf seçmek üzere dokun. Seçmezsen ona özel bir kapak çizilir.",
   "versionCoverSet": "Kendi kapağı seçildi. Değiştirmek için dokun.",
   "versionTracks": "Bonus parçalar ({count}/{max})",
   "versionTracksHint": "Kasadaki yayınlanmamış şarkılar bu versiyonla çıkar. Hiç eklemeden de çıkarabilirsin.",

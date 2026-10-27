@@ -1734,7 +1734,7 @@ k('versionIntro','Put “{title}” out again under a new name and cover, with b
 k('versionName','Name of the version','Versiyonun adı')
 k('versionNameNeeded','Give it a name.','Bir ad ver.')
 k('versionCover','Cover','Kapak')
-k('versionCoverHint','Tap to give this version its own cover. Without one it uses the album cover.','Bu versiyona kendi kapağını vermek için dokun. Vermezsen albüm kapağını kullanır.')
+k('versionCoverHint','Tap to choose a photo for this version’s cover. Without one it gets a cover of its own drawn for it.','Bu versiyonun kapağı için fotoğraf seçmek üzere dokun. Seçmezsen ona özel bir kapak çizilir.')
 k('versionCoverSet','Its own cover is set. Tap to change it.','Kendi kapağı seçildi. Değiştirmek için dokun.')
 k('versionTracks','Bonus tracks ({count}/{max})','Bonus parçalar ({count}/{max})', count='int', max='int')
 k('versionTracksHint','Unreleased songs from the vault come out with this version. You can also put it out with none.','Kasadaki yayınlanmamış şarkılar bu versiyonla çıkar. Hiç eklemeden de çıkarabilirsin.')

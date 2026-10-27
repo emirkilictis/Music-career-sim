@@ -717,10 +717,8 @@ void main() {
     await c.exec(Cmd.closeCareer());
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
     await tester.pumpAndSettle();
-    print('open');
     await tester.tap(_ci('Nova Reyes'));
     await tester.pumpAndSettle();
-    print('opened');
     // An album of hers from ten years ago (docs K226).
     await c.run((s) {
       final w = s.world;
@@ -735,27 +733,23 @@ void main() {
           quality: 78)
         ..status = AlbumStatus.dormant);
     });
-    print('next week');
     await tester.tap(_ci('Next week'));
     for (var i = 0; i < 12 && _ci('Anniversary').evaluate().isEmpty; i++) {
       await tester.runAsync(() => Future.delayed(Duration(milliseconds: 300)));
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 400));
-      print('wait $i');
       if (i > 3 && _ci('Anniversary').evaluate().isEmpty) {
         await tester.tapAt(const Offset(200, 80));
       }
     }
     await tester.pump(const Duration(seconds: 1));
     await shot(tester, '16a_anniversary_prompt');
-    print('prompt');
     await tester.tap(_ci('Make an anniversary edition'));
     for (var i = 0; i < 4; i++) {
       await tester.runAsync(() => Future.delayed(Duration(milliseconds: 300)));
       await tester.pump(const Duration(milliseconds: 400));
     }
     await tester.pumpAndSettle();
-    print('edition');
     await shot(tester, '16b_anniversary_edition');
     await tester.pageBack();
     await tester.pumpAndSettle();
