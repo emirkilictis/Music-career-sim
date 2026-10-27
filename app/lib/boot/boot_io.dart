@@ -16,3 +16,6 @@ Future<(GameController, AppSettings, ImageStore)> boot() async {
   final controller = await IsolateGameController.spawn(careers);
   return (controller, settings, ImageStore(careers));
 }
+
+/// Only a browser has apps' own browsers (docs K218).
+bool inAppBrowser() => false;

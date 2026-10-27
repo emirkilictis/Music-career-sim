@@ -691,6 +691,7 @@ class SaveSlots {
         jsonEncode({
           'slotId': slotId,
           'artistName': p?.name,
+          'artistId': p?.id,
           'kind': p?.kind.name,
           'genre': p?.genre,
           'difficulty': w.difficulty.name,

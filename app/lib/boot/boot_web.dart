@@ -41,3 +41,22 @@ class _LocalStorage implements SettingsStore {
   @override
   void write(String text) => web.window.localStorage.setItem(key, text);
 }
+
+/// Opened inside an app (X, Instagram, TikTok…) rather than the browser:
+/// their browsers may wipe a site's storage when closed (docs K218).
+bool inAppBrowser() {
+  final ua = web.window.navigator.userAgent;
+  const apps = [
+    'Twitter',
+    'Instagram',
+    'FBAN',
+    'FBAV',
+    'TikTok',
+    'musical_ly',
+    'Snapchat',
+    'Line/',
+    'Discord',
+    'GSA/'
+  ];
+  return apps.any(ua.contains);
+}

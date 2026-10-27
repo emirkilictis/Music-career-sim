@@ -44,6 +44,10 @@ class WebSaveFs extends SaveFs {
       (request.result as web.IDBDatabase).createObjectStore(_store);
     }).toJS;
     final db = (await _done(request)) as web.IDBDatabase;
+    // Ask the browser to keep the saves when it runs short of space.
+    try {
+      web.window.navigator.storage.persist();
+    } catch (_) {}
     final keys = (await _done(
             db.transaction(_store.toJS).objectStore(_store).getAllKeys()))
         as JSArray<JSString>;
@@ -150,15 +154,16 @@ class WebSaveFs extends SaveFs {
     return db;
   }
 
-  /// Every loaded file may have changed: store them a moment after the
-  /// last save (a skip saves every week).
+  /// Every loaded file may have changed: store them at most a moment
+  /// after the first unstored save. (Waiting for the saves to pause never
+  /// stored a player who kept pressing Next week, and a phone may drop a
+  /// hidden page before the last write ends.)
   @override
   void saved() {
     for (final p in _memory.fileData.keys) {
       if (!p.endsWith('-journal')) _dirty.add(p);
     }
-    _timer?.cancel();
-    _timer = Timer(const Duration(seconds: 2), persist);
+    _timer ??= Timer(const Duration(seconds: 1), persist);
   }
 
   /// Writes the changed files to IndexedDB now.
@@ -166,15 +171,26 @@ class WebSaveFs extends SaveFs {
     _timer?.cancel();
     _timer = null;
     if (_dirty.isEmpty) return;
-    final store = _db.transaction(_store.toJS, 'readwrite').objectStore(_store);
-    for (final p in _dirty) {
+    final paths = _dirty.toList();
+    _dirty.clear();
+    // One transaction: the save list and the careers change together.
+    final tx = _db.transaction(_store.toJS, 'readwrite');
+    final store = tx.objectStore(_store);
+    for (final p in paths) {
       final data = _memory.fileData[p];
       if (data == null) continue;
       // A copy of the file's bytes: SQLite may change them meanwhile.
       store.put(data.copy().buffer.toJS, p.toJS);
       _stored.add(p);
     }
-    _dirty.clear();
+    // A failed write (storage full, a page being closed) is tried again.
+    void retry(web.Event _) {
+      _dirty.addAll(paths.where(_memory.fileData.containsKey));
+      _timer ??= Timer(const Duration(seconds: 5), persist);
+    }
+
+    tx.onerror = retry.toJS;
+    tx.onabort = retry.toJS;
   }
 
   static Future<JSAny?> _done(web.IDBRequest request) {

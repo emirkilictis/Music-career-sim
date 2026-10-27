@@ -4,6 +4,7 @@
   "brandTop": "Müzik Kariyeri",
   "brandBottom": "Simülatörü",
   "brandTagline": "2000’den bugüne: yaz, çıkar, listelerin zirvesine çık.",
+  "inAppBrowserNotice": "Oyunu bir uygulamanın içinde açtın. Bu tarayıcı kapanınca kariyerlerini silebilir; saklamak için sayfayı Safari ya da Chrome’da aç.",
   "settings": "Ayarlar",
   "newCareer": "Yeni kariyer",
   "noCareersTitle": "Henüz kariyer yok",

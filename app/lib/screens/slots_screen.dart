@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game/game.dart' show GameException;
+import '../boot/boot.dart' show inAppBrowser;
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
@@ -143,131 +144,160 @@ class _SlotsScreenState extends State<SlotsScreen> {
           _load();
         },
       ),
-      body: slots == null
-          ? const Center(child: CircularProgressIndicator())
-          : slots.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      const BrandMark(size: 96),
-                      const SizedBox(height: 20),
-                      Text(l.noCareersTitle,
-                          style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 8),
-                      Text(l.noCareersBody, textAlign: TextAlign.center),
-                    ]),
-                  ),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                  itemCount: slots.length + 1,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
-                  itemBuilder: (context, i) {
-                    if (i == 0) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Text(l.brandTagline,
-                            style: TextStyle(
-                                color: AppColors.textMuted, fontSize: 14)),
-                      );
-                    }
-                    final s = slots[i - 1];
-                    final id = s['slotId'] as String;
-                    final name = s['artistName'] as String? ?? '?';
-                    final fame = (s['fame'] as num?)?.toDouble() ?? 0;
-                    final fans = (s['coreFans'] as num?)?.toDouble() ?? 0;
-                    final album = s['lastAlbumId'] as int? ?? -1;
-                    final hit = s['hitTitle'] as String?;
-                    final albumTitle = s['lastAlbumTitle'] as String?;
-                    final cover = album < 0
-                        ? null
-                        : context.imagesRead
-                            .pathIn(id, ImageStore.albumKey(album));
-                    // The biggest hit, else the latest album (E9).
-                    final story = hit != null
-                        ? l.biggestHit(hit, s['hitPeak'] as int? ?? 0)
-                        : albumTitle != null
-                            ? l.latestAlbum(albumTitle)
-                            : null;
-                    return Card(
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () => _open(id),
-                        onLongPress: () => _delete(id, name),
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
-                          child: Row(children: [
-                            album < 0
-                                ? ArtistAvatar(
-                                    name: name, seed: id.hashCode, size: 64)
-                                : ClipRRect(
-                                    borderRadius:
-                                        BorderRadius.circular(AppShape.r(10)),
-                                    child: cover != null
-                                        ? storedImage(cover,
-                                            width: 64,
-                                            height: 64,
-                                            fit: BoxFit.cover,
-                                            cacheWidth: 192)
-                                        : CoverArt(
-                                            seed: albumCoverSeed(album),
-                                            size: 64),
-                                  ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                            fontSize: 16.5,
-                                            fontWeight: FontWeight.w700)),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                        '${fmt.weekOf(s['weekOfYear'] as int? ?? 1, s['year'] as int? ?? 0)}'
-                                        ' · ${l.fameValue(fmt.percent(fame))}'
-                                        ' · ${l.fansValue(fmt.compact(fans))}',
-                                        style: TextStyle(
-                                            color: AppColors.textMuted,
-                                            fontSize: 13)),
-                                    if (story != null) ...[
-                                      const SizedBox(height: 4),
-                                      Text(story,
+      body: _withNotice(
+        slots == null
+            ? const Center(child: CircularProgressIndicator())
+            : slots.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        const BrandMark(size: 96),
+                        const SizedBox(height: 20),
+                        Text(l.noCareersTitle,
+                            style: Theme.of(context).textTheme.titleLarge),
+                        const SizedBox(height: 8),
+                        Text(l.noCareersBody, textAlign: TextAlign.center),
+                      ]),
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
+                    itemCount: slots.length + 1,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, i) {
+                      if (i == 0) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(l.brandTagline,
+                              style: TextStyle(
+                                  color: AppColors.textMuted, fontSize: 14)),
+                        );
+                      }
+                      final s = slots[i - 1];
+                      final id = s['slotId'] as String;
+                      final name = s['artistName'] as String? ?? '?';
+                      final fame = (s['fame'] as num?)?.toDouble() ?? 0;
+                      final fans = (s['coreFans'] as num?)?.toDouble() ?? 0;
+                      final album = s['lastAlbumId'] as int? ?? -1;
+                      final hit = s['hitTitle'] as String?;
+                      final albumTitle = s['lastAlbumTitle'] as String?;
+                      final cover = album < 0
+                          ? null
+                          : context.imagesRead
+                              .pathIn(id, ImageStore.albumKey(album));
+                      // The biggest hit, else the latest album (E9).
+                      final story = hit != null
+                          ? l.biggestHit(hit, s['hitPeak'] as int? ?? 0)
+                          : albumTitle != null
+                              ? l.latestAlbum(albumTitle)
+                              : null;
+                      return Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () => _open(id),
+                          onLongPress: () => _delete(id, name),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
+                            child: Row(children: [
+                              album < 0
+                                  ? ArtistAvatar(
+                                      name: name,
+                                      // The same face as in the game.
+                                      seed: s['artistId'] as int? ?? 0,
+                                      size: 64)
+                                  : ClipRRect(
+                                      borderRadius:
+                                          BorderRadius.circular(AppShape.r(10)),
+                                      child: cover != null
+                                          ? storedImage(cover,
+                                              width: 64,
+                                              height: 64,
+                                              fit: BoxFit.cover,
+                                              cacheWidth: 192)
+                                          : CoverArt(
+                                              seed: albumCoverSeed(album),
+                                              size: 64),
+                                    ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(name,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                              fontSize: 13.5,
-                                              fontWeight: FontWeight.w600)),
-                                    ],
-                                  ]),
-                            ),
-                            PopupMenuButton<int>(
-                              tooltip: l.careerMenu,
-                              icon: Icon(Icons.more_vert_rounded,
-                                  color: AppColors.textMuted),
-                              onSelected: (_) => _delete(id, name),
-                              itemBuilder: (_) => [
-                                PopupMenuItem(
-                                  value: 0,
-                                  child: Row(children: [
-                                    Icon(Icons.delete_outline_rounded,
-                                        color: AppColors.coral),
-                                    const SizedBox(width: 12),
-                                    Text(l.delete),
-                                  ]),
-                                ),
-                              ],
-                            ),
-                          ]),
+                                              fontSize: 16.5,
+                                              fontWeight: FontWeight.w700)),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                          '${fmt.weekOf(s['weekOfYear'] as int? ?? 1, s['year'] as int? ?? 0)}'
+                                          ' · ${l.fameValue(fmt.percent(fame))}'
+                                          ' · ${l.fansValue(fmt.compact(fans))}',
+                                          style: TextStyle(
+                                              color: AppColors.textMuted,
+                                              fontSize: 13)),
+                                      if (story != null) ...[
+                                        const SizedBox(height: 4),
+                                        Text(story,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                                fontSize: 13.5,
+                                                fontWeight: FontWeight.w600)),
+                                      ],
+                                    ]),
+                              ),
+                              PopupMenuButton<int>(
+                                tooltip: l.careerMenu,
+                                icon: Icon(Icons.more_vert_rounded,
+                                    color: AppColors.textMuted),
+                                onSelected: (_) => _delete(id, name),
+                                itemBuilder: (_) => [
+                                  PopupMenuItem(
+                                    value: 0,
+                                    child: Row(children: [
+                                      Icon(Icons.delete_outline_rounded,
+                                          color: AppColors.coral),
+                                      const SizedBox(width: 12),
+                                      Text(l.delete),
+                                    ]),
+                                  ),
+                                ],
+                              ),
+                            ]),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
+      ),
     );
+  }
+
+  /// In an app's own browser (X, Instagram…) a note on top: those may
+  /// wipe the saves when closed (docs K218).
+  Widget _withNotice(Widget body) {
+    if (!inAppBrowser()) return body;
+    final l = context.l10n;
+    return Column(children: [
+      Container(
+        width: double.infinity,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+            color: AppColors.coral.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(10)),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(Icons.warning_amber_rounded, color: AppColors.coral),
+          const SizedBox(width: 10),
+          Expanded(child: Text(l.inAppBrowserNotice)),
+        ]),
+      ),
+      Expanded(child: body),
+    ]);
   }
 }
 

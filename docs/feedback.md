@@ -196,6 +196,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F94 | Emir: "Streamingde oyuncunun 2,5 kat kazanmasını kaldır." Sonra: "Playlist pitch ve sürüm etkilerini de kıs." | ✅ K216: Araçlar tek bir %25 tavanı paylaşıyor; pitch, sürümler, Marquee, curator ve creator kampanyası kısıldı. 6 yılda araç farkı 2,5×'ten 1,4×'e indi. |
 | F95 | Emir: "Bir single çıkarıp #1 debut neredeyse imkânsız gibi ama bu yaşanan bir şey." | ✅ K217: Ünlü ya da beklenen sanatçının single'ı ilk haftadan liste, radyo ve basın desteğiyle başlıyor; #1'den giriş artık mümkün, rakiplerin #1'lerinin %15–25'i #1'den giriyor. |
 | F96 | Emir: "Oyunu web'e açalım mı bir dahaki adımda." | ✅ K218: Oyun tarayıcıda çalışıyor (Chrome/Edge/Firefox/Safari 18.2+). Kayıtlar tarayıcıda tutuluyor. `flutter build web --wasm` çıktısı herhangi bir statik sunucuya konabilir (docs/web.md). |
+| F97 | Web'i deneyen oyuncular (Emir'in paylaştığı ekran görüntüsü): "Sekmeden çıktım, kariyer gitti." Emir: "Bende son sürüm Safari var, açılmıyor"; Chrome'da da açılmadı. | ✅ K218: Durmadan hafta geçen oyuncunun kaydı hiç yazılmıyordu; artık en geç ~1 sn içinde yazılıyor ve başarısız yazma yeniden deneniyor. Uygulama içi tarayıcıda uyarı çıkıyor. Safari ve Firefox da WebAssembly sürümünü alıyor (iPhone'da bütün tarayıcılar Safari motorunu kullanıyor). |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

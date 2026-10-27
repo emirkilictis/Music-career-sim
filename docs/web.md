@@ -43,6 +43,10 @@ sunucuya konabilir: GitHub Pages, Netlify, Cloudflare Pages ya da kendi sunucun.
 - **Kayıtlar tarayıcıya ve siteye bağlıdır:** başka tarayıcıda ya da cihazda görünmez.
   "Site verilerini temizle" kayıtları siler.
   - Kayıt dosyası bellekte tutulur.
-  - Her kayıttan ~2 sn sonra ve sekme gizlenince ya da kapanırken bütün olarak IndexedDB'ye
-    yazılır.
+  - İlk kaydedilmemiş değişiklikten en geç ~1 sn sonra (oyuncu durmadan hafta geçse de) ve
+    sekme gizlenince ya da kapanırken bütün olarak IndexedDB'ye yazılır. Yazma başarısız olursa
+    tekrar denenir.
+  - Uygulama içi tarayıcılar (X, Instagram, TikTok…) kapanınca site verisini silebilir. Oyun
+    böyle bir tarayıcıda açıldığında kariyer listesinin üstünde "Safari ya da Chrome'da aç"
+    uyarısı çıkar.
 - **Paylaşım kartları** tarayıcının paylaşım ya da indirme penceresiyle paylaşılır.

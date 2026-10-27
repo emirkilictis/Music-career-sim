@@ -4,6 +4,7 @@
   "brandTop": "Music Career",
   "brandBottom": "Simulator",
   "brandTagline": "From 2000 to today: write it, release it, top the charts.",
+  "inAppBrowserNotice": "You opened the game inside an app. Its browser may delete your careers when you close it: open this page in Safari or Chrome to keep them.",
   "settings": "Settings",
   "newCareer": "New career",
   "noCareersTitle": "No careers yet",
