@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:game/game.dart';
 
@@ -24,6 +25,16 @@ abstract final class Cmd {
 
   static HostCmd<void> deleteSlot(String slotId) =>
       (h) => h.slots.delete(slotId);
+
+  /// [slotId]'s database for a backup (docs K219).
+  static HostCmd<Uint8List> backupSlot(String slotId) => (h) async {
+        await h.slots.prepare(slotId);
+        return GameSession.backup(h.slots, slotId);
+      };
+
+  /// Adds a backup's database as a new career; returns its slot.
+  static HostCmd<String> restoreSlot(Uint8List database) =>
+      (h) => GameSession.restore(h.slots, database);
 
   static HostCmd<void> resume(String slotId) => (h) async {
         h.session?.close();

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:sqlite3/common.dart';
 import 'package:sqlite3/sqlite3.dart';
@@ -22,6 +23,25 @@ class IoSaveFs extends SaveFs {
     final f = File(path);
     f.parent.createSync(recursive: true);
     f.writeAsStringSync(text);
+  }
+
+  @override
+  Uint8List? readBytes(String path) {
+    final f = File(path);
+    return f.existsSync() ? f.readAsBytesSync() : null;
+  }
+
+  @override
+  void writeBytes(String path, Uint8List bytes) {
+    final f = File(path);
+    f.parent.createSync(recursive: true);
+    f.writeAsBytesSync(bytes, flush: true);
+  }
+
+  @override
+  void deleteFile(String path) {
+    final f = File(path);
+    if (f.existsSync()) f.deleteSync();
   }
 
   @override

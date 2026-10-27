@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:persistence/persistence.dart';
 import 'package:simulation_core/simulation_core.dart';
@@ -332,6 +333,32 @@ class GameSession {
     // A save from before docs K209 dates its certifications once.
     if (!world.certsTracked) s._backfillCerts();
     return s;
+  }
+
+  /// [slotId]'s career as a backup's database (docs K219): a compact copy,
+  /// whole even while the career is open.
+  static Uint8List backup(SaveSlots slots, String slotId) =>
+      slots.backupOf(slotId);
+
+  /// Adds the career in a backup's database [bytes] as a new slot and
+  /// returns its id (docs K219). A file that is not a career, or one from a
+  /// newer version of the game, is refused and leaves nothing behind.
+  static String restore(SaveSlots slots, Uint8List bytes) {
+    final String slotId;
+    try {
+      slotId = slots.restoreInto(bytes);
+    } on FormatException catch (e) {
+      throw GameException('badBackup', e.message);
+    }
+    try {
+      // Opening it checks it, brings an older save up to date and writes
+      // its line in the career list.
+      resume(slots, slotId).close();
+    } catch (e) {
+      slots.delete(slotId);
+      throw GameException('badBackup', '$e');
+    }
+    return slotId;
   }
 
   /// Dates the certifications an older save already has (docs K209).

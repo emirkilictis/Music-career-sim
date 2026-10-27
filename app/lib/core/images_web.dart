@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart' as picker;
 import 'package:persistence/web.dart';
@@ -41,7 +42,8 @@ class WebImageStore extends ImageStore {
     files[key] = sourcePath;
     notifyListeners();
     picker.XFile(sourcePath).readAsBytes().then((bytes) {
-      final url = 'data:${_mime(bytes)};base64,${base64Encode(bytes)}';
+      final url =
+          'data:${ImageStore.mimeOf(bytes)};base64,${base64Encode(bytes)}';
       fs.writeText('${_prefix(slot)}$key', url);
       if (openSlot == slot && files[key] == sourcePath) {
         files[key] = url;
@@ -69,12 +71,20 @@ class WebImageStore extends ImageStore {
     notifyListeners();
   }
 
-  static String _mime(List<int> b) =>
-      b.length > 3 && b[0] == 0x89 && b[1] == 0x50 && b[2] == 0x4E
-          ? 'image/png'
-          : b.length > 2 && b[0] == 0x47 && b[1] == 0x49
-              ? 'image/gif'
-              : b.length > 12 && b[8] == 0x57 && b[9] == 0x45
-                  ? 'image/webp'
-                  : 'image/jpeg';
+  @override
+  Map<String, Uint8List> imagesOf(String slotId) {
+    final prefix = _prefix(slotId);
+    return {
+      for (final e in fs.textsUnder(prefix).entries)
+        if (e.value.startsWith('data:'))
+          e.key.substring(prefix.length):
+              base64Decode(e.value.substring(e.value.indexOf(',') + 1)),
+    };
+  }
+
+  @override
+  void addImages(String slotId, Map<String, Uint8List> images) {
+    images.forEach((key, bytes) => fs.writeText('${_prefix(slotId)}$key',
+        'data:${ImageStore.mimeOf(bytes)};base64,${base64Encode(bytes)}'));
+  }
 }

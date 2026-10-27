@@ -114,6 +114,29 @@ class WebSaveFs extends SaveFs {
   }
 
   @override
+  Uint8List? readBytes(String path) => _memory.fileData[path]?.copy();
+
+  @override
+  void writeBytes(String path, Uint8List bytes) {
+    final f = _JsFile(_JsFile._alloc(bytes.length), bytes.length);
+    f.bytes.setRange(0, bytes.length, bytes);
+    _memory.fileData[path] = f;
+    saved();
+  }
+
+  @override
+  void deleteFile(String path) {
+    _memory.fileData.remove(path);
+    _dirty.remove(path);
+    if (_stored.remove(path)) {
+      _db
+          .transaction(_store.toJS, 'readwrite')
+          .objectStore(_store)
+          .delete(path.toJS);
+    }
+  }
+
+  @override
   List<String> folders(String path) {
     final prefix = '$path/';
     final out = <String>{};

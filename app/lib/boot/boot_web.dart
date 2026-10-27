@@ -60,3 +60,31 @@ bool inAppBrowser() {
   ];
   return apps.any(ua.contains);
 }
+
+const _tipSeen = 'mcs.homeScreenTipSeen';
+
+/// On an iPhone or iPad browser, not yet as a Home Screen app: Safari may
+/// clear a site's storage after 7 days without a visit, the Home Screen
+/// app keeps it (docs K219). Shown until dismissed.
+bool homeScreenTipDue() {
+  final nav = web.window.navigator;
+  final ua = nav.userAgent;
+  final apple = ua.contains('iPhone') ||
+      ua.contains('iPad') ||
+      (ua.contains('Macintosh') && nav.maxTouchPoints > 1);
+  if (!apple || inAppBrowser()) return false;
+  if (web.window.matchMedia('(display-mode: standalone)').matches) {
+    return false;
+  }
+  try {
+    return web.window.localStorage.getItem(_tipSeen) == null;
+  } catch (_) {
+    return false;
+  }
+}
+
+void dismissHomeScreenTip() {
+  try {
+    web.window.localStorage.setItem(_tipSeen, '1');
+  } catch (_) {}
+}

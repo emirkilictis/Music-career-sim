@@ -652,6 +652,36 @@ class SaveSlots {
   /// Call (and wait) before [open] (docs K218).
   Future<void> prepare(String slotId) => fs.prepare(dbPath(slotId));
 
+  /// A copy of [slotId]'s database for a backup (docs K219), compacted
+  /// and whole even if the career is open. On the web, [prepare] first.
+  Uint8List backupOf(String slotId) {
+    final tmp = '$rootPath/$slotId/backup.tmp';
+    fs.deleteFile(tmp);
+    final db = fs.openDatabase(dbPath(slotId));
+    try {
+      db.execute('VACUUM INTO ?', [tmp]);
+    } finally {
+      db.dispose();
+    }
+    final bytes = fs.readBytes(tmp)!;
+    fs.deleteFile(tmp);
+    return bytes;
+  }
+
+  /// A new slot holding the database [bytes] from a backup (docs K219).
+  /// The caller opens it to check it, and deletes the slot if it fails.
+  String restoreInto(Uint8List bytes) {
+    const header = 'SQLite format 3';
+    if (bytes.length < 100 ||
+        String.fromCharCodes(bytes.sublist(0, header.length)) != header) {
+      throw const FormatException('Not a career database');
+    }
+    final slotId = 'career_${DateTime.now().microsecondsSinceEpoch}';
+    fs.makeFolder('$rootPath/$slotId');
+    fs.writeBytes(dbPath(slotId), bytes);
+    return slotId;
+  }
+
   /// Premium daily login bonus: true at most once per local calendar day for
   /// the whole account (not per slot), and records the claim. The caller
   /// checks Premium and then credits it with `Actions.grantDailyBonus`.

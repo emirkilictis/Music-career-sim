@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:sqlite3/common.dart';
 
 /// Where the saves live (docs K218): folders and SQLite files on the
@@ -8,6 +9,12 @@ abstract class SaveFs {
   /// A small text file's contents (null: none).
   String? readText(String path);
   void writeText(String path, String text);
+
+  /// A file's bytes (null: none), and writing or deleting one: career
+  /// backups (docs K219).
+  Uint8List? readBytes(String path);
+  void writeBytes(String path, Uint8List bytes);
+  void deleteFile(String path);
 
   /// Names of the folders directly in [path].
   List<String> folders(String path);

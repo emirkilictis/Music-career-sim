@@ -857,6 +857,7 @@ class Fmt {
     if (e is! GameException) return l.errorGeneric;
     return switch (e.code) {
       'notEnoughMoney' => l.errorNotEnoughMoney,
+      'badBackup' => l.errorBadBackup,
       'resting' => l.errorResting,
       'noSkillPoints' => l.errorNoSkillPoints,
       'invalidDate' => l.errorInvalidDate,

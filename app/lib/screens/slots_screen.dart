@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game/game.dart' show GameException;
-import '../boot/boot.dart' show inAppBrowser;
+import 'package:file_selector/file_selector.dart' show openFile;
+
+import '../boot/boot.dart'
+    show dismissHomeScreenTip, homeScreenTipDue, inAppBrowser;
+import '../core/backup.dart';
+import '../core/platform_files.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
@@ -25,6 +30,7 @@ class SlotsScreen extends StatefulWidget {
 
 class _SlotsScreenState extends State<SlotsScreen> {
   List<Map<String, Object?>>? _slots;
+  bool _homeTip = homeScreenTipDue();
 
   @override
   void initState() {
@@ -109,6 +115,97 @@ class _SlotsScreenState extends State<SlotsScreen> {
     _load();
   }
 
+  /// Runs [work] behind a small "please wait" dialog.
+  Future<T> _busy<T>(String text, Future<T> Function() work) async {
+    final nav = Navigator.of(context, rootNavigator: true);
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Row(children: [
+            const SizedBox.square(
+                dimension: 28, child: CircularProgressIndicator()),
+            const SizedBox(width: 20),
+            Expanded(child: Text(text)),
+          ]),
+        ),
+      ),
+    );
+    try {
+      return await work();
+    } finally {
+      nav.pop();
+    }
+  }
+
+  /// A career as a backup file (docs K219).
+  Future<void> _backup(String slotId, String name) async {
+    final l = context.l10n;
+    final controller = context.controller;
+    final images = context.imagesRead;
+    final Uint8List file;
+    try {
+      file = await _busy(l.backingUp, () async {
+        final db = await controller.exec(Cmd.backupSlot(slotId));
+        return CareerBackup(db, images.imagesOf(slotId)).encode();
+      });
+    } catch (e) {
+      if (mounted) showError(context, e);
+      return;
+    }
+    if (!mounted) return;
+    // Saving waits for a tap: a browser only downloads on one.
+    await showDialog<void>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text(l.backupCareer),
+        content: Text(l.backupReady),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d), child: Text(l.cancel)),
+          FilledButton.icon(
+            icon: const Icon(Icons.download_rounded),
+            label: Text(l.backupSave),
+            onPressed: () {
+              saveFileAs(file, CareerBackup.fileName(name));
+              Navigator.pop(d);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Adds the career in a backup file the player picks (docs K219).
+  Future<void> _restore() async {
+    final l = context.l10n;
+    final controller = context.controller;
+    final images = context.imagesRead;
+    final picked = await openFile();
+    if (picked == null || !mounted) return;
+    try {
+      final raw = await picked.readAsBytes();
+      final slotId = await _busy(l.restoring, () async {
+        final CareerBackup backup;
+        try {
+          backup = await CareerBackup.decode(raw);
+        } on FormatException catch (e) {
+          throw GameException('badBackup', e.message);
+        }
+        final id = await controller.exec(Cmd.restoreSlot(backup.database));
+        images.addImages(id, backup.images);
+        return id;
+      });
+      await _load();
+      final name = _slots?.firstWhere((s) => s['slotId'] == slotId,
+          orElse: () => const {})['artistName'] as String?;
+      if (mounted) showInfo(context, l.restoredCareer(name ?? ''));
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -127,6 +224,11 @@ class _SlotsScreenState extends State<SlotsScreen> {
                   label: l.appTitle, child: const BrandWordmark(size: 25))),
         ]),
         actions: [
+          IconButton(
+            tooltip: l.restoreBackup,
+            icon: const Icon(Icons.settings_backup_restore_rounded),
+            onPressed: _restore,
+          ),
           IconButton(
             tooltip: l.settings,
             icon: const Icon(Icons.settings_outlined),
@@ -158,6 +260,14 @@ class _SlotsScreenState extends State<SlotsScreen> {
                             style: Theme.of(context).textTheme.titleLarge),
                         const SizedBox(height: 8),
                         Text(l.noCareersBody, textAlign: TextAlign.center),
+                        const SizedBox(height: 16),
+                        // A backup from another browser or device (K219).
+                        TextButton.icon(
+                          icon:
+                              const Icon(Icons.settings_backup_restore_rounded),
+                          label: Text(l.restoreBackup),
+                          onPressed: _restore,
+                        ),
                       ]),
                     ),
                   )
@@ -254,8 +364,18 @@ class _SlotsScreenState extends State<SlotsScreen> {
                                 tooltip: l.careerMenu,
                                 icon: Icon(Icons.more_vert_rounded,
                                     color: AppColors.textMuted),
-                                onSelected: (_) => _delete(id, name),
+                                onSelected: (v) => v == 1
+                                    ? _backup(id, name)
+                                    : _delete(id, name),
                                 itemBuilder: (_) => [
+                                  PopupMenuItem(
+                                    value: 1,
+                                    child: Row(children: [
+                                      const Icon(Icons.save_alt_rounded),
+                                      const SizedBox(width: 12),
+                                      Text(l.backupCareer),
+                                    ]),
+                                  ),
                                   PopupMenuItem(
                                     value: 0,
                                     child: Row(children: [
@@ -277,25 +397,44 @@ class _SlotsScreenState extends State<SlotsScreen> {
     );
   }
 
-  /// In an app's own browser (X, Instagram…) a note on top: those may
-  /// wipe the saves when closed (docs K218).
+  /// Notes on top of the list (docs K218, K219): in an app's own browser
+  /// (X, Instagram…), which may wipe the saves when closed; on an iPhone
+  /// browser, the Home Screen tip.
   Widget _withNotice(Widget body) {
-    if (!inAppBrowser()) return body;
     final l = context.l10n;
+    final inApp = inAppBrowser();
+    if (!inApp && !_homeTip) return body;
+    Widget note(IconData icon, Color color, String text,
+            {VoidCallback? close}) =>
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: EdgeInsets.fromLTRB(12, 12, close == null ? 12 : 0, 12),
+          decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10)),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Icon(icon, color: color),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text)),
+            if (close != null)
+              IconButton(
+                tooltip: l.close,
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.close_rounded, size: 20),
+                onPressed: close,
+              ),
+          ]),
+        );
     return Column(children: [
-      Container(
-        width: double.infinity,
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-            color: AppColors.coral.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(10)),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(Icons.warning_amber_rounded, color: AppColors.coral),
-          const SizedBox(width: 10),
-          Expanded(child: Text(l.inAppBrowserNotice)),
-        ]),
-      ),
+      if (inApp)
+        note(Icons.warning_amber_rounded, AppColors.coral, l.inAppBrowserNotice)
+      else
+        note(Icons.add_to_home_screen_rounded, AppColors.lilac, l.homeScreenTip,
+            close: () {
+          dismissHomeScreenTip();
+          setState(() => _homeTip = false);
+        }),
       Expanded(child: body),
     ]);
   }

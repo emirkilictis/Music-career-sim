@@ -4,7 +4,22 @@
   "brandTop": "Music Career",
   "brandBottom": "Simulator",
   "brandTagline": "From 2000 to today: write it, release it, top the charts.",
-  "inAppBrowserNotice": "You opened the game inside an app. Its browser may delete your careers when you close it: open this page in Safari or Chrome to keep them.",
+  "inAppBrowserNotice": "You opened the game inside an app. Its browser may delete your careers when you close it: open this page in Safari or Chrome, or back your career up (⋮ → Back up).",
+  "backupCareer": "Back up",
+  "restoreBackup": "Restore a backup",
+  "backingUp": "Backing up…",
+  "restoring": "Restoring…",
+  "backupReady": "Backup ready. Keep the file somewhere safe (Files, iCloud Drive): it restores this career here or on another device.",
+  "backupSave": "Save file",
+  "restoredCareer": "Restored: {name}",
+  "@restoredCareer": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeScreenTip": "Play it like an app: tap Share, then “Add to Home Screen”. Safari may clear a site’s data after 7 days without a visit; the Home Screen app keeps it. Careers do not move over by themselves: back one up here (⋮ → Back up), then restore it there.",
   "settings": "Settings",
   "newCareer": "New career",
   "noCareersTitle": "No careers yet",
@@ -2039,6 +2054,7 @@
   "eraSmash": "Smash",
   "errorGeneric": "Something went wrong.",
   "errorNotEnoughMoney": "Not enough money.",
+  "errorBadBackup": "This file is not a career backup, or it is from a newer version of the game.",
   "errorResting": "You are resting this week.",
   "errorNoSkillPoints": "No skill points left. You get one every week.",
   "errorSkillMaxed": "This skill is already 100.",

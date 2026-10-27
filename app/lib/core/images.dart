@@ -180,6 +180,40 @@ class ImageStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// [slotId]'s images (key → bytes), for a backup (docs K219).
+  Map<String, Uint8List> imagesOf(String slotId) {
+    final dir = Directory('$careersRoot/$slotId/images');
+    if (!dir.existsSync()) return {};
+    return {
+      for (final f in dir.listSync().whereType<File>())
+        if (f.uri.pathSegments.last.contains('_'))
+          f.uri.pathSegments.last.substring(
+              0, f.uri.pathSegments.last.lastIndexOf('_')): f.readAsBytesSync(),
+    };
+  }
+
+  /// Puts a backup's images into [slotId] (docs K219).
+  void addImages(String slotId, Map<String, Uint8List> images) {
+    if (images.isEmpty) return;
+    final dir = Directory('$careersRoot/$slotId/images')
+      ..createSync(recursive: true);
+    final stamp = DateTime.now().microsecondsSinceEpoch;
+    images.forEach((key, bytes) {
+      final ext = '.${mimeOf(bytes).split('/').last}';
+      File('${dir.path}/${key}_$stamp$ext').writeAsBytesSync(bytes);
+    });
+  }
+
+  /// An image's type from its first bytes.
+  static String mimeOf(List<int> b) =>
+      b.length > 3 && b[0] == 0x89 && b[1] == 0x50 && b[2] == 0x4E
+          ? 'image/png'
+          : b.length > 2 && b[0] == 0x47 && b[1] == 0x49
+              ? 'image/gif'
+              : b.length > 12 && b[8] == 0x57 && b[9] == 0x45
+                  ? 'image/webp'
+                  : 'image/jpeg';
+
   void _deleteFile(String key) {
     final old = files.remove(key);
     if (old != null) {

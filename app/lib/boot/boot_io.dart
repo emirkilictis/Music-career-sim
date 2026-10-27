@@ -19,3 +19,7 @@ Future<(GameController, AppSettings, ImageStore)> boot() async {
 
 /// Only a browser has apps' own browsers (docs K218).
 bool inAppBrowser() => false;
+
+/// The Home Screen tip is for iPhone browsers (docs K219).
+bool homeScreenTipDue() => false;
+void dismissHomeScreenTip() {}

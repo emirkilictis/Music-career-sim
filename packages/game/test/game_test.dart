@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:game/game.dart';
 import 'package:test/test.dart';
@@ -209,6 +210,28 @@ void main() {
       g.releaseSingle(song.id, campaign: Campaign.none);
       expect(g.song(song.id).grade, g.world.songs[song.id].quality.round());
       g.close();
+    });
+
+    test('a backup restores the career as a new slot, even open (K219)', () {
+      final g = GameSession.start(slots, _setup(name: 'Backup Star'));
+      final song = g.writeSong(budget: BudgetTier.low);
+      g.advanceWeek();
+      // Backed up while the career is still open.
+      final bytes = GameSession.backup(slots, g.slotId);
+      final week = g.week;
+      g.close();
+      final other = SaveSlots(Directory('${tmp.path}/other'));
+      final id = GameSession.restore(other, bytes);
+      expect(other.list().single['artistName'], 'Backup Star');
+      final r = GameSession.resume(other, id);
+      expect(r.week, week);
+      expect(r.song(song.id).title, g.song(song.id).title);
+      r.advanceWeek();
+      r.close();
+      // Not a career: refused, and nothing is left behind.
+      expect(() => GameSession.restore(other, Uint8List.fromList([1, 2, 3])),
+          _code('badBackup'));
+      expect(other.list(), hasLength(1));
     });
 
     test('the career list shows the latest album (E9)', () {
