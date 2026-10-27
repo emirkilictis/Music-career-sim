@@ -154,6 +154,7 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
         RivalAlbumClash() => EventLine(e,
             title: e.clash.title, artistName: w.artists[e.clash.artistId].name),
         BrandDealBroken() => EventLine(e),
+        AwardSubmissionsOpen() => EventLine(e),
         AwardNominated() => EventLine(e, genre: w.player!.genre),
         AwardResults() => EventLine(e, genre: w.player!.genre),
         AwardWinners() => EventLine(e,
@@ -269,6 +270,7 @@ List<EventLine> sortLines(List<EventLine> lines) {
         RivalAlbumMove() => 4,
         CriticsList() => 1,
         AwardNominated() => 1,
+        AwardSubmissionsOpen() => 2,
         AwardWinners() => 9,
       };
   return [...lines]..sort((a, b) => rank(a).compareTo(rank(b)));

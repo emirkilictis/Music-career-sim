@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'actions.dart';
 import 'audience.dart';
 import 'award_campaigns.dart';
+import 'award_submissions.dart';
 import 'config/charts.dart';
 import 'critics.dart';
 import 'lifecycle.dart';
@@ -185,20 +187,246 @@ abstract final class Awards {
     return s != null && !s.held ? s : null;
   }
 
-  /// Picks this year's nominees (in the nominations week). Each nomination
-  /// brings a little buzz.
-  static AwardShow? nominate(World w) {
-    if (GameTime.weekOfYear(w.week) != nominationsWeekOfYear) return null;
-    final year = showYearOf(w.week);
-    if (showFor(w, year) != null) return null;
+  /// Most entries the player can put up in one category (docs K227).
+  static const maxEntries = 3;
+
+  /// Most genre awards the player can enter.
+  static const maxGenres = 2;
+
+  /// What each of an artist's entries in a category loses for every other
+  /// one there: they split the voters.
+  static const splitPenalty = 0.03;
+
+  /// What an album loses in a genre award it does not fit at all.
+  static const misfitPenalty = 0.3;
+
+  /// Whether the player can submit for the next show now: from the end of
+  /// the eligibility window to the nominations (docs K227).
+  static bool submissionsOpen(World w) {
+    final woy = GameTime.weekOfYear(w.week);
+    return woy >= windowStartWeekOfYear && woy < nominationsWeekOfYear;
+  }
+
+  /// The player's songs in the running for [year]'s show: out in the
+  /// window and on the charts.
+  static List<Song> eligibleSongs(World w, int year) {
     final (from, to) = window(year);
-    final r = RandomStream.keyed(w.seed, w.week, year, RngPurpose.awards);
-    double noise() => r.nextNormal() * 0.05;
+    return [
+      for (final id in w.playerSongIds)
+        if (w.songs[id] case final s
+            when s.primaryArtistId == w.playerArtistId &&
+                s.releasedWeek >= 0 &&
+                _out(s) >= from &&
+                _out(s) < to &&
+                _songHit(s) > 0)
+          s
+    ];
+  }
+
+  static int _out(Song s) =>
+      s.isSingle && s.singleWeek >= 0 ? s.singleWeek : s.releasedWeek;
+
+  /// The player's albums in the running for [year]'s show: out in the
+  /// window and reviewed.
+  static List<Album> eligibleAlbums(World w, int year) {
+    final (from, to) = window(year);
+    return [
+      for (final al in w.albums)
+        if (al.artistId == w.playerArtistId &&
+            al.releaseWeek >= from &&
+            al.releaseWeek < to &&
+            al.type == AlbumType.album &&
+            al.criticScore >= 0)
+          al
+    ];
+  }
+
+  /// Whether [al] can be up for Album of the Year: on the charts, or the
+  /// critics loved it.
+  static bool albumOfYearEligible(World w, Album al) =>
+      _albumHit(al) > 0 || _critic(w, al) >= 0.75;
+
+  static double _critic(World w, Album al) =>
+      (Critics.metascore(w, al) / 10 - 1) / 9;
+
+  /// How much of [al] is [genre]: the share of its tracks in it.
+  static double genreFit(World w, Album al, int genre) {
+    if (al.songIds.isEmpty) return 0;
+    var n = 0;
+    for (final id in al.songIds) {
+      if (w.songs[id].genres.contains(genre)) n++;
+    }
+    return n / al.songIds.length;
+  }
+
+  /// The genre awards [al] could go up for: the artist's genre and its
+  /// tracks' genres.
+  static List<int> genreOptions(World w, Album al) => {
+        w.artists[al.artistId].genre,
+        for (final id in al.songIds) ...w.songs[id].genres,
+      }.toList()
+        ..sort();
+
+  /// Whether the player could be up for Best New Artist at [year]'s show.
+  static bool newArtistEligible(World w, int year) {
+    final me = w.player;
+    if (me == null) return false;
+    final (from, _) = window(year);
+    if (me.debutWeek < from - GameTime.weeksPerYear) return false;
+    var first = -1;
+    for (final id in w.playerSongIds) {
+      final s = w.songs[id];
+      if (s.primaryArtistId != me.id || s.releasedWeek < 0) continue;
+      if (first < 0 || s.releasedWeek < first) first = s.releasedWeek;
+    }
+    if (first < from - GameTime.weeksPerYear) return false;
+    for (final show in w.awardShows) {
+      for (final race in show.races) {
+        if (race.category == AwardCategory.newArtist &&
+            race.nominees.any((n) => n.id == me.id)) {
+          return false;
+        }
+      }
+    }
+    return eligibleSongs(w, year).isNotEmpty;
+  }
+
+  /// What the label submits when the player does not (docs K227): its two
+  /// biggest hits for Record and Song of the Year, its biggest album for
+  /// Album of the Year and the artist's genre, and Best New Artist.
+  static AwardSubmissions labelPicks(World w, int year) {
+    final songs = eligibleSongs(w, year)
+      ..sort((a, b) {
+        final d = _songHit(b).compareTo(_songHit(a));
+        return d != 0 ? d : a.id.compareTo(b.id);
+      });
+    final albums = eligibleAlbums(w, year)
+      ..sort((a, b) {
+        final d = _albumHit(b).compareTo(_albumHit(a));
+        return d != 0 ? d : a.id.compareTo(b.id);
+      });
+    final top = albums.isEmpty ? null : albums.first;
+    final genre = w.player?.genre ?? -1;
+    return AwardSubmissions(year, [
+      for (final s in songs.take(2)) AwardSubmission(AwardCategory.record, s.id),
+      for (final s in songs.take(2)) AwardSubmission(AwardCategory.song, s.id),
+      if (top != null && albumOfYearEligible(w, top))
+        AwardSubmission(AwardCategory.album, top.id),
+      if (top != null)
+        AwardSubmission(AwardCategory.genreAlbum, top.id, genre: genre),
+    ]);
+  }
+
+  /// The player's entries for [year]'s show: theirs, or the label's.
+  static AwardSubmissions submissionsFor(World w, int year) {
+    final s = w.awardSubmissions;
+    return s != null && s.year == year ? s : labelPicks(w, year);
+  }
+
+  /// Every entry the player could make for [year]'s show.
+  static AwardSubmissions everything(World w, int year) =>
+      AwardSubmissions(year, [
+        for (final s in eligibleSongs(w, year)) ...[
+          AwardSubmission(AwardCategory.record, s.id),
+          AwardSubmission(AwardCategory.song, s.id),
+        ],
+        for (final al in eligibleAlbums(w, year)) ...[
+          if (albumOfYearEligible(w, al))
+            AwardSubmission(AwardCategory.album, al.id),
+          for (final g in genreOptions(w, al))
+            AwardSubmission(AwardCategory.genreAlbum, al.id, genre: g),
+        ],
+      ]);
+
+  /// Puts in the player's entries for the next show (docs K227).
+  static void submit(World w, AwardSubmissions s) {
+    if (!submissionsOpen(w) || s.year != showYearOf(w.week)) {
+      throw ActionException('Submissions are closed');
+    }
+    final allowed = everything(w, s.year).entries.toSet();
+    for (final e in s.entries) {
+      if (!allowed.contains(e)) throw ActionException('Not eligible');
+    }
+    if (s.entries.toSet().length != s.entries.length) {
+      throw ActionException('Twice');
+    }
+    for (final c in AwardCategory.values) {
+      if (c == AwardCategory.genreAlbum) {
+        for (final g in s.genres) {
+          if (s.count(c, genre: g) > maxEntries) {
+            throw ActionException('Too many');
+          }
+        }
+      } else if (s.count(c) > maxEntries) {
+        throw ActionException('Too many');
+      }
+    }
+    if (s.genres.length > maxGenres) throw ActionException('Too many genres');
+    w.awardSubmissions = s;
+  }
+
+  /// How each of the player's possible entries looks to the voters now,
+  /// against the field (no luck, no split vote).
+  static Map<AwardSubmission, AwardOutlook> outlook(World w, int year) {
+    final all = everything(w, year);
+    final ballots = _ballots(w, year, () => 0, all, split: false);
+    final out = <AwardSubmission, AwardOutlook>{};
+    for (final e in all.entries) {
+      final key =
+          (e.category, e.category == AwardCategory.genreAlbum ? e.genre : -1);
+      final pool = ballots[key] ?? const [];
+      final mine = pool
+          .where((x) => x.$2.id == e.id && x.$2.artistId == w.playerArtistId)
+          .firstOrNull;
+      if (mine == null) continue;
+      // Rivals ahead of it, each artist once.
+      final ahead = <int>{
+        for (final (score, n) in pool)
+          if (n.artistId != w.playerArtistId && score > mine.$1) n.artistId
+      }.length;
+      final slots = Awards.slots(e.category, year);
+      out[e] = ahead < slots - 1
+          ? AwardOutlook.strong
+          : ahead < slots + 2
+              ? AwardOutlook.borderline
+              : AwardOutlook.longShot;
+    }
+    if (newArtistEligible(w, year)) {
+      final pool = ballots[(AwardCategory.newArtist, -1)] ?? const [];
+      final mine =
+          pool.where((x) => x.$2.id == w.playerArtistId).firstOrNull;
+      if (mine != null) {
+        final ahead = pool.where((x) => x.$1 > mine.$1).length;
+        final slots = Awards.slots(AwardCategory.newArtist, year);
+        out[AwardSubmission(AwardCategory.newArtist, w.playerArtistId)] =
+            ahead < slots - 1
+                ? AwardOutlook.strong
+                : ahead < slots + 2
+                    ? AwardOutlook.borderline
+                    : AwardOutlook.longShot;
+      }
+    }
+    return out;
+  }
+
+  /// The voters' scores in every race of [year]'s show: (category, genre
+  /// or -1) to (score, nominee). The player is in only with [mine].
+  static Map<(AwardCategory, int), List<(double, AwardNominee)>> _ballots(
+      World w, int year, double Function() noise, AwardSubmissions mine,
+      {bool split = true}) {
+    final (from, to) = window(year);
+    final me = w.player;
+    final pid = w.playerArtistId;
+    double splitOf(AwardCategory c, {int genre = -1}) =>
+        split ? splitPenalty * (mine.count(c, genre: genre) - 1) : 0;
 
     // Songs: singles (or charting album tracks) out in the window.
     final record = <(double, AwardNominee)>[];
     final song = <(double, AwardNominee)>[];
     final firstRelease = <int, int>{};
+    // Each artist's best record, whatever they submitted: the voters know
+    // a new artist by all of it.
+    final best = <int, double>{};
     for (final s in w.songs) {
       if (s.releasedWeek < 0) continue;
       final a = s.primaryArtistId;
@@ -206,8 +434,7 @@ abstract final class Awards {
       if (first == null || s.releasedWeek < first) {
         firstRelease[a] = s.releasedWeek;
       }
-      final out =
-          s.isSingle && s.singleWeek >= 0 ? s.singleWeek : s.releasedWeek;
+      final out = _out(s);
       if (out < from || out >= to) continue;
       final hit = _songHit(s);
       if (hit <= 0) continue;
@@ -216,32 +443,60 @@ abstract final class Awards {
       final n = AwardNominee(s.id, a);
       // A For Your Consideration campaign (docs K171).
       final fyc = AwardCampaigns.nominationLift(w, year, a);
-      record.add((0.5 * hit + 0.4 * q + 0.1 * fame + noise() + fyc, n));
-      song.add((0.3 * hit + 0.65 * q + 0.05 * fame + noise() + fyc, n));
+      final rec = 0.5 * hit + 0.4 * q + 0.1 * fame + noise() + fyc;
+      final son = 0.3 * hit + 0.65 * q + 0.05 * fame + noise() + fyc;
+      best[a] = math.max(best[a] ?? 0, rec);
+      // The player's records are up only where they were submitted (K227).
+      if (a != pid || mine.has(AwardCategory.record, s.id)) {
+        record.add((rec - (a == pid ? splitOf(AwardCategory.record) : 0), n));
+      }
+      if (a != pid || mine.has(AwardCategory.song, s.id)) {
+        song.add((son - (a == pid ? splitOf(AwardCategory.song) : 0), n));
+      }
     }
 
     // Albums out in the window that critics reviewed.
     final album = <(double, AwardNominee)>[];
-    final genreAlbum = <(double, AwardNominee)>[];
-    final me = w.player;
+    final genres = <int>{if (me != null) me.genre, ...mine.genres};
+    final genreAlbum = {for (final g in genres) g: <(double, AwardNominee)>[]};
     for (final al in w.albums) {
       if (al.releaseWeek < from || al.releaseWeek >= to) continue;
       if (al.type != AlbumType.album || al.criticScore < 0) continue;
       final a = w.artists[al.artistId];
-      final critic = (Critics.metascore(w, al) / 10 - 1) / 9;
+      final critic = _critic(w, al);
       final hit = _albumHit(al);
       final q = _quality(al.quality);
       final n = AwardNominee(al.id, a.id);
       final fyc = AwardCampaigns.nominationLift(w, year, a.id);
-      if (hit > 0 || critic >= 0.75) {
+      final own = a.id == pid;
+      if ((hit > 0 || critic >= 0.75) &&
+          (!own || mine.has(AwardCategory.album, al.id))) {
         album.add((
-          0.45 * critic + 0.25 * q + 0.2 * hit + 0.1 * a.fame + noise() + fyc,
+          0.45 * critic +
+              0.25 * q +
+              0.2 * hit +
+              0.1 * a.fame +
+              noise() +
+              fyc -
+              (own ? splitOf(AwardCategory.album) : 0),
           n
         ));
       }
-      if (me != null && a.genre == me.genre) {
-        genreAlbum
-            .add((0.5 * critic + 0.2 * q + 0.3 * hit + noise() + fyc, n));
+      final genreScore = 0.5 * critic + 0.2 * q + 0.3 * hit + noise() + fyc;
+      if (own) {
+        // The player's album goes up for the genre awards they picked,
+        // weaker where it does not fit (docs K227).
+        for (final g in genres) {
+          if (!mine.has(AwardCategory.genreAlbum, al.id, genre: g)) continue;
+          genreAlbum[g]!.add((
+            genreScore -
+                misfitPenalty * (1 - genreFit(w, al, g)) -
+                splitOf(AwardCategory.genreAlbum, genre: g),
+            n
+          ));
+        }
+      } else if (genreAlbum[a.genre] case final pool?) {
+        pool.add((genreScore, n));
       }
     }
 
@@ -253,10 +508,6 @@ abstract final class Awards {
           if (race.category == AwardCategory.newArtist)
             for (final n in race.nominees) n.id,
     };
-    final best = <int, double>{};
-    for (final (score, n) in record) {
-      best[n.artistId] = math.max(best[n.artistId] ?? 0, score);
-    }
     final newArtist = <(double, AwardNominee)>[];
     for (final e in best.entries) {
       final a = w.artists[e.key];
@@ -266,9 +517,31 @@ abstract final class Awards {
           first < from - GameTime.weeksPerYear) {
         continue;
       }
+      // The player may hold it back for next year (docs K227).
+      if (a.id == pid && !mine.newArtist) continue;
       newArtist.add(
           (0.6 * e.value + 0.4 * a.fame + noise(), AwardNominee(a.id, a.id)));
     }
+    return {
+      (AwardCategory.record, -1): record,
+      (AwardCategory.song, -1): song,
+      (AwardCategory.album, -1): album,
+      (AwardCategory.newArtist, -1): newArtist,
+      for (final g in genres) (AwardCategory.genreAlbum, g): genreAlbum[g]!,
+    };
+  }
+
+  /// Picks this year's nominees (in the nominations week). Each nomination
+  /// brings a little buzz.
+  static AwardShow? nominate(World w) {
+    if (GameTime.weekOfYear(w.week) != nominationsWeekOfYear) return null;
+    final year = showYearOf(w.week);
+    if (showFor(w, year) != null) return null;
+    final r = RandomStream.keyed(w.seed, w.week, year, RngPurpose.awards);
+    double noise() => r.nextNormal() * 0.05;
+    final me = w.player;
+    final mine = submissionsFor(w, year);
+    final ballots = _ballots(w, year, noise, mine);
 
     final races = <AwardRace>[];
     void add(AwardCategory c, List<(double, AwardNominee)> pool,
@@ -289,11 +562,20 @@ abstract final class Awards {
       }
     }
 
-    add(AwardCategory.record, record);
-    add(AwardCategory.song, song);
-    add(AwardCategory.album, album);
-    add(AwardCategory.newArtist, newArtist);
-    if (me != null) add(AwardCategory.genreAlbum, genreAlbum, genre: me.genre);
+    add(AwardCategory.record, ballots[(AwardCategory.record, -1)]!);
+    add(AwardCategory.song, ballots[(AwardCategory.song, -1)]!);
+    add(AwardCategory.album, ballots[(AwardCategory.album, -1)]!);
+    add(AwardCategory.newArtist, ballots[(AwardCategory.newArtist, -1)]!);
+    // The artist's genre, then any other genre the player entered.
+    final genres = [
+      if (me != null) me.genre,
+      for (final g in mine.genres.toList()..sort())
+        if (g != me?.genre) g
+    ];
+    for (final g in genres) {
+      add(AwardCategory.genreAlbum, ballots[(AwardCategory.genreAlbum, g)]!,
+          genre: g);
+    }
     if (races.isEmpty) return null;
     final show = AwardShow(year: year, races: races);
     w.awardShows.add(show);

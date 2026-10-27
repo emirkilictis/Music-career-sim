@@ -168,6 +168,15 @@ int worldHash(World w) {
     addInt(d.startWeek);
     addInt(d.premiered ? 1 : 0);
   }
+  if (w.awardSubmissions case final subs?) {
+    addInt(subs.year);
+    addInt(subs.newArtist ? 1 : 0);
+    for (final e in subs.entries) {
+      addInt(e.category.index);
+      addInt(e.id);
+      addInt(e.genre);
+    }
+  }
   if (w.fycCampaign case final fyc?) {
     addInt(fyc.year);
     addInt(fyc.nomination?.index ?? -1);

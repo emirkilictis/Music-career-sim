@@ -2779,6 +2779,31 @@ class GameSession {
     _saveNow();
   }
 
+  // ------------------------------------------ award submissions (K227)
+
+  /// What the player can submit for the next awards, and what is in
+  /// (null: submissions are closed).
+  AwardSubmissionsView? get awardSubmissions =>
+      Awards.submissionsOpen(world) ? AwardSubmissionsView.of(world) : null;
+
+  /// Puts in the player's entries for the next awards (docs K227).
+  void submitForAwards(List<AwardSubmission> entries,
+      {required bool newArtist}) {
+    if (!Awards.submissionsOpen(world)) {
+      throw GameException('submissionsClosed', 'Submissions are closed');
+    }
+    try {
+      Awards.submit(
+          world,
+          AwardSubmissions(Awards.showYearOf(world.week), List.of(entries),
+              newArtist: newArtist));
+    } on ActionException catch (e) {
+      throw GameException('badSubmission', e.message);
+    }
+    world.dirtyArtists.add(_p.id);
+    _saveNow();
+  }
+
   // -------------------------------------------------- own label (K169)
 
   ImprintView get imprint => ImprintView.of(world, _p);
@@ -4188,6 +4213,12 @@ class GameSession {
           fans: f.fans));
     }
     if (r.newOpportunity case final o?) events.add(OpportunityCame(o.kind));
+    // Award submissions open (docs K227).
+    if (GameTime.weekOfYear(world.week) == Awards.windowStartWeekOfYear &&
+        Awards.submissionsOpen(world) &&
+        !AwardSubmissionsView.of(world).isEmpty) {
+      events.add(AwardSubmissionsOpen(Awards.showYearOf(world.week)));
+    }
     // The Golden Record Awards (docs K91).
     if (r.awardNominations case final show?) {
       final mine = show.racesOf(p.id).toList();

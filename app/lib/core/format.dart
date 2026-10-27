@@ -908,6 +908,8 @@ class Fmt {
       'noMarquee' => l.errorNoMarquee,
       'cannotCloud' => l.errorCannotCloud,
       'noAnniversary' => l.errorNoAnniversary,
+      'badSubmission' => l.errorBadSubmission,
+      'submissionsClosed' => l.errorSubmissionsClosed,
       'noVersion' => switch (e.message) {
           'editionsPending' => l.versionPending,
           'full' => l.versionFull,
@@ -1080,6 +1082,7 @@ class Fmt {
       HolidaySeason() => l.eventHolidaySeason,
       RivalNumberOne() =>
         l.eventRivalNumberOne(line.artistName, t, chart(e.chartId)),
+      AwardSubmissionsOpen() => l.eventAwardSubmissionsOpen(e.year),
       AwardNominated() => l.eventAwardNominated(e.year,
           e.categories.map((c) => awardCategory(c, line.genre)).join(', ')),
       AwardResults() => [

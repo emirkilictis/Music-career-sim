@@ -13,6 +13,7 @@ import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/income_card.dart';
 import '../widgets/image_pickers.dart';
+import 'award_submissions_screen.dart';
 import 'awards_screen.dart';
 import 'certifications_screen.dart';
 import 'discography_screen.dart';
@@ -106,6 +107,7 @@ class _CareerScreenState extends State<CareerScreen> {
   FanClubView? _club;
   ImprintView? _label;
   FycView? _fyc;
+  AwardSubmissionsView? _subs;
   DocumentaryView? _doc;
   List<WrittenSongView> _guest = const [];
   IncomeBreakdown? _income;
@@ -135,6 +137,7 @@ class _CareerScreenState extends State<CareerScreen> {
     final club = await career.read(Cmd.fanClub());
     final label = await career.read(Cmd.imprint());
     final fyc = await career.read(Cmd.fyc());
+    final subs = await career.read(Cmd.awardSubmissions());
     final doc = await career.read(Cmd.documentary());
     final guest = await career.read(Cmd.guestSongs());
     final income = await career.read(Cmd.careerIncome());
@@ -151,6 +154,7 @@ class _CareerScreenState extends State<CareerScreen> {
         _club = club;
         _label = label;
         _fyc = fyc;
+        _subs = subs;
         _doc = doc;
         _guest = guest;
         _income = income;
@@ -1463,6 +1467,37 @@ class _CareerScreenState extends State<CareerScreen> {
                       label: Text(l.awardsButton),
                     ),
                   ),
+                  // Award submissions (docs K227).
+                  if (_subs case final s? when !s.isEmpty) ...[
+                    const Divider(height: 24),
+                    Text(l.subsTitle,
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
+                    Text(l.subsCardHint(s.year, fmt.week(s.deadlineWeek)),
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                    const SizedBox(height: 4),
+                    Text(
+                        s.byLabel
+                            ? l.subsByLabel
+                            : l.subsMine(s.submitted.entries.length),
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: FilledButton.tonalIcon(
+                        onPressed: () async {
+                          final done = await Navigator.push<bool>(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      AwardSubmissionsScreen(state: career)));
+                          if (done == true) _load();
+                        },
+                        icon: const Icon(Icons.how_to_vote_rounded),
+                        label: Text(l.subsButton),
+                      ),
+                    ),
+                  ],
                   // For Your Consideration (docs K171).
                   if (_fyc case final f? when f.phase != FycPhase.closed) ...[
                     const Divider(height: 24),

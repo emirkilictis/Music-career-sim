@@ -63,6 +63,7 @@ class EventIcon extends StatelessWidget {
       ReleaseAnnounced() => (Icons.campaign_rounded, AppColors.sky),
       RivalNumberOne() => (Icons.newspaper_rounded, AppColors.textMuted),
       AwardNominated() => (Icons.workspace_premium_rounded, AppColors.gold),
+      AwardSubmissionsOpen() => (Icons.how_to_vote_rounded, AppColors.gold),
       AwardResults(:final won) => (
           won.isEmpty
               ? Icons.workspace_premium_outlined

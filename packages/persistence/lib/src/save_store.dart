@@ -115,6 +115,8 @@ class SaveStore {
     w.imprint = Imprint.decode(meta['imprint'] as String?);
     // The player's awards campaign (docs K171).
     w.fycCampaign = FycCampaign.decode(meta['fyc'] as String?);
+    // What the player submitted for the awards (docs K227).
+    w.awardSubmissions = AwardSubmissions.decode(meta['awardSubs'] as String?);
     // The player's documentaries (docs K172).
     w.documentaries.addAll(Documentary.decode(meta['docs'] as String?));
     // The player's Streamify Sessions (docs K178).
@@ -415,6 +417,7 @@ class SaveStore {
       'fanClub': w.fanClub?.encode() ?? '',
       'imprint': w.imprint?.encode() ?? '',
       'fyc': w.fycCampaign?.encode() ?? '',
+      'awardSubs': w.awardSubmissions?.encode() ?? '',
       'docs': Documentary.encode(w.documentaries),
       'sessions': StreamifySession.encode(w.streamifySessions),
       'listenersPeak': w.playerPeakListeners,

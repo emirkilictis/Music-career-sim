@@ -3273,6 +3273,97 @@ class FycView {
           : null;
 }
 
+/// The player's award submissions for the next show (docs K227).
+class AwardSubmissionsView {
+  AwardSubmissionsView.of(World w)
+      : year = Awards.showYearOf(w.week),
+        deadlineWeek = w.week +
+            Awards.nominationsWeekOfYear -
+            GameTime.weekOfYear(w.week) -
+            1,
+        byLabel = w.awardSubmissions?.year != Awards.showYearOf(w.week),
+        playerGenre = w.player?.genre ?? -1,
+        songs = [],
+        albums = [],
+        newArtistEligible = Awards.newArtistEligible(w, Awards.showYearOf(w.week)),
+        submitted = Awards.submissionsFor(w, Awards.showYearOf(w.week)) {
+    final outlook = Awards.outlook(w, year);
+    for (final s in Awards.eligibleSongs(w, year)) {
+      songs.add(AwardSongEntry(
+        songId: s.id,
+        title: s.title,
+        record: outlook[AwardSubmission(AwardCategory.record, s.id)],
+        song: outlook[AwardSubmission(AwardCategory.song, s.id)],
+      ));
+    }
+    for (final al in Awards.eligibleAlbums(w, year)) {
+      albums.add(AwardAlbumEntry(
+        albumId: al.id,
+        title: al.title,
+        album: Awards.albumOfYearEligible(w, al)
+            ? outlook[AwardSubmission(AwardCategory.album, al.id)]
+            : null,
+        genres: [
+          for (final g in Awards.genreOptions(w, al))
+            (
+              g,
+              Awards.genreFit(w, al, g),
+              outlook[AwardSubmission(AwardCategory.genreAlbum, al.id,
+                  genre: g)]
+            )
+        ],
+      ));
+    }
+    newArtist = outlook[
+        AwardSubmission(AwardCategory.newArtist, w.playerArtistId)];
+  }
+
+  /// The show it is for and the last week to submit.
+  final int year;
+  final int deadlineWeek;
+
+  /// Nothing submitted yet: the label submits [submitted] for the player.
+  final bool byLabel;
+  final int playerGenre;
+  final List<AwardSongEntry> songs;
+  final List<AwardAlbumEntry> albums;
+  final bool newArtistEligible;
+
+  /// How Best New Artist looks (null: not eligible).
+  late final AwardOutlook? newArtist;
+  final AwardSubmissions submitted;
+
+  bool get isEmpty => songs.isEmpty && albums.isEmpty && !newArtistEligible;
+}
+
+/// A song the player can put up for Record or Song of the Year, and how
+/// it looks there (null: cannot).
+class AwardSongEntry {
+  const AwardSongEntry(
+      {required this.songId,
+      required this.title,
+      required this.record,
+      required this.song});
+  final int songId;
+  final String title;
+  final AwardOutlook? record;
+  final AwardOutlook? song;
+}
+
+/// An album the player can put up for Album of the Year ([album], null:
+/// cannot) and genre awards: (genre, fit 0..1, outlook).
+class AwardAlbumEntry {
+  const AwardAlbumEntry(
+      {required this.albumId,
+      required this.title,
+      required this.album,
+      required this.genres});
+  final int albumId;
+  final String title;
+  final AwardOutlook? album;
+  final List<(int, double, AwardOutlook?)> genres;
+}
+
 /// The player's own label, or what founding one takes (docs K169).
 class ImprintView {
   ImprintView.of(World w, Artist a)

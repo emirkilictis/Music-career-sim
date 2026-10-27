@@ -7695,6 +7695,79 @@
     }
   },
   "errorNoPush": "There is no new single to push now.",
+  "eventAwardSubmissionsOpen": "Submissions for the {year} Golden Record Awards are open: choose what goes up for what before the nominations, or your label will.",
+  "@eventAwardSubmissionsOpen": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "subsTitle": "Award submissions",
+  "subsCardHint": "Choose what goes up for what at the {year} awards, until {date}.",
+  "@subsCardHint": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "subsByLabel": "Your label is submitting its biggest hits for you.",
+  "subsMine": "{count} submissions in",
+  "@subsMine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subsButton": "Choose submissions",
+  "subsIntro": "Only what you put up can be nominated. Several records in one category split the voters; an album in a genre it does not fit is a long shot. The outlook is how voters see each one now.",
+  "subsSongs": "Songs",
+  "subsAlbums": "Albums",
+  "subsGenreAward": "Best {genre} Album · {fit}% fits",
+  "@subsGenreAward": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      },
+      "fit": {
+        "type": "int"
+      }
+    }
+  },
+  "subsNewArtist": "Best New Artist",
+  "subsNewArtistHint": "Held back, you can still be up for it next year, if your first records are recent enough.",
+  "subsStrong": "Strong",
+  "subsBorderline": "Borderline",
+  "subsLongShot": "Long shot",
+  "subsSplit": "{count} in one category: they split the vote.",
+  "@subsSplit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "subsSave": "Submit",
+  "subsDone": "Submitted. You can change it until the deadline.",
+  "subsEmpty": "Nothing of yours is in the running this year: songs need to chart, albums need reviews.",
+  "subsLimit": "Up to {max} per category and {genres} genre awards.",
+  "@subsLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      },
+      "genres": {
+        "type": "int"
+      }
+    }
+  },
+  "errorBadSubmission": "That submission is not allowed.",
+  "errorSubmissionsClosed": "Submissions are closed until next October.",
   "fycTitle": "For Your Consideration",
   "fycNominations": "Before the {year} nominations: trade ads, screenings and parties lift every record of yours in the running.",
   "@fycNominations": {

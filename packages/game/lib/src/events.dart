@@ -738,6 +738,16 @@ class AwardNominated extends GameEvent {
   bool get isMajor => true;
 }
 
+/// Award submissions are open (docs K227): the player has records in the
+/// running for [year]'s show and can pick what goes up for what until the
+/// nominations.
+class AwardSubmissionsOpen extends GameEvent {
+  const AwardSubmissionsOpen(this.year);
+  final int year;
+  @override
+  bool get isMajor => true;
+}
+
 /// The show the player was nominated at was held: what they won and what
 /// the night did.
 class AwardResults extends GameEvent {

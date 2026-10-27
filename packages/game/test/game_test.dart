@@ -615,6 +615,91 @@ void main() {
       g.close();
     });
 
+    test('award submissions: the player picks what goes up for what (K227)',
+        () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2019,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final id = g.slotId;
+      final w = g.world;
+      w.player!.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        w.player!.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      g.releaseSingle(ids.first);
+      g.advanceWeeks(3, stop: SkipStop.never);
+      g.releaseSingle(ids[1]);
+      g.advanceWeeks(3, stop: SkipStop.never);
+      g.releaseAlbum('Ballot', ids);
+      expect(g.awardSubmissions, isNull);
+      final events = <GameEvent>[];
+      while (GameTime.weekOfYear(g.week) < Awards.windowStartWeekOfYear) {
+        events.addAll(g.advanceWeek().events);
+      }
+      expect(events.whereType<AwardSubmissionsOpen>().single.year, 2020);
+      var v = g.awardSubmissions!;
+      expect(v.year, 2020);
+      expect(v.byLabel, isTrue);
+      expect(v.songs, isNotEmpty);
+      expect(v.albums.single.title, 'Ballot');
+      // The label puts up its biggest hits.
+      expect(v.submitted.count(AwardCategory.record), lessThanOrEqualTo(2));
+      // Only eligible records, and not too many in one category.
+      expect(
+          () => g.submitForAwards(
+              [AwardSubmission(AwardCategory.record, 999999)],
+              newArtist: false),
+          _code('badSubmission'));
+      final album = v.albums.single;
+      final other = album.genres.map((x) => x.$1).firstWhere(
+          (x) => x != v.playerGenre,
+          orElse: () => v.playerGenre);
+      final picks = [
+        AwardSubmission(AwardCategory.song, v.songs.first.songId),
+        AwardSubmission(AwardCategory.genreAlbum, album.albumId, genre: other),
+      ];
+      g.submitForAwards(picks, newArtist: false);
+      v = g.awardSubmissions!;
+      expect(v.byLabel, isFalse);
+      expect(v.submitted.entries, picks);
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.awardSubmissions!.submitted.entries, picks);
+      while (GameTime.weekOfYear(g.week) <= Awards.nominationsWeekOfYear) {
+        g.advanceWeek();
+      }
+      expect(g.awardSubmissions, isNull);
+      final show = Awards.showFor(g.world, 2020)!;
+      final me = g.world.playerArtistId;
+      // Up only where submitted: no Record of the Year, no Album of the
+      // Year, no Best New Artist.
+      for (final race in show.races) {
+        final mine = race.nominees.where((n) => n.artistId == me);
+        switch (race.category) {
+          case AwardCategory.record ||
+                AwardCategory.album ||
+                AwardCategory.newArtist:
+            expect(mine, isEmpty, reason: race.category.name);
+          case AwardCategory.song:
+            expect(mine.every((n) => n.id == v.songs.first.songId), isTrue);
+          case AwardCategory.genreAlbum:
+            if (race.genre != other) expect(mine, isEmpty);
+        }
+      }
+      // The genre award entered was held.
+      expect(
+          show.races.any((r) =>
+              r.category == AwardCategory.genreAlbum && r.genre == other),
+          isTrue);
+      g.close();
+    });
+
     test('festivals are booked, played and kept across reopening (K77)', () {
       var g = GameSession.start(
           slots,

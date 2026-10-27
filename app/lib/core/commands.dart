@@ -321,6 +321,13 @@ abstract final class Cmd {
   static SessionCmd<void> releaseDeluxe(int albumId, List<int> songIds) =>
       (s) => s.releaseDeluxe(albumId, songIds);
 
+  /// Award submissions (docs K227).
+  static SessionCmd<AwardSubmissionsView?> awardSubmissions() =>
+      (s) => s.awardSubmissions;
+  static SessionCmd<void> submitForAwards(
+          List<AwardSubmission> entries, bool newArtist) =>
+      (s) => s.submitForAwards(entries, newArtist: newArtist);
+
   /// A new version of an album after it came out (docs K225, K226); the
   /// edition (cover index) it became.
   static SessionCmd<int> releaseAlbumVersion(int albumId,

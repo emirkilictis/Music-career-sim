@@ -13,6 +13,7 @@ import 'festivals.dart';
 import 'model.dart';
 import 'rng.dart';
 import 'award_campaigns.dart';
+import 'award_submissions.dart';
 import 'documentaries.dart';
 import 'streamify_sessions.dart';
 import 'artist_pick.dart';
@@ -100,6 +101,9 @@ class World {
 
   /// The player's latest awards campaign (docs K171).
   FycCampaign? fycCampaign;
+
+  /// What the player submitted for the next awards (docs K227).
+  AwardSubmissions? awardSubmissions;
 
   /// The player's documentaries (docs K172).
   final List<Documentary> documentaries = [];
