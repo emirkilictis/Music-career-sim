@@ -11,6 +11,8 @@
   "restoring": "Restoring…",
   "backupReady": "Backup ready. Keep the file somewhere safe (Files, iCloud Drive): it restores this career here or on another device.",
   "backupSave": "Save file",
+  "restoreHow": "Pick the .mcsave file you saved when you backed up. On an iPhone or iPad tap “Choose File” (not Photo Library), then look in Files › Downloads, or wherever you saved it.",
+  "restoreChoose": "Choose the file",
   "restoredCareer": "Restored: {name}",
   "@restoredCareer": {
     "placeholders": {

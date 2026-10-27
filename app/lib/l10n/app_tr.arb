@@ -11,6 +11,8 @@
   "restoring": "Geri yükleniyor…",
   "backupReady": "Yedek hazır. Dosyayı güvenli bir yere kaydet (Dosyalar, iCloud Drive): bu kariyeri burada ya da başka bir cihazda geri yükler.",
   "backupSave": "Dosyayı kaydet",
+  "restoreHow": "Yedeklerken kaydettiğin .mcsave dosyasını seç. iPhone ya da iPad’de “Dosya Seç”e dokun (Fotoğraf Arşivi’ne değil), sonra Dosyalar › İndirilenler’e ya da kaydettiğin yere bak.",
+  "restoreChoose": "Dosyayı seç",
   "restoredCareer": "Geri yüklendi: {name}",
   "homeScreenTip": "Uygulama gibi oyna: Paylaş’a, sonra “Ana Ekrana Ekle”ye dokun. Safari 7 gün açılmayan sitelerin verisini silebilir; ana ekrandaki uygulama saklar. Kariyerler oraya kendiliğinden geçmez: burada yedekle (⋮ → Yedekle), orada geri yükle.",
   "settings": "Ayarlar",

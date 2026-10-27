@@ -182,6 +182,24 @@ class _SlotsScreenState extends State<SlotsScreen> {
     final l = context.l10n;
     final controller = context.controller;
     final images = context.imagesRead;
+    // Which file, and where: phones offer photos first (F109).
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        icon: const Icon(Icons.settings_backup_restore_rounded),
+        title: Text(l.restoreBackup),
+        content: Text(l.restoreHow),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(c, false),
+              child: Text(l.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(c, true),
+              child: Text(l.restoreChoose)),
+        ],
+      ),
+    );
+    if (go != true || !mounted) return;
     final picked = await openFile();
     if (picked == null || !mounted) return;
     try {

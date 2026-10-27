@@ -49,7 +49,7 @@ sunucuya konabilir: GitHub Pages, Netlify, Cloudflare Pages ya da kendi sunucun.
   - Uygulama içi tarayıcılar (X, Instagram, TikTok…) kapanınca site verisini silebilir. Oyun
     böyle bir tarayıcıda açıldığında kariyer listesinin üstünde "Safari ya da Chrome'da aç"
     uyarısı çıkar.
-- **Yedek (K219):** Kariyer listesinde ⋮ → Yedekle bir `.mcsave` dosyası indirir; ↺ ile başka bir
+- **Yedek (K219):** Kariyer listesinde ⋮ → Yedekle bir `.mcsave` dosyası indirir; ↺ ile (iPhone'da seçicide "Dosya Seç", F109) başka bir
   tarayıcıda, ana ekran uygulamasında ya da telefon uygulamasında geri yüklenir. iPhone'da
   tarayıcıdayken "Ana ekrana ekle" ipucu çıkar (Safari 7 gün açılmayan sitenin verisini
   silebilir; ana ekran uygulamasının deposu ayrıdır).
