@@ -23,6 +23,7 @@ import 'rival_editor_screen.dart';
 import 'releases_tab.dart';
 import 'game_shell.dart';
 import 'song_detail_screen.dart';
+import 'song_earnings_screen.dart';
 import 'streamify/artist_page.dart';
 import 'tour_screen.dart';
 
@@ -1098,19 +1099,18 @@ class _CareerScreenState extends State<CareerScreen> {
           Section(
             title: l.rivalEditorTitle,
             icon: Icons.people_outline_rounded,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l.rivalEditorCard,
-                      style: TextStyle(color: AppColors.textMuted)),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    onPressed: () =>
-                        pushInCareer(context, const RivalEditorScreen()),
-                    icon: const Icon(Icons.edit_outlined),
-                    label: Text(l.rivalEditorOpen),
-                  ),
-                ]),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(l.rivalEditorCard,
+                  style: TextStyle(color: AppColors.textMuted)),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () =>
+                    pushInCareer(context, const RivalEditorScreen()),
+                icon: const Icon(Icons.edit_outlined),
+                label: Text(l.rivalEditorOpen),
+              ),
+            ]),
           ),
         ]),
         ..._on(_CareerPage.business, [
@@ -1165,6 +1165,18 @@ class _CareerScreenState extends State<CareerScreen> {
           if (_income case final income? when income.total >= 100) ...[
             const SizedBox(height: 12),
             IncomeCard(income: income, title: l.incomeCareerTitle),
+            // Song by song (docs K220).
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                icon: const Icon(Icons.format_list_numbered_rounded),
+                label: Text(l.earningsButton),
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => SongEarningsScreen(state: career))),
+              ),
+            ),
           ],
           // Selling the catalog (docs K153).
           if (_catalog case final c? when c.open && c.offerCents > 0) ...[

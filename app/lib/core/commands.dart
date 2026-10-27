@@ -477,6 +477,8 @@ abstract final class Cmd {
   static SessionCmd<IncomeBreakdown> songIncome(int songId) =>
       (s) => s.songIncome(songId);
   static SessionCmd<IncomeBreakdown> careerIncome() => (s) => s.careerIncome;
+  static SessionCmd<List<SongEarningView>> songEarnings() =>
+      (s) => s.songEarnings;
 
   /// The player's channel on the video site (docs K142).
   static SessionCmd<ChannelView> channel() => (s) => s.channel;

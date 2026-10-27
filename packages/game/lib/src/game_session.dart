@@ -3278,6 +3278,41 @@ class GameSession {
   IncomeBreakdown songIncome(int songId) =>
       Income.ofSong(world, world.songs[songId]);
 
+  /// Every released song's money for the player, the best earner first
+  /// (docs K220): their own records and the songs they wrote for others.
+  List<SongEarningView> get songEarnings {
+    final w = world;
+    final out = <SongEarningView>[
+      for (final id in [...w.playerSongIds, ...w.managedSongIds])
+        if (w.songs[id] case final s
+            when s.releasedWeek >= 0 && s.status != SongStatus.scrapped)
+          SongEarningView(
+            songId: s.id,
+            title: s.title,
+            albumId: coverAlbumOf(w, s),
+            year: GameTime.yearOf(s.releasedWeek),
+            earnedCents: Income.ofSong(w, s).total,
+            costCents: s.campaignCostCents,
+            streams: w.songLifetimeStreams(s),
+          ),
+      for (final id in w.writtenSongIds)
+        if (w.songs[id] case final s
+            when s.writerId == w.playerArtistId && s.releasedWeek >= 0)
+          SongEarningView(
+            songId: s.id,
+            title: s.title,
+            albumId: coverAlbumOf(w, s),
+            year: GameTime.yearOf(s.releasedWeek),
+            earnedCents: s.writerCents,
+            costCents: 0,
+            streams: w.songLifetimeStreams(s),
+            forArtist: w.artists[s.primaryArtistId].name,
+          ),
+    ];
+    out.sort((a, b) => b.earnedCents.compareTo(a.earnedCents));
+    return out;
+  }
+
   /// The player's career record money by source (docs K145).
   IncomeBreakdown get careerIncome => Income.ofCareer(world);
 

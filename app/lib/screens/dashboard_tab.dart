@@ -154,6 +154,7 @@ class _NextStepCard extends StatelessWidget {
     final l = context.l10n;
     final career = context.career;
     final p = career.player;
+    const quietWeeks = 26;
     final sinceRelease =
         p.lastReleaseWeek < 0 ? 1 << 20 : career.week - p.lastReleaseWeek;
     Future<void> rest() async {
@@ -207,7 +208,13 @@ class _NextStepCard extends StatelessWidget {
           l.goReleases,
           () => onOpenTab?.call(2),
         ),
-      _ when p.vaultCount > 0 && sinceRelease >= 6 => (
+      // The first song at once; later, only after a real silence: half a
+      // year, when fans start asking (F98; nudging after six weeks pushed
+      // players to release far too often).
+      _
+          when p.vaultCount > 0 &&
+              (p.lastReleaseWeek < 0 || sinceRelease >= quietWeeks) =>
+        (
           Icons.music_note_rounded,
           l.stepReleaseTitle,
           p.lastReleaseWeek < 0
@@ -367,8 +374,10 @@ class _StatusRow extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      // Tall enough for the fame guide on a small phone.
+      isScrollControlled: true,
       builder: (c) => SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -385,6 +394,38 @@ class _StatusRow extends StatelessWidget {
                           fmt.percent(Label.giant.minFame * scale))),
                       row(l.popularityNow, fmt.percent(p.popularity),
                           l.popularityInfo),
+                      const SizedBox(height: 10),
+                      // Where it goes from here (F98: "how does fame grow?").
+                      Text(
+                          p.popularity > p.fame + 0.001
+                              ? l.fameRising(fmt.percent(p.popularity))
+                              : l.fameSteady,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: p.popularity > p.fame + 0.001
+                                  ? AppColors.mint
+                                  : AppColors.textMuted)),
+                      const SizedBox(height: 14),
+                      Text(l.fameHowTitle,
+                          style: const TextStyle(fontWeight: FontWeight.w800)),
+                      for (final t in [
+                        l.fameHow1,
+                        l.fameHow2,
+                        l.fameHow3,
+                        l.fameHow4
+                      ])
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('•  '),
+                                Expanded(
+                                    child: Text(t,
+                                        style:
+                                            const TextStyle(fontSize: 13.5))),
+                              ]),
+                        ),
                     ]
                   : [
                       Text('${l.coreFans} · ${fmt.compact(p.coreFans)}',

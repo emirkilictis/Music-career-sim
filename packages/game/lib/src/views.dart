@@ -2866,6 +2866,35 @@ class WrittenSongView {
   final double earnedCents;
 }
 
+/// What one song has earned the player (docs K220): a record of their
+/// own (their share of streams and sales, less its campaign) or one they
+/// wrote for someone else (the writer's royalty).
+class SongEarningView {
+  SongEarningView({
+    required this.songId,
+    required this.title,
+    required this.albumId,
+    required this.year,
+    required this.earnedCents,
+    required this.costCents,
+    required this.streams,
+    this.forArtist,
+  });
+
+  final int songId;
+  final String title;
+  final int albumId;
+  final int year;
+  final double earnedCents;
+
+  /// What its campaign cost (own records only).
+  final int costCents;
+  final double streams;
+
+  /// Who recorded it, for a song written for someone else.
+  final String? forArtist;
+}
+
 /// The player's documentaries and what making one takes (docs K172).
 class DocumentaryView {
   DocumentaryView.of(World w, Artist a)

@@ -197,6 +197,13 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F95 | Emir: "Bir single çıkarıp #1 debut neredeyse imkânsız gibi ama bu yaşanan bir şey." | ✅ K217: Ünlü ya da beklenen sanatçının single'ı ilk haftadan liste, radyo ve basın desteğiyle başlıyor; #1'den giriş artık mümkün, rakiplerin #1'lerinin %15–25'i #1'den giriyor. |
 | F96 | Emir: "Oyunu web'e açalım mı bir dahaki adımda." | ✅ K218: Oyun tarayıcıda çalışıyor (Chrome/Edge/Firefox/Safari 18.2+). Kayıtlar tarayıcıda tutuluyor. `flutter build web --wasm` çıktısı herhangi bir statik sunucuya konabilir (docs/web.md). |
 | F97 | Web'i deneyen oyuncular (Emir'in paylaştığı ekran görüntüsü): "Sekmeden çıktım, kariyer gitti." Emir: "Bende son sürüm Safari var, açılmıyor"; Chrome'da da açılmadı. | ✅ K218: Durmadan hafta geçen oyuncunun kaydı hiç yazılmıyordu; artık en geç ~1 sn içinde yazılıyor ve başarısız yazma yeniden deneniyor. Uygulama içi tarayıcıda uyarı çıkıyor. Safari ve Firefox da WebAssembly sürümünü alıyor (iPhone'da bütün tarayıcılar Safari motorunu kullanıyor). |
+| F98 | Oyuncu (Emir'in ilettiği): "3-4 ay senden haber alınamadı diyor ya, bence çok az süre; 6-7 ay ya da 1 yıl olmalı, çok sık yayınlamaya itiyor." | ✅ K220: Ana ekranın "bir single çıkar" önerisi artık son çıkıştan 6 ay sonra geliyor (önce 6 haftaydı); ilk şarkı için hemen. |
+| F99 | Oyuncu: "Ünlülük nasıl artıyor çözemedim." | ✅ K220: Ünlülük ekranı şu an yükselip yükselmediğini ve neyin yükselttiğini (küresel listede #1'e göre puan, aynı anda birden çok şarkı, ödüller; hiç düşmez) madde madde söylüyor. |
+| F100 | Oyuncu: "Yazdığımız şarkılardan aldığımız geliri gösteren bir pencere olabilir." | ✅ K220: Kariyer → gelir kartı → "Şarkı şarkı kazançlar": her şarkının kazancı, kampanyası düşülmüş kârı, başkalarına yazılan şarkıların telifi; en çok kazandıran önce. |
+| F101 | Oyuncu: "Turne şu an sadece tıklıyorsun gibi; şehir seçme, hangi arena olacağı, adı, koyacağımız şarkılar gelmeli. Turneye çıkınca albümün satışında ufak da olsa artış olmalı; seçilen şarkılar ve albümleri artmalı." | ⏳ Sırada (setlist, şehir/mekân seçimi, turnede setlist ve albüm artışı). |
+| F102 | Oyuncu: "Ülkelere göre popülerlik olayı da gelebilir." | ⏳ Sırada. |
+| F103 | Oyuncu: "Versiyon olayı iyi olmuş." | 👍 |
+| F104 | Emir ve oyuncu: "Oyun mass-release'e itiyor; biraz hızlı dopamin, daha yavaş ve detaylı olmalı, daha zorlaması lazım, şu an çok basit." | ⏳ Ölçülüyor: sık çıkış ile aralıklı çıkış karşılaştırılacak. |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

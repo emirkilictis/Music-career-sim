@@ -526,6 +526,20 @@
   },
   "popularityNow": "Popularity this week",
   "popularityInfo": "Your chart points this week next to the world’s #1 song. When it is above your fame, fame rises.",
+  "fameRising": "Rising: your music is hotter than your name, so fame climbs toward {target} a little every week.",
+  "@fameRising": {
+    "placeholders": {
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "fameSteady": "Not moving: fame only grows while this week’s popularity is above it. Get a song onto the charts to push it.",
+  "fameHowTitle": "What raises it",
+  "fameHow1": "A hit: what counts is your songs’ chart points next to the world’s #1 song. A song high on the global chart lifts you the most.",
+  "fameHow2": "Several songs at once: every song you have on the charts adds up, album tracks too.",
+  "fameHow3": "Awards: a win adds fame straight away.",
+  "fameHow4": "It never drops: a break costs popularity, not fame.",
   "fansInfo": "Core fans stream your new songs from day one and buy your albums. They come from the people your songs reach; charisma, good eras and tours win more of them.",
   "devotionInfo": "How loyal your fans are. Good eras raise it; devoted fans buy more, editions too.",
   "listenersInfo": "People who know a few of your songs. Some become fans; they stream your hits.",
@@ -2427,7 +2441,7 @@
     }
   },
   "fromVault": "From the vault",
-  "stepReleaseBody": "{count} songs are waiting in the vault, and your fans haven't heard from you in a while.",
+  "stepReleaseBody": "{count} songs are waiting in the vault, and your fans haven't heard from you in half a year.",
   "@stepReleaseBody": {
     "placeholders": {
       "count": {
@@ -5837,6 +5851,34 @@
   },
   "incomeSongTitle": "What it earned you",
   "incomeCareerTitle": "Record money by source",
+  "earningsButton": "What each song earned",
+  "earningsTitle": "Earnings by song",
+  "earningsHint": "Your share of each song’s streams and sales, and the royalties from songs you wrote for others. Under it, what is left after the song’s campaign.",
+  "earningsEmpty": "No released songs yet.",
+  "earningsWrittenFor": "written for {artist}",
+  "@earningsWrittenFor": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "earningsStreams": "{count} streams",
+  "@earningsStreams": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "earningsCampaign": "campaign {cost}",
+  "@earningsCampaign": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
   "incomeHint": "Your share, by where it came from. Per play, the second streaming service pays about twice the big app and the video site a quarter of it.",
   "incomeDownloads": "Downloads",
   "incomePhysical": "Physical singles",

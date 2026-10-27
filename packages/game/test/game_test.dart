@@ -234,6 +234,22 @@ void main() {
       expect(other.list(), hasLength(1));
     });
 
+    test('earnings list every released song, best first (K220)', () {
+      final g = GameSession.start(slots, _setup());
+      final a = g.writeSong(budget: BudgetTier.low);
+      g.world.player!.creativeEnergy = 100;
+      final b = g.writeSong(budget: BudgetTier.low);
+      g.releaseSingle(a.id, campaign: Campaign.none);
+      g.releaseSingle(b.id, campaign: Campaign.none);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      final e = g.songEarnings;
+      expect(e.map((x) => x.songId), unorderedEquals([a.id, b.id]));
+      expect(e.first.earnedCents, greaterThanOrEqualTo(e.last.earnedCents));
+      expect(e.first.earnedCents,
+          closeTo(g.songIncome(e.first.songId).total, 1e-6));
+      g.close();
+    });
+
     test('the career list shows the latest album (E9)', () {
       final g = GameSession.start(slots, _setup());
       final ids = [
