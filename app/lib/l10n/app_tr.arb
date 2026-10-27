@@ -2135,7 +2135,7 @@
   "subsStrong": "Güçlü",
   "subsBorderline": "Sınırda",
   "subsLongShot": "Zayıf ihtimal",
-  "subsSplit": "Bir dalda {count} iş: oylar bölünür.",
+  "subsSplit": "{category}: {count} iş oyları böler.",
   "subsSave": "Gönder",
   "subsDone": "Gönderildi. Son güne kadar değiştirebilirsin.",
   "subsEmpty": "Bu yıl yarışta işin yok: şarkıların listeye girmesi, albümlerin eleştiri alması gerekir.",

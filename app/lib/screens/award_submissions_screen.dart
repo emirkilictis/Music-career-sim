@@ -116,7 +116,8 @@ class _AwardSubmissionsScreenState extends State<AwardSubmissionsScreen> {
                           AwardCategory.album,
                         ])
                           if (_count(c) > 1)
-                            _Warn(l.subsSplit(_count(c))),
+                            _Warn(l.subsSplit(
+                                fmt.awardCategory(c, -1), _count(c))),
                         if (v.songs.isNotEmpty) ...[
                           const SizedBox(height: 14),
                           Section(

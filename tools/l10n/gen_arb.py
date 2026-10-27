@@ -2171,7 +2171,7 @@ k('subsNewArtistHint','Held back, you can still be up for it next year, if your 
 k('subsStrong','Strong','Güçlü')
 k('subsBorderline','Borderline','Sınırda')
 k('subsLongShot','Long shot','Zayıf ihtimal')
-k('subsSplit','{count} in one category: they split the vote.','Bir dalda {count} iş: oylar bölünür.', count='int')
+k('subsSplit','{category}: {count} entries split the vote.','{category}: {count} iş oyları böler.', category='String', count='int')
 k('subsSave','Submit','Gönder')
 k('subsDone','Submitted. You can change it until the deadline.','Gönderildi. Son güne kadar değiştirebilirsin.')
 k('subsEmpty','Nothing of yours is in the running this year: songs need to chart, albums need reviews.','Bu yıl yarışta işin yok: şarkıların listeye girmesi, albümlerin eleştiri alması gerekir.')

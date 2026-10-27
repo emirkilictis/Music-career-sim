@@ -32,7 +32,7 @@ void main() {
     addTearDown(app.dispose);
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Monkey',
           genre: 0,
@@ -44,7 +44,7 @@ void main() {
           premium: true,
           seed: seed,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     final songs = <int>[];
     while (songs.length < 14) {

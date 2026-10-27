@@ -72,7 +72,7 @@ void main() {
     // A Premium vocal group with a single and an album out.
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Velvet Avenue',
           genre: 0,
@@ -84,7 +84,7 @@ void main() {
           premium: true,
           seed: 2024,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     final songs = <int>[];
     while (songs.length < 16) {
@@ -528,7 +528,7 @@ void main() {
     // 2002: CD singles and radio, no streaming yet.
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'June Harper',
           genre: 0,
@@ -538,7 +538,7 @@ void main() {
           premium: true,
           seed: 2002,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     final song =
         (await c.run(Cmd.writeSong(budget: BudgetTier.high, genres: const [0])))
@@ -616,7 +616,7 @@ void main() {
     addTearDown(app.dispose);
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Nova Reyes',
           genre: 0,
@@ -626,7 +626,7 @@ void main() {
           premium: true,
           seed: 209,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     // An album and its singles, half a year on (docs K209, K210).
     await c.run((s) {
@@ -793,6 +793,78 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '16f_new_version');
   });
+  testWidgets('screenshots: award submissions and a crisis',
+      skip: !enabled, (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await tester.runAsync(() => c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 227,
+        ),
+        PortSink(port.sendPort))));
+    port.close();
+    // A year of records, up to the awards submissions (docs K227).
+    await tester.runAsync(() => c.run((s) {
+          final p = s.world.player!;
+          p.moneyCents = 1 << 40;
+          final songs = <int>[];
+          for (var i = 0; i < 10; i++) {
+            p.creativeEnergy = 100;
+            songs.add(s
+                .writeSong(budget: BudgetTier.high, title: 'Track ${i + 1}')
+                .id);
+          }
+          s.releaseSingle(songs.first);
+          s.advanceWeeks(3, stop: SkipStop.never);
+          s.releaseSingle(songs[1]);
+          s.advanceWeeks(3, stop: SkipStop.never);
+          s.releaseAlbum('Gold Rush', songs);
+          while (GameTime.weekOfYear(s.week) < Awards.windowStartWeekOfYear) {
+            s.advanceWeek();
+          }
+          // A hate wave to answer (docs K228).
+          p.opportunity =
+              Opportunity(kind: OpportunityKind.hateWave, week: s.week);
+          s.world.dirtyArtists.add(p.id);
+          s.writeSong(budget: BudgetTier.low);
+        }));
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    ScaffoldMessenger.of(tester.element(find.byType(Scaffold).first))
+        .removeCurrentSnackBar();
+    final crisis = _ci('Hate wave');
+    await tester.scrollUntilVisible(crisis, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await shot(tester, '17a_crisis');
+    await tab(tester, 'Career');
+    await careerPage(tester, 'Track record');
+    final subs = _ci('Choose submissions');
+    await tester.scrollUntilVisible(subs, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await shot(tester, '17b_submissions_card');
+    await tester.tap(subs);
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 300)));
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+    await tester.pumpAndSettle();
+    await shot(tester, '17c_submissions');
+  });
   testWidgets('screenshots: posts with pictures', skip: !enabled,
       (tester) async {
     await tester.runAsync(loadFonts);
@@ -801,7 +873,7 @@ void main() {
     addTearDown(app.dispose);
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Nova Reyes',
           genre: 0,
@@ -811,7 +883,7 @@ void main() {
           premium: true,
           seed: 211,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     // A teaser, a single and the album after it (docs K211).
     await c.run((s) {
@@ -855,7 +927,7 @@ void main() {
     addTearDown(app.dispose);
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Nova Reyes',
           genre: 0,
@@ -865,7 +937,7 @@ void main() {
           premium: true,
           seed: 213,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     await c.exec(Cmd.closeCareer());
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
@@ -903,7 +975,7 @@ void main() {
     addTearDown(app.dispose);
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Nova Reyes',
           genre: 0,
@@ -913,7 +985,7 @@ void main() {
           premium: true,
           seed: 208,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     // Two tours played (docs K208).
     await c.run((s) {
@@ -962,7 +1034,7 @@ void main() {
     // A star with five albums over four years (docs K86).
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Nova Reyes',
           genre: 0,
@@ -972,7 +1044,7 @@ void main() {
           premium: true,
           seed: 86,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     await c.run(_fiveAlbums());
     await c.run((s) {
@@ -1210,7 +1282,7 @@ void main() {
     // Five albums in the CD era, then the best-of (docs K161).
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Dana Vale',
           genre: 0,
@@ -1220,7 +1292,7 @@ void main() {
           premium: true,
           seed: 161,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     await c.run(_fiveAlbums());
     await c.run((s) {
@@ -1273,7 +1345,7 @@ void main() {
     // A K-pop group with two singles out (docs K114).
     final c = app.controller;
     final port = ReceivePort();
-    await c.exec(Cmd.start(
+    await tester.runAsync(() => c.exec(Cmd.start(
         CareerSetup(
           name: 'Starlight',
           genre: MusicShow.genre,
@@ -1285,7 +1357,7 @@ void main() {
           premium: true,
           seed: 114,
         ),
-        PortSink(port.sendPort)));
+        PortSink(port.sendPort))));
     port.close();
     await c.run((s) {
       for (final t in ['Moonrise', 'Paper Hearts']) {

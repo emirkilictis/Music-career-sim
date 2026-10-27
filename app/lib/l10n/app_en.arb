@@ -7891,9 +7891,12 @@
   "subsStrong": "Strong",
   "subsBorderline": "Borderline",
   "subsLongShot": "Long shot",
-  "subsSplit": "{count} in one category: they split the vote.",
+  "subsSplit": "{category}: {count} entries split the vote.",
   "@subsSplit": {
     "placeholders": {
+      "category": {
+        "type": "String"
+      },
       "count": {
         "type": "int"
       }
