@@ -9,6 +9,12 @@ Chrome / Edge 119+, Firefox 120+, Safari 18.2+ (iPhone'da iOS 18.2+). Daha eski 
 oyun açılmaz, "tarayıcı desteklenmiyor" ekranı çıkar. Oyunun 64 bit sayıları JavaScript'e
 düşen eski yolda çalışmıyor.
 
+## Yayın (GitHub Pages)
+
+Her push'ta `.github/workflows/web.yml` oyunu derler ve
+<https://emirkilictis.github.io/Music-career-sim/> adresine koyar. Repo ayarlarında bir kez
+**Settings → Pages → Build and deployment → Source: GitHub Actions** seçili olmalı.
+
 ## Derleme
 
 ```
