@@ -677,6 +677,127 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '14o_stream_counter');
   });
+  testWidgets('screenshots: album versions and an anniversary',
+      skip: !enabled, (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 225,
+        ),
+        PortSink(port.sendPort)));
+    port.close();
+    await c.run((s) {
+      final p = s.world.player!;
+      p.moneyCents = 1 << 40;
+      final songs = <int>[];
+      for (var i = 0; i < 10; i++) {
+        p.creativeEnergy = 100;
+        songs.add(
+            s.writeSong(budget: BudgetTier.high, title: 'Track ${i + 1}').id);
+      }
+      s.releaseAlbum('Gold Rush', songs);
+      s.advanceWeeks(6, stop: SkipStop.never);
+      for (var i = 0; i < 3; i++) {
+        p.creativeEnergy = 100;
+        s.writeSong(budget: BudgetTier.high, title: 'Vault ${i + 1}');
+      }
+    });
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    print('open');
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    print('opened');
+    // An album of hers from ten years ago (docs K226).
+    await c.run((s) {
+      final w = s.world;
+      final gold = w.albums.lastWhere((a) => a.title == 'Gold Rush');
+      w.albums.add(Album(
+          id: w.albums.length,
+          title: 'Paper Hearts',
+          artistId: w.playerArtistId,
+          type: AlbumType.album,
+          releaseWeek: w.week - 10 * GameTime.weeksPerYear,
+          songIds: List.of(gold.songIds),
+          quality: 78)
+        ..status = AlbumStatus.dormant);
+    });
+    print('next week');
+    await tester.tap(_ci('Next week'));
+    for (var i = 0; i < 12 && _ci('Anniversary').evaluate().isEmpty; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 300)));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      print('wait $i');
+      if (i > 3 && _ci('Anniversary').evaluate().isEmpty) {
+        await tester.tapAt(const Offset(200, 80));
+      }
+    }
+    await tester.pump(const Duration(seconds: 1));
+    await shot(tester, '16a_anniversary_prompt');
+    print('prompt');
+    await tester.tap(_ci('Make an anniversary edition'));
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 300)));
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+    await tester.pumpAndSettle();
+    print('edition');
+    await shot(tester, '16b_anniversary_edition');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    // Two versions of the new album (docs K225).
+    await c.run((s) {
+      final w = s.world;
+      final gold = w.albums.lastWhere((a) => a.title == 'Gold Rush');
+      final vault = s.vault;
+      s.releaseAlbumVersion(gold.id,
+          name: '3am Edition',
+          songIds: [vault[0].id, vault[1].id],
+          format: EditionFormat.vinyl);
+      s.advanceWeeks(4, stop: SkipStop.never);
+      s.releaseAlbumVersion(gold.id,
+          name: 'Platinum Edition', songIds: [vault[2].id]);
+    });
+    await tab(tester, 'Releases');
+    final album = _ci('Gold Rush').first;
+    await tester.scrollUntilVisible(album, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(album);
+    await tester.pumpAndSettle();
+    await shot(tester, '16c_album_versions_top');
+    final editions = _ci('Editions');
+    await tester.scrollUntilVisible(editions, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await shot(tester, '16d_album_editions');
+    await tester.scrollUntilVisible(_ci('Tracklist'), 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -300));
+    await tester.pumpAndSettle();
+    await shot(tester, '16e_album_bonus_tracks');
+    await tester.scrollUntilVisible(_ci('New version'), -300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(_ci('New version'));
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 300)));
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+    await tester.pumpAndSettle();
+    await shot(tester, '16f_new_version');
+  });
   testWidgets('screenshots: posts with pictures', skip: !enabled,
       (tester) async {
     await tester.runAsync(loadFonts);

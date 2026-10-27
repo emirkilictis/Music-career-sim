@@ -197,6 +197,21 @@ TOPICS = {
   ("Buying {title} again for the bonus tracks. Obviously.", "Bonus parçalar için {title} albümünü tekrar alıyorum. Tabii ki."),
   ("The {title} deluxe tracks are better than some albums", "{title} deluxe parçaları bazı albümlerden iyi"),
  ],
+ 'versionOut': [
+  ("A NEW VERSION OF {title}?? New cover, new tracks, I'm buying it again", "{title} YENİ VERSİYON MU?? Yeni kapak, yeni parçalar, yine alıyorum"),
+  ("The new {title} edition has me listening to the whole album again", "{title} yeni versiyonu yüzünden bütün albümü baştan dinliyorum"),
+  ("{name} really said one {title} is not enough", "{name} resmen bir tane {title} yetmez dedi"),
+ ],
+ 'cashGrab': [
+  ("Another version of {title}? How many times do we have to buy it", "{title} için bir versiyon daha mı? Kaç kere alacağız bunu"),
+  ("{name} please stop re-releasing {title} and make new music", "{name} lütfen {title} albümünü tekrar tekrar çıkarmayı bırak, yeni müzik yap"),
+  ("Version number whatever of {title}. Cash grab and we all know it", "{title} bilmem kaçıncı versiyon. Para tuzağı, hepimiz biliyoruz"),
+ ],
+ 'anniversaryOut': [
+  ("{title} anniversary edition!! I remember the first time I heard it", "{title} yıl dönümü baskısı!! İlk dinlediğim anı hatırlıyorum"),
+  ("Playing {title} front to back for the anniversary. Still perfect", "Yıl dönümü için {title} baştan sona çalıyor. Hâlâ kusursuz"),
+  ("The {title} anniversary edition is the gift we needed. Thank you {name}", "{title} yıl dönümü baskısı ihtiyacımız olan hediye. Teşekkürler {name}"),
+ ],
  'catchingOn': [
   ("Everyone at my school is suddenly singing {title}", "Okulda herkes birden {title} söylemeye başladı"),
   ("{title} keeps growing. Word of mouth is real.", "{title} büyümeye devam ediyor. Kulaktan kulağa gerçekten işe yarıyor."),

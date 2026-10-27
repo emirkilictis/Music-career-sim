@@ -903,10 +903,15 @@ class Simulator {
       final year = GameTime.yearOf(w.week);
       final tail = c.albumTail(year);
       for (var k = 1; k < vw.length; k++) {
-        if (vw[k] == age) {
-          variantSum +=
-              math.pow(c.variantDecay, k - 1) * al.editionAppeal(k, year);
+        if (vw[k] != age) continue;
+        // Collectors tire of editions close together; a version long
+        // after them (docs K225) tires them less.
+        var tired = 0.0;
+        for (var j = 1; j < k; j++) {
+          tired += age - vw[j] <= maxVariantSpread ? 1 : 0.3;
         }
+        variantSum +=
+            math.pow(c.variantDecay, tired) * al.editionAppeal(k, year);
       }
       final noise =
           RandomStream.keyed(w.seed, w.week, al.id, RngPurpose.albumNoise)
@@ -1638,6 +1643,11 @@ class Simulator {
       w.dirtyArtists.add(a.id);
     }
   }
+
+  /// Editions this many weeks apart or closer count fully against each
+  /// other with collectors (the longest an album's own editions are
+  /// staggered).
+  static const maxVariantSpread = 12;
 
   /// How often each artist's catalog fades (a batch of weeks at a time).
   static const catalogFadeWeeks = 13;

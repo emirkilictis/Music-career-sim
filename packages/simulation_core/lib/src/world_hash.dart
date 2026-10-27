@@ -211,6 +211,13 @@ int worldHash(World w) {
     addInt(al.bundle.index);
     addInt(al.liveTour);
     addInt(al.anniversaries);
+    addInt(al.anniversariesAsked);
+    for (final v in al.versions) {
+      addInt(v.edition);
+      addInt(v.week);
+      addInt(v.songIds.length);
+      addInt(v.anniversary);
+    }
     addInt(al.partnerId);
     addInt(al.visual ? 1 : 0);
     addDouble(al.bundleUnits);

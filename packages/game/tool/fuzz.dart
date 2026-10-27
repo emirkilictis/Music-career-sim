@@ -128,6 +128,11 @@ void main(List<String> args) {
             g.releaseLanguageVersion(rel(), _pick(r, LanguageVersion.values)),
         'deluxe': () => g.releaseDeluxe(
             album(), (vault..shuffle(r)).take(1 + r.nextInt(3)).toList()),
+        'albumVersion': () => g.releaseAlbumVersion(album(),
+            name: 'V$wk',
+            songIds: (vault..shuffle(r)).take(r.nextInt(3)).toList(),
+            format: _pick(r, EditionFormat.values),
+            anniversary: r.nextInt(4) == 0),
         'anniversary': () => g.reissueAnniversary(album()),
         'visual': () => g.makeVisualAlbum(album()),
         'priceCut': () => g.cutAlbumPrice(album(), _pick(r, PriceCut.values)),

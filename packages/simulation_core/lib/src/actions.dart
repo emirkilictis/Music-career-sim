@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'album_versions.dart';
+import 'anniversaries.dart';
 import 'artist_pick.dart';
 import 'audience.dart';
 import 'bundles.dart';
@@ -526,8 +528,8 @@ abstract final class Actions {
   static const radioUpgradeWeeks = 8;
 
   /// What raising [s]'s radio push to [to] costs now: the difference.
-  static int radioUpgradeCost(Artist a, Song s, RadioPush to) => math.max(
-      0, radioPushCostFor(a, to) - radioPushCostFor(a, s.radioPush));
+  static int radioUpgradeCost(Artist a, Song s, RadioPush to) =>
+      math.max(0, radioPushCostFor(a, to) - radioPushCostFor(a, s.radioPush));
 
   static bool canUpgradeRadio(World w, Artist a, Song s) =>
       s.isSingle &&
@@ -876,9 +878,9 @@ abstract final class Actions {
   }
 
   /// Bonus tracks a deluxe edition can add (docs K115).
-  static const maxDeluxeTracks = 6;
+  static const maxDeluxeTracks = AlbumVersions.maxTracks;
 
-  /// Whether [al] already had its deluxe re-release.
+  /// Whether [al] already had a deluxe re-release.
   static bool hasDeluxe(Album al) {
     for (var k = 0; k < al.variantWeeks.length; k++) {
       if (al.variantWeeks[k] > 0 &&
@@ -891,16 +893,29 @@ abstract final class Actions {
   }
 
   /// Re-releases [al] as a deluxe edition with unreleased [songIds] as
-  /// bonus tracks (docs K115): the new tracks come out today, fans buy
-  /// the deluxe edition (an extra edition this week) and the album is
-  /// talked about again. Once per album.
+  /// bonus tracks (docs K115): a version called "Deluxe".
   static void releaseDeluxe(World w, Artist a, Album al, List<int> songIds) {
-    if (al.artistId != a.id) throw ActionException('Not your album');
-    if (al.type == AlbumType.mixtape) throw ActionException('A mixtape');
-    if (w.week <= al.releaseWeek) throw ActionException('Not out yet');
-    if (hasDeluxe(al)) throw ActionException('Already deluxe');
-    if (songIds.isEmpty || songIds.length > maxDeluxeTracks) {
+    if (songIds.isEmpty)
       throw ActionException('1–$maxDeluxeTracks bonus tracks');
+    releaseAlbumVersion(w, a, al,
+        name: 'Deluxe', songIds: songIds, format: EditionFormat.deluxe);
+  }
+
+  /// Puts out a new version of [al] (docs K225): edition [format] called
+  /// [name] with unreleased [songIds] as bonus tracks, out today. Fans buy
+  /// the edition this week and the album is talked about again, less so
+  /// for each version shortly before. An [anniversary] edition (docs
+  /// K149, K226) is remastered too: every track is played again.
+  static AlbumVersion releaseAlbumVersion(World w, Artist a, Album al,
+      {String name = '',
+      List<int> songIds = const [],
+      EditionFormat format = EditionFormat.digital,
+      bool anniversary = false}) {
+    final why = AlbumVersions.block(w, a, al);
+    if (why != null) throw ActionException('No new version: ${why.name}');
+    if (songIds.length > AlbumVersions.maxTracks ||
+        songIds.toSet().length != songIds.length) {
+      throw ActionException('Up to ${AlbumVersions.maxTracks} bonus tracks');
     }
     for (final id in songIds) {
       final s = w.songs[id];
@@ -908,11 +923,19 @@ abstract final class Actions {
         throw ActionException('Only unreleased songs');
       }
     }
-    final cost = EditionFormat.deluxe.costCents;
+    final due = Anniversaries.due(w, al);
+    if (anniversary && due < 0) throw ActionException('No anniversary now');
+    final cost = AlbumVersions.costCents(format, anniversary: anniversary);
     if (a.tier == ArtistTier.player) {
       if (a.moneyCents < cost) throw ActionException('Not enough money');
       a.moneyCents -= cost;
+      // The edition's own cost is counted with the album's editions.
+      al.campaignCostCents += cost - format.costCents;
     }
+    // Fans count the versions shortly before this one.
+    final hype = AlbumVersions.nextHype(w, al);
+    final tired = AlbumVersions.tiresFans(w, al);
+    final fresh = AlbumVersions.recent(w, al) == 0;
     if (al.status == AlbumStatus.dormant) Lifecycle.reactivateAlbum(w, al);
     al.weeksBelowCutoff = 0;
     for (final id in songIds) {
@@ -924,27 +947,43 @@ abstract final class Actions {
       _promote(w, s, Campaign.standard);
       al.songIds.add(id);
     }
-    // The deluxe edition sells to collectors this week, in order with the
-    // other editions.
-    final formats = [
-      for (var k = 0; k < al.variantWeeks.length; k++)
-        k < al.variantFormats.length ? al.variantFormats[k] : -1
+    if (anniversary) {
+      al.anniversaries |= 1 << due;
+      for (final id in al.songIds) {
+        if (songIds.contains(id)) continue;
+        final s = w.songs[id];
+        if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
+        s.weeksBelowCutoff = 0;
+        s.versionBoost += Anniversaries.remasterBoost;
+        w.dirtySongs.add(id);
+      }
+    }
+    // The edition sells to collectors this week; every edition before it
+    // is already out, so it goes last.
+    final k = al.variantWeeks.length;
+    al.variantFormats = [
+      for (var j = 0; j < k; j++)
+        j < al.variantFormats.length ? al.variantFormats[j] : -1,
+      format.index,
     ];
-    final editions = [
-      for (var k = 0; k < al.variantWeeks.length; k++)
-        (al.variantWeeks[k], formats[k], k),
-      (w.week - al.releaseWeek, EditionFormat.deluxe.index, formats.length),
-    ]..sort((x, y) {
-        final d = x.$1.compareTo(y.$1);
-        return d != 0 ? d : x.$3.compareTo(y.$3);
-      });
-    al.variantWeeks = [for (final e in editions) e.$1];
-    al.variantFormats = [for (final e in editions) e.$2];
-    a.hype += 0.1;
-    a.devotion = math.min(1.0, a.devotion + 0.01);
-    a.lastReleaseWeek = w.week;
+    al.variantWeeks = [...al.variantWeeks, w.week - al.releaseWeek];
+    final v = AlbumVersion(
+        edition: k,
+        week: w.week,
+        name: name.trim(),
+        songIds: List.of(songIds),
+        anniversary: anniversary ? due : -1);
+    al.versions.add(v);
+    a.hype += hype;
+    if (tired) {
+      a.devotion = math.max(0.0, a.devotion - 0.02);
+    } else if (fresh) {
+      a.devotion = math.min(1.0, a.devotion + 0.01);
+    }
+    if (songIds.isNotEmpty || anniversary) a.lastReleaseWeek = w.week;
     w.dirtyAlbums.add(al.id);
     w.dirtyArtists.add(a.id);
+    return v;
   }
 
   /// Singles out before the album bring it their sales so far (10 track
@@ -1118,8 +1157,7 @@ abstract final class Actions {
       // Album pre-orders (docs K126): fans order the record ahead, a few
       // more every week the campaign runs.
       if (sr.type == AlbumType.album || sr.type == AlbumType.ep) {
-        final most =
-            preOrderCeiling * expectedFanCopies(w, a, sr.songIds);
+        final most = preOrderCeiling * expectedFanCopies(w, a, sr.songIds);
         if (sr.preOrders < most) {
           sr.preOrders += (most - sr.preOrders) *
               preOrderRate *

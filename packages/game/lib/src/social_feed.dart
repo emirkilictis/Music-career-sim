@@ -52,17 +52,33 @@ abstract final class SocialFeed {
         release(al.quality, albumId: al.id);
       }
     }
-    // A deluxe edition out this week (docs K115).
+    // A new version of an album out this week (docs K115, K225, K226):
+    // the third in a few weeks reads as a cash grab.
     for (final al in w.albums) {
-      if (al.artistId != p.id || !Actions.hasDeluxe(al)) continue;
-      for (var k = 0; k < al.variantWeeks.length; k++) {
-        if (al.releaseWeek + al.variantWeeks[k] == week &&
-            al.variantWeeks[k] > 0 &&
-            k < al.variantFormats.length &&
-            al.variantFormats[k] == EditionFormat.deluxe.index) {
-          fan(FanTopic.deluxeOut, albumId: al.id);
-          fan(FanTopic.deluxeOut, albumId: al.id);
-        }
+      if (al.artistId != p.id || al.versions.isEmpty) continue;
+      // The week's last version is the news.
+      final i = al.versions.lastIndexWhere((v) => v.week == week);
+      if (i < 0) continue;
+      final v = al.versions[i];
+      final before = al.versions
+          .take(i)
+          .where((x) => week - x.week < AlbumVersions.fatigueWeeks)
+          .length;
+      final format = v.edition < al.variantFormats.length
+          ? al.variantFormats[v.edition]
+          : -1;
+      final topic = v.anniversary >= 0
+          ? FanTopic.anniversaryOut
+          : format == EditionFormat.deluxe.index
+              ? FanTopic.deluxeOut
+              : FanTopic.versionOut;
+      if (before >= 2) {
+        fan(FanTopic.cashGrab, albumId: al.id);
+        fan(FanTopic.cashGrab, albumId: al.id);
+        fan(topic, albumId: al.id);
+      } else {
+        fan(topic, albumId: al.id);
+        fan(topic, albumId: al.id);
       }
     }
     for (final id in w.playerSongIds) {

@@ -79,6 +79,9 @@ enum FanTopic {
   wrapped,
   surpriseDrop,
   billionsClub,
+  versionOut,
+  cashGrab,
+  anniversaryOut,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.

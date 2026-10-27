@@ -4994,6 +4994,131 @@ void main() {
       g.close();
     });
 
+    test('album versions: named, repeatable, bonus tracks, fans tire (K225)',
+        () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final id = g.slotId;
+      final w = g.world;
+      w.player!.moneyCents = 1 << 40;
+      final tracks = <int>[];
+      for (var i = 0; i < 8; i++) {
+        w.player!.creativeEnergy = 100;
+        tracks.add(g.writeSong(budget: BudgetTier.low).id);
+      }
+      final album = g.releaseAlbum('Base', tracks).id;
+      // Not before it is out.
+      expect(() => g.releaseAlbumVersion(album, name: 'Too soon'),
+          _code('noVersion'));
+      g.advanceWeeks(3, stop: SkipStop.never);
+      final bonus = <int>[];
+      for (var i = 0; i < 2; i++) {
+        w.player!.creativeEnergy = 100;
+        bonus.add(g.writeSong(budget: BudgetTier.low).id);
+      }
+      expect(g.album(album).canVersion, isTrue);
+      final money = g.player.moneyCents;
+      final hype = w.player!.hype;
+      final k = g.releaseAlbumVersion(album,
+          name: '3am Edition', songIds: bonus, format: EditionFormat.vinyl);
+      expect(k, 1);
+      expect(money - g.player.moneyCents, EditionFormat.vinyl.costCents);
+      expect(w.player!.hype - hype, closeTo(AlbumVersions.hype, 1e-9));
+      var v = g.album(album);
+      expect(v.trackIds, [...tracks, ...bonus]);
+      expect(v.versions.single.name, '3am Edition');
+      expect(v.versions.single.edition, 1);
+      expect(v.versionOfTrack(bonus.first)?.name, '3am Edition');
+      expect(v.variantFormats.last, EditionFormat.vinyl);
+      // Another one, digital and with no new songs: half the hype.
+      final hype2 = w.player!.hype;
+      g.releaseAlbumVersion(album, name: 'Platinum Edition');
+      expect(w.player!.hype - hype2, closeTo(AlbumVersions.hype / 2, 1e-9));
+      expect(g.album(album).versionsRecent, 2);
+      // A third so soon: fans call it a cash grab and some lose faith.
+      final devotion = w.player!.devotion;
+      g.releaseAlbumVersion(album, name: 'Til Dawn Edition');
+      expect(w.player!.devotion, lessThan(devotion));
+      g.advanceWeek();
+      expect(w.social.feed.any((i) => i.topic == FanTopic.cashGrab), isTrue);
+      expect(w.albums[album].weekPure, greaterThan(0));
+      // Names are checked; bonus songs must be in the vault.
+      expect(
+          () => g.releaseAlbumVersion(album, name: 'x' * 41),
+          _code('invalidTitle'));
+      expect(() => g.releaseAlbumVersion(album, name: 'Again', songIds: bonus),
+          _code('notInVault'));
+      g.close();
+      g = GameSession.resume(slots, id);
+      v = g.album(album);
+      expect([for (final x in v.versions) x.name],
+          ['3am Edition', 'Platinum Edition', 'Til Dawn Edition']);
+      expect(v.versions.first.trackIds, bonus);
+      expect(v.variantWeeks.length, 4);
+      g.close();
+    });
+
+    test('an anniversary asks once; the detailed edition adds songs (K226)',
+        () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final w = g.world;
+      final p = w.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      g.releaseAlbum('New', ids);
+      expect(g.anniversaryPrompt, isNull);
+      final old = Album(
+          id: w.albums.length,
+          title: 'Classic',
+          artistId: p.id,
+          type: AlbumType.album,
+          releaseWeek: g.week - 10 * GameTime.weeksPerYear,
+          songIds: List.of(ids),
+          quality: 70)
+        ..status = AlbumStatus.dormant;
+      w.albums.add(old);
+      final ask = g.anniversaryPrompt!;
+      expect(ask.albumId, old.id);
+      expect(ask.years, 10);
+      g.anniversaryAsked(old.id);
+      expect(g.anniversaryPrompt, isNull);
+      // Still offered on the album page; the detailed edition adds songs.
+      expect(g.album(old.id).anniversaryDue, 10);
+      p.creativeEnergy = 100;
+      final song = g.writeSong(budget: BudgetTier.high).id;
+      final money = g.player.moneyCents;
+      g.releaseAlbumVersion(old.id,
+          name: 'Classic (10th Anniversary Edition)',
+          songIds: [song],
+          format: EditionFormat.signed,
+          anniversary: true);
+      expect(money - g.player.moneyCents,
+          EditionFormat.signed.costCents + Anniversaries.remasterCents);
+      final v = g.album(old.id);
+      expect(v.anniversariesMarked, [10]);
+      expect(v.anniversaryDue, 0);
+      expect(v.versions.single.anniversaryYears, 10);
+      expect(v.trackIds.last, song);
+      expect(old.status, AlbumStatus.active);
+      g.advanceWeek();
+      expect(w.social.feed.any((i) => i.topic == FanTopic.anniversaryOut),
+          isTrue);
+      g.close();
+    });
+
     test('a deluxe edition adds bonus tracks once and survives a save (K115)',
         () {
       var g = GameSession.start(

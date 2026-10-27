@@ -804,6 +804,26 @@ class AlbumView {
             al.hitIds.isEmpty &&
             w.week > al.releaseWeek &&
             !Actions.hasDeluxe(al),
+        versions = [
+          for (final v in al.versions)
+            AlbumVersionView(
+              edition: v.edition,
+              week: v.week,
+              name: v.name,
+              trackIds: List.unmodifiable(v.songIds),
+              anniversaryYears:
+                  v.anniversary >= 0 ? Anniversaries.years[v.anniversary] : 0,
+              format: v.edition < al.variantFormats.length &&
+                      al.variantFormats[v.edition] >= 0
+                  ? EditionFormat.values[al.variantFormats[v.edition]]
+                  : null,
+            )
+        ],
+        versionBlock = w.player == null
+            ? VersionBlock.notYours
+            : AlbumVersions.block(w, w.player!, al),
+        versionsRecent = AlbumVersions.recent(w, al),
+        anniversaryIndexDue = Anniversaries.due(w, al),
         scheduleId = al.scheduleId,
         criticScore = al.criticScore,
         reviews = Critics.reviews(w, al),
@@ -942,6 +962,26 @@ class AlbumView {
   /// (docs K115).
   final bool isDeluxe;
   final bool canDeluxe;
+
+  /// Versions put out after it (docs K225), what stops a new one now
+  /// (null: nothing) and how many came out in the last
+  /// [AlbumVersions.fatigueWeeks] (two or more: fans call the next one a
+  /// cash grab).
+  final List<AlbumVersionView> versions;
+  final VersionBlock? versionBlock;
+  final int versionsRecent;
+  bool get canVersion => versionBlock == null;
+
+  /// The [Anniversaries.years] index it is in the year of (-1: none).
+  final int anniversaryIndexDue;
+
+  /// The version that made edition [k], or null.
+  AlbumVersionView? versionOfEdition(int k) =>
+      versions.where((v) => v.edition == k).firstOrNull;
+
+  /// The version a track came out on as a bonus track, or null.
+  AlbumVersionView? versionOfTrack(int songId) =>
+      versions.where((v) => v.trackIds.contains(songId)).firstOrNull;
 
   /// The schedule it came out of, or -1.
   final int scheduleId;
@@ -2074,6 +2114,52 @@ class CounterRow {
       daily - change > 0 ? change / (daily - change) : 0;
 }
 
+/// A version of an album put out after it (docs K225).
+class AlbumVersionView {
+  const AlbumVersionView({
+    required this.edition,
+    required this.week,
+    required this.name,
+    required this.trackIds,
+    required this.anniversaryYears,
+    required this.format,
+  });
+
+  /// Its edition (cover) index.
+  final int edition;
+  final int week;
+
+  /// The player's name for it ('': the default).
+  final String name;
+  final List<int> trackIds;
+
+  /// The anniversary it marks (0: none).
+  final int anniversaryYears;
+  final EditionFormat? format;
+}
+
+/// An album anniversary to ask the player about (docs K226).
+class AnniversaryPrompt {
+  const AnniversaryPrompt({
+    required this.albumId,
+    required this.title,
+    required this.years,
+    required this.releaseWeek,
+    required this.quickCostCents,
+    required this.trackCount,
+    required this.lifetimeUnits,
+  });
+  final int albumId;
+  final String title;
+  final int years;
+  final int releaseWeek;
+
+  /// The quick reissue: remastered, on vinyl (docs K149).
+  final int quickCostCents;
+  final int trackCount;
+  final double lifetimeUnits;
+}
+
 /// A release's Streamify counter, like the fan accounts post (docs K210):
 /// daily plays, their change and the total, song by song.
 class StreamCounterView {
@@ -2700,6 +2786,9 @@ class SocialItemView {
       FanTopic.releaseMixed ||
       FanTopic.releaseHate ||
       FanTopic.deluxeOut ||
+      FanTopic.versionOut ||
+      FanTopic.cashGrab ||
+      FanTopic.anniversaryOut ||
       FanTopic.surpriseDrop ||
       FanTopic.postPromote ||
       FanTopic.catchingOn ||

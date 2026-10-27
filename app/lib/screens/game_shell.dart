@@ -6,6 +6,7 @@ import '../core/commands.dart';
 import '../core/event_lines.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
+import '../widgets/anniversary_prompt.dart';
 import '../widgets/art.dart';
 import '../widgets/celebration.dart';
 import '../widgets/removal_alert.dart';
@@ -112,6 +113,8 @@ class _GameShellState extends State<GameShell> {
         showInfo(context, context.fmt.event(lines.first),
             icon: Icons.notifications_none_rounded);
       }
+      // An album's anniversary came (docs K226).
+      if (mounted) await askAnniversary(context, state);
     } catch (e) {
       outcome?.value = const WeekOutcome.failed();
       await shown;
@@ -192,6 +195,7 @@ class _GameShellState extends State<GameShell> {
         builder: (c) => SkipSummaryScreen(
             report: report, lines: playerNews(lines), state: state),
       ));
+      if (mounted) await askAnniversary(context, state);
     } catch (e) {
       if (mounted) {
         Navigator.of(context).pop();

@@ -1,5 +1,5 @@
 import 'actions.dart';
-import 'lifecycle.dart';
+import 'album_versions.dart';
 import 'model.dart';
 import 'time.dart';
 import 'world.dart';
@@ -35,36 +35,14 @@ abstract final class Anniversaries {
 
   /// Whether [a] can reissue [al] now.
   static bool can(World w, Artist a, Album al) =>
-      al.artistId == a.id && al.type != AlbumType.mixtape && due(w, al) >= 0;
+      AlbumVersions.block(w, a, al) == null && due(w, al) >= 0;
 
-  /// Reissues [al] for its anniversary.
+  /// Reissues [al] for its anniversary: remastered, on a collector's
+  /// vinyl (the quick way; docs K226 lets the player add songs and a new
+  /// cover).
   static void reissue(World w, Artist a, Album al) {
-    final i = due(w, al);
-    if (al.artistId != a.id || al.type == AlbumType.mixtape || i < 0) {
-      throw ActionException('No anniversary now');
-    }
-    final cost = costCents();
-    if (a.moneyCents < cost) throw ActionException('Not enough money');
-    a.moneyCents -= cost;
-    al.campaignCostCents += cost;
-    al.anniversaries |= 1 << i;
-    if (al.status == AlbumStatus.dormant) Lifecycle.reactivateAlbum(w, al);
-    al.weeksBelowCutoff = 0;
-    for (final id in al.songIds) {
-      final s = w.songs[id];
-      if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
-      s.weeksBelowCutoff = 0;
-      s.versionBoost += remasterBoost;
-      w.dirtySongs.add(id);
-    }
-    // The collector's vinyl comes out this week, among its editions.
-    final formats = [
-      for (var k = 0; k < al.variantWeeks.length; k++)
-        k < al.variantFormats.length ? al.variantFormats[k] : -1
-    ];
-    al.variantWeeks = [...al.variantWeeks, w.week - al.releaseWeek];
-    al.variantFormats = [...formats, EditionFormat.vinyl.index];
-    w.dirtyAlbums.add(al.id);
-    w.dirtyArtists.add(a.id);
+    if (!can(w, a, al)) throw ActionException('No anniversary now');
+    Actions.releaseAlbumVersion(w, a, al,
+        format: EditionFormat.vinyl, anniversary: true);
   }
 }

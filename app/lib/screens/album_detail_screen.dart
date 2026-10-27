@@ -18,6 +18,7 @@ import '../widgets/artist_link.dart';
 import '../widgets/history_tables.dart';
 import '../widgets/line_chart.dart';
 import 'releases_tab.dart';
+import 'album_version_screen.dart';
 import 'song_detail_screen.dart';
 import 'stream_counter_screen.dart';
 
@@ -150,83 +151,12 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     }
   }
 
-  /// Picks bonus tracks from the vault and re-releases the album as a
-  /// deluxe edition (docs K115).
-  Future<void> _deluxe(AlbumView a) async {
-    final l = context.l10n;
-    final fmt = context.fmt;
-    final vault = await widget.state.read(Cmd.vault());
-    if (!mounted) return;
-    final picked = await showModalBottomSheet<List<int>>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (c) {
-        final chosen = <int>{};
-        return StatefulBuilder(
-          builder: (c, set) => SafeArea(
-            child: ConstrainedBox(
-              constraints:
-                  BoxConstraints(maxHeight: MediaQuery.of(c).size.height * 0.8),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                  child: Text(l.deluxeTitle,
-                      style: Theme.of(c).textTheme.titleLarge),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Text(
-                      l.deluxeHint(fmt.money(EditionFormat.deluxe.costCents)),
-                      style: Theme.of(c).textTheme.bodySmall),
-                ),
-                if (vault.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(l.deluxeEmpty),
-                  )
-                else
-                  Flexible(
-                    child: ListView(shrinkWrap: true, children: [
-                      for (final s in vault)
-                        CheckboxListTile(
-                          value: chosen.contains(s.id),
-                          onChanged:
-                              !chosen.contains(s.id) && chosen.length >= 6
-                                  ? null
-                                  : (v) => set(() => v == true
-                                      ? chosen.add(s.id)
-                                      : chosen.remove(s.id)),
-                          title: Text(s.title),
-                          subtitle: Text(fmt.songGrade(s)),
-                        ),
-                    ]),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: FilledButton(
-                    onPressed: chosen.isEmpty
-                        ? null
-                        : () => Navigator.pop(c, chosen.toList()),
-                    child: Text(l.deluxeRelease(chosen.length)),
-                  ),
-                ),
-              ]),
-            ),
-          ),
-        );
-      },
-    );
-    if (picked == null || !mounted) return;
-    try {
-      await widget.state.act(Cmd.releaseDeluxe(a.id, picked));
-      if (mounted) {
-        showInfo(context, l.deluxeOut(a.title),
-            icon: Icons.library_add_check_rounded);
-      }
+  /// A new version of the album: name, cover, format, bonus tracks
+  /// (docs K225); an [anniversary] edition is remastered too (K226).
+  Future<void> _newVersion(AlbumView a, {bool anniversary = false}) async {
+    if (await AlbumVersionScreen.open(context, widget.state, a,
+        anniversary: anniversary)) {
       _load();
-    } catch (e) {
-      if (mounted) showError(context, e);
     }
   }
 
@@ -367,18 +297,28 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
             subtitle: '${a.artistName}'
                 '${a.partnerName.isEmpty ? '' : ' & ${a.partnerName}'}'
                 ' · ${fmt.albumType(a.type)}'
-                '${a.isDeluxe ? ' · ${l.deluxeTag}' : ''}'
+                '${a.versions.isNotEmpty ? ' · ${fmt.versionName(a.versions.last)}' : a.isDeluxe ? ' · ${l.deluxeTag}' : ''}'
                 '${a.isRerecord ? ' · ${l.rerecordTag}' : ''}'
                 '${a.isLive ? ' · ${l.liveTag}' : ''}'
                 '${a.isCompilation ? ' · ${l.ghTag}' : ''}',
           ),
-          if (a.canDeluxe) ...[
+          // New versions after it came out (docs K225).
+          if (a.isPlayer &&
+              (a.canVersion ||
+                  a.versionBlock == VersionBlock.editionsPending ||
+                  a.versionBlock == VersionBlock.full)) ...[
             const SizedBox(height: 10),
             OutlinedButton.icon(
-              onPressed: () => _deluxe(a),
+              onPressed: a.canVersion ? () => _newVersion(a) : null,
               icon: const Icon(Icons.library_add_rounded),
-              label: Text(l.deluxeButton),
+              label: Text(l.versionButton),
             ),
+            if (a.versionBlock case final b?) ...[
+              const SizedBox(height: 4),
+              Text(fmt.versionBlock(b),
+                  style:
+                      TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+            ],
           ],
           if (!a.isPlayer)
             ArtistLink(
@@ -591,8 +531,14 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               label: Text(l.anniversaryButton(
                   a.anniversaryDue, fmt.money(Anniversaries.costCents()))),
             ),
+            const SizedBox(height: 6),
+            FilledButton.tonalIcon(
+              onPressed: () => _newVersion(a, anniversary: true),
+              icon: const Icon(Icons.auto_awesome_rounded),
+              label: Text(l.anniversaryDetailed),
+            ),
             const SizedBox(height: 4),
-            Text(l.anniversaryHint,
+            Text('${l.anniversaryHint} ${l.anniversaryDetailedHint}',
                 style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
           ],
           for (final n in a.anniversariesMarked) ...[
@@ -783,6 +729,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                         size: 48),
                     title: Text(k == 0
                         ? l.editionStandard
+                        : a.versionOfEdition(k) != null
+                        ? '${fmt.versionName(a.versionOfEdition(k)!)} · ${fmt.editionFormat(a.versionOfEdition(k)!.format)}'
                         : a.variantFormats[k] == null
                             ? l.editionN(k + 1)
                             : '${l.editionN(k + 1)} · ${fmt.editionFormat(a.variantFormats[k])}'),
@@ -974,7 +922,10 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   title: Text(_tracks[i].featuredNames.isEmpty
                       ? _tracks[i].title
                       : '${_tracks[i].title} (feat. ${_tracks[i].featuredNames.join(', ')})'),
-                  subtitle: Text(_tracks[i].isSingle
+                  subtitle: Text(a.versionOfTrack(_tracks[i].id) != null
+                      ? l.versionBonus(
+                          fmt.versionName(a.versionOfTrack(_tracks[i].id)!))
+                      : _tracks[i].isSingle
                       ? l.typeSingle
                       : _tracks[i].scheduledSingleWeek >= 0
                           ? l.scheduledSingleTag(

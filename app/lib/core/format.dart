@@ -772,6 +772,24 @@ class Fmt {
         EditionFormat.cassette => l.formatCassette,
         EditionFormat.deluxe => l.formatDeluxe,
         EditionFormat.signed => l.formatSigned,
+        EditionFormat.digital => l.formatDigital,
+      };
+
+  /// What a version of an album is called (docs K225): its own name, or
+  /// one for its kind.
+  String versionName(AlbumVersionView v) => v.name.isNotEmpty
+      ? v.name
+      : v.anniversaryYears > 0
+          ? l.versionAnniversaryName(v.anniversaryYears)
+          : v.format == EditionFormat.deluxe
+              ? l.deluxeTag
+              : l.editionN(v.edition + 1);
+
+  /// Why an album cannot have a new version now (docs K225).
+  String versionBlock(VersionBlock b) => switch (b) {
+        VersionBlock.editionsPending => l.versionPending,
+        VersionBlock.full => l.versionFull,
+        _ => l.errorNoVersion,
       };
 
   /// How collectors take a format in [year] (docs K46).
@@ -890,6 +908,11 @@ class Fmt {
       'noMarquee' => l.errorNoMarquee,
       'cannotCloud' => l.errorCannotCloud,
       'noAnniversary' => l.errorNoAnniversary,
+      'noVersion' => switch (e.message) {
+          'editionsPending' => l.versionPending,
+          'full' => l.versionFull,
+          _ => l.errorNoVersion,
+        },
       'noPartner' => l.errorNoPartner,
       'noMood' => l.errorNoMood,
       'noCanvas' => l.errorNoCanvas,

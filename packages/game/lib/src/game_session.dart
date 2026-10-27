@@ -2147,6 +2147,7 @@ class GameSession {
     final editions = [
       for (var k = 0; k < al.variantWeeks.length; k++)
         if (al.variantWeeks[k] <= maxVariantWeek &&
+            AlbumVersions.ofEdition(al, k) == null &&
             (k >= al.variantFormats.length ||
                 al.variantFormats[k] != EditionFormat.deluxe.index))
           k
@@ -2203,6 +2204,87 @@ class GameSession {
     }
     _requireMoney(EditionFormat.deluxe.costCents);
     Actions.releaseDeluxe(world, _p, al, songIds);
+    _saveNow();
+  }
+
+  /// Puts out a new version of album [albumId] (docs K225): called
+  /// [name] ('' for the default), in [format], with unreleased [songIds]
+  /// as bonus tracks; an [anniversary] edition is remastered too (docs
+  /// K226). Returns the edition it became (its cover's index).
+  int releaseAlbumVersion(int albumId,
+      {String name = '',
+      List<int> songIds = const [],
+      EditionFormat format = EditionFormat.digital,
+      bool anniversary = false}) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    final why = AlbumVersions.block(world, _p, al);
+    if (why != null) throw GameException('noVersion', why.name);
+    final n = name.trim();
+    if (n.length > maxVersionName) {
+      throw GameException('invalidTitle', 'Name must be up to 40 chars');
+    }
+    if (songIds.length > AlbumVersions.maxTracks ||
+        songIds.toSet().length != songIds.length) {
+      throw GameException('deluxeTracks', 'Pick up to 6 songs');
+    }
+    for (final id in songIds) {
+      final s = _ownSong(id);
+      if (s.status != SongStatus.vault) {
+        throw GameException('notInVault', 'Only unreleased songs');
+      }
+      if (_p.scheduled.any((sr) => sr.songIds.contains(id))) {
+        throw GameException('songScheduled', 'Song is on a scheduled release');
+      }
+    }
+    if (anniversary && !Anniversaries.can(world, _p, al)) {
+      throw GameException('noAnniversary', 'Not an anniversary now');
+    }
+    _requireMoney(AlbumVersions.costCents(format, anniversary: anniversary));
+    final v = Actions.releaseAlbumVersion(world, _p, al,
+        name: n, songIds: songIds, format: format, anniversary: anniversary);
+    if (anniversary) al.anniversariesAsked |= 1 << v.anniversary;
+    _saveNow();
+    return v.edition;
+  }
+
+  /// Longest name of an album version.
+  static const maxVersionName = 40;
+
+  /// An album of the player's whose anniversary came and that they were
+  /// not asked about yet (docs K226), or null.
+  AnniversaryPrompt? get anniversaryPrompt {
+    final w = world;
+    for (final al in w.albums) {
+      if (al.artistId != _p.id || !Anniversaries.can(w, _p, al)) continue;
+      final i = Anniversaries.due(w, al);
+      if (al.anniversariesAsked & (1 << i) != 0) continue;
+      return AnniversaryPrompt(
+        albumId: al.id,
+        title: al.title,
+        years: Anniversaries.years[i],
+        releaseWeek: al.releaseWeek,
+        quickCostCents: Anniversaries.costCents(),
+        trackCount: al.songIds.length,
+        lifetimeUnits: [
+          for (var r = 0; r < regionCount; r++) w.albumLifetimeUnits(al, r)
+        ].fold(0.0, (x, y) => x + y),
+      );
+    }
+    return null;
+  }
+
+  /// The player was asked about album [albumId]'s anniversary (docs
+  /// K226): it is not asked again; the album page still offers it.
+  void anniversaryAsked(int albumId) {
+    if (albumId < 0 || albumId >= world.albums.length) return;
+    final al = world.albums[albumId];
+    final i = Anniversaries.due(world, al);
+    if (i < 0) return;
+    al.anniversariesAsked |= 1 << i;
+    world.dirtyAlbums.add(al.id);
     _saveNow();
   }
 

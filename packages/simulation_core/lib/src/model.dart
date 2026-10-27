@@ -1093,6 +1093,13 @@ class Album with Charted {
   /// entry (docs K149).
   int anniversaries = 0;
 
+  /// Anniversaries the player was asked about, a bit per
+  /// [Anniversaries.years] entry (docs K226).
+  int anniversariesAsked = 0;
+
+  /// The versions put out after it, oldest first (docs K225).
+  final List<AlbumVersion> versions = [];
+
   /// Its rollout (docs K165): bits of [RolloutStep] that counted and of
   /// those done, scored when it came out.
   int rolloutApplicable = 0;
@@ -1391,6 +1398,46 @@ class ScheduledRelease {
 /// A scheduled release that came out: the single's song id or the album id.
 typedef ScheduledOut = ({int scheduleId, bool isAlbum, int id});
 
+/// A version of an album put out after it (docs K225): a deluxe, a
+/// "3am edition", an anniversary edition. It is edition [edition] of the
+/// album (its own cover) and added [songIds] as bonus tracks.
+class AlbumVersion {
+  AlbumVersion({
+    required this.edition,
+    required this.week,
+    this.name = '',
+    this.songIds = const [],
+    this.anniversary = -1,
+  });
+
+  /// Index into the album's editions.
+  final int edition;
+  final int week;
+
+  /// The player's name for it ('': the default for its kind).
+  final String name;
+  final List<int> songIds;
+
+  /// The [Anniversaries.years] index it marks (-1: none).
+  final int anniversary;
+
+  Map<String, Object?> toJson() => {
+        'e': edition,
+        'w': week,
+        if (name.isNotEmpty) 'n': name,
+        if (songIds.isNotEmpty) 's': songIds,
+        if (anniversary >= 0) 'a': anniversary,
+      };
+
+  static AlbumVersion fromJson(Map<String, Object?> m) => AlbumVersion(
+        edition: m['e'] as int,
+        week: m['w'] as int,
+        name: m['n'] as String? ?? '',
+        songIds: [for (final x in (m['s'] as List?) ?? const []) x as int],
+        anniversary: m['a'] as int? ?? -1,
+      );
+}
+
 /// What an extra album edition is (docs K46). Collectors want different
 /// things in different eras: CDs before streaming, vinyl in its revival,
 /// cassettes as a niche. The standard edition (index 0) is digital + CD.
@@ -1399,7 +1446,11 @@ enum EditionFormat {
   vinyl(6000000),
   cassette(2000000),
   deluxe(1500000),
-  signed(8000000);
+  signed(8000000),
+
+  /// A digital-only version (docs K225): new artwork and its bonus tracks
+  /// in the stores, nothing pressed.
+  digital(500000);
 
   const EditionFormat(this.costCents);
 
@@ -1425,6 +1476,11 @@ enum EditionFormat {
                 : 0.55,
         deluxe => year < 2005 ? 0.35 : 0.8,
         signed => 1.4,
+        digital => year < 2004
+            ? 0.05
+            : year < 2015
+                ? 0.5
+                : 0.3,
       };
 }
 

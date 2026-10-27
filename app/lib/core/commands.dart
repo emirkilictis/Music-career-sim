@@ -321,6 +321,25 @@ abstract final class Cmd {
   static SessionCmd<void> releaseDeluxe(int albumId, List<int> songIds) =>
       (s) => s.releaseDeluxe(albumId, songIds);
 
+  /// A new version of an album after it came out (docs K225, K226); the
+  /// edition (cover index) it became.
+  static SessionCmd<int> releaseAlbumVersion(int albumId,
+          {required String name,
+          required List<int> songIds,
+          required EditionFormat format,
+          bool anniversary = false}) =>
+      (s) => s.releaseAlbumVersion(albumId,
+          name: name,
+          songIds: songIds,
+          format: format,
+          anniversary: anniversary);
+
+  /// An album anniversary to ask about, and having asked (docs K226).
+  static SessionCmd<AnniversaryPrompt?> anniversaryPrompt() =>
+      (s) => s.anniversaryPrompt;
+  static SessionCmd<void> anniversaryAsked(int albumId) =>
+      (s) => s.anniversaryAsked(albumId);
+
   /// Records an album again into a vault draft (docs K139).
   static SessionCmd<void> rerecordAlbum(
           int albumId, String title, List<int> vaultSongIds) =>

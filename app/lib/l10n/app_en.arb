@@ -3637,6 +3637,87 @@
       }
     }
   },
+  "smVersionOut0": "A NEW VERSION OF {title}?? New cover, new tracks, I'm buying it again",
+  "@smVersionOut0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smVersionOut1": "The new {title} edition has me listening to the whole album again",
+  "@smVersionOut1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smVersionOut2": "{name} really said one {title} is not enough",
+  "@smVersionOut2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCashGrab0": "Another version of {title}? How many times do we have to buy it",
+  "@smCashGrab0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCashGrab1": "{name} please stop re-releasing {title} and make new music",
+  "@smCashGrab1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smCashGrab2": "Version number whatever of {title}. Cash grab and we all know it",
+  "@smCashGrab2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smAnniversaryOut0": "{title} anniversary edition!! I remember the first time I heard it",
+  "@smAnniversaryOut0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smAnniversaryOut1": "Playing {title} front to back for the anniversary. Still perfect",
+  "@smAnniversaryOut1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smAnniversaryOut2": "The {title} anniversary edition is the gift we needed. Thank you {name}",
+  "@smAnniversaryOut2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "smCatchingOn0": "Everyone at my school is suddenly singing {title}",
   "@smCatchingOn0": {
     "placeholders": {
@@ -6066,6 +6147,142 @@
       }
     }
   },
+  "formatDigital": "Digital only",
+  "versionButton": "New version",
+  "versionTitle": "New version",
+  "versionIntro": "Put “{title}” out again under a new name and cover, with bonus tracks from the vault if you like. Fans buy the new edition this week and the album is talked about again.",
+  "@versionIntro": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "versionName": "Name of the version",
+  "versionNameNeeded": "Give it a name.",
+  "versionCover": "Cover",
+  "versionCoverHint": "Tap to give this version its own cover. Without one it uses the album cover.",
+  "versionCoverSet": "Its own cover is set. Tap to change it.",
+  "versionTracks": "Bonus tracks ({count}/{max})",
+  "@versionTracks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "versionTracksHint": "Unreleased songs from the vault come out with this version. You can also put it out with none.",
+  "versionTracksEmpty": "No unreleased songs in the vault. Write some in the studio first if you want new tracks.",
+  "versionFormat": "Format",
+  "versionFormatHint": "What fans can buy. Digital costs least; collectors pay for vinyl and signed copies.",
+  "versionAnniversary": "{years}th anniversary edition",
+  "@versionAnniversary": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "versionAnniversaryHint": "Remastered for the anniversary: every track is played again for a while (+{cost}).",
+  "@versionAnniversaryHint": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "versionAnniversaryName": "{years}th Anniversary Edition",
+  "@versionAnniversaryName": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "versionRelease": "Release · {cost}",
+  "@versionRelease": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "versionRecent": "A version came out a few weeks ago: this one brings less hype.",
+  "versionTired": "That would be the third version in a few weeks: fans will call it a cash grab and some lose faith.",
+  "versionOut": "“{name}” is out!",
+  "@versionOut": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "versionPending": "Wait until the editions it came out with are all out.",
+  "versionFull": "This album has all the editions it can have.",
+  "errorNoVersion": "A new version is not possible for this record now.",
+  "versionBonus": "Bonus · {name}",
+  "@versionBonus": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "versionsCount": "{count} versions",
+  "@versionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "anniversaryPromptTag": "ANNIVERSARY",
+  "anniversaryPromptTitle": "“{title}” turns {years}!",
+  "@anniversaryPromptTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "anniversaryPromptBody": "It came out in {date}. Fans are already posting about it. How do you want to mark it?",
+  "@anniversaryPromptBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "anniversaryPromptStats": "{tracks} tracks · {units} sold",
+  "@anniversaryPromptStats": {
+    "placeholders": {
+      "tracks": {
+        "type": "int"
+      },
+      "units": {
+        "type": "String"
+      }
+    }
+  },
+  "anniversaryDetailed": "Make an anniversary edition",
+  "anniversaryDetailedHint": "Your own name and new cover, new songs from the vault, the format you choose. Remastered.",
+  "anniversaryQuick": "Quick reissue · {cost}",
+  "@anniversaryQuick": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "anniversaryQuickHint": "Remastered, on a collector's vinyl. Done in one tap.",
+  "anniversaryLater": "Not now",
+  "anniversaryLaterHint": "The album page offers it all year.",
   "errorNoDeluxe": "This record cannot get a deluxe edition now.",
   "errorNoWindow": "This record cannot be held off streaming now.",
   "errorNoPartner": "That artist cannot make a record with you.",

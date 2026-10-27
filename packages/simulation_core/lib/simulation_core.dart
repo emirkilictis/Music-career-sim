@@ -2,6 +2,7 @@
 library;
 
 export 'src/actions.dart';
+export 'src/album_versions.dart';
 export 'src/anniversaries.dart';
 export 'src/artist_pick.dart';
 export 'src/audience.dart';

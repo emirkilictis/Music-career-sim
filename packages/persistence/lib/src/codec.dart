@@ -514,6 +514,8 @@ abstract final class Codec {
     'bundle', 'liveTour', 'anniv', 'partner', 'visual', 'hits', 'priceCut',
     // Added in schema v47, v48.
     'rollout', 'windowUntil',
+    // Added in schema v54.
+    'versions',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -551,6 +553,12 @@ abstract final class Codec {
             ? null
             : jsonEncode([al.rolloutApplicable, al.rolloutDone]),
         al.windowUntil,
+        al.versions.isEmpty && al.anniversariesAsked == 0
+            ? null
+            : jsonEncode({
+                'v': [for (final v in al.versions) v.toJson()],
+                if (al.anniversariesAsked != 0) 'q': al.anniversariesAsked,
+              }),
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -613,6 +621,15 @@ abstract final class Codec {
       ..sumDormantRate = _d(r['sumDormantRate']);
     _readReg(r, albumRegColumns, al.reg);
     _decodeCharts(r['charts'] as String, al);
+    if (r['versions'] case final String x when x.isNotEmpty) {
+      final j = jsonDecode(x) as Map<String, Object?>;
+      al
+        ..versions.addAll([
+          for (final v in (j['v'] as List?) ?? const [])
+            AlbumVersion.fromJson((v as Map).cast<String, Object?>())
+        ])
+        ..anniversariesAsked = j['q'] as int? ?? 0;
+    }
     if (r['bundle'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       al
