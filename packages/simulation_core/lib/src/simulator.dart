@@ -736,6 +736,7 @@ class Simulator {
           (sumSingles[k] * (1 + rc.outsideAttention) + 1);
       w.spaIndex[k] += spa[k];
       w.lastSpa[k] = spa[k];
+      w.spaWeek = w.week;
       w.lastDpa[k] = dpa[k];
       w.dpaIndex[k] += 0.1 * dpa[k];
       w.emaAttention[k] = 0.9 * w.emaAttention[k] + 0.1 * sumA[k];
@@ -1662,6 +1663,8 @@ class Simulator {
         continue;
       }
       w.settleRetired(a);
+      final mine = a.id == w.playerArtistId ||
+          (a.managedBy >= 0 && a.managedBy == w.playerArtistId);
       var dropped = 0.0;
       // In id order: the list's order differs after loading a save, and
       // the sums must come out the same to the last bit.
@@ -1672,7 +1675,9 @@ class Simulator {
         final perYear = c.catalogFadePerYear(Lifecycle.catalogWeight(s), years);
         var rate = s.dormantRate *
             math.pow(1 - perYear, catalogFadeWeeks / GameTime.weeksPerYear);
-        if (rate < catalogGoneRate) rate = 0;
+        // The player's own songs keep a few listeners however old (docs
+        // K224): a song with millions of plays never shows zero.
+        if (rate < catalogGoneRate && !mine) rate = 0;
         final drop = s.dormantRate - rate;
         if (drop <= 0) continue;
         for (var r = 0; r < regionCount; r++) {

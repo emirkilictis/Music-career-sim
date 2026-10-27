@@ -207,6 +207,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F105 | Emir: "Streaming çok OP, ben 400M falan görüyordum weekly streams, nerflenmeli." Oyuncu: "Bir şarkı için haftada 200M abartı, biraz düşürebilirsin." | ✅ K222: Stream hacmi yarıya indi: haftanın 1 numarası 80–105M (önce 120–207M); gelir ve stream sertifikaları da düştü. |
 | F106 | Oyuncu: "Ödül törenleri için başvuru (submission) eklenebilir." | ⏳ Sırada. |
 | F107 | Oyuncu (iPad): "Kapak için fotoğraf yükleyemiyorum, fotoğrafın sadece küçük bir kısmını alıyor." | ✅ K221: Kare olmayan bir fotoğraf seçilince kırpma ekranı açılıyor: sürükle, iki parmakla yakınlaştır, karenin içi kapak ya da fotoğraf olur (önce ortası kendiliğinden kesiliyordu). |
+| F108 | Oyuncular (iki ayrı kişi): "Bir süre sonra albümümün bütün şarkıları aynı oranla büyüyüp düşüyor" (hepsi +%0,24, hepsi −%6,73; bir parça 0'da). Emir: "Albüm yayınlandıktan sonra yeni versiyon çıkarabilme ekle." Emir: "Anniversary'de ekrana kocaman bildirim gelsin, sorsun; isteyen yeni şarkılar ve yeni kapakla detaylı bir anniversary yapabilsin." | ✅ K224: her katalog şarkısı kendi yolunda; oyuncunun şarkıları 0'a inmiyor. K225–K226: aşağıda. |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

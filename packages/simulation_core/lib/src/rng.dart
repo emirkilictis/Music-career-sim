@@ -37,6 +37,7 @@ abstract final class RngPurpose {
   static const lineup = 41;
   static const rivalTools = 42;
   static const songMarket = 43;
+  static const catalogDrift = 44;
 }
 
 /// A 64-bit constant from its two halves (docs K218): the web build's

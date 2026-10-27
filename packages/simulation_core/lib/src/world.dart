@@ -11,6 +11,7 @@ import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'model.dart';
+import 'rng.dart';
 import 'award_campaigns.dart';
 import 'documentaries.dart';
 import 'streamify_sessions.dart';
@@ -155,6 +156,10 @@ class World {
   /// the UI show "this week" numbers for catalog (dormant) songs in O(1).
   final Float64List lastSpa = Float64List(regionCount);
   final Float64List lastDpa = Float64List(regionCount);
+
+  /// The week [lastSpa] is from (-1 before the first step since loading:
+  /// then the week before [week]).
+  int spaWeek = -1;
 
   /// The player's songs (written or released), so player screens and saves
   /// never scan the whole world.
@@ -415,7 +420,30 @@ class World {
     if (s.status == SongStatus.active) return s.weekRegion?[r] ?? 0;
     if (s.status != SongStatus.dormant) return 0;
     final a = primaryOf(s);
-    return s.dormantRate * a.catalogFactor * a.regionShare[r] * lastSpa[r];
+    return s.dormantRate *
+        a.catalogFactor *
+        a.regionShare[r] *
+        lastSpa[r] *
+        catalogDrift(s);
+  }
+
+  /// How far a catalog song's week strays from its catalog level (docs
+  /// K224): people drift to one old song for a few months and away from
+  /// another, and no two weeks are alike, so an album's tracks never rise
+  /// and fall together by the same share. Averages 1 over time (the
+  /// song's lifetime count follows its level).
+  double catalogDrift(Song s) {
+    final wk = spaWeek >= 0 ? spaWeek : week - 1;
+    double u(int key) => keyedUnit(seed, key, s.id, RngPurpose.catalogDrift);
+    // A slow swing of half a year to a year and a half, a quicker one of
+    // six to fourteen weeks, and the week's own noise.
+    final slow = 26 + 52 * u(-101);
+    final quick = 6 + 8 * u(-102);
+    const turn = 2 * math.pi;
+    return 1 +
+        0.10 * math.sin(turn * (wk / slow + u(-103))) +
+        0.04 * math.sin(turn * (wk / quick + u(-104))) +
+        0.05 * (u(wk) - 0.5);
   }
 
   /// This week's streams of a song in a chart market.
