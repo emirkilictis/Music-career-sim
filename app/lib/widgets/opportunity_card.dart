@@ -32,8 +32,7 @@ class OpportunityCard extends StatelessWidget {
     final fmt = context.fmt;
     final busy = context.career.busy;
     final o = offer;
-    final scandal = o.kind == OpportunityKind.scandal ||
-        o.kind == OpportunityKind.memberRift;
+    final scandal = o.kind.isCrisis;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,

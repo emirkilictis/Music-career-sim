@@ -25,6 +25,24 @@ enum OpportunityKind {
 
   /// A member is feuding with the rest of the group, in public (K87).
   memberRift,
+
+  /// An online pile-on, most often after a release that let people down
+  /// (docs K228).
+  hateWave,
+
+  /// Private messages of the player's leaked (docs K228).
+  dmLeak,
+
+  /// Something went wrong on stage, on tour (docs K228).
+  stageMishap;
+
+  /// Trouble to handle rather than an offer to take (docs K228).
+  bool get isCrisis =>
+      this == scandal ||
+      this == memberRift ||
+      this == hateWave ||
+      this == dmLeak ||
+      this == stageMishap;
 }
 
 /// How the player answers. Most offers are [accept] / [decline]; a scandal
@@ -61,7 +79,7 @@ class Opportunity {
   final int brand;
 
   List<OpportunityChoice> get choices => switch (kind) {
-        OpportunityKind.scandal || OpportunityKind.memberRift => const [
+        _ when kind.isCrisis => const [
             OpportunityChoice.apologize,
             OpportunityChoice.ignore,
             OpportunityChoice.leanIn,
@@ -76,9 +94,7 @@ class Opportunity {
 
   /// What happens when it lapses unanswered.
   OpportunityChoice get lapse =>
-      kind == OpportunityKind.scandal || kind == OpportunityKind.memberRift
-          ? OpportunityChoice.ignore
-          : OpportunityChoice.decline;
+      kind.isCrisis ? OpportunityChoice.ignore : OpportunityChoice.decline;
 
   Map<String, Object?> toJson() => {
         'k': kind.index,
@@ -117,6 +133,7 @@ class OpportunityOutcome {
     this.energy = 0,
     this.won = false,
     this.blewOver = false,
+    this.backfired = false,
   });
 
   final OpportunityKind kind;
@@ -131,6 +148,9 @@ class OpportunityOutcome {
 
   /// Scandal ignored: it blew over by itself.
   final bool blewOver;
+
+  /// A bold answer to a crisis went wrong (docs K228).
+  final bool backfired;
 }
 
 abstract final class Opportunities {
@@ -143,7 +163,8 @@ abstract final class Opportunities {
       festivalEnergy = 25.0,
       performEnergy = 15.0,
       memberSoloEnergy = 20.0,
-      memberTalkEnergy = 25.0;
+      memberTalkEnergy = 25.0,
+      crisisTalkEnergy = 10.0;
 
   /// A new offer may come up for the player this week (none while one is
   /// waiting). Deterministic per week.
@@ -169,8 +190,22 @@ abstract final class Opportunities {
       return roll < at;
     }
 
-    if (fame > 0.3 && hit(0.008, booked: false)) {
+    if (fame > 0.2 && hit(0.01, booked: false)) {
       return Opportunity(kind: OpportunityKind.scandal, week: w.week);
+    }
+    // Trouble (docs K228): a release that let people down brings the
+    // haters out; a careless performer slips up on tour; the famous get
+    // their messages leaked.
+    final flop = recent && _letDown(w, p);
+    if (fame > 0.05 && hit(flop ? 0.08 : 0.004, booked: false)) {
+      return Opportunity(kind: OpportunityKind.hateWave, week: w.week);
+    }
+    if (p.tour != null &&
+        hit(0.02 + 0.04 * (1 - p.skills.performance / 100), booked: false)) {
+      return Opportunity(kind: OpportunityKind.stageMishap, week: w.week);
+    }
+    if (fame > 0.2 && hit(0.005, booked: false)) {
+      return Opportunity(kind: OpportunityKind.dmLeak, week: w.week);
     }
     // Group life (docs K87): a member's solo plans, a feud in public.
     if (p.kind.isGroup && p.members.length >= 2) {
@@ -240,7 +275,9 @@ abstract final class Opportunities {
     final s = p.skills;
     final charm = s.charisma / 100, stage = s.performance / 100;
     var money = 0, fans = 0.0, hype = 0.0, energy = 0.0;
-    var won = false, blewOver = false;
+    var won = false, blewOver = false, backfired = false;
+    // What putting a crisis right costs, paid in full (docs K228).
+    var paid = 0;
 
     void spendEnergy(double e) {
       energy = -math.min(e, p.creativeEnergy);
@@ -324,10 +361,77 @@ abstract final class Opportunities {
         p.buzz += 0.5;
         fans = -p.coreFans * 0.01;
         p.devotion = math.max(0.0, p.devotion - 0.04);
+      // An online pile-on (docs K228).
+      case (OpportunityKind.hateWave, OpportunityChoice.apologize):
+        spendEnergy(crisisTalkEnergy);
+        p.popularity = math.max(0.0, p.popularity - 0.01);
+        p.devotion = math.min(1.0, p.devotion + 0.01);
+      case (OpportunityKind.hateWave, OpportunityChoice.ignore):
+        // Logging off is a rest too.
+        p.creativeEnergy = math.min(100.0, p.creativeEnergy + 5);
+        blewOver = r.chance(0.6);
+        if (!blewOver) {
+          p.popularity = math.max(0.0, p.popularity - 0.05);
+          p.devotion = math.max(0.0, p.devotion - 0.02);
+        }
+      case (OpportunityKind.hateWave, OpportunityChoice.leanIn):
+        backfired = !r.chance(0.3 + 0.5 * charm);
+        if (backfired) {
+          p.popularity = math.max(0.0, p.popularity - 0.08);
+          p.devotion = math.max(0.0, p.devotion - 0.03);
+          hype = 0.04;
+        } else {
+          hype = 0.08;
+          p.buzz += 0.3;
+          fans = p.casual * 0.006;
+        }
+      // Leaked messages (docs K228).
+      case (OpportunityKind.dmLeak, OpportunityChoice.apologize):
+        p.popularity = math.max(0.0, p.popularity - 0.04);
+        p.devotion = math.min(1.0, p.devotion + 0.01);
+      case (OpportunityKind.dmLeak, OpportunityChoice.ignore):
+        blewOver = r.chance(0.5);
+        if (!blewOver) {
+          p.popularity = math.max(0.0, p.popularity - 0.08);
+          p.devotion = math.max(0.0, p.devotion - 0.03);
+          hype = -0.04;
+        }
+      case (OpportunityKind.dmLeak, OpportunityChoice.leanIn):
+        // Calling them fake: believed, it is over; proven real, it is
+        // much worse.
+        backfired = !r.chance(0.55);
+        if (backfired) {
+          p.popularity = math.max(0.0, p.popularity - 0.15);
+          p.devotion = math.max(0.0, p.devotion - 0.06);
+          hype = -0.08;
+        } else {
+          hype = 0.03;
+        }
+      // A slip on stage (docs K228).
+      case (OpportunityKind.stageMishap, OpportunityChoice.apologize):
+        // A free show for the night's crowd.
+        paid = _fee(5e6, 2e8, p.fame, r);
+        p.devotion = math.min(1.0, p.devotion + 0.02);
+      case (OpportunityKind.stageMishap, OpportunityChoice.ignore):
+        blewOver = r.chance(0.5);
+        if (!blewOver) {
+          // The clip goes around.
+          p.popularity = math.max(0.0, p.popularity - 0.03);
+          hype = 0.03;
+        }
+      case (OpportunityKind.stageMishap, OpportunityChoice.leanIn):
+        backfired = !r.chance(0.35 + 0.5 * charm);
+        if (backfired) {
+          p.popularity = math.max(0.0, p.popularity - 0.05);
+        } else {
+          hype = 0.1;
+          Audience.addCasual(w, p, p.casual * 0.02);
+          fans = p.casual * 0.004;
+        }
       case _:
         break; // declined
     }
-    money = p.manager.net(money.toDouble()).round();
+    money = p.manager.net(money.toDouble()).round() - paid;
     p.moneyCents += money;
     p.hype = math.max(0.0, p.hype + hype);
     fans = Audience.addFans(w, p, fans);
@@ -339,7 +443,27 @@ abstract final class Opportunities {
         hype: hype,
         energy: energy,
         won: won,
-        blewOver: blewOver);
+        blewOver: blewOver,
+        backfired: backfired);
+  }
+
+  /// Whether the player's latest release let people down: a weak record
+  /// or a bad review.
+  static bool _letDown(World w, Artist p) {
+    for (final al in w.albums.reversed) {
+      if (al.artistId != p.id) continue;
+      if (w.week - al.releaseWeek > 6) break;
+      if (al.quality < 55 || (al.criticScore >= 0 && al.criticScore < 5.5)) {
+        return true;
+      }
+    }
+    for (final id in w.playerSongIds.reversed) {
+      final s = w.songs[id];
+      if (s.primaryArtistId != p.id || !s.isSingle) continue;
+      if (s.singleWeek < 0 || w.week - s.singleWeek > 6) continue;
+      if (s.quality < 50) return true;
+    }
+    return false;
   }
 
   /// Fee between [lowCents] and [highCents], growing with fame.

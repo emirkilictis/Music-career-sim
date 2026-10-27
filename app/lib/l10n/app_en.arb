@@ -2644,6 +2644,57 @@
       }
     }
   },
+  "offerHateWaveTitle": "Hate wave",
+  "offerHateWaveBody": "People online are piling on you, and it is trending. How do you answer?",
+  "offerDmLeakTitle": "Your messages leaked",
+  "offerDmLeakBody": "Screenshots of your private messages are going around. What do you say?",
+  "offerStageMishapTitle": "On-stage mishap",
+  "offerStageMishapBody": "Last night’s show went wrong in front of everyone, and there are videos. What now?",
+  "choiceRespondCalmly": "Answer calmly",
+  "choiceLogOff": "Log off for a while",
+  "choiceClapBack": "Clap back",
+  "choiceOwnIt": "Own it",
+  "choiceSayNothing": "Say nothing",
+  "choiceCallFake": "Say they are fake",
+  "choiceMakeItUp": "Make it up to the fans",
+  "choiceKeepGoing": "Keep going",
+  "choiceLaughItOff": "Turn it into a moment",
+  "outcomeHateCalm": "You answered calmly. Some of the noise died down and your fans liked it.",
+  "outcomeHateGone": "You logged off and it passed. You feel rested.",
+  "outcomeHateStayed": "You logged off, but it kept going: popularity and devotion took a hit.",
+  "outcomeClapWon": "The clap back landed: everyone is quoting it, +{fans} fans.",
+  "@outcomeClapWon": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeClapLost": "The clap back went badly: now you are the villain. Popularity and devotion fell.",
+  "outcomeOwnIt": "You owned it. It cost you some popularity, but your fans respect it.",
+  "outcomeLeakGone": "You said nothing and it was forgotten.",
+  "outcomeLeakStayed": "You said nothing and it would not die: popularity and devotion took a hit.",
+  "outcomeFakeBelieved": "People believed you. It is over.",
+  "outcomeFakeCaught": "The messages were proven real. That made it much worse.",
+  "outcomeMadeUp": "You put on a free show for the crowd ({money}). Your fans love you for it.",
+  "@outcomeMadeUp": {
+    "placeholders": {
+      "money": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeKeptGoingOk": "You kept going and nobody remembers it a week later.",
+  "outcomeKeptGoingBad": "You kept going, but the clip went around: popularity fell a little.",
+  "outcomeLaughWon": "You laughed it off and the clip went viral for the right reasons: +{fans} fans.",
+  "@outcomeLaughWon": {
+    "placeholders": {
+      "fans": {
+        "type": "String"
+      }
+    }
+  },
+  "outcomeLaughLost": "The joke did not land: people think you don’t care. Popularity fell.",
   "choiceSupport": "Back them",
   "choiceAskToWait": "Ask them to wait",
   "choiceTalkItOut": "Talk it out",
@@ -3204,6 +3255,102 @@
   },
   "smAwardRobbed1": "Awards are rigged anyway. We know who won.",
   "smAwardRobbed2": "Next year. Next year it's ours.",
+  "smHateWave0": "{name} fell off. Not even sorry to say it",
+  "@smHateWave0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHateWave1": "Who is still listening to {name} in this economy",
+  "@smHateWave1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHateWave2": "Unpopular opinion: {name} was never that good",
+  "@smHateWave2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHateDefend0": "The {name} hate today is embarrassing. Leave them alone",
+  "@smHateDefend0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHateDefend1": "Y'all hate {name} for clout and it shows",
+  "@smHateDefend1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHateDefend2": "Stream {name} to annoy a hater today 💅",
+  "@smHateDefend2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smDmLeak0": "The {name} messages… I need to sit down",
+  "@smDmLeak0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smDmLeak1": "If those {name} DMs are real that's a lot",
+  "@smDmLeak1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smDmLeak2": "Not believing anything about {name} until they talk",
+  "@smDmLeak2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smStageMishap0": "Did {name} really just do that on stage 😭",
+  "@smStageMishap0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smStageMishap1": "The clip of {name} last night is everywhere",
+  "@smStageMishap1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smStageMishap2": "I was there. {name} kept going like a pro",
+  "@smStageMishap2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "smScandal0": "Waiting for {name} to explain this…",
   "@smScandal0": {
     "placeholders": {

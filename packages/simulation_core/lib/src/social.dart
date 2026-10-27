@@ -82,6 +82,10 @@ enum FanTopic {
   versionOut,
   cashGrab,
   anniversaryOut,
+  hateWave,
+  hateDefend,
+  dmLeak,
+  stageMishap,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.

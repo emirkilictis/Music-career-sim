@@ -57,6 +57,26 @@ TOPICS = {
   ("Awards are rigged anyway. We know who won.", "Ödüller zaten ayarlı. Asıl kazananı biliyoruz."),
   ("Next year. Next year it's ours.", "Seneye. Seneye bizim."),
  ],
+ 'hateWave': [
+  ("{name} fell off. Not even sorry to say it", "{name} bitti. Söylediğim için üzgün bile değilim"),
+  ("Who is still listening to {name} in this economy", "Bu devirde hâlâ {name} dinleyen var mı"),
+  ("Unpopular opinion: {name} was never that good", "Popüler olmayan görüş: {name} hiç o kadar iyi değildi"),
+ ],
+ 'hateDefend': [
+  ("The {name} hate today is embarrassing. Leave them alone", "Bugünkü {name} nefreti utanç verici. Rahat bırakın"),
+  ("Y'all hate {name} for clout and it shows", "Hepiniz ilgi için {name}'den nefret ediyorsunuz, belli oluyor"),
+  ("Stream {name} to annoy a hater today 💅", "Bugün bir hateri kızdırmak için {name} dinle 💅"),
+ ],
+ 'dmLeak': [
+  ("The {name} messages… I need to sit down", "{name} mesajları… oturmam lazım"),
+  ("If those {name} DMs are real that's a lot", "O {name} mesajları gerçekse bu çok fazla"),
+  ("Not believing anything about {name} until they talk", "{name} konuşana kadar hiçbir şeye inanmıyorum"),
+ ],
+ 'stageMishap': [
+  ("Did {name} really just do that on stage 😭", "{name} gerçekten sahnede bunu mu yaptı 😭"),
+  ("The clip of {name} last night is everywhere", "{name}'in dün geceki videosu her yerde"),
+  ("I was there. {name} kept going like a pro", "Oradaydım. {name} bir profesyonel gibi devam etti"),
+ ],
  'scandal': [
   ("Waiting for {name} to explain this…", "{name} bunu açıklasın bekliyorum…"),
   ("I'm not reading the comments today", "Bugün yorumları okumuyorum"),

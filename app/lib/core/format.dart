@@ -664,6 +664,9 @@ class Fmt {
         OpportunityKind.award => l.offerAwardTitle,
         OpportunityKind.memberSolo => l.offerMemberSoloTitle,
         OpportunityKind.memberRift => l.offerMemberRiftTitle,
+        OpportunityKind.hateWave => l.offerHateWaveTitle,
+        OpportunityKind.dmLeak => l.offerDmLeakTitle,
+        OpportunityKind.stageMishap => l.offerStageMishapTitle,
       };
 
   String offerBody(OpportunityView o) => switch (o.kind) {
@@ -688,9 +691,31 @@ class Fmt {
             o.memberName, Opportunities.memberSoloEnergy.round()),
         OpportunityKind.memberRift => l.offerMemberRiftBody(
             o.memberName, Opportunities.memberTalkEnergy.round()),
+        OpportunityKind.hateWave => l.offerHateWaveBody,
+        OpportunityKind.dmLeak => l.offerDmLeakBody,
+        OpportunityKind.stageMishap => l.offerStageMishapBody,
       };
 
   String offerChoice(OpportunityKind k, OpportunityChoice c) => switch (c) {
+        // Crises (docs K228).
+        OpportunityChoice.apologize when k == OpportunityKind.hateWave =>
+          l.choiceRespondCalmly,
+        OpportunityChoice.ignore when k == OpportunityKind.hateWave =>
+          l.choiceLogOff,
+        OpportunityChoice.leanIn when k == OpportunityKind.hateWave =>
+          l.choiceClapBack,
+        OpportunityChoice.apologize when k == OpportunityKind.dmLeak =>
+          l.choiceOwnIt,
+        OpportunityChoice.ignore when k == OpportunityKind.dmLeak =>
+          l.choiceSayNothing,
+        OpportunityChoice.leanIn when k == OpportunityKind.dmLeak =>
+          l.choiceCallFake,
+        OpportunityChoice.apologize when k == OpportunityKind.stageMishap =>
+          l.choiceMakeItUp,
+        OpportunityChoice.ignore when k == OpportunityKind.stageMishap =>
+          l.choiceKeepGoing,
+        OpportunityChoice.leanIn when k == OpportunityKind.stageMishap =>
+          l.choiceLaughItOff,
         OpportunityChoice.accept when k == OpportunityKind.memberSolo =>
           l.choiceSupport,
         OpportunityChoice.decline when k == OpportunityKind.memberSolo =>
@@ -733,6 +758,23 @@ class Fmt {
       (OpportunityKind.memberRift, OpportunityChoice.ignore) =>
         o.blewOver ? l.outcomeRiftPassed : l.outcomeRiftBad(compact(-o.fans)),
       (OpportunityKind.memberRift, _) => l.outcomeRiftAired(compact(-o.fans)),
+      (OpportunityKind.hateWave, OpportunityChoice.apologize) =>
+        l.outcomeHateCalm,
+      (OpportunityKind.hateWave, OpportunityChoice.ignore) =>
+        o.blewOver ? l.outcomeHateGone : l.outcomeHateStayed,
+      (OpportunityKind.hateWave, _) =>
+        o.backfired ? l.outcomeClapLost : l.outcomeClapWon(fans),
+      (OpportunityKind.dmLeak, OpportunityChoice.apologize) => l.outcomeOwnIt,
+      (OpportunityKind.dmLeak, OpportunityChoice.ignore) =>
+        o.blewOver ? l.outcomeLeakGone : l.outcomeLeakStayed,
+      (OpportunityKind.dmLeak, _) =>
+        o.backfired ? l.outcomeFakeCaught : l.outcomeFakeBelieved,
+      (OpportunityKind.stageMishap, OpportunityChoice.apologize) =>
+        l.outcomeMadeUp(money(-o.moneyCents)),
+      (OpportunityKind.stageMishap, OpportunityChoice.ignore) =>
+        o.blewOver ? l.outcomeKeptGoingOk : l.outcomeKeptGoingBad,
+      (OpportunityKind.stageMishap, _) =>
+        o.backfired ? l.outcomeLaughLost : l.outcomeLaughWon(fans),
       (_, OpportunityChoice.decline) => l.outcomeDeclined,
       (OpportunityKind.interview, _) => l.outcomeInterview(fans),
       (OpportunityKind.feature, _) =>
@@ -1071,8 +1113,7 @@ class Fmt {
           compact(e.fans)),
       MilestoneReached(:final milestone) =>
         l.eventMilestone(milestoneName(milestone), milestone.skillPoints),
-      OpportunityLapsed() => e.outcome.kind == OpportunityKind.scandal ||
-              e.outcome.kind == OpportunityKind.memberRift
+      OpportunityLapsed() => e.outcome.kind.isCrisis
           ? offerOutcome(e.outcome)
           : l.eventOfferLapsed(offerTitle(e.outcome.kind)),
       ReleaseAnnounced() => l.eventReleaseAnnounced(t, week(e.releaseWeek)),

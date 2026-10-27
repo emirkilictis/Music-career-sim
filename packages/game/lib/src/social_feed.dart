@@ -117,6 +117,17 @@ abstract final class SocialFeed {
         case OpportunityCame(kind: OpportunityKind.scandal):
           fan(FanTopic.scandal);
           fan(FanTopic.scandal);
+        // Trouble (docs K228): the haters, and the fans who answer them.
+        case OpportunityCame(kind: OpportunityKind.hateWave):
+          fan(FanTopic.hateWave);
+          fan(FanTopic.hateWave);
+          fan(FanTopic.hateDefend);
+        case OpportunityCame(kind: OpportunityKind.dmLeak):
+          fan(FanTopic.dmLeak);
+          fan(FanTopic.dmLeak);
+        case OpportunityCame(kind: OpportunityKind.stageMishap):
+          fan(FanTopic.stageMishap);
+          fan(FanTopic.stageMishap);
         case TourFinished():
           fan(FanTopic.tour);
           fan(FanTopic.tour);

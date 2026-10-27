@@ -329,6 +329,105 @@ void main() {
       g.close();
     });
 
+    test('crises: three answers each, bold ones can backfire (K228)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final p = g.world.player!;
+      final seen = <(OpportunityKind, OpportunityChoice), Set<bool>>{};
+      for (var i = 0; i < 40; i++) {
+        for (final kind in const [
+          OpportunityKind.hateWave,
+          OpportunityKind.dmLeak,
+          OpportunityKind.stageMishap,
+        ]) {
+          for (final choice in const [
+            OpportunityChoice.apologize,
+            OpportunityChoice.ignore,
+            OpportunityChoice.leanIn,
+          ]) {
+            // A different week each time: a different roll.
+            p.opportunity =
+                Opportunity(kind: kind, week: g.world.week - i * 3 - 1);
+            p.popularity = 0.5;
+            p.devotion = 0.5;
+            p.creativeEnergy = 100;
+            final money = p.moneyCents;
+            final out = g.answerOpportunity(choice);
+            expect(out.kind.isCrisis, isTrue);
+            (seen[(kind, choice)] ??= {}).add(out.backfired ||
+                (!out.blewOver && choice == OpportunityChoice.ignore));
+            // Owning a leak costs popularity; making a mishap up costs money.
+            if (kind == OpportunityKind.dmLeak &&
+                choice == OpportunityChoice.apologize) {
+              expect(p.popularity, lessThan(0.5));
+            }
+            if (kind == OpportunityKind.stageMishap &&
+                choice == OpportunityChoice.apologize) {
+              expect(out.moneyCents, lessThan(0));
+              expect(p.moneyCents, money + out.moneyCents);
+            }
+            // Calling real messages fake makes it much worse.
+            if (kind == OpportunityKind.dmLeak &&
+                choice == OpportunityChoice.leanIn &&
+                out.backfired) {
+              expect(p.popularity, closeTo(0.35, 1e-9));
+            }
+          }
+        }
+      }
+      // Bold answers and letting it ride go both ways over many tries.
+      for (final kind in const [
+        OpportunityKind.hateWave,
+        OpportunityKind.dmLeak,
+        OpportunityKind.stageMishap,
+      ]) {
+        expect(seen[(kind, OpportunityChoice.leanIn)], {true, false});
+        expect(seen[(kind, OpportunityChoice.ignore)], {true, false});
+      }
+      g.close();
+    });
+
+    test('a release that lets people down brings the haters out (K228)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final w = g.world;
+      final p = w.player!;
+      int hate(bool flop) {
+        var n = 0;
+        for (var i = 0; i < 300; i++) {
+          w.week++;
+          p.opportunity = null;
+          p.lastReleaseWeek = w.week;
+          if (flop) {
+            // A weak album out this week.
+            w.albums.add(Album(
+                id: w.albums.length,
+                title: 'Flop $i',
+                artistId: p.id,
+                type: AlbumType.album,
+                releaseWeek: w.week,
+                songIds: const [],
+                quality: 40));
+          }
+          if (Opportunities.roll(w, p)?.kind == OpportunityKind.hateWave) n++;
+        }
+        return n;
+      }
+
+      final calm = hate(false), flop = hate(true);
+      expect(flop, greaterThan(8));
+      expect(flop, greaterThan(3 * calm));
+      g.close();
+    });
+
     test('a tour is planned, survives reopening and is reported (K63)', () {
       var g = GameSession.start(
           slots,
