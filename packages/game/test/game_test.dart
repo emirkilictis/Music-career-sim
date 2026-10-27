@@ -376,6 +376,75 @@ void main() {
       g.close();
     });
 
+    test('a tour plays the cities, venues and set the player picks (K223)',
+        () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final slot = g.slotId;
+      final ids = <int>[];
+      for (var i = 0; i < 4; i++) {
+        g.world.player!.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.medium).id);
+      }
+      g.releaseAlbum('Live Set', ids.take(3).toList(),
+          type: AlbumType.ep, campaign: Campaign.none);
+      g.releaseSingle(ids[3], campaign: Campaign.none);
+      g.advanceWeeks(4, stop: SkipStop.never);
+
+      // New York and Chicago only, each in a venue of the player's choice.
+      final cities = g.tourCities(TourMarket.usa, TourKind.theater);
+      final ny = cities.firstWhere((c) => c.name == 'New York');
+      final chi = cities.firstWhere((c) => c.name == 'Chicago');
+      expect(ny.venues, hasLength(Tours.venueChoices));
+      final leg = TourLeg(TourMarket.usa, TourKind.theater, 4,
+          stops: [TourStop(ny.city, 2), TourStop(chi.city, 1)]);
+      // A set of two, the single first.
+      final request =
+          TourRequest(legs: [leg], setlist: [ids[3], ids[0], 999999]);
+      final plan = g.tourPreview(request);
+      expect(plan.available, isTrue);
+      expect(plan.legs.single.maxShows, 2 * TourKind.theater.maxNights);
+      expect({for (final s in plan.schedule) s.city}, {'New York', 'Chicago'});
+      for (final s in plan.schedule) {
+        final want = s.city == 'New York' ? ny.venues[2] : chi.venues[1];
+        expect(s.venue, want.$1);
+      }
+      expect(plan.setlist.map((x) => x.songId), [ids[3], ids[0]]);
+      // No picks: the biggest songs.
+      expect(g.tourPreview(TourRequest(legs: [leg])).setlist, isNotEmpty);
+      // Too many nights for two cities, or no city at all.
+      expect(
+          g.tourPreview(TourRequest(legs: [
+            TourLeg(TourMarket.usa, TourKind.theater, 30,
+                stops: const [TourStop(0)])
+          ])).problems,
+          contains('tourShows'));
+      expect(
+          g.tourPreview(const TourRequest(legs: [
+            TourLeg(TourMarket.usa, TourKind.theater, 2, stops: [])
+          ])).problems,
+          contains('tourShows'));
+
+      g.startTour(request);
+      g.close();
+      g = GameSession.resume(slots, slot);
+      final t = g.world.player!.tour!;
+      expect(t.setlist, [ids[3], ids[0]]);
+      expect(t.legs.single.stops!.map((s) => s.venue), [2, 1]);
+      // On stage this week: the set and its album gain.
+      expect(Tours.songLifts(g.world).keys, unorderedEquals([ids[3], ids[0]]));
+      final album = g.world.songs[ids[0]].albumId;
+      expect(Tours.albumLifts(g.world)[album], greaterThan(0));
+      g.advanceWeeks(4, stop: SkipStop.never);
+      expect(g.world.player!.tour, isNull);
+      expect(Tours.songLifts(g.world), isEmpty);
+      g.close();
+    });
+
     test('songs on no album count in the career units (K99)', () {
       final g = GameSession.start(
           slots,

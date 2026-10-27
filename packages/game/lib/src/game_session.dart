@@ -650,9 +650,9 @@ class GameSession {
     final leg = r.legs.where((l) => l.market == m).firstOrNull;
     if (leg == null) throw GameException('tourMarkets', 'No such leg');
     var best = 1;
-    for (var n = 1; n <= Tours.maxShows(m, leg.kind); n++) {
+    for (var n = 1; n <= Tours.maxShowsOf(leg); n++) {
       final v = tourPreview(TourRequest(
-          legs: [TourLeg(m, leg.kind, n)],
+          legs: [TourLeg(m, leg.kind, n, stops: leg.stops)],
           priceFactor: r.priceFactor,
           production: r.production,
           openerId: r.openerId,
@@ -667,8 +667,10 @@ class GameSession {
   TourPlanView tourPreview(TourRequest r) {
     final legs = [
       for (final l in r.legs)
+        // A leg with no city left plays nothing (and cannot start).
         TourLeg(l.market, l.kind,
-            l.shows.clamp(1, Tours.maxShows(l.market, l.kind)).toInt())
+            l.shows.clamp(0, Tours.maxShowsOf(l)).toInt(),
+            stops: l.stops)
     ];
     final opener = r.openerId >= 0 ? world.artists[r.openerId] : null;
     final t = Tours.plan(world, _p,
@@ -677,7 +679,8 @@ class GameSession {
         priceFactor: r.priceFactor,
         production: r.production,
         openerId: opener?.id ?? -1,
-        reunionOf: _reunionOf(r));
+        reunionOf: _reunionOf(r),
+        setlist: _setlist(r));
     final (e, each) = Tours.estimate(world, _p, t);
     final legViews = <TourLegView>[];
     for (var i = 0; i < legs.length; i++) {
@@ -693,7 +696,7 @@ class GameSession {
           tickets: tickets,
           fill: seats == 0 ? 0 : tickets / seats,
           grossCents: gross.round(),
-          maxShows: Tours.maxShows(legs[i].market, legs[i].kind),
+          maxShows: Tours.maxShowsOf(legs[i]),
           priceCents: Tours.priceFor(legs[i].kind, year, t.priceFactor)));
     }
     return TourPlanView(
@@ -709,6 +712,9 @@ class GameSession {
       ],
       openerName: opener?.name,
       openerFeeCents: opener == null ? 0 : Tours.openerFeeCents(opener),
+      setlist: [
+        for (final id in t.setlist) SetlistSong.of(world, world.songs[id])
+      ],
     );
   }
 
@@ -718,7 +724,16 @@ class GameSession {
         reunionOn ? Reunions.group(world)!.coreFans : _p.coreFans;
     final fame = reunionOn ? Reunions.audience(world).fame : _p.fame;
     final showsOk = r.legs.every(
-        (l) => l.shows >= 1 && l.shows <= Tours.maxShows(l.market, l.kind));
+        (l) =>
+            l.shows >= 1 &&
+            l.shows <= Tours.maxShowsOf(l) &&
+            (l.stops == null ||
+                (l.stops!.isNotEmpty &&
+                    l.stops!.every((s) =>
+                        s.city >= 0 &&
+                        s.city < l.market.cities.length &&
+                        s.venue >= 0 &&
+                        s.venue < Tours.venueChoices))));
     return [
       if (_p.tour != null) 'onTour',
       if (r.reunion && !reunionOn) 'noReunion',
@@ -736,6 +751,50 @@ class GameSession {
         'reunionTourLong',
     ];
   }
+
+  /// Most songs a set can have (docs K223).
+  static const maxSetlist = 25;
+
+  /// Songs a tour of [r] could play: the released songs of whoever
+  /// headlines it, the most played first (docs K223).
+  List<SetlistSong> setlistOptions(TourRequest r) {
+    final who = _reunionOf(r) >= 0 ? _reunionOf(r) : _p.id;
+    // The player's own songs are listed; an old group's are looked up.
+    final pool = who == _p.id
+        ? [for (final id in world.playerSongIds) world.songs[id]]
+        : world.songs;
+    final songs = [
+      for (final s in pool)
+        if (s.primaryArtistId == who &&
+            s.releasedWeek >= 0 &&
+            s.status != SongStatus.scrapped &&
+            s.liveOf < 0)
+          s
+    ]..sort((a, b) => world
+        .songLifetimeStreams(b)
+        .compareTo(world.songLifetimeStreams(a)));
+    return [for (final s in songs) SetlistSong.of(world, s)];
+  }
+
+  /// [r]'s set: the player's picks that can be played, in order, else
+  /// the twelve biggest songs.
+  List<int> _setlist(TourRequest r) {
+    final allowed = {for (final s in setlistOptions(r)) s.songId};
+    final picked = [
+      for (final id in r.setlist.toSet())
+        if (allowed.contains(id)) id
+    ];
+    if (picked.isNotEmpty) return picked.take(maxSetlist).toList();
+    return [for (final s in setlistOptions(r).take(12)) s.songId];
+  }
+
+  /// The cities [market] offers and the venues of each at [kind] size
+  /// (docs K223).
+  List<TourCityView> tourCities(TourMarket market, TourKind kind) => [
+        for (var c = 0; c < market.cities.length; c++)
+          TourCityView(c, market.cities[c].name,
+              Tours.venueOptions(world, market, c, kind)),
+      ];
 
   /// The group a reunion tour plays as (-1: the player's own).
   int _reunionOf(TourRequest r) =>
@@ -1155,7 +1214,8 @@ class GameSession {
         priceFactor: r.priceFactor,
         production: r.production,
         openerId: r.openerId,
-        reunionOf: reunionOf);
+        reunionOf: reunionOf,
+        setlist: _setlist(r));
     Tours.start(world, _p, t);
     Milestone.firstTour.mark(world, _p);
     if (t.kind == TourKind.stadium) Milestone.stadiumTour.mark(world, _p);

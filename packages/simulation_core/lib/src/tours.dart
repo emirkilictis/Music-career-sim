@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'audience.dart';
 import 'config/regions.dart';
+import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
 import 'time.dart';
@@ -214,10 +215,48 @@ enum TourProduction {
 
 /// One leg: a market, a venue size and a number of shows.
 class TourLeg {
-  const TourLeg(this.market, this.kind, this.shows);
+  const TourLeg(this.market, this.kind, this.shows, {this.stops});
   final TourMarket market;
   final TourKind kind;
   final int shows;
+
+  /// The cities the player picked, each with the venue they chose there
+  /// (an index into [Tours.venueOptions]); null: the routing picks the
+  /// cities, the first venue in each (docs K223).
+  final List<TourStop>? stops;
+
+  /// Cities on the route, in routing order.
+  List<int> get cities => stops == null
+      ? [for (var c = 0; c < market.cities.length; c++) c]
+      : ([for (final s in stops!) s.city]..sort());
+
+  /// The venue picked in [city].
+  int venueIn(int city) =>
+      stops?.firstWhere((s) => s.city == city, orElse: () => const TourStop(0)).venue ??
+      0;
+
+  List<Object> toJson() => [
+        market.index,
+        kind.index,
+        shows,
+        if (stops != null) [for (final s in stops!) [s.city, s.venue]],
+      ];
+
+  static TourLeg fromJson(List<dynamic> l) => TourLeg(
+      TourMarket.values[l[0] as int], TourKind.values[l[1] as int], l[2] as int,
+      stops: l.length > 3
+          ? [
+              for (final x in l[3] as List)
+                TourStop((x as List)[0] as int, x[1] as int)
+            ]
+          : null);
+}
+
+/// A city the player put on a leg and the venue they chose there.
+class TourStop {
+  const TourStop(this.city, [this.venue = 0]);
+  final int city;
+  final int venue;
 }
 
 /// One night: where, when, how big, and once played how it sold.
@@ -290,6 +329,7 @@ class Tour {
     this.openerId = -1,
     this.cut = Tours.artistCut,
     this.reunionOf = -1,
+    this.setlist = const [],
     List<TourShow>? shows,
     this.tickets = 0,
     this.grossCents = 0,
@@ -317,6 +357,10 @@ class Tour {
   /// The group a reunion tour plays as (-1: the player's own tour; docs
   /// K196).
   final int reunionOf;
+
+  /// The songs played each night, in order (docs K223): in show weeks
+  /// they and their albums are streamed and bought more.
+  final List<int> setlist;
 
   /// Every night, in order.
   final List<TourShow> shows;
@@ -348,9 +392,8 @@ class Tour {
   Map<String, Object?> toJson() => {
         'v': 2,
         'n': name,
-        'legs': [
-          for (final l in legs) [l.market.index, l.kind.index, l.shows]
-        ],
+        'legs': [for (final l in legs) l.toJson()],
+        if (setlist.isNotEmpty) 'sl': setlist,
         'w': startWeek,
         'pf': priceFactor,
         'pr': production.index,
@@ -395,11 +438,8 @@ class Tour {
     }
     return Tour(
       name: j['n'] as String? ?? '',
-      legs: [
-        for (final l in j['legs'] as List)
-          TourLeg(TourMarket.values[(l as List)[0] as int],
-              TourKind.values[l[1] as int], l[2] as int),
-      ],
+      legs: [for (final l in j['legs'] as List) TourLeg.fromJson(l as List)],
+      setlist: [for (final id in j['sl'] as List? ?? const []) id as int],
       startWeek: j['w'] as int,
       priceFactor: d('pf'),
       production: TourProduction.values[j['pr'] as int],
@@ -527,6 +567,10 @@ abstract final class Tours {
   static int maxShows(TourMarket market, TourKind kind) =>
       math.min(maxShowsPerLeg, market.cities.length * kind.maxNights);
 
+  /// Most shows [leg] can have in the cities on its route.
+  static int maxShowsOf(TourLeg leg) =>
+      math.min(maxShowsPerLeg, leg.cities.length * leg.kind.maxNights);
+
   /// A support act's fee per night: more for a known name.
   static int openerFeeCents(Artist o) =>
       (100000 * (1 + 150 * o.fame * o.fame)).round();
@@ -554,9 +598,34 @@ abstract final class Tours {
 
   /// The venue of [kind] size in a city: same name and size every time in
   /// this world (fictional names; docs K76).
-  static (String, int) venue(World w, TourMarket m, int city, TourKind kind) {
-    final r = RandomStream.keyed(
-        w.seed, m.index * 100 + city, kind.index, RngPurpose.tour);
+  /// Venues a city offers at [kind] size, to pick from (docs K223).
+  static const venueChoices = 3;
+
+  static List<(String, int)> venueOptions(
+          World w, TourMarket m, int city, TourKind kind) =>
+      _distinctVenues(w, m, city, kind, venueChoices);
+
+  /// The venue played in [city] at [kind] size: option [option] of
+  /// [venueOptions] (0: the venue every tour played before the choice).
+  static (String, int) venue(World w, TourMarket m, int city, TourKind kind,
+          [int option = 0]) =>
+      _distinctVenues(w, m, city, kind, option + 1)[option];
+
+  /// The first [n] differently named venues the city's draws give.
+  static List<(String, int)> _distinctVenues(
+      World w, TourMarket m, int city, TourKind kind, int n) {
+    final out = <(String, int)>[];
+    for (var k = 0; out.length < n; k++) {
+      final v = _venueDraw(w, m, city, kind, k);
+      if (k > 12 || !out.any((x) => x.$1 == v.$1)) out.add(v);
+    }
+    return out;
+  }
+
+  static (String, int) _venueDraw(
+      World w, TourMarket m, int city, TourKind kind, int draw) {
+    final r = RandomStream.keyed(w.seed, m.index * 100 + city + 10000 * draw,
+        kind.index, RngPurpose.tour);
     final name = m.cities[city].name;
     final cap = (kind.minCapacity +
             r.nextDouble() * (kind.maxCapacity - kind.minCapacity))
@@ -590,12 +659,13 @@ abstract final class Tours {
     for (var li = 0; li < legs.length; li++) {
       final leg = legs[li];
       final cities = leg.market.cities;
+      final route = leg.cities.toSet();
       final nights = List.filled(cities.length, 0);
       for (var n = 0; n < leg.shows; n++) {
         var best = -1;
         var bestScore = -1.0;
         for (var c = 0; c < cities.length; c++) {
-          if (nights[c] >= leg.kind.maxNights) continue;
+          if (!route.contains(c) || nights[c] >= leg.kind.maxNights) continue;
           final score = cities[c].weight / (nights[c] + 1);
           if (score > bestScore) {
             bestScore = score;
@@ -608,7 +678,7 @@ abstract final class Tours {
       var i = 0;
       for (var c = 0; c < cities.length; c++) {
         if (nights[c] == 0) continue;
-        final (name, cap) = venue(w, leg.market, c, leg.kind);
+        final (name, cap) = venue(w, leg.market, c, leg.kind, leg.venueIn(c));
         for (var k = 0; k < nights[c]; k++) {
           final week = cursor + i ~/ showsPerWeek;
           shows.add(TourShow(
@@ -638,6 +708,7 @@ abstract final class Tours {
     TourProduction production = TourProduction.standard,
     int openerId = -1,
     int reunionOf = -1,
+    List<int> setlist = const [],
   }) {
     final pf = priceFactor.clamp(minPriceFactor, maxPriceFactor).toDouble();
     return Tour(
@@ -649,6 +720,7 @@ abstract final class Tours {
       openerId: openerId,
       cut: cutFor(a),
       reunionOf: reunionOf,
+      setlist: setlist,
       shows: schedule(w, legs, w.week, pf),
     );
   }
@@ -798,7 +870,7 @@ abstract final class Tours {
       if (drawOf(w, a, t).coreFans < l.kind.minFans) {
         throw StateError('Not enough fans for ${l.kind.name} venues');
       }
-      if (l.shows < 1 || l.shows > maxShows(l.market, l.kind)) {
+      if (l.shows < 1 || l.shows > maxShowsOf(l)) {
         throw ArgumentError('Shows out of range');
       }
     }
@@ -874,6 +946,66 @@ abstract final class Tours {
       return t;
     }
     return null;
+  }
+
+  /// What a setlist song gains in a week with shows (docs K223): people
+  /// at the show and around it go back to the songs they heard, the
+  /// opener and the closer most.
+  static const setlistLift = 0.4, setlistEdgeLift = 0.2;
+
+  /// What an album gains in a week with shows: the merch stand and the
+  /// fans who want the record of the night, more the more of it is in
+  /// the set.
+  static const albumLiftBase = 0.08, albumLiftPerSong = 0.04,
+      albumLiftMax = 0.35;
+
+  /// The player's tour has nights this week.
+  static Tour? _onStage(World w) {
+    final t = w.player?.tour;
+    if (t == null || t.setlist.isEmpty || t.showsIn(w.week).isEmpty) {
+      return null;
+    }
+    return t;
+  }
+
+  /// Setlist songs' exposure lift this week (docs K223).
+  static Map<int, double> songLifts(World w) {
+    final t = _onStage(w);
+    if (t == null) return const {};
+    final q = t.production.quality;
+    final last = t.setlist.length - 1;
+    return {
+      for (final (i, id) in t.setlist.indexed)
+        id: (setlistLift + (i == 0 || i == last ? setlistEdgeLift : 0)) * q,
+    };
+  }
+
+  /// Albums' sales lift this week, from their songs in the set.
+  static Map<int, double> albumLifts(World w) {
+    final t = _onStage(w);
+    if (t == null) return const {};
+    final count = <int, int>{};
+    for (final id in t.setlist) {
+      final al = w.songs[id].albumId;
+      if (al >= 0) count[al] = (count[al] ?? 0) + 1;
+    }
+    return {
+      for (final e in count.entries)
+        e.key: math.min(albumLiftMax,
+                albumLiftBase + albumLiftPerSong * e.value) *
+            t.production.quality,
+    };
+  }
+
+  /// Setlist songs that had gone quiet come back for the show weeks.
+  static void wakeSetlist(World w) {
+    final t = _onStage(w);
+    if (t == null) return;
+    for (final id in t.setlist) {
+      if (w.songs[id].status == SongStatus.dormant) {
+        Lifecycle.reactivateSong(w, w.songs[id]);
+      }
+    }
   }
 
   /// Weeks left (including this one).

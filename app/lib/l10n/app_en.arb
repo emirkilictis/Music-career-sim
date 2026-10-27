@@ -1406,6 +1406,37 @@
   "tourName": "Tour name",
   "tourNameHint": "e.g. Midnight World Tour",
   "tourLegsHint": "Pick markets, a venue size and how many shows. Big cities get extra nights; fans from cities you skip travel in, a few.",
+  "tourSetlist": "Setlist",
+  "tourSetlistHint": "Played every night. In show weeks these songs and their albums are streamed and bought more; the opener and the closer most.",
+  "tourSetlistEdit": "Edit the set",
+  "tourSetlistDefault": "Biggest songs",
+  "tourSetlistEmpty": "No released songs yet: the set needs some.",
+  "tourSetlistPick": "Tap songs in the order you want them played, up to {max}.",
+  "@tourSetlistPick": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "tourRouteAuto": "Cities: picked by the route",
+  "tourRouteCount": "Cities: {count} picked",
+  "@tourRouteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tourRouteHint": "Pick the cities and the venue in each. Fans from cities you skip travel in, a quarter of them.",
+  "tourSeats": "{count} seats",
+  "@tourSeats": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "tourShowsCount": "{count} shows",
   "@tourShowsCount": {
     "placeholders": {

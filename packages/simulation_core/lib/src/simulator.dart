@@ -175,6 +175,8 @@ class Simulator {
     Documentaries.weekly(w);
     // The player's own playlist gains or loses followers (docs K159).
     OwnPlaylists.weekly(w);
+    // The tour's setlist comes back for the show weeks (docs K223).
+    Tours.wakeSetlist(w);
     // Holiday songs come back for the season (docs K136).
     if (GameTime.weekOfYear(w.week) == Holidays.returnWeek) {
       for (final a in w.artists) {
@@ -238,6 +240,8 @@ class Simulator {
     final pickLifts = ArtistPicks.lifts(w);
     // Mood playlists keep catalog songs going (docs K186).
     final moodLifts = MoodPlaylists.lifts(w);
+    // The songs on the player's tour setlist (docs K223).
+    final tourLifts = Tours.songLifts(w);
     // The player's This Is list plays their catalog (docs K189).
     final thisIsLifts = ThisIs.lifts(w);
     // The player's label pushes its signees further (docs K169).
@@ -475,6 +479,7 @@ class Simulator {
           versionLift +
           algoLift +
           videoLift +
+          (tourLifts[s.id] ?? 0) +
           (p.tier == ArtistTier.player ? lineLift : 0);
       final stacked = c.stackedLift(lifts) * c.toolStack(appLift);
       final exposure = (c.baseExposure +
@@ -874,6 +879,7 @@ class Simulator {
         List.generate(Charts.count, (_) => Float64List(albumIds.length));
     final albumRules = Charts.songRules(ChartMarket.global, w.week);
     final holiday = c.holidaySales(GameTime.weekOfYear(w.week), year);
+    final tourAlbums = Tours.albumLifts(w);
     for (var ai = 0; ai < albumIds.length; ai++) {
       final al = w.albums[albumIds[ai]];
       final p = w.artists[al.artistId];
@@ -1051,7 +1057,10 @@ class Simulator {
                     // A cut download price (docs K163).
                     PriceCuts.salesFactor(w, al) *
                     // Held off streaming, the fans buy (docs K174).
-                    StreamWindows.salesFactor(w, al) +
+                    StreamWindows.salesFactor(w, al) *
+                    // The record of the night, at the merch stand and
+                    // after (docs K223).
+                    (1 + (tourAlbums[al.id] ?? 0)) +
                 (age == 0 ? al.preOrders * share * Actions.preOrderExtra : 0.0) +
                 // Bundled copies (docs K144).
                 (age == 0 ? al.bundleUnits * share : 0.0);

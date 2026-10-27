@@ -288,6 +288,10 @@ abstract final class Cmd {
       (s) => s.tourPreview(r);
   static SessionCmd<List<OpenerView>> tourOpeners() => (s) => s.tourOpeners;
   static SessionCmd<void> startTour(TourRequest r) => (s) => s.startTour(r);
+  static SessionCmd<List<SetlistSong>> setlistOptions(TourRequest r) =>
+      (s) => s.setlistOptions(r);
+  static SessionCmd<List<TourCityView>> tourCities(TourMarket m, TourKind k) =>
+      (s) => s.tourCities(m, k);
 
   static SessionCmd<List<FestivalView>> festivals() => (s) => s.festivals;
   static SessionCmd<void> bookFestival(int festival) =>

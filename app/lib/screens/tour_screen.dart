@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:game/game.dart';
 
@@ -25,6 +27,20 @@ class _LegDraft {
   _LegDraft(this.kind, this.shows);
   TourKind kind;
   int shows;
+
+  /// City → venue option the player picked (null: the routing picks;
+  /// docs K223).
+  Map<int, int>? stops;
+
+  TourLeg leg(TourMarket m) => TourLeg(m, kind, shows,
+      stops: stops == null
+          ? null
+          : [
+              for (final c in stops!.keys.toList()..sort())
+                TourStop(c, stops![c]!)
+            ]);
+
+  int maxShows(TourMarket m) => Tours.maxShowsOf(leg(m));
 }
 
 class _TourScreenState extends State<TourScreen> {
@@ -35,6 +51,9 @@ class _TourScreenState extends State<TourScreen> {
   double _price = 1.0;
   TourProduction _production = TourProduction.standard;
   OpenerView? _opener;
+
+  /// The set in order (empty: the biggest songs; docs K223).
+  List<int> _setlist = const [];
   TourPlanView? _plan;
   int _asked = 0;
 
@@ -72,8 +91,7 @@ class _TourScreenState extends State<TourScreen> {
   /// The biggest venues the player can fill, about a third of the market.
   _LegDraft _defaultLeg(TourMarket m) {
     final fans = _fans;
-    final kind = TourKind.values.lastWhere(
-        (k) => Tours.canPlay(fans, _fame, k),
+    final kind = TourKind.values.lastWhere((k) => Tours.canPlay(fans, _fame, k),
         orElse: () => TourKind.club);
     return _LegDraft(kind, _defaultShows(m, kind));
   }
@@ -91,10 +109,8 @@ class _TourScreenState extends State<TourScreen> {
   TourRequest get _request => TourRequest(
         reunion: widget.reunion != null,
         name: _name.text,
-        legs: [
-          for (final e in _legs.entries)
-            TourLeg(e.key, e.value.kind, e.value.shows)
-        ],
+        legs: [for (final e in _legs.entries) e.value.leg(e.key)],
+        setlist: _setlist,
         priceFactor: _price,
         production: _production,
         openerId: _opener?.artistId ?? -1,
@@ -154,6 +170,41 @@ class _TourScreenState extends State<TourScreen> {
     );
     if (picked == null) return;
     _change(() => _opener = picked is OpenerView ? picked : null);
+  }
+
+  /// The cities of [m]'s leg and the venue in each (docs K223).
+  Future<void> _pickRoute(TourMarket m) async {
+    final d = _legs[m];
+    if (d == null) return;
+    final cities = await widget.state.read(Cmd.tourCities(m, d.kind));
+    if (!mounted) return;
+    final picked = await showModalBottomSheet<_Route>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) =>
+          _RouteSheet(market: m, cities: cities, stops: d.stops ?? const {}),
+    );
+    if (picked == null) return;
+    _change(() {
+      d.stops = picked.stops;
+      d.shows = d.shows.clamp(1, math.max(1, d.maxShows(m)));
+    });
+  }
+
+  /// The songs played each night (docs K223).
+  Future<void> _editSetlist() async {
+    final options = await widget.state.read(Cmd.setlistOptions(_request));
+    if (!mounted) return;
+    final current = _plan?.setlist.map((s) => s.songId).toList() ?? _setlist;
+    final picked = await showModalBottomSheet<List<int>>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => _SetlistSheet(options: options, picked: current),
+    );
+    if (picked == null) return;
+    _change(() => _setlist = picked);
   }
 
   Future<void> _start() async {
@@ -235,13 +286,51 @@ class _TourScreenState extends State<TourScreen> {
                         _change(() {
                           final d = _legs[m]!;
                           d.kind = k;
-                          d.shows = d.shows.clamp(1, Tours.maxShows(m, k));
+                          d.shows =
+                              d.shows.clamp(1, math.max(1, d.maxShows(m)));
                         });
                         _fit(m);
                       },
                       onShows: (n) => _change(() => _legs[m]!.shows = n),
                       onFit: () => _fit(m),
+                      onRoute: () => _pickRoute(m),
                     ),
+                ]),
+          ),
+          const SizedBox(height: 12),
+          Section(
+            title: l.tourSetlist,
+            icon: Icons.queue_music_rounded,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (plan == null || plan.setlist.isEmpty)
+                    Text(l.tourSetlistEmpty,
+                        style: TextStyle(color: AppColors.textMuted))
+                  else
+                    for (final (i, s) in plan.setlist.indexed)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Text('${i + 1}. ${s.title}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontWeight:
+                                    i == 0 || i == plan.setlist.length - 1
+                                        ? FontWeight.w700
+                                        : FontWeight.w500)),
+                      ),
+                  const SizedBox(height: 6),
+                  Text(l.tourSetlistHint,
+                      style: Theme.of(context).textTheme.bodySmall),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: _editSetlist,
+                      icon: const Icon(Icons.edit_rounded, size: 18),
+                      label: Text(l.tourSetlistEdit),
+                    ),
+                  ),
                 ]),
           ),
           const SizedBox(height: 12),
@@ -361,6 +450,7 @@ class _MarketTile extends StatelessWidget {
     required this.onKind,
     required this.onShows,
     required this.onFit,
+    required this.onRoute,
   });
   final TourMarket market;
   final _LegDraft? draft;
@@ -374,13 +464,16 @@ class _MarketTile extends StatelessWidget {
   /// Sizes the leg to its demand (docs K181).
   final VoidCallback onFit;
 
+  /// Picks the cities and venues (docs K223).
+  final VoidCallback onRoute;
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final fmt = context.fmt;
     final d = draft;
     final e = estimate;
-    final max = d == null ? 0 : Tours.maxShows(market, d.kind);
+    final max = d == null ? 0 : d.maxShows(market);
     return Container(
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.fromLTRB(4, 2, 8, 8),
@@ -421,9 +514,8 @@ class _MarketTile extends StatelessWidget {
                 ChoiceChip(
                   label: Text(fmt.tourKind(k)),
                   selected: d.kind == k,
-                  onSelected: Tours.canPlay(fans, fame, k)
-                      ? (_) => onKind(k)
-                      : null,
+                  onSelected:
+                      Tours.canPlay(fans, fame, k) ? (_) => onKind(k) : null,
                   tooltip: Tours.canPlay(fans, fame, k)
                       ? null
                       : l.tourNeedsFans(fmt.compact(k.minFans)),
@@ -452,6 +544,19 @@ class _MarketTile extends StatelessWidget {
                 ),
               ]),
             ),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: onRoute,
+                icon: const Icon(Icons.location_city_rounded, size: 18),
+                label: Text(d.stops == null
+                    ? l.tourRouteAuto
+                    : l.tourRouteCount(d.stops!.length)),
+              ),
+            ),
+          ),
         ],
       ]),
     );
@@ -563,6 +668,198 @@ class TourShowRow extends StatelessWidget {
                       : fmt.money(s.priceCents),
               style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
         ]),
+      ]),
+    );
+  }
+}
+
+/// What the route sheet returns: the picked stops, or null for the
+/// routing's own.
+class _Route {
+  const _Route(this.stops);
+  final Map<int, int>? stops;
+}
+
+/// The cities of a leg, each on or off, with the venue played there
+/// (docs K223).
+class _RouteSheet extends StatefulWidget {
+  const _RouteSheet(
+      {required this.market, required this.cities, required this.stops});
+  final TourMarket market;
+  final List<TourCityView> cities;
+  final Map<int, int> stops;
+
+  @override
+  State<_RouteSheet> createState() => _RouteSheetState();
+}
+
+class _RouteSheetState extends State<_RouteSheet> {
+  late final Map<int, int> _stops = {...widget.stops};
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      builder: (c, scroll) => Column(children: [
+        Expanded(
+          child: ListView(controller: scroll, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child: Text(fmt.tourMarket(widget.market),
+                  style: Theme.of(c).textTheme.titleLarge),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child:
+                  Text(l.tourRouteHint, style: Theme.of(c).textTheme.bodySmall),
+            ),
+            for (final city in widget.cities)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 16, 8),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CheckboxListTile(
+                        dense: true,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        contentPadding: EdgeInsets.zero,
+                        value: _stops.containsKey(city.city),
+                        title: Text(city.name,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w700)),
+                        onChanged: (on) => setState(() => on == true
+                            ? _stops[city.city] = 0
+                            : _stops.remove(city.city)),
+                      ),
+                      if (_stops.containsKey(city.city))
+                        Padding(
+                          padding: const EdgeInsets.only(left: 48),
+                          child: Wrap(spacing: 6, runSpacing: 4, children: [
+                            for (final (i, (name, seats))
+                                in city.venues.indexed)
+                              ChoiceChip(
+                                label: Text(
+                                    '$name · ${l.tourSeats(fmt.compact(seats.toDouble()))}'),
+                                selected: _stops[city.city] == i,
+                                onSelected: (_) =>
+                                    setState(() => _stops[city.city] = i),
+                              ),
+                          ]),
+                        ),
+                    ]),
+              ),
+          ]),
+        ),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Row(children: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, const _Route(null)),
+                child: Text(l.tourRouteAuto),
+              ),
+              const Spacer(),
+              FilledButton(
+                onPressed: _stops.isEmpty
+                    ? null
+                    : () => Navigator.pop(context, _Route({..._stops})),
+                child: Text(l.done),
+              ),
+            ]),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+/// The set: songs ticked in the order they are played (docs K223).
+class _SetlistSheet extends StatefulWidget {
+  const _SetlistSheet({required this.options, required this.picked});
+  final List<SetlistSong> options;
+  final List<int> picked;
+
+  @override
+  State<_SetlistSheet> createState() => _SetlistSheetState();
+}
+
+class _SetlistSheetState extends State<_SetlistSheet> {
+  late final List<int> _picked = [...widget.picked];
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final full = _picked.length >= GameSession.maxSetlist;
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      builder: (c, scroll) => Column(children: [
+        Expanded(
+          child: ListView(controller: scroll, children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+              child:
+                  Text(l.tourSetlist, style: Theme.of(c).textTheme.titleLarge),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(l.tourSetlistPick(GameSession.maxSetlist),
+                  style: Theme.of(c).textTheme.bodySmall),
+            ),
+            if (widget.options.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(l.tourSetlistEmpty),
+              ),
+            for (final s in widget.options)
+              ListTile(
+                leading: _picked.contains(s.songId)
+                    ? CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Theme.of(c).colorScheme.primary,
+                        child: Text('${_picked.indexOf(s.songId) + 1}',
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: Theme.of(c).colorScheme.onPrimary)))
+                    : const Icon(Icons.radio_button_unchecked_rounded),
+                title:
+                    Text(s.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                subtitle: Text([
+                  if (s.albumTitle != null) s.albumTitle!,
+                  l.earningsStreams(fmt.compact(s.streams)),
+                ].join(' · ')),
+                enabled: _picked.contains(s.songId) || !full,
+                onTap: () => setState(() => _picked.contains(s.songId)
+                    ? _picked.remove(s.songId)
+                    : _picked.add(s.songId)),
+              ),
+          ]),
+        ),
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Row(children: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, const <int>[]),
+                child: Text(l.tourSetlistDefault),
+              ),
+              const Spacer(),
+              FilledButton(
+                onPressed: _picked.isEmpty
+                    ? null
+                    : () => Navigator.pop(context, [..._picked]),
+                child: Text(l.done),
+              ),
+            ]),
+          ),
+        ),
       ]),
     );
   }

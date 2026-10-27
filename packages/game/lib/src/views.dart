@@ -2235,7 +2235,11 @@ class TourView {
         costCents = t.costCents.round(),
         netCents = t.netCents.round(),
         fans = t.fans,
-        soldOut = t.soldOut;
+        soldOut = t.soldOut,
+        setlist = [for (final id in t.setlist) w.songs[id].title];
+
+  /// The songs played each night (docs K223).
+  final List<String> setlist;
 
   /// The player's name for it ('' = named after its biggest venues).
   final String name;
@@ -2359,8 +2363,12 @@ class TourRequest {
     this.production = TourProduction.standard,
     this.openerId = -1,
     this.reunion = false,
+    this.setlist = const [],
   });
   final List<TourLeg> legs;
+
+  /// Songs for the set, in order (empty: the biggest ones; docs K223).
+  final List<int> setlist;
   final String name;
   final double priceFactor;
   final TourProduction production;
@@ -2368,6 +2376,37 @@ class TourRequest {
 
   /// Played as the old group on its reunion (docs K196).
   final bool reunion;
+}
+
+/// A song that can go on a tour's setlist (docs K223).
+class SetlistSong {
+  SetlistSong.of(World w, Song s)
+      : songId = s.id,
+        title = s.title,
+        albumId = coverAlbumOf(w, s),
+        albumTitle = s.albumId >= 0 ? w.albums[s.albumId].title : null,
+        streams = w.songLifetimeStreams(s),
+        peak = s.statsOrNull(Charts.usSongs)?.peak ?? 0;
+  final int songId;
+  final String title;
+  final int albumId;
+
+  /// The album it is on (null: a single only).
+  final String? albumTitle;
+  final double streams;
+
+  /// Best place on the US songs chart (0: never charted).
+  final int peak;
+}
+
+/// A city a leg can play and the venues it offers there (docs K223).
+class TourCityView {
+  TourCityView(this.city, this.name, this.venues);
+  final int city;
+  final String name;
+
+  /// Venue name and seats, by option.
+  final List<(String, int)> venues;
 }
 
 /// One leg as planned: its expected turnout.
@@ -2419,8 +2458,12 @@ class TourPlanView {
     required this.schedule,
     required this.openerName,
     required this.openerFeeCents,
+    required this.setlist,
   });
   final TourRequest request;
+
+  /// The set as it would be played (docs K223).
+  final List<SetlistSong> setlist;
 
   /// Why it cannot start: 'onTour', 'tourMarkets', 'tourTooBig',
   /// 'tourShows', 'noReunion', 'reunionTourLong' (empty = ready).

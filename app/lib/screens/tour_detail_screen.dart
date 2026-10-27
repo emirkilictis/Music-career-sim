@@ -67,6 +67,23 @@ class TourDetailScreen extends StatelessWidget {
                       label: l.tourStatFans, value: '+${fmt.compact(t.fans)}'),
                 ]),
               ),
+              if (t.setlist.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Section(
+                  title: l.tourSetlist,
+                  icon: Icons.queue_music_rounded,
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (i, title) in t.setlist.indexed)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Text('${i + 1}. $title',
+                                maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ),
+                      ]),
+                ),
+              ],
               const SizedBox(height: 12),
               Section(
                 title: l.tourSchedule,
