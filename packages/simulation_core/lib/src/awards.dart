@@ -469,21 +469,23 @@ abstract final class Awards {
       final n = AwardNominee(al.id, a.id);
       final fyc = AwardCampaigns.nominationLift(w, year, a.id);
       final own = a.id == pid;
-      if ((hit > 0 || critic >= 0.75) &&
-          (!own || mine.has(AwardCategory.album, al.id))) {
-        album.add((
-          0.45 * critic +
-              0.25 * q +
-              0.2 * hit +
-              0.1 * a.fame +
-              noise() +
-              fyc -
-              (own ? splitOf(AwardCategory.album) : 0),
-          n
-        ));
+      // The voters' luck is drawn as before submissions (docs K227), so
+      // worlds play out the same: for every album in the running, and for
+      // the genre race the artist is in.
+      if (hit > 0 || critic >= 0.75) {
+        final score = 0.45 * critic +
+            0.25 * q +
+            0.2 * hit +
+            0.1 * a.fame +
+            noise() +
+            fyc;
+        if (!own || mine.has(AwardCategory.album, al.id)) {
+          album.add((score - (own ? splitOf(AwardCategory.album) : 0), n));
+        }
       }
-      final genreScore = 0.5 * critic + 0.2 * q + 0.3 * hit + noise() + fyc;
       if (own) {
+        if (genres.isEmpty) continue;
+        final genreScore = 0.5 * critic + 0.2 * q + 0.3 * hit + noise() + fyc;
         // The player's album goes up for the genre awards they picked,
         // weaker where it does not fit (docs K227).
         for (final g in genres) {
@@ -496,7 +498,7 @@ abstract final class Awards {
           ));
         }
       } else if (genreAlbum[a.genre] case final pool?) {
-        pool.add((genreScore, n));
+        pool.add((0.5 * critic + 0.2 * q + 0.3 * hit + noise() + fyc, n));
       }
     }
 

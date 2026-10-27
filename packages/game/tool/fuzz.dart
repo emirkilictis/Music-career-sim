@@ -91,9 +91,13 @@ void main(List<String> args) {
         'write': () => g.writeSong(
             budget: _pick(r, BudgetTier.values),
             genres: [genre, if (r.nextBool()) r.nextInt(20)]),
-        'single': () => g.releaseSingle(_pick(r, vault.isEmpty ? own : vault),
-            campaign: _pick(r, Campaign.values),
-            radio: _pick(r, RadioPush.values)),
+        'single': () {
+          // Nothing written yet: nothing to put out.
+          if (vault.isEmpty && own.isEmpty) return;
+          g.releaseSingle(_pick(r, vault.isEmpty ? own : vault),
+              campaign: _pick(r, Campaign.values),
+              radio: _pick(r, RadioPush.values));
+        },
         'album': () => g.releaseAlbum(
             'A$wk', (vault..shuffle(r)).take(3 + r.nextInt(10)).toList(),
             type: _pick(r, AlbumType.values),
