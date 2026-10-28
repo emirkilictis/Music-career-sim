@@ -289,10 +289,11 @@ abstract final class Platforms {
     switch (p) {
       case MusicPlatform.fruitTunes:
         return null;
+      // Casual listeners follow too (docs K239: a superstar had ~6M).
       case MusicPlatform.streamify:
-        return (0.85 * fans + 0.05 * cas) * m;
+        return (1.0 * fans + 0.6 * cas) * m;
       case MusicPlatform.fruitMusic:
-        return (0.25 * fans + 0.02 * cas) *
+        return (0.3 * fans + 0.15 * cas) *
             m *
             (0.5 + a.regionShare[Region.northAmerica.index]);
       case MusicPlatform.viewTube:
@@ -303,15 +304,15 @@ abstract final class Platforms {
         // The player's own uploads bring subscribers too (docs K142).
         final uploads =
             a.id == w.playerArtistId ? w.channelVideos.length : 0;
-        return (0.6 * fans + 0.06 * cas) *
+        return (0.8 * fans + 0.5 * cas) *
             m *
             (0.8 +
                 0.4 * math.min(1, videos / 5) +
                 0.2 * math.min(1, uploads / 20));
       case MusicPlatform.noiseCloud:
-        return (0.1 * fans + 0.008 * cas) * m;
+        return (0.1 * fans + 0.03 * cas) * m;
       case MusicPlatform.tikTak:
-        return (0.25 * fans + 0.06 * cas) *
+        return (0.4 * fans + 0.6 * cas) *
             m *
             (0.6 + 0.8 * a.skills.charisma / 100);
     }

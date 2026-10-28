@@ -691,31 +691,29 @@ abstract final class Awards {
     }
   }
 
-  /// How big a hit [s] was: 1 for a long-running #1, 0 if it never charted.
-  static double _songHit(Song s) {
-    var peak = 0;
-    for (final c in [Charts.usSongs, Charts.globalSongs]) {
-      final p = s.peakOn(c);
-      if (p > 0 && (peak == 0 || p < peak)) peak = p;
-    }
-    if (peak == 0) return 0;
-    final weeks = math.max(
-        s.weeksOnChart(Charts.usSongs), s.weeksOnChart(Charts.globalSongs));
-    return 0.7 * (1 - math.log(peak) / math.log(101)) +
-        0.3 * math.min(1.0, weeks / 40);
-  }
+  /// What a UK chart run counts for next to a US or global one (docs
+  /// K239): voters hear of a British hit too, not as loudly.
+  static const ukWeight = 0.8;
 
-  static double _albumHit(Album al) {
-    var peak = 0;
-    for (final c in [Charts.usAlbums, Charts.globalAlbums]) {
-      final p = al.peakOn(c);
+  /// How big a hit [s] was: 1 for a long-running #1, 0 if it never charted.
+  static double _songHit(Song s) => math.max(
+      _hit(s, [Charts.usSongs, Charts.globalSongs], 101, 40),
+      ukWeight * _hit(s, [Charts.ukSongs], 101, 40));
+
+  static double _albumHit(Album al) => math.max(
+      _hit(al, [Charts.usAlbums, Charts.globalAlbums], 201, 52),
+      ukWeight * _hit(al, [Charts.ukAlbums], 201, 52));
+
+  static double _hit(Charted e, List<int> charts, int size, int fullWeeks) {
+    var peak = 0, weeks = 0;
+    for (final c in charts) {
+      final p = e.peakOn(c);
       if (p > 0 && (peak == 0 || p < peak)) peak = p;
+      weeks = math.max(weeks, e.weeksOnChart(c));
     }
     if (peak == 0) return 0;
-    final weeks = math.max(
-        al.weeksOnChart(Charts.usAlbums), al.weeksOnChart(Charts.globalAlbums));
-    return 0.7 * (1 - math.log(peak) / math.log(201)) +
-        0.3 * math.min(1.0, weeks / 52);
+    return 0.7 * (1 - math.log(peak) / math.log(size)) +
+        0.3 * math.min(1.0, weeks / fullWeeks);
   }
 
   /// Quality on a 0..1 scale where it matters to voters (40 → 0, 95 → 1).

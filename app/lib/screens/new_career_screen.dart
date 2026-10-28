@@ -281,6 +281,18 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
                       ),
                     ),
                   ]),
+                  // Where the music starts (docs K239).
+                  const SizedBox(height: 6),
+                  Text(
+                      switch (_home) {
+                        HomeCountry.us => l.homeHintUs,
+                        HomeCountry.canada => l.homeHintCanada,
+                        HomeCountry.uk => l.homeHintUk,
+                        HomeCountry.europe => l.homeHintEurope,
+                        HomeCountry.other => l.homeHintOther,
+                      },
+                      style: TextStyle(
+                          color: AppColors.textMuted, fontSize: 12.5)),
                 ]),
           ),
           const SizedBox(height: 12),

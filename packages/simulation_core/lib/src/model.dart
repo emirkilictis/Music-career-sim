@@ -1605,7 +1605,9 @@ enum Label {
       advanceCents: 1000000000,
       contractAlbums: 4,
       minFans: 2000000,
-      minFame: 0.6,
+      // 0.6 until docs K239: fame tracks the world's #1, and 0.6 meant
+      // outdoing it week after week.
+      minFame: 0.45,
       minResult: EraResult.success);
 
   const Label({

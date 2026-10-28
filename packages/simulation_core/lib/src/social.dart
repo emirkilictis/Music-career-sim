@@ -276,11 +276,12 @@ abstract final class Social {
           ? 0.15 + 0.05 * (year - 2004)
           : math.min(1.0, 0.4 + 0.085 * (year - 2009));
 
-  /// Followers of [a] in [year].
+  /// Followers of [a] in [year]: the fans and a good share of the casual
+  /// listeners (docs K239; 0.8 and 0.04 before, a superstar had ~6M).
   static double followers(World w, Artist a) {
     final year = GameTime.yearOf(w.week);
     return adoption(year) *
-        (a.coreFans * 0.8 + a.casual * 0.04) *
+        (a.coreFans * 1.5 + a.casual * 0.8) *
         (1 + w.social.engagement);
   }
 
