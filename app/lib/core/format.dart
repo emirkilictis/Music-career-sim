@@ -971,6 +971,10 @@ class Fmt {
       'badSubmission' => l.errorBadSubmission,
       'noDiss' => l.errorNoDiss,
       'noBeef' => l.errorNoBeef,
+      'postGone' => l.errorPostGone,
+      'replyLimit' => l.errorReplyLimit,
+      'alreadyReplied' => l.errorAlreadyReplied,
+      'noComment' => l.errorNoComment,
       'noDissTarget' => l.errorNoDissTarget,
       'submissionsClosed' => l.errorSubmissionsClosed,
       'noVersion' => switch (e.message) {

@@ -912,6 +912,40 @@ class GameSession {
   /// The player's social media: the feed, followers, posts left (docs K93).
   SocialView get social => SocialView.of(world, _p);
 
+  SocialItem _feedItem(int key) {
+    for (final i in world.social.feed.reversed) {
+      if (Comments.keyOf(i) == key) return i;
+    }
+    throw GameException('postGone', 'The post is gone');
+  }
+
+  /// A post with its comments (docs K238).
+  PostDetailView postDetail(int key) =>
+      PostDetailView.of(world, _p, _feedItem(key));
+
+  /// Answers comment [index] of a post ([Comments.author]: a fan's post
+  /// itself; docs K238).
+  ReplyOutcome replyToComment(int key, int index, ReplyKind kind) {
+    if (!Social.canPostIn(year)) {
+      throw GameException('socialLocked', 'No social media yet');
+    }
+    final post = _feedItem(key);
+    if (Comments.repliesLeft(world) <= 0) {
+      throw GameException('replyLimit', 'Replied enough this week');
+    }
+    if (Comments.replyTo(world, post, index) != null) {
+      throw GameException('alreadyReplied', 'Already replied');
+    }
+    final mood = Comments.target(world, _p, post, index);
+    if (mood == null ||
+        (kind == ReplyKind.thanks) != (mood != CommentMood.hater)) {
+      throw GameException('noComment', 'Cannot answer that');
+    }
+    final out = Comments.reply(world, _p, post, index, kind);
+    _saveNow();
+    return out;
+  }
+
   /// Posts; fans answer in the feed.
   PostOutcome post(PostKind kind, {int songId = -1}) {
     final year = GameTime.yearOf(world.week);

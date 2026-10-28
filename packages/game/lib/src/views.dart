@@ -2888,6 +2888,7 @@ class SocialItemView {
         albumId = i.albumId,
         rivalName = i.artistId >= 0 ? w.artists[i.artistId].name : '',
         rivalId = i.artistId,
+        key = Comments.keyOf(i),
         coverAlbumId = i.albumId >= 0
             ? i.albumId
             : i.songId >= 0
@@ -2909,6 +2910,9 @@ class SocialItemView {
   /// The rival a beef post is about ('' and -1 for none; docs K229).
   final String rivalName;
   final int rivalId;
+
+  /// Opens the post with its comments (docs K238).
+  final int key;
 
   /// The song or album it talks about ('' if none).
   final String title;
@@ -2950,6 +2954,101 @@ class SocialItemView {
       _ => PostMedia.none,
     };
   }
+}
+
+/// A post opened with its comments (docs K238).
+class PostDetailView {
+  PostDetailView.of(World w, Artist p, SocialItem i)
+      : post = SocialItemView.of(w, i),
+        network = Social.networkIn(GameTime.yearOf(w.week)),
+        verified = p.fame >= 0.1 || Social.followers(w, p) >= 1e5,
+        canReply = Social.canPostIn(GameTime.yearOf(w.week)) &&
+            (i.byPlayer || i.fan >= 0),
+        repliesLeft = Comments.repliesLeft(w),
+        authorMood = i.fan >= 0 ? Comments.authorMood(i) : null,
+        authorReply = switch (Comments.replyTo(w, i, Comments.author)) {
+          final r? => ReplyView.of(r),
+          null => null,
+        },
+        comments = [
+          for (final c in Comments.of(w, p, i))
+            CommentView(
+                c,
+                switch (Comments.replyTo(w, i, c.index)) {
+                  final r? => ReplyView.of(r),
+                  null => null,
+                },
+                i.byPlayer),
+        ];
+  final SocialItemView post;
+  final SocialNetwork network;
+  final bool verified;
+
+  /// Social media is on and the post is the player's or a fan's.
+  final bool canReply;
+  final int repliesLeft;
+
+  /// How a fan post's author feels about the player (null: the player's
+  /// or a rival's post).
+  final CommentMood? authorMood;
+  final ReplyView? authorReply;
+  final List<CommentView> comments;
+}
+
+/// One comment under a post (docs K238).
+class CommentView {
+  CommentView(Comment c, this.reply, this.answerable)
+      : index = c.index,
+        mood = c.mood,
+        topic = c.topic,
+        variant = c.variant,
+        fan = c.fan,
+        likes = c.likes;
+  final int index;
+  final CommentMood mood;
+  final FanTopic topic;
+  final int variant;
+  final int fan;
+  final int likes;
+
+  /// The player's answer, if any.
+  final ReplyView? reply;
+
+  /// Under the player's own post: they may answer.
+  final bool answerable;
+}
+
+/// The player's answer to a comment and how it went down (docs K238).
+class ReplyView {
+  ReplyView.of(CommentReply r)
+      : kind = r.kind,
+        ok = r.ok,
+        variant = r.variant,
+        week = r.week;
+  final ReplyKind kind;
+  final bool ok;
+  final int variant;
+  final int week;
+
+  /// What the player wrote.
+  FanTopic get topic => switch (kind) {
+        ReplyKind.thanks => FanTopic.replyThanks,
+        ReplyKind.clapBack => FanTopic.replyClapBack,
+        ReplyKind.kind => FanTopic.replyKind,
+      };
+
+  /// The answer to it: the fan beside themself, a fan cheering the roast,
+  /// the hater hitting back or softening (null: no answer).
+  FanTopic? get reaction => switch ((kind, ok)) {
+        (ReplyKind.thanks, _) => FanTopic.fanReplied,
+        (ReplyKind.clapBack, true) => FanTopic.haterRoasted,
+        (ReplyKind.clapBack, false) => FanTopic.haterComeback,
+        (ReplyKind.kind, true) => FanTopic.haterSoftened,
+        (ReplyKind.kind, false) => null,
+      };
+
+  /// The reaction comes from the commenter, except a fan cheering a roast.
+  bool get reactionByOther => kind == ReplyKind.clapBack && ok;
 }
 
 /// What a feed post shows under its text (docs K211), as posts on real

@@ -518,6 +518,100 @@ void main() {
       g.close();
     });
 
+    test('posts have replies; the player answers fans and haters (K238)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2019,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final id = g.slotId;
+      g.post(PostKind.hotTake);
+      g.post(PostKind.studio);
+      final mine = [
+        for (final i in g.social.items)
+          if (i.isPlayer) i
+      ];
+      expect(mine, hasLength(2));
+      final d = g.postDetail(mine.first.key);
+      expect(d.comments, isNotEmpty);
+      // The same post always shows the same replies.
+      expect([for (final c in g.postDetail(mine.first.key).comments) c.fan],
+          [for (final c in d.comments) c.fan]);
+      expect(d.repliesLeft, Comments.repliesPerWeek);
+      final all = [
+        for (final m in mine)
+          for (final c in g.postDetail(m.key).comments) (m.key, c)
+      ];
+      final fan = all.firstWhere((x) => x.$2.mood != CommentMood.hater);
+      final devotion = g.world.player!.devotion;
+      final out = g.replyToComment(fan.$1, fan.$2.index, ReplyKind.thanks);
+      expect(out.devotion, greaterThan(0));
+      expect(g.world.player!.devotion, greaterThan(devotion));
+      expect(() => g.replyToComment(fan.$1, fan.$2.index, ReplyKind.thanks),
+          _code('alreadyReplied'));
+      // Haters get a clap-back or kindness, not thanks.
+      for (final (key, c) in all) {
+        if (c.mood == CommentMood.hater) {
+          expect(() => g.replyToComment(key, c.index, ReplyKind.thanks),
+              _code('noComment'));
+          g.replyToComment(key, c.index, ReplyKind.clapBack);
+          break;
+        }
+      }
+      final answered = g.postDetail(fan.$1).comments
+          .firstWhere((c) => c.index == fan.$2.index);
+      expect(answered.reply?.kind, ReplyKind.thanks);
+      expect(answered.reply?.reaction, FanTopic.fanReplied);
+      // A fan's own post can be answered too, not a rival's.
+      final fanPost = g.world.social.feed.lastWhere((i) => i.fan >= 0);
+      final key = Comments.keyOf(fanPost);
+      final mood = g.postDetail(key).authorMood!;
+      g.replyToComment(key, Comments.author,
+          mood == CommentMood.hater ? ReplyKind.kind : ReplyKind.thanks);
+      expect(g.postDetail(key).authorReply, isNotNull);
+      // Five replies a week.
+      final used = Comments.repliesPerWeek - g.postDetail(key).repliesLeft;
+      var left = Comments.repliesPerWeek - used;
+      for (final (k, c) in all) {
+        if (left == 0) break;
+        if (g.postDetail(k).comments.firstWhere((x) => x.index == c.index)
+                .reply !=
+            null) {
+          continue;
+        }
+        g.replyToComment(k, c.index,
+            c.mood == CommentMood.hater ? ReplyKind.kind : ReplyKind.thanks);
+        left--;
+      }
+      if (left == 0) {
+        final rest = all.firstWhere((x) =>
+            g.postDetail(x.$1).comments
+                .firstWhere((c) => c.index == x.$2.index)
+                .reply ==
+            null);
+        expect(
+            () => g.replyToComment(
+                rest.$1,
+                rest.$2.index,
+                rest.$2.mood == CommentMood.hater
+                    ? ReplyKind.kind
+                    : ReplyKind.thanks),
+            _code('replyLimit'));
+      }
+      // Replies are kept in the save.
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(
+          g.postDetail(fan.$1).comments
+              .firstWhere((c) => c.index == fan.$2.index)
+              .reply
+              ?.kind,
+          ReplyKind.thanks);
+      g.close();
+    });
+
     test('rivals start beefs and fire back, posting it themselves (K229, K234)', () {
       final g = GameSession.start(
           slots,

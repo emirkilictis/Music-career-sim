@@ -14,6 +14,7 @@ import 'package:music_career_sim/core/event_lines.dart';
 import 'package:music_career_sim/core/scope.dart';
 import 'package:music_career_sim/screens/charts_tab.dart';
 import 'package:music_career_sim/screens/rival_editor_screen.dart';
+import 'package:music_career_sim/screens/social_screen.dart';
 import 'package:music_career_sim/screens/streamify/editorial_page.dart';
 import 'package:music_career_sim/screens/streamify/this_is_page.dart';
 import 'package:music_career_sim/widgets/art.dart';
@@ -938,6 +939,74 @@ void main() {
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
     await tester.pumpAndSettle();
     await shot(tester, '18c_beef_more');
+  });
+  testWidgets('screenshots: post replies', skip: !enabled, (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await tester.runAsync(() => c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 238,
+        ),
+        PortSink(port.sendPort))));
+    port.close();
+    // A hot take: fans and haters reply (docs K238).
+    await tester.runAsync(() => c.run((s) {
+          s.advanceWeeks(1, stop: SkipStop.never);
+          s.post(PostKind.hotTake);
+        }));
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    final feed = _ci('Open the feed');
+    await tester.scrollUntilVisible(feed, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(feed);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -560));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('For you').hitTestable().evaluate().isEmpty
+        ? find.byType(FeedPost).first
+        : find.byType(FeedPost).first);
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 200)));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    await tester.pumpAndSettle();
+    await shot(tester, '19a_post_replies');
+    await tester.tap(find.text('Thank').first);
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 200)));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    await tester.pumpAndSettle();
+    final roast = find.text('Clap back');
+    if (roast.evaluate().isNotEmpty) {
+      await tester.ensureVisible(roast.first);
+      await tester.pumpAndSettle();
+      await tester.tap(roast.first);
+      for (var i = 0; i < 4; i++) {
+        await tester
+            .runAsync(() => Future.delayed(Duration(milliseconds: 200)));
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+      await tester.pumpAndSettle();
+    }
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    await shot(tester, '19b_post_answered');
   });
   testWidgets('screenshots: collabs with the singles', skip: !enabled,
       (tester) async {

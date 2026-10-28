@@ -3,6 +3,7 @@ import 'package:game/game.dart';
 
 import '../core/career_state.dart';
 import 'beef_screen.dart';
+import 'post_detail_screen.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
@@ -314,6 +315,14 @@ class _SocialScreenState extends State<SocialScreen> {
                   skin: skin,
                   verified: v.verified,
                   // Answer the rival right under their post (docs K234).
+                  onTap: () async {
+                    await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => PostDetailScreen(
+                                state: widget.state, postKey: i.key)));
+                    _load();
+                  },
                   onClapBack: i.isRival &&
                           i.rivalId == v.beefRivalId &&
                           v.canPost &&
@@ -526,7 +535,7 @@ class _Profile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            _NameLine(
+            NameLine(
                 name: p.name, verified: view.verified, skin: skin, size: 20),
             Text(playerHandle(p.name), style: TextStyle(color: skin.muted)),
             const SizedBox(height: 10),
@@ -583,9 +592,11 @@ class _Profile extends StatelessWidget {
   }
 }
 
-class _NameLine extends StatelessWidget {
-  const _NameLine(
-      {required this.name,
+class NameLine extends StatelessWidget {
+  /// A display name with the blue tick when [verified].
+  const NameLine(
+      {super.key,
+      required this.name,
       required this.verified,
       required this.skin,
       this.size = 15});
@@ -838,7 +849,8 @@ class FeedPost extends StatelessWidget {
       required this.state,
       this.skin = SocialSkin.chirper,
       this.verified = false,
-      this.onClapBack});
+      this.onClapBack,
+      this.onTap});
   final SocialItemView item;
   final CareerState state;
   final SocialSkin skin;
@@ -849,8 +861,20 @@ class FeedPost extends StatelessWidget {
   /// Answers a rival's post (null: no button; docs K234).
   final VoidCallback? onClapBack;
 
+  /// Opens the post with its replies (docs K238).
+  final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
+    final post = _post(context);
+    return onTap == null
+        ? post
+        : Material(
+            type: MaterialType.transparency,
+            child: InkWell(onTap: onTap, child: post));
+  }
+
+  Widget _post(BuildContext context) {
     final fmt = context.fmt;
     final p = state.player;
     final rival = item.isRival;
@@ -987,7 +1011,7 @@ class FeedPost extends StatelessWidget {
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               Flexible(
-                child: _NameLine(
+                child: NameLine(
                     name: name,
                     verified: item.isPlayer && verified || rival,
                     skin: skin),

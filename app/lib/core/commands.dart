@@ -126,6 +126,11 @@ abstract final class Cmd {
   static SessionCmd<void> dissPost(int rivalId) => (s) => s.dissPost(rivalId);
   static SessionCmd<bool> dissHaters() => (s) => s.dissHaters();
   static SessionCmd<void> makePeace() => (s) => s.makePeace();
+  static SessionCmd<PostDetailView> postDetail(int key) =>
+      (s) => s.postDetail(key);
+  static SessionCmd<ReplyOutcome> replyToComment(
+          int key, int index, ReplyKind kind) =>
+      (s) => s.replyToComment(key, index, kind);
 
   static SessionCmd<void> releaseSingle(int songId, Campaign campaign,
           [RadioPush radio = RadioPush.none]) =>

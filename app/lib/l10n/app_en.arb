@@ -2860,6 +2860,43 @@
   "beefHatersDone": "Your fans rallied behind you.",
   "beefHatersBacklash": "It came off as thin-skinned: some people laughed at you.",
   "beefNoPosts": "No posts left this week",
+  "postTitle": "Post",
+  "commentsTitle": "Replies",
+  "commentsEmpty": "No replies yet.",
+  "repliesLeft": "{count, plural, =1{1 reply left this week} other{{count} replies left this week}}",
+  "@repliesLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "replyThanksButton": "Thank",
+  "replyClapBackButton": "Clap back",
+  "replyKindButton": "Be kind",
+  "replyHint": "Fans love a thank-you. A clap-back at a hater can land or look petty; kindness is safe.",
+  "replyToAuthor": "Answer {who}",
+  "@replyToAuthor": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "replyDoneThanks": "Your fan is over the moon.",
+  "replyDoneRoast": "The fans loved it.",
+  "replyDonePetty": "It looked petty: the hater hit back.",
+  "replyDoneSoftened": "The hater softened.",
+  "replyDoneIgnored": "No answer. At least you were nice.",
+  "commentHaterTag": "Hater",
+  "replyingTo": "Replying to {handle}",
+  "@replyingTo": {
+    "placeholders": {
+      "handle": {
+        "type": "String"
+      }
+    }
+  },
   "clapBack": "Clap back",
   "composeDissRival": "Diss a rival",
   "composeDissRivalHint": "A shot at a rival. They may fire back and the public picks a side.",
@@ -3002,6 +3039,10 @@
     }
   },
   "errorNoDiss": "You can’t go at them now.",
+  "errorPostGone": "That post is no longer in the feed.",
+  "errorReplyLimit": "No replies left this week.",
+  "errorAlreadyReplied": "You already answered that.",
+  "errorNoComment": "You can't answer that.",
   "errorNoBeef": "There is no beef on.",
   "errorNoDissTarget": "A diss track goes at a rival or the haters.",
   "offerHateWaveTitle": "Hate wave",
@@ -3972,6 +4013,184 @@
   },
   "smRivalPost2": "Heard {name} has something to say. Say it to my numbers",
   "@smRivalPost2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smCommentFan0": "Literally the best artist of this generation",
+  "smCommentFan1": "{name} posting = my day is made",
+  "@smCommentFan1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smCommentFan2": "I'd take a bullet for {name} honestly",
+  "@smCommentFan2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smCommentFan3": "Been here since day one and I'm not going anywhere 🫶",
+  "smCommentFan4": "The way I screamed when I saw this",
+  "smCommentFan5": "Mother has spoken 🙌",
+  "smCommentFan6": "Protect {name} at all costs",
+  "@smCommentFan6": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smCommentFan7": "Notice me {name} 🥺 I've streamed everything",
+  "@smCommentFan7": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smCommentHater0": "Who even listens to {name} anymore",
+  "@smCommentHater0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smCommentHater1": "Mid. Next.",
+  "smCommentHater2": "{name} fell off and everyone knows it",
+  "@smCommentHater2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smCommentHater3": "All marketing, zero talent",
+  "smCommentHater4": "Ratio + nobody asked",
+  "smCommentHater5": "My grandma sings better than this",
+  "smCommentHater6": "The industry plant is posting again",
+  "smCommentHater7": "Unfollowing. Was never a fan anyway.",
+  "smCommentAsk0": "When is the tour coming to my city??",
+  "smCommentAsk1": "Album when?",
+  "smCommentAsk2": "Is the new song out on Friday?",
+  "smCommentAsk3": "Okay but what's the name of the jacket",
+  "smCommentAsk4": "Not sure how I feel about this one tbh",
+  "smCommentAsk5": "Can we get a behind the scenes?",
+  "smCommentAsk6": "Who produced this era?",
+  "smCommentAsk7": "Merch restock please 🙏",
+  "smReplyThanks0": "Love you so much, thank you 🤍",
+  "smReplyThanks1": "You guys are everything to me",
+  "smReplyThanks2": "This made my whole day 🥹",
+  "smReplyThanks3": "Day ones forever 🫶",
+  "smReplyThanks4": "Seeing this before the show. Thank you!",
+  "smReplyThanks5": "I read all of these, I promise",
+  "smReplyThanks6": "Soon 👀",
+  "smReplyThanks7": "Couldn't do it without you",
+  "smReplyClapBack0": "And yet you're here 😘",
+  "smReplyClapBack1": "Streaming numbers say otherwise, babe",
+  "smReplyClapBack2": "Thanks for the engagement 💸",
+  "smReplyClapBack3": "Sending you a free ticket so you can hate in person",
+  "smReplyClapBack4": "Your grandma has great taste then",
+  "smReplyClapBack5": "Noted. Anyway, #1 again",
+  "smReplyClapBack6": "Imagine being this pressed on a Tuesday",
+  "smReplyClapBack7": "Mute button's right there 🙂",
+  "smReplyKind0": "Sorry it's not for you! Hope the next one is 🤍",
+  "smReplyKind1": "Hope your day gets better",
+  "smReplyKind2": "All love here, even for you",
+  "smReplyKind3": "Fair enough, I'll keep working",
+  "smReplyKind4": "Thanks for listening anyway",
+  "smReplyKind5": "Sending good vibes your way ✨",
+  "smReplyKind6": "Not everyone has to like everything 🤷",
+  "smReplyKind7": "I'll win you over one day",
+  "smFanReplied0": "{name} REPLIED TO ME I'M SHAKING",
+  "@smFanReplied0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smFanReplied1": "Framing this. Printing it. Tattooing it.",
+  "smFanReplied2": "I can die happy now 😭",
+  "smFanReplied3": "Okay I'm never logging off again",
+  "smFanReplied4": "My mom thinks I'm crazy but {name} replied!!",
+  "@smFanReplied4": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smFanReplied5": "Best day of my life no exaggeration",
+  "smFanReplied6": "Changing my name to 'replied by {name}'",
+  "@smFanReplied6": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smFanReplied7": "THEY SEE US 🥹",
+  "smHaterComeback0": "Imagine replying to haters. Thin skin much?",
+  "smHaterComeback1": "Hit a nerve I see 😂",
+  "smHaterComeback2": "Screenshotted. This is going everywhere.",
+  "smHaterComeback3": "Big star, tiny ego",
+  "smHaterComeback4": "Your PR team must be crying",
+  "smHaterComeback5": "This is why nobody takes {name} seriously",
+  "@smHaterComeback5": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHaterComeback6": "Mad because it's true",
+  "smHaterComeback7": "Reported for being cringe",
+  "smHaterSoftened0": "…okay that was actually nice",
+  "smHaterSoftened1": "Fine. I'll give the next one a chance.",
+  "smHaterSoftened2": "Didn't expect a real reply ngl",
+  "smHaterSoftened3": "Respect for answering",
+  "smHaterSoftened4": "Ok you're kind of growing on me",
+  "smHaterSoftened5": "Fair. My bad.",
+  "smHaterSoftened6": "Maybe I was too harsh",
+  "smHaterSoftened7": "Streaming it once. ONCE.",
+  "smHaterRoasted0": "{name} ENDED them 💀",
+  "@smHaterRoasted0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHaterRoasted1": "The way {name} said ✨bye✨",
+  "@smHaterRoasted1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHaterRoasted2": "Hater left the chat",
+  "smHaterRoasted3": "Not {name} cooking a hater in 8 words",
+  "@smHaterRoasted3": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smHaterRoasted4": "This is why we stan",
+  "smHaterRoasted5": "Somebody call the fire department 🔥",
+  "smHaterRoasted6": "Pinned in my heart",
+  "smHaterRoasted7": "{name} 1, haters 0",
+  "@smHaterRoasted7": {
     "placeholders": {
       "name": {
         "type": "String"

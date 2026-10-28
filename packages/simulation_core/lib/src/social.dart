@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'actions.dart';
 import 'audience.dart';
+import 'comments.dart';
 import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
@@ -96,6 +97,17 @@ enum FanTopic {
   beefWon,
   beefLost,
   rivalPost,
+  // Comments and replies (docs K238): [Comments.variants] wordings each.
+  commentFan,
+  commentHater,
+  commentAsk,
+  replyThanks,
+  replyClapBack,
+  replyKind,
+  fanReplied,
+  haterComeback,
+  haterSoftened,
+  haterRoasted,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.
@@ -177,12 +189,22 @@ class SocialState {
 
   int postsIn(int week) => postWeek == week ? postsThisWeek : 0;
 
+  /// The player's replies to comments (docs K238).
+  final List<CommentReply> replies = [];
+  int replyWeek = -1;
+  int repliesThisWeek = 0;
+
+  int repliesIn(int week) => replyWeek == week ? repliesThisWeek : 0;
+
   String encode() => jsonEncode({
         'f': [for (final i in feed) i.toJson()],
         'pw': postWeek,
         'pc': postsThisWeek,
         'e': engagement,
         'h': lastHiatusWeek,
+        if (replies.isNotEmpty) 'r': [for (final x in replies) x.toJson()],
+        'rw': replyWeek,
+        'rc': repliesThisWeek,
       });
 
   void decode(String? s) {
@@ -196,6 +218,14 @@ class SocialState {
     postsThisWeek = j['pc'] as int;
     engagement = (j['e'] as num).toDouble();
     lastHiatusWeek = j['h'] as int;
+    replies
+      ..clear()
+      ..addAll([
+        for (final x in (j['r'] as List?) ?? const [])
+          CommentReply.fromJson(x as List)
+      ]);
+    replyWeek = (j['rw'] as int?) ?? -1;
+    repliesThisWeek = (j['rc'] as int?) ?? 0;
   }
 }
 
