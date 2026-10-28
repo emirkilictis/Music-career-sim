@@ -220,6 +220,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F118 | Emir'in arkadaşı: "Enerji biraz abartı, çok uzun sürüyor şarkı yapmak." Emir: "Düşük enerji ile kimse şarkı yazmadığı için o kalan 40 enerji çöp oluyor gibi." | ✅ K237 |
 | F119 | Emir: "Twitter postlarına detay lazım, yorumlar olmalı, fanlara veya haterlara cevap verebilmeliyiz. Yorumlarımızı okuyabilmeliyiz kendi postumuzda." | ✅ K238 |
 | F120 | Emir'in arkadaşı (UK'den başladı): "UK listesi bir tık daha kolay, USA daha zor… ünlülük arttırmak uzun sürüyor, %45'lerde son şirkete geçemedim… hiç ödül kazanamadım." Emir: "Sosyal medyalarda takipçi sayılarımız çok düşük, onu arttır." | ✅ K239 |
+| F121 | Bir oyuncu: "InvalidStateError: Failed to execute 'transaction' on 'IDBDatabase': The database connection is closing." | ✅ K240 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

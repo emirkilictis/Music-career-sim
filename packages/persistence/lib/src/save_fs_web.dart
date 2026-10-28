@@ -134,8 +134,17 @@ class WebSaveFs extends SaveFs {
   @override
   Future<void> prepare(String path) async {
     if (_memory.fileData.containsKey(path) || !_stored.contains(path)) return;
-    final value = await _done(
+    Future<JSAny?> read() async => _done(
         (await _txAsync('readonly')).objectStore(_store).get(path.toJS));
+    JSAny? value;
+    try {
+      value = await read();
+    } catch (_) {
+      // The connection dropped mid-read (Safari after a while in the
+      // background): once more on a fresh one.
+      _db = null;
+      value = await read();
+    }
     if (value == null) return;
     final bytes = (value as JSArrayBuffer).toDart.asUint8List();
     _memory.fileData[path] = _JsFile(bytes, bytes.length);
