@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' show PointMode;
 
 import 'package:flutter/material.dart';
+import 'package:game/game.dart' show Word64, jsNumbers;
 
 import '../core/images.dart';
 import '../core/scope.dart';
@@ -49,6 +50,19 @@ const _schemes = <(Color, Color, Color)>[
 ];
 
 int _hash(int seed) {
+  // The JavaScript build has no 64-bit ints: the same steps on halves
+  // (docs K236), so a cover looks the same in every browser.
+  if (jsNumbers) {
+    final w = Word64.of(seed)
+      ..mul(Word64(0, 0x9E3779B1))
+      ..add(Word64(0, 0x7F4A7C15))
+      ..xorSar(15)
+      ..mul(Word64(0, 0x2C1B3C6D))
+      ..xorSar(12)
+      ..mul(Word64(0, 0x297A2D39))
+      ..xorSar(15);
+    return w.lo & 0x7fffffff;
+  }
   var z = seed * 0x9E3779B1 + 0x7F4A7C15;
   z = (z ^ (z >> 15)) * 0x2C1B3C6D;
   z = (z ^ (z >> 12)) * 0x297A2D39;

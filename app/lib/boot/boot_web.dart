@@ -12,9 +12,6 @@ import '../core/settings.dart';
 /// storage.
 Future<(GameController, AppSettings, ImageStore)> boot() async {
   try {
-    // The JavaScript fallback has no 64-bit integers: the game needs the
-    // WebAssembly build (Chrome/Edge 119+, Firefox 120+, Safari 18.2+).
-    if (identical(0, 0.0)) throw const UnsupportedBrowser();
     final fs = await WebSaveFs.open(wasm: Uri.base.resolve('sqlite3.wasm'));
     const careers = '/careers';
     final controller = LocalGameController.on(SaveSlots.on(fs, careers));
@@ -24,11 +21,6 @@ Future<(GameController, AppSettings, ImageStore)> boot() async {
     // The page's own loading logo makes way for the app.
     web.document.getElementById('loading')?.remove();
   }
-}
-
-/// The browser cannot run the game (docs K218).
-class UnsupportedBrowser implements Exception {
-  const UnsupportedBrowser();
 }
 
 class _LocalStorage implements SettingsStore {

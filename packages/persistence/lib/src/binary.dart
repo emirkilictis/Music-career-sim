@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:simulation_core/simulation_core.dart' show jsNumbers;
+
 /// Compact binary encoding for rows of (int | double | String | null).
 /// Used for the weekly hot-state snapshot: one contiguous blob instead of
 /// thousands of scattered row updates.
@@ -27,7 +29,16 @@ class RowWriter {
 
   void _i64(int v) {
     _ensure(8);
-    _view.setInt64(_pos, v, Endian.little);
+    if (jsNumbers) {
+      // No setInt64 in JavaScript: the same bytes from two halves (docs
+      // K236).
+      final lo = v & 0xFFFFFFFF;
+      _view.setUint32(_pos, lo, Endian.little);
+      _view.setUint32(_pos + 4,
+          ((v - lo) ~/ 0x100000000) & 0xFFFFFFFF, Endian.little);
+    } else {
+      _view.setInt64(_pos, v, Endian.little);
+    }
     _pos += 8;
   }
 
@@ -77,7 +88,10 @@ class RowReader {
   int _pos = 0;
 
   int _i64() {
-    final v = _view.getInt64(_pos, Endian.little);
+    final v = jsNumbers
+        ? _view.getInt32(_pos + 4, Endian.little) * 0x100000000 +
+            _view.getUint32(_pos, Endian.little)
+        : _view.getInt64(_pos, Endian.little);
     _pos += 8;
     return v;
   }

@@ -216,6 +216,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F114 | Emir: "11x plat 12x plat gibi şeyler de olsun." | ✅ K233 |
 | F115 | Emir: "twitterdan da beefleme özelliği olsun." | ✅ K234 |
 | F116 | Emir: "Arkadaşım tarayıcı hatası alıyo." | ✅ K235 (dil etiketi çökmesi; eski tarayıcı ve açılış hatası mesajı) |
+| F117 | Emir (arkadaşı): "Teli yeni şeye yükseltemiyorum yer olmadığı için, ondan açılmıyo… sadece pcde oynayabiliyorum." | ✅ K236 (eski tarayıcılarda JavaScript sürümü) |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

@@ -51,21 +51,13 @@ function mcsShow(en, tr, detail) {
   }
 }
 
-// The game needs the WebAssembly build with garbage collection (64-bit
-// integers; docs K218): Chrome/Edge 119+, Firefox 120+, Safari 18.2+.
-var mcsWasmGC = (function () {
-  try {
-    return typeof WebAssembly === 'object' && WebAssembly.validate(
-        new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 95, 1, 120, 0]));
-  } catch (_) {
-    return false;
-  }
-})();
-
-if (!mcsWasmGC) {
+// Browsers without WebAssembly GC (older iPhones, Safari before 18.2) get
+// the JavaScript build, which runs the same game (docs K236). Saves need
+// plain WebAssembly (SQLite), which every browser since 2017 has.
+if (typeof WebAssembly !== 'object') {
   mcsShow(
-      'This browser is too old for the game. Update it or open the game in a recent Chrome, Edge, Firefox or Safari (iPhone: iOS 18.2 or later).',
-      'Bu tarayıcı oyun için çok eski. Güncelle ya da oyunu güncel bir Chrome, Edge, Firefox veya Safari\'de aç (iPhone\'da iOS 18.2 ve sonrası).');
+      'This browser is too old for the game. Update it or open the game in a recent Chrome, Edge, Firefox or Safari.',
+      'Bu tarayıcı oyun için çok eski. Güncelle ya da oyunu güncel bir Chrome, Edge, Firefox veya Safari\'de aç.');
 } else {
   // Anything that stops the start shows on the loading screen.
   var mcsFail = function (e) {
@@ -83,7 +75,7 @@ if (!mcsWasmGC) {
 {{flutter_build_config}}
 
   // Flutter only picks the WebAssembly build on Chromium by default:
-  // Safari 18.2+ and Firefox 120+ run it too.
+  // Safari 18.2+ and Firefox 120+ run it too; older ones load JavaScript.
   _flutter.loader.load({
     config: {
       wasmAllowList: { blink: true, gecko: true, webkit: true },
