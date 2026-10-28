@@ -541,6 +541,29 @@ void main() {
       g.close();
     });
 
+    test('past diamond, platinum goes on: 11×, 12× (K233)', () {
+      expect(Certification.of(9.5e6), (Certification.platinum, 9));
+      expect(Certification.of(1.05e7), (Certification.diamond, 10));
+      expect(Certification.of(1.24e7), (Certification.diamond, 12));
+      // From 9× platinum to 12×: diamond, 11×, 12×.
+      expect(
+          Certs.newLevels([
+            [Certification.platinum.index, 9, 0, 0]
+          ], 1.24e7),
+          [
+            (Certification.diamond, 10),
+            (Certification.diamond, 11),
+            (Certification.diamond, 12)
+          ]);
+      // An older save's 2× diamond is 20× platinum.
+      expect(Certification.times(Certification.diamond, 2), 20);
+      expect(
+          Certs.newLevels([
+            [Certification.diamond.index, 2, 0, 0]
+          ], 2.15e7),
+          [(Certification.diamond, 21)]);
+    });
+
     test('the chart history counts the hits from each album (K232)', () {
       final g = GameSession.start(
           slots,

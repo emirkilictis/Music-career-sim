@@ -2644,6 +2644,14 @@
       }
     }
   },
+  "certDiamondPlatinum": "{count}× Platinum (Diamond)",
+  "@certDiamondPlatinum": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "plaquesTotals": "{plat}× platinum in all · {songs} songs, {albums} albums certified",
   "@plaquesTotals": {
     "placeholders": {

@@ -81,7 +81,14 @@ class PlaqueDisc extends StatelessWidget {
                 color: dark.withValues(alpha: 0.6)),
             FittedBox(
               child: Text(
-                  (multiple > 1 ? '$multiple× $name' : name).toUpperCase(),
+                  (level == Certification.diamond
+                          ? (Certification.times(level, multiple) > 10
+                              ? '${Certification.times(level, multiple)}× ${l.certPlatinum}'
+                              : name)
+                          : multiple > 1
+                              ? '$multiple× $name'
+                              : name)
+                      .toUpperCase(),
                   style: TextStyle(
                       fontFamily: AppFonts.condensed,
                       fontWeight: FontWeight.w800,

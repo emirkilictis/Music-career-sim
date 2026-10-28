@@ -213,6 +213,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F111 | Emir: "Diss şarkısı falan olsun, diğer artistlerle beefleme olsun, diss tweeti atma olsun. Haterlara diss atmada olsun." | ✅ K229 |
 | F112 | Emir: "Collabler releases kısmında dursun, singlelar gibi." | ✅ K230 |
 | F113 | Emir: "Kaç diamond kaç plat plağım var, hangi şarkılar dia, daha kolay ve detaylı görmem lazım. Chart history kısmı ekle: tüm chart historyme şarkı albüm bazlı detaylıca bakmak isterim. Bir albümden kaç #1 kaç top 10 hit çıkmış önemli." | ✅ K231, K232 |
+| F114 | Emir: "11x plat 12x plat gibi şeyler de olsun." | ✅ K233 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

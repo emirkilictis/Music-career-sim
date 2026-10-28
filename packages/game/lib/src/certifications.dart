@@ -4,7 +4,8 @@ import 'events.dart';
 import 'views.dart';
 
 /// The player's US certifications as they come (docs K209): each new
-/// level (gold, every platinum, every diamond) is recorded with its week
+/// level (gold, every platinum, diamond and every platinum after it) is
+/// recorded with its week
 /// and the label then, and is news.
 abstract final class Certs {
   /// A release's key in [World.certs].
@@ -21,7 +22,8 @@ abstract final class Certs {
           : usAlbumUnits(w, w.albums[id]);
 
   /// Units a level asks for.
-  static double needs(Certification c, int multiple) => c.units * multiple;
+  static double needs(Certification c, int multiple) =>
+      Certification.unitsOf(c, multiple);
 
   /// The levels between the last recorded one and [units], in order.
   static List<(Certification, int)> newLevels(
@@ -31,7 +33,8 @@ abstract final class Certs {
     final steps = <(Certification, int)>[
       (Certification.gold, 1),
       for (var m = 1; m < 10; m++) (Certification.platinum, m),
-      for (var m = 1;
+      // Diamond at 10× platinum, then every million more (docs K233).
+      for (var m = 10;
           m <= reached.$2 && reached.$1 == Certification.diamond;
           m++)
         (Certification.diamond, m),

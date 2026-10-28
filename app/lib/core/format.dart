@@ -55,6 +55,11 @@ class Fmt {
 
   /// "Gold", "3× Platinum", "Diamond" (docs K209).
   String certLevel(Certification c, int multiple) {
+    // Past diamond the RIAA counts platinum on (docs K233).
+    if (c == Certification.diamond) {
+      final m = Certification.times(c, multiple);
+      return m > 10 ? l.certDiamondPlatinum(m) : l.certDiamond;
+    }
     final name = switch (c) {
       Certification.gold => l.certGold,
       Certification.platinum => l.certPlatinum,

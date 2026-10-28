@@ -2093,10 +2093,12 @@ enum Certification {
   final double units;
 
   /// The level reached with [units] and how many times over (platinum
-  /// counts multiples: 3× platinum), or null below gold.
+  /// counts multiples: 3× platinum), or null below gold. Diamond counts
+  /// in platinum too, as the RIAA does (docs K233): 10× is diamond, then
+  /// 11×, 12× platinum on a diamond record.
   static (Certification, int)? of(double units) {
     if (units >= diamond.units) {
-      return (diamond, (units / diamond.units).floor());
+      return (diamond, (units / platinum.units).floor());
     }
     if (units >= platinum.units) {
       return (platinum, (units / platinum.units).floor());
@@ -2104,6 +2106,16 @@ enum Certification {
     if (units >= gold.units) return (gold, 1);
     return null;
   }
+
+  /// A recorded [multiple] of [c] in platinum terms: saves from before
+  /// docs K233 counted diamonds (2× diamond = 20× platinum).
+  static int times(Certification c, int multiple) =>
+      c == diamond && multiple < 10 ? multiple * 10 : multiple;
+
+  /// The units [multiple] of [c] stands for.
+  static double unitsOf(Certification c, int multiple) => c == diamond
+      ? platinum.units * times(c, multiple)
+      : c.units * multiple;
 }
 
 /// One song on the stream counter (docs K210): Streamify plays a day
@@ -2232,7 +2244,12 @@ class PlaqueView {
               },
         levels = [
           for (final x in levels)
-            (Certification.values[x[0]], x[1], x[2], Label.values[x[3]])
+            (
+              Certification.values[x[0]],
+              Certification.times(Certification.values[x[0]], x[1]),
+              x[2],
+              Label.values[x[3]]
+            )
         ],
         usUnits = kind == EntityKind.song
             ? usSingleUnits(w, w.songs[id])
@@ -2268,10 +2285,10 @@ class PlaqueView {
   (Certification, int, int, Label) get top => levels.last;
 
   /// Units the top level stands for.
-  double get topUnits => top.$1.units * top.$2;
+  double get topUnits => Certification.unitsOf(top.$1, top.$2);
 
   /// The next level and the units it needs (after 9× platinum comes
-  /// diamond).
+  /// diamond, then 11× platinum and on).
   (Certification, int, double) get next {
     final (c, m, _, _) = top;
     if (c == Certification.gold) {
@@ -2284,8 +2301,9 @@ class PlaqueView {
         Certification.platinum.units * (m + 1)
       );
     }
-    final d = c == Certification.diamond ? m + 1 : 1;
-    return (Certification.diamond, d, Certification.diamond.units * d);
+    // Past diamond, every million is one more platinum (docs K233).
+    final d = c == Certification.diamond ? m + 1 : 10;
+    return (Certification.diamond, d, Certification.platinum.units * d);
   }
 }
 

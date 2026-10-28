@@ -99,7 +99,13 @@ class CertificationTag extends StatelessWidget {
       Certification.platinum => AppColors.sky,
       Certification.diamond => AppColors.lilac,
     };
-    return Tag(times > 1 ? l.certMultiple(times, name) : name,
-        color: color, icon: Icons.album_rounded);
+    return Tag(
+        level == Certification.diamond
+            ? context.fmt.certLevel(level, times)
+            : times > 1
+                ? l.certMultiple(times, name)
+                : name,
+        color: color,
+        icon: Icons.album_rounded);
   }
 }
