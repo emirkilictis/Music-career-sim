@@ -656,7 +656,7 @@ void main() {
     await tester.tap(plaques);
     await tester.pumpAndSettle();
     await shot(tester, '15ze_plaques');
-    await tester.tap(_ci('Plaque').first);
+    await tester.tap(find.text('Gold Rush').first);
     await tester.pumpAndSettle();
     await shot(tester, '15zf_plaque');
     await tester.tap(_ci('Close'));

@@ -2652,7 +2652,7 @@
       }
     }
   },
-  "plaquesTotals": "{plat}× platinum in all · {songs} songs, {albums} albums certified",
+  "plaquesTotals": "{plat}× platinum in all · {songs, plural, =1{1 song} other{{songs} songs}}, {albums, plural, =1{1 album} other{{albums} albums}} certified",
   "@plaquesTotals": {
     "placeholders": {
       "plat": {
