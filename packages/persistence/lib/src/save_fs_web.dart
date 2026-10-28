@@ -18,11 +18,19 @@ import 'save_fs.dart';
 /// The files live in the browser's own byte arrays ([_JsFiles]), so
 /// SQLite's page reads and writes are plain array copies.
 class WebSaveFs extends SaveFs {
-  WebSaveFs._(this._sqlite, this._memory, this._db, this._stored);
+  WebSaveFs._(this._sqlite, this._memory, this._name, this._db, this._stored) {
+    _watch(_db!);
+  }
 
   final WasmSqlite3 _sqlite;
   final _JsFiles _memory;
-  final web.IDBDatabase _db;
+  final String _name;
+
+  /// The IndexedDB connection; null once the browser closed it (Safari
+  /// does when a page sits in the background), until it is reopened
+  /// (docs K240).
+  web.IDBDatabase? _db;
+  Future<web.IDBDatabase>? _reopening;
 
   /// Paths stored in IndexedDB (loaded or not).
   final Set<String> _stored;
@@ -39,11 +47,7 @@ class WebSaveFs extends SaveFs {
     final sqlite = await WasmSqlite3.loadFromUrl(wasm);
     final memory = _JsFiles();
     sqlite.registerVirtualFileSystem(memory, makeDefault: true);
-    final request = web.window.indexedDB.open(name, 1);
-    request.onupgradeneeded = ((web.Event _) {
-      (request.result as web.IDBDatabase).createObjectStore(_store);
-    }).toJS;
-    final db = (await _done(request)) as web.IDBDatabase;
+    final db = await _openDb(name);
     // Ask the browser to keep the saves when it runs short of space.
     try {
       web.window.navigator.storage.persist();
@@ -52,7 +56,7 @@ class WebSaveFs extends SaveFs {
             db.transaction(_store.toJS).objectStore(_store).getAllKeys()))
         as JSArray<JSString>;
     final fs = WebSaveFs._(
-        sqlite, memory, db, {for (final k in keys.toDart) k.toDart});
+        sqlite, memory, name, db, {for (final k in keys.toDart) k.toDart});
     await fs.prepare(indexPath);
     fs._index = sqlite.open(indexPath)
       ..execute('PRAGMA journal_mode = MEMORY')
@@ -69,12 +73,69 @@ class WebSaveFs extends SaveFs {
     return fs;
   }
 
+  static Future<web.IDBDatabase> _openDb(String name) async {
+    final request = web.window.indexedDB.open(name, 1);
+    request.onupgradeneeded = ((web.Event _) {
+      (request.result as web.IDBDatabase).createObjectStore(_store);
+    }).toJS;
+    return (await _done(request)) as web.IDBDatabase;
+  }
+
+  /// Forgets [db] when the browser closes it.
+  void _watch(web.IDBDatabase db) {
+    db.onclose = ((web.Event _) {
+      if (identical(_db, db)) _db = null;
+    }).toJS;
+  }
+
+  Future<web.IDBDatabase> _reopen() => _reopening ??= _openDb(_name).then(
+        (db) {
+          _db = db;
+          _watch(db);
+          _reopening = null;
+          return db;
+        },
+        onError: (Object e) {
+          _reopening = null;
+          throw e;
+        },
+      );
+
+  /// A transaction on the store, or null when the connection is gone
+  /// ("The database connection is closing"); it is then reopened.
+  web.IDBTransaction? _tx(String mode) {
+    final db = _db;
+    if (db != null) {
+      try {
+        return db.transaction(_store.toJS, mode);
+      } catch (_) {
+        _db = null;
+      }
+    }
+    _reopen().ignore();
+    return null;
+  }
+
+  /// [_tx], waiting for the connection to come back.
+  Future<web.IDBTransaction> _txAsync(String mode) async =>
+      _tx(mode) ?? (await _reopen()).transaction(_store.toJS, mode);
+
+  /// Runs [f] on the store now, or once the connection is back.
+  void _write(void Function(web.IDBObjectStore store) f) {
+    final tx = _tx('readwrite');
+    if (tx != null) {
+      f(tx.objectStore(_store));
+    } else {
+      _txAsync('readwrite').then((t) => f(t.objectStore(_store))).ignore();
+    }
+  }
+
   /// Reads [path] in from IndexedDB, if it is stored and not loaded yet.
   @override
   Future<void> prepare(String path) async {
     if (_memory.fileData.containsKey(path) || !_stored.contains(path)) return;
     final value = await _done(
-        _db.transaction(_store.toJS).objectStore(_store).get(path.toJS));
+        (await _txAsync('readonly')).objectStore(_store).get(path.toJS));
     if (value == null) return;
     final bytes = (value as JSArrayBuffer).toDart.asUint8List();
     _memory.fileData[path] = _JsFile(bytes, bytes.length);
@@ -128,12 +189,7 @@ class WebSaveFs extends SaveFs {
   void deleteFile(String path) {
     _memory.fileData.remove(path);
     _dirty.remove(path);
-    if (_stored.remove(path)) {
-      _db
-          .transaction(_store.toJS, 'readwrite')
-          .objectStore(_store)
-          .delete(path.toJS);
-    }
+    if (_stored.remove(path)) _write((store) => store.delete(path.toJS));
   }
 
   @override
@@ -159,11 +215,18 @@ class WebSaveFs extends SaveFs {
       for (final p in {..._memory.fileData.keys, ..._stored})
         if (p.startsWith('$path/')) p
     ];
-    final store = _db.transaction(_store.toJS, 'readwrite').objectStore(_store);
+    final drop = <String>[];
     for (final p in gone) {
       _memory.fileData.remove(p);
       _dirty.remove(p);
-      if (_stored.remove(p)) store.delete(p.toJS);
+      if (_stored.remove(p)) drop.add(p);
+    }
+    if (drop.isNotEmpty) {
+      _write((store) {
+        for (final p in drop) {
+          store.delete(p.toJS);
+        }
+      });
     }
     saved();
   }
@@ -196,24 +259,35 @@ class WebSaveFs extends SaveFs {
     if (_dirty.isEmpty) return;
     final paths = _dirty.toList();
     _dirty.clear();
-    // One transaction: the save list and the careers change together.
-    final tx = _db.transaction(_store.toJS, 'readwrite');
-    final store = tx.objectStore(_store);
-    for (final p in paths) {
-      final data = _memory.fileData[p];
-      if (data == null) continue;
-      // A copy of the file's bytes: SQLite may change them meanwhile.
-      store.put(data.copy().buffer.toJS, p.toJS);
-      _stored.add(p);
-    }
     // A failed write (storage full, a page being closed) is tried again.
-    void retry(web.Event _) {
+    void retry([Duration wait = const Duration(seconds: 5)]) {
       _dirty.addAll(paths.where(_memory.fileData.containsKey));
-      _timer ??= Timer(const Duration(seconds: 5), persist);
+      _timer ??= Timer(wait, persist);
     }
 
-    tx.onerror = retry.toJS;
-    tx.onabort = retry.toJS;
+    // One transaction: the save list and the careers change together.
+    final tx = _tx('readwrite');
+    if (tx == null) {
+      // The browser closed the connection: write once it is back.
+      retry(const Duration(seconds: 1));
+      return;
+    }
+    try {
+      final store = tx.objectStore(_store);
+      for (final p in paths) {
+        final data = _memory.fileData[p];
+        if (data == null) continue;
+        // A copy of the file's bytes: SQLite may change them meanwhile.
+        store.put(data.copy().buffer.toJS, p.toJS);
+        _stored.add(p);
+      }
+    } catch (_) {
+      _db = null;
+      retry(const Duration(seconds: 1));
+      return;
+    }
+    tx.onerror = ((web.Event _) => retry()).toJS;
+    tx.onabort = ((web.Event _) => retry()).toJS;
   }
 
   static Future<JSAny?> _done(web.IDBRequest request) {
