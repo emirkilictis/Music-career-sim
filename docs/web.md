@@ -6,8 +6,11 @@ Kayıtlar tarayıcının içinde (IndexedDB) tutulur; sunucu ya da hesap gerekme
 ## Desteklenen tarayıcılar
 
 Chrome / Edge 119+, Firefox 120+, Safari 18.2+ (iPhone'da iOS 18.2+). Daha eski bir tarayıcıda
-oyun açılmaz, "tarayıcı desteklenmiyor" ekranı çıkar. Oyunun 64 bit sayıları JavaScript'e
-düşen eski yolda çalışmıyor.
+oyun açılmaz; yükleme ekranında "Bu tarayıcı oyun için çok eski" yazar. Oyunun 64 bit sayıları
+JavaScript'e düşen eski yolda çalışmıyor.
+
+Açılışta bir hata olursa yükleme ekranında "Oyun açılamadı" ve hatanın metni çıkar (K235).
+Arkadaşın bu metni gönderirse sorun bulunabilir.
 
 ## Yayın (GitHub Pages)
 
