@@ -25,6 +25,11 @@ class _StudioTabState extends State<StudioTab> {
 
   /// Writing a holiday song (docs K136).
   bool _holiday = false;
+
+  /// A diss track's target (docs K229): -1 none, [Beefs.haters], or a
+  /// rival ([_dissName]).
+  int _diss = -1;
+  String _dissName = '';
   BudgetTier _budget = BudgetTier.low;
   int? _producer;
   int? _cowriter;
@@ -32,6 +37,54 @@ class _StudioTabState extends State<StudioTab> {
   List<CollaboratorView> _writers = const [];
   List<SongView> _vault = const [];
   int _loadedRevision = -1;
+
+  /// Picks a diss track's target (docs K229).
+  Future<void> _pickDiss() async {
+    final l = context.l10n;
+    final targets = await context.careerRead.read(Cmd.dissTargets());
+    if (!mounted) return;
+    final picked = await showModalBottomSheet<(int, String)>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: ConstrainedBox(
+          constraints:
+              BoxConstraints(maxHeight: MediaQuery.of(c).size.height * 0.75),
+          child: ListView(shrinkWrap: true, children: [
+            ListTile(
+              leading: const Icon(Icons.block_rounded),
+              title: Text(l.dissNone),
+              onTap: () => Navigator.pop(c, (-1, '')),
+            ),
+            ListTile(
+              leading: const Icon(Icons.thumb_down_alt_rounded),
+              title: Text(l.dissAtHaters),
+              onTap: () => Navigator.pop(c, (Beefs.haters, '')),
+            ),
+            for (final t in targets)
+              ListTile(
+                leading: ArtistAvatar(
+                    name: t.name, seed: t.artistId, artistId: t.artistId),
+                title: Text(t.name),
+                subtitle: t.punch < 0
+                    ? Text(l.beefBully,
+                        style: TextStyle(color: AppColors.coral))
+                    : t.punch > 0
+                        ? Text(l.beefBrave)
+                        : null,
+                onTap: () => Navigator.pop(c, (t.artistId, t.name)),
+              ),
+          ]),
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _diss = picked.$1;
+      _dissName = picked.$2;
+    });
+  }
 
   @override
   void dispose() {
@@ -206,8 +259,12 @@ class _StudioTabState extends State<StudioTab> {
         genres: _genres ?? [career.player.genre],
         title: title.isEmpty ? null : title,
         holiday: _holiday,
+        dissTarget: _diss,
       ));
       _title.clear();
+      // A diss track is a one-off (docs K229).
+      _diss = -1;
+      _dissName = '';
       if (!mounted) return;
       await showDialog<void>(
         context: context,
@@ -308,6 +365,15 @@ class _StudioTabState extends State<StudioTab> {
                 title: Text(l.holidaySong,
                     style: const TextStyle(fontWeight: FontWeight.w700)),
                 subtitle: Text(l.holidaySongHint),
+              ),
+              _ChoiceRow(
+                label: l.dissTrack,
+                value: _diss == -1
+                    ? l.dissNone
+                    : _diss == Beefs.haters
+                        ? l.dissAtHaters
+                        : l.dissAt(_dissName),
+                onTap: _pickDiss,
               ),
               _ChoiceRow(
                 label: l.producer,

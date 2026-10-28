@@ -135,6 +135,7 @@ class Fmt {
         i.variant,
         title: i.title,
         name: playerName,
+        rival: i.rivalName,
         n: switch (i.topic) {
           FanTopic.bigWeek => compact(i.number.toDouble()),
           FanTopic.criticHigh ||
@@ -667,6 +668,7 @@ class Fmt {
         OpportunityKind.hateWave => l.offerHateWaveTitle,
         OpportunityKind.dmLeak => l.offerDmLeakTitle,
         OpportunityKind.stageMishap => l.offerStageMishapTitle,
+        OpportunityKind.dissed => l.offerDissedTitle,
       };
 
   String offerBody(OpportunityView o) => switch (o.kind) {
@@ -694,9 +696,17 @@ class Fmt {
         OpportunityKind.hateWave => l.offerHateWaveBody,
         OpportunityKind.dmLeak => l.offerDmLeakBody,
         OpportunityKind.stageMishap => l.offerStageMishapBody,
+        OpportunityKind.dissed => l.offerDissedBody(o.partnerName),
       };
 
   String offerChoice(OpportunityKind k, OpportunityChoice c) => switch (c) {
+        // A rival's diss (docs K229).
+        OpportunityChoice.leanIn when k == OpportunityKind.dissed =>
+          l.choiceFireBack,
+        OpportunityChoice.ignore when k == OpportunityKind.dissed =>
+          l.choiceRiseAbove,
+        OpportunityChoice.apologize when k == OpportunityKind.dissed =>
+          l.choiceMakePeace,
         // Crises (docs K228).
         OpportunityChoice.apologize when k == OpportunityKind.hateWave =>
           l.choiceRespondCalmly,
@@ -775,6 +785,9 @@ class Fmt {
         o.blewOver ? l.outcomeKeptGoingOk : l.outcomeKeptGoingBad,
       (OpportunityKind.stageMishap, _) =>
         o.backfired ? l.outcomeLaughLost : l.outcomeLaughWon(fans),
+      (OpportunityKind.dissed, OpportunityChoice.leanIn) => l.outcomeFiredBack,
+      (OpportunityKind.dissed, OpportunityChoice.ignore) => l.outcomeRoseAbove,
+      (OpportunityKind.dissed, _) => l.outcomeMadePeace,
       (_, OpportunityChoice.decline) => l.outcomeDeclined,
       (OpportunityKind.interview, _) => l.outcomeInterview(fans),
       (OpportunityKind.feature, _) =>
@@ -951,6 +964,9 @@ class Fmt {
       'cannotCloud' => l.errorCannotCloud,
       'noAnniversary' => l.errorNoAnniversary,
       'badSubmission' => l.errorBadSubmission,
+      'noDiss' => l.errorNoDiss,
+      'noBeef' => l.errorNoBeef,
+      'noDissTarget' => l.errorNoDissTarget,
       'submissionsClosed' => l.errorSubmissionsClosed,
       'noVersion' => switch (e.message) {
           'editionsPending' => l.versionPending,
@@ -1124,6 +1140,25 @@ class Fmt {
       RivalNumberOne() =>
         l.eventRivalNumberOne(line.artistName, t, chart(e.chartId)),
       AwardSubmissionsOpen() => l.eventAwardSubmissionsOpen(e.year),
+      BeefStarted() => e.songId >= 0
+          ? l.eventBeefStartedTrack(line.artistName, t)
+          : l.eventBeefStarted(line.artistName),
+      RivalFiredBack() => e.songId >= 0
+          ? l.eventRivalFiredBackTrack(line.artistName, t)
+          : l.eventRivalFiredBack(line.artistName),
+      BeefRoundScored() => e.rivalSongId < 0 && e.playerWon
+          ? l.eventBeefRoundUnanswered(line.artistName)
+          : e.playerSongId < 0 && !e.playerWon
+              ? l.eventBeefRoundTheirs(line.artistName)
+              : e.playerWon
+                  ? l.eventBeefRoundWon(line.artistName)
+                  : l.eventBeefRoundLost(line.artistName),
+      BeefEnded() => switch (e.end) {
+          BeefEnd.won => l.eventBeefWon(line.artistName),
+          BeefEnd.lost => l.eventBeefLost(line.artistName),
+          BeefEnd.truce => l.eventBeefTruce(line.artistName),
+          BeefEnd.fizzled => l.eventBeefFizzled(line.artistName),
+        },
       AwardNominated() => l.eventAwardNominated(e.year,
           e.categories.map((c) => awardCategory(c, line.genre)).join(', ')),
       AwardResults() => [

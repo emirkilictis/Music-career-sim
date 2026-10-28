@@ -428,6 +428,119 @@ void main() {
       g.close();
     });
 
+    test('beefs: a diss post, a diss track, rounds, peace (K229)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2019,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final id = g.slotId;
+      final w = g.world;
+      final p = w.player!;
+      p.moneyCents = 1 << 40;
+      final targets = g.dissTargets;
+      expect(targets, isNotEmpty);
+      final rival = targets.first.artistId;
+      final other = targets[1].artistId;
+      final posts = w.social.postsIn(w.week);
+      g.dissPost(rival);
+      expect(w.social.postsIn(w.week), posts + 1);
+      var b = g.beefs.active!;
+      expect(b.rivalId, rival);
+      expect(b.playerStarted, isTrue);
+      expect(b.heat, greaterThan(0));
+      expect(b.moves.single.kind, BeefMoveKind.tweet);
+      expect(w.social.feed.any((i) => i.topic == FanTopic.postDiss), isTrue);
+      // One beef at a time.
+      expect(() => g.dissPost(other), _code('noDiss'));
+      // A diss track at the rival, out as a single.
+      p.creativeEnergy = 100;
+      final s = g.writeSong(budget: BudgetTier.high, dissTarget: rival);
+      expect(s.isDiss, isTrue);
+      expect(() => g.writeSong(dissTarget: p.id), _code('noDissTarget'));
+      g.releaseSingle(s.id);
+      b = g.beefs.active!;
+      expect(b.moves.first.kind, BeefMoveKind.track);
+      expect(b.heat, greaterThan(0.5));
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.beefs.active!.moves.length, 2);
+      expect(g.song(s.id).dissTargetName, isNotEmpty);
+      final events = <GameEvent>[];
+      for (var i = 0; i < 4; i++) {
+        events.addAll(g.advanceWeek().events);
+      }
+      // The diss track's round was scored.
+      expect(events.whereType<BeefRoundScored>(), isNotEmpty);
+      // Peace ends it; the same rival is off limits for a while.
+      g.makePeace();
+      expect(g.beefs.active, isNull);
+      expect(g.beefs.past.first.end, BeefEnd.truce);
+      expect(g.dissTargets.firstWhere((x) => x.artistId == rival).block,
+          DissBlock.cooldown);
+      expect(() => g.makePeace(), _code('noBeef'));
+      g.close();
+    });
+
+    test('a beef cools to a winner; haters get a diss too (K229)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2019,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final w = g.world;
+      final rival = g.dissTargets.first.artistId;
+      g.dissPost(rival);
+      // The public is firmly on the player's side.
+      Beefs.active(w)!.opinion = 0.9;
+      final events = <GameEvent>[];
+      for (var i = 0; i < 30 && Beefs.active(w) != null; i++) {
+        events.addAll(g.advanceWeek().events);
+      }
+      expect(Beefs.active(w), isNull);
+      final end = events.whereType<BeefEnded>().single;
+      expect(end.rivalId, rival);
+      // The rival may have fired back and swung it, but rarely all the way.
+      expect(end.end, isIn([BeefEnd.won, BeefEnd.fizzled]));
+      g.dissHaters();
+      expect(
+          w.social.feed.any((i) => i.topic == FanTopic.postDissHaters), isTrue);
+      g.close();
+    });
+
+    test('rivals start beefs and fire back (K229)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2019,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final w = g.world;
+      final p = w.player!;
+      var started = 0, firedBack = 0;
+      for (var i = 0; i < 1500; i++) {
+        w.week++;
+        p.opportunity = null;
+        for (final n in Beefs.weekly(w)) {
+          if (n is BeefRivalStarted) {
+            started++;
+            expect(p.opportunity?.kind, OpportunityKind.dissed);
+            // Answer it: the rival may fire back.
+            Opportunities.answer(w, p, OpportunityChoice.leanIn);
+          }
+          if (n is BeefFiredBack) firedBack++;
+        }
+      }
+      expect(started, greaterThan(0));
+      expect(firedBack, greaterThan(0));
+      g.close();
+    });
+
     test('a tour is planned, survives reopening and is reported (K63)', () {
       var g = GameSession.start(
           slots,

@@ -4,9 +4,12 @@ import 'package:game/game.dart';
 import '../l10n/gen/app_localizations.dart';
 
 /// The words of a social feed item ([title]: its song or album, [name]:
-/// the player, [n]: its number, formatted).
+/// the player, [n]: its number, formatted, [rival]: a beef's rival).
 String socialText(AppLocalizations l, FanTopic topic, int variant,
-        {required String title, required String name, required String n}) =>
+        {required String title,
+        required String name,
+        required String n,
+        String rival = ''}) =>
     switch ((topic, variant % 3)) {
       (FanTopic.releaseLove, 0) => l.smReleaseLove0(title),
       (FanTopic.releaseLove, 1) => l.smReleaseLove1(name, title),
@@ -53,6 +56,33 @@ String socialText(AppLocalizations l, FanTopic topic, int variant,
       (FanTopic.stageMishap, 0) => l.smStageMishap0(name),
       (FanTopic.stageMishap, 1) => l.smStageMishap1(name),
       (FanTopic.stageMishap, 2) => l.smStageMishap2(name),
+      (FanTopic.postDiss, 0) => l.smPostDiss0(rival),
+      (FanTopic.postDiss, 1) => l.smPostDiss1(rival),
+      (FanTopic.postDiss, 2) => l.smPostDiss2(rival),
+      (FanTopic.postDissHaters, 0) => l.smPostDissHaters0,
+      (FanTopic.postDissHaters, 1) => l.smPostDissHaters1,
+      (FanTopic.postDissHaters, 2) => l.smPostDissHaters2,
+      (FanTopic.replyDissFor, 0) => l.smReplyDissFor0(name, rival),
+      (FanTopic.replyDissFor, 1) => l.smReplyDissFor1(rival),
+      (FanTopic.replyDissFor, 2) => l.smReplyDissFor2(name),
+      (FanTopic.replyDissAgainst, 0) => l.smReplyDissAgainst0(name, rival),
+      (FanTopic.replyDissAgainst, 1) => l.smReplyDissAgainst1(name, rival),
+      (FanTopic.replyDissAgainst, 2) => l.smReplyDissAgainst2(rival),
+      (FanTopic.dissTrackOut, 0) => l.smDissTrackOut0(name, rival),
+      (FanTopic.dissTrackOut, 1) => l.smDissTrackOut1(name, rival),
+      (FanTopic.dissTrackOut, 2) => l.smDissTrackOut2(rival, title),
+      (FanTopic.dissTrackHaters, 0) => l.smDissTrackHaters0(name, title),
+      (FanTopic.dissTrackHaters, 1) => l.smDissTrackHaters1(name),
+      (FanTopic.dissTrackHaters, 2) => l.smDissTrackHaters2(title),
+      (FanTopic.rivalDiss, 0) => l.smRivalDiss0(name, rival),
+      (FanTopic.rivalDiss, 1) => l.smRivalDiss1(name, rival),
+      (FanTopic.rivalDiss, 2) => l.smRivalDiss2(name, rival),
+      (FanTopic.beefWon, 0) => l.smBeefWon0(name, rival),
+      (FanTopic.beefWon, 1) => l.smBeefWon1(name, rival),
+      (FanTopic.beefWon, 2) => l.smBeefWon2(name, rival),
+      (FanTopic.beefLost, 0) => l.smBeefLost0(name, rival),
+      (FanTopic.beefLost, 1) => l.smBeefLost1(name, rival),
+      (FanTopic.beefLost, 2) => l.smBeefLost2(name, rival),
       (FanTopic.scandal, 0) => l.smScandal0(name),
       (FanTopic.scandal, 1) => l.smScandal1,
       (FanTopic.scandal, 2) => l.smScandal2(name),

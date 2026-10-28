@@ -14,6 +14,7 @@ import 'model.dart';
 import 'rng.dart';
 import 'award_campaigns.dart';
 import 'award_submissions.dart';
+import 'beefs.dart';
 import 'documentaries.dart';
 import 'streamify_sessions.dart';
 import 'artist_pick.dart';
@@ -104,6 +105,9 @@ class World {
 
   /// What the player submitted for the next awards (docs K227).
   AwardSubmissions? awardSubmissions;
+
+  /// The player's beefs with rivals, oldest first (docs K229).
+  final List<Beef> beefs = [];
 
   /// The player's documentaries (docs K172).
   final List<Documentary> documentaries = [];

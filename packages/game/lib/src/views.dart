@@ -341,6 +341,10 @@ class SongView {
                     r: Actions.radioUpgradeCost(w.player!, s, r),
               },
         holiday = s.holiday,
+        dissTarget = s.dissTarget,
+        dissTargetName = s.dissTarget >= 0
+            ? w.artists[s.dissTarget].name
+            : '',
         rerecordOf = s.rerecordOf,
         liveOf = s.liveOf,
         leakedWeek = s.leakedWeek,
@@ -477,6 +481,12 @@ class SongView {
 
   /// A holiday song (docs K136).
   final bool holiday;
+
+  /// A diss track's target (docs K229): a rival's id ([dissTargetName]),
+  /// [Beefs.haters], or -1.
+  final int dissTarget;
+  final String dissTargetName;
+  bool get isDiss => dissTarget != -1;
 
   /// The song this one re-records (-1: an original), and the week its
   /// own re-recording came out (-1: none; docs K139).
@@ -2747,6 +2757,7 @@ class SocialItemView {
         number = i.number,
         songId = i.songId,
         albumId = i.albumId,
+        rivalName = i.artistId >= 0 ? w.artists[i.artistId].name : '',
         coverAlbumId = i.albumId >= 0
             ? i.albumId
             : i.songId >= 0
@@ -2760,6 +2771,9 @@ class SocialItemView {
   /// The fan's handle seed (-1: the player).
   final int fan;
   bool get isPlayer => fan < 0;
+
+  /// The rival a beef post is about ('' for none; docs K229).
+  final String rivalName;
 
   /// The song or album it talks about ('' if none).
   final String title;
@@ -3271,6 +3285,121 @@ class FycView {
       : phase == FycPhase.voting
           ? vote
           : null;
+}
+
+/// The player's beefs (docs K229).
+class BeefsView {
+  BeefsView.of(World w, Artist p)
+      : active = Beefs.active(w) == null
+            ? null
+            : BeefView.of(w, Beefs.active(w)!),
+        past = [
+          for (final b in w.beefs.reversed)
+            if (!b.active) BeefView.of(w, b)
+        ],
+        canPost = Social.canPostIn(GameTime.yearOf(w.week)),
+        postsLeft = Social.postsPerWeek - w.social.postsIn(w.week);
+  final BeefView? active;
+  final List<BeefView> past;
+  final bool canPost;
+  final int postsLeft;
+}
+
+/// One beef: the rival, how hot it is, whose side the public is on and
+/// every diss.
+class BeefView {
+  BeefView.of(World w, Beef b)
+      : rivalId = b.rivalId,
+        rivalName = w.artists[b.rivalId].name,
+        rivalFame = w.artists[b.rivalId].fame,
+        startWeek = b.startWeek,
+        playerStarted = b.playerStarted,
+        heat = b.heat,
+        opinion = b.opinion,
+        endWeek = b.endWeek,
+        end = b.end,
+        moves = [
+          for (final m in b.moves.reversed)
+            BeefMoveView(
+              week: m.week,
+              byPlayer: m.byPlayer,
+              kind: m.kind,
+              songId: m.songId,
+              title: m.songId >= 0 ? w.songs[m.songId].title : '',
+            )
+        ];
+  final int rivalId;
+  final String rivalName;
+  final double rivalFame;
+  final int startWeek;
+  final bool playerStarted;
+  final double heat;
+  final double opinion;
+  final int endWeek;
+  final BeefEnd? end;
+
+  /// Newest first.
+  final List<BeefMoveView> moves;
+}
+
+class BeefMoveView {
+  const BeefMoveView(
+      {required this.week,
+      required this.byPlayer,
+      required this.kind,
+      required this.songId,
+      required this.title});
+  final int week;
+  final bool byPlayer;
+  final BeefMoveKind kind;
+  final int songId;
+  final String title;
+}
+
+/// A rival the player could go at, and how it would look.
+class DissTargetView {
+  const DissTargetView(
+      {required this.artistId,
+      required this.name,
+      required this.fame,
+      required this.punch,
+      required this.block});
+  final int artistId;
+  final String name;
+  final double fame;
+
+  /// How the public takes it: below 0 bullying, above 0 brave.
+  final double punch;
+
+  /// What stops a diss now (null: nothing; noPost is about posts only).
+  final DissBlock? block;
+
+  /// The biggest active rivals and those closest to the player's fame.
+  static List<DissTargetView> list(World w, Artist p) {
+    final rivals = [
+      for (final id in w.activeArtistIds)
+        if (w.artists[id] case final a
+            when a.tier != ArtistTier.player && !a.isRetired && a.fame > 0.02)
+          a
+    ];
+    final big = (List.of(rivals)..sort((a, b) => b.fame.compareTo(a.fame)))
+        .take(8);
+    final near = (List.of(rivals)
+          ..sort((a, b) =>
+              (a.fame - p.fame).abs().compareTo((b.fame - p.fame).abs())))
+        .take(8);
+    final seen = <int>{};
+    return [
+      for (final a in [...big, ...near])
+        if (seen.add(a.id))
+          DissTargetView(
+              artistId: a.id,
+              name: a.name,
+              fame: a.fame,
+              punch: Beefs.punch(p, a),
+              block: Beefs.block(w, p, a.id))
+    ]..sort((a, b) => b.fame.compareTo(a.fame));
+  }
 }
 
 /// The player's award submissions for the next show (docs K227).

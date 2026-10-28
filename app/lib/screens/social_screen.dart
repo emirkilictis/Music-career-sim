@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game/game.dart';
 
 import '../core/career_state.dart';
+import 'beef_screen.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
@@ -277,6 +278,20 @@ class _SocialScreenState extends State<SocialScreen> {
                       : FontStyle.normal,
                   fontSize: 22,
                   color: s.barText)),
+      // Beefs (docs K229).
+      actions: [
+        IconButton(
+          tooltip: context.l10n.beefTitle,
+          icon: const Icon(Icons.local_fire_department_rounded),
+          onPressed: () async {
+            await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => BeefScreen(state: widget.state)));
+            _load();
+          },
+        ),
+      ],
     );
   }
 }

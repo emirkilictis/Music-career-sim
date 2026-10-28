@@ -940,6 +940,10 @@ class Song with Charted {
   /// market (docs K205; -1: the artist's own). They keep a share.
   int boughtFrom = -1;
 
+  /// A diss track (docs K229): the artist it goes at, [Beefs.haters] for
+  /// the haters, -1 for an ordinary song.
+  int dissTarget = -1;
+
   /// The artist's share of what it earns, fixed by the deal it came out
   /// under (docs K139): a label owns the masters for good. Null until
   /// it first earns.

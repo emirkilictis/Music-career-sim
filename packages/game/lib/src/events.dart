@@ -727,6 +727,50 @@ class CreatorsFlopped extends GameEvent {
   bool get isMajor => false;
 }
 
+/// A rival started a beef with the player (docs K229): a post, or a diss
+/// track ([songId]).
+class BeefStarted extends GameEvent {
+  const BeefStarted(this.rivalId, this.songId);
+  final int rivalId;
+  final int songId;
+  @override
+  bool get isMajor => true;
+}
+
+/// The rival fired back at the player's diss (docs K229).
+class RivalFiredBack extends GameEvent {
+  const RivalFiredBack(this.rivalId, this.songId);
+  final int rivalId;
+
+  /// Their diss track (-1: a post).
+  final int songId;
+  @override
+  bool get isMajor => true;
+}
+
+/// A diss track round was scored (docs K229).
+class BeefRoundScored extends GameEvent {
+  const BeefRoundScored(this.rivalId,
+      {required this.playerWon,
+      required this.playerSongId,
+      required this.rivalSongId});
+  final int rivalId;
+  final bool playerWon;
+  final int playerSongId;
+  final int rivalSongId;
+  @override
+  bool get isMajor => true;
+}
+
+/// The player's beef is over (docs K229).
+class BeefEnded extends GameEvent {
+  const BeefEnded(this.rivalId, this.end);
+  final int rivalId;
+  final BeefEnd end;
+  @override
+  bool get isMajor => end == BeefEnd.won || end == BeefEnd.lost;
+}
+
 /// The player is up for Golden Record Awards (docs K91).
 class AwardNominated extends GameEvent {
   const AwardNominated(this.year, this.categories);

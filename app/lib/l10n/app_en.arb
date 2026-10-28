@@ -2644,6 +2644,232 @@
       }
     }
   },
+  "beefTitle": "Beef",
+  "beefIntro": "Diss a rival in a post or a diss track. They may fire back; the public picks a side. When it cools down, whoever the public backs wins: fame and popularity for the winner. Going at someone far smaller looks like bullying.",
+  "beefWith": "You vs {rival}",
+  "@beefWith": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "beefHeat": "Heat",
+  "beefOpinion": "The public",
+  "beefOpinionSplit": "{you}% you · {them}% {rival}",
+  "@beefOpinionSplit": {
+    "placeholders": {
+      "you": {
+        "type": "int"
+      },
+      "them": {
+        "type": "int"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "beefStartedBy": "Started {date} by {who}",
+  "@beefStartedBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "beefYou": "you",
+  "beefDissPost": "Diss post",
+  "beefDissTrack": "Write a diss track",
+  "beefPeace": "Make peace",
+  "beefMoveTweetMine": "You posted a diss",
+  "beefMoveTweetTheirs": "{rival} posted a diss",
+  "@beefMoveTweetTheirs": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "beefMoveTrackMine": "Your diss track “{title}”",
+  "@beefMoveTrackMine": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "beefMoveTrackTheirs": "{rival}’s diss track “{title}”",
+  "@beefMoveTrackTheirs": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "beefPickRival": "Pick a rival",
+  "beefBully": "Punching down",
+  "beefBrave": "Brave",
+  "beefCooldown": "Not yet: you two only just stopped",
+  "beefBusy": "You are already in a beef",
+  "beefHaters": "Diss the haters",
+  "beefHatersHint": "A post at the haters: fans rally behind you, unless it looks thin-skinned.",
+  "beefPast": "Past beefs",
+  "beefEndWon": "Won",
+  "beefEndLost": "Lost",
+  "beefEndTruce": "Made peace",
+  "beefEndFizzled": "Died down",
+  "beefPosted": "Diss posted. Wait and see if they fire back.",
+  "beefTrackWritten": "“{title}” is in the vault. Put it out as a single to hit them with it.",
+  "@beefTrackWritten": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "beefPeaceMade": "You made peace.",
+  "beefHatersDone": "Your fans rallied behind you.",
+  "beefHatersBacklash": "It came off as thin-skinned: some people laughed at you.",
+  "beefNoPosts": "No posts left this week",
+  "dissTrack": "Diss track",
+  "dissNone": "No",
+  "dissAtHaters": "At the haters",
+  "dissAt": "At {name}",
+  "@dissAt": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dissTag": "Diss",
+  "offerDissedTitle": "You got dissed",
+  "offerDissedBody": "{name} just came for you in public. Everyone is waiting for your answer.",
+  "@offerDissedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "choiceFireBack": "Fire back",
+  "choiceRiseAbove": "Rise above it",
+  "choiceMakePeace": "Make peace",
+  "outcomeFiredBack": "You fired back. It is on.",
+  "outcomeRoseAbove": "You rose above it; some respect that, and it cooled down.",
+  "outcomeMadePeace": "You offered peace and they took it.",
+  "eventBeefStarted": "{rival} came for you in public. Answer it on the Beef page.",
+  "@eventBeefStarted": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBeefStartedTrack": "{rival} dropped a diss track about you: “{title}”.",
+  "@eventBeefStartedTrack": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventRivalFiredBack": "{rival} fired back at you.",
+  "@eventRivalFiredBack": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "eventRivalFiredBackTrack": "{rival} answered with a diss track: “{title}”.",
+  "@eventRivalFiredBackTrack": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBeefRoundWon": "Your diss track beat {rival}’s: the public is on your side.",
+  "@eventBeefRoundWon": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBeefRoundLost": "{rival}’s diss track did better than yours: the public is leaning their way.",
+  "@eventBeefRoundLost": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBeefRoundUnanswered": "{rival} never answered your diss track: it stands.",
+  "@eventBeefRoundUnanswered": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBeefRoundTheirs": "You never answered {rival}’s diss track: it stands.",
+  "@eventBeefRoundTheirs": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBeefWon": "You won the beef with {rival}: more fame and popularity.",
+  "@eventBeefWon": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBeefLost": "You lost the beef with {rival}: popularity took a hit.",
+  "@eventBeefLost": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBeefFizzled": "The beef with {rival} died down.",
+  "@eventBeefFizzled": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "eventBeefTruce": "You made peace with {rival}.",
+  "@eventBeefTruce": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "errorNoDiss": "You can’t go at them now.",
+  "errorNoBeef": "There is no beef on.",
+  "errorNoDissTarget": "A diss track goes at a rival or the haters.",
   "offerHateWaveTitle": "Hate wave",
   "offerHateWaveBody": "People online are piling on you, and it is trending. How do you answer?",
   "offerDmLeakTitle": "Your messages leaked",
@@ -3347,6 +3573,249 @@
   "@smStageMishap2": {
     "placeholders": {
       "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smPostDiss0": "Funny how {rival} only trends when they say my name",
+  "@smPostDiss0": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smPostDiss1": "{rival} made one good song and thinks they run this. Sit down",
+  "@smPostDiss1": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smPostDiss2": "Not me being the only one in this game actually writing my songs, right {rival}?",
+  "@smPostDiss2": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smPostDissHaters0": "To everyone hating: keep streaming, it pays my rent 💅",
+  "smPostDissHaters1": "Read your comments. Wrote a song about them. You're welcome",
+  "smPostDissHaters2": "The haters really think they matter. Cute",
+  "smReplyDissFor0": "{name} said what we were all thinking about {rival}",
+  "@smReplyDissFor0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyDissFor1": "{rival} is NOT recovering from this one",
+  "@smReplyDissFor1": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyDissFor2": "Team {name}. Always",
+  "@smReplyDissFor2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyDissAgainst0": "Leave {rival} out of this {name}, this is so unnecessary",
+  "@smReplyDissAgainst0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyDissAgainst1": "{name} picking a fight with {rival} for attention again 🙄",
+  "@smReplyDissAgainst1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smReplyDissAgainst2": "Team {rival}, sorry not sorry",
+  "@smReplyDissAgainst2": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smDissTrackOut0": "{name} REALLY named {rival} on the new song?? I'm screaming",
+  "@smDissTrackOut0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smDissTrackOut1": "This {name} diss track is the end of {rival}'s career",
+  "@smDissTrackOut1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smDissTrackOut2": "Every line of {title} is about {rival} and we all know it",
+  "@smDissTrackOut2": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smDissTrackHaters0": "{title} is for every hater in {name}'s comments. Iconic",
+  "@smDissTrackHaters0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smDissTrackHaters1": "{name} turned the hate into a song. That's how you win",
+  "@smDissTrackHaters1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smDissTrackHaters2": "Playing {title} at every hater I know",
+  "@smDissTrackHaters2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalDiss0": "{rival} just came for {name} 😳 who's going to tell them",
+  "@smRivalDiss0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalDiss1": "{rival} vs {name} was not on my bingo card",
+  "@smRivalDiss1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalDiss2": "Grabbing popcorn: {rival} is dissing {name} now",
+  "@smRivalDiss2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smBeefWon0": "{name} won the {rival} beef. It's not even close",
+  "@smBeefWon0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smBeefWon1": "{rival} went quiet. {name} wins",
+  "@smBeefWon1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smBeefWon2": "History will remember {name} vs {rival}. And who won",
+  "@smBeefWon2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smBeefLost0": "Ngl {rival} won that one against {name}",
+  "@smBeefLost0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smBeefLost1": "{name} should have stayed quiet about {rival}",
+  "@smBeefLost1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smBeefLost2": "The {rival} beef did {name} no favors",
+  "@smBeefLost2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "rival": {
         "type": "String"
       }
     }

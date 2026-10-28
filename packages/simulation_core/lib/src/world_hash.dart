@@ -168,6 +168,13 @@ int worldHash(World w) {
     addInt(d.startWeek);
     addInt(d.premiered ? 1 : 0);
   }
+  for (final b in w.beefs) {
+    addInt(b.rivalId);
+    addDouble(b.heat);
+    addDouble(b.opinion);
+    addInt(b.endWeek);
+    addInt(b.moves.length);
+  }
   if (w.awardSubmissions case final subs?) {
     addInt(subs.year);
     addInt(subs.newArtist ? 1 : 0);

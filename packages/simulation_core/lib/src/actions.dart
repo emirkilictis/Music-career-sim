@@ -4,6 +4,7 @@ import 'album_versions.dart';
 import 'anniversaries.dart';
 import 'artist_pick.dart';
 import 'audience.dart';
+import 'beefs.dart';
 import 'bundles.dart';
 import 'cloud.dart';
 import 'config/charts.dart';
@@ -709,6 +710,8 @@ abstract final class Actions {
     }
     _promote(w, s, campaign);
     a.lastReleaseWeek = w.week;
+    // A diss track (docs K229).
+    if (s.dissTarget != -1) Beefs.onRelease(w, a, s);
   }
 
   /// Releases an album/EP. Songs not yet released become album tracks;

@@ -17,7 +17,7 @@ abstract final class SocialFeed {
     final base = r.nextInt(Social.variants);
     final used = <FanTopic, int>{};
     void fan(FanTopic topic,
-        {int songId = -1, int albumId = -1, int number = 0}) {
+        {int songId = -1, int albumId = -1, int number = 0, int artistId = -1}) {
       items.add(SocialItem(
         week: week,
         topic: topic,
@@ -28,6 +28,7 @@ abstract final class SocialFeed {
         albumId: albumId,
         number: number,
         likes: (followers * r.range(0.0005, 0.01)).round(),
+        artistId: artistId,
       ));
     }
 
@@ -122,6 +123,13 @@ abstract final class SocialFeed {
           fan(FanTopic.hateWave);
           fan(FanTopic.hateWave);
           fan(FanTopic.hateDefend);
+        // Beefs (docs K229).
+        case BeefEnded(end: BeefEnd.won, :final rivalId):
+          fan(FanTopic.beefWon, artistId: rivalId);
+          fan(FanTopic.beefWon, artistId: rivalId);
+        case BeefEnded(end: BeefEnd.lost, :final rivalId):
+          fan(FanTopic.beefLost, artistId: rivalId);
+          fan(FanTopic.beefLost, artistId: rivalId);
         case OpportunityCame(kind: OpportunityKind.dmLeak):
           fan(FanTopic.dmLeak);
           fan(FanTopic.dmLeak);

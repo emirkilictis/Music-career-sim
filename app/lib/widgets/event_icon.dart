@@ -64,6 +64,22 @@ class EventIcon extends StatelessWidget {
       RivalNumberOne() => (Icons.newspaper_rounded, AppColors.textMuted),
       AwardNominated() => (Icons.workspace_premium_rounded, AppColors.gold),
       AwardSubmissionsOpen() => (Icons.how_to_vote_rounded, AppColors.gold),
+      BeefStarted() || RivalFiredBack() =>
+        (Icons.local_fire_department_rounded, AppColors.coral),
+      BeefRoundScored(:final playerWon) => (
+          Icons.sports_mma_rounded,
+          playerWon ? AppColors.mint : AppColors.coral
+        ),
+      BeefEnded(:final end) => (
+          end == BeefEnd.truce
+              ? Icons.handshake_rounded
+              : Icons.sports_mma_rounded,
+          end == BeefEnd.won
+              ? AppColors.mint
+              : end == BeefEnd.lost
+                  ? AppColors.coral
+                  : AppColors.textMuted
+        ),
       AwardResults(:final won) => (
           won.isEmpty
               ? Icons.workspace_premium_outlined
@@ -135,6 +151,7 @@ IconData opportunityIcon(OpportunityKind k) => switch (k) {
       OpportunityKind.hateWave => Icons.thumb_down_alt_rounded,
       OpportunityKind.dmLeak => Icons.forum_rounded,
       OpportunityKind.stageMishap => Icons.mic_off_rounded,
+      OpportunityKind.dissed => Icons.local_fire_department_rounded,
     };
 
 /// Each platform's brand colour and icon (docs K67).

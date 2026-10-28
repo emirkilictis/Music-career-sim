@@ -86,6 +86,15 @@ enum FanTopic {
   hateDefend,
   dmLeak,
   stageMishap,
+  postDiss,
+  postDissHaters,
+  replyDissFor,
+  replyDissAgainst,
+  dissTrackOut,
+  dissTrackHaters,
+  rivalDiss,
+  beefWon,
+  beefLost,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.
@@ -100,6 +109,7 @@ class SocialItem {
     this.likes = 0,
     this.number = 0,
     this.brand = -1,
+    this.artistId = -1,
   });
   final int week;
   final FanTopic topic;
@@ -117,10 +127,23 @@ class SocialItem {
   /// The brand of a sponsored post ([Brands.all] index; docs K102).
   final int brand;
 
+  /// The rival a beef post is about (docs K229).
+  final int artistId;
+
   bool get byPlayer => fan < 0;
 
-  List<int> toJson() =>
-      [week, topic.index, variant, fan, songId, albumId, likes, number, brand];
+  List<int> toJson() => [
+        week,
+        topic.index,
+        variant,
+        fan,
+        songId,
+        albumId,
+        likes,
+        number,
+        brand,
+        if (artistId >= 0) artistId
+      ];
 
   static SocialItem fromJson(List<dynamic> j) => SocialItem(
         week: j[0] as int,
@@ -132,6 +155,7 @@ class SocialItem {
         likes: j[6] as int,
         number: j[7] as int,
         brand: j.length > 8 ? j[8] as int : -1,
+        artistId: j.length > 9 ? j[9] as int : -1,
       );
 }
 

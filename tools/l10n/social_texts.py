@@ -77,6 +77,51 @@ TOPICS = {
   ("The clip of {name} last night is everywhere", "{name}'in dün geceki videosu her yerde"),
   ("I was there. {name} kept going like a pro", "Oradaydım. {name} bir profesyonel gibi devam etti"),
  ],
+ 'postDiss': [
+  ("Funny how {rival} only trends when they say my name", "{rival} ancak benim adımı anınca gündem oluyor, komik"),
+  ("{rival} made one good song and thinks they run this. Sit down", "{rival} bir tane iyi şarkı yaptı, her şeyi yönettiğini sanıyor. Otur yerine"),
+  ("Not me being the only one in this game actually writing my songs, right {rival}?", "Bu işte şarkılarını gerçekten kendi yazan tek kişi benim, değil mi {rival}?"),
+ ],
+ 'postDissHaters': [
+  ("To everyone hating: keep streaming, it pays my rent 💅", "Nefret edenlere: dinlemeye devam edin, kiramı siz ödüyorsunuz 💅"),
+  ("Read your comments. Wrote a song about them. You're welcome", "Yorumlarınızı okudum. Hakkınızda şarkı yazdım. Rica ederim"),
+  ("The haters really think they matter. Cute", "Haterlar gerçekten önemli olduklarını sanıyor. Tatlı"),
+ ],
+ 'replyDissFor': [
+  ("{name} said what we were all thinking about {rival}", "{name}, {rival} hakkında hepimizin düşündüğünü söyledi"),
+  ("{rival} is NOT recovering from this one", "{rival} bundan kolay kolay toparlanamaz"),
+  ("Team {name}. Always", "Team {name}. Her zaman"),
+ ],
+ 'replyDissAgainst': [
+  ("Leave {rival} out of this {name}, this is so unnecessary", "{rival}'i bu işe karıştırma {name}, hiç gerek yoktu"),
+  ("{name} picking a fight with {rival} for attention again 🙄", "{name} yine ilgi için {rival} ile kavga çıkarıyor 🙄"),
+  ("Team {rival}, sorry not sorry", "Team {rival}, kusura bakmayın"),
+ ],
+ 'dissTrackOut': [
+  ("{name} REALLY named {rival} on the new song?? I'm screaming", "{name} yeni şarkıda GERÇEKTEN {rival}'in adını mı verdi?? Çığlık atıyorum"),
+  ("This {name} diss track is the end of {rival}'s career", "Bu {name} diss şarkısı {rival}'in kariyerinin sonu"),
+  ("Every line of {title} is about {rival} and we all know it", "{title} şarkısının her satırı {rival} hakkında, hepimiz biliyoruz"),
+ ],
+ 'dissTrackHaters': [
+  ("{title} is for every hater in {name}'s comments. Iconic", "{title}, {name}'in yorumlarındaki her hater için. İkonik"),
+  ("{name} turned the hate into a song. That's how you win", "{name} nefreti şarkıya çevirdi. Kazanmak böyle olur"),
+  ("Playing {title} at every hater I know", "Tanıdığım her haterin yüzüne {title} çalıyorum"),
+ ],
+ 'rivalDiss': [
+  ("{rival} just came for {name} 😳 who's going to tell them", "{rival} az önce {name}'e laf soktu 😳 kim söyleyecek"),
+  ("{rival} vs {name} was not on my bingo card", "{rival} ile {name} kavgası listemde yoktu"),
+  ("Grabbing popcorn: {rival} is dissing {name} now", "Patlamış mısırı alıyorum: {rival} şimdi de {name}'e sataşıyor"),
+ ],
+ 'beefWon': [
+  ("{name} won the {rival} beef. It's not even close", "{name}, {rival} kavgasını kazandı. Yakın bile değil"),
+  ("{rival} went quiet. {name} wins", "{rival} sustu. {name} kazandı"),
+  ("History will remember {name} vs {rival}. And who won", "Tarih {name} - {rival} kavgasını hatırlayacak. Ve kimin kazandığını"),
+ ],
+ 'beefLost': [
+  ("Ngl {rival} won that one against {name}", "Dürüst olayım, o kavgayı {rival} kazandı"),
+  ("{name} should have stayed quiet about {rival}", "{name}, {rival} hakkında susmalıydı"),
+  ("The {rival} beef did {name} no favors", "{rival} kavgası {name}'e hiç iyi gelmedi"),
+ ],
  'scandal': [
   ("Waiting for {name} to explain this…", "{name} bunu açıklasın bekliyorum…"),
   ("I'm not reading the comments today", "Bugün yorumları okumuyorum"),

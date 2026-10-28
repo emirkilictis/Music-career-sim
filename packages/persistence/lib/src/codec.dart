@@ -261,6 +261,8 @@ abstract final class Codec {
     'curators',
     // Added in schema v49, v50, v51, v53.
     'ringtones', 'weekRingtones', 'mood', 'canvas', 'bought',
+    // Added in schema v55.
+    'diss',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -346,6 +348,7 @@ abstract final class Codec {
             : jsonEncode([s.moodWeek, s.mood, s.moodIn ? 1 : 0]),
         s.canvasWeek < 0 ? null : s.canvasWeek,
         s.boughtFrom < 0 ? null : s.boughtFrom,
+        s.dissTarget == -1 ? null : s.dissTarget,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -412,6 +415,7 @@ abstract final class Codec {
     s.guestCents = (r['guestCents'] as num?)?.toDouble() ?? 0;
     s.canvasWeek = r['canvas'] as int? ?? -1;
     s.boughtFrom = r['bought'] as int? ?? -1;
+    s.dissTarget = r['diss'] as int? ?? -1;
     if (r['mood'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       s

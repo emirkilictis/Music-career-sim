@@ -6,6 +6,7 @@ import 'ai.dart';
 import 'artist_pick.dart';
 import 'audience.dart';
 import 'awards.dart';
+import 'beefs.dart';
 import 'brands.dart';
 import 'canvas.dart';
 import 'cloud.dart';
@@ -71,6 +72,7 @@ class WeekResult {
     this.brandDealsBroken = const [],
     this.rivalClashes = const [],
     this.musicShow,
+    this.beefNews = const [],
   });
 
   final int week;
@@ -126,6 +128,9 @@ class WeekResult {
 
   /// The K-pop music show's week, if one was held (docs K114).
   final MusicShowWeek? musicShow;
+
+  /// What happened in the player's beef (docs K229).
+  final List<BeefNews> beefNews;
 
   List<ChartEntry> get songChart => charts[Charts.usSongs];
   List<ChartEntry> get albumChart => charts[Charts.usAlbums];
@@ -1220,6 +1225,7 @@ class Simulator {
     final nominations = Awards.nominate(w);
     final night = Awards.hold(w);
     Social.weekly(w);
+    final beefNews = Beefs.weekly(w);
     final dealsBroken = Brands.weekly(w);
     if (me != null) {
       // The group's members' own popularity (docs K192).
@@ -1272,6 +1278,7 @@ class Simulator {
       brandDealsBroken: dealsBroken,
       rivalClashes: clashes,
       musicShow: show,
+      beefNews: beefNews,
     );
     w.week++;
     return result;

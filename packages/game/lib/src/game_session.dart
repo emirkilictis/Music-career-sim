@@ -537,8 +537,15 @@ class GameSession {
     List<int>? genres,
     String? title,
     bool holiday = false,
+    int dissTarget = -1,
   }) {
     final p = _p;
+    // A diss track goes at a rival or the haters (docs K229).
+    if (dissTarget != -1 &&
+        dissTarget != Beefs.haters &&
+        Beefs.block(world, p, dissTarget) == DissBlock.notRival) {
+      throw GameException('noDissTarget', 'Not a rival');
+    }
     if (world.week < p.burnoutUntilWeek) {
       throw GameException('burnout', 'Burnout until ${p.burnoutUntilWeek}');
     }
@@ -576,6 +583,7 @@ class GameSession {
         genres: g,
         title: t,
         holiday: holiday);
+    s.dissTarget = dissTarget;
     _saveNow();
     return SongView.of(world, s);
   }
@@ -2779,6 +2787,47 @@ class GameSession {
     _saveNow();
   }
 
+  // --------------------------------------------------------- beefs (K229)
+
+  /// The player's beef now and the ones before it, newest first.
+  BeefsView get beefs => BeefsView.of(world, _p);
+
+  /// Rivals the player could go at: the biggest names and those near
+  /// the player's size.
+  List<DissTargetView> get dissTargets => DissTargetView.list(world, _p);
+
+  /// Disses rival [rivalId] in a post (one of the week's posts).
+  void dissPost(int rivalId) {
+    final why = Beefs.block(world, _p, rivalId, post: true);
+    if (why != null) throw GameException('noDiss', why.name);
+    Beefs.dissPost(world, _p, rivalId);
+    _saveNow();
+  }
+
+  /// Disses the haters in a post; true when it backfired.
+  bool dissHaters() {
+    if (!Social.canPostIn(year)) {
+      throw GameException('socialLocked', 'No social media yet');
+    }
+    if (world.social.postsIn(world.week) >= Social.postsPerWeek) {
+      throw GameException('postLimit', 'Posted enough this week');
+    }
+    final out = Beefs.dissHatersPost(world, _p);
+    _saveNow();
+    return out;
+  }
+
+  /// Makes peace with the rival.
+  void makePeace() {
+    if (Beefs.active(world) == null) {
+      throw GameException('noBeef', 'No beef on');
+    }
+    Beefs.makePeace(world, _p);
+    // A rival's diss waiting for an answer is answered by it.
+    if (_p.opportunity?.kind == OpportunityKind.dissed) _p.opportunity = null;
+    _saveNow();
+  }
+
   // ------------------------------------------ award submissions (K227)
 
   /// What the player can submit for the next awards, and what is in
@@ -4213,6 +4262,26 @@ class GameSession {
           fans: f.fans));
     }
     if (r.newOpportunity case final o?) events.add(OpportunityCame(o.kind));
+    // The player's beef (docs K229).
+    for (final n in r.beefNews) {
+      events.add(switch (n) {
+        BeefRivalStarted(:final rivalId, :final songId) =>
+          BeefStarted(rivalId, songId),
+        BeefFiredBack(:final rivalId, :final songId) =>
+          RivalFiredBack(rivalId, songId),
+        BeefRound(
+          :final rivalId,
+          :final playerWon,
+          :final playerSongId,
+          :final rivalSongId
+        ) =>
+          BeefRoundScored(rivalId,
+              playerWon: playerWon,
+              playerSongId: playerSongId,
+              rivalSongId: rivalSongId),
+        BeefOver(:final rivalId, :final end) => BeefEnded(rivalId, end),
+      });
+    }
     // Award submissions open (docs K227).
     if (GameTime.weekOfYear(world.week) == Awards.windowStartWeekOfYear &&
         Awards.submissionsOpen(world) &&

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'audience.dart';
 import 'awards.dart';
+import 'beefs.dart';
 import 'brands.dart';
 import 'credits.dart';
 import 'model.dart';
@@ -34,7 +35,10 @@ enum OpportunityKind {
   dmLeak,
 
   /// Something went wrong on stage, on tour (docs K228).
-  stageMishap;
+  stageMishap,
+
+  /// A rival dissed the player (docs K229).
+  dissed;
 
   /// Trouble to handle rather than an offer to take (docs K228).
   bool get isCrisis =>
@@ -42,7 +46,8 @@ enum OpportunityKind {
       this == memberRift ||
       this == hateWave ||
       this == dmLeak ||
-      this == stageMishap;
+      this == stageMishap ||
+      this == dissed;
 }
 
 /// How the player answers. Most offers are [accept] / [decline]; a scandal
@@ -428,6 +433,13 @@ abstract final class Opportunities {
           Audience.addCasual(w, p, p.casual * 0.02);
           fans = p.casual * 0.004;
         }
+      // A rival's diss (docs K229): fire back, rise above, make peace.
+      case (OpportunityKind.dissed, OpportunityChoice.leanIn):
+        Beefs.fireBack(w, p);
+      case (OpportunityKind.dissed, OpportunityChoice.ignore):
+        Beefs.riseAbove(w, p);
+      case (OpportunityKind.dissed, OpportunityChoice.apologize):
+        if (Beefs.active(w) != null) Beefs.makePeace(w, p);
       case _:
         break; // declined
     }

@@ -865,6 +865,61 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '17c_submissions');
   });
+  testWidgets('screenshots: a beef', skip: !enabled, (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await tester.runAsync(() => c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 229,
+        ),
+        PortSink(port.sendPort))));
+    port.close();
+    // A diss post and a diss track at the biggest rival (docs K229).
+    await tester.runAsync(() => c.run((s) {
+          final p = s.world.player!;
+          p.moneyCents = 1 << 40;
+          final rival = s.dissTargets.first.artistId;
+          s.dissPost(rival);
+          s.advanceWeeks(2, stop: SkipStop.never);
+          p.creativeEnergy = 100;
+          final diss = s.writeSong(
+              budget: BudgetTier.high, title: 'Smaller Now', dissTarget: rival);
+          s.releaseSingle(diss.id);
+          s.advanceWeeks(2, stop: SkipStop.never);
+        }));
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    final feed = _ci('Open the feed');
+    await tester.scrollUntilVisible(feed, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(feed);
+    await tester.pumpAndSettle();
+    await shot(tester, '18a_beef_feed');
+    await tester.tap(find.byIcon(Icons.local_fire_department_rounded).first);
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 300)));
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+    await tester.pumpAndSettle();
+    await shot(tester, '18b_beef');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -600));
+    await tester.pumpAndSettle();
+    await shot(tester, '18c_beef_more');
+  });
   testWidgets('screenshots: posts with pictures', skip: !enabled,
       (tester) async {
     await tester.runAsync(loadFonts);

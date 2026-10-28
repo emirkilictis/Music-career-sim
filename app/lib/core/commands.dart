@@ -105,6 +105,7 @@ abstract final class Cmd {
     required List<int> genres,
     String? title,
     bool holiday = false,
+    int dissTarget = -1,
   }) =>
       (s) => s.writeSong(
           producerId: producerId,
@@ -112,7 +113,16 @@ abstract final class Cmd {
           budget: budget,
           genres: genres,
           title: title,
-          holiday: holiday);
+          holiday: holiday,
+          dissTarget: dissTarget);
+
+  /// Beefs (docs K229).
+  static SessionCmd<BeefsView> beefs() => (s) => s.beefs;
+  static SessionCmd<List<DissTargetView>> dissTargets() =>
+      (s) => s.dissTargets;
+  static SessionCmd<void> dissPost(int rivalId) => (s) => s.dissPost(rivalId);
+  static SessionCmd<bool> dissHaters() => (s) => s.dissHaters();
+  static SessionCmd<void> makePeace() => (s) => s.makePeace();
 
   static SessionCmd<void> releaseSingle(int songId, Campaign campaign,
           [RadioPush radio = RadioPush.none]) =>

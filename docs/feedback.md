@@ -210,6 +210,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F108 | Oyuncular (iki ayrı kişi): "Bir süre sonra albümümün bütün şarkıları aynı oranla büyüyüp düşüyor" (hepsi +%0,24, hepsi −%6,73; bir parça 0'da). Emir: "Albüm yayınlandıktan sonra yeni versiyon çıkarabilme ekle." Emir: "Anniversary'de ekrana kocaman bildirim gelsin, sorsun; isteyen yeni şarkılar ve yeni kapakla detaylı bir anniversary yapabilsin." | ✅ K224: her katalog şarkısı kendi yolunda; oyuncunun şarkıları 0'a inmiyor. K225: albüme istediğin kadar yeni versiyon (ad, kapak, format, bonus parçalar; arka arkaya çıkarınca hayranlar bıkıyor). K226: yıl dönümünde büyük kart, detaylı yıl dönümü baskısı ya da hızlı baskı. |
 | F109 | Oyuncu (iPhone): "Eski yedeğimi geri yükle'ye basınca fotoğraf girmemi istiyor, ne gireceğim? Ya da dosya mı?" (iOS dosya seçicisi önce Fotoğraf Arşivi'ni gösteriyor.) | ✅ Geri yüklemeden önce kısa bir pencere: yedeklerken kaydedilen .mcsave dosyasını seç; iPhone/iPad'de "Dosya Seç" (Fotoğraf Arşivi değil), sonra Dosyalar › İndirilenler. |
 | F110 | Emir: "2, 3 ve o sessiz işi hallet" (ödül başvuruları, daha çok olumsuz olay, takılan ekran görüntüsü testleri). | ✅ K227 ödül başvuruları, K228 krizler. |
+| F111 | Emir: "Diss şarkısı falan olsun, diğer artistlerle beefleme olsun, diss tweeti atma olsun. Haterlara diss atmada olsun." | ✅ K229 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
