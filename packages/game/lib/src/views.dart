@@ -808,6 +808,7 @@ class AlbumView {
             ? albumWeekUnitsIn(w, al, ChartMarket.us)
             : 0,
         isPlayer = al.artistId == w.playerArtistId,
+        usHits = ChartHistoryView.albumHits(w, al, Charts.usSongs),
         isDeluxe = Actions.hasDeluxe(al),
         canDeluxe = al.artistId == w.playerArtistId &&
             al.type != AlbumType.mixtape &&
@@ -972,6 +973,10 @@ class AlbumView {
   /// (docs K115).
   final bool isDeluxe;
   final bool canDeluxe;
+
+  /// Its songs on the US songs chart (docs K232): (charted, top 10s,
+  /// #1s).
+  final (int, int, int) usHits;
 
   /// Versions put out after it (docs K225), what stops a new one now
   /// (null: nothing) and how many came out in the last
@@ -2281,6 +2286,112 @@ class PlaqueView {
     }
     final d = c == Certification.diamond ? m + 1 : 1;
     return (Certification.diamond, d, Certification.diamond.units * d);
+  }
+}
+
+/// One release in the player's chart history (docs K232): its runs on
+/// every chart, and for an album how many of its songs charted, made the
+/// top 10 and went to #1 on the matching songs chart.
+class ChartHistoryEntry {
+  ChartHistoryEntry({
+    required this.kind,
+    required this.id,
+    required this.title,
+    required this.artistName,
+    required this.coverAlbumId,
+    required this.releaseWeek,
+    required this.records,
+    this.feature = false,
+    this.hits = const {},
+  });
+  final EntityKind kind;
+  final int id;
+  final String title;
+
+  /// The headliner (a rival on a feature).
+  final String artistName;
+  final int coverAlbumId;
+  final int releaseWeek;
+  final List<ChartRecord> records;
+
+  /// A verse on a rival's song (docs K158).
+  final bool feature;
+
+  /// Album chart id to (charted, top 10s, #1s) among its songs on the
+  /// matching songs chart.
+  final Map<int, (int, int, int)> hits;
+
+  ChartRecord? on(int chartId) =>
+      records.where((r) => r.chartId == chartId).firstOrNull;
+}
+
+/// The player's whole chart history (docs K232): songs (with features on
+/// rivals' songs) and albums, newest first.
+class ChartHistoryView {
+  ChartHistoryView.of(World w)
+      : songs = [],
+        albums = [] {
+    final me = w.playerArtistId;
+    ChartHistoryEntry song(Song s, {bool feature = false}) =>
+        ChartHistoryEntry(
+          kind: EntityKind.song,
+          id: s.id,
+          title: s.title,
+          artistName: w.artists[s.primaryArtistId].name,
+          coverAlbumId: coverAlbumOf(w, s),
+          releaseWeek:
+              s.isSingle && s.singleWeek >= 0 ? s.singleWeek : s.releasedWeek,
+          records: _records(s),
+          feature: feature,
+        );
+    for (final id in w.playerSongIds.reversed) {
+      final s = w.songs[id];
+      if (s.primaryArtistId != me || s.releasedWeek < 0) continue;
+      if (_records(s).isEmpty) continue;
+      songs.add(song(s));
+    }
+    for (final id in w.guestSongIds.reversed) {
+      final s = w.songs[id];
+      if (s.releasedWeek < 0 || !s.featuredArtistIds.contains(me)) continue;
+      if (_records(s).isEmpty) continue;
+      songs.add(song(s, feature: true));
+    }
+    songs.sort((a, b) => b.releaseWeek.compareTo(a.releaseWeek));
+    for (final al in w.albums.reversed) {
+      if (al.artistId != me || al.releaseWeek > w.week) continue;
+      albums.add(ChartHistoryEntry(
+        kind: EntityKind.album,
+        id: al.id,
+        title: al.title,
+        artistName: w.artists[al.artistId].name,
+        coverAlbumId: al.id,
+        releaseWeek: al.releaseWeek,
+        records: _records(al),
+        hits: {
+          for (final (albumChart, songChart) in const [
+            (Charts.usAlbums, Charts.usSongs),
+            (Charts.ukAlbums, Charts.ukSongs),
+            (Charts.globalAlbums, Charts.globalSongs),
+          ])
+            albumChart: albumHits(w, al, songChart),
+        },
+      ));
+    }
+  }
+  final List<ChartHistoryEntry> songs;
+  final List<ChartHistoryEntry> albums;
+
+  /// Of [al]'s songs on [songChart]: (charted, top 10s, #1s).
+  static (int, int, int) albumHits(World w, Album al, int songChart) {
+    var charted = 0, top10 = 0, no1 = 0;
+    for (final id in al.songIds) {
+      final peak = w.songs[id].peakOn(songChart);
+      if (peak <= 0) continue;
+      charted++;
+      if (peak <= 10) top10++;
+      if (peak == 1) no1++;
+    }
+    return (charted, top10, no1);
   }
 }
 

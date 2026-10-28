@@ -116,6 +116,9 @@ abstract final class Cmd {
           holiday: holiday,
           dissTarget: dissTarget);
 
+  /// The player's chart history (docs K232).
+  static SessionCmd<ChartHistoryView> chartHistory() => (s) => s.chartHistory;
+
   /// Beefs (docs K229).
   static SessionCmd<BeefsView> beefs() => (s) => s.beefs;
   static SessionCmd<List<DissTargetView>> dissTargets() =>

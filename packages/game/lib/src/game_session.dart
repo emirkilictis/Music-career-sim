@@ -1043,6 +1043,9 @@ class GameSession {
     );
   }
 
+  /// The player's whole chart history (docs K232).
+  ChartHistoryView get chartHistory => ChartHistoryView.of(world);
+
   /// The player's gold, platinum and diamond records (docs K209).
   CertificationsView get certifications {
     final plaques = [

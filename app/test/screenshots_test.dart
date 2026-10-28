@@ -973,6 +973,76 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '19_collabs');
   });
+  testWidgets('screenshots: plaques and the chart history', skip: !enabled,
+      (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await tester.runAsync(() => c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 232,
+        ),
+        PortSink(port.sendPort))));
+    port.close();
+    // Two albums with singles, a year and a half on (docs K231, K232).
+    await tester.runAsync(() => c.run((s) {
+          final p = s.world.player!;
+          p.moneyCents = 1 << 40;
+          for (final name in ['Gold Rush', 'Afterglow']) {
+            final songs = <int>[];
+            for (var i = 0; i < 10; i++) {
+              p.creativeEnergy = 100;
+              songs.add(s
+                  .writeSong(
+                      budget: BudgetTier.high, title: '$name ${i + 1}')
+                  .id);
+            }
+            s.releaseSingle(songs.first);
+            s.advanceWeeks(3, stop: SkipStop.never);
+            s.releaseAlbum(name, songs);
+            s.advanceWeeks(4, stop: SkipStop.never);
+            s.releaseSingle(songs[1]);
+            s.advanceWeeks(35, stop: SkipStop.never);
+          }
+        }));
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Career');
+    await careerPage(tester, 'Track record');
+    final plaques = _ci('My plaques');
+    await tester.scrollUntilVisible(plaques, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.pumpAndSettle();
+    await tester.tap(plaques);
+    await tester.pumpAndSettle();
+    await shot(tester, '20a_plaques');
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -500));
+    await tester.pumpAndSettle();
+    await shot(tester, '20b_plaques_list');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Chart history'));
+    await tester.pumpAndSettle();
+    await shot(tester, '20c_chart_history_songs');
+    await tester.tap(_ci('Albums'));
+    await tester.pumpAndSettle();
+    await shot(tester, '20d_chart_history_albums');
+    await tester.tap(_ci('Gold Rush').first);
+    await tester.pumpAndSettle();
+    await shot(tester, '20e_album_hits');
+  });
   testWidgets('screenshots: posts with pictures', skip: !enabled,
       (tester) async {
     await tester.runAsync(loadFonts);

@@ -323,6 +323,18 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
           if (!a.isPlayer)
             ArtistLink(
                 artistId: a.artistId, name: a.artistName, state: widget.state),
+          // How many hits came from it (docs K232).
+          if (a.usHits.$1 > 0) ...[
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                  l.albumHitsLine(a.usHits.$3, a.usHits.$2, a.usHits.$1),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: a.usHits.$3 > 0 ? AppColors.gold : AppColors.textMuted,
+                      fontWeight: FontWeight.w700)),
+            ),
+          ],
           if (a.usLifetimeUnits >= Certification.gold.units) ...[
             const SizedBox(height: 10),
             Center(child: CertificationTag(units: a.usLifetimeUnits)),

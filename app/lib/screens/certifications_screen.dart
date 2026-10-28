@@ -23,8 +23,14 @@ class CertificationsScreen extends StatefulWidget {
   State<CertificationsScreen> createState() => _CertificationsScreenState();
 }
 
+/// Which plaques are listed, and in what order (docs K231).
+enum _Order { highest, newest }
+
 class _CertificationsScreenState extends State<CertificationsScreen> {
   CertificationsView? _view;
+  Certification? _level;
+  EntityKind? _kind;
+  _Order _order = _Order.highest;
 
   @override
   void initState() {
@@ -38,34 +44,173 @@ class _CertificationsScreenState extends State<CertificationsScreen> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final v = _view;
+    if (v == null) {
+      return Scaffold(
+          appBar: AppBar(title: Text(l.plaques)),
+          body: const Center(child: CircularProgressIndicator()));
+    }
+    final shown = [
+      for (final p in v.plaques)
+        if ((_level == null || p.top.$1 == _level) &&
+            (_kind == null || p.kind == _kind))
+          p
+    ];
+    if (_order == _Order.highest) {
+      shown.sort((a, b) {
+        final d = b.topUnits.compareTo(a.topUnits);
+        return d != 0 ? d : b.usUnits.compareTo(a.usUnits);
+      });
+    }
+    // Every certified unit counted in platinum (a diamond is ten).
+    final platinums = v.plaques.fold(
+        0,
+        (t, p) =>
+            t + (p.topUnits / Certification.platinum.units).floor());
+    final songs = v.plaques.where((p) => p.kind == EntityKind.song).length;
+    final albums = v.plaques.length - songs;
+    double progress(PlaqueView p) =>
+        ((p.usUnits - p.topUnits) / (p.next.$3 - p.topUnits)).clamp(0.0, 1.0);
+    final closest = [...v.plaques]
+      ..sort((a, b) => progress(b).compareTo(progress(a)));
     return Scaffold(
       appBar: AppBar(title: Text(l.plaques)),
-      body: v == null
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-              children: [
-                Row(children: [
-                  for (final (c, n) in [
-                    (Certification.gold, v.gold),
-                    (Certification.platinum, v.platinum),
-                    (Certification.diamond, v.diamond),
-                  ]) ...[
-                    Expanded(child: _Count(level: c, count: n)),
-                    if (c != Certification.diamond) const SizedBox(width: 10),
-                  ],
-                ]),
-                const SizedBox(height: 14),
-                Text(l.plaquesHint,
-                    style: TextStyle(color: AppColors.textMuted, height: 1.4)),
-                const SizedBox(height: 14),
-                if (v.plaques.isEmpty) EmptyNote(l.plaquesEmpty),
-                for (final p in v.plaques) ...[
-                  _PlaqueCard(plaque: p),
-                  const SizedBox(height: 12),
-                ],
-              ],
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+        children: [
+          Row(children: [
+            for (final (c, n) in [
+              (Certification.gold, v.gold),
+              (Certification.platinum, v.platinum),
+              (Certification.diamond, v.diamond),
+            ]) ...[
+              Expanded(child: _Count(level: c, count: n)),
+              if (c != Certification.diamond) const SizedBox(width: 10),
+            ],
+          ]),
+          const SizedBox(height: 10),
+          if (v.plaques.isNotEmpty)
+            Text(l.plaquesTotals(platinums, songs, albums),
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 6),
+          Text(l.plaquesHint,
+              style: TextStyle(color: AppColors.textMuted, height: 1.4)),
+          if (v.plaques.isEmpty) ...[
+            const SizedBox(height: 14),
+            EmptyNote(l.plaquesEmpty),
+          ] else ...[
+            const SizedBox(height: 14),
+            // The ones about to go up a level.
+            Section(
+              title: l.plaquesClosest,
+              icon: Icons.trending_up_rounded,
+              child: Column(children: [
+                for (final p in closest.take(3)) _Row(plaque: p, next: true),
+              ]),
             ),
+            const SizedBox(height: 12),
+            Wrap(spacing: 6, runSpacing: 6, children: [
+              for (final c in [null, ...Certification.values.reversed])
+                ChoiceChip(
+                  label: Text(switch (c) {
+                    null => l.plaquesAll,
+                    Certification.gold => l.certGold,
+                    Certification.platinum => l.certPlatinum,
+                    Certification.diamond => l.certDiamond,
+                  }),
+                  selected: _level == c,
+                  onSelected: (_) => setState(() => _level = c),
+                ),
+            ]),
+            const SizedBox(height: 6),
+            Wrap(spacing: 6, runSpacing: 6, children: [
+              for (final k in [null, EntityKind.song, EntityKind.album])
+                ChoiceChip(
+                  label: Text(switch (k) {
+                    null => l.plaquesAll,
+                    EntityKind.song => l.historySongs,
+                    EntityKind.album => l.historyAlbums,
+                  }),
+                  selected: _kind == k,
+                  onSelected: (_) => setState(() => _kind = k),
+                ),
+              const SizedBox(width: 12),
+              for (final o in _Order.values)
+                ChoiceChip(
+                  label: Text(o == _Order.highest
+                      ? l.plaquesHighest
+                      : l.historySortNewest),
+                  selected: _order == o,
+                  onSelected: (_) => setState(() => _order = o),
+                ),
+            ]),
+            const SizedBox(height: 8),
+            Text(l.plaquesShown(shown.length),
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+            for (final p in shown) _Row(plaque: p),
+            const SizedBox(height: 8),
+            Text(l.plaquesTapHint,
+                style: TextStyle(color: AppColors.textFaint, fontSize: 12)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A plaque in a line: its disc, the record, its level and how far the
+/// next one is; tapping opens it framed.
+class _Row extends StatelessWidget {
+  const _Row({required this.plaque, this.next = false});
+  final PlaqueView plaque;
+
+  /// Shows what the next level needs.
+  final bool next;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final p = plaque;
+    final (level, multiple, week, _) = p.top;
+    final (nextLevel, nextMultiple, nextUnits) = p.next;
+    final progress =
+        ((p.usUnits - p.topUnits) / (nextUnits - p.topUnits)).clamp(0.0, 1.0);
+    return InkWell(
+      onTap: () => showPlaque(context, p),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(children: [
+          PlaqueDisc(level: level, multiple: multiple, size: 52),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(p.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w800, fontSize: 15.5)),
+                  Text(
+                      '${fmt.certLevel(level, multiple)} · '
+                      '${fmt.plaqueFormat(p.format)} · ${fmt.date(week)}',
+                      style: TextStyle(
+                          color: AppColors.textMuted, fontSize: 12.5)),
+                  if (next)
+                    Text(
+                        l.plaqueToNext(fmt.compact(nextUnits - p.usUnits),
+                            fmt.certLevel(nextLevel, nextMultiple)),
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                  const SizedBox(height: 4),
+                  PillBar(value: progress, height: 4),
+                ]),
+          ),
+          const SizedBox(width: 8),
+          Text(fmt.compact(p.usUnits),
+              style: const TextStyle(fontWeight: FontWeight.w800)),
+        ]),
+      ),
     );
   }
 }
@@ -104,76 +249,6 @@ class _Count extends StatelessWidget {
                 letterSpacing: 2,
                 fontWeight: FontWeight.w700,
                 color: metal[1])),
-      ]),
-    );
-  }
-}
-
-class _PlaqueCard extends StatelessWidget {
-  const _PlaqueCard({required this.plaque});
-  final PlaqueView plaque;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final fmt = context.fmt;
-    final p = plaque;
-    final (level, multiple, week, label) = p.top;
-    final (nextLevel, nextMultiple, nextUnits) = p.next;
-    final progress =
-        ((p.usUnits - p.topUnits) / (nextUnits - p.topUnits)).clamp(0.0, 1.0);
-    TextSpan field(String label, String value) => TextSpan(children: [
-          TextSpan(
-              text: '$label ',
-              style: const TextStyle(fontWeight: FontWeight.w800)),
-          TextSpan(text: value),
-        ]);
-    return Section(
-      title: p.artistName,
-      icon: Icons.album_rounded,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          PlaqueDisc(level: level, multiple: multiple, size: 96),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                  style: TextStyle(
-                      color: AppColors.textMuted, height: 1.45, fontSize: 14),
-                  children: [
-                    TextSpan(
-                        text: '${p.title}\n',
-                        style: TextStyle(
-                            color: AppColors.text,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 17)),
-                    TextSpan(
-                        text: '${fmt.certLevel(level, multiple)} · '
-                            '${fmt.date(week)}\n'),
-                    field(l.plaqueLabel('').trim(), fmt.labelName(label)),
-                    const TextSpan(text: '\n'),
-                    field(
-                        l.plaqueFormat('').trim(), fmt.plaqueFormat(p.format)),
-                  ]),
-            ),
-          ),
-        ]),
-        const SizedBox(height: 12),
-        Text(
-            l.plaqueToNext(fmt.compact(nextUnits - p.usUnits),
-                fmt.certLevel(nextLevel, nextMultiple)),
-            style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-        const SizedBox(height: 6),
-        PillBar(value: progress, height: 6),
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: OutlinedButton.icon(
-            onPressed: () => showPlaque(context, p),
-            icon: const Icon(Icons.workspace_premium_outlined),
-            label: Text(l.plaqueOpen),
-          ),
-        ),
       ]),
     );
   }

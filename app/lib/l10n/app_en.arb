@@ -2644,6 +2644,108 @@
       }
     }
   },
+  "plaquesTotals": "{plat}× platinum in all · {songs} songs, {albums} albums certified",
+  "@plaquesTotals": {
+    "placeholders": {
+      "plat": {
+        "type": "int"
+      },
+      "songs": {
+        "type": "int"
+      },
+      "albums": {
+        "type": "int"
+      }
+    }
+  },
+  "plaquesClosest": "Closest to the next level",
+  "plaquesAll": "All",
+  "plaquesHighest": "Highest first",
+  "plaquesShown": "{count} records",
+  "@plaquesShown": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "plaquesTapHint": "Tap a record to open its plaque and share it.",
+  "chartHistoryButton": "Chart history",
+  "historySongs": "Songs",
+  "historyAlbums": "Albums",
+  "historyUs": "US",
+  "historyUk": "UK",
+  "historyGlobal": "Global",
+  "historyEntries": "Chart entries",
+  "historyTop10s": "Top 10s",
+  "historyNo1s": "Number ones",
+  "historyWeeksAt1": "Weeks at #1",
+  "historyWeeksOn": "Weeks on chart",
+  "historyNo1Songs": "#1 songs from albums",
+  "historySortNewest": "Newest",
+  "historySortPeak": "Peak",
+  "historySortWeeks": "Weeks on",
+  "historyEmpty": "Nothing on this chart yet.",
+  "historyFeature": "with {artist}",
+  "@historyFeature": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      }
+    }
+  },
+  "historyWeeks": "{count, plural, =1{1 wk} other{{count} wks}}",
+  "@historyWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyWeeksAt1Short": "{count, plural, =1{1 wk at #1} other{{count} wks at #1}}",
+  "@historyWeeksAt1Short": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyDebut": "debut #{pos}",
+  "@historyDebut": {
+    "placeholders": {
+      "pos": {
+        "type": "int"
+      }
+    }
+  },
+  "historyAlbumHits": "{no1} #1 hits · {top10} top 10s · {charted} charted songs",
+  "@historyAlbumHits": {
+    "placeholders": {
+      "no1": {
+        "type": "int"
+      },
+      "top10": {
+        "type": "int"
+      },
+      "charted": {
+        "type": "int"
+      }
+    }
+  },
+  "albumHitsLine": "Hits from it (US): {no1} #1s · {top10} top 10s · {charted} charted",
+  "@albumHitsLine": {
+    "placeholders": {
+      "no1": {
+        "type": "int"
+      },
+      "top10": {
+        "type": "int"
+      },
+      "charted": {
+        "type": "int"
+      }
+    }
+  },
   "collabs": "Collabs",
   "collabLine": "{artist} feat. you · {year}",
   "@collabLine": {

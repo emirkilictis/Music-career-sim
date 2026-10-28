@@ -16,6 +16,7 @@ import '../widgets/image_pickers.dart';
 import 'award_submissions_screen.dart';
 import 'awards_screen.dart';
 import 'certifications_screen.dart';
+import 'chart_history_screen.dart';
 import 'discography_screen.dart';
 import 'album_detail_screen.dart';
 import 'labels_screen.dart';
@@ -1425,9 +1426,8 @@ class _CareerScreenState extends State<CareerScreen> {
           Section(
             title: l.plaques,
             icon: Icons.album_rounded,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
+            child: Wrap(spacing: 8, runSpacing: 8, children: [
+              OutlinedButton.icon(
                 onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -1435,7 +1435,16 @@ class _CareerScreenState extends State<CareerScreen> {
                 icon: const Icon(Icons.workspace_premium_outlined),
                 label: Text(l.plaquesButton),
               ),
-            ),
+              // Every chart run (docs K232).
+              OutlinedButton.icon(
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => ChartHistoryScreen(state: career))),
+                icon: const Icon(Icons.show_chart_rounded),
+                label: Text(l.chartHistoryButton),
+              ),
+            ]),
           ),
           const SizedBox(height: 12),
           Section(

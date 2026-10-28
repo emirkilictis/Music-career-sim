@@ -541,6 +541,41 @@ void main() {
       g.close();
     });
 
+    test('the chart history counts the hits from each album (K232)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2019,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final p = g.world.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      g.releaseSingle(ids.first);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      final album = g.releaseAlbum('Hits', ids).id;
+      g.advanceWeeks(6, stop: SkipStop.never);
+      final h = g.chartHistory;
+      final entry = h.albums.firstWhere((e) => e.id == album);
+      final (charted, top10, no1) = entry.hits[Charts.usAlbums]!;
+      final peaks = [
+        for (final id in ids) g.world.songs[id].peakOn(Charts.usSongs)
+      ];
+      expect(charted, peaks.where((x) => x > 0).length);
+      expect(top10, peaks.where((x) => x > 0 && x <= 10).length);
+      expect(no1, peaks.where((x) => x == 1).length);
+      expect(g.album(album).usHits, (charted, top10, no1));
+      // Every song listed charted somewhere; newest first.
+      expect(h.songs, isNotEmpty);
+      expect(h.songs.every((e) => e.records.isNotEmpty), isTrue);
+      g.close();
+    });
+
     test('a tour is planned, survives reopening and is reported (K63)', () {
       var g = GameSession.start(
           slots,
