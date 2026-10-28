@@ -125,6 +125,12 @@ void main() {
 
       // No weekly limit (K46): low creativity weakens songs, and writing
       // on until it runs out means burnout.
+      // The whole bar writes at full strength (K237).
+      while (g.player.creativeEnergy >= Actions.energyCostPerSong) {
+        expect(g.player.creativityPenalty, 0);
+        g.writeSong(budget: BudgetTier.low);
+      }
+      expect(g.player.burnoutWeeksLeft, 0);
       expect(g.player.creativityPenalty, greaterThan(0));
       while (g.player.canWrite) {
         g.writeSong(budget: BudgetTier.low);

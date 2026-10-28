@@ -233,7 +233,7 @@ class _StudioTabState extends State<StudioTab> {
     final fmt = context.fmt;
     final title = _title.text.trim();
     // Warn before the song that ends in burnout (playtest finding A3).
-    if (career.player.creativeEnergy <= Actions.energyCostPerSong) {
+    if (career.player.creativeEnergy < Actions.energyCostPerSong) {
       final go = await showDialog<bool>(
         context: context,
         builder: (c) => AlertDialog(

@@ -14,6 +14,11 @@ import 'dart:math' as math;
 
 import 'package:game/game.dart';
 
+/// Writes only at or above this creativity (55: the old full-strength line;
+/// 20 since docs K237).
+final minEnergy =
+    double.parse(Platform.environment['PROBE_MIN_ENERGY'] ?? '20');
+
 void main(List<String> args) {
   final startYear = args.isNotEmpty ? int.parse(args[0]) : 2010;
   final tier =
@@ -283,7 +288,11 @@ int _week(GameSession s, void Function(int) setSingle, int Function() single,
   // Write while creativity keeps songs at full strength.
   for (var i = 0; i < 3; i++) {
     p = s.player;
-    if (p.burnoutWeeksLeft > 0 || !p.canWrite || p.creativeEnergy < 55) break;
+    if (p.burnoutWeeksLeft > 0 ||
+        !p.canWrite ||
+        p.creativeEnergy < minEnergy) {
+      break;
+    }
     final money = p.moneyCents;
     final budget = money > 10000000
         ? BudgetTier.high

@@ -297,15 +297,17 @@ abstract final class Actions {
   static bool canWrite(World w, Artist a) =>
       w.week >= a.burnoutUntilWeek && a.restWeek != w.week;
 
-  /// Creativity at or above this writes at full strength.
-  static const creativityFull = 50.0;
+  /// Creativity at or above this writes at full strength: a whole song's
+  /// worth, so the whole bar is usable (docs K237; was 50, which left the
+  /// lower 40 unused).
+  static const creativityFull = energyCostPerSong;
 
   /// Share of the song's quality lost at creativity 0.
   static const creativityPenaltyMax = 0.5;
 
   /// Share of quality lost by a song written at creativity [c]: none at
-  /// 50+, 10% at 40, 30% at 20, half at 0. A share, not points, so even
-  /// a maxed-out artist writes weak songs when spent (docs K46).
+  /// 20+, 25% at 10, half at 0. A share, not points, so even a maxed-out
+  /// artist writes weak songs when spent (docs K46, K237).
   static double creativityPenalty(double c) => c >= creativityFull
       ? 0
       : (creativityFull - c) / creativityFull * creativityPenaltyMax;
@@ -459,7 +461,11 @@ abstract final class Actions {
 
     if (!aiMode) {
       a.creativeEnergy = math.max(0, a.creativeEnergy - energyCostPerSong);
-      if (a.creativeEnergy <= 0) a.burnoutUntilWeek = w.week + burnoutWeeks;
+      // Only a song written on fumes burns out (docs K237): the fifth
+      // song from a full bar lands on 0 and is fine.
+      if (energyBefore < energyCostPerSong) {
+        a.burnoutUntilWeek = w.week + burnoutWeeks;
+      }
       _grow(a,
           songwriting: 0.6,
           vocals: 0.15,

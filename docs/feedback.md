@@ -217,6 +217,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F115 | Emir: "twitterdan da beefleme özelliği olsun." | ✅ K234 |
 | F116 | Emir: "Arkadaşım tarayıcı hatası alıyo." | ✅ K235 (dil etiketi çökmesi; eski tarayıcı ve açılış hatası mesajı) |
 | F117 | Emir (arkadaşı): "Teli yeni şeye yükseltemiyorum yer olmadığı için, ondan açılmıyo… sadece pcde oynayabiliyorum." | ✅ K236 (eski tarayıcılarda JavaScript sürümü) |
+| F118 | Emir'in arkadaşı: "Enerji biraz abartı, çok uzun sürüyor şarkı yapmak." Emir: "Düşük enerji ile kimse şarkı yazmadığı için o kalan 40 enerji çöp oluyor gibi." | ✅ K237 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

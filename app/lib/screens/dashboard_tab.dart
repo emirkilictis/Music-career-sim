@@ -180,7 +180,7 @@ class _NextStepCard extends StatelessWidget {
           () => onOpenTab?.call(2),
         ),
       _
-          when p.creativeEnergy < 30 &&
+          when p.creativeEnergy < Actions.energyCostPerSong &&
               !p.restingThisWeek &&
               p.songsWrittenThisWeek == 0 =>
         (

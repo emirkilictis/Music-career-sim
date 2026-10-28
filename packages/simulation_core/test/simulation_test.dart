@@ -104,11 +104,17 @@ void main() {
       }
       expect(p.creativeEnergy, 20);
       expect(Actions.canWrite(w, p), isTrue);
+      // The whole bar writes at full strength (K237).
       expect(Actions.creativityPenalty(100), 0);
-      expect(Actions.creativityPenalty(50), 0);
-      expect(Actions.creativityPenalty(40), closeTo(0.1, 1e-9));
-      expect(Actions.creativityPenalty(20), closeTo(0.3, 1e-9));
+      expect(Actions.creativityPenalty(20), 0);
+      expect(Actions.creativityPenalty(10), closeTo(0.25, 1e-9));
       expect(Actions.creativityPenalty(0), closeTo(0.5, 1e-9));
+      // The fifth song lands on 0 without burnout; the next one burns out.
+      Actions.writeSong(w, p, budget: BudgetTier.low);
+      expect(p.creativeEnergy, 0);
+      expect(Actions.canWrite(w, p), isTrue);
+      Actions.writeSong(w, p, budget: BudgetTier.low);
+      expect(Actions.canWrite(w, p), isFalse);
     });
 
     test('writing until energy is gone causes burnout', () {
