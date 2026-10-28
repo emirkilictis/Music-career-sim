@@ -36,6 +36,10 @@ class _ReleasesTabState extends State<ReleasesTab> {
   CompilationBlock? _hitsBlock = CompilationBlock.tooEarly;
   int _loadedRevision = -1;
 
+  /// Rivals' songs with the player's verse (docs K158), shown with the
+  /// singles.
+  List<WrittenSongView> _collabs = const [];
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -54,8 +58,10 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final rivals = await career.read(Cmd.upcomingRivalAlbums());
     final liveTours = await career.read(Cmd.liveAlbumTours());
     final hitsBlock = await career.read(Cmd.compilationBlock());
+    final collabs = await career.read(Cmd.guestSongs());
     if (mounted) {
       setState(() {
+        _collabs = collabs;
         _hitsBlock = hitsBlock;
         _liveTours = liveTours;
         _songs = songs;
@@ -715,6 +721,36 @@ class _ReleasesTabState extends State<ReleasesTab> {
                     ),
                 ]),
         ),
+        // Collabs: the player's verses on rivals' songs (docs K158).
+        if (_collabs.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          Section(
+            title: l.collabs,
+            icon: Icons.people_alt_outlined,
+            child: Column(children: [
+              for (final c in _collabs)
+                MediaTile(
+                  coverSeed: songCoverSeed(c.songId, c.albumId),
+                  songId: c.songId,
+                  albumId: c.albumId,
+                  badge: PeakTag(c.peak),
+                  title: c.title,
+                  subtitle: c.released
+                      ? l.collabLine(
+                          c.artistName, GameTime.yearOf(c.releasedWeek))
+                      : '${c.artistName} · ${l.writtenComing}',
+                  value: c.streams >= 1
+                      ? l.streamsValue(fmt.compact(c.streams))
+                      : '',
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => SongDetailScreen(
+                              songId: c.songId, state: career))),
+                ),
+            ]),
+          ),
+        ],
         const SizedBox(height: 12),
         if (_rivals.isNotEmpty) ...[
           Section(

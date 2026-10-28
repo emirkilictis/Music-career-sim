@@ -929,6 +929,8 @@
   "offerMemberSoloBody": "{member} solo bir albüm çıkarmak istiyor. Onun dinleyicileri grubu da keşfeder, ama bir süre stüdyodan uzak kalır (−{energy} yaratıcılık).",
   "offerMemberRiftTitle": "Grupta gerginlik",
   "offerMemberRiftBody": "{member} grubun geri kalanıyla kavgalı ve haberler yayılıyor. Oturup konuşmak zaman alır (−{energy} yaratıcılık).",
+  "collabs": "Düetler",
+  "collabLine": "{artist} feat. sen · {year}",
   "beefTitle": "Kavga",
   "beefIntro": "Bir rakibe paylaşımla ya da diss şarkısıyla sataş. Cevap verebilirler; halk bir taraf seçer. Kavga soğuyunca halkın desteklediği kazanır: kazanana ün ve popülerlik. Kendinden çok küçük birine sataşmak zorbalık gibi görünür.",
   "beefWith": "Sen vs {rival}",

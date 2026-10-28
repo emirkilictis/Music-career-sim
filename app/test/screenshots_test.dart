@@ -920,6 +920,59 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '18c_beef_more');
   });
+  testWidgets('screenshots: collabs with the singles', skip: !enabled,
+      (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await tester.runAsync(() => c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 230,
+        ),
+        PortSink(port.sendPort))));
+    port.close();
+    // A single of hers and two verses on rivals' songs (docs K158).
+    await tester.runAsync(() => c.run((s) {
+          final w = s.world;
+          final p = w.player!;
+          p.moneyCents = 1 << 40;
+          p.creativeEnergy = 100;
+          final song =
+              s.writeSong(budget: BudgetTier.high, title: 'Gold Rush').id;
+          s.releaseSingle(song);
+          for (final rival in s.dissTargets.take(2)) {
+            p.creativeEnergy = 100;
+            p.opportunity = Opportunity(
+                kind: OpportunityKind.feature,
+                week: w.week,
+                partnerArtistId: rival.artistId,
+                feeCents: 1000000);
+            s.answerOpportunity(OpportunityChoice.accept);
+            s.advanceWeeks(3, stop: SkipStop.never);
+          }
+        }));
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Releases');
+    final collabs = _ci('Collabs');
+    await tester.scrollUntilVisible(collabs, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 300));
+    await tester.pumpAndSettle();
+    await shot(tester, '19_collabs');
+  });
   testWidgets('screenshots: posts with pictures', skip: !enabled,
       (tester) async {
     await tester.runAsync(loadFonts);

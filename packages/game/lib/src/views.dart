@@ -2996,6 +2996,9 @@ class WrittenSongView {
         artistName = w.artists[s.primaryArtistId].name,
         albumId = coverAlbumOf(w, s),
         released = s.releasedWeek >= 0,
+        releasedWeek = s.isSingle && s.singleWeek >= 0
+            ? s.singleWeek
+            : s.releasedWeek,
         peak = s.statsOrNull(Charts.usSongs)?.peak ?? 0,
         streams = w.songLifetimeStreams(s),
         earnedCents = earnedCents ?? s.writerCents;
@@ -3005,6 +3008,9 @@ class WrittenSongView {
   final String artistName;
   final int albumId;
   final bool released;
+
+  /// The week it came out (-1: not yet).
+  final int releasedWeek;
 
   /// Best place on the US songs chart (0: never charted).
   final int peak;

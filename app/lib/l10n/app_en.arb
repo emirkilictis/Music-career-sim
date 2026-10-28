@@ -2644,6 +2644,18 @@
       }
     }
   },
+  "collabs": "Collabs",
+  "collabLine": "{artist} feat. you · {year}",
+  "@collabLine": {
+    "placeholders": {
+      "artist": {
+        "type": "String"
+      },
+      "year": {
+        "type": "int"
+      }
+    }
+  },
   "beefTitle": "Beef",
   "beefIntro": "Diss a rival in a post or a diss track. They may fire back; the public picks a side. When it cools down, whoever the public backs wins: fame and popularity for the winner. Going at someone far smaller looks like bullying.",
   "beefWith": "You vs {rival}",

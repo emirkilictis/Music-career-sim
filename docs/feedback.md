@@ -211,6 +211,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F109 | Oyuncu (iPhone): "Eski yedeğimi geri yükle'ye basınca fotoğraf girmemi istiyor, ne gireceğim? Ya da dosya mı?" (iOS dosya seçicisi önce Fotoğraf Arşivi'ni gösteriyor.) | ✅ Geri yüklemeden önce kısa bir pencere: yedeklerken kaydedilen .mcsave dosyasını seç; iPhone/iPad'de "Dosya Seç" (Fotoğraf Arşivi değil), sonra Dosyalar › İndirilenler. |
 | F110 | Emir: "2, 3 ve o sessiz işi hallet" (ödül başvuruları, daha çok olumsuz olay, takılan ekran görüntüsü testleri). | ✅ K227 ödül başvuruları, K228 krizler. |
 | F111 | Emir: "Diss şarkısı falan olsun, diğer artistlerle beefleme olsun, diss tweeti atma olsun. Haterlara diss atmada olsun." | ✅ K229 |
+| F112 | Emir: "Collabler releases kısmında dursun, singlelar gibi." | ✅ K230 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
