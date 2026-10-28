@@ -2887,6 +2887,7 @@ class SocialItemView {
         songId = i.songId,
         albumId = i.albumId,
         rivalName = i.artistId >= 0 ? w.artists[i.artistId].name : '',
+        rivalId = i.artistId,
         coverAlbumId = i.albumId >= 0
             ? i.albumId
             : i.songId >= 0
@@ -2897,12 +2898,17 @@ class SocialItemView {
   final FanTopic topic;
   final int variant;
 
-  /// The fan's handle seed (-1: the player).
+  /// The fan's handle seed (-1: the player, [SocialItem.byRival]: the
+  /// rival's own post).
   final int fan;
-  bool get isPlayer => fan < 0;
+  bool get isPlayer => fan == -1;
 
-  /// The rival a beef post is about ('' for none; docs K229).
+  /// The rival posting it themself (docs K234).
+  bool get isRival => fan == SocialItem.byRival;
+
+  /// The rival a beef post is about ('' and -1 for none; docs K229).
   final String rivalName;
+  final int rivalId;
 
   /// The song or album it talks about ('' if none).
   final String title;
@@ -2959,6 +2965,11 @@ class SocialView {
         followers = Social.followers(w, p),
         verified = p.fame >= 0.1 || Social.followers(w, p) >= 1e5,
         postsLeft = Social.postsPerWeek - w.social.postsIn(w.week),
+        beefRivalId = Beefs.active(w)?.rivalId ?? -1,
+        beefRivalName = switch (Beefs.active(w)) {
+          final b? => w.artists[b.rivalId].name,
+          null => '',
+        },
         hasTeaser = Social.hasTeaser(w, p),
         songs = [
           for (final id in w.playerSongIds.reversed)
@@ -3017,6 +3028,10 @@ class SocialView {
   /// The blue tick: famous or big enough (as on the streaming profiles).
   final bool verified;
   final int postsLeft;
+
+  /// The rival in the player's beef now (-1: none; docs K234).
+  final int beefRivalId;
+  final String beefRivalName;
 
   /// Something unreleased to tease.
   final bool hasTeaser;

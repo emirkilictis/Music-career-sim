@@ -108,15 +108,105 @@ class _SocialScreenState extends State<SocialScreen> {
 
   Future<void> _compose() async {
     final v = _view!;
-    final kind = await showModalBottomSheet<PostKind>(
+    final pick = await showModalBottomSheet<Object>(
       context: context,
       isScrollControlled: true,
       backgroundColor: SocialSkin.of(v.network).bg,
       shape: const RoundedRectangleBorder(),
       builder: (_) => _ComposeSheet(view: v, state: widget.state),
     );
-    if (kind != null) await _post(kind);
+    switch (pick) {
+      case final PostKind k:
+        await _post(k);
+      case _Diss.rival:
+        await _dissRival(v.beefRivalId);
+      case _Diss.haters:
+        await _dissHaters();
+    }
   }
+
+  Future<void> _busy(Future<void> Function() f) async {
+    setState(() => _posting = true);
+    try {
+      await f();
+      await _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _posting = false);
+    }
+  }
+
+  /// A diss post at [rivalId], or at one the player picks when there is no
+  /// beef on (docs K234).
+  Future<void> _dissRival(int rivalId) async {
+    final l = context.l10n;
+    final skin = SocialSkin.of(_view!.network);
+    if (rivalId < 0) {
+      final targets = await widget.state.read(Cmd.dissTargets());
+      if (!mounted) return;
+      final picked = await showModalBottomSheet<int>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: skin.bg,
+        builder: (c) => SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(c).height * 0.7),
+            child: ListView(shrinkWrap: true, children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                child: Text(l.composePickRival,
+                    style: TextStyle(
+                        color: skin.text,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800)),
+              ),
+              for (final t in targets)
+                ListTile(
+                  enabled: t.block == null || t.block == DissBlock.noPost,
+                  leading: ArtistAvatar(
+                      name: t.name, seed: t.artistId, artistId: t.artistId),
+                  title: Text(t.name, style: TextStyle(color: skin.text)),
+                  subtitle: Text(
+                      t.block == DissBlock.cooldown
+                          ? l.beefCooldown
+                          : t.punch < 0
+                              ? l.beefBully
+                              : t.punch > 0
+                                  ? l.beefBrave
+                                  : context.fmt.percent(t.fame),
+                      style: TextStyle(
+                          color:
+                              t.punch < 0 ? AppColors.coral : skin.muted)),
+                  onTap: () => Navigator.pop(c, t.artistId),
+                ),
+            ]),
+          ),
+        ),
+      );
+      if (picked == null) return;
+      rivalId = picked;
+    }
+    await _busy(() async {
+      await widget.state.act(Cmd.dissPost(rivalId));
+      if (mounted) {
+        showInfo(context, l.beefPosted,
+            icon: Icons.local_fire_department_rounded);
+      }
+    });
+  }
+
+  Future<void> _dissHaters() => _busy(() async {
+        final backlash = await widget.state.act(Cmd.dissHaters());
+        if (mounted) {
+          final l = context.l10n;
+          showInfo(context, backlash ? l.beefHatersBacklash : l.beefHatersDone,
+              icon: backlash
+                  ? Icons.warning_amber_rounded
+                  : Icons.favorite_rounded);
+        }
+      });
 
   Future<void> _post(PostKind kind) async {
     final l = context.l10n;
@@ -222,7 +312,15 @@ class _SocialScreenState extends State<SocialScreen> {
                   item: i,
                   state: widget.state,
                   skin: skin,
-                  verified: v.verified),
+                  verified: v.verified,
+                  // Answer the rival right under their post (docs K234).
+                  onClapBack: i.isRival &&
+                          i.rivalId == v.beefRivalId &&
+                          v.canPost &&
+                          v.postsLeft > 0 &&
+                          !_posting
+                      ? () => _dissRival(i.rivalId)
+                      : null),
           ],
         ),
       ),
@@ -603,6 +701,9 @@ class _PostButton extends StatelessWidget {
   }
 }
 
+/// A diss from the compose sheet (docs K234).
+enum _Diss { rival, haters }
+
 /// Write a post: pick what to share; each shows what it does.
 class _ComposeSheet extends StatefulWidget {
   const _ComposeSheet({required this.view, required this.state});
@@ -615,6 +716,7 @@ class _ComposeSheet extends StatefulWidget {
 
 class _ComposeSheetState extends State<_ComposeSheet> {
   PostKind? _kind;
+  _Diss? _diss;
 
   bool _can(PostKind k) =>
       (k != PostKind.teaser || widget.view.hasTeaser) &&
@@ -628,6 +730,37 @@ class _ComposeSheetState extends State<_ComposeSheet> {
     final p = widget.state.player;
     final chirper = skin == SocialSkin.chirper;
     final k = _kind;
+    final d = _diss;
+    final beef = widget.view.beefRivalId >= 0;
+    Widget chip(String label, bool selected, VoidCallback? onTap,
+            {Color? color}) =>
+        ChoiceChip(
+          selected: selected,
+          onSelected: onTap == null ? null : (_) => onTap(),
+          showCheckmark: false,
+          backgroundColor: skin.bg,
+          selectedColor: color ?? skin.accent,
+          disabledColor: skin.bg,
+          side: BorderSide(
+              color: selected ? color ?? skin.accent : color ?? skin.line),
+          shape: chirper ? const StadiumBorder() : const RoundedRectangleBorder(),
+          label: Text(label,
+              style: TextStyle(
+                  color: selected
+                      ? Colors.white
+                      : onTap != null
+                          ? skin.text
+                          : skin.muted,
+                  fontWeight: FontWeight.w600)),
+        );
+    final hint = switch ((k, d)) {
+      (final PostKind k?, _) => fmt.postKindHint(k),
+      (_, _Diss.rival) => beef
+          ? l.composeClapBackHint(widget.view.beefRivalName)
+          : l.composeDissRivalHint,
+      (_, _Diss.haters) => l.beefHatersHint,
+      _ => null,
+    };
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -647,7 +780,9 @@ class _ComposeSheetState extends State<_ComposeSheet> {
                     ? const StadiumBorder()
                     : const RoundedRectangleBorder(),
               ),
-              onPressed: k == null ? null : () => Navigator.pop(context, k),
+              onPressed: k == null && d == null
+                  ? null
+                  : () => Navigator.pop(context, k ?? d),
               child: Text(l.postButton),
             ),
           ]),
@@ -656,35 +791,37 @@ class _ComposeSheetState extends State<_ComposeSheet> {
             ArtistAvatar(name: p.name, seed: p.id, size: 40, artistId: p.id),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(k == null ? l.composeHint : fmt.postKindHint(k),
+              child: Text(hint ?? l.composeHint,
                   style: TextStyle(
-                      color: k == null ? skin.muted : skin.text, fontSize: 19)),
+                      color: hint == null ? skin.muted : skin.text,
+                      fontSize: 19)),
             ),
           ]),
           const SizedBox(height: 18),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final kind in PostKind.values)
-              ChoiceChip(
-                selected: k == kind,
-                onSelected:
-                    _can(kind) ? (_) => setState(() => _kind = kind) : null,
-                showCheckmark: false,
-                backgroundColor: skin.bg,
-                selectedColor: skin.accent,
-                disabledColor: skin.bg,
-                side: BorderSide(color: k == kind ? skin.accent : skin.line),
-                shape: chirper
-                    ? const StadiumBorder()
-                    : const RoundedRectangleBorder(),
-                label: Text(fmt.postKind(kind),
-                    style: TextStyle(
-                        color: k == kind
-                            ? Colors.white
-                            : _can(kind)
-                                ? skin.text
-                                : skin.muted,
-                        fontWeight: FontWeight.w600)),
-              ),
+              chip(
+                  fmt.postKind(kind),
+                  k == kind,
+                  _can(kind)
+                      ? () => setState(() {
+                            _kind = kind;
+                            _diss = null;
+                          })
+                      : null),
+            // Beefing from the feed (docs K229, K234).
+            for (final diss in _Diss.values)
+              chip(
+                  switch (diss) {
+                    _Diss.rival => beef ? l.clapBack : l.composeDissRival,
+                    _Diss.haters => l.beefHaters,
+                  },
+                  d == diss,
+                  () => setState(() {
+                        _diss = diss;
+                        _kind = null;
+                      }),
+                  color: AppColors.coral),
           ]),
         ]),
       ),
@@ -700,7 +837,8 @@ class FeedPost extends StatelessWidget {
       required this.item,
       required this.state,
       this.skin = SocialSkin.chirper,
-      this.verified = false});
+      this.verified = false,
+      this.onClapBack});
   final SocialItemView item;
   final CareerState state;
   final SocialSkin skin;
@@ -708,13 +846,24 @@ class FeedPost extends StatelessWidget {
   /// The player's blue tick.
   final bool verified;
 
+  /// Answers a rival's post (null: no button; docs K234).
+  final VoidCallback? onClapBack;
+
   @override
   Widget build(BuildContext context) {
     final fmt = context.fmt;
     final p = state.player;
-    final handle =
-        item.isPlayer ? playerHandle(p.name) : fanHandle(item.fan, p.name);
-    final name = item.isPlayer ? p.name : fanName(item.fan, p.name);
+    final rival = item.isRival;
+    final handle = item.isPlayer
+        ? playerHandle(p.name)
+        : rival
+            ? playerHandle(item.rivalName)
+            : fanHandle(item.fan, p.name);
+    final name = item.isPlayer
+        ? p.name
+        : rival
+            ? item.rivalName
+            : fanName(item.fan, p.name);
     final square = !skin.round;
     final avatar = item.isPlayer
         ? ArtistAvatar(
@@ -723,13 +872,38 @@ class FeedPost extends StatelessWidget {
             size: square ? 48 : 40,
             artistId: p.id,
             square: square)
-        : ArtistAvatar(
+        : rival
+            ? ArtistAvatar(
+                name: item.rivalName,
+                seed: item.rivalId,
+                size: square ? 48 : 40,
+                artistId: item.rivalId,
+                square: square)
+            : ArtistAvatar(
             name: name.split(' | ').first,
             seed: item.fan,
             size: square ? 48 : 40,
             square: square);
     final text = fmt.social(item, p.name);
     final age = fmt.feedAge(item.week, state.week);
+    final clapBack = onClapBack == null
+        ? null
+        : Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.coral,
+                side: BorderSide(color: AppColors.coral),
+                visualDensity: VisualDensity.compact,
+                shape: skin.round
+                    ? const StadiumBorder()
+                    : const RoundedRectangleBorder(),
+              ),
+              onPressed: onClapBack,
+              icon: const Icon(Icons.local_fire_department_rounded, size: 18),
+              label: Text(context.l10n.clapBack),
+            ),
+          );
     if (skin != SocialSkin.chirper) {
       // A 2000s comment: square photo and handle on the left.
       return Container(
@@ -744,7 +918,7 @@ class FeedPost extends StatelessWidget {
             child: Column(children: [
               avatar,
               const SizedBox(height: 4),
-              Text(item.isPlayer ? p.name : handle.substring(1),
+              Text(item.isPlayer || rival ? name : handle.substring(1),
                   maxLines: 1,
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
@@ -774,6 +948,7 @@ class FeedPost extends StatelessWidget {
                     week: state.week,
                     dark: false,
                     round: false),
+              if (clapBack != null) clapBack,
             ]),
           ),
         ]),
@@ -814,7 +989,7 @@ class FeedPost extends StatelessWidget {
               Flexible(
                 child: _NameLine(
                     name: name,
-                    verified: item.isPlayer && verified,
+                    verified: item.isPlayer && verified || rival,
                     skin: skin),
               ),
               const SizedBox(width: 4),
@@ -837,6 +1012,7 @@ class FeedPost extends StatelessWidget {
               count(Icons.bar_chart_rounded, views),
               Icon(Icons.ios_share_rounded, size: 17, color: skin.muted),
             ]),
+            if (clapBack != null) clapBack,
           ]),
         ),
       ]),

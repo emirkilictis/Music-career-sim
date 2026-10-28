@@ -555,9 +555,20 @@ abstract final class Beefs {
         w,
         SocialItem(
             week: w.week,
+            topic: FanTopic.rivalPost,
+            variant: r.nextInt(Social.variants),
+            fan: SocialItem.byRival,
+            likes: (Social.followers(w, p) * r.range(0.04, 0.1)).round(),
+            artistId: rival.id));
+    // Their post, then the fans talking about it (docs K234).
+    Social.add(
+        w,
+        SocialItem(
+            week: w.week,
             topic: FanTopic.rivalDiss,
             variant: r.nextInt(Social.variants),
             fan: r.nextInt(1 << 20),
+            likes: (Social.followers(w, p) * r.range(0.001, 0.006)).round(),
             artistId: rival.id));
     return -1;
   }

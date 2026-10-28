@@ -95,6 +95,7 @@ enum FanTopic {
   rivalDiss,
   beefWon,
   beefLost,
+  rivalPost,
 }
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.
@@ -115,8 +116,12 @@ class SocialItem {
   final FanTopic topic;
   final int variant;
 
-  /// Picks the fan's handle (-1: the player).
+  /// Picks the fan's handle (-1: the player, [byRival]: the rival
+  /// [artistId] posting; docs K234).
   final int fan;
+
+  /// [fan] of a rival's own post.
+  static const byRival = -2;
   final int songId;
   final int albumId;
   final int likes;
@@ -130,7 +135,7 @@ class SocialItem {
   /// The rival a beef post is about (docs K229).
   final int artistId;
 
-  bool get byPlayer => fan < 0;
+  bool get byPlayer => fan == -1;
 
   List<int> toJson() => [
         week,

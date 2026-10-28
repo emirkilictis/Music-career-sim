@@ -122,6 +122,11 @@ TOPICS = {
   ("{name} should have stayed quiet about {rival}", "{name}, {rival} hakkında susmalıydı"),
   ("The {rival} beef did {name} no favors", "{rival} kavgası {name}'e hiç iyi gelmedi"),
  ],
+ 'rivalPost': [
+  ("Some people need a feature with me to chart. Not naming names, {name}", "Bazıları listeye girmek için benimle düet yapmak zorunda. İsim vermiyorum, {name}"),
+  ("{name} talks a lot for someone who's never had a real hit", "{name}, gerçek bir hiti hiç olmamış biri için çok konuşuyor"),
+  ("Heard {name} has something to say. Say it to my numbers", "{name}'in söyleyecekleri varmış. Rakamlarıma söylesin"),
+ ],
  'scandal': [
   ("Waiting for {name} to explain this…", "{name} bunu açıklasın bekliyorum…"),
   ("I'm not reading the comments today", "Bugün yorumları okumuyorum"),

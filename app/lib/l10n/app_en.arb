@@ -2860,6 +2860,18 @@
   "beefHatersDone": "Your fans rallied behind you.",
   "beefHatersBacklash": "It came off as thin-skinned: some people laughed at you.",
   "beefNoPosts": "No posts left this week",
+  "clapBack": "Clap back",
+  "composeDissRival": "Diss a rival",
+  "composeDissRivalHint": "A shot at a rival. They may fire back and the public picks a side.",
+  "composeClapBackHint": "Fire back at {rival}.",
+  "@composeClapBackHint": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "composePickRival": "Who are you dissing?",
   "dissTrack": "Diss track",
   "dissNone": "No",
   "dissAtHaters": "At the haters",
@@ -3938,6 +3950,30 @@
         "type": "String"
       },
       "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalPost0": "Some people need a feature with me to chart. Not naming names, {name}",
+  "@smRivalPost0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalPost1": "{name} talks a lot for someone who's never had a real hit",
+  "@smRivalPost1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalPost2": "Heard {name} has something to say. Say it to my numbers",
+  "@smRivalPost2": {
+    "placeholders": {
+      "name": {
         "type": "String"
       }
     }

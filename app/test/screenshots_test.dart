@@ -896,6 +896,17 @@ void main() {
               budget: BudgetTier.high, title: 'Smaller Now', dissTarget: rival);
           s.releaseSingle(diss.id);
           s.advanceWeeks(2, stop: SkipStop.never);
+          // Until the rival answers in a post of their own (docs K234).
+          bool posted() => s.world.social.feed.any((i) =>
+              i.topic == FanTopic.rivalPost &&
+              i.week >= s.world.week - 1 &&
+              i.artistId == s.beefs.active?.rivalId);
+          for (var i = 0; i < 30 && !posted(); i++) {
+            if (s.beefs.active == null) {
+              s.dissPost(s.dissTargets.firstWhere((t) => t.block == null).artistId);
+            }
+            s.advanceWeeks(1, stop: SkipStop.never);
+          }
         }));
     await c.exec(Cmd.closeCareer());
     await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
@@ -909,6 +920,14 @@ void main() {
     await tester.tap(feed);
     await tester.pumpAndSettle();
     await shot(tester, '18a_beef_feed');
+    // Diss from the compose sheet (docs K234).
+    await tester.tap(find.byIcon(Icons.add_rounded).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Clap back').last);
+    await tester.pumpAndSettle();
+    await shot(tester, '18d_beef_compose');
+    await tester.tap(find.byIcon(Icons.close_rounded).last);
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.local_fire_department_rounded).first);
     for (var i = 0; i < 4; i++) {
       await tester.runAsync(() => Future.delayed(Duration(milliseconds: 300)));

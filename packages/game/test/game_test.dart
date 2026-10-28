@@ -512,7 +512,7 @@ void main() {
       g.close();
     });
 
-    test('rivals start beefs and fire back (K229)', () {
+    test('rivals start beefs and fire back, posting it themselves (K229, K234)', () {
       final g = GameSession.start(
           slots,
           _setup(
@@ -538,6 +538,20 @@ void main() {
       }
       expect(started, greaterThan(0));
       expect(firedBack, greaterThan(0));
+      // Their diss posts are in the feed as theirs (docs K234).
+      final theirs =
+          w.social.feed.where((i) => i.topic == FanTopic.rivalPost).toList();
+      expect(theirs, isNotEmpty);
+      for (final i in theirs) {
+        expect(i.fan, SocialItem.byRival);
+        expect(i.byPlayer, isFalse);
+        expect(i.artistId, isNot(p.id));
+      }
+      final v = g.social;
+      for (final i in v.items.where((i) => i.isRival)) {
+        expect(i.isPlayer, isFalse);
+        expect(i.rivalName, isNotEmpty);
+      }
       g.close();
     });
 
