@@ -794,6 +794,8 @@ void main() {
       }
       p.opportunity = null;
       w.brandDeals.clear();
+      // Rivals may have posted at the player on the way (docs K229).
+      w.social.feed.clear();
       // A superstar fits a luxury house, not a burger chain.
       final lux = Brands.all.indexWhere((b) => b.name == 'Maison Lumière');
       final burger = Brands.all.indexWhere((b) => b.name == 'Crunch King');
