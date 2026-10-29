@@ -224,15 +224,24 @@ class SimConfig {
           ? 1.15
           : 0.9;
 
-  /// Album sales after the first week against the 2000s (docs K79): as
-  /// listening moves online fans buy at release and the rest stream it.
-  /// Later weeks sell 75% as much in 2010, 69% in 2011, 62% in 2012, then
-  /// 55% in 2013, 45% in 2014, 35% in 2015 and 28% from 2016.
-  double albumTail(int year) => year < 2010
-      ? 1.0
-      : year < 2013
-          ? 0.75 - 0.065 * (year - 2010)
-          : math.max(0.28, 0.55 - 0.1 * (year - 2013));
+  /// Album sales after the first week (docs K79): in the CD years an
+  /// album sold for months, so later weeks hold up more (×1.35 to 2006,
+  /// down to ×1.0 in 2009; docs K259: ×1.0 before). As listening moves
+  /// online fans buy at release and the rest stream it: later weeks sell
+  /// 75% as much in 2010, 69% in 2011, 62% in 2012, then 55% in 2013, 45%
+  /// in 2014, 35% in 2015 and 28% from 2016.
+  double albumTail(int year) => year < 2007
+      ? 1.35
+      : year < 2010
+          ? 1.35 - 0.12 * (year - 2006)
+          : year < 2013
+              ? 0.75 - 0.065 * (year - 2010)
+              : math.max(0.28, 0.55 - 0.1 * (year - 2013));
+
+  /// Weeks for the casual buyers an album's songs reach to tire of it
+  /// (docs K259): in the CD years word of mouth sold albums for longer.
+  double albumReachFatigue(int year) =>
+      year < 2008 ? albumReachFatigueWeeks * 1.6 : albumReachFatigueWeeks;
 
   /// Download demand of an album cut (not a single) relative to a single:
   /// low in the early download era, when buyers took whole albums.

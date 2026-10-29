@@ -1086,7 +1086,7 @@ class Simulator {
                 c.casualBuyRate *
                 era.casualPurchaseRate *
                 (age == 0 ? 1.5 : 1.0) /
-                (1 + age / c.albumReachFatigueWeeks) +
+                (1 + age / c.albumReachFatigue(year)) +
             (age == 0 ? casual * 0.003 * era.casualPurchaseRate : 0.0) +
             holiday *
                 casual *
@@ -1125,7 +1125,7 @@ class Simulator {
             era.casualPurchaseRate *
             later *
             (age == 0 ? 1.5 : 1.0) /
-            (1 + age / c.albumReachFatigueWeeks);
+            (1 + age / c.albumReachFatigue(year));
         // A mixtape is given away: nothing sold (docs K62).
         // Pre-orders ship in week one (docs K126).
         final pure = al.isMixtape
