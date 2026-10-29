@@ -448,10 +448,12 @@ class World {
     final slow = 26 + 52 * u(-101);
     final quick = 6 + 8 * u(-102);
     const turn = 2 * math.pi;
+    // Calmer week to week since docs K244 (0.04 and 0.05 before): an old
+    // song moves a percent or two a week.
     return 1 +
         0.10 * math.sin(turn * (wk / slow + u(-103))) +
-        0.04 * math.sin(turn * (wk / quick + u(-104))) +
-        0.05 * (u(wk) - 0.5);
+        0.02 * math.sin(turn * (wk / quick + u(-104))) +
+        0.02 * (u(wk) - 0.5);
   }
 
   /// This week's streams of a song in a chart market.

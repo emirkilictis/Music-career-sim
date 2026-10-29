@@ -553,7 +553,10 @@ class Simulator {
       // A viral trend reaches people regardless of the song's age.
       final viralPart =
           c.publicPool * (0.5 + 0.5 * s.commercial) * s.viralBoost * 0.1;
-      final noise = r.logNormal(0.06) *
+      // A little noise each week on top of the slow momentum (docs K244:
+      // 0.06 before, which with the old momentum moved even an old song
+      // 5–8% a week).
+      final noise = r.logNormal(0.02) *
           _momentum(s.id, s.releasedWeek, RngPurpose.momentum);
       // Not every good song connects (docs K127): beyond the fans, how far
       // a song travels is partly luck, drawn once and hidden.
@@ -920,7 +923,7 @@ class Simulator {
       }
       final noise =
           RandomStream.keyed(w.seed, w.week, al.id, RngPurpose.albumNoise)
-                  .logNormal(0.05) *
+                  .logNormal(0.02) *
               _momentum(al.id, al.releaseWeek, RngPurpose.albumMomentum);
       // Long tracklists sell a little more (more for the money, bundles);
       // each doubling beyond 10 tracks adds [SimConfig.longAlbumBonus].
@@ -1877,16 +1880,24 @@ class Simulator {
   /// weeks instead of jittering around a smooth curve.
   double _momentum(int id, int released, int purpose) {
     final w = world;
-    var m = 0.0, weight = 1.0;
-    for (var j = 0; j < 8; j++) {
-      final week = w.week - j;
-      if (week < released) break;
-      final u = keyedUnit(w.seed, week, id, purpose);
-      m += weight * (u - 0.5);
-      weight *= 0.75;
+    final age = w.week - released;
+    // A smooth curve through a random level every [period] weeks (docs
+    // K244): runs of luck as big as before, but a week moves a song a
+    // little, not by the jumps of a fresh draw each week.
+    double curve(int period, int salt) {
+      final t = age / period;
+      final k = t.floor();
+      final f = t - k;
+      double knot(int i) =>
+          keyedUnit(w.seed, salt * 100000 + i, id, purpose) - 0.5;
+      final a = knot(k);
+      return a + (knot(k + 1) - a) * f * f * (3 - 2 * f);
     }
-    // (u − 0.5) has a deviation of 0.29; the echoes add up to about 1.5×.
-    return math.exp(w.config.momentumSigma / 0.29 / 1.47 * m);
+
+    // A slow swing of about ten weeks and a quicker ripple; (u − 0.5)
+    // has a deviation of 0.29, the blend between knots a little less.
+    final m = 0.95 * curve(10, 1) + 0.3 * curve(4, 2);
+    return math.exp(w.config.momentumSigma / 0.27 * m);
   }
 
   /// How much more (or less) the track at [index] of [tracks] is played
