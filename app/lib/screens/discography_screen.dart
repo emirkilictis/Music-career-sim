@@ -150,8 +150,9 @@ class _DiscographyScreenState extends State<DiscographyScreen> {
     final p = career.player;
     final items = _items;
     final bars = _bars;
-    // Bars shrink to fit the screen (down to 40 wide); a longer career
-    // scrolls sideways, and the shared image keeps every bar.
+    // Bars shrink to fit the screen, but stay wide enough for the titles
+    // (docs K241); a longer career scrolls sideways, and the shared image
+    // keeps every bar.
     final screen = MediaQuery.sizeOf(context).width - 32;
     final fit = bars.isEmpty
         ? _SalesChartCard.maxBar
@@ -259,8 +260,12 @@ class _SalesChartCard extends StatelessWidget {
   static const _muted = Color(0xFF57534C);
   static const _chartHeight = 300.0;
 
-  /// A bar's width range and the gap between bars.
-  static const minBar = 40.0, maxBar = 64.0, barGap = 10.0;
+  /// A bar's width range and the gap between bars: wide enough for a
+  /// title on up to three lines (docs K241; 40–64 cut them short).
+  static const minBar = 92.0, maxBar = 120.0, barGap = 12.0;
+
+  /// Room above the tallest bar for its number and title.
+  static const labelRoom = 72.0;
 
   @override
   Widget build(BuildContext context) {
@@ -308,7 +313,7 @@ class _SalesChartCard extends StatelessWidget {
         ]),
         const SizedBox(height: 18),
         SizedBox(
-          height: _chartHeight + 46,
+          height: _chartHeight + labelRoom,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -375,14 +380,15 @@ class _Bar extends StatelessWidget {
         Text(value,
             maxLines: 1,
             style: const TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.w900,
                 color: _SalesChartCard._ink)),
         Text(r.title,
-            maxLines: 1,
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-                fontSize: 10.5,
+                fontSize: 11.5,
+                height: 1.15,
                 fontWeight: FontWeight.w700,
                 color: _SalesChartCard._ink)),
         const SizedBox(height: 4),

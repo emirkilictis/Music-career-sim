@@ -45,6 +45,23 @@ void main() {
     });
   }
 
+  /// The discography's sales chart as it is shared, whole (docs K241).
+  Future<void> card(WidgetTester tester, String name) async {
+    final chart = find.byWidgetPredicate(
+        (w) => w.runtimeType.toString() == '_SalesChartCard');
+    if (chart.evaluate().isEmpty) return; // nothing to chart
+    final boundary = tester.renderObject<RenderRepaintBoundary>(find
+        .ancestor(of: chart, matching: find.byType(RepaintBoundary))
+        .first);
+    await tester.runAsync(() async {
+      final image = await boundary.toImage(pixelRatio: 2);
+      final png = await image.toByteData(format: ui.ImageByteFormat.png);
+      File('${out.path}/$name.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(png!.buffer.asUint8List());
+    });
+  }
+
   Future<void> tab(WidgetTester tester, String label) async {
     await tester.tap(find.text(label).last);
     await tester.pumpAndSettle();
@@ -234,6 +251,13 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(disco);
     await shot(tester, '15i_discography');
+    // The shared images, whole (docs K241).
+    await card(tester, '15i_share_albums');
+    await tester.tap(find.text('Singles').first);
+    await tester.pumpAndSettle();
+    await card(tester, '15i_share_singles');
+    await tester.tap(find.text('Albums').first);
+    await tester.pumpAndSettle();
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -520));
     await shot(tester, '15j_discography_list');
     await tester.pageBack();
@@ -1483,6 +1507,12 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(disco);
     await shot(tester, '15k_sales_chart');
+    await card(tester, '15k_share_albums');
+    await tester.tap(find.text('Singles').first);
+    await tester.pumpAndSettle();
+    await card(tester, '15k_share_singles');
+    await tester.tap(find.text('Albums').first);
+    await tester.pumpAndSettle();
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -640));
     await shot(tester, '15l_discography_list');
 
