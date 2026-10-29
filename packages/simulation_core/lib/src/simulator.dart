@@ -278,7 +278,8 @@ class Simulator {
       if (!s.isSingle || promoAge >= 26) continue;
       final ageRel = w.week - s.releasedWeek;
       final id = s.primaryArtistId;
-      singleLoad[id] = (singleLoad[id] ?? 0) + _fanCurve(c, ageRel);
+      singleLoad[id] =
+          (singleLoad[id] ?? 0) + _singleFanCurve(c, ageRel, promoAge);
       radioLoad[id] = (radioLoad[id] ?? 0) + _radioLife(s, promoAge);
       promoLoad[id] = (promoLoad[id] ?? 0) +
           _promoLife(s, promoAge, fastStart(w.artists[id]));
@@ -337,7 +338,9 @@ class Simulator {
 
       final ageRel = w.week - s.releasedWeek;
       final promoAge = s.isSingle ? w.week - s.singleWeek : ageRel;
-      final fanCurve = _fanCurve(c, ageRel);
+      final fanCurve = s.isSingle
+          ? _singleFanCurve(c, ageRel, promoAge)
+          : _fanCurve(c, ageRel);
       // Fans' time is shared between the artist's fresh singles: a new
       // single every few weeks gets less of it each (docs K83).
       final load = s.isSingle && promoAge < 26
@@ -431,7 +434,12 @@ class Simulator {
       // longer a song has been on the charts (listener fatigue).
       var chartShape = 0.0;
       var weeksCharted = 0;
+      var peakShape = 0.0;
       for (final ch in Charts.mainSongCharts) {
+        final st = s.statsOrNull(ch);
+        if (st != null && st.peak > 0) {
+          peakShape = math.max(peakShape, 1 - (st.peak - 1) / 100);
+        }
         final pos = s.lastPosOn(ch);
         if (pos > 0) {
           chartShape = math.max(chartShape, 1 - (pos - 1) / 100);
@@ -446,10 +454,16 @@ class Simulator {
         chartShape = math.max(
             chartShape, fastStart(p) * math.exp(-promoAge / 3.0));
       }
-      final chartBoost = c.chartFeedback *
-          chartShape *
-          chartShape /
-          (1 + weeksCharted / c.chartFatigueWeeks);
+      // Listeners tire of what they hear everywhere (docs K247): the lift
+      // wears off fast enough that a #1 comes down from its debut instead
+      // of holding it for two months.
+      final tired = 1 + weeksCharted / c.chartFatigueWeeks;
+      final chartBoost =
+          c.chartFeedback * chartShape * chartShape / (tired * tired);
+      // A hit stays in rotation once its run is over (docs K247): the
+      // lists and stations keep a song that went high, so it fades slowly
+      // instead of falling to nothing with its chart run.
+      final recurrent = c.chartFeedback * 0.3 * peakShape * peakShape;
       // People already know a famous artist: a campaign adds less on top
       // of fame (half as much for a household name; docs K81).
       final campExp = _knownCampaign(exposureOf(s), p.fame);
@@ -489,7 +503,7 @@ class Simulator {
       final stacked = c.stackedLift(lifts) * c.toolStack(appLift);
       final exposure = (c.baseExposure +
               c.fameExposure * p.fame +
-              chartBoost +
+              math.max(chartBoost, recurrent) +
               0.02 * p.buzz) *
           promo *
           p.labelReach *
@@ -509,9 +523,11 @@ class Simulator {
       if (s.versionBoost < 1e-4) s.versionBoost = 0;
       // How a release is received (docs K245): for a week or two people
       // play it on faith, then a weak one is dropped and a strong one
-      // passed on. Fame no longer carries a bad record for months.
+      // passed on. Fame no longer carries a bad record for months. A
+      // strong one gains little: it was not meant to climb for two months
+      // after its debut (docs K247; up to +30% before).
       final reception = 1 +
-          ((s.quality / 100 - 0.6) * 2.0).clamp(-0.75, 0.3) *
+          ((s.quality / 100 - 0.6) * 2.0).clamp(-0.75, 0.1) *
               math.min(1.0, math.max(0, promoAge - 1) / 6);
       final qMult =
           (0.35 + 0.65 * math.pow(s.quality / 100, 1.4)) * reception;
@@ -1546,9 +1562,21 @@ class Simulator {
   /// A song's promotion run (new listeners), before its catalog tail. A
   /// star's song is heard everywhere the week it comes out: [fast] cuts
   /// the rise (docs K217).
-  static double _promoLife(Song s, int promoAge, [double fast = 0]) =>
-      (1 - math.exp(-(promoAge + 1) / (s.riseWeeks * (1 - fast)))) *
-      math.exp(-promoAge / s.lifeWeeks);
+  ///
+  /// A song comes down fast from its peak, then fades slowly for a long
+  /// time instead of holding its peak for weeks and then falling off
+  /// (docs K247); most of all a star's single, heard by everyone at once.
+  /// A newcomer's song still finds its crowd week by week.
+  static double _promoLife(Song s, int promoAge, [double fast = 0]) {
+    final t = promoAge.toDouble();
+    final life = s.lifeWeeks;
+    final k = 0.5 + 0.5 * (2 * fast / 0.85).clamp(0.0, 1.0);
+    final steady = math.exp(-t / life);
+    final front = 0.6 * math.exp(-t / (0.2 * life)) +
+        0.4 * math.exp(-t / (2.0 * life));
+    return (1 - math.exp(-(t + 1) / (s.riseWeeks * (1 - fast)))) *
+        ((1 - k) * steady + k * front);
+  }
 
   /// How much of a song's rise [a]'s name skips (docs K217): nothing for
   /// a newcomer, whose songs find their crowd week by week; most of it
@@ -1559,6 +1587,15 @@ class Simulator {
 
   /// Fans stream hard at release, then settle to a floor that fades over
   /// ~2 years.
+  /// An older song made a single (docs K247): fans come back to it
+  /// almost as to a new one, though they have heard it. Before, a single
+  /// cut from a years-old album got no fan run at all.
+  static double _singleFanCurve(SimConfig c, int ageRel, int promoAge) {
+    final own = _fanCurve(c, ageRel);
+    if (promoAge >= ageRel || promoAge < 0) return own;
+    return math.max(own, 0.7 * _fanCurve(c, promoAge));
+  }
+
   static double _fanCurve(SimConfig c, int ageRel) {
     final floor = c.fanCurveFloor * math.exp(-ageRel / 104.0);
     return floor +

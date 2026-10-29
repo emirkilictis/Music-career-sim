@@ -1201,7 +1201,7 @@ class GameSession {
             pr.week >= w.week &&
             pr.week < w.week + rivalLookaheadWeeks &&
             // A surprise drop is on no one's calendar (docs K175).
-            !RivalMoves.surprise(w, a, pr.week)) {
+            !RivalMoves.mayDrop(w, a, pr.week)) {
           out.add(UpcomingRelease(
               artistId: a.id,
               artistName: a.name,

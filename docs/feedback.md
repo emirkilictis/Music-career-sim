@@ -224,6 +224,9 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F122 | Emir: "Full discography satışların gösterildiği paylaşma fotosu daha geniş olmalı, albüm isimleri fut... şeklinde oluyor, gözükmüyor; singlelar için de aynı." | ✅ K241 |
 | F123 | Emir (gerçek bir sayaç görüntüsüyle: 8 yıllık şarkı haftada +%0,89): "Streamlerde stabilite kötü biraz sanki? Test eder misin?" | ✅ K244 |
 | F124 | Oyuncu grubu (Federico): "Is there some sort of way to make it a bit harder cuz after getting your first N1 it becomes so easy, no albums flop later." | ✅ K245 |
+| F125 | Emir: "Eski şarkıların streaming era'da single olsalar bile flop kalıyor." | ✅ K247 |
+| F126 | Emir (JT, %100 ünlülük, yılda 1,92B dinlenme): "Pasif dinlenmem çok az, sürekli aktif olmam mı lazım? İlk yayınlama anlarındaki düşüşü biraz çabuk getirip daha uzun bir zamana mı yaysak?" ve "Şarkım ilk hafta 60M, sonraki haftalarda sürekli 60 60 gidiyor; 20-30'u görmesini hızlandırsak ama uzun zaman geçince dibi görmese?" | ✅ K247 |
+| F127 | Emir (2038, 109 eski şarkı yılda $1,34M, satış teklifi $16M): "Kataloğum çok değersiz oluyor." | ✅ K247 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

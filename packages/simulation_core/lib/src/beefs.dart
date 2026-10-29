@@ -576,15 +576,30 @@ abstract final class Beefs {
   /// Now and then a rival about the player's size starts on them.
   static BeefNews? _rivalStarts(World w, Artist p, RandomStream r) {
     if (p.fame < 0.12 || !r.chance(0.004)) return null;
-    final pool = [
+    final open = [
       for (final id in w.activeArtistIds)
         if (w.artists[id] case final x
             when x.tier != ArtistTier.player &&
                 !x.isRetired &&
-                (x.fame - p.fame).abs() < 0.15 &&
                 block(w, p, id) == null)
           x
     ];
+    var pool = [
+      for (final x in open)
+        if ((x.fame - p.fame).abs() < 0.15) x
+    ];
+    // The biggest star has no one that close: the nearest names below
+    // come for them (docs K229).
+    if (pool.isEmpty) {
+      open.sort((a, b) {
+        final d = (a.fame - p.fame).abs().compareTo((b.fame - p.fame).abs());
+        return d != 0 ? d : a.id.compareTo(b.id);
+      });
+      pool = [
+        for (final x in open.take(3))
+          if (x.fame >= 0.3) x
+      ];
+    }
     if (pool.isEmpty) return null;
     final rival = pool[r.nextInt(pool.length)];
     final b = _beefWith(w, p, rival.id, playerStarted: false, heat: 0.15);

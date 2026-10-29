@@ -296,22 +296,26 @@ void main() {
       expect(now, greaterThanOrEqualTo(life));
       life = now;
     }
-    // Its class's yearly fade (K85): a top-10 single loses 12% a year in
-    // its first decade, other songs faster.
+    // Its class's yearly fade (K85, K247): a top-10 single loses 8% a
+    // year in its first decade, other songs faster.
     final perYear = w.config.catalogFadePerYear(Lifecycle.catalogWeight(s), 1);
     expect(s.dormantRate / rate0, closeTo((1 - perYear) * (1 - perYear), 0.03));
-    // Rivals' catalogs fade too, a forgotten album track fastest (45% a
-    // year).
+    // Rivals' catalogs fade too, a forgotten album track fastest (30% a
+    // year while new, then 10%; K247).
     final rival = w.songs.firstWhere((x) =>
         x.status == SongStatus.dormant &&
         x.primaryArtistId != a.id &&
         x.dormantRate > 1e5 &&
-        Lifecycle.catalogWeight(x) < 0.5);
+        Lifecycle.catalogWeight(x) < 0.5 &&
+        // Not turning five this year, when its fade slows.
+        ((w.week - x.releasedWeek) / GameTime.weeksPerYear - 4.5).abs() > 0.6);
     final before = rival.dormantRate;
     for (var i = 0; i < GameTime.weeksPerYear; i++) {
       sim.step();
     }
-    expect(rival.dormantRate / before, closeTo(0.55, 0.05));
+    final age = (w.week - rival.releasedWeek) / GameTime.weeksPerYear - 0.5;
+    expect(rival.dormantRate / before,
+        closeTo(1 - w.config.catalogFadePerYear(0.25, age), 0.05));
   });
 
   test('a mixtape is free: streams, buzz, no sales, charts or era (K62)', () {

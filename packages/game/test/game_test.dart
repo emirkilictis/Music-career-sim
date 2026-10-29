@@ -1207,7 +1207,7 @@ void main() {
           a.tier == ArtistTier.a &&
           !a.isRetired &&
           a.plan.isEmpty &&
-          !RivalMoves.surprise(w, a, w.week + 3));
+          !RivalMoves.mayDrop(w, a, w.week + 3));
       // Known two months ahead.
       rival.plan.add(PlannedRelease(week: w.week + 3, kind: PlannedKind.album));
       rival.pendingAlbumTitle = 'Big Return';
@@ -3020,6 +3020,12 @@ void main() {
               premium: true));
       final p = g.world.player!;
       p.moneyCents = 1 << 40;
+      // A strong record: a weak one is dropped after a week or two (K245).
+      p.skills
+        ..songwriting = 85
+        ..vocals = 85
+        ..production = 85
+        ..performance = 85;
       final ids = <int>[];
       for (var i = 0; i < 8; i++) {
         p.creativeEnergy = 100;

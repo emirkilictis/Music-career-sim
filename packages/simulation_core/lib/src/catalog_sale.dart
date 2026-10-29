@@ -24,10 +24,10 @@ abstract final class CatalogSale {
         < fromYear => 0,
         2018 => 10,
         2019 => 12,
-        2020 => 15,
-        2021 => 18,
-        2022 => 14,
-        _ => 12,
+        2020 => 16,
+        2021 => 20,
+        2022 => 16,
+        _ => 14,
       };
 
   /// The player's catalog songs they still own a part of.

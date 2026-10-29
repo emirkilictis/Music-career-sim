@@ -31,7 +31,7 @@ class SimConfig {
     this.fameRate = 0.02,
     this.playerFameRate = 0.03,
     this.chartFeedback = 0.12,
-    this.chartFatigueWeeks = 12,
+    this.chartFatigueWeeks = 16,
     this.albumTrackFanShare = 0.6,
     this.albumEventFanBoost = 12,
     this.albumEventWeeks = 1.5,
@@ -72,7 +72,7 @@ class SimConfig {
     this.catalogFadeEarly = 0.001,
     this.catalogFadeLate = 0.0004,
     this.catalogFadeYears = 10,
-    this.catalogLevel = 2.2,
+    this.catalogLevel = 1.0,
     this.streamEquivalentAlbum = 1500,
     this.downloadHitExponent = 1.45,
     this.downloadHitExponentLate = 1.15,
@@ -172,7 +172,8 @@ class SimConfig {
   final double playerFameRate;
   final double chartFeedback;
 
-  /// Chart feedback halves after this many weeks on the charts.
+  /// Chart feedback falls to a quarter after this many weeks on the
+  /// charts (docs K247: halved after 12 weeks before).
   final double chartFatigueWeeks;
 
   /// Share of fan attention that non-single album tracks get.
@@ -440,19 +441,24 @@ class SimConfig {
   final double catalogFadeYears;
 
   /// Catalog listening against a song's last weeks (docs K85): with the
-  /// fade, old songs keep ~70% of all listening, as in the US streaming
-  /// market (catalog ~73% of consumption in 2023).
+  /// fade, old songs keep about 60% of all listening (the US streaming
+  /// market: catalog ~73% of consumption in 2023). 2.2 before docs K247,
+  /// when songs left the charts with less of their listening and lost it
+  /// faster afterwards.
   final double catalogLevel;
 
   /// Share of a catalog song's listeners lost per year (docs K85), by its
-  /// catalog weight (see Lifecycle.catalogWeight): top-10 singles 12% in
-  /// their first decade, then 3%; other singles and charting album tracks
-  /// 25%; the rest 45%.
+  /// catalog weight (see Lifecycle.catalogWeight): top-10 singles 8% in
+  /// their first decade, then 2%; other singles and charting album tracks
+  /// 18% for five years, then 6%; the rest 30%, then 10%. Old songs
+  /// settle on the listeners who keep them instead of fading to nothing
+  /// (docs K247: 12%/3%, 25% and 45% before, which left a twenty-year-old
+  /// catalog almost silent).
   double catalogFadePerYear(double weight, double years) => weight >= 1.8
-      ? (years < 10 ? 0.12 : 0.03)
+      ? (years < 10 ? 0.08 : 0.02)
       : weight >= 0.5
-          ? 0.25
-          : 0.45;
+          ? (years < 5 ? 0.18 : 0.06)
+          : (years < 5 ? 0.30 : 0.10);
   final double streamEquivalentAlbum;
   final double songChartStreamDivisor;
   final double songChartRadioDivisor;

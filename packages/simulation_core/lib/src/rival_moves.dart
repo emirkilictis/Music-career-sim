@@ -30,8 +30,13 @@ abstract final class RivalMoves {
   /// Whether [a]'s album due in [week] comes out unannounced: it is not
   /// on anyone's calendar until it is out.
   static bool surprise(World w, Artist a, int week) =>
+      _star(a, 0) && mayDrop(w, a, week);
+
+  /// The draw behind [surprise] without the star check: an artist can
+  /// become a star before the date, so the calendar leaves out every date
+  /// that would be a surprise for a star (docs K175).
+  static bool mayDrop(World w, Artist a, int week) =>
       GameTime.yearOf(week) >= surpriseFrom &&
-      _star(a, 0) &&
       _r(w, a, week, 42).chance(surpriseChance);
 
   /// Whether [a]'s album out now goes to the second service alone.
