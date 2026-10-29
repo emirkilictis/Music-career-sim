@@ -48,6 +48,9 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   /// The song's record money by source (docs K145).
   IncomeBreakdown? _income;
 
+  /// The player's station visits (docs K254).
+  RadioVisitsView? _visits;
+
   Future<void> _load() async {
     final song = await widget.state.read(Cmd.song(widget.songId));
     final history = await widget.state.read(Cmd.songHistory(widget.songId));
@@ -57,9 +60,13 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     final income = song.isPlayer && song.releasedWeek >= 0
         ? await widget.state.read(Cmd.songIncome(widget.songId))
         : null;
+    final visits = song.isPlayer && song.isSingle && song.releasedWeek >= 0
+        ? await widget.state.read(Cmd.radioVisits())
+        : null;
     if (mounted) {
       setState(() {
         _income = income;
+        _visits = visits;
         _song = song;
         _history = history;
         _run = run;
@@ -531,12 +538,15 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
-  Future<void> _tool(SessionCmd<void> cmd) async {
+  /// Runs [cmd] and reloads; false if it failed (the error is shown).
+  Future<bool> _tool(SessionCmd<void> cmd) async {
     try {
       await widget.state.act(cmd);
       _load();
+      return true;
     } catch (e) {
       if (mounted) showError(context, e);
+      return false;
     }
   }
 
@@ -677,6 +687,52 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     } catch (e) {
       if (mounted) showError(context, e);
     }
+  }
+
+  /// Station visits for the US and the UK (docs K254).
+  Widget _visitCard(RadioVisitsView v) {
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(l.radioVisitTitle,
+            style: const TextStyle(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 2),
+        Text(
+            l.radioVisitHint(RadioTools.visitWeeks, v.energy,
+                RadioTools.visitGapWeeks),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+        const SizedBox(height: 6),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final m in v.markets)
+            Tooltip(
+              message: m.weeksLeft > 0
+                  ? l.radioVisitActive(m.weeksLeft)
+                  : m.nextIn > 0
+                      ? l.radioVisitNext(m.nextIn)
+                      : '',
+              child: ActionChip(
+                avatar: Icon(
+                    m.weeksLeft > 0
+                        ? Icons.check_circle_rounded
+                        : Icons.mic_external_on_rounded,
+                    size: 16),
+                label: Text(m.market == RadioMarket.us
+                    ? l.radioVisitUs
+                    : l.radioVisitUk),
+                onPressed: m.can
+                    ? () async {
+                        if (await _tool(Cmd.visitRadio(m.market)) && mounted) {
+                          showInfo(context, l.radioVisitDone,
+                              icon: Icons.mic_external_on_rounded);
+                        }
+                      }
+                    : null,
+              ),
+            ),
+        ]),
+      ]),
+    );
   }
 
   /// Takes the single off the radio after asking (docs K253).
@@ -892,6 +948,59 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         ),
                     ]),
                   ],
+                  // The radio edit, the UK push, station visits (docs K254).
+                  if (s.radioEdit) ...[
+                    const SizedBox(height: 8),
+                    Tag(l.radioEditTag,
+                        icon: Icons.content_cut_rounded,
+                        color: AppColors.mint),
+                  ] else if (s.radioEditCost case final cost?) ...[
+                    const SizedBox(height: 8),
+                    Text(l.radioEditHint,
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: ActionChip(
+                        avatar:
+                            const Icon(Icons.content_cut_rounded, size: 16),
+                        label: Text(l.radioEditButton(fmt.money(cost))),
+                        onPressed: () async {
+                          if (await _tool(Cmd.cutRadioEdit(s.id)) &&
+                              mounted) {
+                            showInfo(this.context, l.radioEditDone,
+                                icon: Icons.content_cut_rounded);
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                  if (s.isSingle &&
+                      s.releasedWeek >= 0 &&
+                      s.ukRadioPush != s.radioPush) ...[
+                    const SizedBox(height: 6),
+                    Text(l.radioUkLine(fmt.radioPush(s.ukRadioPush)),
+                        style: TextStyle(color: AppColors.textMuted)),
+                  ],
+                  if (s.ukRadioOptions.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(l.radioUkHint,
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                    const SizedBox(height: 6),
+                    Wrap(spacing: 8, runSpacing: 8, children: [
+                      for (final e in s.ukRadioOptions.entries)
+                        ActionChip(
+                          avatar: Icon(radioIcon(e.key), size: 16),
+                          label: Text(
+                              'UK · ${fmt.radioPush(e.key)} · ${fmt.money(e.value)}'),
+                          onPressed: () =>
+                              _tool(Cmd.raiseUkRadio(s.id, e.key)),
+                        ),
+                    ]),
+                  ],
+                  if (_visits case final v?) _visitCard(v),
                   // Off the radio for another single (docs K253).
                   if (s.canPullRadio) ...[
                     const SizedBox(height: 6),

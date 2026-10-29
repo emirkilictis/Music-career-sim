@@ -152,6 +152,13 @@ class SaveStore {
           Tour.fromJson(x as Map<String, Object?>)
       ]);
     }
+    // Radio station visits (docs K254).
+    if (meta['radioVisits'] case final String s when s.isNotEmpty) {
+      w.radioVisits.addAll([
+        for (final x in jsonDecode(s) as List)
+          ((x as List)[0] as int, x[1] as int)
+      ]);
+    }
     // The song market's bought offers (docs K205).
     if (meta['songMarket'] case final String s when s.isNotEmpty) {
       w.boughtPitches.addAll((jsonDecode(s) as List).cast<int>());
@@ -432,6 +439,9 @@ class SaveStore {
       'rivalSplits': RivalSplit.encode(w.rivalSplits),
       'songMarket': jsonEncode(w.boughtPitches.toList()..sort()),
       'pastTours': jsonEncode([for (final t in w.pastTours) t.toJson()]),
+      'radioVisits': jsonEncode([
+        for (final (week, m) in w.radioVisits) [week, m]
+      ]),
       if (w.certsTracked)
         'certs':
             jsonEncode({for (final e in w.certs.entries) '${e.key}': e.value}),

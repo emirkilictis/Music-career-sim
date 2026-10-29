@@ -103,6 +103,8 @@ int worldHash(World w) {
     addDouble(s.campaignPower);
     addDouble(s.campaignReturnCents);
     addInt(s.radioPush.index);
+    addInt(s.ukRadioPush?.index ?? -1);
+    addInt(s.radioEditWeek);
     addDouble(s.dormantRate);
     addDouble(s.lifetimePhysical);
     addDouble(s.lifetimeRingtones);

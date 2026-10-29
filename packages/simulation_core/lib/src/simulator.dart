@@ -34,6 +34,7 @@ import 'music_show.dart';
 import 'opportunities.dart';
 import 'own_playlist.dart';
 import 'price_cuts.dart';
+import 'radio_tools.dart';
 import 'rerecords.dart';
 import 'ringtones.dart';
 import 'rng.dart';
@@ -337,6 +338,11 @@ class Simulator {
       if (l <= 1) return 1;
       return math.pow(l, -c.selfCompetitionExponent).toDouble();
     }
+
+    // The player's station visits (docs K254).
+    final visits = [
+      for (var k = 0; k < _r; k++) RadioTools.visitFactor(w, k)
+    ];
 
     final activeIndex = <int, int>{};
     for (var i = 0; i < n; i++) {
@@ -704,12 +710,20 @@ class Simulator {
           radioOf(s) *
           (1 + 8 * chartBoost);
 
+      final mine = p.tier == ArtistTier.player;
+      final tuned = s.radioEditWeek >= 0 || s.ukRadioPush != null || mine;
       for (var k = 0; k < _r; k++) {
         final share = p.regionShare[k];
         final j = i * _r + k;
         att[j] = a * share * onApps;
         dl[j] = d * share;
-        radio[j] = rd * share;
+        // The edit, a UK push of its own, a station visit (docs K254).
+        radio[j] = rd *
+            share *
+            (tuned
+                ? RadioTools.regionFactor(w, p, s, k,
+                    visit: mine ? visits[k] : 1)
+                : 1);
         sumA[k] += att[j];
         sumD[k] += dl[j];
         sumR[k] += radio[j];
@@ -1575,6 +1589,9 @@ class Simulator {
 
   /// Starts a viral trend: it grows for three weeks, then fades. Most trends
   /// are small; a few become huge and can push a song up the charts.
+  /// [_radioLife] for the views (docs K254).
+  static double radioLife(Song s, int promoAge) => _radioLife(s, promoAge);
+
   /// A single's run on the radio: builds over its first weeks, then fades.
   static double _radioLife(Song s, int promoAge) =>
       (1 - math.exp(-(promoAge + 1) / (s.riseWeeks + 3))) *

@@ -663,6 +663,11 @@ abstract final class Cmd {
   static SessionCmd<void> upgradeRadio(int id, RadioPush to) =>
       (s) => s.upgradeRadio(id, to);
   static SessionCmd<void> pullRadio(int id) => (s) => s.pullRadio(id);
+  static SessionCmd<void> cutRadioEdit(int id) => (s) => s.cutRadioEdit(id);
+  static SessionCmd<void> raiseUkRadio(int id, RadioPush to) =>
+      (s) => s.raiseUkRadio(id, to);
+  static SessionCmd<RadioVisitsView> radioVisits() => (s) => s.radioVisits;
+  static SessionCmd<void> visitRadio(RadioMarket m) => (s) => s.visitRadio(m);
 
   static SessionCmd<void> setRadioFormat(int id, RadioFormat f) =>
       (s) => s.setRadioFormat(id, f);

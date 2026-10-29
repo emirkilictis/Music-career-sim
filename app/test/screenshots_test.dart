@@ -1034,6 +1034,70 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '19b_post_answered');
   });
+  testWidgets('screenshots: radio tools', skip: !enabled, (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await tester.runAsync(() => c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 254,
+        ),
+        PortSink(port.sendPort))));
+    port.close();
+    // A single on the radio two weeks (docs K254).
+    final title = await tester.runAsync(() => c.run((s) {
+          s.world.player!.creativeEnergy = 100;
+          final id = s.writeSong(budget: BudgetTier.high).id;
+          s.releaseSingle(id, radio: RadioPush.light);
+          s.advanceWeeks(2, stop: SkipStop.never);
+          return s.song(id).title;
+        }));
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    await tab(tester, 'Charts');
+    final radioTab = _ci('US RADIO');
+    await tester.scrollUntilVisible(radioTab, 200,
+        scrollable: find
+            .byWidgetPredicate((w) =>
+                w is Scrollable && w.axisDirection == AxisDirection.right)
+            .first);
+    await tester.pumpAndSettle();
+    await tester.tap(radioTab);
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 200)));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    await tester.pumpAndSettle();
+    await shot(tester, '30_radio_most_added');
+    await tab(tester, 'Releases');
+    final song = find.text(title!).first;
+    await tester.scrollUntilVisible(song, 200,
+        scrollable: find.byType(Scrollable).first);
+    await tester.tap(song);
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 200)));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    await tester.pumpAndSettle();
+    final visit = _ci('Visit the stations');
+    await tester.scrollUntilVisible(visit, 300,
+        scrollable: find.byType(Scrollable).first);
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 250));
+    await tester.pumpAndSettle();
+    await shot(tester, '30b_radio_tools');
+  });
   testWidgets('screenshots: collabs with the singles', skip: !enabled,
       (tester) async {
     await tester.runAsync(loadFonts);

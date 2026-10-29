@@ -438,10 +438,17 @@ class _ChartsTabState extends State<ChartsTab> {
                             style: const TextStyle(color: PaperColors.muted)))
                     : ListView.separated(
                         padding: const EdgeInsets.only(bottom: 16),
-                        itemCount: view.rows.length,
+                        // A radio chart opens on the week's most added
+                        // (docs K254).
+                        itemCount:
+                            view.rows.length + (view.adds.isEmpty ? 0 : 1),
                         separatorBuilder: (_, __) => const Divider(
                             color: PaperColors.line, height: 1, indent: 16),
-                        itemBuilder: (context, i) {
+                        itemBuilder: (context, at) {
+                          if (view.adds.isNotEmpty && at == 0) {
+                            return _MostAdded(adds: view.adds);
+                          }
+                          final i = at - (view.adds.isEmpty ? 0 : 1);
                           final r = view.rows[i];
                           final albums = view.def.kind == ChartKind.albums;
                           final open = _openId == r.entityId;
@@ -465,6 +472,58 @@ class _ChartsTabState extends State<ChartsTab> {
                       ),
           ),
         ],
+      ]),
+    );
+  }
+}
+
+/// The radio chart's most added songs this week (docs K254), as the
+/// trade papers print them.
+class _MostAdded extends StatelessWidget {
+  const _MostAdded({required this.adds});
+  final List<RadioAdd> adds;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Container(
+      color: const Color(0xFFF2EFE8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(l.radioMostAdded.toUpperCase(),
+            style: const TextStyle(
+                fontFamily: AppFonts.condensed,
+                fontWeight: FontWeight.w800,
+                fontSize: 14,
+                letterSpacing: 0.8,
+                color: PaperColors.ink)),
+        const SizedBox(height: 6),
+        for (final (i, a) in adds.take(5).indexed)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: Row(children: [
+              SizedBox(
+                width: 22,
+                child: Text('${i + 1}',
+                    style: const TextStyle(
+                        fontFamily: AppFonts.condensed,
+                        fontWeight: FontWeight.w800,
+                        color: PaperColors.ink)),
+              ),
+              Expanded(
+                child: Text('${a.title} · ${a.artistName}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: PaperColors.ink)),
+              ),
+              const SizedBox(width: 8),
+              Text(l.radioAddsLine(a.added, a.stations),
+                  style: const TextStyle(
+                      color: PaperColors.muted,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700)),
+            ]),
+          ),
       ]),
     );
   }

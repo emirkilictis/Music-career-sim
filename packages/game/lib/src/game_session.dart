@@ -1993,6 +1993,41 @@ class GameSession {
     _saveNow();
   }
 
+  /// Cuts a radio edit of a single (docs K254).
+  void cutRadioEdit(int songId) {
+    final s = _ownSong(songId);
+    if (!RadioTools.canEdit(world, _p, s)) {
+      throw GameException('radioLocked', 'No radio edit now');
+    }
+    _requireMoney(RadioTools.editCostFor(_p));
+    RadioTools.cutEdit(world, _p, s);
+    _saveNow();
+  }
+
+  /// Raises a single's radio push in the UK alone (docs K254).
+  void raiseUkRadio(int songId, RadioPush to) {
+    final s = _ownSong(songId);
+    final cost = RadioTools.ukOptions(world, _p, s)[to];
+    if (cost == null) {
+      throw GameException('radioLocked', 'The stations have decided');
+    }
+    _requireMoney(cost);
+    RadioTools.raiseUk(world, _p, s, to);
+    _saveNow();
+  }
+
+  /// The player's radio station visits (docs K254).
+  RadioVisitsView get radioVisits => RadioVisitsView.of(world, _p);
+
+  /// Visits a market's stations (docs K254).
+  void visitRadio(RadioMarket m) {
+    if (!RadioTools.canVisit(world, _p, m)) {
+      throw GameException('radioVisitLocked', 'No visit now');
+    }
+    RadioTools.visit(world, _p, m);
+    _saveNow();
+  }
+
   /// Takes a single off the radio to work another one (docs K253).
   void pullRadio(int songId) {
     final s = _ownSong(songId);

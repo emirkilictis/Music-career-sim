@@ -5924,6 +5924,72 @@
   "radioBlitz": "Radio blitz",
   "radioBlitzHint": "Every format, heavy rotation everywhere (a major label only).",
   "radioPulled": "Off the radio",
+  "radioMostAdded": "Most added this week",
+  "radioAddsLine": "+{added} · {stations} stations",
+  "@radioAddsLine": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "stations": {
+        "type": "int"
+      }
+    }
+  },
+  "radioEditTag": "Radio edit",
+  "radioEditButton": "Cut a radio edit · {cost}",
+  "@radioEditButton": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "radioEditHint": "A tight, clean version for the stations: they add it more readily (+20% radio).",
+  "radioEditDone": "Radio edit sent to the stations.",
+  "radioUkLine": "UK radio: {push}",
+  "@radioUkLine": {
+    "placeholders": {
+      "push": {
+        "type": "String"
+      }
+    }
+  },
+  "radioUkHint": "Push it harder in the UK alone (first 8 weeks; you pay the difference, the UK at about a third of the price):",
+  "radioVisitTitle": "Visit the stations",
+  "radioVisitHint": "Interviews and a live set on air: the stations play your singles more for {weeks} weeks. Takes {energy} energy; once every {gap} weeks per country, not on tour.",
+  "@radioVisitHint": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      },
+      "energy": {
+        "type": "int"
+      },
+      "gap": {
+        "type": "int"
+      }
+    }
+  },
+  "radioVisitUs": "US stations",
+  "radioVisitUk": "UK stations",
+  "radioVisitActive": "{weeks} more weeks of extra play",
+  "@radioVisitActive": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "radioVisitNext": "Again in {weeks} weeks",
+  "@radioVisitNext": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "radioVisitDone": "The stations loved the visit.",
   "radioPulledHint": "Taken off the radio: stations stopped playing it, its slots went to your other singles.",
   "radioPullButton": "Take off the radio",
   "radioPullTitle": "Take it off the radio?",

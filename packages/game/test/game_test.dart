@@ -1995,6 +1995,75 @@ void main() {
       expect(firstWeeks(true), greaterThanOrEqualTo(firstWeeks(false)));
     });
 
+    test('radio edit, a UK push, station visits, most added (K254)', () {
+      // The same single with nothing, with an edit, a UK push and a US
+      // station visit: its radio in each region over four weeks.
+      (double, double, int) run(bool extras) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2016,
+                premium: true,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire));
+        final w = g.world;
+        final p = w.player!;
+        p.creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.high).id;
+        g.releaseSingle(id,
+            campaign: Campaign.standard, radio: RadioPush.light);
+        if (extras) {
+          final v = g.song(id);
+          expect(v.radioEditCost, isNotNull);
+          g.cutRadioEdit(id);
+          expect(g.song(id).radioEdit, isTrue);
+          expect(g.song(id).radioEditCost, isNull);
+          expect(() => g.cutRadioEdit(id), _code('radioLocked'));
+          final uk = g.song(id).ukRadioOptions;
+          expect(uk.keys, contains(RadioPush.standard));
+          // A third of what the same push everywhere would cost.
+          expect(uk[RadioPush.standard],
+              lessThan(g.song(id).radioUpgradeCosts[RadioPush.standard]!));
+          g.raiseUkRadio(id, RadioPush.standard);
+          expect(g.song(id).ukRadioPush, RadioPush.standard);
+          expect(g.song(id).radioPush, RadioPush.light);
+          final energy = p.creativeEnergy;
+          expect(g.radioVisits.markets.first.can, isTrue);
+          g.visitRadio(RadioMarket.us);
+          expect(p.creativeEnergy, energy - RadioTools.visitEnergy);
+          expect(g.radioVisits.markets.first.can, isFalse);
+          expect(() => g.visitRadio(RadioMarket.us),
+              _code('radioVisitLocked'));
+        }
+        var na = 0.0, eu = 0.0;
+        for (var i = 0; i < 4; i++) {
+          g.advanceWeek();
+          final s = w.songs[id];
+          final share = w.artists[s.primaryArtistId].regionShare;
+          na += s.weekRadio * share[Region.northAmerica.index];
+          eu += s.weekRadio * share[Region.europe.index];
+        }
+        final adds = g.chart(Charts.usRadio).adds;
+        // Kept across reopening.
+        final slot = g.slotId;
+        g.close();
+        final again = GameSession.resume(slots, slot);
+        if (extras) {
+          expect(again.song(id).radioEdit, isTrue);
+          expect(again.song(id).ukRadioPush, RadioPush.standard);
+          expect(again.world.radioVisits, isNotEmpty);
+        }
+        again.close();
+        return (na, eu, adds.length);
+      }
+
+      final plain = run(false), tuned = run(true);
+      expect(tuned.$1, greaterThan(plain.$1 * 1.2));
+      expect(tuned.$2, greaterThan(plain.$2 * 1.3));
+      // The stations' adds this week are listed, the most first.
+      expect(plain.$3, greaterThan(0));
+    });
+
     test('a single taken off the radio frees its slots (K253)', () {
       // Two singles three weeks apart, the first taken off the radio or
       // not: the second gets more radio without it.

@@ -951,6 +951,13 @@ class Song with Charted {
   /// the haters, -1 for an ordinary song.
   int dissTarget = -1;
 
+  /// Its own radio push in the UK (docs K254; null: the same as
+  /// [radioPush] everywhere).
+  RadioPush? ukRadioPush;
+
+  /// The week a radio edit was cut (-1: none; docs K254).
+  int radioEditWeek = -1;
+
   /// The artist's share of what it earns, fixed by the deal it came out
   /// under (docs K139): a label owns the masters for good. Null until
   /// it first earns.

@@ -63,6 +63,10 @@ class World {
   /// K208; tours before it are only in [tourRecords]).
   final List<Tour> pastTours = [];
 
+  /// The player's radio station visits: (week, market) with market 0 the
+  /// US, 1 the UK (docs K254).
+  final List<(int, int)> radioVisits = [];
+
   /// The player's US certifications as they came (docs K209), by release
   /// (a song's id × 2, an album's × 2 + 1): [level, multiple, week, label]
   /// for each new level, in order.

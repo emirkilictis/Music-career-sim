@@ -342,6 +342,15 @@ class SongView {
               },
         canPullRadio = s.primaryArtistId == w.playerArtistId &&
             Actions.canPullRadio(w, w.player!, s),
+        radioEdit = s.radioEditWeek >= 0,
+        radioEditCost = s.primaryArtistId == w.playerArtistId &&
+                RadioTools.canEdit(w, w.player!, s)
+            ? RadioTools.editCostFor(w.player!)
+            : null,
+        ukRadioPush = RadioTools.ukPush(s),
+        ukRadioOptions = s.primaryArtistId == w.playerArtistId
+            ? RadioTools.ukOptions(w, w.player!, s)
+            : const {},
         holiday = s.holiday,
         dissTarget = s.dissTarget,
         dissTargetName = s.dissTarget >= 0
@@ -686,6 +695,16 @@ class SongView {
 
   /// It can be taken off the radio for another single (docs K253).
   final bool canPullRadio;
+
+  /// A radio edit was cut; what one costs now (null: not possible; docs
+  /// K254).
+  final bool radioEdit;
+  final int? radioEditCost;
+
+  /// The push the UK stations get, and the ones it can be raised to there
+  /// with their price (docs K254).
+  final RadioPush ukRadioPush;
+  final Map<RadioPush, int> ukRadioOptions;
   final PlaylistAdd playlistAdd;
   final List<ChartRecord> charts;
   final double weekStreamsUs;
@@ -1126,7 +1145,11 @@ enum ChartCredit {
 }
 
 class ChartView {
-  ChartView._(this.def, this.week, this.rows);
+  ChartView._(this.def, this.week, this.rows, [this.adds = const []]);
+
+  /// A radio chart's most added songs this week (docs K254): the stations
+  /// that took each one on since last week, the most first.
+  final List<RadioAdd> adds;
 
   /// The latest published chart (the week just simulated).
   factory ChartView.latest(World w, int chartId) {
@@ -1138,7 +1161,39 @@ class ChartView {
         _row(w, def.market, kind, e.position, e.lastPos, e.peak, e.weeksOn,
             e.entityId, e.points),
     ];
-    return ChartView._(def, w.week - 1, rows);
+    final adds = <RadioAdd>[];
+    if (def.market == ChartMarket.usRadio ||
+        def.market == ChartMarket.ukRadio) {
+      final cap = def.market == ChartMarket.ukRadio
+          ? Radio.ukReportingStations
+          : Radio.reportingStations;
+      int stations(double audience) => Radio.stations(audience, cap: cap);
+      for (final r in rows) {
+        final s = w.songs[r.entityId];
+        if (!s.isSingle || s.status != SongStatus.active) continue;
+        // Last week's audience by the song's radio curve.
+        final age = w.week - 1 - s.singleWeek;
+        final now = Simulator.radioLife(s, age);
+        final before = age <= 0 || now <= 0
+            ? 0.0
+            : r.points * Simulator.radioLife(s, age - 1) / now;
+        final added = stations(r.points) - stations(before);
+        if (added > 0) {
+          adds.add(RadioAdd(
+              songId: s.id,
+              title: s.title,
+              artistId: s.primaryArtistId,
+              artistName: w.artists[s.primaryArtistId].name,
+              stations: stations(r.points),
+              added: added));
+        }
+      }
+      adds.sort((a, b) {
+        final d = b.added.compareTo(a.added);
+        return d != 0 ? d : a.songId.compareTo(b.songId);
+      });
+    }
+    return ChartView._(def, w.week - 1, rows, adds.take(10).toList());
   }
 
   static ChartRow _row(World w, ChartMarket market, EntityKind kind,
@@ -1648,9 +1703,59 @@ abstract final class Radio {
 
   static double spins(double audience) => audience / listenersPerSpin;
 
-  static int stations(double audience) => math
-      .min(reportingStations, spins(audience) / spinsPerStation)
-      .round();
+  /// Stations reporting in the UK (docs K254).
+  static const ukReportingStations = 300;
+
+  static int stations(double audience, {int cap = reportingStations}) =>
+      math.min(cap, spins(audience) / spinsPerStation).round();
+}
+
+/// The player's station visits (docs K254): per market, whether one is
+/// possible now and how long the last one still helps.
+class RadioVisitsView {
+  RadioVisitsView.of(World w, Artist a)
+      : energy = RadioTools.visitEnergy.round(),
+        markets = [
+          for (final m in RadioMarket.values)
+            (
+              market: m,
+              can: RadioTools.canVisit(w, a, m),
+              weeksLeft: () {
+                final last = RadioTools.lastVisit(w, m);
+                return last < 0
+                    ? 0
+                    : math.max(0, RadioTools.visitWeeks - (w.week - last));
+              }(),
+              nextIn: () {
+                final last = RadioTools.lastVisit(w, m);
+                return last < 0
+                    ? 0
+                    : math.max(0, RadioTools.visitGapWeeks - (w.week - last));
+              }(),
+            )
+        ];
+  final int energy;
+  final List<({RadioMarket market, bool can, int weeksLeft, int nextIn})>
+      markets;
+}
+
+/// A song stations added this week (docs K254).
+class RadioAdd {
+  const RadioAdd(
+      {required this.songId,
+      required this.title,
+      required this.artistId,
+      required this.artistName,
+      required this.stations,
+      required this.added});
+  final int songId;
+  final String title;
+  final int artistId;
+  final String artistName;
+
+  /// Stations playing it now, and those new this week.
+  final int stations;
+  final int added;
 }
 
 /// The fictional streaming platform's view of an artist (Streamify artist
