@@ -999,6 +999,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(feed);
     await tester.pumpAndSettle();
+    // Answer buttons on the feed itself (docs K252).
+    await shot(tester, '19_feed_answers');
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -560));
     await tester.pumpAndSettle();
     await tester.tap(find.text('For you').hitTestable().evaluate().isEmpty

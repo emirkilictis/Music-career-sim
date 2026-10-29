@@ -138,6 +138,37 @@ class _SocialScreenState extends State<SocialScreen> {
     }
   }
 
+  /// Answers a fan's post from the feed (docs K252).
+  Future<void> _answer(SocialItemView i, ReplyKind kind) async {
+    final l = context.l10n;
+    setState(() => _posting = true);
+    try {
+      final out = await widget.state
+          .act(Cmd.replyToComment(i.key, Comments.author, kind));
+      if (mounted) {
+        final (text, icon) = switch ((kind, out.reply.ok)) {
+          (ReplyKind.thanks, _) => (l.replyDoneThanks, Icons.favorite_rounded),
+          (ReplyKind.clapBack, true) => (
+              l.replyDoneRoast,
+              Icons.local_fire_department_rounded
+            ),
+          (ReplyKind.clapBack, false) => (
+              l.replyDonePetty,
+              Icons.warning_amber_rounded
+            ),
+          (ReplyKind.kind, true) => (l.replyDoneSoftened, Icons.spa_rounded),
+          (ReplyKind.kind, false) => (l.replyDoneIgnored, Icons.spa_rounded),
+        };
+        showInfo(context, text, icon: icon);
+      }
+      await _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _posting = false);
+    }
+  }
+
   /// A diss post at [rivalId], or at one the player picks when there is no
   /// beef on (docs K234).
   Future<void> _dissRival(int rivalId) async {
@@ -323,6 +354,9 @@ class _SocialScreenState extends State<SocialScreen> {
                                 state: widget.state, postKey: i.key)));
                     _load();
                   },
+                  onReply: v.repliesLeft > 0 && v.canPost && !_posting
+                      ? (k) => _answer(i, k)
+                      : null,
                   onClapBack: i.isRival &&
                           i.rivalId == v.beefRivalId &&
                           v.canPost &&
@@ -850,6 +884,7 @@ class FeedPost extends StatelessWidget {
       this.skin = SocialSkin.chirper,
       this.verified = false,
       this.onClapBack,
+      this.onReply,
       this.onTap});
   final SocialItemView item;
   final CareerState state;
@@ -863,6 +898,10 @@ class FeedPost extends StatelessWidget {
 
   /// Opens the post with its replies (docs K238).
   final VoidCallback? onTap;
+
+  /// Answers a fan's post right from the feed (docs K252; null: no
+  /// replies left this week).
+  final void Function(ReplyKind)? onReply;
 
   @override
   Widget build(BuildContext context) {
@@ -928,6 +967,7 @@ class FeedPost extends StatelessWidget {
               label: Text(context.l10n.clapBack),
             ),
           );
+    final answers = _answers(context);
     if (skin != SocialSkin.chirper) {
       // A 2000s comment: square photo and handle on the left.
       return Container(
@@ -973,6 +1013,7 @@ class FeedPost extends StatelessWidget {
                     dark: false,
                     round: false),
               if (clapBack != null) clapBack,
+              if (answers != null) answers,
             ]),
           ),
         ]),
@@ -1037,8 +1078,82 @@ class FeedPost extends StatelessWidget {
               Icon(Icons.ios_share_rounded, size: 17, color: skin.muted),
             ]),
             if (clapBack != null) clapBack,
+            if (answers != null) answers,
           ]),
         ),
+      ]),
+    );
+  }
+
+  /// Answering from the feed (docs K252): a fan's post gets a thank-you,
+  /// a hater's a clap-back or kindness; once answered, what the player
+  /// did. The player's own post says how many haters wait in its replies.
+  Widget? _answers(BuildContext context) {
+    final l = context.l10n;
+    final i = item;
+    if (i.isPlayer) {
+      if (i.haters == 0 || onTap == null) return null;
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Row(children: [
+            Icon(Icons.local_fire_department_rounded,
+                size: 16, color: AppColors.coral),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(l.feedHaters(i.haters),
+                  style: TextStyle(
+                      color: AppColors.coral,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700)),
+            ),
+          ]),
+        ),
+      );
+    }
+    final mood = i.authorMood;
+    if (mood == null) return null;
+    if (i.answered case final done?) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Text(
+            switch (done) {
+              ReplyKind.thanks => l.feedAnsweredThanks,
+              ReplyKind.clapBack => l.feedAnsweredClapBack,
+              ReplyKind.kind => l.feedAnsweredKind,
+            },
+            style: TextStyle(
+                color: skin.muted, fontSize: 12.5, fontStyle: FontStyle.italic)),
+      );
+    }
+    final reply = onReply;
+    if (reply == null) return null;
+    Widget button(ReplyKind k, String label, IconData icon, Color color) =>
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: color,
+            side: BorderSide(color: color),
+            visualDensity: VisualDensity.compact,
+            shape: skin.round
+                ? const StadiumBorder()
+                : const RoundedRectangleBorder(),
+          ),
+          onPressed: () => reply(k),
+          icon: Icon(icon, size: 16),
+          label: Text(label),
+        );
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Wrap(spacing: 8, runSpacing: 6, children: [
+        if (mood == CommentMood.hater) ...[
+          button(ReplyKind.clapBack, l.replyClapBackButton,
+              Icons.local_fire_department_rounded, AppColors.coral),
+          button(ReplyKind.kind, l.replyKindButton, Icons.spa_rounded,
+              skin.accent),
+        ] else
+          button(ReplyKind.thanks, l.replyThanksButton,
+              Icons.favorite_rounded, AppColors.mint),
       ]),
     );
   }

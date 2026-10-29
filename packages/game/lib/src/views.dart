@@ -2896,6 +2896,17 @@ class SocialItemView {
         rivalName = i.artistId >= 0 ? w.artists[i.artistId].name : '',
         rivalId = i.artistId,
         key = Comments.keyOf(i),
+        authorMood = i.fan >= 0 ? Comments.authorMood(i) : null,
+        answered = i.fan >= 0
+            ? Comments.replyTo(w, i, Comments.author)?.kind
+            : null,
+        haters = i.byPlayer && w.player != null
+            ? Comments.of(w, w.player!, i)
+                .where((c) =>
+                    c.mood == CommentMood.hater &&
+                    Comments.replyTo(w, i, c.index) == null)
+                .length
+            : 0,
         coverAlbumId = i.albumId >= 0
             ? i.albumId
             : i.songId >= 0
@@ -2920,6 +2931,14 @@ class SocialItemView {
 
   /// Opens the post with its comments (docs K238).
   final int key;
+
+  /// How a fan post's author feels about the player, and the player's
+  /// answer to it (null: none yet), to answer from the feed (docs K252).
+  final CommentMood? authorMood;
+  final ReplyKind? answered;
+
+  /// Haters under the player's own post not answered yet (docs K252).
+  final int haters;
 
   /// The song or album it talks about ('' if none).
   final String title;
@@ -3068,6 +3087,7 @@ class SocialView {
   SocialView.of(World w, Artist p)
       : network = Social.networkIn(GameTime.yearOf(w.week)),
         canPost = Social.canPostIn(GameTime.yearOf(w.week)),
+        repliesLeft = Comments.repliesLeft(w),
         followers = Social.followers(w, p),
         verified = p.fame >= 0.1 || Social.followers(w, p) >= 1e5,
         postsLeft = Social.postsPerWeek - w.social.postsIn(w.week),
@@ -3129,6 +3149,9 @@ class SocialView {
 
   final SocialNetwork network;
   final bool canPost;
+
+  /// Replies to comments left this week (docs K238, K252).
+  final int repliesLeft;
   final double followers;
 
   /// The blue tick: famous or big enough (as on the streaming profiles).

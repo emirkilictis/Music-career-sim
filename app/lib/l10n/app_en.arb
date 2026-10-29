@@ -5954,6 +5954,17 @@
   "chartUsRadio": "US Radio Songs",
   "chartShortUsRadio": "US Radio",
   "chartUkRadio": "UK Radio Songs",
+  "feedHaters": "{count, plural, =1{1 hater in the replies · answer} other{{count} haters in the replies · answer}}",
+  "@feedHaters": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feedAnsweredThanks": "You thanked them",
+  "feedAnsweredClapBack": "You clapped back",
+  "feedAnsweredKind": "You were kind",
   "chartShortUkRadio": "UK Radio",
   "chartUsStreaming": "US Streaming Songs",
   "chartShortUsStreaming": "US Streaming",

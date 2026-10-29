@@ -232,6 +232,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F130 | Oyuncu grubu (Federico): "Also maybe add genre categories for songs too in grammys. Like you have best rock, pop, R&B etc. album. Same could go for songs." | ✅ K250 |
 | F131 | Oyuncu grubu: "You could make it possible to release variants vinyl and CD etc. even after album release." Emir: "Bizde bu var ama detaylandıralım: normal albüm yayınlar gibi tarih seçelim, duyuralım, hype inşa edelim." | ⏳ Sırada. |
 | F132 | Oyuncu grubu (Federico): "Also I've noticed not to release a single with the album. It literally kills the song." Emir: "Bu doğru mu? Şarkı ölmesin ya, floplamasın." | ✅ K251 |
+| F133 | Bir oyuncu: "Arkadaşının, sana laf atanlara laf sokma seçeneğini eklemesi gerekiyor." Emir: "Clap back yapabiliyorsun yorumlarda… ama intuitive yapmadık sanki." | ✅ K252 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
