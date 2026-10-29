@@ -581,10 +581,15 @@ void main() {
     expect(mine.length, 13);
     expect(mine.where((x) => x <= 10).length, greaterThanOrEqualTo(1));
     // Radio is a real part of the top established hit's points (the
-    // album's own tracks are a week old, with little radio yet).
-    final top = w.songs[chart
-        .firstWhere((e) => w.songs[e.entityId].primaryArtistId != p.id)
-        .entityId];
+    // album's own tracks are a week old, with little radio yet). A single
+    // out two months or more: a fresh one from a new album is mostly its
+    // album's streams (docs K251).
+    final top = w.songs[chart.firstWhere((e) {
+      final s = w.songs[e.entityId];
+      return s.primaryArtistId != p.id &&
+          s.isSingle &&
+          w.week - s.singleWeek >= 8;
+    }).entityId];
     expect(top.weekRadioPtsUs / top.weekPtsUs, greaterThan(0.05));
   });
 
