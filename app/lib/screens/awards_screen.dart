@@ -8,6 +8,7 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import 'album_detail_screen.dart';
+import 'award_night_screen.dart';
 import 'song_detail_screen.dart';
 
 /// The Golden Record Awards, year by year (docs K91): every category with
@@ -79,6 +80,23 @@ class _AwardsScreenState extends State<AwardsScreen> {
                     ),
                     const SizedBox(height: 8),
                     _Header(show: show),
+                    // Relive the night (docs K243).
+                    if (show.held && show.playerNominations > 0) ...[
+                      const SizedBox(height: 10),
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.gold,
+                            foregroundColor: PaperColors.ink),
+                        onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                                fullscreenDialog: true,
+                                builder: (_) => AwardNightScreen(
+                                    show: show, state: widget.state))),
+                        icon: const Icon(Icons.emoji_events_rounded),
+                        label: Text(l.awardNightWatch),
+                      ),
+                    ],
                     for (final race in show.races) ...[
                       const SizedBox(height: 14),
                       _Race(race: race, held: show.held, state: widget.state),

@@ -3301,6 +3301,48 @@
     }
   },
   "awardWinner": "Winner",
+  "awardNightTitle": "Golden Record Awards {year}",
+  "@awardNightTitle": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "awardNightIntro": "{count, plural, =1{Tonight you are up for one award.} other{Tonight you are up for {count} awards.}} The lights go down…",
+  "@awardNightIntro": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "awardNightStart": "Take your seat",
+  "awardNightCategory": "The nominees for",
+  "awardNightOpen": "Open the envelope",
+  "awardNightEnvelope": "And the award goes to…",
+  "awardNightYouWon": "You won!",
+  "awardNightGoesTo": "The award goes to {name}",
+  "@awardNightGoesTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "awardNightNextTime": "You clap politely. Next year.",
+  "awardNightNext": "Next category",
+  "awardNightSkip": "Skip to the end",
+  "awardNightDone": "Leave the show",
+  "awardNightEmpty": "No trophy this time, but a nomination is a career moment too.",
+  "awardNightProud": "The trophies go on the shelf. The fans are going wild online.",
+  "awardSpeech0": "I wrote some of these songs in my bedroom. Thank you for listening to every one.",
+  "awardSpeech1": "To my team, my family and every single fan: this is yours.",
+  "awardSpeech2": "I really didn’t prepare a speech. Thank you, thank you!",
+  "awardSpeech3": "Ten years ago I was singing in bars for tips. Dream big.",
+  "awardSpeech4": "To everyone who said I couldn’t: watch this.",
+  "awardSpeech5": "This one is for the fans who streamed it on repeat at 3am.",
+  "awardNightWatch": "Watch the night",
   "awardRecord": "Record of the Year",
   "awardSong": "Song of the Year",
   "awardAlbum": "Album of the Year",

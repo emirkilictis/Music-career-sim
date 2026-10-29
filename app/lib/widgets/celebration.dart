@@ -119,7 +119,7 @@ class _CelebrationState extends State<_Celebration>
             child: AnimatedBuilder(
               animation: _confetti,
               builder: (_, __) =>
-                  CustomPaint(painter: _ConfettiPainter(_confetti.value)),
+                  CustomPaint(painter: ConfettiPainter(_confetti.value)),
             ),
           ),
         ),
@@ -304,8 +304,8 @@ class _MomentCard extends StatelessWidget {
 }
 
 /// Falling confetti; [t] runs 0 → 1 once.
-class _ConfettiPainter extends CustomPainter {
-  _ConfettiPainter(this.t);
+class ConfettiPainter extends CustomPainter {
+  ConfettiPainter(this.t);
   final double t;
 
   static final _pieces = List.generate(90, (i) {
@@ -349,5 +349,5 @@ class _ConfettiPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ConfettiPainter old) => old.t != t;
+  bool shouldRepaint(ConfettiPainter old) => old.t != t;
 }

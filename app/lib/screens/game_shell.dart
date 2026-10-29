@@ -9,6 +9,7 @@ import '../ui/palette.dart';
 import '../widgets/anniversary_prompt.dart';
 import '../widgets/art.dart';
 import '../widgets/celebration.dart';
+import 'award_night_screen.dart';
 import '../widgets/removal_alert.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
@@ -99,6 +100,12 @@ class _GameShellState extends State<GameShell> {
           lines.where((l) => isCelebration(l, state.before)).firstOrNull;
       if (big != null) {
         await showCelebration(context, big, state);
+        if (!mounted) return;
+      }
+      // The awards night the player was up at (docs K243).
+      for (final r in lines.where((l) => l.event is AwardResults)) {
+        await showAwardNight(
+            context, state, (r.event as AwardResults).year);
         if (!mounted) return;
       }
       // Bought streams removed: its own alert (docs K95, F65).

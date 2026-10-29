@@ -1527,6 +1527,41 @@ void main() {
     await shot(tester, '15m_awards_section');
     await tester.tap(awards);
     await shot(tester, '15n_awards');
+    // The night itself, relived (docs K243): the latest show she was up at.
+    final watch = find.text('Watch the night');
+    for (final y in ['2017', '2016', '2015']) {
+      if (watch.evaluate().isNotEmpty) break;
+      await tester.tap(find.text(y).first);
+      for (var i = 0; i < 3; i++) {
+        await tester
+            .runAsync(() => Future.delayed(Duration(milliseconds: 200)));
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+      await tester.pumpAndSettle();
+    }
+    if (watch.evaluate().isNotEmpty) {
+      await tester.tap(watch);
+      await tester.pumpAndSettle();
+      await shot(tester, '15n1_award_night');
+      await tester.tap(find.text('Take your seat'));
+      await tester.pumpAndSettle();
+      await shot(tester, '15n2_award_nominees');
+      await tester.tap(find.text('Open the envelope'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 200));
+      await shot(tester, '15n3_award_envelope', settle: false);
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 900));
+      await shot(tester, '15n4_award_winner', settle: false);
+      await tester.pump(const Duration(seconds: 4));
+      await tester.tap(find.text('Skip to the end'));
+      await tester.pumpAndSettle();
+      await shot(tester, '15n5_award_tally');
+      await tester.tap(find.text('Leave the show'));
+      await tester.pumpAndSettle();
+    }
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -700));
     await shot(tester, '15o_awards_more');
 
