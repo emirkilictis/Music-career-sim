@@ -399,6 +399,7 @@ class Fmt {
         RadioPush.heavy => l.radioHeavy,
         RadioPush.light => l.radioLight,
         RadioPush.blitz => l.radioBlitz,
+        RadioPush.pulled => l.radioPulled,
       };
 
   String radioPushHint(RadioPush r) => switch (r) {
@@ -407,6 +408,7 @@ class Fmt {
         RadioPush.standard => l.radioStandardHint,
         RadioPush.heavy => l.radioHeavyHint,
         RadioPush.blitz => l.radioBlitzHint,
+        RadioPush.pulled => l.radioPulledHint,
       };
 
   /// A radio format's name (docs K134).

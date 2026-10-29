@@ -183,7 +183,11 @@ enum RadioPush {
   light(costCents: 5000000, factor: 0.75, rank: 1),
 
   /// Every format at once, heavy rotation everywhere (docs K128).
-  blitz(costCents: 150000000, factor: 2.1, rank: 4);
+  blitz(costCents: 150000000, factor: 2.1, rank: 4),
+
+  /// Taken off the radio to work another single (docs K253): stations
+  /// drop it, and its slots go to the artist's other singles.
+  pulled(costCents: 0, factor: 0.05, rank: -1);
 
   const RadioPush(
       {required this.costCents, required this.factor, required this.rank});
@@ -211,6 +215,9 @@ enum RadioPush {
       _ => factor,
     };
   }
+
+
+  bool get isPulled => this == pulled;
 }
 
 /// The radio formats a single is worked to (docs K134): how many people

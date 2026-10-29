@@ -1995,6 +1995,53 @@ void main() {
       expect(firstWeeks(true), greaterThanOrEqualTo(firstWeeks(false)));
     });
 
+    test('a single taken off the radio frees its slots (K253)', () {
+      // Two singles three weeks apart, the first taken off the radio or
+      // not: the second gets more radio without it.
+      (double, double) run(bool pull) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2016,
+                premium: true,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire));
+        final p = g.world.player!;
+        final ids = <int>[];
+        for (var i = 0; i < 2; i++) {
+          p.creativeEnergy = 100;
+          ids.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        g.releaseSingle(ids[0], campaign: Campaign.standard);
+        g.advanceWeeks(3, stop: SkipStop.never);
+        g.releaseSingle(ids[1], campaign: Campaign.standard);
+        if (pull) {
+          expect(g.song(ids[0]).canPullRadio, isTrue);
+          g.pullRadio(ids[0]);
+          expect(g.song(ids[0]).radioPush, RadioPush.pulled);
+          expect(g.song(ids[0]).canPullRadio, isFalse);
+          expect(() => g.pullRadio(ids[0]), _code('radioLocked'));
+        }
+        var first = 0.0, second = 0.0;
+        for (var i = 0; i < 4; i++) {
+          g.advanceWeek();
+          first += g.world.songs[ids[0]].weekRadio;
+          second += g.world.songs[ids[1]].weekRadio;
+        }
+        // Kept across reopening.
+        final slot = g.slotId;
+        g.close();
+        final again = GameSession.resume(slots, slot);
+        if (pull) expect(again.song(ids[0]).radioPush, RadioPush.pulled);
+        again.close();
+        return (first, second);
+      }
+
+      final kept = run(false), pulled = run(true);
+      expect(pulled.$1, lessThan(kept.$1 * 0.2));
+      expect(pulled.$2, greaterThan(kept.$2 * 1.05));
+    });
+
     test('the radio charts rank US and UK airplay (K129, K248)', () {
       final g = GameSession.start(slots, _setup());
       g.advanceWeeks(3, stop: SkipStop.never);

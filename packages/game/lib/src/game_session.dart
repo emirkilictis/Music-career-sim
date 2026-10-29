@@ -1993,6 +1993,16 @@ class GameSession {
     _saveNow();
   }
 
+  /// Takes a single off the radio to work another one (docs K253).
+  void pullRadio(int songId) {
+    final s = _ownSong(songId);
+    if (!Actions.canPullRadio(world, _p, s)) {
+      throw GameException('radioLocked', 'Not on the radio');
+    }
+    Actions.pullRadio(world, _p, s);
+    _saveNow();
+  }
+
   /// Raises a released single's radio push (docs K128).
   void upgradeRadio(int songId, RadioPush to) {
     final s = _ownSong(songId);

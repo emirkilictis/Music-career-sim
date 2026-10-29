@@ -556,6 +556,22 @@ abstract final class Actions {
     w.dirtySongs.add(s.id);
   }
 
+  /// Whether [s] can be taken off the radio (docs K253): a single on air
+  /// in its first half year.
+  static bool canPullRadio(World w, Artist a, Song s) =>
+      s.isSingle &&
+      s.status == SongStatus.active &&
+      !s.radioPush.isPulled &&
+      w.week - s.singleWeek < 26;
+
+  /// Takes [s] off the radio to work another single (docs K253): no money
+  /// back, the stations drop it, and it stops taking the artist's slots.
+  static void pullRadio(World w, Artist a, Song s) {
+    if (!canPullRadio(w, a, s)) throw ActionException('Not on the radio');
+    s.radioPush = RadioPush.pulled;
+    w.dirtySongs.add(s.id);
+  }
+
   /// Raises a released single's radio push (docs K128).
   static void upgradeRadio(World w, Artist a, Song s, RadioPush to) {
     if (!canUpgradeRadio(w, a, s) ||

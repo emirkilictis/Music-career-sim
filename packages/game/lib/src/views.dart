@@ -340,6 +340,8 @@ class SongView {
                       r.rank <= Actions.maxRadioPush(w.player!.label).rank)
                     r: Actions.radioUpgradeCost(w.player!, s, r),
               },
+        canPullRadio = s.primaryArtistId == w.playerArtistId &&
+            Actions.canPullRadio(w, w.player!, s),
         holiday = s.holiday,
         dissTarget = s.dissTarget,
         dissTargetName = s.dissTarget >= 0
@@ -681,6 +683,9 @@ class SongView {
 
   /// The radio push bought for it as a single (docs K84).
   final RadioPush radioPush;
+
+  /// It can be taken off the radio for another single (docs K253).
+  final bool canPullRadio;
   final PlaylistAdd playlistAdd;
   final List<ChartRecord> charts;
   final double weekStreamsUs;

@@ -983,6 +983,7 @@ IconData radioIcon(RadioPush r) => switch (r) {
       RadioPush.standard => Icons.radio,
       RadioPush.heavy => Icons.cell_tower_rounded,
       RadioPush.blitz => Icons.campaign_rounded,
+      RadioPush.pulled => Icons.radio_button_unchecked_rounded,
     };
 
 /// The autoplay levels as chips (docs K128).

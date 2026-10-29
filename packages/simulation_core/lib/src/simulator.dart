@@ -280,7 +280,10 @@ class Simulator {
       final id = s.primaryArtistId;
       singleLoad[id] =
           (singleLoad[id] ?? 0) + _singleFanCurve(c, ageRel, promoAge);
-      radioLoad[id] = (radioLoad[id] ?? 0) + _radioLife(s, promoAge);
+      // A single taken off the radio frees its slots (docs K253).
+      if (!s.radioPush.isPulled) {
+        radioLoad[id] = (radioLoad[id] ?? 0) + _radioLife(s, promoAge);
+      }
       promoLoad[id] = (promoLoad[id] ?? 0) +
           _promoLife(s, promoAge, fastStart(w.artists[id]));
     }
@@ -289,6 +292,8 @@ class Simulator {
     // same artist every week (docs K222). Full after a gap of
     // [SimConfig.releaseGapWeeks]; an album counts as a release.
     final releases = <int, List<(int, int)>>{};
+    // Singles taken off the radio (docs K253).
+    final pulled = <int>{};
     // Each artist's songs on the charts and around them (docs K222).
     final songCount = <int, int>{};
     for (var i = 0; i < n; i++) {
@@ -297,6 +302,7 @@ class Simulator {
       if (s.isSingle) {
         (releases[s.primaryArtistId] ??= []).add((s.singleWeek, s.id));
       }
+      if (s.radioPush.isPulled) pulled.add(s.id);
     }
     for (final id in w.activeAlbumIds) {
       final al = w.albums[id];
@@ -304,13 +310,16 @@ class Simulator {
         (releases[al.artistId] ??= []).add((al.releaseWeek, -1 - al.id));
       }
     }
-    double gapOf(Song s) {
+    // [radio]: for the stations, which have room again once the single
+    // before was taken off the radio (docs K253).
+    double gapOf(Song s, {bool radio = false}) {
       if (!s.isSingle) return 1;
       var prev = -1 << 30;
       for (final (week, key)
           in releases[s.primaryArtistId] ?? const <(int, int)>[]) {
         // Its own album is no rival release (docs K251).
         if (key == s.id || key == -1 - s.albumId) continue;
+        if (radio && pulled.contains(key)) continue;
         if (week < s.singleWeek || (week == s.singleWeek && key < s.id)) {
           if (week > prev) prev = week;
         }
@@ -687,7 +696,7 @@ class Simulator {
       final rd = s.radioAppeal *
           _radioLife(s, promoAge) *
           share(radioLoad, s, promoAge) *
-          gapOf(s) *
+          gapOf(s, radio: true) *
           (s.isSingle ? 1.0 : 0.03) *
           (0.2 + p.fame) *
           p.labelReach *

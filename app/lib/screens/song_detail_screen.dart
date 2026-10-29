@@ -679,6 +679,36 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
   }
 
+  /// Takes the single off the radio after asking (docs K253).
+  Future<void> _pullRadio(SongView s) async {
+    final l = context.l10n;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l.radioPullTitle),
+        content: Text(l.radioPullBody),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(c, false), child: Text(l.cancel)),
+          FilledButton(
+              onPressed: () => Navigator.pop(c, true),
+              child: Text(l.radioPullButton)),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await widget.state.act(Cmd.pullRadio(s.id));
+      if (mounted) {
+        showInfo(context, l.radioPullDone,
+            icon: Icons.radio_button_unchecked_rounded);
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _scrap(SongView s) async {
     final l = context.l10n;
     final ok = await showDialog<bool>(
@@ -861,6 +891,19 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           onPressed: () => _tool(Cmd.upgradeRadio(s.id, e.key)),
                         ),
                     ]),
+                  ],
+                  // Off the radio for another single (docs K253).
+                  if (s.canPullRadio) ...[
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => _pullRadio(s),
+                        icon: const Icon(Icons.radio_button_unchecked_rounded,
+                            size: 18),
+                        label: Text(l.radioPullButton),
+                      ),
+                    ),
                   ],
                   // A leak (docs K140).
                   if (s.inVault && s.leakedWeek >= 0) ...[
