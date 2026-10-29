@@ -5929,6 +5929,8 @@
   "radioUpgradeHint": "Raise the radio push while stations are still deciding (first 8 weeks; you pay the difference):",
   "chartUsRadio": "US Radio Songs",
   "chartShortUsRadio": "US Radio",
+  "chartUkRadio": "UK Radio Songs",
+  "chartShortUkRadio": "UK Radio",
   "chartUsStreaming": "US Streaming Songs",
   "chartShortUsStreaming": "US Streaming",
   "chartUsDigital": "US Digital Song Sales",

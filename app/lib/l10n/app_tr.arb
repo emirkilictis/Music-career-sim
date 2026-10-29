@@ -1724,6 +1724,8 @@
   "radioUpgradeHint": "İstasyonlar hâlâ karar verirken radyo tanıtımını yükselt (ilk 8 hafta; farkı ödersin):",
   "chartUsRadio": "ABD Radyo Şarkıları",
   "chartShortUsRadio": "ABD Radyo",
+  "chartUkRadio": "UK Radyo Şarkıları",
+  "chartShortUkRadio": "UK Radyo",
   "chartUsStreaming": "ABD Streaming Şarkıları",
   "chartShortUsStreaming": "ABD Streaming",
   "chartUsDigital": "ABD Dijital Şarkı Satışları",

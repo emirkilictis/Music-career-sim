@@ -1155,8 +1155,10 @@ class ChartView {
           ChartMarket.usRingtones =>
             CountryShares.usOfNorthAmerica(artist.homeCountry) *
                 byRegion(Region.northAmerica.index),
-          ChartMarket.uk => CountryShares.ukOfEurope(artist.homeCountry) *
-              byRegion(Region.europe.index),
+          ChartMarket.uk ||
+          ChartMarket.ukRadio =>
+            CountryShares.ukOfEurope(artist.homeCountry) *
+                byRegion(Region.europe.index),
           _ => byRegion(0) + byRegion(1) + byRegion(2),
         };
     double streams = 0, sales = 0, radio = 0, pure = 0, sea = 0, tea = 0;

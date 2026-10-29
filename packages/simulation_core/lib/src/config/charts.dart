@@ -25,6 +25,9 @@ enum ChartMarket {
 
   /// US ringtone sales (docs K183).
   usRingtones,
+
+  /// UK radio airplay audience (docs K248).
+  ukRadio,
 }
 
 /// A chart definition. Names are fictional (no real chart or platform
@@ -100,6 +103,9 @@ abstract final class Charts {
   /// Ringtone sales (docs K183), 2004–2010.
   static const usRingtones = 14;
 
+  /// UK radio airplay (docs K248).
+  static const ukRadio = 15;
+
   static const all = <ChartDef>[
     ChartDef(
         id: usSongs,
@@ -165,8 +171,7 @@ abstract final class Charts {
         key: 'chart.us.radio',
         kind: ChartKind.songs,
         market: ChartMarket.usRadio,
-        size: 50,
-        retired: true),
+        size: 50),
     ChartDef(
         id: usStreaming,
         key: 'chart.us.streaming',
@@ -208,9 +213,16 @@ abstract final class Charts {
         startYear: 2004,
         endYear: 2010,
         retired: true),
+    // Back with a UK one (docs K248): Emir wanted the radio charts.
+    ChartDef(
+        id: ukRadio,
+        key: 'chart.uk.radio',
+        kind: ChartKind.songs,
+        market: ChartMarket.ukRadio,
+        size: 50),
   ];
 
-  static const count = 15;
+  static const count = 16;
 
   /// Song charts whose positions feed back into exposure and dormancy.
   static const mainSongCharts = [usSongs, ukSongs, globalSongs];

@@ -1547,6 +1547,8 @@ k('radioUpgradeHint','Raise the radio push while stations are still deciding (fi
 # US radio chart (K129)
 k('chartUsRadio','US Radio Songs','ABD Radyo Şarkıları')
 k('chartShortUsRadio','US Radio','ABD Radyo')
+k('chartUkRadio','UK Radio Songs','UK Radyo Şarkıları')
+k('chartShortUkRadio','UK Radio','UK Radyo')
 k('chartUsStreaming','US Streaming Songs','ABD Streaming Şarkıları')
 k('chartShortUsStreaming','US Streaming','ABD Streaming')
 k('chartUsDigital','US Digital Song Sales','ABD Dijital Şarkı Satışları')

@@ -1944,6 +1944,31 @@ void main() {
       g.close();
     });
 
+    test('the radio charts rank US and UK airplay (K129, K248)', () {
+      final g = GameSession.start(slots, _setup());
+      g.advanceWeeks(3, stop: SkipStop.never);
+      for (final (id, region) in [
+        (Charts.usRadio, Region.northAmerica),
+        (Charts.ukRadio, Region.europe),
+      ]) {
+        final radio = g.chart(id);
+        expect(radio.rows.length, 50);
+        for (var i = 1; i < radio.rows.length; i++) {
+          expect(radio.rows[i].points,
+              lessThanOrEqualTo(radio.rows[i - 1].points));
+        }
+        // The audience it counts is the song's radio in that market.
+        final top = g.world.songs[radio.rows.first.entityId];
+        expect(top.weekRadio, greaterThan(0));
+        expect(g.world.artists[top.primaryArtistId].regionShare[region.index],
+            greaterThan(0));
+      }
+      // Not the same list: each country's stations play their own.
+      expect(g.chart(Charts.ukRadio).rows.map((r) => r.entityId).take(10),
+          isNot(g.chart(Charts.usRadio).rows.map((r) => r.entityId).take(10)));
+      g.close();
+    });
+
     test('an independent picks a distributor (K157)', () {
       var g = GameSession.start(
           slots,
@@ -1983,9 +2008,8 @@ void main() {
       g.close();
     });
 
-    test('the side charts are gone (K202)', () {
+    test('the side charts are gone, the radio ones back (K202, K248)', () {
       const gone = [
-        Charts.usRadio,
         Charts.usStreaming,
         Charts.usDigital,
         Charts.usAlbumSales,
@@ -2001,6 +2025,7 @@ void main() {
       }
       // The main charts are all still there.
       expect(ids, containsAll(const [Charts.usSongs, Charts.usAlbums]));
+      expect(ids, containsAll(const [Charts.usRadio, Charts.ukRadio]));
       // Nothing charts on them any more.
       for (final s in g.world.songs) {
         for (final c in gone) {

@@ -29,6 +29,9 @@ const _magazineCharts = [
   Charts.globalAlbums,
   Charts.ukSongs,
   Charts.ukAlbums,
+  // Radio airplay (docs K248).
+  Charts.usRadio,
+  Charts.ukRadio,
 ];
 
 /// The box-office board in the chart tabs (docs K77).

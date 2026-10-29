@@ -4262,6 +4262,9 @@ class GameSession {
     Charts.usSongs,
     Charts.ukSongs,
     Charts.globalSongs,
+    // Debuts and #1s on the radio (docs K248); no news for each new peak.
+    Charts.usRadio,
+    Charts.ukRadio,
   ];
   static const _albumCharts = [
     Charts.usAlbums,
@@ -4405,7 +4408,7 @@ class GameSession {
           events.add(StillNumberOne(c, kind, id, st.weeksAtNo1));
         } else if (kind == EntityKind.song &&
             !isDebut &&
-            c != Charts.ukSongs &&
+            (c == Charts.usSongs || c == Charts.globalSongs) &&
             st.lastPos <= 40 &&
             (prevPeak == 0 || st.lastPos < prevPeak)) {
           events.add(NewPeak(c, id, st.lastPos));

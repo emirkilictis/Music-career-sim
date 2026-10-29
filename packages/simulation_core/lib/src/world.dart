@@ -476,8 +476,11 @@ class World {
                 : 1) *
             wr[Region.northAmerica.index],
       ChartMarket.uk ||
+      ChartMarket.ukRadio ||
       ChartMarket.platformEurope =>
-        (market == ChartMarket.uk ? CountryShares.ukOfEurope(home) : 1) *
+        (market != ChartMarket.platformEurope
+                ? CountryShares.ukOfEurope(home)
+                : 1) *
             wr[Region.europe.index],
       _ => wr[0] + wr[1] + wr[2],
     };
