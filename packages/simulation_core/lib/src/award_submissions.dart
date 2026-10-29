@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'awards.dart';
 
 /// One record the player put up for one category (docs K227): a song for
-/// Record or Song of the Year, an album for Album of the Year or a genre's
-/// album award ([genre], a [genreNames] index).
+/// Record or Song of the Year or a genre's song award, an album for Album
+/// of the Year or a genre's album award ([genre], a [genreNames] index).
 class AwardSubmission {
   const AwardSubmission(this.category, this.id, {this.genre = -1});
   final AwardCategory category;
@@ -40,13 +40,13 @@ class AwardSubmissions {
   /// voters.
   int count(AwardCategory c, {int genre = -1}) => entries
       .where((e) =>
-          e.category == c && (c != AwardCategory.genreAlbum || e.genre == genre))
+          e.category == c && (!c.isGenre || e.genre == genre))
       .length;
 
-  /// Genre awards entered.
+  /// Genres entered, in either genre award (docs K250).
   Set<int> get genres => {
         for (final e in entries)
-          if (e.category == AwardCategory.genreAlbum) e.genre
+          if (e.category.isGenre) e.genre
       };
 
   String encode() => jsonEncode([

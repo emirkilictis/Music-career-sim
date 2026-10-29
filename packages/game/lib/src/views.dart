@@ -3679,6 +3679,13 @@ class AwardSubmissionsView {
         title: s.title,
         record: outlook[AwardSubmission(AwardCategory.record, s.id)],
         song: outlook[AwardSubmission(AwardCategory.song, s.id)],
+        genres: [
+          for (final g in Awards.songGenreOptions(w, s))
+            (
+              g,
+              outlook[AwardSubmission(AwardCategory.genreSong, s.id, genre: g)]
+            )
+        ],
       ));
     }
     for (final al in Awards.eligibleAlbums(w, year)) {
@@ -3728,11 +3735,15 @@ class AwardSongEntry {
       {required this.songId,
       required this.title,
       required this.record,
-      required this.song});
+      required this.song,
+      this.genres = const []});
   final int songId;
   final String title;
   final AwardOutlook? record;
   final AwardOutlook? song;
+
+  /// Genre song awards it can go up for: (genre, outlook) (docs K250).
+  final List<(int, AwardOutlook?)> genres;
 }
 
 /// An album the player can put up for Album of the Year ([album], null:

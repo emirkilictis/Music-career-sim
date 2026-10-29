@@ -45,18 +45,18 @@ class _AwardSubmissionsScreenState extends State<AwardSubmissionsScreen> {
 
   int _count(AwardCategory c, {int genre = -1}) => _picked
       .where((e) =>
-          e.category == c && (c != AwardCategory.genreAlbum || e.genre == genre))
+          e.category == c && (!c.isGenre || e.genre == genre))
       .length;
 
   int get _genres => {
         for (final e in _picked)
-          if (e.category == AwardCategory.genreAlbum) e.genre
+          if (e.category.isGenre) e.genre
       }.length;
 
   bool _canAdd(AwardSubmission e) {
     if (_count(e.category, genre: e.genre) >= Awards.maxEntries) return false;
-    if (e.category == AwardCategory.genreAlbum &&
-        _count(e.category, genre: e.genre) == 0 &&
+    if (e.category.isGenre &&
+        !_picked.any((x) => x.category.isGenre && x.genre == e.genre) &&
         _genres >= Awards.maxGenres) {
       return false;
     }
@@ -146,6 +146,16 @@ class _AwardSubmissionsScreenState extends State<AwardSubmissionsScreen> {
                                           fmt.awardCategory(
                                               AwardCategory.song, -1),
                                           s.song!),
+                                    // Genre song awards (docs K250).
+                                    for (final (g, o) in s.genres)
+                                      if (o != null)
+                                        _option(
+                                            AwardSubmission(
+                                                AwardCategory.genreSong,
+                                                s.songId,
+                                                genre: g),
+                                            l.subsGenreSongAward(fmt.genre(g)),
+                                            o),
                                   ],
                                 ),
                             ]),

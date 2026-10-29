@@ -1032,8 +1032,12 @@ void main() {
       expect(v.byLabel, isTrue);
       expect(v.songs, isNotEmpty);
       expect(v.albums.single.title, 'Ballot');
-      // The label puts up its biggest hits.
+      // The label puts up its biggest hits, the biggest for its genre's
+      // song award too (K250).
       expect(v.submitted.count(AwardCategory.record), lessThanOrEqualTo(2));
+      expect(v.submitted.count(AwardCategory.genreSong, genre: v.playerGenre),
+          1);
+      expect(v.songs.first.genres.map((x) => x.$1), contains(v.playerGenre));
       // Only eligible records, and not too many in one category.
       expect(
           () => g.submitForAwards(
@@ -1074,7 +1078,18 @@ void main() {
             expect(mine.every((n) => n.id == v.songs.first.songId), isTrue);
           case AwardCategory.genreAlbum:
             if (race.genre != other) expect(mine, isEmpty);
+          case AwardCategory.genreSong:
+            expect(mine, isEmpty);
         }
+      }
+      // The genre's song award is held, with the genre's rivals (K250).
+      final genreSong = show.races
+          .where((r) =>
+              r.category == AwardCategory.genreSong && r.genre == v.playerGenre)
+          .single;
+      for (final n in genreSong.nominees) {
+        expect(g.world.artists[n.artistId].genre, v.playerGenre);
+        expect(AwardCategory.genreSong.entry, AwardEntry.song);
       }
       // The genre award entered was held.
       expect(

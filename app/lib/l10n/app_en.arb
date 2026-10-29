@@ -3372,6 +3372,14 @@
       }
     }
   },
+  "awardGenreSong": "Best {genre} Song",
+  "@awardGenreSong": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      }
+    }
+  },
   "eventAwardNominated": "Golden Record Awards {year}: you are nominated for {what}.",
   "@eventAwardNominated": {
     "placeholders": {
@@ -8800,6 +8808,14 @@
       }
     }
   },
+  "subsGenreSongAward": "Best {genre} Song",
+  "@subsGenreSongAward": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      }
+    }
+  },
   "subsNewArtist": "Best New Artist",
   "subsNewArtistHint": "Held back, you can still be up for it next year, if your first records are recent enough.",
   "subsStrong": "Strong",
@@ -8819,7 +8835,7 @@
   "subsSave": "Submit",
   "subsDone": "Submitted. You can change it until the deadline.",
   "subsEmpty": "Nothing of yours is in the running this year: songs need to chart, albums need reviews.",
-  "subsLimit": "Up to {max} per category and {genres} genre awards.",
+  "subsLimit": "Up to {max} per category, in up to {genres} genres (album and song awards).",
   "@subsLimit": {
     "placeholders": {
       "max": {

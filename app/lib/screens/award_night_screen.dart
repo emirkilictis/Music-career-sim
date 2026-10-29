@@ -44,10 +44,11 @@ class _AwardNightScreenState extends State<AwardNightScreen>
   late final AnimationController _confetti =
       AnimationController(vsync: this, duration: const Duration(seconds: 3));
 
-  /// The player's categories, the genre award first and Album of the Year
+  /// The player's categories, the genre awards first and Album of the Year
   /// last, as the show builds to it.
   late final List<AwardRaceView> _races = [
     for (final c in const [
+      AwardCategory.genreSong,
       AwardCategory.genreAlbum,
       AwardCategory.newArtist,
       AwardCategory.song,

@@ -229,7 +229,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F127 | Emir (2038, 109 eski şarkı yılda $1,34M, satış teklifi $16M): "Kataloğum çok değersiz oluyor." | ✅ K247 |
 | F128 | Emir: "Not al: radio chart." Sonra: "Tamam sadece USA ve UK radio chart geri gelsin." | ✅ K248 |
 | F129 | Emir: "Art arda bir sürü turne yapabiliyor oyuncu. Hem hiç yorulmuyor hem de bir sürü para kazanıyor; sık turne yapınca bilet satışları mı düşse? Ama uzun süre turne yapmasa iyi bilet satsa biriken hype ile." | ✅ K249 |
-| F130 | Oyuncu grubu (Federico): "Also maybe add genre categories for songs too in grammys. Like you have best rock, pop, R&B etc. album. Same could go for songs." | ⏳ Sırada. |
+| F130 | Oyuncu grubu (Federico): "Also maybe add genre categories for songs too in grammys. Like you have best rock, pop, R&B etc. album. Same could go for songs." | ✅ K250 |
 | F131 | Oyuncu grubu: "You could make it possible to release variants vinyl and CD etc. even after album release." Emir: "Bizde bu var ama detaylandıralım: normal albüm yayınlar gibi tarih seçelim, duyuralım, hype inşa edelim." | ⏳ Sırada. |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 

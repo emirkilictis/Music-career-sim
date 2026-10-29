@@ -178,6 +178,8 @@ class Fmt {
         AwardCategory.newArtist => l.awardNewArtist,
         AwardCategory.genreAlbum =>
           l.awardGenreAlbum(genre >= 0 ? this.genre(genre) : ''),
+        AwardCategory.genreSong =>
+          l.awardGenreSong(genre >= 0 ? this.genre(genre) : ''),
       };
 
   /// "January, week 2" (no year) for an absolute game week.

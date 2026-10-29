@@ -29,17 +29,23 @@ enum AwardCategory {
   newArtist,
 
   /// The best album in the player's genre ([AwardRace.genre]).
-  genreAlbum;
+  genreAlbum,
+
+  /// The best song in a genre (docs K250): Best Pop Song, Best Rock Song…
+  genreSong;
 
   /// What the nominees are.
   AwardEntry get entry => switch (this) {
-        record || song => AwardEntry.song,
+        record || song || genreSong => AwardEntry.song,
         album || genreAlbum => AwardEntry.album,
         newArtist => AwardEntry.artist,
       };
 
+  /// A genre's award ([AwardRace.genre] says which genre).
+  bool get isGenre => this == genreAlbum || this == genreSong;
+
   /// One of the four big awards everyone watches.
-  bool get isGeneralField => this != genreAlbum;
+  bool get isGeneralField => !isGenre;
 }
 
 enum AwardEntry { song, album, artist }
@@ -62,7 +68,7 @@ class AwardRace {
   final AwardCategory category;
   final List<AwardNominee> nominees;
 
-  /// [genreNames] index for [AwardCategory.genreAlbum].
+  /// [genreNames] index for a genre award ([AwardCategory.isGenre]).
   final int genre;
 
   /// Index into [nominees]; -1 until the show.
@@ -261,6 +267,21 @@ abstract final class Awards {
 
   /// The genre awards [al] could go up for: the artist's genre and its
   /// tracks' genres.
+  /// The genres [s] can be entered in (docs K250): its own and its
+  /// artist's.
+  static List<int> songGenreOptions(World w, Song s) => {
+        w.artists[s.primaryArtistId].genre,
+        ...s.genres,
+      }.toList()
+        ..sort();
+
+  /// How well [s] fits [genre]: 1 if it is one of its genres.
+  static double songGenreFit(World w, Song s, int genre) =>
+      s.genres.contains(genre) ||
+              (s.genres.isEmpty && w.artists[s.primaryArtistId].genre == genre)
+          ? 1
+          : 0;
+
   static List<int> genreOptions(World w, Album al) => {
         w.artists[al.artistId].genre,
         for (final id in al.songIds) ...w.songs[id].genres,
@@ -314,6 +335,8 @@ abstract final class Awards {
         AwardSubmission(AwardCategory.album, top.id),
       if (top != null)
         AwardSubmission(AwardCategory.genreAlbum, top.id, genre: genre),
+      for (final s in songs.take(1))
+        AwardSubmission(AwardCategory.genreSong, s.id, genre: genre),
     ]);
   }
 
@@ -329,6 +352,8 @@ abstract final class Awards {
         for (final s in eligibleSongs(w, year)) ...[
           AwardSubmission(AwardCategory.record, s.id),
           AwardSubmission(AwardCategory.song, s.id),
+          for (final g in songGenreOptions(w, s))
+            AwardSubmission(AwardCategory.genreSong, s.id, genre: g),
         ],
         for (final al in eligibleAlbums(w, year)) ...[
           if (albumOfYearEligible(w, al))
@@ -351,7 +376,7 @@ abstract final class Awards {
       throw ActionException('Twice');
     }
     for (final c in AwardCategory.values) {
-      if (c == AwardCategory.genreAlbum) {
+      if (c.isGenre) {
         for (final g in s.genres) {
           if (s.count(c, genre: g) > maxEntries) {
             throw ActionException('Too many');
@@ -372,8 +397,7 @@ abstract final class Awards {
     final ballots = _ballots(w, year, () => 0, all, split: false);
     final out = <AwardSubmission, AwardOutlook>{};
     for (final e in all.entries) {
-      final key =
-          (e.category, e.category == AwardCategory.genreAlbum ? e.genre : -1);
+      final key = (e.category, e.category.isGenre ? e.genre : -1);
       final pool = ballots[key] ?? const [];
       final mine = pool
           .where((x) => x.$2.id == e.id && x.$2.artistId == w.playerArtistId)
@@ -413,7 +437,8 @@ abstract final class Awards {
   /// or -1) to (score, nominee). The player is in only with [mine].
   static Map<(AwardCategory, int), List<(double, AwardNominee)>> _ballots(
       World w, int year, double Function() noise, AwardSubmissions mine,
-      {bool split = true}) {
+      {bool split = true, double Function(int songId)? keyedNoise}) {
+    double songNoise(int id) => keyedNoise?.call(id) ?? 0;
     final (from, to) = window(year);
     final me = w.player;
     final pid = w.playerArtistId;
@@ -423,6 +448,11 @@ abstract final class Awards {
     // Songs: singles (or charting album tracks) out in the window.
     final record = <(double, AwardNominee)>[];
     final song = <(double, AwardNominee)>[];
+    final genres = <int>{if (me != null) me.genre, ...mine.genres};
+    // Genre song awards (docs K250): each rival's songs in their genre,
+    // the player's where submitted. Their luck is drawn per song, apart
+    // from the other races'.
+    final genreSong = {for (final g in genres) g: <(double, AwardNominee)>[]};
     final firstRelease = <int, int>{};
     // Each artist's best record, whatever they submitted: the voters know
     // a new artist by all of it.
@@ -453,11 +483,26 @@ abstract final class Awards {
       if (a != pid || mine.has(AwardCategory.song, s.id)) {
         song.add((son - (a == pid ? splitOf(AwardCategory.song) : 0), n));
       }
+      if (genreSong.isNotEmpty) {
+        final gen = 0.45 * hit + 0.45 * q + 0.1 * fame + songNoise(s.id) + fyc;
+        if (a == pid) {
+          for (final g in genres) {
+            if (!mine.has(AwardCategory.genreSong, s.id, genre: g)) continue;
+            genreSong[g]!.add((
+              gen -
+                  misfitPenalty * (1 - songGenreFit(w, s, g)) -
+                  splitOf(AwardCategory.genreSong, genre: g),
+              n
+            ));
+          }
+        } else if (genreSong[w.artists[a].genre] case final pool?) {
+          pool.add((gen, n));
+        }
+      }
     }
 
     // Albums out in the window that critics reviewed.
     final album = <(double, AwardNominee)>[];
-    final genres = <int>{if (me != null) me.genre, ...mine.genres};
     final genreAlbum = {for (final g in genres) g: <(double, AwardNominee)>[]};
     for (final al in w.albums) {
       if (al.releaseWeek < from || al.releaseWeek >= to) continue;
@@ -530,6 +575,7 @@ abstract final class Awards {
       (AwardCategory.album, -1): album,
       (AwardCategory.newArtist, -1): newArtist,
       for (final g in genres) (AwardCategory.genreAlbum, g): genreAlbum[g]!,
+      for (final g in genres) (AwardCategory.genreSong, g): genreSong[g]!,
     };
   }
 
@@ -543,7 +589,11 @@ abstract final class Awards {
     double noise() => r.nextNormal() * 0.05;
     final me = w.player;
     final mine = submissionsFor(w, year);
-    final ballots = _ballots(w, year, noise, mine);
+    final ballots = _ballots(w, year, noise, mine,
+        keyedNoise: (id) =>
+            RandomStream.keyed(w.seed, year, id, RngPurpose.awards)
+                .nextNormal() *
+            0.05);
 
     final races = <AwardRace>[];
     void add(AwardCategory c, List<(double, AwardNominee)> pool,
@@ -576,6 +626,10 @@ abstract final class Awards {
     ];
     for (final g in genres) {
       add(AwardCategory.genreAlbum, ballots[(AwardCategory.genreAlbum, g)]!,
+          genre: g);
+    }
+    for (final g in genres) {
+      add(AwardCategory.genreSong, ballots[(AwardCategory.genreSong, g)]!,
           genre: g);
     }
     if (races.isEmpty) return null;
@@ -681,6 +735,8 @@ abstract final class Awards {
         lift(w.songs[n.id], 0.6);
       case AwardCategory.song:
         lift(w.songs[n.id], 0.4);
+      case AwardCategory.genreSong:
+        lift(w.songs[n.id], 0.15);
       case AwardCategory.album || AwardCategory.genreAlbum:
         final al = w.albums[n.id];
         for (final id in al.songIds) {
