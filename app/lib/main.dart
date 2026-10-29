@@ -10,6 +10,7 @@ Future<void> main() async {
     final (controller, settings, images) = await boot();
     runApp(MusicCareerApp(
         controller: controller, settings: settings, images: images));
+    watchForUpdates();
   } catch (e) {
     runApp(StartFailedApp(error: '$e'));
   }

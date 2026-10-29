@@ -42,6 +42,8 @@
   "memberN": "{n}. üye",
   "genre": "Tür",
   "homeCountry": "Memleket",
+  "updateReady": "Oyunun yeni sürümü çıktı.",
+  "updateReload": "Yenile",
   "homeHintUs": "Müziğin Kuzey Amerika'da başlar: ABD listeleri ve ödüller sana en yakın. ABD listesi en büyük ve zirvesi en zor liste.",
   "homeHintCanada": "Müziğin Kuzey Amerika'da başlar ama başta ABD payı küçüktür. Ünlendikçe ABD listeleri açılır.",
   "homeHintUk": "Müziğin Avrupa'da başlar: en kolay ulaşılan liste İngiltere listesi. Ünlenene kadar dinlenmenin çoğu Avrupa'da kalır, bu yüzden ABD listeleri başta zordur.",

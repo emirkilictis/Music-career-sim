@@ -29,7 +29,14 @@ jobs:
         working-directory: app
         run: |
           flutter pub get
-          flutter build web --wasm --base-href /Music-career-sim/
+          # The release's id (docs K242): the game checks build.txt for a
+          # newer one, and the code files carry it so a browser never mixes
+          # a new page with code it cached from an older release.
+          V=${GITHUB_SHA::12}
+          flutter build web --wasm --base-href /Music-career-sim/ --dart-define=BUILD_ID=$V
+          echo "$V" > build/web/build.txt
+          sed -i "s#\"main.dart.wasm\"#\"main.dart.wasm?v=$V\"#g; s#\"main.dart.mjs\"#\"main.dart.mjs?v=$V\"#g; s#\"main.dart.js\"#\"main.dart.js?v=$V\"#g" build/web/flutter_bootstrap.js
+          sed -i "s#\"flutter_bootstrap.js\"#\"flutter_bootstrap.js?v=$V\"#" build/web/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

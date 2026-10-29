@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'boot/boot.dart' show applyUpdate, updateReady;
 import 'core/game_controller.dart';
 import 'core/images.dart';
 import 'core/scope.dart';
@@ -78,7 +79,7 @@ class _MusicCareerAppState extends State<MusicCareerApp> {
                   value: AppColors.isLight
                       ? SystemUiOverlayStyle.dark
                       : SystemUiOverlayStyle.light,
-                  child: DismissKeyboard(child: child!),
+                  child: DismissKeyboard(child: UpdateBanner(child: child!)),
                 ),
                 home: const SlotsScreen(),
               );
@@ -127,4 +128,63 @@ class DismissKeyboard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "A new version is out" over every screen of the web game (docs K242):
+/// one tap stores the saves and reloads.
+class UpdateBanner extends StatelessWidget {
+  const UpdateBanner({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+        valueListenable: updateReady,
+        builder: (context, ready, _) {
+          if (!ready) return child;
+          final l = AppLocalizations.of(context);
+          return Stack(children: [
+            child,
+            Positioned(
+              left: 12,
+              right: 12,
+              top: 0,
+              child: SafeArea(
+                child: Material(
+                  color: AppColors.lilac,
+                  elevation: 6,
+                  borderRadius: BorderRadius.circular(AppShape.r(14)),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 6, 6, 6),
+                    child: Row(children: [
+                      Icon(Icons.system_update_rounded,
+                          color: AppColors.onAccent, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(l.updateReady,
+                            style: TextStyle(
+                                color: AppColors.onAccent,
+                                fontWeight: FontWeight.w700)),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                            foregroundColor: AppColors.onAccent,
+                            textStyle:
+                                const TextStyle(fontWeight: FontWeight.w900)),
+                        onPressed: applyUpdate,
+                        child: Text(l.updateReload),
+                      ),
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        color: AppColors.onAccent,
+                        icon: const Icon(Icons.close_rounded, size: 18),
+                        onPressed: () => updateReady.value = false,
+                      ),
+                    ]),
+                  ),
+                ),
+              ),
+            ),
+          ]);
+        },
+      );
 }

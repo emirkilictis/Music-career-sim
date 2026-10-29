@@ -261,6 +261,16 @@ class WebSaveFs extends SaveFs {
     _timer ??= Timer(const Duration(seconds: 1), persist);
   }
 
+  /// The last write, done when IndexedDB has it.
+  Future<void> _written = Future.value();
+
+  /// Writes the changed files and waits until IndexedDB has them (before
+  /// the page reloads for a new version; docs K242).
+  Future<void> flush() {
+    persist();
+    return _written;
+  }
+
   /// Writes the changed files to IndexedDB now.
   void persist() {
     _timer?.cancel();
@@ -295,8 +305,17 @@ class WebSaveFs extends SaveFs {
       retry(const Duration(seconds: 1));
       return;
     }
-    tx.onerror = ((web.Event _) => retry()).toJS;
-    tx.onabort = ((web.Event _) => retry()).toJS;
+    final done = Completer<void>();
+    _written = done.future;
+    tx.oncomplete = ((web.Event _) => done.complete()).toJS;
+    tx.onerror = ((web.Event _) {
+      retry();
+      if (!done.isCompleted) done.complete();
+    }).toJS;
+    tx.onabort = ((web.Event _) {
+      retry();
+      if (!done.isCompleted) done.complete();
+    }).toJS;
   }
 
   static Future<JSAny?> _done(web.IDBRequest request) {

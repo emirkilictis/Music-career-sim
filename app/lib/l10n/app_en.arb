@@ -114,6 +114,8 @@
   },
   "genre": "Genre",
   "homeCountry": "Home",
+  "updateReady": "A new version of the game is out.",
+  "updateReload": "Reload",
   "homeHintUs": "Your music starts in North America: the US charts and the award shows are closest. The US chart is the biggest and the hardest to top.",
   "homeHintCanada": "Your music starts in North America, though the US is a smaller share of it at first. The US charts open up as you get famous.",
   "homeHintUk": "Your music starts in Europe: the UK chart is the easiest to reach. Most listening stays in Europe until you are famous, so the US charts are hard at first.",

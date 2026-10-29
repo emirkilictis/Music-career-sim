@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:path_provider/path_provider.dart';
 
 import '../core/game_controller.dart';
@@ -23,3 +25,8 @@ bool inAppBrowser() => false;
 /// The Home Screen tip is for iPhone browsers (docs K219).
 bool homeScreenTipDue() => false;
 void dismissHomeScreenTip() {}
+
+/// Apps update through the store; the web page checks itself (docs K242).
+final updateReady = ValueNotifier<bool>(false);
+void watchForUpdates() {}
+Future<void> applyUpdate() async {}
