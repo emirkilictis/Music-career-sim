@@ -39,6 +39,15 @@ void main(List<String> args) {
       final weak = c == 'b';
       // A middling record: written half spent (a quarter weaker).
       final middling = c == 'm';
+      // An A record: every skill maxed.
+      if (c == 'a') {
+        p.skills
+          ..songwriting = 100
+          ..vocals = 100
+          ..production = 100
+          ..performance = 100
+          ..charisma = 100;
+      }
       final fast = n < pattern.length - 1 && pattern[n + 1 == pattern.length ? n : n + 1] == 'f';
       n++;
       List<int> write(int k) => [
@@ -76,7 +85,7 @@ void main(List<String> args) {
         ..sort();
       final grade = q[q.length ~/ 2];
       g.advanceWeeks(fast ? 0 : 18, stop: SkipStop.never);
-      lines.add('album $n ${weak ? 'WEAK' : middling ? 'mid ' : 'good'} median q ${grade.toStringAsFixed(0)}'
+      lines.add('album $n ${weak ? 'WEAK' : middling ? 'mid ' : c == 'a' ? 'A   ' : 'good'} median q ${grade.toStringAsFixed(0)}'
           '  US peak ${al.peakOn(usAlb)}  wk1 ${(v.firstWeekUsUnits / 1e3).round()}K'
           '  26wk ${(v.lifetimeUnits.total / 1e6).toStringAsFixed(2)}M'
           '  fame ${(p.fame * 100).round()}%');
