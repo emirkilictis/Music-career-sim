@@ -226,7 +226,7 @@ abstract final class Actions {
     return (wrote ? energyRegenWriting : energyRegenIdle) +
         (a.restWeek == w.week ? energyRestBonus : 0) -
         a.job.energyCost -
-        (a.tour != null ? Tours.energyPerWeek : 0);
+        Tours.energyFor(w, a);
   }
 
   /// Core fans a collaborator wants before working with you: none up to

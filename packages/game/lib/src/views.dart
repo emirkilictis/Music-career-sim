@@ -2644,8 +2644,13 @@ class TourLegView {
       required this.fill,
       required this.grossCents,
       required this.maxShows,
-      required this.priceCents});
+      required this.priceCents,
+      this.mood = 1});
   final TourLeg leg;
+
+  /// The market's appetite against a fresh one (docs K249): below 1 when
+  /// toured lately, above after a long break.
+  final double mood;
   final double tickets;
   final double fill;
   final int grossCents;

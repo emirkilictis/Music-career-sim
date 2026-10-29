@@ -228,6 +228,9 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F126 | Emir (JT, %100 ünlülük, yılda 1,92B dinlenme): "Pasif dinlenmem çok az, sürekli aktif olmam mı lazım? İlk yayınlama anlarındaki düşüşü biraz çabuk getirip daha uzun bir zamana mı yaysak?" ve "Şarkım ilk hafta 60M, sonraki haftalarda sürekli 60 60 gidiyor; 20-30'u görmesini hızlandırsak ama uzun zaman geçince dibi görmese?" | ✅ K247 |
 | F127 | Emir (2038, 109 eski şarkı yılda $1,34M, satış teklifi $16M): "Kataloğum çok değersiz oluyor." | ✅ K247 |
 | F128 | Emir: "Not al: radio chart." Sonra: "Tamam sadece USA ve UK radio chart geri gelsin." | ✅ K248 |
+| F129 | Emir: "Art arda bir sürü turne yapabiliyor oyuncu. Hem hiç yorulmuyor hem de bir sürü para kazanıyor; sık turne yapınca bilet satışları mı düşse? Ama uzun süre turne yapmasa iyi bilet satsa biriken hype ile." | ✅ K249 |
+| F130 | Oyuncu grubu (Federico): "Also maybe add genre categories for songs too in grammys. Like you have best rock, pop, R&B etc. album. Same could go for songs." | ⏳ Sırada. |
+| F131 | Oyuncu grubu: "You could make it possible to release variants vinyl and CD etc. even after album release." Emir: "Bizde bu var ama detaylandıralım: normal albüm yayınlar gibi tarih seçelim, duyuralım, hype inşa edelim." | ⏳ Sırada. |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

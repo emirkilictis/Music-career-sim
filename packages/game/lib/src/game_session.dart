@@ -705,7 +705,9 @@ class GameSession {
           fill: seats == 0 ? 0 : tickets / seats,
           grossCents: gross.round(),
           maxShows: Tours.maxShowsOf(legs[i]),
-          priceCents: Tours.priceFor(legs[i].kind, year, t.priceFactor)));
+          priceCents: Tours.priceFor(legs[i].kind, year, t.priceFactor),
+          mood: Tours.marketMood(
+              world, Tours.drawOf(world, _p, t), legs[i].market)));
     }
     return TourPlanView(
       request: r,

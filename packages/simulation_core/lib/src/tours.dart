@@ -528,8 +528,81 @@ abstract final class Tours {
     return net > 0 ? a.manager.net(net) : net;
   }
 
-  /// Energy a tour week takes.
-  static const energyPerWeek = 12.0;
+  /// Energy a night on stage takes (docs K249): three nights a week cost
+  /// more than an idle week gives back.
+  static const energyPerShow = 9.0;
+
+  /// Weeks on the road before it starts to wear the artist down, and
+  /// what each week after adds (docs K249).
+  static const roadWeeks = 8, roadWearPerWeek = 1.0, roadWearMax = 10.0;
+
+  /// Energy this week's tour takes from [a] (0 off the road).
+  static double energyFor(World w, Artist a) {
+    final t = a.tour;
+    if (t == null || w.week < t.startWeek) return 0;
+    final nights = t.showsIn(w.week).length;
+    if (nights == 0) return 0;
+    final onRoad = w.week - t.startWeek;
+    return nights * energyPerShow +
+        math.min(roadWearMax, math.max(0, onRoad - roadWeeks) * roadWearPerWeek);
+  }
+
+  /// A tired artist gives a flatter show (docs K249): fewer people won
+  /// over, less buzz. Full from [freshEnergy].
+  static const freshEnergy = 40.0;
+  static double form(Artist a) =>
+      0.5 + 0.5 * (a.creativeEnergy / freshEnergy).clamp(0.0, 1.0);
+
+  /// How much of a market's audience still wants a ticket (docs K249):
+  /// people who saw the artist lately do not buy again soon, so a market
+  /// toured to the bone sells far less; after a long break the fans who
+  /// waited come out for it. 1 for a market never played.
+  static double marketMood(World w, Artist a, TourMarket m) {
+    final key = (w, w.week, w.pastTours.length, a.id, m);
+    final hit = _moodCache[key];
+    if (hit != null) return hit;
+    if (_moodCache.length > 64) _moodCache.clear();
+    var seen = 0.0;
+    var last = -1;
+    for (final t in w.pastTours) {
+      for (final s in t.shows) {
+        if (s.market != m || !s.played) continue;
+        final ago = w.week - s.week;
+        if (ago < 0) continue;
+        seen += s.sold * math.exp(-ago / seenWeeks);
+        if (s.week > last) last = s.week;
+      }
+    }
+    var mood = 1.0;
+    if (last >= 0) {
+      final base = marketDemand(w, a, m, 1, null);
+      final tired = base <= 0 ? 1.0 : (seen / base).clamp(0.0, 1.0);
+      final gap = w.week - last;
+      // Back so soon: the show is no event, whoever the artist is.
+      final recent = math.exp(-gap / recentWeeks);
+      mood = 1 - maxRecent * recent - maxTired * tired;
+      if (gap > waitedWeeks) {
+        mood *= 1 +
+            waitedBonus *
+                ((gap - waitedWeeks) / waitedWeeks).clamp(0.0, 1.0) *
+                (0.3 + 0.7 * a.fame);
+      }
+    }
+    return _moodCache[key] = mood;
+  }
+
+  static final _moodCache = <Object, double>{};
+
+  /// How long the people at a show stay away (weeks, time constant), the
+  /// most the people who saw it take off the demand, and the break after
+  /// which the fans have waited: up to [waitedBonus] more after twice
+  /// that.
+  static const seenWeeks = 52.0, maxTired = 0.3;
+
+  /// Coming back to a market straight away costs this share of its
+  /// demand, fading with a time constant of [recentWeeks].
+  static const maxRecent = 0.35, recentWeeks = 52.0;
+  static const waitedWeeks = 78, waitedBonus = 0.4;
 
   /// Whether [fans] core fans at [fame] can play [kind] venues: enough
   /// fans, or a famous enough name (docs K206).
@@ -787,6 +860,7 @@ abstract final class Tours {
     }
     final reach = visitedWeight / m.totalWeight;
     final pool = marketDemand(w, drawOf(w, a, t), m, t.priceFactor, opener) *
+        marketMood(w, drawOf(w, a, t), m) *
         t.legs[s.leg].kind.draw *
         (t.reunionOf >= 0 ? reunionDraw : 1) *
         (reach + 0.25 * (1 - reach));
@@ -895,6 +969,7 @@ abstract final class Tours {
     final tonight = t.showsIn(w.week);
     if (tonight.isNotEmpty) {
       var net = 0.0, fill = 0.0;
+      final form = Tours.form(a);
       for (final s in tonight) {
         final noise = RandomStream.keyed(
                 w.seed, w.week, a.id * 64 + t.shows.indexOf(s), RngPurpose.tour)
@@ -906,7 +981,7 @@ abstract final class Tours {
             merchPerHeadCents(GameTime.yearOf(w.week)) *
             drawOf(w, a, t).kind.merch *
             merchKeep;
-        final fans = fansFrom(a, t, r.sold);
+        final fans = fansFrom(a, t, r.sold) * form;
         s.sold = r.sold;
         s.grossCents = r.grossCents;
         if (s.soldOut) t.soldOut++;
@@ -936,9 +1011,9 @@ abstract final class Tours {
       fill /= tonight.length;
       // The manager's cut comes out of a profit, not a loss.
       a.moneyCents += (net > 0 ? a.manager.net(net) : net).round();
-      a.devotion =
-          math.min(1.0, a.devotion + 0.002 * fill * t.production.quality);
-      a.hype = math.max(a.hype, 0.1 * fill * t.production.quality);
+      a.devotion = math.min(
+          1.0, a.devotion + 0.002 * fill * t.production.quality * form);
+      a.hype = math.max(a.hype, 0.1 * fill * t.production.quality * form);
       a.skills.performance += 0.15 * (1 - a.skills.performance / 100);
       w.dirtyArtists.add(a.id);
     }

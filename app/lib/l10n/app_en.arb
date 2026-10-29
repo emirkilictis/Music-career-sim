@@ -1404,10 +1404,26 @@
       }
     }
   },
-  "tourHint": "Shows take {energy} energy a week and a great performance wins more fans. Empty seats still cost the production.",
+  "tourHint": "Each night takes {energy} energy, more after two months on the road; a tired artist wins fewer fans. A market you toured lately buys fewer tickets; after a year and a half away the fans have waited. Empty seats still cost the production.",
   "@tourHint": {
     "placeholders": {
       "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "tourMarketTired": "Toured here lately: {pct}% fewer tickets",
+  "@tourMarketTired": {
+    "placeholders": {
+      "pct": {
+        "type": "int"
+      }
+    }
+  },
+  "tourMarketWaited": "Fans waited: {pct}% more tickets",
+  "@tourMarketWaited": {
+    "placeholders": {
+      "pct": {
         "type": "int"
       }
     }

@@ -407,7 +407,7 @@ class _TourScreenState extends State<TourScreen> {
             _ScheduleCard(shows: plan.schedule),
           ],
           const SizedBox(height: 8),
-          Text(l.tourHint(Tours.energyPerWeek.round()),
+          Text(l.tourHint(Tours.energyPerShow.round()),
               style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
         ],
       ),
@@ -543,6 +543,18 @@ class _MarketTile extends StatelessWidget {
                   label: Text(context.l10n.tourFit),
                 ),
               ]),
+            ),
+          // Toured here lately, or the fans waited (docs K249).
+          if (e != null && (e.mood - 1).abs() >= 0.02)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 2, 0, 0),
+              child: Text(
+                  e.mood < 1
+                      ? l.tourMarketTired(((1 - e.mood) * 100).round())
+                      : l.tourMarketWaited(((e.mood - 1) * 100).round()),
+                  style: TextStyle(
+                      color: e.mood < 1 ? AppColors.coral : AppColors.mint,
+                      fontSize: 12.5)),
             ),
           Padding(
             padding: const EdgeInsets.only(left: 4),
