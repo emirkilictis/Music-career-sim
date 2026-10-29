@@ -34,8 +34,14 @@ void main(List<String> args) {
     final id = g.writeSong(budget: BudgetTier.high).id;
     g.releaseSingle(id, campaign: Campaign.standard);
     final s = w.songs[id];
+    final quarters = <String>[];
     for (var y = 0; y < years; y++) {
-      g.advanceWeeks(52, stop: SkipStop.never);
+      for (var q = 0; q < 4; q++) {
+        g.advanceWeeks(13, stop: SkipStop.never);
+        quarters.add((w.songWeekStreamsIn(s, ChartMarket.global) / 7 / 1e3)
+            .round()
+            .toString());
+      }
       final weekly = w.songWeekStreamsIn(s, ChartMarket.global);
       final total = w.songLifetimeStreams(s);
       print('seed $seed year ${y + 1}: ${(weekly / 7 / 1e3).round()}K a day, '
@@ -43,6 +49,7 @@ void main(List<String> args) {
           'daily/total ${(weekly / 7 / total * 1e4).toStringAsFixed(2)} per 10k '
           '(${s.status.name}, peak #${s.statsOrNull(Charts.usSongs)?.peak ?? 0})');
     }
+    print('  each quarter, K a day: ${quarters.join(' ')}');
     g.close();
     dir.deleteSync(recursive: true);
   }

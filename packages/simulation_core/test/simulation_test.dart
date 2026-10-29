@@ -287,7 +287,13 @@ void main() {
     while (s.status != SongStatus.dormant) {
       sim.step();
     }
-    final rate0 = s.dormantRate;
+    // The quarter's trend in a rate after the week just played (K261).
+    double trend(Song x) => Lifecycle.catalogTrend(
+        w.seed,
+        Lifecycle.lastCatalogUpdate(w.week - 1, x.primaryArtistId) ~/
+            Lifecycle.fadeWeeks,
+        x.id);
+    final rate0 = s.dormantRate / trend(s);
     var life = w.songLifetimeStreams(s);
     for (var i = 0; i < 2 * GameTime.weeksPerYear; i++) {
       sim.step();
@@ -299,7 +305,8 @@ void main() {
     // Its class's yearly fade (K85, K247): a top-10 single loses 8% a
     // year in its first decade, other songs faster.
     final perYear = w.config.catalogFadePerYear(Lifecycle.catalogWeight(s), 1);
-    expect(s.dormantRate / rate0, closeTo((1 - perYear) * (1 - perYear), 0.03));
+    expect(s.dormantRate / trend(s) / rate0,
+        closeTo((1 - perYear) * (1 - perYear), 0.03));
     // Rivals' catalogs fade too, a forgotten album track fastest (30% a
     // year while new, then 10%; K247).
     final rival = w.songs.firstWhere((x) =>
@@ -309,12 +316,12 @@ void main() {
         Lifecycle.catalogWeight(x) < 0.5 &&
         // Not turning five this year, when its fade slows.
         ((w.week - x.releasedWeek) / GameTime.weeksPerYear - 4.5).abs() > 0.6);
-    final before = rival.dormantRate;
+    final before = rival.dormantRate / trend(rival);
     for (var i = 0; i < GameTime.weeksPerYear; i++) {
       sim.step();
     }
     final age = (w.week - rival.releasedWeek) / GameTime.weeksPerYear - 0.5;
-    expect(rival.dormantRate / before,
+    expect(rival.dormantRate / trend(rival) / before,
         closeTo(1 - w.config.catalogFadePerYear(0.25, age), 0.05));
   });
 

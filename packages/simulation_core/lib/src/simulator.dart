@@ -1754,7 +1754,7 @@ class Simulator {
   static const maxVariantSpread = 12;
 
   /// How often each artist's catalog fades (a batch of weeks at a time).
-  static const catalogFadeWeeks = 13;
+  static const catalogFadeWeeks = Lifecycle.fadeWeeks;
 
   /// A catalog song this quiet stops being tracked (its listeners are
   /// gone): the fade then has nothing left to do for it.
@@ -1787,13 +1787,21 @@ class Simulator {
         if (s.dormantRate <= 0) continue;
         final years = (w.week - s.releasedWeek) / GameTime.weeksPerYear;
         final perYear = c.catalogFadePerYear(Lifecycle.catalogWeight(s), years);
-        var rate = s.dormantRate *
+        // This quarter's trend (docs K261) comes off before the fade and
+        // the floor, the next one goes on after: an old song is found
+        // again or forgotten for a while, then goes back to its level.
+        final quarter = w.week ~/ catalogFadeWeeks;
+        final before = Lifecycle.catalogTrend(w.seed, quarter - 1, id);
+        final now = Lifecycle.catalogTrend(w.seed, quarter, id);
+        var rate = s.dormantRate /
+            before *
             math.pow(1 - perYear, catalogFadeWeeks / GameTime.weeksPerYear);
         // A hit never falls below a share of all its plays a week (docs
         // K258): old hits stay in people's lives, as on the real apps,
         // and a catalog faded by older rules is brought back up.
         final floor = _catalogFloor(s, a, years);
         if (rate < floor) rate = floor;
+        rate *= now;
         // The player's own songs keep a few listeners however old (docs
         // K224): a song with millions of plays never shows zero.
         if (rate < catalogGoneRate && !mine) rate = 0;

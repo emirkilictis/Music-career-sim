@@ -239,6 +239,8 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F137 | Emir (sayaç: Say Something, 3,2B toplam, günde 48.667, 2040): "Streamler ölmesin, stabiliteyi arttır, git bak gerçekte nasıl." (kworb'dan The Weeknd listesiyle) | ✅ K258 |
 | F138 | Emir (2001–2007 yıl sonu küresel albüm listeleri): "2000'lerdeki pure sales'i biraz arttır, biraz daha stabil olsun." | ✅ K259 |
 | F139 | Emir (sayaç: Can't Stop the Feeling, 1,42B, günde 166K, 2041): "Hâlâ kötü, single'lar bu kadar düşmemeli." | ✅ K260 |
+| F140 | Oyuncu grubu (Federico): "After a while your catalogue, especially older songs, stay stable and trends never change; could you make it so that sometimes an old song rises or falls more than expected, or trends switch a bit?" | ✅ K261 |
+| F141 | Emir: "Dizi ya da filmler bize sorsun bazen şarkınızı kullanabilir miyiz diye, hatta reklamlarda olsun; bunlar bize hem para hem stream boost versin." | ⏳ Sırada (K262). |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

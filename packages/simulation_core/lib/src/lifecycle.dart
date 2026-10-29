@@ -6,6 +6,7 @@ import 'config/sim_config.dart';
 import 'leaks.dart';
 import 'model.dart';
 import 'rerecords.dart';
+import 'rng.dart';
 import 'snippets.dart';
 import 'world.dart';
 
@@ -82,6 +83,32 @@ abstract final class Lifecycle {
       ? 1.0
       : math.pow(c.catalogSongs / songs, c.catalogShareExponent).toDouble();
 
+  /// An old song's trend for quarter [quarter] (docs K261): mostly its
+  /// usual level; now and then found again (a film, a show, a nostalgia
+  /// wave: 1.4–3×) or out of fashion (0.55–0.8×) for that quarter.
+  static double catalogTrend(int seed, int quarter, int songId) {
+    final u = keyedUnit(seed, quarter, songId, RngPurpose.catalogTrend);
+    if (u < resurgenceChance) {
+      return 1.4 + 1.6 * (u / resurgenceChance);
+    }
+    if (u < resurgenceChance + slumpChance) {
+      return 0.55 + 0.25 * ((u - resurgenceChance) / slumpChance);
+    }
+    return 1;
+  }
+
+  /// Weeks between an artist's catalog updates ([Simulator]'s fade).
+  static const fadeWeeks = 13;
+
+  /// The last week at or before [week] when artist [artistId]'s catalog
+  /// was updated (each artist's turn comes every [fadeWeeks] weeks).
+  static int lastCatalogUpdate(int week, int artistId) =>
+      week - (week - artistId) % fadeWeeks;
+
+  /// A quarter's chances of an old song being found again, or out of
+  /// fashion (docs K261).
+  static const resurgenceChance = 0.06, slumpChance = 0.06;
+
   static void makeSongDormant(World w, Song s) {
     final a = w.primaryOf(s);
     w.settleRetired(a);
@@ -89,7 +116,11 @@ abstract final class Lifecycle {
         a.catalogFactor *
         catalogWeight(s) *
         w.config.catalogLevel *
-        catalogShare(w.config, a.dormantSongIds.length + 1);
+        catalogShare(w.config, a.dormantSongIds.length + 1) *
+        // The trend the artist's next catalog update takes off (docs
+        // K261): the quarter of its last one.
+        catalogTrend(w.seed, lastCatalogUpdate(w.week, a.id) ~/ fadeWeeks,
+            s.id);
     s.dormantRate = rate;
     for (var r = 0; r < regionCount; r++) {
       s.reg[SongReg.indexStreams + r] = a.reg[ArtistReg.indexStreams + r];
