@@ -112,7 +112,7 @@ abstract final class Lifecycle {
   static void makeSongDormant(World w, Song s) {
     final a = w.primaryOf(s);
     w.settleRetired(a);
-    final rate = s.lastAttention /
+    final fresh = s.lastAttention /
         a.catalogFactor *
         catalogWeight(s) *
         w.config.catalogLevel *
@@ -121,6 +121,8 @@ abstract final class Lifecycle {
         // K261): the quarter of its last one.
         catalogTrend(w.seed, lastCatalogUpdate(w.week, a.id) ~/ fadeWeeks,
             s.id);
+    // Back in the catalog after a comeback: at least where it was.
+    final rate = math.max(fresh, s.dormantRate);
     s.dormantRate = rate;
     for (var r = 0; r < regionCount; r++) {
       s.reg[SongReg.indexStreams + r] = a.reg[ArtistReg.indexStreams + r];
@@ -178,7 +180,8 @@ abstract final class Lifecycle {
       if (al.sumDormantRate < 0) al.sumDormantRate = 0;
       if (al.status == AlbumStatus.dormant) reactivateAlbum(w, al);
     }
-    s.dormantRate = 0;
+    // Its catalog listening is kept while it is back (docs K262): the
+    // active song plays it on top, and it is the least it goes back to.
     activateSong(w, s);
   }
 

@@ -2170,6 +2170,8 @@ class OpportunityView {
                   t.$1
               ]
             : const [],
+        songTitle = o.songId >= 0 ? w.songs[o.songId].title : '',
+        medium = o.medium,
         memberName = o.member >= 0 && o.member < w.player!.members.length
             ? w.player!.members[o.member]
             : '',
@@ -2185,6 +2187,9 @@ class OpportunityView {
   final int weeksLeft;
   final int partnerArtistId;
   final String partnerName;
+  /// A sync's song and where it would be heard (docs K262).
+  final String songTitle;
+  final SyncMedium medium;
   final int feeCents;
 
   /// Award show: how many awards the player is up for.

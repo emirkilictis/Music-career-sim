@@ -791,6 +791,16 @@ class Fmt {
         OpportunityKind.dmLeak => l.offerDmLeakTitle,
         OpportunityKind.stageMishap => l.offerStageMishapTitle,
         OpportunityKind.dissed => l.offerDissedTitle,
+        OpportunityKind.sync => l.offerSyncTitle,
+      };
+
+  /// Where a synced song is heard (docs K262).
+  String syncMedium(SyncMedium m) => switch (m) {
+        SyncMedium.film => l.syncFilm,
+        SyncMedium.series => l.syncSeries,
+        SyncMedium.ad => l.syncAd,
+        SyncMedium.game => l.syncGame,
+        SyncMedium.trailer => l.syncTrailer,
       };
 
   String offerBody(OpportunityView o) => switch (o.kind) {
@@ -819,6 +829,8 @@ class Fmt {
         OpportunityKind.dmLeak => l.offerDmLeakBody,
         OpportunityKind.stageMishap => l.offerStageMishapBody,
         OpportunityKind.dissed => l.offerDissedBody(o.partnerName),
+        OpportunityKind.sync => l.offerSyncBody(
+            syncMedium(o.medium), o.songTitle, money(o.feeCents)),
       };
 
   String offerChoice(OpportunityKind k, OpportunityChoice c) => switch (c) {
@@ -917,6 +929,9 @@ class Fmt {
       (OpportunityKind.festival, _) =>
         l.outcomeFestival(fans, money(o.moneyCents)),
       (OpportunityKind.brandDeal, _) => l.outcomeBrand(money(o.moneyCents)),
+      (OpportunityKind.sync, _) => o.won
+          ? l.outcomeSyncBreakout(money(o.moneyCents))
+          : l.outcomeSync(money(o.moneyCents)),
     };
   }
 

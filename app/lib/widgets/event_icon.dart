@@ -152,6 +152,7 @@ IconData opportunityIcon(OpportunityKind k) => switch (k) {
       OpportunityKind.dmLeak => Icons.forum_rounded,
       OpportunityKind.stageMishap => Icons.mic_off_rounded,
       OpportunityKind.dissed => Icons.local_fire_department_rounded,
+      OpportunityKind.sync => Icons.movie_creation_rounded,
     };
 
 /// Each platform's brand colour and icon (docs K67).

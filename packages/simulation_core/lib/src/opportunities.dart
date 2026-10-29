@@ -6,6 +6,7 @@ import 'awards.dart';
 import 'beefs.dart';
 import 'brands.dart';
 import 'credits.dart';
+import 'lifecycle.dart';
 import 'model.dart';
 import 'rng.dart';
 import 'time.dart';
@@ -38,7 +39,11 @@ enum OpportunityKind {
   stageMishap,
 
   /// A rival dissed the player (docs K229).
-  dissed;
+  dissed,
+
+  /// A film, a show, an ad, a game or a trailer wants one of the player's
+  /// songs (docs K262).
+  sync;
 
   /// Trouble to handle rather than an offer to take (docs K228).
   bool get isCrisis =>
@@ -55,6 +60,20 @@ enum OpportunityKind {
 /// perform), [accept] (attend) or [decline] (stay home).
 enum OpportunityChoice { accept, decline, apologize, ignore, leanIn, perform }
 
+/// Where a synced song is heard (docs K262): what it pays against a film
+/// and how much it gets people listening. Index order is stored in saves:
+/// only append.
+enum SyncMedium {
+  film(pay: 1.0, lift: 0.4),
+  series(pay: 0.6, lift: 0.6),
+  ad(pay: 2.0, lift: 0.3),
+  game(pay: 0.4, lift: 0.15),
+  trailer(pay: 0.8, lift: 0.25);
+
+  const SyncMedium({required this.pay, required this.lift});
+  final double pay, lift;
+}
+
 /// An offer waiting for the player's answer.
 class Opportunity {
   Opportunity({
@@ -64,6 +83,8 @@ class Opportunity {
     this.feeCents = 0,
     this.member = -1,
     this.brand = -1,
+    this.songId = -1,
+    this.medium = SyncMedium.film,
   });
 
   final OpportunityKind kind;
@@ -82,6 +103,10 @@ class Opportunity {
 
   /// The brand of a brand deal ([Brands.all] index; docs K102).
   final int brand;
+
+  /// The song a sync is for, and where it would be heard (docs K262).
+  final int songId;
+  final SyncMedium medium;
 
   List<OpportunityChoice> get choices => switch (kind) {
         _ when kind.isCrisis => const [
@@ -108,6 +133,8 @@ class Opportunity {
         'f': feeCents,
         'm': member,
         'b': brand,
+        if (songId >= 0) 's': songId,
+        if (songId >= 0) 'd': medium.index,
       };
 
   static Opportunity fromJson(Map<String, Object?> j) => Opportunity(
@@ -117,6 +144,8 @@ class Opportunity {
         feeCents: j['f'] as int? ?? 0,
         member: j['m'] as int? ?? -1,
         brand: j['b'] as int? ?? -1,
+        songId: j['s'] as int? ?? -1,
+        medium: SyncMedium.values[j['d'] as int? ?? 0],
       );
 
   static String? encode(Opportunity? o) =>
@@ -248,6 +277,24 @@ abstract final class Opportunities {
                   Brands.feeFactor(Brands.all[brand]) *
                   p.manager.feeBoost)
               .round());
+    }
+    // A film, a show, an ad wants a song (docs K262).
+    if (fame > 0.08 && hit(0.025)) {
+      final song = _syncSong(w, p, r);
+      if (song != null) {
+        final medium = SyncMedium.values[r.nextInt(SyncMedium.values.length)];
+        if (medium != SyncMedium.ad || fame > 0.25) {
+          return Opportunity(
+              kind: OpportunityKind.sync,
+              week: w.week,
+              songId: song.id,
+              medium: medium,
+              feeCents: (_fee(2e6, 5e8, fame, r) *
+                      medium.pay *
+                      p.manager.feeBoost)
+                  .round());
+        }
+      }
     }
     if (fame > 0.15 && hit(0.03)) {
       final partner = _partner(w, p, r);
@@ -433,6 +480,24 @@ abstract final class Opportunities {
           Audience.addCasual(w, p, p.casual * 0.02);
           fans = p.casual * 0.004;
         }
+      // A sync (docs K262): the fee, and the song is heard again; now and
+      // then the scene everyone talks about makes it a hit again.
+      case (OpportunityKind.sync, OpportunityChoice.accept):
+        money = o.feeCents;
+        final s = w.songs[o.songId];
+        if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
+        if (s.status == SongStatus.active) {
+          s.weeksBelowCutoff = 0;
+          won = r.chance(syncBreakout);
+          s.versionBoost += o.medium.lift * (won ? 2.5 : 1);
+          if (won) {
+            s.viralBoost = math.max(s.viralBoost, 0.05 + 0.05 * r.nextDouble());
+            s.viralRamp = 3;
+          }
+          w.dirtySongs.add(s.id);
+        }
+        hype = 0.02;
+        fans = p.casual * 0.002 * o.medium.lift;
       // A rival's diss (docs K229): fire back, rise above, make peace.
       case (OpportunityKind.dissed, OpportunityChoice.leanIn):
         Beefs.fireBack(w, p);
@@ -485,6 +550,32 @@ abstract final class Opportunities {
               math.pow(highCents / lowCents, fame.clamp(0.0, 1.0)) *
               (0.8 + 0.4 * r.nextDouble()))
           .round();
+
+  /// A sync's chance of becoming the scene everyone talks about.
+  static const syncBreakout = 0.15;
+
+  /// The song a sync asks for: one of the player's released songs, the
+  /// better and bigger ones more often (docs K262).
+  static Song? _syncSong(World w, Artist p, RandomStream r) {
+    final pool = <Song>[];
+    var total = 0.0;
+    for (final id in w.playerSongIds) {
+      final s = w.songs[id];
+      if (s.releasedWeek < 0 || s.releasedWeek >= w.week) continue;
+      if (s.status != SongStatus.active && s.status != SongStatus.dormant) {
+        continue;
+      }
+      pool.add(s);
+      total += s.quality;
+    }
+    if (pool.isEmpty) return null;
+    var x = r.nextDouble() * total;
+    for (final s in pool) {
+      x -= s.quality;
+      if (x <= 0) return s;
+    }
+    return pool.last;
+  }
 
   /// A rival a bit bigger than the player, or about their size.
   static Artist? _partner(World w, Artist p, RandomStream r) {

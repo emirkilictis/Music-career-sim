@@ -5668,6 +5668,50 @@ void main() {
       g.close();
     });
 
+    test('a film, a show or an ad wants a song: money and plays (K262)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final w = g.world;
+      final p = w.player!;
+      p.creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id);
+      // Long enough to fade into the catalog.
+      while (w.songs[id].status != SongStatus.dormant) {
+        g.advanceWeek();
+      }
+      g.advanceWeeks(4, stop: SkipStop.never);
+      final before = w.songWeekStreamsIn(w.songs[id], ChartMarket.global);
+      p.opportunity = Opportunity(
+          kind: OpportunityKind.sync,
+          week: w.week,
+          songId: id,
+          medium: SyncMedium.series,
+          feeCents: 5000000);
+      // Kept in the save with its song and medium.
+      final kept = Opportunity.decode(Opportunity.encode(p.opportunity))!;
+      expect(kept.songId, id);
+      expect(kept.medium, SyncMedium.series);
+      final offer = g.player.opportunity!;
+      expect(offer.kind, OpportunityKind.sync);
+      expect(offer.songTitle, w.songs[id].title);
+      expect(offer.medium, SyncMedium.series);
+      final money = p.moneyCents;
+      final out = g.answerOpportunity(OpportunityChoice.accept);
+      expect(out.moneyCents, greaterThan(0));
+      expect(p.moneyCents, greaterThan(money));
+      expect(w.songs[id].status, SongStatus.active);
+      expect(w.songs[id].versionBoost, greaterThan(0));
+      g.advanceWeek();
+      expect(w.songWeekStreamsIn(w.songs[id], ChartMarket.global),
+          greaterThan(before * 1.2));
+      g.close();
+    });
+
     test('moments: an interview, a crisis, on stage (K256)', () {
       var g = GameSession.start(
           slots,

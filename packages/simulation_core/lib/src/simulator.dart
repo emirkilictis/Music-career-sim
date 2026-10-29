@@ -633,7 +633,8 @@ class Simulator {
       final holidayPart = Holidays.part(c, s, w.week);
       // A re-recorded song's listeners moved to the new one (docs K139).
       final keep = Rerecords.keep(s);
-      final a = ((fanPart + (casPart + pubPart + viralPart) * hit) * season +
+      final fresh0 = ((fanPart + (casPart + pubPart + viralPart) * hit) *
+                  season +
               holidayPart * hit) *
           qMult *
           noise *
@@ -642,7 +643,12 @@ class Simulator {
           keep *
           // A free upload is heard on one site only (docs K148).
           Cloud.attention(w, s);
-      s.lastAttention = a;
+      s.lastAttention = fresh0;
+      // A catalog song brought back (a sync, a version, an award) keeps
+      // the listeners it had in the catalog on top (docs K262): before,
+      // coming back could leave it with fewer plays than it had.
+      final a = fresh0 +
+          (s.dormantRate > 0 ? s.dormantRate * p.catalogFactor * keep : 0);
       songAttention[i] = a;
       // Where the player's listening came from (docs K120).
       if (p.tier == ArtistTier.player) {
