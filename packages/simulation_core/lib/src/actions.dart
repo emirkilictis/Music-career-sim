@@ -935,7 +935,8 @@ abstract final class Actions {
       {String name = '',
       List<int> songIds = const [],
       EditionFormat format = EditionFormat.digital,
-      bool anniversary = false}) {
+      bool anniversary = false,
+      bool paid = false}) {
     final why = AlbumVersions.block(w, a, al);
     if (why != null) throw ActionException('No new version: ${why.name}');
     if (songIds.length > AlbumVersions.maxTracks ||
@@ -950,8 +951,10 @@ abstract final class Actions {
     }
     final due = Anniversaries.due(w, al);
     if (anniversary && due < 0) throw ActionException('No anniversary now');
-    final cost = AlbumVersions.costCents(format, anniversary: anniversary);
-    if (a.tier == ArtistTier.player) {
+    // A dated version was paid when it was set (docs K255).
+    final cost =
+        paid ? 0 : AlbumVersions.costCents(format, anniversary: anniversary);
+    if (a.tier == ArtistTier.player && !paid) {
       if (a.moneyCents < cost) throw ActionException('Not enough money');
       a.moneyCents -= cost;
       // The edition's own cost is counted with the album's editions.

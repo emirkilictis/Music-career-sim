@@ -1118,6 +1118,13 @@ class Album with Charted {
   /// The versions put out after it, oldest first (docs K225).
   final List<AlbumVersion> versions = [];
 
+  /// A version announced for a later week (docs K255), or null.
+  PlannedVersion? planned;
+
+  /// Pre-ordered copies of a version out this week (docs K255): set when
+  /// it comes out, counted with the week's sales, not kept.
+  double versionShipping = 0;
+
   /// Its rollout (docs K165): bits of [RolloutStep] that counted and of
   /// those done, scored when it came out.
   int rolloutApplicable = 0;
@@ -1453,6 +1460,53 @@ class AlbumVersion {
         name: m['n'] as String? ?? '',
         songIds: [for (final x in (m['s'] as List?) ?? const []) x as int],
         anniversary: m['a'] as int? ?? -1,
+      );
+}
+
+/// A version of an album set for a later week (docs K255): announced,
+/// it builds hype and takes pre-orders until it comes out.
+class PlannedVersion {
+  PlannedVersion({
+    required this.name,
+    required this.format,
+    required this.songIds,
+    required this.releaseWeek,
+    required this.announceWeek,
+    this.preOrders = 0,
+    this.buzz = 0,
+  });
+
+  final String name;
+  final EditionFormat format;
+  final List<int> songIds;
+  final int releaseWeek;
+
+  /// The week it is announced ([releaseWeek]: a surprise).
+  final int announceWeek;
+  double preOrders;
+  double buzz;
+
+  bool announcedBy(int week) =>
+      announceWeek < releaseWeek && week >= announceWeek;
+
+  Map<String, Object?> toJson() => {
+        'n': name,
+        'f': format.index,
+        if (songIds.isNotEmpty) 's': songIds,
+        'r': releaseWeek,
+        'a': announceWeek,
+        'o': preOrders,
+        'b': buzz,
+      };
+
+  static PlannedVersion fromJson(Map<String, Object?> m) => PlannedVersion(
+        name: m['n'] as String? ?? '',
+        format: EditionFormat.values[m['f'] as int],
+        songIds: [for (final x in (m['s'] as List?) ?? const []) x as int],
+        releaseWeek: m['r'] as int,
+        announceWeek: m['a'] as int,
+        preOrders: (m['o'] as num?)?.toDouble() ?? 0,
+        buzz: (m['b'] as num?)?.toDouble() ?? 0,
       );
 }
 

@@ -1330,6 +1330,10 @@ class GameSession {
     if (_p.scheduled.any((sr) => !sr.isAlbum && sr.songIds.contains(s.id))) {
       throw GameException('alreadyScheduled', 'Already scheduled as a single');
     }
+    // Waiting for a dated album version (docs K255).
+    if (AlbumVersions.reserved(world, s.id)) {
+      throw GameException('songScheduled', 'Song is on a scheduled release');
+    }
     return s;
   }
 
@@ -2290,7 +2294,8 @@ class GameSession {
       if (s.status != SongStatus.vault) {
         throw GameException('notInVault', 'Only unreleased songs');
       }
-      if (_p.scheduled.any((sr) => sr.songIds.contains(id))) {
+      if (_p.scheduled.any((sr) => sr.songIds.contains(id)) ||
+          AlbumVersions.reserved(world, id)) {
         throw GameException('songScheduled', 'Song is on a scheduled release');
       }
     }
@@ -2327,7 +2332,8 @@ class GameSession {
       if (s.status != SongStatus.vault) {
         throw GameException('notInVault', 'Only unreleased songs');
       }
-      if (_p.scheduled.any((sr) => sr.songIds.contains(id))) {
+      if (_p.scheduled.any((sr) => sr.songIds.contains(id)) ||
+          AlbumVersions.reserved(world, id)) {
         throw GameException('songScheduled', 'Song is on a scheduled release');
       }
     }
@@ -2344,6 +2350,68 @@ class GameSession {
 
   /// Longest name of an album version.
   static const maxVersionName = 40;
+
+  /// Sets a version of album [albumId] for [releaseWeek], announced in
+  /// [announceWeek] ([releaseWeek] for a surprise; docs K255): pre-orders
+  /// and hype build until it comes out. Paid now.
+  void scheduleAlbumVersion(int albumId,
+      {required String name,
+      List<int> songIds = const [],
+      EditionFormat format = EditionFormat.digital,
+      required int releaseWeek,
+      required int announceWeek}) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    final why = AlbumVersions.block(world, _p, al);
+    if (why != null) throw GameException('noVersion', why.name);
+    final n = name.trim();
+    if (n.isEmpty || n.length > maxVersionName) {
+      throw GameException('invalidTitle', 'Name must be 1-40 chars');
+    }
+    if (releaseWeek <= world.week ||
+        releaseWeek > world.week + AlbumVersions.maxLeadWeeks ||
+        announceWeek < world.week ||
+        announceWeek > releaseWeek) {
+      throw GameException('badWeek', 'Pick a week ahead');
+    }
+    if (songIds.length > AlbumVersions.maxTracks ||
+        songIds.toSet().length != songIds.length) {
+      throw GameException('deluxeTracks', 'Pick up to 6 songs');
+    }
+    for (final id in songIds) {
+      final s = _ownSong(id);
+      if (s.status != SongStatus.vault) {
+        throw GameException('notInVault', 'Only unreleased songs');
+      }
+      if (_p.scheduled.any((sr) => sr.songIds.contains(id)) ||
+          AlbumVersions.reserved(world, id)) {
+        throw GameException('songScheduled', 'Song is on a scheduled release');
+      }
+    }
+    _requireMoney(AlbumVersions.costCents(format));
+    AlbumVersions.schedule(world, _p, al,
+        name: n,
+        format: format,
+        songIds: songIds,
+        releaseWeek: releaseWeek,
+        announceWeek: announceWeek);
+    _saveNow();
+  }
+
+  /// Calls off album [albumId]'s dated version (nothing refunded).
+  void cancelAlbumVersion(int albumId) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    if (al.artistId != _p.id || al.planned == null) {
+      throw GameException('noVersion', 'Nothing set');
+    }
+    AlbumVersions.cancel(world, al);
+    _saveNow();
+  }
 
   /// An album of the player's whose anniversary came and that they were
   /// not asked about yet (docs K226), or null.
@@ -2386,7 +2454,8 @@ class GameSession {
     if (s.status != SongStatus.vault) {
       throw GameException('notInVault', 'Only unreleased songs');
     }
-    if (_p.scheduled.any((sr) => sr.songIds.contains(s.id))) {
+    if (_p.scheduled.any((sr) => sr.songIds.contains(s.id)) ||
+        AlbumVersions.reserved(world, s.id)) {
       throw GameException('songScheduled', 'Song is on a scheduled release');
     }
     Actions.scrapSong(world, s);
@@ -2427,10 +2496,18 @@ class GameSession {
   WeekReport advanceWeek() {
     final p = _p;
     final before = _Snapshot(world, p);
+    // Dated album versions due this week (docs K255).
+    final versionsDue = [
+      for (final al in world.albums)
+        if (al.artistId == p.id && al.planned?.releaseWeek == world.week) al
+    ];
     final r = _sim.step();
     final milestones = Milestone.check(world, p);
     final events = [
       ..._events(r, before),
+      for (final al in versionsDue)
+        if (al.versions.isNotEmpty && al.versions.last.week == r.week)
+          ReleaseOut(EntityKind.album, al.id, -1),
       for (final m in milestones) MilestoneReached(m),
       // New gold, platinum and diamond records (docs K209).
       ...Certs.update(world),

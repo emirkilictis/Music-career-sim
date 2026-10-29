@@ -858,6 +858,7 @@ class AlbumView {
             ? VersionBlock.notYours
             : AlbumVersions.block(w, w.player!, al),
         versionsRecent = AlbumVersions.recent(w, al),
+        planned = al.planned,
         anniversaryIndexDue = Anniversaries.due(w, al),
         scheduleId = al.scheduleId,
         criticScore = al.criticScore,
@@ -1009,6 +1010,9 @@ class AlbumView {
   final List<AlbumVersionView> versions;
   final VersionBlock? versionBlock;
   final int versionsRecent;
+
+  /// A version set for a later week (docs K255), or null.
+  final PlannedVersion? planned;
   bool get canVersion => versionBlock == null;
 
   /// The [Anniversaries.years] index it is in the year of (-1: none).

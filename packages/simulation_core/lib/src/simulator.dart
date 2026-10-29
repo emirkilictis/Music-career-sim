@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'actions.dart';
+import 'album_versions.dart';
 import 'ai.dart';
 import 'artist_pick.dart';
 import 'audience.dart';
@@ -173,6 +174,8 @@ class Simulator {
     final scheduledOut = player == null
         ? const <ScheduledOut>[]
         : Actions.releaseScheduled(w, player);
+    // Dated album versions build up and come out (docs K255).
+    if (player != null) AlbumVersions.weekly(w, player);
     // Playlist editors answer this week's pitches (docs K97).
     StreamingTools.answerPitches(w);
     // Independent curators answer last week's submissions (docs K160).
@@ -1138,6 +1141,8 @@ class Simulator {
                     // after (docs K223).
                     (1 + (tourAlbums[al.id] ?? 0)) +
                 (age == 0 ? al.preOrders * share * Actions.preOrderExtra : 0.0) +
+                // A dated version's pre-orders ship (docs K255).
+                al.versionShipping * share +
                 // Bundled copies (docs K144).
                 (age == 0 ? al.bundleUnits * share : 0.0);
         final streams = sea[k] +

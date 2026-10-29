@@ -567,11 +567,12 @@ abstract final class Codec {
             ? null
             : jsonEncode([al.rolloutApplicable, al.rolloutDone]),
         al.windowUntil,
-        al.versions.isEmpty && al.anniversariesAsked == 0
+        al.versions.isEmpty && al.anniversariesAsked == 0 && al.planned == null
             ? null
             : jsonEncode({
                 'v': [for (final v in al.versions) v.toJson()],
                 if (al.anniversariesAsked != 0) 'q': al.anniversariesAsked,
+                if (al.planned case final p?) 'p': p.toJson(),
               }),
       ];
 
@@ -642,7 +643,10 @@ abstract final class Codec {
           for (final v in (j['v'] as List?) ?? const [])
             AlbumVersion.fromJson((v as Map).cast<String, Object?>())
         ])
-        ..anniversariesAsked = j['q'] as int? ?? 0;
+        ..anniversariesAsked = j['q'] as int? ?? 0
+        ..planned = j['p'] == null
+            ? null
+            : PlannedVersion.fromJson((j['p'] as Map).cast<String, Object?>());
     }
     if (r['bundle'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;

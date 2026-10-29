@@ -223,6 +223,8 @@ int worldHash(World w) {
     addInt(al.campaign.index);
     addDouble(al.campaignReturnCents);
     addDouble(al.preOrders);
+    addInt(al.planned?.releaseWeek ?? -1);
+    addDouble(al.planned?.preOrders ?? 0);
     addInt(al.exclusiveUntil);
     addInt(al.windowUntil);
     addDouble(al.masterShare ?? -1);

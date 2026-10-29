@@ -7375,6 +7375,91 @@
     }
   },
   "versionPending": "Wait until the editions it came out with are all out.",
+  "versionPlannedBlock": "A version is set already: wait for it or call it off.",
+  "versionWhen": "When",
+  "versionNow": "Now",
+  "versionLater": "On a date",
+  "versionOutOn": "Out {date} (in {weeks} weeks)",
+  "@versionOutOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "versionAnnounceOn": "Announced {date} ({weeks} weeks before)",
+  "@versionAnnounceOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "versionSurprise": "A surprise: not announced",
+  "versionLaterHint": "From the announcement fans pre-order it and the hype builds; the pre-orders ship the week it comes out. Paid now; the bonus tracks wait in the vault for it.",
+  "versionSchedule": "Set the date · {cost}",
+  "@versionSchedule": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "versionSet": "{name} is set for {date}.",
+  "@versionSet": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "versionPlannedTitle": "Coming: {name}",
+  "@versionPlannedTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "versionPlannedLine": "{format} · out {date}",
+  "@versionPlannedLine": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "versionPlannedAnnounce": "Announced {date}",
+  "@versionPlannedAnnounce": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "versionPlannedSurprise": "A surprise: nobody knows yet",
+  "versionPlannedPreOrders": "{copies} pre-orders so far",
+  "@versionPlannedPreOrders": {
+    "placeholders": {
+      "copies": {
+        "type": "String"
+      }
+    }
+  },
+  "versionCancel": "Call it off",
+  "versionCancelled": "Called off. The money is not refunded.",
   "versionFull": "This album has all the editions it can have.",
   "errorNoVersion": "A new version is not possible for this record now.",
   "versionBonus": "Bonus · {name}",

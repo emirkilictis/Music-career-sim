@@ -348,6 +348,20 @@ abstract final class Cmd {
 
   /// A new version of an album after it came out (docs K225, K226); the
   /// edition (cover index) it became.
+  static SessionCmd<void> scheduleAlbumVersion(int albumId,
+          {required String name,
+          List<int> songIds = const [],
+          EditionFormat format = EditionFormat.digital,
+          required int releaseWeek,
+          required int announceWeek}) =>
+      (s) => s.scheduleAlbumVersion(albumId,
+          name: name,
+          songIds: songIds,
+          format: format,
+          releaseWeek: releaseWeek,
+          announceWeek: announceWeek);
+  static SessionCmd<void> cancelAlbumVersion(int albumId) =>
+      (s) => s.cancelAlbumVersion(albumId);
   static SessionCmd<int> releaseAlbumVersion(int albumId,
           {required String name,
           required List<int> songIds,

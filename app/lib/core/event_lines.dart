@@ -205,7 +205,7 @@ List<(int, int)> scheduledAlbumsOut(List<EventLine> lines) => [
               kind: EntityKind.album,
               :final entityId,
               :final scheduleId
-            ))
+            ) when scheduleId >= 0)
           (scheduleId, entityId),
     ];
 

@@ -114,6 +114,20 @@ abstract final class ReleaseCalendar {
       }
     }
     for (final al in w.albums) {
+      // A dated version (docs K255): its announcement and its week.
+      if (al.planned case final v? when al.artistId == p.id) {
+        final title = v.name.isEmpty ? al.title : '${al.title} (${v.name})';
+        add(
+            v.releaseWeek,
+            CalendarEntry(CalendarKind.edition,
+                title: title, type: al.type, albumId: al.id));
+        if (v.announceWeek < v.releaseWeek) {
+          add(
+              v.announceWeek,
+              CalendarEntry(CalendarKind.announce,
+                  title: title, type: al.type, albumId: al.id));
+        }
+      }
       if (al.artistId != p.id || al.releaseWeek + 40 < from) continue;
       for (var k = 1; k < al.variantWeeks.length; k++) {
         if (al.variantWeeks[k] > 0) {

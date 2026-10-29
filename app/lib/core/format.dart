@@ -855,6 +855,7 @@ class Fmt {
   String versionBlock(VersionBlock b) => switch (b) {
         VersionBlock.editionsPending => l.versionPending,
         VersionBlock.full => l.versionFull,
+        VersionBlock.planned => l.versionPlannedBlock,
         _ => l.errorNoVersion,
       };
 

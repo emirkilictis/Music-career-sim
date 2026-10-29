@@ -55,6 +55,12 @@ class _AlbumVersionScreenState extends State<AlbumVersionScreen> {
   EditionFormat _format = EditionFormat.digital;
   final _picked = <int>[];
   List<SongView>? _vault;
+
+  /// Out later (docs K255): in [_weeks] weeks, announced [_lead] weeks
+  /// before (0: a surprise).
+  bool _later = false;
+  int _weeks = 6;
+  int _lead = 6;
   bool _busy = false;
   bool _released = false;
 
@@ -104,6 +110,29 @@ class _AlbumVersionScreenState extends State<AlbumVersionScreen> {
       return;
     }
     setState(() => _busy = true);
+    if (_later && !_anniversary) {
+      final week = widget.state.week;
+      try {
+        await widget.state.act(Cmd.scheduleAlbumVersion(_a.id,
+            name: name,
+            songIds: List.of(_picked),
+            format: _format,
+            releaseWeek: week + _weeks,
+            announceWeek: week + _weeks - _lead));
+        _released = true;
+        if (!mounted) return;
+        showInfo(context,
+            l.versionSet(name, context.fmt.week(week + _weeks)),
+            icon: Icons.event_available_rounded);
+        Navigator.pop(context, true);
+      } catch (e) {
+        if (mounted) {
+          setState(() => _busy = false);
+          showError(context, e);
+        }
+      }
+      return;
+    }
     try {
       await widget.state.act(Cmd.releaseAlbumVersion(_a.id,
           name: name,
@@ -273,6 +302,60 @@ class _AlbumVersionScreenState extends State<AlbumVersionScreen> {
                         ),
                   ]),
             ),
+            // Now or on a date, announced ahead (docs K255).
+            if (!_anniversary) ...[
+              const SizedBox(height: 12),
+              Section(
+                title: l.versionWhen,
+                icon: Icons.event_rounded,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SegmentedButton<bool>(
+                        segments: [
+                          ButtonSegment(value: false, label: Text(l.versionNow)),
+                          ButtonSegment(
+                              value: true, label: Text(l.versionLater)),
+                        ],
+                        selected: {_later},
+                        onSelectionChanged: (v) =>
+                            setState(() => _later = v.first),
+                      ),
+                      if (_later) ...[
+                        const SizedBox(height: 10),
+                        Text(l.versionOutOn(
+                            fmt.week(widget.state.week + _weeks), _weeks)),
+                        Slider(
+                          value: _weeks.toDouble(),
+                          min: 1,
+                          max: AlbumVersions.maxLeadWeeks.toDouble(),
+                          divisions: AlbumVersions.maxLeadWeeks - 1,
+                          label: '$_weeks',
+                          onChanged: (v) => setState(() {
+                            _weeks = v.round();
+                            if (_lead > _weeks) _lead = _weeks;
+                          }),
+                        ),
+                        Text(_lead == 0
+                            ? l.versionSurprise
+                            : l.versionAnnounceOn(
+                                fmt.week(widget.state.week + _weeks - _lead),
+                                _lead)),
+                        Slider(
+                          value: _lead.toDouble(),
+                          min: 0,
+                          max: _weeks.toDouble(),
+                          divisions: _weeks,
+                          label: '$_lead',
+                          onChanged: (v) => setState(() => _lead = v.round()),
+                        ),
+                        Text(l.versionLaterHint,
+                            style: TextStyle(
+                                color: AppColors.textMuted, fontSize: 12.5)),
+                      ],
+                    ]),
+              ),
+            ],
             if (_a.versionsRecent > 0) ...[
               const SizedBox(height: 12),
               Row(children: [
@@ -292,7 +375,9 @@ class _AlbumVersionScreenState extends State<AlbumVersionScreen> {
             FilledButton.icon(
               onPressed: _busy || _name.text.trim().isEmpty ? null : _release,
               icon: const Icon(Icons.rocket_launch_rounded),
-              label: Text(l.versionRelease(fmt.money(_cost))),
+              label: Text(_later && !_anniversary
+                  ? l.versionSchedule(fmt.money(_cost))
+                  : l.versionRelease(fmt.money(_cost))),
             ),
           ],
         ),

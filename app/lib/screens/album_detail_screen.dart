@@ -153,6 +153,60 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
 
   /// A new version of the album: name, cover, format, bonus tracks
   /// (docs K225); an [anniversary] edition is remastered too (K226).
+  /// The dated version on its way, with its pre-orders (docs K255).
+  Widget _plannedCard(AlbumView a, PlannedVersion v) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final week = widget.state.week;
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHigh,
+        borderRadius: BorderRadius.circular(AppShape.r(12)),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(Icons.event_available_rounded, color: AppColors.mint),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(l.versionPlannedTitle(v.name),
+                style: const TextStyle(fontWeight: FontWeight.w800)),
+          ),
+        ]),
+        const SizedBox(height: 6),
+        Text(l.versionPlannedLine(
+            fmt.editionFormat(v.format), fmt.week(v.releaseWeek))),
+        Text(
+            v.announceWeek >= v.releaseWeek
+                ? l.versionPlannedSurprise
+                : l.versionPlannedAnnounce(fmt.week(v.announceWeek)),
+            style: TextStyle(color: AppColors.textMuted)),
+        if (v.preOrders >= 1 && week >= v.announceWeek)
+          Text(l.versionPlannedPreOrders(fmt.compact(v.preOrders)),
+              style: TextStyle(color: AppColors.textMuted)),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () async {
+              try {
+                await widget.state.act(Cmd.cancelAlbumVersion(a.id));
+                if (mounted) {
+                  showInfo(context, l.versionCancelled,
+                      icon: Icons.event_busy_rounded);
+                }
+                _load();
+              } catch (e) {
+                if (mounted) showError(context, e);
+              }
+            },
+            child: Text(l.versionCancel),
+          ),
+        ),
+      ]),
+    );
+  }
+
   Future<void> _newVersion(AlbumView a, {bool anniversary = false}) async {
     if (await AlbumVersionScreen.open(context, widget.state, a,
         anniversary: anniversary)) {
@@ -302,6 +356,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 '${a.isLive ? ' · ${l.liveTag}' : ''}'
                 '${a.isCompilation ? ' · ${l.ghTag}' : ''}',
           ),
+          // A dated version on its way (docs K255).
+          if (a.isPlayer && a.planned != null) _plannedCard(a, a.planned!),
           // New versions after it came out (docs K225).
           if (a.isPlayer &&
               (a.canVersion ||

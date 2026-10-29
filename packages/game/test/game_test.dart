@@ -5668,6 +5668,80 @@ void main() {
       g.close();
     });
 
+    test('a dated album version: announced, pre-ordered, out (K255)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      final w = g.world;
+      w.player!.moneyCents = 1 << 40;
+      final tracks = <int>[];
+      for (var i = 0; i < 8; i++) {
+        w.player!.creativeEnergy = 100;
+        tracks.add(g.writeSong(budget: BudgetTier.low).id);
+      }
+      final album = g.releaseAlbum('Base', tracks).id;
+      g.advanceWeeks(4, stop: SkipStop.never);
+      w.player!.creativeEnergy = 100;
+      final bonus = g.writeSong(budget: BudgetTier.low).id;
+      final week = g.week;
+      final money = g.player.moneyCents;
+      // Out in six weeks, announced in two.
+      g.scheduleAlbumVersion(album,
+          name: 'Vinyl Edition',
+          songIds: [bonus],
+          format: EditionFormat.vinyl,
+          releaseWeek: week + 6,
+          announceWeek: week + 2);
+      expect(money - g.player.moneyCents, EditionFormat.vinyl.costCents);
+      var v = g.album(album);
+      expect(v.planned!.name, 'Vinyl Edition');
+      expect(v.canVersion, isFalse);
+      expect(v.versionBlock, VersionBlock.planned);
+      // The bonus track waits for it.
+      expect(() => g.releaseSingle(bonus), _code('songScheduled'));
+      expect(() => g.scrapSong(bonus), _code('songScheduled'));
+      // On the calendar.
+      expect(
+          g.calendar
+              .where((c) => c.week == week + 6)
+              .expand((c) => c.entries)
+              .map((e) => e.kind),
+          contains(CalendarKind.edition));
+      // Nothing before the announcement, then pre-orders grow.
+      g.advanceWeek();
+      expect(g.album(album).planned!.preOrders, 0);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      final early = g.album(album).planned!.preOrders;
+      expect(early, greaterThan(0));
+      g.close();
+      g = GameSession.resume(slots, slot);
+      expect(g.album(album).planned!.preOrders, early);
+      g.advanceWeeks(3, stop: SkipStop.never);
+      final pre = g.album(album).planned!.preOrders;
+      expect(pre, greaterThan(early));
+      // The week it is due it comes out, the pre-orders shipping.
+      final out = g.advanceWeek().events.whereType<ReleaseOut>();
+      expect(out.map((e) => e.entityId), contains(album));
+      v = g.album(album);
+      expect(v.planned, isNull);
+      expect(v.versions.last.name, 'Vinyl Edition');
+      expect(v.trackIds, contains(bonus));
+      expect(g.world.albums[album].weekPure, greaterThan(pre * 0.9));
+      // Calling one off.
+      g.advanceWeeks(1, stop: SkipStop.never);
+      g.scheduleAlbumVersion(album,
+          name: 'Later', releaseWeek: g.week + 4, announceWeek: g.week + 4);
+      expect(g.album(album).planned!.announceWeek, g.week + 4);
+      g.cancelAlbumVersion(album);
+      expect(g.album(album).planned, isNull);
+      expect(() => g.cancelAlbumVersion(album), _code('noVersion'));
+      g.close();
+    });
+
     test('album versions: named, repeatable, bonus tracks, fans tire (K225)',
         () {
       var g = GameSession.start(
