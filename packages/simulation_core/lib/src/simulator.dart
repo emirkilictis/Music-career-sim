@@ -1789,11 +1789,17 @@ class Simulator {
         final perYear = c.catalogFadePerYear(Lifecycle.catalogWeight(s), years);
         var rate = s.dormantRate *
             math.pow(1 - perYear, catalogFadeWeeks / GameTime.weeksPerYear);
+        // A hit never falls below a share of all its plays a week (docs
+        // K258): old hits stay in people's lives, as on the real apps,
+        // and a catalog faded by older rules is brought back up.
+        final floor = _catalogFloor(s, a, years);
+        if (rate < floor) rate = floor;
         // The player's own songs keep a few listeners however old (docs
         // K224): a song with millions of plays never shows zero.
         if (rate < catalogGoneRate && !mine) rate = 0;
+        // Negative: raised to the floor.
         final drop = s.dormantRate - rate;
-        if (drop <= 0) continue;
+        if (drop == 0) continue;
         for (var r = 0; r < regionCount; r++) {
           s.reg[SongReg.lifeStreams + r] = w.songLifetimeStreams(s, r);
           s.reg[SongReg.lifeDownloads + r] = w.songLifetimeDownloads(s, r);
@@ -1809,7 +1815,7 @@ class Simulator {
         }
         w.dirtySongs.add(id);
       }
-      if (dropped <= 0) continue;
+      if (dropped == 0) continue;
       a.sumDormantRate = math.max(0.0, a.sumDormantRate - dropped);
       if (a.isRetired) {
         for (var r = 0; r < regionCount; r++) {
@@ -1821,6 +1827,36 @@ class Simulator {
       }
       w.dirtyArtists.add(a.id);
     }
+  }
+
+  /// The weekly share of all its plays a catalog song keeps at least
+  /// (docs K258), by its catalog weight: on Spotify an old hit plays
+  /// 0.03–0.06% of its total a day (The Hills: 3.2B, 1.05M a day; Mirrors:
+  /// 1.68B, 1.04M; Rock Your Body, 2003: 1.16B, 609K; Blank Space: 2.65B,
+  /// 1.37M). Over ten years old a little less each year, or a floor that
+  /// grows with the total would grow without end.
+  static double catalogFloorShare(double weight, double years) =>
+      (weight >= 1.8
+          ? 0.0025
+          : weight >= 1.2
+              ? 0.0015
+              : weight >= 0.5
+                  ? 0.0008
+                  : 0.0) *
+      math.min(1.0, 10 / math.max(1.0, years));
+
+  /// The dormant rate that keeps [s] at its floor (0: none).
+  double _catalogFloor(Song s, Artist a, double years) {
+    final share = catalogFloorShare(Lifecycle.catalogWeight(s), years);
+    if (share <= 0) return 0;
+    final w = world;
+    // Weekly plays per unit of rate (the drift averages out).
+    var perRate = 0.0;
+    for (var r = 0; r < regionCount; r++) {
+      perRate += a.catalogFactor * a.regionShare[r] * w.lastSpa[r];
+    }
+    if (perRate <= 0) return 0;
+    return share * w.songLifetimeStreams(s) / perRate;
   }
 
   /// No artist reaches more than a few per cent of a market (docs K105):

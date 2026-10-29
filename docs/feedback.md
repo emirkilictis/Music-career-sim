@@ -236,6 +236,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F134 | Bir oyuncu: "You could make it so you can take a song off radio push, cuz we can send it to radio but we can't get it off to focus on another one." Emir: "Odağı kaydırırız, single'lar birbirini bloklamaz." | ✅ K253 |
 | F135 | Emir: "Acaba interaktif eventler ve oynanış şeyleri eklesek mi?" → "Röportaj güzel olur, konser anı da, kriz yönetimi de." | ✅ K256 |
 | F136 | Bir oyuncu (Sable): "There should be a feature to skip specifically to a certain week: select the month, then the week, then the year. When simulating artists it takes so long to skip skip skip until their albums release." | ✅ K257 |
+| F137 | Emir (sayaç: Say Something, 3,2B toplam, günde 48.667, 2040): "Streamler ölmesin, stabiliteyi arttır, git bak gerçekte nasıl." (kworb'dan The Weeknd listesiyle) | ✅ K258 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
