@@ -1959,6 +1959,42 @@ void main() {
       g.close();
     });
 
+    test('a single out with its album is not buried by it (K251)', () {
+      // The same album twice: its first track made a single the week the
+      // album comes out, and left an album track.
+      double firstWeeks(bool single) {
+        final g = GameSession.start(
+            slots,
+            _setup(
+                startYear: 2018,
+                premium: true,
+                tier: StartTier.superstar,
+                money: StartMoney.millionaire));
+        final p = g.world.player!;
+        p.skills
+          ..songwriting = 85
+          ..vocals = 85
+          ..production = 85
+          ..performance = 85;
+        final ids = <int>[];
+        for (var i = 0; i < 8; i++) {
+          p.creativeEnergy = 100;
+          ids.add(g.writeSong(budget: BudgetTier.high).id);
+        }
+        g.releaseAlbum('Together', ids, campaign: Campaign.standard);
+        if (single) g.releaseSingle(ids.first, campaign: Campaign.standard);
+        var total = 0.0;
+        for (var i = 0; i < 4; i++) {
+          g.advanceWeek();
+          total += g.world.songs[ids.first].weekStreams;
+        }
+        g.close();
+        return total;
+      }
+
+      expect(firstWeeks(true), greaterThanOrEqualTo(firstWeeks(false)));
+    });
+
     test('the radio charts rank US and UK airplay (K129, K248)', () {
       final g = GameSession.start(slots, _setup());
       g.advanceWeeks(3, stop: SkipStop.never);

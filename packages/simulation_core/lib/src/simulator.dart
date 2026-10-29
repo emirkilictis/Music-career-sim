@@ -309,7 +309,8 @@ class Simulator {
       var prev = -1 << 30;
       for (final (week, key)
           in releases[s.primaryArtistId] ?? const <(int, int)>[]) {
-        if (key == s.id) continue;
+        // Its own album is no rival release (docs K251).
+        if (key == s.id || key == -1 - s.albumId) continue;
         if (week < s.singleWeek || (week == s.singleWeek && key < s.id)) {
           if (week > prev) prev = week;
         }
@@ -536,12 +537,23 @@ class Simulator {
       // a streaming-era album's first weeks, when fans play the whole
       // record and its cuts flood the song charts, then fall back (docs
       // F25).
-      final albumEvent = s.isSingle || s.albumId < 0
-          ? 1.0
-          : 1 +
-              c.albumEventFanBoost *
-                  c.playlistShare(year) *
-                  math.exp(-ageRel / c.albumEventWeeks);
+      // A single from the album is played with the record too (docs
+      // K251): counted from the album's week, it gets at least what it
+      // would as one of the album's tracks. Before, a single out the week
+      // of its album lost the album's first weeks altogether.
+      final albumAge = s.albumId < 0
+          ? -1
+          : s.isSingle
+              ? w.week - w.albums[s.albumId].releaseWeek
+              : ageRel;
+      final albumEvent =
+          s.albumId < 0 || w.albums[s.albumId].releaseWeek < 0 || albumAge < 0
+              ? 1.0
+              : 1 +
+                  c.albumEventFanBoost *
+                      c.playlistShare(year) *
+                      math.exp(-albumAge / c.albumEventWeeks);
+      final asTrack = c.albumTrackFanShare * albumEvent * p.kind.albumAffinity;
       final fanPart = fans *
           s.fanAppeal *
           fanCurve *
@@ -549,8 +561,8 @@ class Simulator {
           position *
           (1 + p.hype) *
           (s.isSingle
-              ? 1.0
-              : c.albumTrackFanShare * albumEvent * p.kind.albumAffinity) *
+              ? (albumEvent > 1 ? math.max(1.0, asTrack) : 1.0)
+              : asTrack) *
           Rerecords.fanFactor(s) *
           // Fans who have the leak already (docs K140).
           Leaks.fanFactor(s) *
