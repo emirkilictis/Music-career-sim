@@ -507,7 +507,14 @@ class Simulator {
       // New versions bring a wave of listening (docs K92).
       s.versionBoost *= c.versionFade;
       if (s.versionBoost < 1e-4) s.versionBoost = 0;
-      final qMult = 0.35 + 0.65 * math.pow(s.quality / 100, 1.4);
+      // How a release is received (docs K245): for a week or two people
+      // play it on faith, then a weak one is dropped and a strong one
+      // passed on. Fame no longer carries a bad record for months.
+      final reception = 1 +
+          ((s.quality / 100 - 0.6) * 2.0).clamp(-0.75, 0.3) *
+              math.min(1.0, math.max(0, promoAge - 1) / 6);
+      final qMult =
+          (0.35 + 0.65 * math.pow(s.quality / 100, 1.4)) * reception;
 
       // Fans replay singles; deep cuts get less of their time, except in
       // a streaming-era album's first weeks, when fans play the whole
@@ -898,9 +905,11 @@ class Simulator {
       // Some records have legs, others are all first week (docs K105):
       // a trait drawn once per album.
       final legs = _albumLegs(al);
-      final secondWeek = c.albumSecondWeekRatio * (0.55 + 0.9 * q01) * legs;
+      // Fans buy week one on faith; after it, word gets round (docs K245:
+      // a weak record falls hard, 0.55 + 0.9q and 1.5 − 0.7q before).
+      final secondWeek = c.albumSecondWeekRatio * (0.3 + 1.3 * q01) * legs;
       final decay = math.min(0.97,
-          1 - (1 - c.albumWeeklyDecay) * (1.5 - 0.7 * q01) / math.sqrt(legs));
+          1 - (1 - c.albumWeeklyDecay) * (1.8 - 1.3 * q01) / math.sqrt(legs));
       final superCurve = age == 0 ? 1.0 : secondWeek * math.pow(decay, age - 1);
       // Devoted fanbases buy more (and buy variants).
       final superRate = c.superfanBuyRate * p.devotionBuyFactor;
@@ -999,7 +1008,8 @@ class Simulator {
             era.superfanFactor *
             superCurve *
             (1 + al.hypeAtRelease) *
-            (0.5 + q01) *
+            // Week one on faith, then how good it is (docs K245).
+            (age == 0 ? 0.5 + q01 : 0.2 + 1.5 * q01) *
             fanFresh;
         final collectorPart = variantSum == 0
             ? 0.0

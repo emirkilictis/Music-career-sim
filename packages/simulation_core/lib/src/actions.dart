@@ -1236,10 +1236,20 @@ abstract final class Eras {
     // The last era carries over as how it did against its own
     // expectation, not as raw units: markets shrink and grow (a 2006 CD
     // smash says little about 2013 sales; docs K53).
-    final lastScore = a.lastEraUnits > 0 && a.eraExpected > 0
-        ? (a.lastEraUnits / a.eraExpected).clamp(0.5, 2.5)
+    // People expect what the last album did (docs K245): its units next
+    // to what the fanbase alone would buy now, so a market that shrank or
+    // grew since is allowed for. The longer the break, the less the last
+    // album counts (K3: a comeback after years is judged afresh). Before,
+    // the last era counted as its score against its own expectation, so
+    // after a weak album any good one was a 5× smash.
+    final level = a.lastEraUnits > 0
+        ? (a.lastEraUnits / baseline).clamp(0.5, 8.0)
         : 1.0;
-    a.eraExpected = baseline * (0.45 + 0.55 * lastScore);
+    final gap = w.week - a.eraStartWeek;
+    final weight = a.lastEraUnits <= 0
+        ? 0.0
+        : (0.8 - 0.1 * math.max(0, gap - 104) / 52).clamp(0.3, 0.8);
+    a.eraExpected = baseline * ((1 - weight) + weight * level);
     a.anticipation = 0;
     a.anticipationCap = 0;
     a.flopSupport = 0;

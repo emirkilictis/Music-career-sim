@@ -223,6 +223,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F121 | Bir oyuncu: "InvalidStateError: Failed to execute 'transaction' on 'IDBDatabase': The database connection is closing." | ✅ K240 |
 | F122 | Emir: "Full discography satışların gösterildiği paylaşma fotosu daha geniş olmalı, albüm isimleri fut... şeklinde oluyor, gözükmüyor; singlelar için de aynı." | ✅ K241 |
 | F123 | Emir (gerçek bir sayaç görüntüsüyle: 8 yıllık şarkı haftada +%0,89): "Streamlerde stabilite kötü biraz sanki? Test eder misin?" | ✅ K244 |
+| F124 | Oyuncu grubu (Federico): "Is there some sort of way to make it a bit harder cuz after getting your first N1 it becomes so easy, no albums flop later." | ✅ K245 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
