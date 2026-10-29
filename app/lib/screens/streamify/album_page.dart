@@ -11,6 +11,7 @@ import '../../widgets/art.dart';
 import '../../widgets/common.dart';
 import '../album_detail_screen.dart';
 import '../song_detail_screen.dart';
+import '../stream_counter_screen.dart';
 
 /// Streamify album page, laid out like a big streaming app's (docs F23):
 /// cover over a tinted header, title and artist, controls, the tracklist
@@ -184,6 +185,20 @@ class _StreamifyAlbumPageState extends State<StreamifyAlbumPage> {
                           builder: (_) => AlbumDetailScreen(
                               albumId: al.id, state: career))),
                 ),
+                // The fan-account counter, a tap away (docs K210).
+                if (al.isPlayer)
+                  IconButton(
+                    tooltip: l.counterButton,
+                    icon: const Icon(Icons.table_chart_outlined,
+                        color: StreamifyColors.muted),
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => StreamCounterScreen(
+                                state: career,
+                                kind: EntityKind.album,
+                                id: al.id))),
+                  ),
                 const Spacer(),
                 const Icon(Icons.shuffle_rounded,
                     color: StreamifyColors.muted, size: 26),
