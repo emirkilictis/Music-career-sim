@@ -232,11 +232,13 @@ class SimConfig {
   /// in 2014, 35% in 2015 and 28% from 2016.
   double albumTail(int year) => year < 2007
       ? 1.35
-      : year < 2010
-          ? 1.35 - 0.12 * (year - 2006)
-          : year < 2013
-              ? 0.75 - 0.065 * (year - 2010)
-              : math.max(0.28, 0.55 - 0.1 * (year - 2013));
+      : year < 2009
+          ? 1.35 - 0.35 * (year - 2006) / 3
+          : year < 2010
+              ? 1.0
+              : year < 2013
+                  ? 0.75 - 0.065 * (year - 2010)
+                  : math.max(0.28, 0.55 - 0.1 * (year - 2013));
 
   /// Weeks for the casual buyers an album's songs reach to tire of it
   /// (docs K259): in the CD years word of mouth sold albums for longer.
