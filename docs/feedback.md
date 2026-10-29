@@ -238,6 +238,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F136 | Bir oyuncu (Sable): "There should be a feature to skip specifically to a certain week: select the month, then the week, then the year. When simulating artists it takes so long to skip skip skip until their albums release." | ✅ K257 |
 | F137 | Emir (sayaç: Say Something, 3,2B toplam, günde 48.667, 2040): "Streamler ölmesin, stabiliteyi arttır, git bak gerçekte nasıl." (kworb'dan The Weeknd listesiyle) | ✅ K258 |
 | F138 | Emir (2001–2007 yıl sonu küresel albüm listeleri): "2000'lerdeki pure sales'i biraz arttır, biraz daha stabil olsun." | ✅ K259 |
+| F139 | Emir (sayaç: Can't Stop the Feeling, 1,42B, günde 166K, 2041): "Hâlâ kötü, single'lar bu kadar düşmemeli." | ✅ K260 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

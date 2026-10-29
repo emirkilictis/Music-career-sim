@@ -1830,20 +1830,21 @@ class Simulator {
   }
 
   /// The weekly share of all its plays a catalog song keeps at least
-  /// (docs K258), by its catalog weight: on Spotify an old hit plays
-  /// 0.03–0.06% of its total a day (The Hills: 3.2B, 1.05M a day; Mirrors:
-  /// 1.68B, 1.04M; Rock Your Body, 2003: 1.16B, 609K; Blank Space: 2.65B,
-  /// 1.37M). Over ten years old a little less each year, or a floor that
-  /// grows with the total would grow without end.
+  /// (docs K258, K260), by its catalog weight: on Spotify an old hit plays
+  /// 0.02–0.06% of its total a day however old (The Hills: 3.2B, 1.05M a
+  /// day; Mirrors: 1.68B, 1.04M; Rock Your Body, 2003: 1.16B, 609K; Can't
+  /// Stop the Feeling: 2.14B, 430K). Over ten years old it eases very
+  /// slowly (a 40-year-old hit keeps half), or a floor that grows with the
+  /// total would grow without end.
   static double catalogFloorShare(double weight, double years) =>
       (weight >= 1.8
-          ? 0.0025
+          ? 0.003
           : weight >= 1.2
-              ? 0.0015
+              ? 0.0018
               : weight >= 0.5
-                  ? 0.0008
+                  ? 0.001
                   : 0.0) *
-      math.min(1.0, 10 / math.max(1.0, years));
+      math.min(1.0, math.sqrt(10 / math.max(1.0, years)));
 
   /// The dormant rate that keeps [s] at its floor (0: none).
   double _catalogFloor(Song s, Artist a, double years) {
