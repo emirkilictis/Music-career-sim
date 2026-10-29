@@ -1034,6 +1034,39 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '19b_post_answered');
   });
+  testWidgets('screenshots: skip to a date', skip: !enabled, (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await tester.runAsync(() => c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 257,
+        ),
+        PortSink(port.sendPort))));
+    port.close();
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Skip'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(_ci('To a date'), 100,
+        scrollable: find.byType(Scrollable).last);
+    await tester.tap(_ci('To a date'));
+    await tester.pumpAndSettle();
+    await shot(tester, '32_skip_to_date');
+  });
+
   testWidgets('screenshots: moments', skip: !enabled, (tester) async {
     await tester.runAsync(loadFonts);
     phoneView(tester);

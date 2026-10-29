@@ -321,7 +321,7 @@
   "homeEurope": "Europe",
   "homeOther": "Rest of world",
   "nextWeek": "Next week",
-  "skipYear": "Skip year",
+  "skipYear": "Year",
   "skip": "Skip",
   "skipAhead": "Skip ahead",
   "skipWeeksOption": "{count} weeks",
@@ -335,6 +335,37 @@
   "skipWeeksHint": "Plays every week without stopping; a summary at the end.",
   "skipYearOption": "A whole year",
   "skipYearHint": "All 52 weeks without stopping; the year's summary at the end.",
+  "skipToDateOption": "To a date",
+  "skipToDateHint": "Pick the month, the week and the year; every week is played, the summary at the end.",
+  "skipToDateTitle": "Skip to",
+  "skipMonth": "Month",
+  "skipWeek": "Week",
+  "skipWeekN": "Week {n}",
+  "@skipWeekN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "skipToDateWeeks": "{weeks, plural, =1{1 week from now} other{{weeks} weeks from now}}",
+  "@skipToDateWeeks": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "skipToDatePast": "That week has passed.",
+  "skipToDateTooFar": "At most {years} years ahead.",
+  "@skipToDateTooFar": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "skipToDateGo": "Skip",
   "skippingWeeks": "Skipping {count} weeks…",
   "@skippingWeeks": {
     "placeholders": {
