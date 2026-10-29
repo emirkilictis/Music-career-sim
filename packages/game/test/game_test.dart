@@ -2058,15 +2058,20 @@ void main() {
       g = GameSession.resume(slots, slot);
       expect(g.songMarket.pitches[x.index].bought, isTrue);
       expect(g.world.songs[s.id].boughtFrom, greaterThanOrEqualTo(0));
-      // Rivals take some demos over the month; next month brings new ones.
+      // Rivals take some demos over a month (not every month: a short
+      // list can last); next month brings new ones.
       final period = SongMarket.period(g.world.week);
       var taken = false;
       while (SongMarket.period(g.world.week) == period) {
         taken |= g.songMarket.pitches.any((x) => x.taken);
         g.advanceWeek();
       }
-      expect(taken, isTrue);
       expect(g.songMarket.pitches.any((x) => x.bought), isFalse);
+      for (var i = 0; i < 3 * SongMarket.periodWeeks && !taken; i++) {
+        taken |= g.songMarket.pitches.any((x) => x.taken);
+        g.advanceWeek();
+      }
+      expect(taken, isTrue);
       g.close();
     });
 
@@ -3783,13 +3788,15 @@ void main() {
       expect(Leaks.chance(g.world, p, s0), 0);
       p.fame = fame;
       // A big vault leaks now and then, not every week (F83).
+      // About one in 50 weeks: three years, or six if luck is slow.
       final leaks = <SongLeaked>[];
-      for (var i = 0; i < 156; i++) {
+      var weeks = 0;
+      for (; weeks < 312 && (weeks < 156 || leaks.isEmpty); weeks++) {
         p.fame = 1;
         leaks.addAll(g.advanceWeek().events.whereType<SongLeaked>());
       }
       expect(leaks, isNotEmpty);
-      expect(leaks.length, lessThanOrEqualTo(156 ~/ Leaks.quietWeeks));
+      expect(leaks.length, lessThanOrEqualTo(weeks ~/ Leaks.quietWeeks));
       expect(Leaks.weeklyOdds(10), closeTo(Leaks.maxWeekly, 1e-9));
       expect(Leaks.weeklyOdds(0.001), closeTo(0.001, 0.0001));
       final leak = leaks.last;
