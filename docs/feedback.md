@@ -227,6 +227,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F125 | Emir: "Eski şarkıların streaming era'da single olsalar bile flop kalıyor." | ✅ K247 |
 | F126 | Emir (JT, %100 ünlülük, yılda 1,92B dinlenme): "Pasif dinlenmem çok az, sürekli aktif olmam mı lazım? İlk yayınlama anlarındaki düşüşü biraz çabuk getirip daha uzun bir zamana mı yaysak?" ve "Şarkım ilk hafta 60M, sonraki haftalarda sürekli 60 60 gidiyor; 20-30'u görmesini hızlandırsak ama uzun zaman geçince dibi görmese?" | ✅ K247 |
 | F127 | Emir (2038, 109 eski şarkı yılda $1,34M, satış teklifi $16M): "Kataloğum çok değersiz oluyor." | ✅ K247 |
+| F128 | Emir: "Not al: radio chart." US Radio listesi K202'de (F84, "çok chart var") kaldırılmıştı; hesaplaması `ChartDef.retired` ile duruyor, geri açmak kolay. | ⏳ Not alındı: ne isteneceği (listeyi geri getirmek mi, radyoyu başka bir yerde göstermek mi) netleşince. |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
