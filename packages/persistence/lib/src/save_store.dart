@@ -152,6 +152,8 @@ class SaveStore {
           Tour.fromJson(x as Map<String, Object?>)
       ]);
     }
+    // A moment waiting for the player (docs K256).
+    w.moment = Moment.decode(meta['moment'] as String?);
     // Radio station visits (docs K254).
     if (meta['radioVisits'] case final String s when s.isNotEmpty) {
       w.radioVisits.addAll([
@@ -439,6 +441,7 @@ class SaveStore {
       'rivalSplits': RivalSplit.encode(w.rivalSplits),
       'songMarket': jsonEncode(w.boughtPitches.toList()..sort()),
       'pastTours': jsonEncode([for (final t in w.pastTours) t.toJson()]),
+      'moment': w.moment?.encode() ?? '',
       'radioVisits': jsonEncode([
         for (final (week, m) in w.radioVisits) [week, m]
       ]),

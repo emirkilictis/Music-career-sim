@@ -27,6 +27,7 @@ import 'imprints.dart';
 import 'joint_albums.dart';
 import 'leaks.dart';
 import 'lifecycle.dart';
+import 'moments.dart';
 import 'lineups.dart';
 import 'live_albums.dart';
 import 'model.dart';
@@ -176,6 +177,8 @@ class Simulator {
         : Actions.releaseScheduled(w, player);
     // Dated album versions build up and come out (docs K255).
     if (player != null) AlbumVersions.weekly(w, player);
+    // A moment passes, or one comes up on stage (docs K256).
+    Moments.weekly(w);
     // Playlist editors answer this week's pitches (docs K97).
     StreamingTools.answerPitches(w);
     // Independent curators answer last week's submissions (docs K160).

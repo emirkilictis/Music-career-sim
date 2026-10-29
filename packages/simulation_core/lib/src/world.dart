@@ -11,6 +11,7 @@ import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'model.dart';
+import 'moments.dart';
 import 'rng.dart';
 import 'award_campaigns.dart';
 import 'award_submissions.dart';
@@ -62,6 +63,9 @@ class World {
   /// The player's finished tours, night by night, oldest first (docs
   /// K208; tours before it are only in [tourRecords]).
   final List<Tour> pastTours = [];
+
+  /// A moment waiting for the player's answers (docs K256), or null.
+  Moment? moment;
 
   /// The player's radio station visits: (week, market) with market 0 the
   /// US, 1 the UK (docs K254).

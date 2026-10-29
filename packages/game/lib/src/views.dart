@@ -116,6 +116,7 @@ class ArtistView {
           for (final r in RadioPush.values) Actions.radioPushCostFor(a, r)
         ],
         maxRadioPush = Actions.maxRadioPush(a.label),
+        moment = w.moment == null ? null : MomentView.of(w, w.moment!),
         opportunity = a.opportunity == null
             ? null
             : OpportunityView.of(w, a.opportunity!),
@@ -228,6 +229,9 @@ class ArtistView {
 
   /// An offer waiting for the player's answer (docs K59).
   final OpportunityView? opportunity;
+
+  /// A moment waiting for the player's answers (docs K256).
+  final MomentView? moment;
 
   /// The tour on the road (docs K63).
   final TourView? tour;
@@ -1712,6 +1716,24 @@ abstract final class Radio {
 
   static int stations(double audience, {int cap = reportingStations}) =>
       math.min(cap, spins(audience) / spinsPerStation).round();
+}
+
+/// A moment waiting for the player (docs K256): its scene now, the names
+/// the scene mentions, the step out of how many.
+class MomentView {
+  MomentView.of(World w, Moment m)
+      : kind = m.kind,
+        scene = m.scene,
+        step = m.step,
+        steps = m.kind == MomentKind.crisis ? 2 : m.scenes.length,
+        rivalName = m.rivalId >= 0 ? w.artists[m.rivalId].name : '',
+        songTitle = m.songId >= 0 ? w.songs[m.songId].title : '',
+        crisis = m.crisis >= 0 ? OpportunityKind.values[m.crisis] : null;
+  final MomentKind kind;
+  final MomentScene scene;
+  final int step, steps;
+  final String rivalName, songTitle;
+  final OpportunityKind? crisis;
 }
 
 /// The player's station visits (docs K254): per market, whether one is

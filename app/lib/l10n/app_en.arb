@@ -6026,6 +6026,145 @@
   "chartUsRadio": "US Radio Songs",
   "chartShortUsRadio": "US Radio",
   "chartUkRadio": "UK Radio Songs",
+  "momentQRelease": "Tell us about the new music. What should people expect?",
+  "momentQReleaseA0": "It's the most honest thing I've made.",
+  "momentQReleaseA1": "Honestly? It's the best record of the year.",
+  "momentQReleaseA2": "Let's just say… keep your eyes open.",
+  "momentQRival": "Everyone's comparing you to {rival}. Thoughts?",
+  "@momentQRival": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      }
+    }
+  },
+  "momentQRivalA0": "Love what they do. Room for all of us.",
+  "momentQRivalA1": "Comparing us? That's generous to them.",
+  "momentQRivalA2": "I don't really follow anyone else's music.",
+  "momentQPersonal": "Fans want to know: are you seeing someone?",
+  "momentQPersonalA0": "My heart belongs to the stage. *laughs*",
+  "momentQPersonalA1": "I'll be honest, it's been a rough year for love.",
+  "momentQPersonalA2": "Next question.",
+  "momentQIndustry": "Do you think streaming is fair to artists?",
+  "momentQIndustryA0": "No. Artists deserve far better, and I'll say it.",
+  "momentQIndustryA1": "It's complicated. It helps people find music.",
+  "momentQIndustryA2": "As long as you're streaming my songs, it's fair!",
+  "momentQFans": "Anything you want to say to your fans?",
+  "momentQFansA0": "You're the reason I do this. Thank you.",
+  "momentQFansA1": "Get ready, something big is coming.",
+  "momentQFansA2": "Stop tagging me in memes. Actually, don't.",
+  "momentQDrama": "We have to ask about the drama everyone's talking about.",
+  "momentQDramaA0": "I regret how it went. I'm working on it.",
+  "momentQDramaA1": "I'd rather keep the focus on the music.",
+  "momentQDramaA2": "I meant every word. Let them be mad.",
+  "momentQFuture": "What's next for you?",
+  "momentQFutureA0": "A tour. I need to see these fans in person.",
+  "momentQFutureA1": "New music, sooner than you think.",
+  "momentQFutureA2": "Rest. I've earned a little silence.",
+  "momentQInspiration": "Who inspired you to make music?",
+  "momentQInspirationA0": "The legends I grew up on, of course.",
+  "momentQInspirationA1": "Honestly? Nobody. I built this myself.",
+  "momentQInspirationA2": "My mom singing in the kitchen.",
+  "momentFanOnStage": "A fan climbs onto the stage mid-song during {song}!",
+  "@momentFanOnStage": {
+    "placeholders": {
+      "song": {
+        "type": "String"
+      }
+    }
+  },
+  "momentFanOnStageA0": "Pull them in and sing the chorus together",
+  "momentFanOnStageA1": "Let security handle it",
+  "momentFanOnStageA2": "Keep singing like nothing happened",
+  "momentSoundCut": "The sound cuts out in the middle of {song}.",
+  "@momentSoundCut": {
+    "placeholders": {
+      "song": {
+        "type": "String"
+      }
+    }
+  },
+  "momentSoundCutA0": "Keep going a cappella",
+  "momentSoundCutA1": "Stop and wait for the fix",
+  "momentSoundCutA2": "Hand the song to the crowd",
+  "momentStarInCrowd": "A big star is spotted in the crowd tonight.",
+  "momentStarInCrowdA0": "Bring them on stage for {song}",
+  "@momentStarInCrowdA0": {
+    "placeholders": {
+      "song": {
+        "type": "String"
+      }
+    }
+  },
+  "momentStarInCrowdA1": "Give them a shout-out",
+  "momentStarInCrowdA2": "Focus on your fans",
+  "momentProposal": "Someone just proposed in the front row!",
+  "momentProposalA0": "Stop the show and dedicate {song} to them",
+  "@momentProposalA0": {
+    "placeholders": {
+      "song": {
+        "type": "String"
+      }
+    }
+  },
+  "momentProposalA1": "Congratulate them from the mic",
+  "momentProposalA2": "Carry on with the set",
+  "momentStorm": "A storm rolls in over the open-air show.",
+  "momentStormA0": "Play on in the rain",
+  "momentStormA1": "Pause until it passes",
+  "momentStormA2": "Call it off and refund the night",
+  "momentCrisisStatement": "Everyone is waiting for your statement.",
+  "momentCrisisStatementA0": "Apologize publicly",
+  "momentCrisisStatementA1": "Say nothing",
+  "momentCrisisStatementA2": "Fire back",
+  "momentPressSpreading": "The story is spreading. Every site has it.",
+  "momentPressSpreadingA0": "Go on a talk show and face it",
+  "momentPressSpreadingA1": "Do something good, quietly",
+  "momentPressSpreadingA2": "Lay low",
+  "momentPressFading": "The noise is dying down.",
+  "momentPressFadingA0": "Let it go",
+  "momentPressFadingA1": "Joke about it online",
+  "momentPressFadingA2": "Thank the fans who stood by you",
+  "momentPressSplit": "People are split: half defend you, half don't.",
+  "momentPressSplitA0": "Talk to your fans directly",
+  "momentPressSplitA1": "Sit down for a long interview",
+  "momentPressSplitA2": "Say nothing more",
+  "momentInterviewTitle": "Interview",
+  "momentConcertTitle": "On stage",
+  "momentCrisisTitle": "Crisis room",
+  "momentStep": "Question {n} of {total}",
+  "@momentStep": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "momentGood": "It landed.",
+  "momentBad": "It backfired.",
+  "momentViral": "A clip of {song} is going viral!",
+  "@momentViral": {
+    "placeholders": {
+      "song": {
+        "type": "String"
+      }
+    }
+  },
+  "momentNext": "Next",
+  "momentDone": "Done",
+  "momentCardInterview": "The interview is waiting: answer the questions",
+  "momentCardConcert": "Something happened on stage: decide",
+  "momentCardCrisis": "The crisis isn't over: what's your next move?",
+  "momentHandleCrisis": "Handle it step by step",
+  "momentChangeHype": "Hype",
+  "momentChangeDevotion": "Devotion",
+  "momentChangePopularity": "Popularity",
+  "momentChangeFans": "Fans",
+  "momentChangeEnergy": "Energy",
+  "momentChangeMoney": "Money",
   "feedHaters": "{count, plural, =1{1 hater in the replies · answer} other{{count} haters in the replies · answer}}",
   "@feedHaters": {
     "placeholders": {

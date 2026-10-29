@@ -6,6 +6,7 @@ import '../core/scope.dart';
 import '../ui/palette.dart';
 import 'common.dart';
 import 'event_icon.dart';
+import '../screens/moment_screen.dart';
 
 /// The offer waiting for an answer, with its choices (docs K59).
 class OpportunityCard extends StatelessWidget {
@@ -21,6 +22,25 @@ class OpportunityCard extends StatelessWidget {
         showInfo(context, fmt.offerOutcome(out),
             icon: opportunityIcon(out.kind));
       }
+      // A yes to an interview: the questions follow (docs K256).
+      if (out.kind == OpportunityKind.interview &&
+          out.choice == OpportunityChoice.accept) {
+        final m = await career.read(Cmd.moment());
+        if (m != null && context.mounted) {
+          await MomentScreen.open(context, career, m);
+        }
+      }
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
+  /// A crisis handled step by step (docs K256).
+  Future<void> _handle(BuildContext context) async {
+    final career = context.careerRead;
+    try {
+      final m = await career.act(Cmd.handleCrisis());
+      if (context.mounted) await MomentScreen.open(context, career, m);
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -66,6 +86,16 @@ class OpportunityCard extends StatelessWidget {
                 color: AppColors.textFaint,
                 fontWeight: FontWeight.w600)),
         const SizedBox(height: 12),
+        // A crisis can be played through instead (docs K256).
+        if (scandal && o.kind != OpportunityKind.dissed) ...[
+          FilledButton.icon(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.coral),
+            onPressed: busy ? null : () => _handle(context),
+            icon: const Icon(Icons.forum_rounded),
+            label: Text(l.momentHandleCrisis),
+          ),
+          const SizedBox(height: 8),
+        ],
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (final (i, c) in o.choices.indexed)
             i == 0

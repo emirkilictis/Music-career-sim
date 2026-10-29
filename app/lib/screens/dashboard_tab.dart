@@ -9,6 +9,7 @@ import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/platforms_list.dart';
+import 'moment_screen.dart';
 import 'social_screen.dart';
 import '../widgets/tour_section.dart';
 import '../widgets/opportunity_card.dart';
@@ -30,6 +31,12 @@ class DashboardTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
+        // An interview, a stage moment or a crisis to play through (docs
+        // K256).
+        if (context.career.player.moment case final m?) ...[
+          MomentCard(moment: m),
+          const SizedBox(height: 12),
+        ],
         if (context.career.player.opportunity case final offer?) ...[
           OpportunityCard(offer: offer),
           const SizedBox(height: 12),

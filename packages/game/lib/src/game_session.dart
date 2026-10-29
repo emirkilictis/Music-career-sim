@@ -1292,6 +1292,39 @@ class GameSession {
         out.choice == OpportunityChoice.accept) {
       Milestone.firstFestival.mark(world, _p);
     }
+    // A yes to an interview: the questions follow (docs K256).
+    if (out.kind == OpportunityKind.interview &&
+        out.choice == OpportunityChoice.accept) {
+      Moments.interview(world, _p);
+    }
+    _saveNow();
+    return out;
+  }
+
+  /// The moment waiting for the player's answers (docs K256), or null.
+  MomentView? get moment =>
+      world.moment == null ? null : MomentView.of(world, world.moment!);
+
+  /// Handles the crisis on the player's plate step by step (docs K256).
+  MomentView handleCrisis() {
+    final o = _p.opportunity;
+    if (o == null || !o.kind.isCrisis || o.kind == OpportunityKind.dissed) {
+      throw GameException('noOffer', 'No crisis');
+    }
+    final m = Moments.crisis(world, _p);
+    _saveNow();
+    return MomentView.of(world, m);
+  }
+
+  /// Answers the moment's scene (docs K256).
+  MomentOutcome answerMoment(int answer) {
+    if (world.moment == null) {
+      throw GameException('noMoment', 'Nothing to answer');
+    }
+    if (answer < 0 || answer > 2) {
+      throw GameException('invalidChoice', 'No such answer');
+    }
+    final out = Moments.answer(world, _p, answer);
     _saveNow();
     return out;
   }

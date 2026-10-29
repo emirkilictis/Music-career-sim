@@ -1034,6 +1034,50 @@ void main() {
     await tester.pumpAndSettle();
     await shot(tester, '19b_post_answered');
   });
+  testWidgets('screenshots: moments', skip: !enabled, (tester) async {
+    await tester.runAsync(loadFonts);
+    phoneView(tester);
+    final app = TestApp.create(premium: true);
+    addTearDown(app.dispose);
+    final c = app.controller;
+    final port = ReceivePort();
+    await tester.runAsync(() => c.exec(Cmd.start(
+        CareerSetup(
+          name: 'Nova Reyes',
+          genre: 0,
+          startYear: 2019,
+          tier: StartTier.superstar,
+          money: StartMoney.millionaire,
+          premium: true,
+          seed: 256,
+        ),
+        PortSink(port.sendPort))));
+    port.close();
+    // A yes to an interview (docs K256).
+    await tester.runAsync(() => c.run((s) {
+          final p = s.world.player!;
+          p.opportunity =
+              Opportunity(kind: OpportunityKind.interview, week: s.week);
+          s.answerOpportunity(OpportunityChoice.accept);
+        }));
+    await c.exec(Cmd.closeCareer());
+    await tester.pumpWidget(RepaintBoundary(key: key, child: app.widget));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Nova Reyes'));
+    await tester.pumpAndSettle();
+    await shot(tester, '31_moment_card');
+    await tester.tap(find.textContaining('The interview is waiting'));
+    await tester.pumpAndSettle();
+    await shot(tester, '31b_interview_question');
+    await tester.tap(find.byType(OutlinedButton).at(1));
+    for (var i = 0; i < 4; i++) {
+      await tester.runAsync(() => Future.delayed(Duration(milliseconds: 200)));
+      await tester.pump(const Duration(milliseconds: 300));
+    }
+    await tester.pumpAndSettle();
+    await shot(tester, '31c_interview_answer');
+  });
+
   testWidgets('screenshots: radio tools', skip: !enabled, (tester) async {
     await tester.runAsync(loadFonts);
     phoneView(tester);

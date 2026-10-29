@@ -656,6 +656,10 @@ abstract final class Cmd {
           {ContractDeal deal = ContractDeal.standard}) =>
       (s) => s.signLabel(label, deal: deal);
 
+  static SessionCmd<MomentView?> moment() => (s) => s.moment;
+  static SessionCmd<MomentOutcome> answerMoment(int answer) =>
+      (s) => s.answerMoment(answer);
+  static SessionCmd<MomentView> handleCrisis() => (s) => s.handleCrisis();
   static SessionCmd<OpportunityOutcome> answerOpportunity(
           OpportunityChoice choice) =>
       (s) => s.answerOpportunity(choice);

@@ -5668,6 +5668,88 @@ void main() {
       g.close();
     });
 
+    test('moments: an interview, a crisis, on stage (K256)', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      var w = g.world;
+      var p = w.player!;
+      expect(g.moment, isNull);
+      expect(() => g.answerMoment(0), _code('noMoment'));
+      // A yes to an interview: three questions follow.
+      p.opportunity =
+          Opportunity(kind: OpportunityKind.interview, week: w.week);
+      g.answerOpportunity(OpportunityChoice.accept);
+      var m = g.moment!;
+      expect(m.kind, MomentKind.interview);
+      expect(m.steps, Moments.questions);
+      expect(m.scene.kind, MomentKind.interview);
+      expect(() => g.answerMoment(3), _code('invalidChoice'));
+      g.answerMoment(0);
+      expect(g.moment!.step, 1);
+      // Kept across reopening.
+      g.close();
+      g = GameSession.resume(slots, slot);
+      w = g.world;
+      p = w.player!;
+      expect(g.moment!.step, 1);
+      g.answerMoment(1);
+      final last = g.answerMoment(2);
+      expect(last.scene.kind, MomentKind.interview);
+      expect(g.moment, isNull);
+      // A crisis in two steps: the statement is the crisis's answer, the
+      // press turns, then the follow-up.
+      p.opportunity = Opportunity(kind: OpportunityKind.scandal, week: w.week);
+      m = g.handleCrisis();
+      expect(m.kind, MomentKind.crisis);
+      expect(m.scene, MomentScene.crisisStatement);
+      final first = g.answerMoment(0);
+      expect(first.crisis!.choice, OpportunityChoice.apologize);
+      expect(p.opportunity, isNull);
+      m = g.moment!;
+      expect(m.step, 1);
+      expect(m.scene, isIn(const [
+        MomentScene.pressSpreading,
+        MomentScene.pressFading,
+        MomentScene.pressSplit
+      ]));
+      g.answerMoment(2);
+      expect(g.moment, isNull);
+      expect(() => g.handleCrisis(), _code('noOffer'));
+      // On stage: a clip may take off with the song.
+      p.creativeEnergy = 100;
+      final song = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(song);
+      p.skills.performance = 100;
+      var viral = false;
+      for (var i = 0; i < 12 && !viral; i++) {
+        w.moment = Moment(
+            kind: MomentKind.concert,
+            week: w.week,
+            scenes: [MomentScene.proposal],
+            songId: song);
+        final out = g.answerMoment(0);
+        expect(out.good, isTrue);
+        viral = out.viralSongId == song;
+        g.advanceWeek();
+      }
+      expect(viral, isTrue);
+      expect(w.songs[song].viralBoost, greaterThan(0));
+      // Left unanswered, a moment passes.
+      w.moment = Moment(
+          kind: MomentKind.concert,
+          week: w.week,
+          scenes: [MomentScene.storm],
+          songId: song);
+      g.advanceWeeks(Moments.answerWeeks + 1, stop: SkipStop.never);
+      expect(g.moment, isNull);
+      g.close();
+    });
+
     test('a dated album version: announced, pre-ordered, out (K255)', () {
       var g = GameSession.start(
           slots,

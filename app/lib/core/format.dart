@@ -170,6 +170,117 @@ class Fmt {
         SingleFormat.signed => l.formatSignedSingle,
       };
 
+  /// A moment's scene, as asked (docs K256).
+  String momentPrompt(MomentScene scene, MomentView m) => switch (scene) {
+        MomentScene.qRelease => l.momentQRelease,
+        MomentScene.qRival => l.momentQRival(m.rivalName),
+        MomentScene.qPersonal => l.momentQPersonal,
+        MomentScene.qIndustry => l.momentQIndustry,
+        MomentScene.qFans => l.momentQFans,
+        MomentScene.qDrama => l.momentQDrama,
+        MomentScene.qFuture => l.momentQFuture,
+        MomentScene.qInspiration => l.momentQInspiration,
+        MomentScene.fanOnStage => l.momentFanOnStage(m.songTitle),
+        MomentScene.soundCut => l.momentSoundCut(m.songTitle),
+        MomentScene.starInCrowd => l.momentStarInCrowd,
+        MomentScene.proposal => l.momentProposal,
+        MomentScene.storm => l.momentStorm,
+        MomentScene.crisisStatement => l.momentCrisisStatement,
+        MomentScene.pressSpreading => l.momentPressSpreading,
+        MomentScene.pressFading => l.momentPressFading,
+        MomentScene.pressSplit => l.momentPressSplit,
+      };
+
+  /// Answer [i] (0–2) to a moment's scene (docs K256).
+  String momentAnswer(MomentScene scene, int i, MomentView m) =>
+      switch (scene) {
+        MomentScene.qRelease => [
+          l.momentQReleaseA0,
+          l.momentQReleaseA1,
+          l.momentQReleaseA2,
+        ][i],
+        MomentScene.qRival => [
+          l.momentQRivalA0,
+          l.momentQRivalA1,
+          l.momentQRivalA2,
+        ][i],
+        MomentScene.qPersonal => [
+          l.momentQPersonalA0,
+          l.momentQPersonalA1,
+          l.momentQPersonalA2,
+        ][i],
+        MomentScene.qIndustry => [
+          l.momentQIndustryA0,
+          l.momentQIndustryA1,
+          l.momentQIndustryA2,
+        ][i],
+        MomentScene.qFans => [
+          l.momentQFansA0,
+          l.momentQFansA1,
+          l.momentQFansA2,
+        ][i],
+        MomentScene.qDrama => [
+          l.momentQDramaA0,
+          l.momentQDramaA1,
+          l.momentQDramaA2,
+        ][i],
+        MomentScene.qFuture => [
+          l.momentQFutureA0,
+          l.momentQFutureA1,
+          l.momentQFutureA2,
+        ][i],
+        MomentScene.qInspiration => [
+          l.momentQInspirationA0,
+          l.momentQInspirationA1,
+          l.momentQInspirationA2,
+        ][i],
+        MomentScene.fanOnStage => [
+          l.momentFanOnStageA0,
+          l.momentFanOnStageA1,
+          l.momentFanOnStageA2,
+        ][i],
+        MomentScene.soundCut => [
+          l.momentSoundCutA0,
+          l.momentSoundCutA1,
+          l.momentSoundCutA2,
+        ][i],
+        MomentScene.starInCrowd => [
+          l.momentStarInCrowdA0(m.songTitle),
+          l.momentStarInCrowdA1,
+          l.momentStarInCrowdA2,
+        ][i],
+        MomentScene.proposal => [
+          l.momentProposalA0(m.songTitle),
+          l.momentProposalA1,
+          l.momentProposalA2,
+        ][i],
+        MomentScene.storm => [
+          l.momentStormA0,
+          l.momentStormA1,
+          l.momentStormA2,
+        ][i],
+        MomentScene.crisisStatement => [
+          l.momentCrisisStatementA0,
+          l.momentCrisisStatementA1,
+          l.momentCrisisStatementA2,
+        ][i],
+        MomentScene.pressSpreading => [
+          l.momentPressSpreadingA0,
+          l.momentPressSpreadingA1,
+          l.momentPressSpreadingA2,
+        ][i],
+        MomentScene.pressFading => [
+          l.momentPressFadingA0,
+          l.momentPressFadingA1,
+          l.momentPressFadingA2,
+        ][i],
+        MomentScene.pressSplit => [
+          l.momentPressSplitA0,
+          l.momentPressSplitA1,
+          l.momentPressSplitA2,
+        ][i],
+      };
+
   /// A Golden Record Awards category (docs K91).
   String awardCategory(AwardCategory c, [int genre = -1]) => switch (c) {
         AwardCategory.record => l.awardRecord,
