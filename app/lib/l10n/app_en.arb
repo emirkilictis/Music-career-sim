@@ -2569,6 +2569,7 @@
   "coverOwn": "Your own image",
   "coverGenerated": "Generated cover",
   "addCover": "Add cover",
+  "videoThumbnail": "Thumbnail",
   "changeCover": "Change",
   "chooseFromPhotos": "Choose from photos",
   "cropTitle": "Choose the square",

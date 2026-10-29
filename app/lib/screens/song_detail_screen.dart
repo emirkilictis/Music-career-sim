@@ -900,8 +900,21 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     ),
                   ] else if (s.video != null) ...[
                     const SizedBox(height: 8),
-                    Tag(l.hasVideo(fmt.videoBudget(s.video!)),
-                        icon: Icons.videocam_rounded),
+                    Row(children: [
+                      Tag(l.hasVideo(fmt.videoBudget(s.video!)),
+                          icon: Icons.videocam_rounded),
+                      // The video's own thumbnail (docs K246).
+                      if (s.isPlayer) ...[
+                        const SizedBox(width: 8),
+                        TextButton.icon(
+                          onPressed: () => editImage(
+                              context, ImageStore.videoKey(s.id),
+                              aspect: 16 / 9),
+                          icon: const Icon(Icons.wallpaper_rounded, size: 18),
+                          label: Text(l.videoThumbnail),
+                        ),
+                      ],
+                    ]),
                   ],
                   // A sleeper hit in the making (docs K108).
                   if (s.catchingOn) ...[

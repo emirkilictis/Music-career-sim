@@ -3,10 +3,13 @@ import 'package:game/game.dart';
 
 import '../core/career_state.dart';
 import '../core/commands.dart';
+import '../core/images.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/image_pickers.dart';
+import '../widgets/stored_image.dart';
 import 'song_detail_screen.dart';
 
 /// The player's channel on the video site (docs K142): subscribers, views,
@@ -236,6 +239,9 @@ class _VideoTile extends StatelessWidget {
     final title = r.songId < 0
         ? fmt.videoKind(kind!)
         : '${r.title} (${kind == null ? l.channelMusicVideo : fmt.videoKind(kind)})';
+    // The player's own thumbnail, if they set one (docs K246).
+    final key = ImageStore.videoKey(r.songId, kind: kind?.index, week: r.week);
+    final thumb = context.images.path(key);
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -245,7 +251,9 @@ class _VideoTile extends StatelessWidget {
             width: 128,
             height: 72,
             child: Stack(fit: StackFit.expand, children: [
-              if (r.songId >= 0)
+              if (thumb != null)
+                storedImage(thumb, fit: BoxFit.cover, gaplessPlayback: true)
+              else if (r.songId >= 0)
                 ClipRect(
                   child: FittedBox(
                     fit: BoxFit.cover,
@@ -284,6 +292,13 @@ class _VideoTile extends StatelessWidget {
                       style:
                           TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
                 ]),
+          ),
+          IconButton(
+            tooltip: l.videoThumbnail,
+            visualDensity: VisualDensity.compact,
+            icon: Icon(Icons.wallpaper_rounded,
+                size: 20, color: AppColors.textMuted),
+            onPressed: () => editImage(context, key, aspect: 16 / 9),
           ),
         ]),
       ),

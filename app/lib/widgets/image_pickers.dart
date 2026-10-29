@@ -8,8 +8,11 @@ import 'art.dart';
 import 'photo_crop.dart';
 import 'stored_image.dart';
 
-/// "Choose from photos / Use the generated one" for one image [key].
-Future<void> editImage(BuildContext context, String key) async {
+/// "Choose from photos / Use the generated one" for one image [key];
+/// [aspect] is its shape, width over height (16 / 9 for a video thumbnail,
+/// docs K246).
+Future<void> editImage(BuildContext context, String key,
+    {double aspect = 1}) async {
   final l = context.l10n;
   final store = context.imagesRead;
   final hasOwn = store.path(key) != null;
@@ -38,12 +41,13 @@ Future<void> editImage(BuildContext context, String key) async {
     // (docs K221: the middle square cut off what they wanted).
     final bytes = await readPicked(picked);
     final size = imageSize(bytes);
-    if (size != null && (size.$1 - size.$2).abs() <= size.$1 * 0.02) {
+    if (size != null &&
+        (size.$1 - size.$2 * aspect).abs() <= size.$1 * 0.02) {
       store.save(key, picked);
       return;
     }
     if (!context.mounted) return;
-    final square = await cropToSquare(context, bytes);
+    final square = await cropTo(context, bytes, aspect: aspect);
     if (square != null) store.saveBytes(key, square);
   } else if (choice == false) {
     store.remove(key);

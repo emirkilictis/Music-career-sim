@@ -8,6 +8,7 @@ import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
+import '../widgets/stored_image.dart';
 import '../widgets/event_icon.dart';
 import 'channel_screen.dart';
 import 'song_detail_screen.dart';
@@ -332,12 +333,21 @@ class _VideoList extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(children: [
-              CoverArt(
-                  seed: songCoverSeed(r.songId, r.albumId),
-                  size: 44,
-                  radius: 4,
-                  songId: r.songId,
-                  albumId: r.albumId),
+              // The video's own thumbnail if the player set one (K246).
+              if (context.images.path(ImageStore.videoKey(r.songId))
+                  case final thumb?)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: storedImage(thumb,
+                      width: 44, height: 44, fit: BoxFit.cover),
+                )
+              else
+                CoverArt(
+                    seed: songCoverSeed(r.songId, r.albumId),
+                    size: 44,
+                    radius: 4,
+                    songId: r.songId,
+                    albumId: r.albumId),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

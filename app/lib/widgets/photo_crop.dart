@@ -11,8 +11,14 @@ import '../ui/palette.dart';
 /// artist photo (docs K221): drag and pinch, then use it. Returns the
 /// square as a PNG, or null if they cancelled.
 Future<Uint8List?> cropToSquare(BuildContext context, Uint8List bytes) =>
+    cropTo(context, bytes);
+
+/// [cropToSquare] for any shape: [aspect] is width over height (16 / 9 for
+/// a video thumbnail; docs K246).
+Future<Uint8List?> cropTo(BuildContext context, Uint8List bytes,
+        {double aspect = 1}) =>
     Navigator.of(context).push<Uint8List>(MaterialPageRoute(
-        fullscreenDialog: true, builder: (_) => _CropScreen(bytes)));
+        fullscreenDialog: true, builder: (_) => _CropScreen(bytes, aspect)));
 
 /// Width and height from a PNG's or a JPEG's header without decoding it
 /// (null: another format, or a damaged file).
@@ -42,8 +48,9 @@ Future<Uint8List?> cropToSquare(BuildContext context, Uint8List bytes) =>
 }
 
 class _CropScreen extends StatefulWidget {
-  const _CropScreen(this.bytes);
+  const _CropScreen(this.bytes, this.aspect);
   final Uint8List bytes;
+  final double aspect;
 
   @override
   State<_CropScreen> createState() => _CropScreenState();
@@ -82,18 +89,22 @@ class _CropScreenState extends State<_CropScreen> {
     // The square on screen, back in the photo's pixels.
     final inverse = Matrix4.inverted(_view.value);
     final a = MatrixUtils.transformPoint(inverse, Offset.zero) / _fit;
-    final b = MatrixUtils.transformPoint(inverse, Offset(_side, _side)) / _fit;
+    final b = MatrixUtils.transformPoint(
+            inverse, Offset(_side, _side / widget.aspect)) /
+        _fit;
     final bounds =
         Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble());
     final src = Rect.fromPoints(a, b).intersect(bounds);
-    final out = math.min(1024, src.shortestSide.round()).clamp(1, 1024);
+    final cap = widget.aspect == 1 ? 1024 : 1280;
+    final out = math.min(cap, src.width.round()).clamp(1, cap);
+    final outH = math.max(1, (out / widget.aspect).round());
     final rec = ui.PictureRecorder();
     Canvas(rec).drawImageRect(
         img,
         src,
-        Rect.fromLTWH(0, 0, out.toDouble(), out.toDouble()),
+        Rect.fromLTWH(0, 0, out.toDouble(), outH.toDouble()),
         Paint()..filterQuality = FilterQuality.high);
-    final square = await rec.endRecording().toImage(out, out);
+    final square = await rec.endRecording().toImage(out, outH);
     final png = await square.toByteData(format: ui.ImageByteFormat.png);
     square.dispose();
     if (mounted) Navigator.pop(context, png?.buffer.asUint8List());
@@ -115,13 +126,16 @@ class _CropScreenState extends State<_CropScreen> {
       body: img == null
           ? const Center(child: CircularProgressIndicator())
           : LayoutBuilder(builder: (context, box) {
-              _side = math.min(box.maxWidth, box.maxHeight - 80) - 32;
-              // The photo covers the square at first, centred.
-              _fit = _side / math.min(img.width, img.height);
+              final aspect = widget.aspect;
+              _side = math.min(box.maxWidth - 32,
+                  (box.maxHeight - 112) * aspect);
+              final frameH = _side / aspect;
+              // The photo covers the frame at first, centred.
+              _fit = math.max(_side / img.width, frameH / img.height);
               final w = img.width * _fit, h = img.height * _fit;
               if (!_placed) {
                 _view.value = Matrix4.translationValues(
-                    -(w - _side) / 2, -(h - _side) / 2, 0);
+                    -(w - _side) / 2, -(h - frameH) / 2, 0);
                 _placed = true;
               }
               return Column(children: [
@@ -130,8 +144,9 @@ class _CropScreenState extends State<_CropScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                         border: Border.all(color: AppColors.text, width: 2)),
-                    child: SizedBox.square(
-                      dimension: _side,
+                    child: SizedBox(
+                      width: _side,
+                      height: _side / aspect,
                       child: ClipRect(
                         child: InteractiveViewer(
                           transformationController: _view,

@@ -898,6 +898,7 @@
   "coverOwn": "Kendi görselin",
   "coverGenerated": "Otomatik kapak",
   "addCover": "Kapak ekle",
+  "videoThumbnail": "Video kapağı",
   "changeCover": "Değiştir",
   "chooseFromPhotos": "Fotoğraflardan seç",
   "cropTitle": "Kareyi seç",

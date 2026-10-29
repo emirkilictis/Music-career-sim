@@ -91,6 +91,16 @@ class ImageStore extends ChangeNotifier {
   }
 
   static String songKey(int songId) => 'song_$songId';
+
+  /// A video's own thumbnail (docs K246): the official music video of a
+  /// song, or one of the channel's uploads ([kind] its video kind's index,
+  /// [week] for a video about the artist).
+  static String videoKey(int songId, {int? kind, int week = -1}) =>
+      songId < 0
+          ? 'video_artist_${week}_$kind'
+          : kind == null
+              ? 'video_$songId'
+              : 'video_${songId}_$kind';
   static String albumKey(int albumId) => 'album_$albumId';
 
   /// An album cover chosen before a scheduled album exists (docs K45).
