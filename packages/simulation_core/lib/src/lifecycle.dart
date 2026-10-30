@@ -109,6 +109,15 @@ abstract final class Lifecycle {
   /// fashion (docs K261).
   static const resurgenceChance = 0.06, slumpChance = 0.06;
 
+  /// The floor's yardstick for a song without one (out before streaming,
+  /// or from a save before it; docs K265): against its last active week's
+  /// listening, what songs of its weight have (medians measured).
+  static double oldCatalogBase(double weight) => weight >= 1.8
+      ? 170
+      : weight >= 1.2
+          ? 110
+          : 54;
+
   /// Weekly plays one unit of [a]'s dormant rate brings at last week's
   /// market (the drift averages out).
   static double playsPerRate(World w, Artist a) {
@@ -134,11 +143,13 @@ abstract final class Lifecycle {
     // Back in the catalog after a comeback: at least where it was.
     final rate = math.max(fresh, s.dormantRate);
     s.dormantRate = rate;
-    // The catalog floor's yardstick (docs K265).
-    final perRate = playsPerRate(w, a);
-    if (perRate > 0) {
-      s.catalogBase =
-          math.max(s.catalogBase, w.songLifetimeStreams(s) / perRate);
+    // The catalog floor's yardstick (docs K265), once: back from a
+    // comeback it keeps the first, or the floor would grow on its plays.
+    if (s.catalogBase <= 0) {
+      final perRate = playsPerRate(w, a);
+      s.catalogBase = perRate > 0
+          ? w.songLifetimeStreams(s) / perRate
+          : oldCatalogBase(catalogWeight(s)) * s.lastAttention / a.catalogFactor;
     }
     for (var r = 0; r < regionCount; r++) {
       s.reg[SongReg.indexStreams + r] = a.reg[ArtistReg.indexStreams + r];

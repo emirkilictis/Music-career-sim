@@ -22,11 +22,13 @@ void main(List<String> args) {
   final w = g.world;
   String m(double x) => '${(x / 1e6).toStringAsFixed(0)}M';
   for (var y = 0; y < years; y++) {
-    var fresh = 0.0, all = 0.0, top = 0.0;
+    var fresh = 0.0, all = 0.0, top = 0.0, old = 0;
     for (var k = 0; k < 52; k++) {
       g.advanceWeek();
       if (k % 13 != 6) continue;
       for (final id in w.activeSongIds) {
+        // Old songs back on the charts from the catalog (docs K267).
+        if (w.week - w.songs[id].releasedWeek > 3 * 52) old++;
         final s = w.songs[id].weekStreams;
         fresh += s;
         if (s > top) top = s;
@@ -37,7 +39,8 @@ void main(List<String> args) {
     }
     final catalog = all - fresh;
     print('${g.year - 1}: new ${m(fresh / 4)}/wk, catalog ${m(catalog / 4)}/wk'
-        ' (${(catalog / all * 100).round()}%), top new song ${m(top)}');
+        ' (${(catalog / all * 100).round()}%), top new song ${m(top)},'
+        ' ${(old / 4).round()} songs 3+ years old active');
   }
   g.close();
   dir.deleteSync(recursive: true);

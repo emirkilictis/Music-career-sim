@@ -1782,9 +1782,37 @@ class Simulator {
   /// and 3% after (the classics stay); other singles and charting album
   /// tracks 25% a year; the rest 45%. Each song's lifetime so far is
   /// settled first, then its rate drops.
+  /// Saves from before the floor's yardstick (docs K265) are put right
+  /// at the first week played after loading, not artist by artist over a
+  /// quarter: their swollen catalogs held the market from the new songs.
+  bool _catalogRepairDue = true;
+
   void _fadeCatalogs() {
     final w = world;
-    final c = w.config;
+    if (_catalogRepairDue) {
+      _catalogRepairDue = false;
+      final removed = Float64List(regionCount);
+      for (final a in w.artists) {
+        if (a.dormantSongIds.isEmpty) continue;
+        final dropped = _updateCatalog(a, repair: true);
+        for (var k = 0; k < regionCount; k++) {
+          removed[k] += dropped *
+              a.catalogFactor *
+              a.regionShare[k] *
+              (a.isRetired ? 1.0 : _cap(a.id, k));
+        }
+      }
+      // The market's memory of how much was listened to forgets the
+      // catalog taken off too, or the new songs would share a market
+      // still sized for it for half a year.
+      for (var k = 0; k < regionCount; k++) {
+        if (removed[k] <= 0) continue;
+        w.emaAttention[k] =
+            math.max(0.2 * w.emaAttention[k], w.emaAttention[k] - removed[k]);
+        w.emaDownloadDemand[k] = math.max(0.2 * w.emaDownloadDemand[k],
+            w.emaDownloadDemand[k] - 0.1 * removed[k]);
+      }
+    }
     // A thirteenth of the artists each week, so the work (and the songs
     // to save) is spread evenly.
     final turn = w.week % catalogFadeWeeks;
@@ -1792,66 +1820,105 @@ class Simulator {
       if (a.dormantSongIds.isEmpty || a.id % catalogFadeWeeks != turn) {
         continue;
       }
-      w.settleRetired(a);
-      final mine = a.id == w.playerArtistId ||
-          (a.managedBy >= 0 && a.managedBy == w.playerArtistId);
-      var dropped = 0.0;
-      // In id order: the list's order differs after loading a save, and
-      // the sums must come out the same to the last bit.
-      for (final id in a.dormantSongIds.toList()..sort()) {
-        final s = w.songs[id];
-        if (s.dormantRate <= 0) continue;
-        final years = (w.week - s.releasedWeek) / GameTime.weeksPerYear;
-        final perYear = c.catalogFadePerYear(Lifecycle.catalogWeight(s), years);
-        // This quarter's trend (docs K261) comes off before the fade and
-        // the floor, the next one goes on after: an old song is found
-        // again or forgotten for a while, then goes back to its level.
-        final quarter = w.week ~/ catalogFadeWeeks;
-        final before = Lifecycle.catalogTrend(w.seed, quarter - 1, id);
-        final now = Lifecycle.catalogTrend(w.seed, quarter, id);
-        var rate = s.dormantRate /
-            before *
-            math.pow(1 - perYear, catalogFadeWeeks / GameTime.weeksPerYear);
-        // A save from before the floor's yardstick (docs K265): its
-        // catalog may have grown on the old floor, taking the market from
-        // the new songs; back to at most what it went in with.
-        if (s.catalogBase <= 0) {
-          rate = math.min(
-              rate,
-              s.lastAttention /
-                  a.catalogFactor *
-                  Lifecycle.catalogWeight(s) *
-                  c.catalogLevel);
-        }
-        // A hit never falls below a share of its plays up to the catalog
-        // a week (docs K258, K265): old hits stay in people's lives, as on
-        // the real apps, and a catalog faded by older rules is brought
-        // back up.
-        final floor = _catalogFloor(s, a, years);
-        if (rate < floor) rate = floor;
-        rate *= now;
-        // The player's own songs keep a few listeners however old (docs
-        // K224): a song with millions of plays never shows zero.
-        if (rate < catalogGoneRate && !mine) rate = 0;
-        // Negative: raised to the floor.
-        final drop = s.dormantRate - rate;
-        if (drop == 0) continue;
-        for (var r = 0; r < regionCount; r++) {
-          s.reg[SongReg.lifeStreams + r] = w.songLifetimeStreams(s, r);
-          s.reg[SongReg.lifeDownloads + r] = w.songLifetimeDownloads(s, r);
-          s.reg[SongReg.indexStreams + r] = w.artistIndexStreams(a, r);
-          s.reg[SongReg.indexDownloads + r] = w.artistIndexDownloads(a, r);
-        }
-        s.dormantRate = rate;
-        dropped += drop;
-        if (s.albumId >= 0) {
-          final al = w.albums[s.albumId];
-          Lifecycle.settleAlbum(w, al);
-          al.sumDormantRate = math.max(0.0, al.sumDormantRate - drop);
-        }
-        w.dirtySongs.add(id);
+      _updateCatalog(a);
+    }
+  }
+
+  /// [a]'s quarterly catalog update: the fade, the trends, the floor; or,
+  /// with [repair], only its songs from a save before the yardstick,
+  /// brought back to at most what they went in with (docs K265).
+  /// Returns the rate taken off.
+  double _updateCatalog(Artist a, {bool repair = false}) {
+    final w = world;
+    final c = w.config;
+    if (repair &&
+        !a.dormantSongIds.any((id) =>
+            w.songs[id].catalogBase <= 0 && w.songs[id].dormantRate > 0)) {
+      return 0;
+    }
+    w.settleRetired(a);
+    final mine = a.id == w.playerArtistId ||
+        (a.managedBy >= 0 && a.managedBy == w.playerArtistId);
+    var dropped = 0.0;
+    // Played as much as the songs on the Streamify chart: back on the
+    // charts, as old songs are on the real ones (docs K267; a retired
+    // artist's stay in the catalog).
+    final back = <int>[];
+    final cutoff = w.chartCutoff[Charts.platformGlobal];
+    final quarter = w.week ~/ catalogFadeWeeks;
+    // The trend a rate holds before this week's update: its last one's.
+    final held =
+        Lifecycle.lastCatalogUpdate(w.week - 1, a.id) ~/ catalogFadeWeeks;
+    // In id order: the list's order differs after loading a save, and
+    // the sums must come out the same to the last bit.
+    for (final id in a.dormantSongIds.toList()..sort()) {
+      final s = w.songs[id];
+      if (s.dormantRate <= 0) continue;
+      if (repair && s.catalogBase > 0) continue;
+      final years = (w.week - s.releasedWeek) / GameTime.weeksPerYear;
+      final perYear = c.catalogFadePerYear(Lifecycle.catalogWeight(s), years);
+      // This quarter's trend (docs K261) comes off before the fade and
+      // the floor, the next one goes on after: an old song is found
+      // again or forgotten for a while, then goes back to its level.
+      final before = Lifecycle.catalogTrend(
+          w.seed, repair ? held : quarter - 1, id);
+      final now =
+          repair ? before : Lifecycle.catalogTrend(w.seed, quarter, id);
+      var rate = s.dormantRate /
+          before *
+          (repair
+              ? 1.0
+              : math.pow(
+                  1 - perYear, catalogFadeWeeks / GameTime.weeksPerYear));
+      // A save from before the floor's yardstick (docs K265): its
+      // catalog may have grown on the old floor, taking the market from
+      // the new songs; back to at most what it went in with.
+      if (s.catalogBase <= 0) {
+        rate = math.min(
+            rate,
+            s.lastAttention /
+                a.catalogFactor *
+                Lifecycle.catalogWeight(s) *
+                c.catalogLevel);
       }
-      if (dropped == 0) continue;
+      // A hit never falls below a share of its plays up to the catalog
+      // a week (docs K258, K265): old hits stay in people's lives, as on
+      // the real apps, and a catalog faded by older rules is brought
+      // back up.
+      final floor = _catalogFloor(s, a, years);
+      if (rate < floor) rate = floor;
+      rate *= now;
+      // The player's own songs keep a few listeners however old (docs
+      // K224): a song with millions of plays never shows zero.
+      if (rate < catalogGoneRate && !mine) rate = 0;
+      // Its own level, not a quarter's rediscovery: it comes back on
+      // that and plays it while back (a trend would stay with it).
+      if (!repair &&
+          !a.isRetired &&
+          cutoff > 0 &&
+          rate / now * Lifecycle.playsPerRate(w, a) >= cutoff) {
+        back.add(id);
+        rate /= now;
+      }
+      // Negative: raised to the floor.
+      final drop = s.dormantRate - rate;
+      if (drop == 0) continue;
+      for (var r = 0; r < regionCount; r++) {
+        s.reg[SongReg.lifeStreams + r] = w.songLifetimeStreams(s, r);
+        s.reg[SongReg.lifeDownloads + r] = w.songLifetimeDownloads(s, r);
+        s.reg[SongReg.indexStreams + r] = w.artistIndexStreams(a, r);
+        s.reg[SongReg.indexDownloads + r] = w.artistIndexDownloads(a, r);
+      }
+      s.dormantRate = rate;
+      dropped += drop;
+      if (s.albumId >= 0) {
+        final al = w.albums[s.albumId];
+        Lifecycle.settleAlbum(w, al);
+        al.sumDormantRate = math.max(0.0, al.sumDormantRate - drop);
+      }
+      w.dirtySongs.add(id);
+    }
+    if (dropped != 0) {
       a.sumDormantRate = math.max(0.0, a.sumDormantRate - dropped);
       if (a.isRetired) {
         for (var r = 0; r < regionCount; r++) {
@@ -1863,6 +1930,10 @@ class Simulator {
       }
       w.dirtyArtists.add(a.id);
     }
+    for (final id in back) {
+      Lifecycle.reactivateSong(w, w.songs[id]);
+    }
+    return dropped;
   }
 
   /// The weekly share of all its plays a catalog song keeps at least
@@ -1892,20 +1963,11 @@ class Simulator {
     if (s.catalogBase <= 0) {
       final weight = Lifecycle.catalogWeight(s);
       s.catalogBase =
-          oldCatalogBase(weight) * s.lastAttention / a.catalogFactor;
+          Lifecycle.oldCatalogBase(weight) * s.lastAttention / a.catalogFactor;
       world.dirtySongs.add(s.id);
     }
     return share * s.catalogBase;
   }
-
-  /// A catalog song without the yardstick (a save from before, or out
-  /// before streaming; docs K265): the yardstick against its last active
-  /// week's listening that songs of its weight have (medians measured).
-  static double oldCatalogBase(double weight) => weight >= 1.8
-      ? 170
-      : weight >= 1.2
-          ? 110
-          : 54;
 
   /// No artist reaches more than a few per cent of a market (docs K105):
   /// each artist's listening beyond their fans in a region is compared
