@@ -53,6 +53,12 @@ class AppSettings extends ChangeNotifier {
   /// Drawn faces for people without a photo (docs K212) or initials.
   bool avatarFaces = true;
 
+  /// The career open when the page went away (docs K263): opened again
+  /// at the next start, so a reload (a phone dropping the tab, an update)
+  /// does not throw the player out to the careers list. null once they
+  /// leave it themselves.
+  String? openSlot;
+
   Locale? get locale => languageCode == null ? null : Locale(languageCode!);
 
   static Future<AppSettings> load(SettingsStore? store) async {
@@ -69,6 +75,7 @@ class AppSettings extends ChangeNotifier {
         // default, so everyone starts sharp once.
         s.sharpCorners = m['cornerStyle'] != 'soft';
         s.avatarFaces = m['avatars'] != 'initials';
+        s.openSlot = m['openSlot'] as String?;
       } on FormatException {
         // A broken settings file falls back to defaults.
       }
@@ -107,13 +114,19 @@ class AppSettings extends ChangeNotifier {
     _save();
   }
 
+  void setOpenSlot(String? slotId) {
+    if (openSlot == slotId) return;
+    openSlot = slotId;
+    _save(notify: false);
+  }
+
   void setWeekTransition(bool on) {
     weekTransition = on;
     _save();
   }
 
-  void _save() {
-    notifyListeners();
+  void _save({bool notify = true}) {
+    if (notify) notifyListeners();
     _store?.write(jsonEncode({
       'language': languageCode,
       'premium': premium,
@@ -121,6 +134,7 @@ class AppSettings extends ChangeNotifier {
       'theme': lightTheme ? 'light' : 'ink',
       'cornerStyle': sharpCorners ? 'sharp' : 'soft',
       'avatars': avatarFaces ? 'faces' : 'initials',
+      if (openSlot != null) 'openSlot': openSlot,
     }));
   }
 }

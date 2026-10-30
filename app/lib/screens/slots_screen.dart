@@ -38,9 +38,19 @@ class _SlotsScreenState extends State<SlotsScreen> {
     _load();
   }
 
+  /// The career open last time is reopened once per start (docs K263).
+  static bool _resumed = false;
+
   Future<void> _load() async {
     final slots = await context.controller.exec(Cmd.listSlots());
-    if (mounted) setState(() => _slots = slots);
+    if (!mounted) return;
+    setState(() => _slots = slots);
+    if (_resumed) return;
+    _resumed = true;
+    final last = context.settingsRead.openSlot;
+    if (last != null && slots.any((s) => s['slotId'] == last)) {
+      await _open(last);
+    }
   }
 
   Future<void> _open(String slotId) async {
@@ -51,8 +61,10 @@ class _SlotsScreenState extends State<SlotsScreen> {
       await openCareer(context, CareerState(controller));
     } catch (e, st) {
       // A rule the game enforces reads as usual; anything else is a save
-      // that does not load, shown in full so it can be reported.
+      // that does not load, shown in full so it can be reported. Not
+      // reopened by itself again (docs K263).
       if (!mounted) return;
+      context.settingsRead.setOpenSlot(null);
       if (e is GameException) {
         showError(context, e);
       } else {
@@ -467,10 +479,14 @@ Future<void> openCareer(BuildContext context, CareerState state) async {
   if (!context.mounted) return;
   state.onScheduledAlbumOut = (scheduleId, albumId) => images.adoptWithEditions(
       ImageStore.scheduledKey(scheduleId), ImageStore.albumKey(albumId));
+  // Remembered so a reload comes back here (docs K263).
+  final settings = context.settingsRead..setOpenSlot(state.slotId);
   await Navigator.push(
     context,
     MaterialPageRoute(builder: (_) => GameShell(state: state)),
   );
+  // Left by the player: the next start shows the careers.
+  settings.setOpenSlot(null);
   images.close();
   await state.controller.exec(Cmd.closeCareer());
 }

@@ -241,6 +241,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F139 | Emir (sayaç: Can't Stop the Feeling, 1,42B, günde 166K, 2041): "Hâlâ kötü, single'lar bu kadar düşmemeli." | ✅ K260 |
 | F140 | Oyuncu grubu (Federico): "After a while your catalogue, especially older songs, stay stable and trends never change; could you make it so that sometimes an old song rises or falls more than expected, or trends switch a bit?" | ✅ K261 |
 | F141 | Emir: "Dizi ya da filmler bize sorsun bazen şarkınızı kullanabilir miyiz diye, hatta reklamlarda olsun; bunlar bize hem para hem stream boost versin." | ✅ K262 |
+| F142 | Emir: "Birisi durmadan logoutlandığını söylüyo." | ✅ K263 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
