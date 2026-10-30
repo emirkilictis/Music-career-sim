@@ -646,9 +646,12 @@ class Simulator {
       s.lastAttention = fresh0;
       // A catalog song brought back (a sync, a version, an award) keeps
       // the listeners it had in the catalog on top (docs K262): before,
-      // coming back could leave it with fewer plays than it had.
+      // coming back could leave it with fewer plays than it had. The
+      // scene or the new version sends them back to it too (docs K265).
       final a = fresh0 +
-          (s.dormantRate > 0 ? s.dormantRate * p.catalogFactor * keep : 0);
+          (s.dormantRate > 0
+              ? s.dormantRate * p.catalogFactor * keep * (1 + versionLift)
+              : 0);
       songAttention[i] = a;
       // Where the player's listening came from (docs K120).
       if (p.tier == ArtistTier.player) {
