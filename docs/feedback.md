@@ -244,6 +244,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F142 | Emir: "Birisi durmadan logoutlandığını söylüyo." | ✅ K263 |
 | F143 | Emir: "2000'lerde fiziksel satışlar daha stabil olsun, hemen çakılmasın." | ✅ K264 |
 | F144 | Federico: "Dünyanın en çok dinlenen şarkısı haftada 10M; radyo aşırı güçlü." / "Eski şarkım yenisinden çok dinleniyor ama listede yeni olan var; eski şarkılar sayılmıyor mu?" | ✅ K265 |
+| F145 | Emir: "Year end'de şarkılar ne kadar satmış onu da görmek isterim." | ✅ K266 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

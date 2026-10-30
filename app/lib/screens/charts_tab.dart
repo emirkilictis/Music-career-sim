@@ -1005,8 +1005,19 @@ class _YearEndBoard extends StatelessWidget {
                                             ? l.criticsLine(r.points, r.peak)
                                             : albums
                                                 ? '${l.yearEndSold(fmt.compact(r.points.toDouble()))} · ${l.yearEndLine(r.peak, r.weeksOn)}'
-                                                : l.yearEndLine(
-                                                    r.peak, r.weeksOn),
+                                                // A song's sales and streams
+                                                // over the year (docs K266).
+                                                : [
+                                                    if (r.sales >= 1)
+                                                      l.yearEndSold(
+                                                          fmt.compact(r.sales)),
+                                                    if (r.streams >= 1)
+                                                      l.yearEndStreams(
+                                                          fmt.compact(
+                                                              r.streams)),
+                                                    l.yearEndLine(
+                                                        r.peak, r.weeksOn),
+                                                  ].join(' · '),
                                         style: const TextStyle(
                                             fontSize: 12.5,
                                             color: PaperColors.muted)),

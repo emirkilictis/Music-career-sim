@@ -5796,6 +5796,14 @@
       }
     }
   },
+  "yearEndStreams": "{count} streams",
+  "@yearEndStreams": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "wrappedTitle": "Wrapped",
   "wrappedHeader": "YOUR {year} WRAPPED",
   "@wrappedHeader": {

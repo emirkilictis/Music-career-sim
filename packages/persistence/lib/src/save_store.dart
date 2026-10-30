@@ -40,7 +40,7 @@ class SaveStore {
       store._writeArtists(world, world.artists);
       store._writeSongs(world, world.songs, withCredits: true);
       store._writeAlbums(world, world.albums, withTracks: true);
-      store._writeCharts(world.week - 1, world.charts);
+      store._writeCharts(world, world.week - 1, world.charts);
       store._writeHot(world);
     });
     _clearDirty(world);
@@ -536,12 +536,18 @@ class SaveStore {
         ('lastDpa', w.lastDpa),
       ];
 
-  void _writeCharts(int week, List<List<ChartEntry>> charts) {
+  void _writeCharts(World w, int week, List<List<ChartEntry>> charts) {
     final chart = db.prepare('INSERT OR REPLACE INTO chartEntry '
-        '(chartId, week, position, entityId, points, lastPos, peak, weeksOn) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+        '(chartId, week, position, entityId, points, lastPos, peak, weeksOn, '
+        'sales, streams) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     for (var id = 0; id < charts.length; id++) {
+      // The main song charts keep the week's sales and streams for the
+      // year-end lists (docs K266).
+      final main = Charts.mainSongCharts.contains(id);
+      final market = Charts.all[id].market;
       for (final e in charts[id]) {
+        final s = main ? w.songs[e.entityId] : null;
         chart.execute([
           id,
           week,
@@ -550,7 +556,9 @@ class SaveStore {
           e.points.round(),
           e.lastPos,
           e.peak,
-          e.weeksOn
+          e.weeksOn,
+          s == null ? null : w.songWeekSalesIn(s, market),
+          s == null ? null : w.songWeekStreamsIn(s, market),
         ]);
       }
     }
@@ -558,7 +566,7 @@ class SaveStore {
   }
 
   void _writeHistory(World w, WeekResult r) {
-    _writeCharts(r.week, r.charts);
+    _writeCharts(w, r.week, r.charts);
 
     // Detailed weekly stats (regional streams, sales) are kept for the
     // player's releases; AI releases keep their full chart history

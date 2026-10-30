@@ -1773,6 +1773,12 @@ void main() {
       }
       expect(songs.first.entityId, news.topSongId);
       expect(songs.first.peak, lessThanOrEqualTo(10));
+      // What the songs sold and streamed in the US that year (K266).
+      for (final r in songs) {
+        expect(r.sales, greaterThan(0));
+        expect(r.streams, greaterThan(0));
+      }
+      expect(songs.first.streams, greaterThan(1e7));
       // The player's entries are the ones the news names.
       expect([
         for (final r in songs)

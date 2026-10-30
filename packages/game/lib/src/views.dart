@@ -1346,7 +1346,9 @@ class YearEndRow {
       required this.entityId,
       required this.points,
       required this.peak,
-      required this.weeksOn})
+      required this.weeksOn,
+      this.sales = 0,
+      this.streams = 0})
       : title = kind == EntityKind.song
             ? w.songs[entityId].title
             : w.albums[entityId].title,
@@ -1380,6 +1382,10 @@ class YearEndRow {
   final int points;
   final int peak;
   final int weeksOn;
+
+  /// A song's track sales and streams in the chart's territory over its
+  /// weeks on the chart (docs K266; 0 for years played before).
+  final double sales, streams;
 }
 
 /// A rival the player could ask to feature on a song (docs K117).

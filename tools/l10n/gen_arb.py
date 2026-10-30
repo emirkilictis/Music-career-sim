@@ -1497,6 +1497,7 @@ k('preSavesHint','Came out with {count} pre-saves: they play it in its first two
 # Year-end: my releases and sales (F74)
 k('yearEndMine','Only mine','Sadece benimkiler')
 k('yearEndSold','{count} sold','{count} satış', count='String')
+k('yearEndStreams','{count} streams','{count} stream', count='String')
 
 # Streamify Wrapped (K123)
 k('wrappedTitle','Wrapped','Wrapped')

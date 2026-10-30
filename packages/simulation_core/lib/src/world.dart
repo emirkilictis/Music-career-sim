@@ -494,6 +494,25 @@ class World {
     };
   }
 
+  /// Last week's track sales of an active song (downloads and singles)
+  /// in [market]'s song chart territory (docs K266): the US or UK share
+  /// of its region, or the world.
+  double songWeekSalesIn(Song s, ChartMarket market) {
+    if (s.status != SongStatus.active) return 0;
+    final wr = s.weekRegion;
+    final a = primaryOf(s);
+    double region(int r) =>
+        (wr == null ? 0.0 : wr[regionCount + r]) +
+        s.weekPhysical * a.regionShare[r];
+    return switch (market) {
+      ChartMarket.us => CountryShares.usOfNorthAmerica(a.homeCountry) *
+          region(Region.northAmerica.index),
+      ChartMarket.uk =>
+        CountryShares.ukOfEurope(a.homeCountry) * region(Region.europe.index),
+      _ => s.weekDownloads + s.weekPhysical,
+    };
+  }
+
   static void insertSorted(List<int> list, int id) {
     var lo = 0, hi = list.length;
     while (lo < hi) {

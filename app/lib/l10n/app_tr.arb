@@ -1685,6 +1685,7 @@
   "preSavesHint": "{count} pre-save ile çıktı: ilk iki haftasında dinliyorlar.",
   "yearEndMine": "Sadece benimkiler",
   "yearEndSold": "{count} satış",
+  "yearEndStreams": "{count} stream",
   "wrappedTitle": "Wrapped",
   "wrappedHeader": "{year} WRAPPED'IN",
   "wrappedBanner": "{year} Wrapped'in hazır",

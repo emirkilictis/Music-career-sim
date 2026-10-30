@@ -2685,7 +2685,8 @@ class GameSession {
   /// [year]'s year-end chart of [chartId] (docs K110): what it sold and
   /// streamed over the tracking year (its weekly chart points: units for
   /// albums), not how long it stayed (F73), with its best position and
-  /// weeks on.
+  /// weeks on; a song's sales and streams in the chart's territory over
+  /// its weeks on (docs K266).
   List<YearEndRow> yearEnd(int chartId, int year, {int limit = YearEnd.size}) {
     if (chartId == YearEnd.critics) return _criticsList(year, limit);
     // The songs of the summer: the US songs chart over the summer weeks
@@ -2701,7 +2702,8 @@ class GameSession {
     return [
       for (final r in _store.db.select(
           'SELECT entityId, SUM(points) AS pts, MIN(position) AS peak, '
-          'COUNT(*) AS weeks FROM chartEntry '
+          'COUNT(*) AS weeks, SUM(sales) AS sales, SUM(streams) AS streams '
+          'FROM chartEntry '
           'WHERE chartId = ? AND week BETWEEN ? AND ? '
           'GROUP BY entityId ORDER BY pts DESC, peak ASC, entityId ASC '
           'LIMIT ?',
@@ -2711,7 +2713,9 @@ class GameSession {
             entityId: r['entityId'] as int,
             points: r['pts'] as int,
             peak: r['peak'] as int,
-            weeksOn: r['weeks'] as int),
+            weeksOn: r['weeks'] as int,
+            sales: (r['sales'] as num?)?.toDouble() ?? 0,
+            streams: (r['streams'] as num?)?.toDouble() ?? 0),
     ];
   }
 
