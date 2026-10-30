@@ -294,14 +294,21 @@ void main() {
             Lifecycle.fadeWeeks,
         x.id);
     final rate0 = s.dormantRate / trend(s);
+    // The floor's yardstick, once set (at the latest by its first
+    // catalog update), stays fixed (K265): the floor does not grow on its
+    // own plays.
+    var base = 0.0;
     var life = w.songLifetimeStreams(s);
     for (var i = 0; i < 2 * GameTime.weeksPerYear; i++) {
       sim.step();
+      if (i == Lifecycle.fadeWeeks) base = s.catalogBase;
       final now = w.songLifetimeStreams(s);
       // Settling never loses streams already counted.
       expect(now, greaterThanOrEqualTo(life));
       life = now;
     }
+    expect(base, greaterThan(0));
+    expect(s.catalogBase, base);
     // Its class's yearly fade (K85, K247): a top-10 single loses 8% a
     // year in its first decade, other songs faster.
     final perYear = w.config.catalogFadePerYear(Lifecycle.catalogWeight(s), 1);

@@ -1809,9 +1809,21 @@ class Simulator {
         var rate = s.dormantRate /
             before *
             math.pow(1 - perYear, catalogFadeWeeks / GameTime.weeksPerYear);
-        // A hit never falls below a share of all its plays a week (docs
-        // K258): old hits stay in people's lives, as on the real apps,
-        // and a catalog faded by older rules is brought back up.
+        // A save from before the floor's yardstick (docs K265): its
+        // catalog may have grown on the old floor, taking the market from
+        // the new songs; back to at most what it went in with.
+        if (s.catalogBase <= 0) {
+          rate = math.min(
+              rate,
+              s.lastAttention /
+                  a.catalogFactor *
+                  Lifecycle.catalogWeight(s) *
+                  c.catalogLevel);
+        }
+        // A hit never falls below a share of its plays up to the catalog
+        // a week (docs K258, K265): old hits stay in people's lives, as on
+        // the real apps, and a catalog faded by older rules is brought
+        // back up.
         final floor = _catalogFloor(s, a, years);
         if (rate < floor) rate = floor;
         rate *= now;
@@ -1867,19 +1879,30 @@ class Simulator {
                   : 0.0) *
       math.min(1.0, math.sqrt(10 / math.max(1.0, years)));
 
-  /// The dormant rate that keeps [s] at its floor (0: none).
+  /// The dormant rate that keeps [s] at its floor (0: none): a share of
+  /// its plays up to the catalog, in rate (docs K265; K258 took all its
+  /// plays, the floor's own included, at last week's market, and grew on
+  /// both until the catalog had the whole market).
   double _catalogFloor(Song s, Artist a, double years) {
     final share = catalogFloorShare(Lifecycle.catalogWeight(s), years);
     if (share <= 0) return 0;
-    final w = world;
-    // Weekly plays per unit of rate (the drift averages out).
-    var perRate = 0.0;
-    for (var r = 0; r < regionCount; r++) {
-      perRate += a.catalogFactor * a.regionShare[r] * w.lastSpa[r];
+    if (s.catalogBase <= 0) {
+      final weight = Lifecycle.catalogWeight(s);
+      s.catalogBase =
+          oldCatalogBase(weight) * s.lastAttention / a.catalogFactor;
+      world.dirtySongs.add(s.id);
     }
-    if (perRate <= 0) return 0;
-    return share * w.songLifetimeStreams(s) / perRate;
+    return share * s.catalogBase;
   }
+
+  /// A catalog song without the yardstick (a save from before, or out
+  /// before streaming; docs K265): the yardstick against its last active
+  /// week's listening that songs of its weight have (medians measured).
+  static double oldCatalogBase(double weight) => weight >= 1.8
+      ? 170
+      : weight >= 1.2
+          ? 110
+          : 54;
 
   /// No artist reaches more than a few per cent of a market (docs K105):
   /// each artist's listening beyond their fans in a region is compared

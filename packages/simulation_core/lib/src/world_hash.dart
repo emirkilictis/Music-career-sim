@@ -106,6 +106,7 @@ int worldHash(World w) {
     addInt(s.ukRadioPush?.index ?? -1);
     addInt(s.radioEditWeek);
     addDouble(s.dormantRate);
+    addDouble(s.catalogBase);
     addDouble(s.lifetimePhysical);
     addDouble(s.lifetimeRingtones);
     addInt(s.moodWeek);

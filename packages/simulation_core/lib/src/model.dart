@@ -1023,6 +1023,13 @@ class Song with Charted {
   // Dormant accrual.
   double dormantRate = 0;
 
+  /// The yardstick of the catalog floor (docs K265): the song's plays up
+  /// to the week it went to the catalog, in units of dormant rate (its
+  /// plays then over the weekly plays one unit of rate brought). Fixed
+  /// from then on, so the floor feeds neither on its own plays nor on a
+  /// crowded market. 0: not set (a save from before).
+  double catalogBase = 0;
+
   /// Per-region lifetime (settled part) and dormant settle indices, layout
   /// [SongReg]. One array per song keeps memory low for 100k+ songs.
   final Float64List reg = Float64List(SongReg.length);

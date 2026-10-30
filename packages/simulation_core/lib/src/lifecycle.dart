@@ -109,6 +109,16 @@ abstract final class Lifecycle {
   /// fashion (docs K261).
   static const resurgenceChance = 0.06, slumpChance = 0.06;
 
+  /// Weekly plays one unit of [a]'s dormant rate brings at last week's
+  /// market (the drift averages out).
+  static double playsPerRate(World w, Artist a) {
+    var perRate = 0.0;
+    for (var r = 0; r < regionCount; r++) {
+      perRate += a.catalogFactor * a.regionShare[r] * w.lastSpa[r];
+    }
+    return perRate;
+  }
+
   static void makeSongDormant(World w, Song s) {
     final a = w.primaryOf(s);
     w.settleRetired(a);
@@ -124,6 +134,12 @@ abstract final class Lifecycle {
     // Back in the catalog after a comeback: at least where it was.
     final rate = math.max(fresh, s.dormantRate);
     s.dormantRate = rate;
+    // The catalog floor's yardstick (docs K265).
+    final perRate = playsPerRate(w, a);
+    if (perRate > 0) {
+      s.catalogBase =
+          math.max(s.catalogBase, w.songLifetimeStreams(s) / perRate);
+    }
     for (var r = 0; r < regionCount; r++) {
       s.reg[SongReg.indexStreams + r] = a.reg[ArtistReg.indexStreams + r];
       s.reg[SongReg.indexDownloads + r] = a.reg[ArtistReg.indexDownloads + r];
