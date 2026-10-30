@@ -972,8 +972,14 @@ class Simulator {
       // Fans buy week one on faith; after it, word gets round (docs K245:
       // a weak record falls hard, 0.55 + 0.9q and 1.5 − 0.7q before).
       final secondWeek = c.albumSecondWeekRatio * (0.3 + 1.3 * q01) * legs;
-      final decay = math.min(0.97,
-          1 - (1 - c.albumWeeklyDecay) * (1.8 - 1.3 * q01) / math.sqrt(legs));
+      final year = GameTime.yearOf(w.week);
+      final decay = math.min(
+          0.97,
+          1 -
+              (1 - c.albumWeeklyDecay) *
+                  (1.8 - 1.3 * q01) /
+                  math.sqrt(legs) *
+                  c.albumFade(year));
       final superCurve = age == 0 ? 1.0 : secondWeek * math.pow(decay, age - 1);
       // Devoted fanbases buy more (and buy variants).
       final superRate = c.superfanBuyRate * p.devotionBuyFactor;
@@ -981,7 +987,6 @@ class Simulator {
       // standard edition) sells extra copies, with diminishing returns.
       var variantSum = 0.0;
       final vw = al.variantWeeks;
-      final year = GameTime.yearOf(w.week);
       final tail = c.albumTail(year);
       for (var k = 1; k < vw.length; k++) {
         if (vw[k] != age) continue;
@@ -1100,9 +1105,11 @@ class Simulator {
                 era.casualPurchaseRate *
                 (0.5 + q01);
         // A superstar's album is an event: even non-fans buy it in the
-        // first weeks. Grows steeply with fame (fame³), so it lifts the
-        // biggest stars without touching working artists.
-        final eventPart = age > 1
+        // first weeks (for months in the CD years, docs K264). Grows
+        // steeply with fame (fame³), so it lifts the biggest stars
+        // without touching working artists.
+        final eventWeek = c.albumEventWeek(age, year);
+        final eventPart = eventWeek == 0
             ? 0.0
             : casual *
                 c.eventBuyRate *
@@ -1111,7 +1118,7 @@ class Simulator {
                 p.fame *
                 era.casualPurchaseRate *
                 (1 + al.hypeAtRelease) *
-                (age == 0 ? 1.0 : 0.25) *
+                eventWeek *
                 fresh *
                 (al.isLive ? LiveAlbums.eventBuy : 1.0);
         // From 2013 fans buy in week one and everyone else streams (docs

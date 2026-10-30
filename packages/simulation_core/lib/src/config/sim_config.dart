@@ -225,20 +225,45 @@ class SimConfig {
           : 0.9;
 
   /// Album sales after the first week (docs K79): in the CD years an
-  /// album sold for months, so later weeks hold up more (×1.35 to 2006,
-  /// down to ×1.0 in 2009; docs K259: ×1.0 before). As listening moves
+  /// album sold for months, so later weeks hold up more (×1.15 to 2006,
+  /// down to ×1.0 in 2009; docs K259, ×1.35 until K264 spread the event
+  /// buyers out). As listening moves
   /// online fans buy at release and the rest stream it: later weeks sell
   /// 75% as much in 2010, 69% in 2011, 62% in 2012, then 55% in 2013, 45%
   /// in 2014, 35% in 2015 and 28% from 2016.
   double albumTail(int year) => year < 2007
-      ? 1.35
+      ? 1.15
       : year < 2009
-          ? 1.35 - 0.35 * (year - 2006) / 3
+          ? 1.15 - 0.15 * (year - 2006) / 3
           : year < 2010
               ? 1.0
               : year < 2013
                   ? 0.75 - 0.065 * (year - 2010)
                   : math.max(0.28, 0.55 - 0.1 * (year - 2013));
+
+  /// How fast an album's fan sales fade week to week, against now (docs
+  /// K264): in the CD years a record stayed in the shops and sold for
+  /// months, so it fades at 55% of today's pace to 2006, back to today's
+  /// by 2010.
+  double albumFade(int year) => year < 2007
+      ? 0.55
+      : year < 2010
+          ? 0.55 + 0.45 * (year - 2006) / 4
+          : 1.0;
+
+  /// Share of a big album's week-one event buyers (non-fans who buy it
+  /// because everyone does) buying in week [age] (docs K264). Now they
+  /// all come in the first two weeks; in the CD years they kept coming
+  /// for months (35% in week two, 20% less each week after, to 2006, then
+  /// fading into today's by 2010), so a big record did not fall off a
+  /// cliff in week three.
+  double albumEventWeek(int age, int year) {
+    if (age == 0) return 1;
+    final now = age == 1 ? 0.25 : 0.0;
+    final cd = age > 30 ? 0.0 : 0.35 * math.pow(0.8, age - 1);
+    final t = (1 - albumFade(year)) / 0.45;
+    return now + (cd - now) * t;
+  }
 
   /// Weeks for the casual buyers an album's songs reach to tire of it
   /// (docs K259): in the CD years word of mouth sold albums for longer.

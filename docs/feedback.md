@@ -242,6 +242,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F140 | Oyuncu grubu (Federico): "After a while your catalogue, especially older songs, stay stable and trends never change; could you make it so that sometimes an old song rises or falls more than expected, or trends switch a bit?" | ✅ K261 |
 | F141 | Emir: "Dizi ya da filmler bize sorsun bazen şarkınızı kullanabilir miyiz diye, hatta reklamlarda olsun; bunlar bize hem para hem stream boost versin." | ✅ K262 |
 | F142 | Emir: "Birisi durmadan logoutlandığını söylüyo." | ✅ K263 |
+| F143 | Emir: "2000'lerde fiziksel satışlar daha stabil olsun, hemen çakılmasın." | ✅ K264 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
