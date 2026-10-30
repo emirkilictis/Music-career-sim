@@ -4412,7 +4412,8 @@ void main() {
         p.creativeEnergy = 100;
         g.releaseSingle(g.writeSong(budget: BudgetTier.high).id);
       }
-      for (var i = 0; i < 6; i++) {
+      // Asked while the singles are at their peak (listeners fade after).
+      for (var i = 0; i < 2; i++) {
         g.advanceWeek();
       }
       final v = g.sessions;
