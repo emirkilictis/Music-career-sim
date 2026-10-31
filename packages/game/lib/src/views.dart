@@ -4131,6 +4131,8 @@ class LineupView {
   LineupView.of(World w, Artist a)
       : split = Lineups.splitOf(a),
         center = Lineups.center(a),
+        centerPushed =
+            a.focusMember >= 0 && a.focusMember < a.memberPop.length,
         lift = Lineups.lineLift(w, a),
         cheerCents = Lineups.cheerCostCents(a),
         canCheer = Lineups.canCheer(w, a),
@@ -4140,8 +4142,10 @@ class LineupView {
   final LineSplit split;
 
   /// The member the songs are built around, and what the split adds to
-  /// the songs' listening.
+  /// the songs' listening. The center is the member the label pushes, or
+  /// else the most popular one ([centerPushed]; docs K269).
   final int center;
+  final bool centerPushed;
   final double lift;
 
   /// A morale bonus: its cost, and whether one can be paid now (else

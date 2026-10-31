@@ -79,7 +79,7 @@ class CareerSetup {
     if (kind.isGroup) {
       if (members.length < ArtistKind.minMembers ||
           members.length > ArtistKind.maxMembers) {
-        throw GameException('invalidMembers', 'A group needs 2–7 members');
+        throw GameException('invalidMembers', 'A group needs 2–13 members');
       }
       if (members.any((m) => m.trim().isEmpty)) {
         throw GameException('invalidMembers', 'Member names cannot be empty');

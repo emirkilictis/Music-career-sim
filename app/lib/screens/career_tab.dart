@@ -700,6 +700,12 @@ class _CareerScreenState extends State<CareerScreen> {
               ? l.lineSplitEvenNow
               : l.lineSplitNow((v.lift * 100).round(), center),
           style: const TextStyle(fontWeight: FontWeight.w600)),
+      // Who the center is and why (docs K269).
+      if (center.isNotEmpty)
+        Text(
+            l.centerWhy(center,
+                v.centerPushed ? l.centerWhyPushed : l.centerWhyPopular),
+            style: const TextStyle(fontSize: 13)),
       Text(l.lineSplitHint,
           style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
       const SizedBox(height: 8),

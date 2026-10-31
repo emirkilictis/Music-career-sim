@@ -247,6 +247,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F145 | Emir: "Year end'de şarkılar ne kadar satmış onu da görmek isterim." | ✅ K266 |
 | F146 | Federico: "Radio still OP and streaming still dead; the charts stop counting all old songs, not only Spotify but every other platform." | ✅ K267 |
 | F147 | Bir oyuncu: "Specific release weeks for music, similar to how we can skip to a specific week." Emir: "Şu anki tarihten kaç hafta uzak, o tarihte gözüksün." | ✅ K268 |
+| F148 | shine: "Girls' Generation açmak istiyordum, en fazla 7 üye oluyormuş." / "Oyun center'ı neye göre belirliyor, rastgele olması kötü." / "Sub rapper ve sub vocal rolü de gelsin." | ✅ K269 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

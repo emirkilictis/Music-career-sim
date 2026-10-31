@@ -1484,7 +1484,7 @@ void groupTests() {
   World fresh() => WorldGen.create(seed: 31, startYear: 2010);
   const four = ['Ava', 'Mia', 'Zoe', 'Lia'];
 
-  test('a group needs 2–7 members, a solo artist none', () {
+  test('a group needs 2–13 members, a solo artist none', () {
     expect(
         () => WorldGen.addPlayer(fresh(),
             name: 'G', genre: 0, kind: ArtistKind.vocalGroup, members: ['A']),
@@ -1494,7 +1494,7 @@ void groupTests() {
             name: 'G',
             genre: 0,
             kind: ArtistKind.band,
-            members: List.filled(8, 'X')),
+            members: List.filled(14, 'X')),
         throwsArgumentError);
     expect(
         () => WorldGen.addPlayer(fresh(), name: 'S', genre: 0, members: four),
@@ -1503,6 +1503,20 @@ void groupTests() {
         name: 'Girls', genre: 0, kind: ArtistKind.vocalGroup, members: four);
     expect(g.members, four);
     expect(g.kind.isGroup, isTrue);
+  });
+
+  test('a nine-member group has its second lines (K269)', () {
+    final w = fresh();
+    final g = WorldGen.addPlayer(w,
+        name: 'Girls',
+        genre: 0,
+        kind: ArtistKind.vocalGroup,
+        members: [for (var i = 0; i < 9; i++) 'M$i']);
+    Lineups.ensure(w, g);
+    final roles = {for (final r in g.memberRoles) ...Lineups.rolesOf(r)};
+    expect(roles, containsAll([MemberRole.subVocal, MemberRole.subRapper]));
+    expect(MemberRole.forKind(ArtistKind.vocalGroup),
+        containsAll([MemberRole.subVocal, MemberRole.subRapper]));
   });
 
   test('auto stats suit the kind and stay within the rules', () {

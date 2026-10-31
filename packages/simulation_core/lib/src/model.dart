@@ -122,7 +122,9 @@ enum ArtistKind {
 
   bool get isGroup => this != solo;
   static const minMembers = 2;
-  static const maxMembers = 7;
+  /// Up to 13 (docs K269): Girls' Generation and TWICE had nine,
+  /// SEVENTEEN has thirteen.
+  static const maxMembers = 13;
 }
 
 /// [scrapped]: an unreleased song the player threw away (never released,

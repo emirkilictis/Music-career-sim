@@ -21,7 +21,11 @@ enum MemberRole {
   guitar(12),
   bass(4, unique: true),
   drums(6, unique: true),
-  keys(4, unique: true);
+  keys(4, unique: true),
+
+  /// The second line of vocals and of raps (docs K269).
+  subVocal(4),
+  subRapper(4);
 
   const MemberRole(this.appeal, {this.unique = false});
 
@@ -43,6 +47,8 @@ enum MemberRole {
           leadVocal,
           mainDancer,
           mainRapper,
+          subVocal,
+          subRapper,
           visual,
           maknae
         ];
@@ -176,15 +182,22 @@ abstract final class Lineups {
             (i < parts.length ? parts[i] : MemberRole.guitar).bit;
       }
     } else {
+      // Big groups have their second lines (docs K269).
       const parts = [
         MemberRole.mainVocal,
         MemberRole.mainDancer,
         MemberRole.mainRapper,
         MemberRole.leadVocal,
+        MemberRole.subVocal,
+        MemberRole.subRapper,
       ];
       for (var i = 0; i < n; i++) {
-        a.memberRoles[i] |=
-            (i < parts.length ? parts[i] : MemberRole.leadVocal).bit;
+        a.memberRoles[i] |= (i < parts.length
+                ? parts[i]
+                : i.isEven
+                    ? MemberRole.subVocal
+                    : MemberRole.leadVocal)
+            .bit;
       }
       a.memberRoles[n - 1] |= MemberRole.maknae.bit;
       a.memberRoles[r.nextInt(n)] |= MemberRole.visual.bit;

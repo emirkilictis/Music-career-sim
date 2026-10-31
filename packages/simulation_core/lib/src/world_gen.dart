@@ -301,7 +301,7 @@ abstract final class WorldGen {
             members.length > ArtistKind.maxMembers
         : members.isNotEmpty) {
       throw ArgumentError.value(members.length, 'members',
-          kind.isGroup ? 'a group needs 2–7 members' : 'solo has no members');
+          kind.isGroup ? 'a group needs 2–13 members' : 'solo has no members');
     }
     final (fame, fans, casual) = switch (tier) {
       StartTier.unknown => (0.0, 2e3, 2e4),

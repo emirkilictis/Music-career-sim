@@ -441,6 +441,8 @@ class Fmt {
         MemberRole.leadVocal => l.roleLeadVocal,
         MemberRole.mainDancer => l.roleMainDancer,
         MemberRole.mainRapper => l.roleMainRapper,
+        MemberRole.subVocal => l.roleSubVocal,
+        MemberRole.subRapper => l.roleSubRapper,
         MemberRole.visual => l.roleVisual,
         MemberRole.maknae => l.roleMaknae,
         MemberRole.frontman => l.roleFrontman,

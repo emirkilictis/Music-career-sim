@@ -2182,7 +2182,7 @@
   "errorAlreadyScheduled": "This song is already set to come out as a single.",
   "errorPremiumRequired": "This start needs Premium.",
   "errorInvalidName": "Enter a name (up to 40 characters).",
-  "errorInvalidMembers": "A group needs 2–7 members with names.",
+  "errorInvalidMembers": "A group needs 2–13 members with names.",
   "errorInvalidSkills": "Stat points do not add up.",
   "eventNumberOne": "“{title}” is #1 on the {chart}!",
   "@eventNumberOne": {
@@ -8053,6 +8053,8 @@
   "roleLeader": "Leader",
   "roleMainVocal": "Main vocal",
   "roleLeadVocal": "Lead vocal",
+  "roleSubVocal": "Sub vocal",
+  "roleSubRapper": "Sub rapper",
   "roleMainDancer": "Main dancer",
   "roleMainRapper": "Main rapper",
   "roleVisual": "Visual",
@@ -8133,6 +8135,19 @@
       }
     }
   },
+  "centerWhy": "Center: {name} · {why}",
+  "@centerWhy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "centerWhyPushed": "the label is pushing them",
+  "centerWhyPopular": "the most popular member; push another member to change it",
   "lineSplitEvenNow": "Everyone sings: members and fans are happy.",
   "memberMorale": "Morale {m}",
   "@memberMorale": {
