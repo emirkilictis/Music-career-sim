@@ -1,3 +1,4 @@
+import '../widgets/creative_brief.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
@@ -35,6 +36,7 @@ class AlbumDetailScreen extends StatefulWidget {
 
 class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   AlbumView? _album;
+  EraBrief? _brief;
   List<({String name, double gross, bool active, int startWeek})> _tours = [];
   List<SongView> _tracks = const [];
   List<SongView> _hits = const [];
@@ -54,6 +56,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   Future<void> _load() async {
     final st = widget.state;
     final album = await st.read(Cmd.album(widget.albumId));
+    final brief = await st.read(Cmd.albumBrief(widget.albumId));
     final tracks = [
       for (final id in album.trackIds) await st.read(Cmd.song(id))
     ];
@@ -70,6 +73,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         _picks = picks;
         _tours = tours;
         _album = album;
+        _brief = brief;
         _tracks = tracks;
         _hits = hits;
         _history = history;
@@ -372,6 +376,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   )
               ]),
             ),
+          if (_brief case final brief?) CreativeBriefCard(brief: brief),
           // A dated version on its way (docs K255).
           if (a.isPlayer && a.planned != null) _plannedCard(a, a.planned!),
           // New versions after it came out (docs K225).

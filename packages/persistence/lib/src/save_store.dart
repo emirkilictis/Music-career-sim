@@ -107,6 +107,7 @@ class SaveStore {
     // The player's channel (docs K142).
     w.channelVideos.addAll(ChannelVideo.decode(meta['channel'] as String?));
     // The player's own playlist (docs K159).
+    w.studio = CreativeStudio.decode(meta['creativeStudio'] as String?);
     w.ownPlaylist = OwnPlaylist.decode(meta['playlist'] as String?);
     w.artistPick = ArtistPick.decode(meta['pick'] as String?);
     // The player's fan club (docs K164).
@@ -423,6 +424,7 @@ class SaveStore {
       ]),
       'musicShow': w.musicShow.encode(),
       'channel': ChannelVideo.encode(w.channelVideos),
+      'creativeStudio': w.studio.encode(),
       'playlist': OwnPlaylist.encode(w.ownPlaylist),
       'pick': w.artistPick?.encode() ?? '',
       'fanClub': w.fanClub?.encode() ?? '',

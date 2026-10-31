@@ -533,6 +533,27 @@ class GameSession {
 
   // ---------------------------------------------------------------- actions
 
+  void setCreativeBrief(EraBrief brief) {
+    if (brief.name.trim().length > 60)
+      throw GameException('invalidTitle', 'Era name too long');
+    for (final entry in [
+      (brief.producerId, CollaboratorRole.producer),
+      (brief.cowriterId, CollaboratorRole.songwriter)
+    ]) {
+      if (entry.$1 < 0) continue;
+      final c = _collaborator(entry.$1, entry.$2);
+      if (c == null || !Actions.collaboratorAvailable(c, _p))
+        throw GameException('collaboratorRefused', 'Team unavailable');
+    }
+    world.studio.brief = EraBrief(
+        name: brief.name.trim(),
+        sound: brief.sound,
+        theme: brief.theme,
+        producerId: brief.producerId,
+        cowriterId: brief.cowriterId);
+    _saveNow();
+  }
+
   /// Writes and records a song (docs/game-design.md §4).
   SongView writeSong({
     int? producerId,
@@ -542,6 +563,7 @@ class GameSession {
     String? title,
     bool holiday = false,
     int dissTarget = -1,
+    SongDirection direction = SongDirection.balanced,
   }) {
     final p = _p;
     // A diss track goes at a rival or the haters (docs K229).
@@ -586,7 +608,9 @@ class GameSession {
         budget: budget,
         genres: g,
         title: t,
-        holiday: holiday);
+        holiday: holiday,
+        direction: direction,
+        brief: world.studio.brief.name.isEmpty ? null : world.studio.brief);
     s.dissTarget = dissTarget;
     _saveNow();
     return SongView.of(world, s);

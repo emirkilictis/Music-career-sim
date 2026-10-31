@@ -2863,6 +2863,91 @@ void main() {
       g.close();
     });
 
+    test('rollout credits earlier standalone singles when added to the album',
+        () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2020,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final ids = <int>[];
+      for (var i = 0; i < 4; i++) {
+        g.world.player!.creativeEnergy = 100;
+        ids.add(g.writeSong().id);
+      }
+      for (final id in ids.take(2)) {
+        g.releaseSingle(id, campaign: Campaign.none);
+        g.world.songs[id].singleWeek = g.world.week - 40;
+      }
+      final st =
+          Rollouts.status(g.world, g.world.player!, ids, g.world.week, -1);
+      expect(st.has(RolloutStep.leadSingle), isTrue);
+      expect(st.has(RolloutStep.secondSingle), isTrue);
+      final one = Rollouts.status(
+          g.world, g.world.player!, [ids.first, ids.first], g.world.week, -1);
+      expect(one.has(RolloutStep.secondSingle), isFalse);
+      final album = g.releaseAlbum('Earlier singles', ids,
+          type: AlbumType.ep, campaign: Campaign.none);
+      expect(album.rollout.has(RolloutStep.secondSingle), isTrue);
+      final slot = g.slotId;
+      g.close();
+      final resumed = GameSession.resume(slots, slot);
+      expect(
+          resumed.album(album.id).rollout.has(RolloutStep.leadSingle), isTrue);
+      resumed.close();
+    });
+
+    test('creative directions trade strengths and preserve era snapshots', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final other = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      const brief = EraBrief(
+          name: 'Blue Nights',
+          sound: EraSound.reinvention,
+          theme: SongTheme.nightlife);
+      g.setCreativeBrief(brief);
+      other.setCreativeBrief(brief);
+      final dance = g.writeSong(direction: SongDirection.dance);
+      final ballad = other.writeSong(direction: SongDirection.ballad);
+      final d = g.world.songs[dance.id], b = other.world.songs[ballad.id];
+      expect(d.quality, b.quality);
+      expect(d.radioAppeal, greaterThan(b.radioAppeal));
+      expect(d.virality, greaterThan(b.virality));
+      expect(d.longevity, lessThan(b.longevity));
+      expect(d.fanAppeal, lessThan(b.fanAppeal));
+      final ids = [dance.id];
+      for (var i = 0; i < 3; i++) {
+        g.world.player!.creativeEnergy = 100;
+        ids.add(g.writeSong().id);
+      }
+      g.setCreativeBrief(const EraBrief(
+          name: 'The Next Chapter', theme: SongTheme.heartbreak));
+      final album = g.releaseAlbum('Blue Nights', ids,
+          type: AlbumType.ep, campaign: Campaign.none);
+      expect(g.world.studio.albums[album.id]!.name, 'Blue Nights');
+      final slot = g.slotId;
+      g.close();
+      other.close();
+      final resumed = GameSession.resume(slots, slot);
+      expect(resumed.world.studio.brief.name, 'The Next Chapter');
+      expect(
+          resumed.world.studio.songs[dance.id]!.direction, SongDirection.dance);
+      expect(resumed.world.studio.albums[album.id]!.theme, SongTheme.nightlife);
+      expect(CreativeStudio.decode(null).brief.name, isEmpty);
+      resumed.close();
+    });
+
     test('an album rollout (K165)', () {
       var g = GameSession.start(
           slots,

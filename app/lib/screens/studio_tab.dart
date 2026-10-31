@@ -1,3 +1,4 @@
+import '../widgets/creative_brief.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
@@ -21,6 +22,26 @@ class StudioTab extends StatefulWidget {
 
 class _StudioTabState extends State<StudioTab> {
   final _title = TextEditingController();
+  final _eraName = TextEditingController();
+  EraSound _sound = EraSound.familiar;
+  SongTheme _theme = SongTheme.love;
+  SongDirection _direction = SongDirection.balanced;
+  bool _briefLoaded = false;
+  EraBrief get _brief => EraBrief(
+      name: _eraName.text.trim(),
+      sound: _sound,
+      theme: _theme,
+      producerId: _producer ?? -1,
+      cowriterId: _cowriter ?? -1);
+  Future<void> _saveBrief() async {
+    try {
+      await context.careerRead.act(Cmd.setCreativeBrief(_brief));
+      if (mounted) showInfo(context, context.l10n.creativeSaved);
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   List<int>? _genres;
 
   /// Writing a holiday song (docs K136).
@@ -89,6 +110,7 @@ class _StudioTabState extends State<StudioTab> {
   @override
   void dispose() {
     _title.dispose();
+    _eraName.dispose();
     super.dispose();
   }
 
@@ -109,8 +131,22 @@ class _StudioTabState extends State<StudioTab> {
     final writers =
         await career.read(Cmd.collaborators(CollaboratorRole.songwriter));
     final vault = await career.read(Cmd.vault());
+    final brief = await career.read(Cmd.creativeBrief());
     if (!mounted) return;
     setState(() {
+      if (!_briefLoaded) {
+        _eraName.text = brief.name;
+        _sound = brief.sound;
+        _theme = brief.theme;
+        _producer =
+            producers.any((p) => p.id == brief.producerId && p.available)
+                ? brief.producerId
+                : null;
+        _cowriter = writers.any((p) => p.id == brief.cowriterId && p.available)
+            ? brief.cowriterId
+            : null;
+        _briefLoaded = true;
+      }
       _producers = producers;
       _writers = writers;
       _vault = vault;
@@ -252,6 +288,7 @@ class _StudioTabState extends State<StudioTab> {
       if (go != true || !mounted) return;
     }
     try {
+      await career.act(Cmd.setCreativeBrief(_brief));
       final song = await career.act(Cmd.writeSong(
         producerId: _producer,
         cowriterId: _cowriter,
@@ -260,6 +297,7 @@ class _StudioTabState extends State<StudioTab> {
         title: title.isEmpty ? null : title,
         holiday: _holiday,
         dissTarget: _diss,
+        direction: _direction,
       ));
       _title.clear();
       // A diss track is a one-off (docs K229).
@@ -357,6 +395,57 @@ class _StudioTabState extends State<StudioTab> {
                 value: fmt.genres(genres),
                 onTap: () => _pickGenres(genres),
               ),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                title: Text(l.creativeTitle),
+                subtitle: Text(
+                    _eraName.text.isEmpty ? l.creativeName : _eraName.text),
+                children: [
+                  Text(l.creativeHint),
+                  TextField(
+                      controller: _eraName,
+                      maxLength: 60,
+                      decoration: InputDecoration(labelText: l.creativeName),
+                      onChanged: (_) => setState(() {})),
+                  DropdownButtonFormField<EraSound>(
+                      initialValue: _sound,
+                      isExpanded: true,
+                      decoration: InputDecoration(labelText: l.creativeSound),
+                      items: [
+                        for (final v in EraSound.values)
+                          DropdownMenuItem(
+                              value: v,
+                              child: Text(soundLabel(l, v),
+                                  maxLines: 1, overflow: TextOverflow.ellipsis))
+                      ],
+                      onChanged: (v) => setState(() => _sound = v!)),
+                  DropdownButtonFormField<SongTheme>(
+                      initialValue: _theme,
+                      isExpanded: true,
+                      decoration: InputDecoration(labelText: l.creativeTheme),
+                      items: [
+                        for (final v in SongTheme.values)
+                          DropdownMenuItem(
+                              value: v, child: Text(themeLabel(l, v)))
+                      ],
+                      onChanged: (v) => setState(() => _theme = v!)),
+                  TextButton(
+                      onPressed: career.busy ? null : _saveBrief,
+                      child: Text(l.creativeSave)),
+                ],
+              ),
+              DropdownButtonFormField<SongDirection>(
+                  initialValue: _direction,
+                  isExpanded: true,
+                  decoration: InputDecoration(labelText: l.creativeDirection),
+                  items: [
+                    for (final v in SongDirection.values)
+                      DropdownMenuItem(
+                          value: v,
+                          child: Text(directionLabel(l, v),
+                              maxLines: 1, overflow: TextOverflow.ellipsis))
+                  ],
+                  onChanged: (v) => setState(() => _direction = v!)),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 dense: true,
@@ -443,7 +532,8 @@ class _StudioTabState extends State<StudioTab> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: OutlinedButton.icon(
-                  onPressed: () => pushInCareer(context, const SongMarketScreen()),
+                  onPressed: () =>
+                      pushInCareer(context, const SongMarketScreen()),
                   icon: const Icon(Icons.storefront_rounded),
                   label: Text(l.songMarketOpen),
                 ),

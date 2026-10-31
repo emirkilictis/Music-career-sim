@@ -147,8 +147,11 @@ class _ReleasesTabState extends State<ReleasesTab> {
                         collection
                             ? l.collHint(Compilations.minCollection,
                                 Compilations.maxCollection, Compilations.maxNew)
-                            : l.ghHint(Compilations.minHits, Compilations.maxHits,
-                                Compilations.minNew, Compilations.maxNew),
+                            : l.ghHint(
+                                Compilations.minHits,
+                                Compilations.maxHits,
+                                Compilations.minNew,
+                                Compilations.maxNew),
                         style: Theme.of(c).textTheme.bodySmall),
                   ),
                   Padding(
@@ -193,8 +196,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
                           child: Wrap(spacing: 8, runSpacing: 4, children: [
                             for (final id in records)
                               ActionChip(
-                                avatar: const Icon(Icons.album_rounded,
-                                    size: 18),
+                                avatar:
+                                    const Icon(Icons.album_rounded, size: 18),
                                 label: Text(albums[id]!),
                                 onPressed: () => set(() {
                                   final ids = [
@@ -257,8 +260,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
     try {
       final al = await career.act(collection
           ? Cmd.releaseCollection(picked.$1, picked.$2, picked.$3, campaign)
-          : Cmd.releaseGreatestHits(
-              picked.$1, picked.$2, picked.$3, campaign));
+          : Cmd.releaseGreatestHits(picked.$1, picked.$2, picked.$3, campaign));
       if (mounted) showInfo(context, l.albumReleased(al.title));
     } catch (e) {
       if (mounted) showError(context, e);
@@ -335,7 +337,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
                     child: FilledButton(
                       onPressed: chosen.length < LiveAlbums.minTracks
                           ? null
-                          : () => Navigator.pop(c, (name.text, List.of(chosen))),
+                          : () =>
+                              Navigator.pop(c, (name.text, List.of(chosen))),
                       child: Text(l.liveGo(chosen.length)),
                     ),
                   ),
@@ -441,8 +444,10 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final action = await showModalBottomSheet<int>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (c) => SafeArea(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
+        child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
             title: Text(s.title,
                 style: const TextStyle(fontWeight: FontWeight.w800)),
@@ -450,6 +455,15 @@ class _ReleasesTabState extends State<ReleasesTab> {
                 s.songIds.length, fmt.week(s.createdWeek))),
           ),
           PendingKeyCoverRow(imageKey: ImageStore.scheduledKey(s.id)),
+          if (s.rollout case final status?)
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(l.rolloutNowPreview),
+                      RolloutChecklist(status: status)
+                    ])),
           ListTile(
             leading: const Icon(Icons.rocket_launch_rounded),
             title: Text(l.releaseDraftNow),
@@ -465,7 +479,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
             title: Text(l.deleteDraft),
             onTap: () => Navigator.pop(c, 2),
           ),
-        ]),
+        ])),
       ),
     );
     if (action == null || !mounted) return;
@@ -673,17 +687,15 @@ class _ReleasesTabState extends State<ReleasesTab> {
           OutlinedButton.icon(
             onPressed: career.busy ? null : () => _liveAlbum(t),
             icon: const Icon(Icons.mic_external_on_outlined),
-            label: Text(l.liveButton(t.name.isEmpty ? l.liveTourFallback : t.name,
-                t.shows)),
+            label: Text(l.liveButton(
+                t.name.isEmpty ? l.liveTourFallback : t.name, t.shows)),
           ),
         ],
         // Picking a week: the next six months at a glance (docs K177).
         const SizedBox(height: 12),
         OutlinedButton.icon(
-          onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => CalendarScreen(state: career))),
+          onPressed: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => CalendarScreen(state: career))),
           icon: const Icon(Icons.calendar_month_rounded),
           label: Text(l.calTitle),
         ),
@@ -713,9 +725,7 @@ class _ReleasesTabState extends State<ReleasesTab> {
                   const SizedBox(height: 4),
                   Text('${s.title} · ${l.rolloutTitle(r.doneCount, r.count)}',
                       style: const TextStyle(fontWeight: FontWeight.w700)),
-                  Text(
-                      l.rolloutHint(
-                          (Rollouts.fullHype * 100).round()),
+                  Text(l.rolloutHint((Rollouts.fullHype * 100).round()),
                       style: Theme.of(context).textTheme.bodySmall),
                   const SizedBox(height: 6),
                   RolloutChecklist(status: r),
@@ -1359,6 +1369,15 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
                       ),
                   ]),
           ),
+          if (Rollouts.counts(_type) && _picked.isNotEmpty)
+            FutureBuilder<RolloutStatus>(
+              future: widget.state.read(Cmd.rolloutPreview(List.of(_picked))),
+              builder: (context, snapshot) => snapshot.data == null
+                  ? const SizedBox.shrink()
+                  : Section(
+                      title: l.rolloutNowPreview,
+                      child: RolloutChecklist(status: snapshot.data!)),
+            ),
           // A streaming exclusive (docs K135).
           if (_exclusiveOffer != null && _type == AlbumType.album) ...[
             const SizedBox(height: 12),
@@ -1382,8 +1401,7 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
                 style: const TextStyle(fontWeight: FontWeight.w700)),
             const SizedBox(height: 4),
             Text(
-                l.windowHint(
-                    ((StreamWindows.buyLift(year) - 1) * 100).round()),
+                l.windowHint(((StreamWindows.buyLift(year) - 1) * 100).round()),
                 style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
             const SizedBox(height: 6),
             Wrap(spacing: 8, runSpacing: 8, children: [
@@ -1439,8 +1457,8 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
               ),
               for (final e in _bundles.entries)
                 ChoiceChip(
-                  label: Text(l.bundleOption(
-                      fmt.bundle(e.key), fmt.compact(e.value))),
+                  label: Text(
+                      l.bundleOption(fmt.bundle(e.key), fmt.compact(e.value))),
                   selected: _bundle == e.key,
                   onSelected: (_) => setState(() => _bundle = e.key),
                 ),
@@ -1649,14 +1667,14 @@ class _EditionEditor extends StatelessWidget {
         Wrap(spacing: 6, runSpacing: 6, children: [
           for (final f in EditionFormat.values)
             if (f != EditionFormat.digital)
-            ChoiceChip(
-              label: Text(fmt.editionFormat(f)),
-              selected: f == edition.format,
-              onSelected: (_) {
-                edition.format = f;
-                onChanged();
-              },
-            ),
+              ChoiceChip(
+                label: Text(fmt.editionFormat(f)),
+                selected: f == edition.format,
+                onSelected: (_) {
+                  edition.format = f;
+                  onChanged();
+                },
+              ),
         ]),
       ]),
     );

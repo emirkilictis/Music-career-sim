@@ -98,6 +98,15 @@ abstract final class Cmd {
 
   // ------------------------------------------------------------- actions
 
+  static SessionCmd<RolloutStatus> rolloutPreview(List<int> ids) =>
+      (s) => Rollouts.status(s.world, s.world.player!, ids, s.world.week, -1);
+  static SessionCmd<EraBrief> creativeBrief() => (s) => s.world.studio.brief;
+  static SessionCmd<void> setCreativeBrief(EraBrief brief) =>
+      (s) => s.setCreativeBrief(brief);
+  static SessionCmd<SongConcept?> songConcept(int id) =>
+      (s) => s.world.studio.songs[id];
+  static SessionCmd<EraBrief?> albumBrief(int id) =>
+      (s) => s.world.studio.albums[id];
   static SessionCmd<SongView> writeSong({
     int? producerId,
     int? cowriterId,
@@ -106,6 +115,7 @@ abstract final class Cmd {
     String? title,
     bool holiday = false,
     int dissTarget = -1,
+    SongDirection direction = SongDirection.balanced,
   }) =>
       (s) => s.writeSong(
           producerId: producerId,
@@ -114,7 +124,8 @@ abstract final class Cmd {
           genres: genres,
           title: title,
           holiday: holiday,
-          dissTarget: dissTarget);
+          dissTarget: dissTarget,
+          direction: direction);
 
   /// The player's chart history (docs K232).
   static SessionCmd<ChartHistoryView> chartHistory() => (s) => s.chartHistory;

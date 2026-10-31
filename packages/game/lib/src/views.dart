@@ -1978,8 +1978,12 @@ class ScheduledView {
         preOrders = sr.preOrders,
         buzzCap = Actions.announceCap(
             w, w.player!, sr.type, w.week - 1 - sr.announceWeek),
-        rollout = sr.isAlbum && !sr.isDraft && Rollouts.counts(sr.type)
-            ? Rollouts.status(w, w.player!, sr.songIds, sr.releaseWeek,
+        rollout = sr.isAlbum && Rollouts.counts(sr.type)
+            ? Rollouts.status(
+                w,
+                w.player!,
+                sr.songIds,
+                sr.isDraft ? w.week : sr.releaseWeek,
                 sr.isSurprise ? -1 : sr.announceWeek,
                 planned: true)
             : null;

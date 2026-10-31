@@ -56,9 +56,9 @@ abstract final class Rollouts {
   /// Hype a complete rollout adds at release.
   static const fullHype = 0.15;
 
-  /// The lead single comes out at least this many weeks ahead, and the
-  /// singles count up to [windowWeeks] before the record.
-  static const leadWeeks = 4, windowWeeks = 26;
+  /// The lead single is out at least four weeks before the album. Earlier
+  /// singles count whenever they are added to its tracklist.
+  static const leadWeeks = 4;
 
   /// The announcement comes at least this many weeks ahead.
   static const announceWeeks = 4;
@@ -66,8 +66,8 @@ abstract final class Rollouts {
   /// How [songIds] (out in [releaseWeek], announced in [announceWeek],
   /// -1: not) stand. With [planned], singles set for later count as done
   /// if they come out in time.
-  static RolloutStatus status(World w, Artist a, List<int> songIds,
-      int releaseWeek, int announceWeek,
+  static RolloutStatus status(
+      World w, Artist a, List<int> songIds, int releaseWeek, int announceWeek,
       {bool planned = false}) {
     final year = GameTime.yearOf(w.week);
     var applicable = 0, done = 0;
@@ -77,22 +77,22 @@ abstract final class Rollouts {
       if (ok) done |= 1 << s.index;
     }
 
-    final singleWeeks = <int>[];
+    final singleWeeks = <int, int>{};
     for (final id in songIds) {
       final s = w.songs[id];
-      if (s.isSingle && s.singleWeek >= 0) singleWeeks.add(s.singleWeek);
+      if (s.isSingle && s.singleWeek >= 0) singleWeeks[id] = s.singleWeek;
     }
     if (planned) {
       for (final sr in a.scheduled) {
         if (sr.isAlbum || sr.isDraft) continue;
         if (songIds.contains(sr.songIds.single)) {
-          singleWeeks.add(sr.releaseWeek);
+          singleWeeks.putIfAbsent(sr.songIds.single, () => sr.releaseWeek);
         }
       }
     }
     final inWindow = [
-      for (final wk in singleWeeks)
-        if (wk <= releaseWeek && wk >= releaseWeek - windowWeeks) wk
+      for (final wk in singleWeeks.values)
+        if (wk < releaseWeek) wk
     ];
     mark(RolloutStep.leadSingle, true,
         inWindow.any((wk) => wk <= releaseWeek - leadWeeks));
