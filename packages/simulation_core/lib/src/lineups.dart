@@ -182,21 +182,22 @@ abstract final class Lineups {
             (i < parts.length ? parts[i] : MemberRole.guitar).bit;
       }
     } else {
-      // Big groups have their second lines (docs K269).
       const parts = [
         MemberRole.mainVocal,
         MemberRole.mainDancer,
         MemberRole.mainRapper,
         MemberRole.leadVocal,
-        MemberRole.subVocal,
-        MemberRole.subRapper,
       ];
+      // Beyond seven, a big group's second lines (docs K269); the first
+      // seven as before, so the worlds already played stay the same.
       for (var i = 0; i < n; i++) {
         a.memberRoles[i] |= (i < parts.length
                 ? parts[i]
-                : i.isEven
-                    ? MemberRole.subVocal
-                    : MemberRole.leadVocal)
+                : i < 7
+                    ? MemberRole.leadVocal
+                    : i.isOdd
+                        ? MemberRole.subVocal
+                        : MemberRole.subRapper)
             .bit;
       }
       a.memberRoles[n - 1] |= MemberRole.maknae.bit;
