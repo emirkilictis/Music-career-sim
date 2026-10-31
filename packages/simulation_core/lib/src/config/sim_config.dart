@@ -426,7 +426,7 @@ class SimConfig {
 
   double announceBuzzCap(AlbumType type, double fame) =>
       switch (type) {
-        AlbumType.album => announceBuzzAlbum,
+        AlbumType.album || AlbumType.collection => announceBuzzAlbum,
         AlbumType.ep || AlbumType.mixtape => announceBuzzEp,
         AlbumType.single => announceBuzzSingle,
       } *

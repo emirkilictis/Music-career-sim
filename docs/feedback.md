@@ -249,6 +249,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F147 | Bir oyuncu: "Specific release weeks for music, similar to how we can skip to a specific week." Emir: "Şu anki tarihten kaç hafta uzak, o tarihte gözüksün." | ✅ K268 |
 | F148 | shine: "Girls' Generation açmak istiyordum, en fazla 7 üye oluyormuş." / "Oyun center'ı neye göre belirliyor, rastgele olması kötü." / "Sub rapper ve sub vocal rolü de gelsin." | ✅ K269 |
 | F149 | Emir: "EP'ye konan şarkılar albümlere de konabilsin." / "Yayınladığım single'ları bir albümün deluxe'üne koyabileyim." shine: "Birden fazla single çıkardım ama ikinci single maddesi işaretlenmiyor." | ✅ K270 |
+| F150 | Emir: "Compilation albüm de ekle, 20/20 Complete falan yayınlarım." | ✅ K271 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

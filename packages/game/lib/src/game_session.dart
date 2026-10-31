@@ -3664,6 +3664,48 @@ class GameSession {
     return AlbumView.of(world, al);
   }
 
+  /// What stops a collection now (null: nothing; docs K271).
+  CompilationBlock? get collectionBlock =>
+      Compilations.collectionBlock(world, _p);
+
+  /// Puts out a collection (docs K271): released [songIds] together again
+  /// ("complete edition"), with up to three unreleased [newIds].
+  AlbumView releaseCollection(String title, List<int> songIds, List<int> newIds,
+      {Campaign campaign = Campaign.standard}) {
+    if (Compilations.collectionBlock(world, _p) != null) {
+      throw GameException('noCompilation', 'Not now');
+    }
+    final t = title.trim();
+    if (t.isEmpty || t.length > 60) {
+      throw GameException('invalidTitle', 'Title must be 1–60 chars');
+    }
+    if (songIds.length < Compilations.minCollection ||
+        songIds.length > Compilations.maxCollection ||
+        newIds.length > Compilations.maxNew ||
+        {...songIds, ...newIds}.length != songIds.length + newIds.length) {
+      throw GameException('trackCount', 'Wrong number of songs');
+    }
+    final allowed = {for (final s in Compilations.candidates(world, _p)) s.id};
+    for (final id in songIds) {
+      _ownSong(id);
+      if (!allowed.contains(id)) {
+        throw GameException('notReleased', 'Only released songs');
+      }
+    }
+    for (final id in newIds) {
+      final s = _ownSong(id);
+      if (s.status != SongStatus.vault ||
+          _p.scheduled.any((sr) => sr.songIds.contains(id))) {
+        throw GameException('notInVault', 'Only unreleased songs');
+      }
+    }
+    _requireMoney(_campaignCost(campaign));
+    final al = Compilations.releaseCollection(world, _p, t, songIds, newIds,
+        campaign: campaign);
+    _saveNow();
+    return AlbumView.of(world, al);
+  }
+
   /// Finished tours a live album can come from, latest first (docs K146).
   List<LiveTourView> get liveAlbumTours => [
         for (final t in LiveAlbums.tours(world, _p)) LiveTourView.of(t)

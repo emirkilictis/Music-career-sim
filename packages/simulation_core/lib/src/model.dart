@@ -133,7 +133,9 @@ enum SongStatus { vault, active, dormant, scrapped }
 
 /// Release types. A mixtape is free (docs K62): streams only, no sales,
 /// no album chart, no era.
-enum AlbumType { single, ep, album, mixtape }
+/// Index order is stored: only append. [collection]: released songs put
+/// together again, a "complete edition" (docs K271).
+enum AlbumType { single, ep, album, mixtape, collection }
 
 enum AlbumStatus { active, dormant }
 

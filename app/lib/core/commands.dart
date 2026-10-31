@@ -452,6 +452,11 @@ abstract final class Cmd {
       (s) => s.compilationBlock;
   static SessionCmd<List<HitCandidateView>> compilationCandidates() =>
       (s) => s.compilationCandidates;
+  static SessionCmd<CompilationBlock?> collectionBlock() =>
+      (s) => s.collectionBlock;
+  static SessionCmd<AlbumView> releaseCollection(String title,
+          List<int> songIds, List<int> newIds, Campaign campaign) =>
+      (s) => s.releaseCollection(title, songIds, newIds, campaign: campaign);
   static SessionCmd<AlbumView> releaseGreatestHits(String title,
           List<int> hitIds, List<int> newIds, Campaign campaign) =>
       (s) => s.releaseGreatestHits(title, hitIds, newIds, campaign: campaign);

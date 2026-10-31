@@ -8737,6 +8737,40 @@
   },
   "errorNoCurators": "This song cannot be sent to curators now.",
   "ghButton": "Greatest hits album",
+  "typeCollection": "Collection",
+  "collButton": "Collection: released songs together again",
+  "collTitle": "Collection",
+  "collDefaultTitle": "The Complete Collection",
+  "collHint": "{min}–{max} of your released songs together again, a \"complete edition\" of two albums or a box set, with up to {maxNew} new songs or none. Fans who have the songs buy it less; their plays stay with their own records.",
+  "@collHint": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      },
+      "maxNew": {
+        "type": "int"
+      }
+    }
+  },
+  "collSongs": "Released songs ({count})",
+  "@collSongs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collTooSoon": "One collection every {weeks} weeks.",
+  "@collTooSoon": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
   "ghTitle": "Greatest hits",
   "ghHint": "Pick {minHits}–{maxHits} released songs and {minNew}–{maxNew} new ones from the vault. Fans have the old songs; people who know your hits buy it, for years, most of all in the CD era. No new era, and the label does not count it as an album it is owed.",
   "@ghHint": {

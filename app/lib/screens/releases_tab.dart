@@ -34,6 +34,9 @@ class _ReleasesTabState extends State<ReleasesTab> {
   /// Tours a live album can come from (docs K146).
   List<LiveTourView> _liveTours = const [];
   CompilationBlock? _hitsBlock = CompilationBlock.tooEarly;
+
+  /// What stops a collection (docs K271).
+  CompilationBlock? _collectionBlock = CompilationBlock.fewSongs;
   int _loadedRevision = -1;
 
   /// Rivals' songs with the player's verse (docs K158), shown with the
@@ -58,11 +61,13 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final rivals = await career.read(Cmd.upcomingRivalAlbums());
     final liveTours = await career.read(Cmd.liveAlbumTours());
     final hitsBlock = await career.read(Cmd.compilationBlock());
+    final collectionBlock = await career.read(Cmd.collectionBlock());
     final collabs = await career.read(Cmd.guestSongs());
     if (mounted) {
       setState(() {
         _collabs = collabs;
         _hitsBlock = hitsBlock;
+        _collectionBlock = collectionBlock;
         _liveTours = liveTours;
         _songs = songs;
         _albums = albums;
@@ -72,12 +77,23 @@ class _ReleasesTabState extends State<ReleasesTab> {
     }
   }
 
-  /// Picks hits and new songs and puts out a greatest hits album (K161).
-  Future<void> _greatestHits() async {
+  /// Picks hits and new songs and puts out a greatest hits album (K161),
+  /// or, as a [collection], any released songs together again with up to
+  /// three new ones (K271).
+  Future<void> _greatestHits({bool collection = false}) async {
     final l = context.l10n;
     final career = context.careerRead;
     final hits = await career.read(Cmd.compilationCandidates());
+    // The records the songs are on, to take one whole (K271).
+    final albums = {
+      for (final a in await career.read(Cmd.albums())) a.id: a.title
+    };
     if (!mounted) return;
+    final minPick =
+        collection ? Compilations.minCollection : Compilations.minHits;
+    final maxPick =
+        collection ? Compilations.maxCollection : Compilations.maxHits;
+    final minNew = collection ? 0 : Compilations.minNew;
     final fresh = [
       for (final s in _songs)
         if (s.inVault &&
@@ -86,19 +102,29 @@ class _ReleasesTabState extends State<ReleasesTab> {
             s.albumId < 0)
           s
     ];
-    if (fresh.isEmpty) {
+    if (fresh.isEmpty && !collection) {
       showInfo(context, l.ghNeedNew);
       return;
     }
-    final name = TextEditingController(text: l.ghDefaultTitle);
+    final name = TextEditingController(
+        text: collection ? l.collDefaultTitle : l.ghDefaultTitle);
+    final records = [
+      for (final id in {
+        for (final h in hits)
+          if (albums.containsKey(h.albumId)) h.albumId
+      })
+        id
+    ];
     final picked = await showModalBottomSheet<(String, List<int>, List<int>)>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
       builder: (c) {
-        // The biggest hits are ticked to start with.
+        // The biggest hits are ticked to start with (a collection starts
+        // empty).
         final chosen = [
-          for (final h in hits.take(Compilations.minHits + 2)) h.songId
+          if (!collection)
+            for (final h in hits.take(Compilations.minHits + 2)) h.songId
         ];
         final added = <int>[];
         return StatefulBuilder(
@@ -112,14 +138,17 @@ class _ReleasesTabState extends State<ReleasesTab> {
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-                    child: Text(l.ghTitle,
+                    child: Text(collection ? l.collTitle : l.ghTitle,
                         style: Theme.of(c).textTheme.titleLarge),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                     child: Text(
-                        l.ghHint(Compilations.minHits, Compilations.maxHits,
-                            Compilations.minNew, Compilations.maxNew),
+                        collection
+                            ? l.collHint(Compilations.minCollection,
+                                Compilations.maxCollection, Compilations.maxNew)
+                            : l.ghHint(Compilations.minHits, Compilations.maxHits,
+                                Compilations.minNew, Compilations.maxNew),
                         style: Theme.of(c).textTheme.bodySmall),
                   ),
                   Padding(
@@ -151,14 +180,46 @@ class _ReleasesTabState extends State<ReleasesTab> {
                         ),
                       ListTile(
                           dense: true,
-                          title: Text(l.ghHits(chosen.length),
+                          title: Text(
+                              collection
+                                  ? l.collSongs(chosen.length)
+                                  : l.ghHits(chosen.length),
                               style: const TextStyle(
                                   fontWeight: FontWeight.w800))),
+                      // A whole record at a tap (K271).
+                      if (collection && records.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Wrap(spacing: 8, runSpacing: 4, children: [
+                            for (final id in records)
+                              ActionChip(
+                                avatar: const Icon(Icons.album_rounded,
+                                    size: 18),
+                                label: Text(albums[id]!),
+                                onPressed: () => set(() {
+                                  final ids = [
+                                    for (final h in hits)
+                                      if (h.albumId == id) h.songId
+                                  ];
+                                  if (ids.every(chosen.contains)) {
+                                    chosen.removeWhere(ids.contains);
+                                  } else {
+                                    for (final x in ids) {
+                                      if (!chosen.contains(x) &&
+                                          chosen.length < maxPick) {
+                                        chosen.add(x);
+                                      }
+                                    }
+                                  }
+                                }),
+                              ),
+                          ]),
+                        ),
                       for (final h in hits)
                         CheckboxListTile(
                           value: chosen.contains(h.songId),
                           onChanged: !chosen.contains(h.songId) &&
-                                  chosen.length >= Compilations.maxHits
+                                  chosen.length >= maxPick
                               ? null
                               : (v) => set(() => v == true
                                   ? chosen.add(h.songId)
@@ -173,8 +234,8 @@ class _ReleasesTabState extends State<ReleasesTab> {
                   Padding(
                     padding: const EdgeInsets.all(16),
                     child: FilledButton(
-                      onPressed: chosen.length < Compilations.minHits ||
-                              added.length < Compilations.minNew
+                      onPressed: chosen.length < minPick ||
+                              added.length < minNew
                           ? null
                           : () => Navigator.pop(
                               c, (name.text, List.of(chosen), List.of(added))),
@@ -194,8 +255,10 @@ class _ReleasesTabState extends State<ReleasesTab> {
     final campaign = await pickCampaign(context, career);
     if (campaign == null || !mounted) return;
     try {
-      final al = await career.act(Cmd.releaseGreatestHits(
-          picked.$1, picked.$2, picked.$3, campaign));
+      final al = await career.act(collection
+          ? Cmd.releaseCollection(picked.$1, picked.$2, picked.$3, campaign)
+          : Cmd.releaseGreatestHits(
+              picked.$1, picked.$2, picked.$3, campaign));
       if (mounted) showInfo(context, l.albumReleased(al.title));
     } catch (e) {
       if (mounted) showError(context, e);
@@ -584,6 +647,23 @@ class _ReleasesTabState extends State<ReleasesTab> {
                     CompilationBlock.fewSongs =>
                       l.ghFewSongs(Compilations.minHits),
                   },
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+            ),
+        ],
+        // A collection: released songs together again (docs K271).
+        if (_collectionBlock != CompilationBlock.fewSongs) ...[
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: career.busy || _collectionBlock != null
+                ? null
+                : () => _greatestHits(collection: true),
+            icon: const Icon(Icons.library_music_rounded),
+            label: Text(l.collButton),
+          ),
+          if (_collectionBlock == CompilationBlock.tooSoon)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(l.collTooSoon(Compilations.collectionGapWeeks),
                   style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
             ),
         ],

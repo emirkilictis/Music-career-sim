@@ -37,6 +37,61 @@ abstract final class Compilations {
 
   static bool isCompilation(Album al) => al.hitIds.isNotEmpty;
 
+  /// A collection (docs K271): any released songs put together again,
+  /// two albums as one "complete edition", with up to [maxNew] new songs
+  /// or none. One every [collectionGapWeeks]; it does not count as a
+  /// best-of.
+  static const minCollection = 2, maxCollection = 40;
+  static const collectionGapWeeks = 26;
+
+  static bool isCollection(Album al) => al.type == AlbumType.collection;
+
+  /// What stops [a] making a collection now (null: nothing).
+  static CompilationBlock? collectionBlock(World w, Artist a) {
+    for (final al in w.albums) {
+      if (al.artistId == a.id &&
+          isCollection(al) &&
+          w.week - al.releaseWeek < collectionGapWeeks) {
+        return CompilationBlock.tooSoon;
+      }
+    }
+    if (candidates(w, a).length < minCollection) {
+      return CompilationBlock.fewSongs;
+    }
+    return null;
+  }
+
+  /// Puts out collection [title]: released [songIds] with up to [maxNew]
+  /// unreleased [newIds].
+  static Album releaseCollection(World w, Artist a, String title,
+      List<int> songIds, List<int> newIds,
+      {Campaign campaign = Campaign.standard}) {
+    if (collectionBlock(w, a) case final b?) {
+      throw ActionException('Blocked: $b');
+    }
+    if (songIds.length < minCollection || songIds.length > maxCollection) {
+      throw ActionException('$minCollection–$maxCollection songs');
+    }
+    if (newIds.length > maxNew) throw ActionException('Up to $maxNew new');
+    if ({...songIds, ...newIds}.length != songIds.length + newIds.length) {
+      throw ActionException('Twice');
+    }
+    for (final id in songIds) {
+      if (!_eligible(w.songs[id], a)) throw ActionException('Not released');
+    }
+    for (final id in newIds) {
+      final s = w.songs[id];
+      if (s.primaryArtistId != a.id || s.status != SongStatus.vault) {
+        throw ActionException('Only unreleased songs');
+      }
+    }
+    return Actions.releaseAlbum(w, a, title, newIds,
+        type: AlbumType.collection,
+        campaign: campaign,
+        announced: true,
+        hits: songIds);
+  }
+
   /// Songs [a] could put on a best-of: their released studio songs.
   static List<Song> candidates(World w, Artist a) => [
         for (final id in w.playerSongIds)
@@ -59,6 +114,7 @@ abstract final class Compilations {
     for (final al in w.albums) {
       if (al.artistId == a.id &&
           isCompilation(al) &&
+          !isCollection(al) &&
           w.week - al.releaseWeek < gapYears * GameTime.weeksPerYear) {
         return CompilationBlock.tooSoon;
       }

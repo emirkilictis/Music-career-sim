@@ -146,6 +146,21 @@ void main() {
       expect(g.song(loose).albumId, album.id);
       expect(g.album(album.id).trackIds, contains(loose));
       expect(g.song(loose).looseSingle, isFalse);
+      // A collection (K271): released songs together again, no new song
+      // needed; then not again for half a year.
+      expect(g.collectionBlock, isNull);
+      final box = g.releaseCollection('Complete', [...ids, loose], const [],
+          campaign: Campaign.none);
+      expect(box.type, AlbumType.collection);
+      expect(box.hitTrackIds, [...ids, loose]);
+      expect(g.song(loose).albumId, album.id);
+      expect(g.collectionBlock, CompilationBlock.tooSoon);
+      g.advanceWeek();
+      expect(g.album(box.id).weekPure, greaterThan(0));
+      expect(
+          () => g.releaseCollection('Again', ids, const [],
+              campaign: Campaign.none),
+          _code('noCompilation'));
 
       for (var i = 0; i < 3; i++) {
         g.rewardAd();

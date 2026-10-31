@@ -2366,6 +2366,13 @@ k('errorNoCurators','This song cannot be sent to curators now.','Bu şarkı şu 
 
 # Greatest hits (docs K161).
 k('ghButton','Greatest hits album','Greatest Hits albümü')
+k('typeCollection','Collection','Derleme')
+k('collButton','Collection: released songs together again','Derleme: çıkmış şarkılar bir arada')
+k('collTitle','Collection','Derleme albümü')
+k('collDefaultTitle','The Complete Collection','The Complete Collection')
+k('collHint','{min}–{max} of your released songs together again, a "complete edition" of two albums or a box set, with up to {maxNew} new songs or none. Fans who have the songs buy it less; their plays stay with their own records.','Çıkmış şarkılarından {min}–{max} tanesi bir arada: iki albümün "complete edition"ı ya da bir kutu set; istersen en çok {maxNew} yeni şarkıyla. Şarkıları olan hayranlar daha az alır; dinlenmeleri kendi albümlerinde kalır.', min='int', max='int', maxNew='int')
+k('collSongs','Released songs ({count})','Çıkmış şarkılar ({count})', count='int')
+k('collTooSoon','One collection every {weeks} weeks.','{weeks} haftada bir derleme.', weeks='int')
 k('ghTitle','Greatest hits','En iyiler albümü')
 k('ghHint','Pick {minHits}–{maxHits} released songs and {minNew}–{maxNew} new ones from the vault. Fans have the old songs; people who know your hits buy it, for years, most of all in the CD era. No new era, and the label does not count it as an album it is owed.','{minHits}–{maxHits} çıkmış şarkı ve kasadan {minNew}–{maxNew} yeni şarkı seç. Hayranlarda eski şarkılar zaten var; hitlerini bilen geniş kitle onu yıllarca alır, en çok CD döneminde. Yeni bir dönem açmaz ve plak şirketi borçlu olduğun albümlerden saymaz.', minHits='int', maxHits='int', minNew='int', maxNew='int')
 k('ghDefaultTitle','Greatest Hits','Greatest Hits')
