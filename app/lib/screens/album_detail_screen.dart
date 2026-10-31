@@ -35,6 +35,7 @@ class AlbumDetailScreen extends StatefulWidget {
 
 class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   AlbumView? _album;
+  List<({String name, double gross, bool active, int startWeek})> _tours = [];
   List<SongView> _tracks = const [];
   List<SongView> _hits = const [];
   List<HistoryPoint> _history = const [];
@@ -63,9 +64,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     final sales = await st.read(Cmd.albumSales(widget.albumId));
     final run = await st.read(Cmd.chartRun(EntityKind.album, widget.albumId));
     final picks = await st.read(Cmd.singlePicks(widget.albumId));
+    final tours = await st.read(Cmd.albumTours(widget.albumId));
     if (mounted) {
       setState(() {
         _picks = picks;
+        _tours = tours;
         _album = album;
         _tracks = tracks;
         _hits = hits;
@@ -111,9 +114,8 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               onPressed: career.busy
                   ? null
                   : () async {
-                      final song = _tracks
-                          .where((s) => s.id == x.songId)
-                          .firstOrNull;
+                      final song =
+                          _tracks.where((s) => s.id == x.songId).firstOrNull;
                       if (song == null) return;
                       if (await releaseSingleFlow(context, career, song)) {
                         _load();
@@ -356,6 +358,20 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                 '${a.isLive ? ' · ${l.liveTag}' : ''}'
                 '${a.isCompilation ? ' · ${l.ghTag}' : ''}',
           ),
+          if (_tours.isNotEmpty)
+            Section(
+              title: l.tourRelated,
+              icon: Icons.stadium_outlined,
+              child: Column(children: [
+                for (final t in _tours)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(t.name.isEmpty ? l.tourRelated : t.name),
+                    subtitle: t.active ? Text(l.tourActiveNow) : null,
+                    trailing: Text(fmt.money(t.gross.round())),
+                  )
+              ]),
+            ),
           // A dated version on its way (docs K255).
           if (a.isPlayer && a.planned != null) _plannedCard(a, a.planned!),
           // New versions after it came out (docs K225).
@@ -372,8 +388,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
             if (a.versionBlock case final b?) ...[
               const SizedBox(height: 4),
               Text(fmt.versionBlock(b),
-                  style:
-                      TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
             ],
           ],
           if (!a.isPlayer)
@@ -387,7 +402,9 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                   l.albumHitsLine(a.usHits.$3, a.usHits.$2, a.usHits.$1),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: a.usHits.$3 > 0 ? AppColors.gold : AppColors.textMuted,
+                      color: a.usHits.$3 > 0
+                          ? AppColors.gold
+                          : AppColors.textMuted,
                       fontWeight: FontWeight.w700)),
             ),
           ],
@@ -448,9 +465,7 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
             const SizedBox(height: 10),
             _Line(
                 icon: Icons.flag_outlined,
-                text: l.rolloutResult(
-                    a.rollout.doneCount,
-                    a.rollout.count,
+                text: l.rolloutResult(a.rollout.doneCount, a.rollout.count,
                     (Rollouts.fullHype * a.rollout.share * 100).round())),
             const SizedBox(height: 6),
             RolloutChecklist(status: a.rollout),
@@ -479,15 +494,14 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     Wrap(spacing: 8, runSpacing: 8, children: [
                       for (final c in PriceCut.values)
                         OutlinedButton(
-                          onPressed: a.priceCutBlocks[c] != null ||
-                                  widget.state.busy
-                              ? null
-                              : () => _cutPrice(a, c),
+                          onPressed:
+                              a.priceCutBlocks[c] != null || widget.state.busy
+                                  ? null
+                                  : () => _cutPrice(a, c),
                           child: Text(_priceLabel(l, c)),
                         ),
                     ]),
-                    if (a.priceCutBlocks.values
-                        .contains(PriceCutBlock.tooSoon))
+                    if (a.priceCutBlocks.values.contains(PriceCutBlock.tooSoon))
                       Text(l.priceCutTooSoon(PriceCuts.gapWeeks),
                           style: TextStyle(
                               color: AppColors.textMuted, fontSize: 12.5))
@@ -798,10 +812,10 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                     title: Text(k == 0
                         ? l.editionStandard
                         : a.versionOfEdition(k) != null
-                        ? '${fmt.versionName(a.versionOfEdition(k)!)} · ${fmt.editionFormat(a.versionOfEdition(k)!.format)}'
-                        : a.variantFormats[k] == null
-                            ? l.editionN(k + 1)
-                            : '${l.editionN(k + 1)} · ${fmt.editionFormat(a.variantFormats[k])}'),
+                            ? '${fmt.versionName(a.versionOfEdition(k)!)} · ${fmt.editionFormat(a.versionOfEdition(k)!.format)}'
+                            : a.variantFormats[k] == null
+                                ? l.editionN(k + 1)
+                                : '${l.editionN(k + 1)} · ${fmt.editionFormat(a.variantFormats[k])}'),
                     subtitle: Text(l.editionWeek(
                         fmt.week(a.releaseWeek + a.variantWeeks[k]))),
                     trailing:
@@ -994,11 +1008,11 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
                       ? l.versionBonus(
                           fmt.versionName(a.versionOfTrack(_tracks[i].id)!))
                       : _tracks[i].isSingle
-                      ? l.typeSingle
-                      : _tracks[i].scheduledSingleWeek >= 0
-                          ? l.scheduledSingleTag(
-                              fmt.week(_tracks[i].scheduledSingleWeek))
-                          : fmt.songMain(_tracks[i], widget.state.week)),
+                          ? l.typeSingle
+                          : _tracks[i].scheduledSingleWeek >= 0
+                              ? l.scheduledSingleTag(
+                                  fmt.week(_tracks[i].scheduledSingleWeek))
+                              : fmt.songMain(_tracks[i], widget.state.week)),
                   // Another single from the album in one tap.
                   trailing: a.isPlayer &&
                           !_tracks[i].isSingle &&

@@ -45,8 +45,8 @@ RegionalNumbers _regional(double Function(int r) f) =>
 
 class ArtistView {
   ArtistView._(World w, Artist a)
-      :
-        regionShare = List.unmodifiable(a.regionShare), id = a.id,
+      : regionShare = List.unmodifiable(a.regionShare),
+        id = a.id,
         name = a.name,
         kind = a.kind,
         members = List.unmodifiable(a.members),
@@ -293,8 +293,8 @@ class SongView {
                 Actions.canCarry(w, w.artists[s.primaryArtistId], s)
             ? w.albums[s.albumId].title
             : null,
-        looseSingle = Actions.canCarry(w, w.artists[s.primaryArtistId], s,
-            fromEp: false),
+        looseSingle =
+            Actions.canCarry(w, w.artists[s.primaryArtistId], s, fromEp: false),
         estimatedGrade = s.estimatedGrade,
         gradeLow = math.max(1, s.estimatedGrade - s.gradeSpread),
         gradeHigh = math.min(100, s.estimatedGrade + s.gradeSpread),
@@ -364,9 +364,7 @@ class SongView {
             : const {},
         holiday = s.holiday,
         dissTarget = s.dissTarget,
-        dissTargetName = s.dissTarget >= 0
-            ? w.artists[s.dissTarget].name
-            : '',
+        dissTargetName = s.dissTarget >= 0 ? w.artists[s.dissTarget].name : '',
         rerecordOf = s.rerecordOf,
         liveOf = s.liveOf,
         leakedWeek = s.leakedWeek,
@@ -391,10 +389,10 @@ class SongView {
         leakHurts = s.releasedWeek >= 0 && Leaks.hurts(s),
         replacedWeek = s.replacedWeek,
         masterShare = Rerecords.songShare(w.artists[s.primaryArtistId], s),
-        masterBuyCents = w.player != null &&
-                MasterBuyback.canSong(w, w.player!, s)
-            ? MasterBuyback.songPriceCents(w, w.player!, s)
-            : null,
+        masterBuyCents =
+            w.player != null && MasterBuyback.canSong(w, w.player!, s)
+                ? MasterBuyback.songPriceCents(w, w.player!, s)
+                : null,
         languageVersions = [
           for (final v in LanguageVersion.values)
             if (s.languages & (1 << v.index) != 0) v
@@ -405,9 +403,8 @@ class SongView {
               if (Languages.can(w, w.player!, s, v)) v
         ],
         snippetWeek = s.snippetWeek,
-        snippetReaction = s.snippetWeek < 0
-            ? null
-            : Snippets.reaction(s.snippetScore),
+        snippetReaction =
+            s.snippetWeek < 0 ? null : Snippets.reaction(s.snippetScore),
         snippetScore = s.snippetWeek < 0 ? 0 : s.snippetScore.round(),
         canSnippet = w.player != null && Snippets.can(w, w.player!, s),
         cloudWeek = s.cloudWeek,
@@ -684,6 +681,7 @@ class SongView {
   final int writtenWeek;
   final int releasedWeek;
   final int singleWeek;
+
   /// An EP track an album can take over, with the EP's title (docs
   /// K270); null otherwise.
   final String? epTitle;
@@ -808,8 +806,7 @@ class AlbumView {
             ? VisualAlbums.costCents(w, al)
             : null,
         partnerName = al.partnerId >= 0 ? w.artists[al.partnerId].name : '',
-        anniversaryDue = w.player != null &&
-                Anniversaries.can(w, w.player!, al)
+        anniversaryDue = w.player != null && Anniversaries.can(w, w.player!, al)
             ? Anniversaries.years[Anniversaries.due(w, al)]
             : 0,
         anniversariesMarked = [
@@ -819,26 +816,25 @@ class AlbumView {
         marqueeCostCents = StreamingTools.canMarqueeAlbum(w, al)
             ? StreamingTools.albumMarqueeCostCents(w.player!)
             : null,
-        onMarquee = al.songIds.isNotEmpty &&
-            w.songs[al.songIds.first].marqueeWeek >= 0,
+        onMarquee =
+            al.songIds.isNotEmpty && w.songs[al.songIds.first].marqueeWeek >= 0,
         bundleUnits = al.bundleUnits,
         masterShare = Rerecords.albumShare(w.artists[al.artistId], al),
-        masterBuyCents = w.player != null &&
-                MasterBuyback.canAlbum(w, w.player!, al)
-            ? MasterBuyback.albumPriceCents(w, w.player!, al)
-            : null,
-        masterOwnerYearCents = w.player != null &&
-                MasterBuyback.canAlbum(w, w.player!, al)
-            ? MasterBuyback.albumYearCents(w, w.player!, al)
-            : 0,
+        masterBuyCents =
+            w.player != null && MasterBuyback.canAlbum(w, w.player!, al)
+                ? MasterBuyback.albumPriceCents(w, w.player!, al)
+                : null,
+        masterOwnerYearCents =
+            w.player != null && MasterBuyback.canAlbum(w, w.player!, al)
+                ? MasterBuyback.albumYearCents(w, w.player!, al)
+                : 0,
         isRerecord = Rerecords.isRerecord(w, al),
         rerecordBlock = al.artistId == w.playerArtistId
             ? Rerecords.block(w, w.artists[al.artistId], al)
             : RerecordBlock.notYours,
         rerecordCostCents = Rerecords.costCents(al),
-        replacedWeek = al.songIds.isEmpty
-            ? -1
-            : w.songs[al.songIds.first].replacedWeek,
+        replacedWeek =
+            al.songIds.isEmpty ? -1 : w.songs[al.songIds.first].replacedWeek,
         originalAlbumId = _originalAlbum(w, al),
         originalTitle = _originalAlbum(w, al) < 0
             ? ''
@@ -1276,10 +1272,10 @@ class ChartView {
       weekValue: market == ChartMarket.usRingtones
           ? points
           : kind == EntityKind.song
-          ? w.songWeekStreamsIn(w.songs[id], market)
-          // What the album chart ranked: pure sales before 2015, units
-          // after (docs K49).
-          : points,
+              ? w.songWeekStreamsIn(w.songs[id], market)
+              // What the album chart ranked: pure sales before 2015, units
+              // after (docs K49).
+              : points,
       position: position,
       lastPos: lastPos,
       peak: peak,
@@ -1823,8 +1819,8 @@ abstract final class Streamify {
   /// The five cities with the most of [monthly] listeners (docs K130):
   /// each region's listeners spread over its big cities by size, more at
   /// home and where the genre is big.
-  static List<CityListeners> topCities(List<double> regionShare,
-      HomeCountry home, int genre, double monthly) {
+  static List<CityListeners> topCities(
+      List<double> regionShare, HomeCountry home, int genre, double monthly) {
     if (monthly <= 0) return const [];
     double weight(_City c) {
       var x = c.size;
@@ -2126,8 +2122,8 @@ class SongPitchView {
             .round()
             .clamp(1, 100),
         bought = w.boughtPitches.contains(_pitchKey(w, x)),
-        taken = w.week >= x.takenWeek &&
-            !w.boughtPitches.contains(_pitchKey(w, x));
+        taken =
+            w.week >= x.takenWeek && !w.boughtPitches.contains(_pitchKey(w, x));
   final int index;
   final String title;
   final int genre;
@@ -2151,8 +2147,7 @@ class SongMarketView {
       : pitches = [
           for (final x in SongMarket.pitches(w, a)) SongPitchView.of(w, a, x)
         ],
-        weeksToNext =
-            SongMarket.periodWeeks - w.week % SongMarket.periodWeeks,
+        weeksToNext = SongMarket.periodWeeks - w.week % SongMarket.periodWeeks,
         cutPct = (SongMarket.writerCut * 100).round();
   final List<SongPitchView> pitches;
 
@@ -2208,6 +2203,7 @@ class OpportunityView {
   final int weeksLeft;
   final int partnerArtistId;
   final String partnerName;
+
   /// A sync's song and where it would be heard (docs K262).
   final String songTitle;
   final SyncMedium medium;
@@ -2277,9 +2273,8 @@ enum Certification {
       c == diamond && multiple < 10 ? multiple * 10 : multiple;
 
   /// The units [multiple] of [c] stands for.
-  static double unitsOf(Certification c, int multiple) => c == diamond
-      ? platinum.units * times(c, multiple)
-      : c.units * multiple;
+  static double unitsOf(Certification c, int multiple) =>
+      c == diamond ? platinum.units * times(c, multiple) : c.units * multiple;
 }
 
 /// One song on the stream counter (docs K210): Streamify plays a day
@@ -2301,8 +2296,7 @@ class CounterRow {
   final double total;
 
   /// [change] against last week's daily plays (0 with none).
-  double get changeShare =>
-      daily - change > 0 ? change / (daily - change) : 0;
+  double get changeShare => daily - change > 0 ? change / (daily - change) : 0;
 }
 
 /// A version of an album put out after it (docs K225).
@@ -2514,8 +2508,7 @@ class ChartHistoryView {
       : songs = [],
         albums = [] {
     final me = w.playerArtistId;
-    ChartHistoryEntry song(Song s, {bool feature = false}) =>
-        ChartHistoryEntry(
+    ChartHistoryEntry song(Song s, {bool feature = false}) => ChartHistoryEntry(
           kind: EntityKind.song,
           id: s.id,
           title: s.title,
@@ -2609,6 +2602,10 @@ class MilestoneView {
 class TourView {
   TourView.of(World w, Tour t)
       : name = t.name,
+        albumTitle = t.albumId >= 0 && t.albumId < w.albums.length
+            ? w.albums[t.albumId].title
+            : null,
+        greatestHits = t.greatestHits,
         kind = t.kind,
         legs = List.unmodifiable(t.legs),
         production = t.production,
@@ -2632,6 +2629,8 @@ class TourView {
 
   /// The player's name for it ('' = named after its biggest venues).
   final String name;
+  final String? albumTitle;
+  final bool greatestHits;
 
   /// The biggest venues on the tour.
   final TourKind kind;
@@ -2753,8 +2752,12 @@ class TourRequest {
     this.openerId = -1,
     this.reunion = false,
     this.setlist = const [],
+    this.albumId = -1,
+    this.greatestHits = false,
   });
   final List<TourLeg> legs;
+  final int albumId;
+  final bool greatestHits;
 
   /// Songs for the set, in order (empty: the biggest ones; docs K223).
   final List<int> setlist;
@@ -2772,9 +2775,10 @@ class SetlistSong {
   SetlistSong.of(World w, Song s)
       : songId = s.id,
         title = s.title,
-        albumId = coverAlbumOf(w, s),
+        albumId = s.albumId,
         albumTitle = s.albumId >= 0 ? w.albums[s.albumId].title : null,
         streams = w.songLifetimeStreams(s),
+        fanScore = s.fanAppeal * s.longevity,
         peak = s.statsOrNull(Charts.usSongs)?.peak ?? 0;
   final int songId;
   final String title;
@@ -2783,6 +2787,7 @@ class SetlistSong {
   /// The album it is on (null: a single only).
   final String? albumTitle;
   final double streams;
+  final double fanScore;
 
   /// Best place on the US songs chart (0: never charted).
   final int peak;
@@ -3059,9 +3064,8 @@ class SocialItemView {
         rivalId = i.artistId,
         key = Comments.keyOf(i),
         authorMood = i.fan >= 0 ? Comments.authorMood(i) : null,
-        answered = i.fan >= 0
-            ? Comments.replyTo(w, i, Comments.author)?.kind
-            : null,
+        answered =
+            i.fan >= 0 ? Comments.replyTo(w, i, Comments.author)?.kind : null,
         haters = i.byPlayer && w.player != null
             ? Comments.of(w, w.player!, i)
                 .where((c) =>
@@ -3119,7 +3123,9 @@ class SocialItemView {
     if (i.topic == FanTopic.postTeaser) return PostMedia.snippet;
     if (i.songId < 0 && i.albumId < 0) return PostMedia.none;
     return switch (i.topic) {
-      FanTopic.numberOne || FanTopic.topTen || FanTopic.yearEndHit =>
+      FanTopic.numberOne ||
+      FanTopic.topTen ||
+      FanTopic.yearEndHit =>
         PostMedia.chart,
       FanTopic.bigWeek || FanTopic.billionsClub => PostMedia.stat,
       FanTopic.criticHigh || FanTopic.criticLow => PostMedia.score,
@@ -3431,9 +3437,8 @@ class WrittenSongView {
         artistName = w.artists[s.primaryArtistId].name,
         albumId = coverAlbumOf(w, s),
         released = s.releasedWeek >= 0,
-        releasedWeek = s.isSingle && s.singleWeek >= 0
-            ? s.singleWeek
-            : s.releasedWeek,
+        releasedWeek =
+            s.isSingle && s.singleWeek >= 0 ? s.singleWeek : s.releasedWeek,
         peak = s.statsOrNull(Charts.usSongs)?.peak ?? 0,
         streams = w.songLifetimeStreams(s),
         earnedCents = earnedCents ?? s.writerCents;
@@ -3665,8 +3670,8 @@ class SessionsView {
               week: s.week,
               title: w.songs[s.songId].title,
               coverTitle: w.songs[s.coverSongId].title,
-              coverArtist: w.artists[w.songs[s.coverSongId].primaryArtistId]
-                  .name
+              coverArtist:
+                  w.artists[w.songs[s.coverSongId].primaryArtistId].name
             )
         ];
 
@@ -3676,15 +3681,12 @@ class SessionsView {
 
   /// When the next invitation comes after the last session (-1: none yet).
   final int nextWeek;
-  final List<({int id, String title, String artist, double listeners})>
-      songs;
+  final List<({int id, String title, String artist, double listeners})> songs;
 
   /// The biggest songs of others this week, with the listeners a cover
   /// would win.
-  final List<({int id, String title, String artist, double listeners})>
-      covers;
-  final List<
-      ({int week, String title, String coverTitle, String coverArtist})>
+  final List<({int id, String title, String artist, double listeners})> covers;
+  final List<({int week, String title, String coverTitle, String coverArtist})>
       sessions;
 
   static List<({int id, String title, String artist, double listeners})>
@@ -3731,9 +3733,8 @@ class FycView {
 /// The player's beefs (docs K229).
 class BeefsView {
   BeefsView.of(World w, Artist p)
-      : active = Beefs.active(w) == null
-            ? null
-            : BeefView.of(w, Beefs.active(w)!),
+      : active =
+            Beefs.active(w) == null ? null : BeefView.of(w, Beefs.active(w)!),
         past = [
           for (final b in w.beefs.reversed)
             if (!b.active) BeefView.of(w, b)
@@ -3823,8 +3824,8 @@ class DissTargetView {
             when a.tier != ArtistTier.player && !a.isRetired && a.fame > 0.02)
           a
     ];
-    final big = (List.of(rivals)..sort((a, b) => b.fame.compareTo(a.fame)))
-        .take(8);
+    final big =
+        (List.of(rivals)..sort((a, b) => b.fame.compareTo(a.fame))).take(8);
     final near = (List.of(rivals)
           ..sort((a, b) =>
               (a.fame - p.fame).abs().compareTo((b.fame - p.fame).abs())))
@@ -3855,7 +3856,8 @@ class AwardSubmissionsView {
         playerGenre = w.player?.genre ?? -1,
         songs = [],
         albums = [],
-        newArtistEligible = Awards.newArtistEligible(w, Awards.showYearOf(w.week)),
+        newArtistEligible =
+            Awards.newArtistEligible(w, Awards.showYearOf(w.week)),
         submitted = Awards.submissionsFor(w, Awards.showYearOf(w.week)) {
     final outlook = Awards.outlook(w, year);
     for (final s in Awards.eligibleSongs(w, year)) {
@@ -3885,14 +3887,14 @@ class AwardSubmissionsView {
             (
               g,
               Awards.genreFit(w, al, g),
-              outlook[AwardSubmission(AwardCategory.genreAlbum, al.id,
-                  genre: g)]
+              outlook[
+                  AwardSubmission(AwardCategory.genreAlbum, al.id, genre: g)]
             )
         ],
       ));
     }
-    newArtist = outlook[
-        AwardSubmission(AwardCategory.newArtist, w.playerArtistId)];
+    newArtist =
+        outlook[AwardSubmission(AwardCategory.newArtist, w.playerArtistId)];
   }
 
   /// The show it is for and the last week to submit.
@@ -4034,8 +4036,7 @@ class FanClubView {
         activity = FanClubs.activity(w, a),
         estimates = {
           for (final p in ClubPrice.values)
-            p: FanClubs.target(
-                w, a, FanClub(openWeek: w.week, price: p)),
+            p: FanClubs.target(w, a, FanClub(openWeek: w.week, price: p)),
         };
   final bool open;
   final bool canOpen;
@@ -4121,9 +4122,8 @@ class PlaylistTrackView {
         artistName = w.artists[s.primaryArtistId].name,
         albumId = coverAlbumOf(w, s),
         isPlayer = s.primaryArtistId == w.playerArtistId,
-        weekStreams = s.releasedWeek < 0
-            ? 0
-            : w.songWeekStreamsIn(s, ChartMarket.global),
+        weekStreams =
+            s.releasedWeek < 0 ? 0 : w.songWeekStreamsIn(s, ChartMarket.global),
         fresh = w.week - s.releasedWeek <= 12,
         onPlaylist = w.ownPlaylist?.songIds.contains(s.id) ?? false;
   final int songId;
@@ -4146,8 +4146,7 @@ class LineupView {
   LineupView.of(World w, Artist a)
       : split = Lineups.splitOf(a),
         center = Lineups.center(a),
-        centerPushed =
-            a.focusMember >= 0 && a.focusMember < a.memberPop.length,
+        centerPushed = a.focusMember >= 0 && a.focusMember < a.memberPop.length,
         lift = Lineups.lineLift(w, a),
         cheerCents = Lineups.cheerCostCents(a),
         canCheer = Lineups.canCheer(w, a),
@@ -4254,9 +4253,8 @@ class MemberView {
             : const [],
         popularity =
             index < group.memberPop.length ? group.memberPop[index] : 0,
-        share = index < group.memberPop.length
-            ? Lineups.share(group, index)
-            : 0,
+        share =
+            index < group.memberPop.length ? Lineups.share(group, index) : 0,
         focused = group.focusMember == index,
         morale = index < group.memberMorale.length
             ? group.memberMorale[index]
@@ -4269,8 +4267,7 @@ class MemberView {
         fame = _memberOrNull(w, group, index)?.fame ?? 0,
         songs = [
           for (final id in w.managedSongIds.reversed)
-            if (w.songs[id].primaryArtistId ==
-                Credits.memberIdOf(group, index))
+            if (w.songs[id].primaryArtistId == Credits.memberIdOf(group, index))
               WrittenSongView.of(w, w.songs[id],
                   earnedCents: w.songs[id].revenueCents),
         ],
@@ -4310,7 +4307,7 @@ class MemberView {
   /// Their solo EPs and albums (docs K173), newest first: first week
   /// units and best US albums chart place (0: never charted).
   final List<
-      ({int id, String title, AlbumType type, double firstWeek, int peak})>
+          ({int id, String title, AlbumType type, double firstWeek, int peak})>
       albums;
 
   static Artist? _memberOrNull(World w, Artist group, int i) {

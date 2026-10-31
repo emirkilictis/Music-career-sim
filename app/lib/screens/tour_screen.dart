@@ -55,6 +55,9 @@ class _TourScreenState extends State<TourScreen> {
   /// The set in order (empty: the biggest songs; docs K223).
   List<int> _setlist = const [];
   TourPlanView? _plan;
+  int _albumId = -1;
+  bool _greatestHits = false;
+  List<AlbumView> _albums = [];
   int _asked = 0;
 
   @override
@@ -111,6 +114,8 @@ class _TourScreenState extends State<TourScreen> {
         name: _name.text,
         legs: [for (final e in _legs.entries) e.value.leg(e.key)],
         setlist: _setlist,
+        albumId: _albumId,
+        greatestHits: _greatestHits,
         priceFactor: _price,
         production: _production,
         openerId: _opener?.artistId ?? -1,
@@ -118,8 +123,14 @@ class _TourScreenState extends State<TourScreen> {
 
   Future<void> _load() async {
     final asked = ++_asked;
+    final albums = await widget.state.read(Cmd.tourAlbums(_request));
     final plan = await widget.state.read(Cmd.tourPreview(_request));
-    if (mounted && asked == _asked) setState(() => _plan = plan);
+    if (mounted && asked == _asked) {
+      setState(() {
+        _plan = plan;
+        _albums = albums;
+      });
+    }
   }
 
   void _change(VoidCallback f) {
@@ -197,11 +208,16 @@ class _TourScreenState extends State<TourScreen> {
     final options = await widget.state.read(Cmd.setlistOptions(_request));
     if (!mounted) return;
     final current = _plan?.setlist.map((s) => s.songId).toList() ?? _setlist;
+    final album = _albums.where((a) => a.id == _albumId).firstOrNull;
     final picked = await showModalBottomSheet<List<int>>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
-      builder: (c) => _SetlistSheet(options: options, picked: current),
+      builder: (c) => _SetlistSheet(
+          options: options,
+          picked: current,
+          albumId: _albumId,
+          focusIds: {...?album?.trackIds, ...?album?.hitTrackIds}),
     );
     if (picked == null) return;
     _change(() => _setlist = picked);
@@ -221,6 +237,7 @@ class _TourScreenState extends State<TourScreen> {
   String _problem(String code) {
     final l = context.l10n;
     return switch (code) {
+      'tourAlbum' => l.tourAlbumProblem,
       'onTour' => l.tourProblemOnTour,
       'tourMarkets' => l.tourProblemMarkets,
       'tourTooBig' => l.tourProblemTooBig,
@@ -259,6 +276,26 @@ class _TourScreenState extends State<TourScreen> {
                 hintText: l.tourNameHint,
                 border: const OutlineInputBorder()),
           ),
+          DropdownButtonFormField<int>(
+            initialValue: _greatestHits ? -2 : _albumId,
+            isExpanded: true,
+            decoration: InputDecoration(labelText: l.tourFocus),
+            items: [
+              DropdownMenuItem(value: -1, child: Text(l.tourIndependent)),
+              DropdownMenuItem(value: -2, child: Text(l.tourGreatestHits)),
+              for (final a in _albums)
+                DropdownMenuItem(
+                    value: a.id,
+                    child: Text(a.title, overflow: TextOverflow.ellipsis)),
+            ],
+            onChanged: (id) => _change(() {
+              _greatestHits = id == -2;
+              _albumId = id! < 0 ? -1 : id;
+            }),
+          ),
+          Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(l.tourAlbumEffect)),
           Section(
             title: l.tourWhere,
             icon: Icons.public_rounded,
@@ -789,90 +826,206 @@ class _RouteSheetState extends State<_RouteSheet> {
   }
 }
 
-/// The set: songs ticked in the order they are played (docs K223).
+/// Searchable, grouped library with a separately reorderable running order.
 class _SetlistSheet extends StatefulWidget {
-  const _SetlistSheet({required this.options, required this.picked});
+  const _SetlistSheet(
+      {required this.options,
+      required this.picked,
+      required this.albumId,
+      required this.focusIds});
   final List<SetlistSong> options;
   final List<int> picked;
-
+  final int albumId;
+  final Set<int> focusIds;
   @override
   State<_SetlistSheet> createState() => _SetlistSheetState();
 }
 
 class _SetlistSheetState extends State<_SetlistSheet> {
   late final List<int> _picked = [...widget.picked];
+  String _query = '';
+  bool _hide = true, _group = true;
+  void _add(Iterable<SetlistSong> songs) {
+    setState(() {
+      for (final s in songs) {
+        if (_picked.length == GameSession.maxSetlist) break;
+        if (!_picked.contains(s.songId)) _picked.add(s.songId);
+      }
+    });
+  }
+
+  void _draft(int mode) {
+    final songs = [...widget.options];
+    songs.sort((a, b) {
+      if (mode == 0) {
+        final cmp = (widget.focusIds.contains(b.songId) ? 1 : 0)
+            .compareTo(widget.focusIds.contains(a.songId) ? 1 : 0);
+        if (cmp != 0) return cmp;
+      }
+      if (mode == 2) {
+        final cmp = b.fanScore.compareTo(a.fanScore);
+        if (cmp != 0) return cmp;
+      }
+      if (mode == 1) {
+        final cmp =
+            (a.peak > 0 ? a.peak : 999).compareTo(b.peak > 0 ? b.peak : 999);
+        if (cmp != 0) return cmp;
+      }
+      return b.streams.compareTo(a.streams);
+    });
+    setState(() {
+      _picked.clear();
+      _picked.addAll(songs.take(20).map((s) => s.songId));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final fmt = context.fmt;
+    final byId = {for (final s in widget.options) s.songId: s};
+    final visible = widget.options
+        .where((s) =>
+            (!_hide || !_picked.contains(s.songId)) &&
+            '${s.title} ${s.albumTitle ?? ''}'
+                .toLowerCase()
+                .contains(_query.toLowerCase()))
+        .toList()
+      ..sort((a, b) => b.streams.compareTo(a.streams));
+    final groups = <int, List<SetlistSong>>{};
+    for (final s in visible) {
+      groups.putIfAbsent(_group ? s.albumId : -2, () => []).add(s);
+    }
     final full = _picked.length >= GameSession.maxSetlist;
-    return DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.85,
-      builder: (c, scroll) => Column(children: [
-        Expanded(
-          child: ListView(controller: scroll, children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
-              child:
-                  Text(l.tourSetlist, style: Theme.of(c).textTheme.titleLarge),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: Text(l.tourSetlistPick(GameSession.maxSetlist),
-                  style: Theme.of(c).textTheme.bodySmall),
-            ),
+    return SizedBox(
+        height: (MediaQuery.sizeOf(context).height -
+                MediaQuery.viewInsetsOf(context).bottom) *
+            .9,
+        child: Column(children: [
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(children: [
+                Text(
+                    '${l.tourSetlist} · ${_picked.length}/${GameSession.maxSetlist}',
+                    style: Theme.of(context).textTheme.titleLarge),
+                TextField(
+                    decoration: InputDecoration(
+                        hintText: l.setSearch,
+                        prefixIcon: const Icon(Icons.search)),
+                    onChanged: (v) => setState(() => _query = v)),
+                Wrap(spacing: 8, children: [
+                  FilterChip(
+                      label: Text(l.setHide),
+                      selected: _hide,
+                      onSelected: (v) => setState(() => _hide = v)),
+                  FilterChip(
+                      label: Text(l.setAlbums),
+                      selected: _group,
+                      onSelected: (v) => setState(() => _group = v)),
+                ]),
+                Wrap(spacing: 6, children: [
+                  ActionChip(
+                      label: Text(l.setAlbumDraft),
+                      onPressed: widget.albumId < 0 ? null : () => _draft(0)),
+                  ActionChip(
+                      label: Text(l.setHitsDraft), onPressed: () => _draft(1)),
+                  ActionChip(
+                      label: Text(l.setFansDraft), onPressed: () => _draft(2)),
+                ]),
+                Text(l.setDraftHint,
+                    style: Theme.of(context).textTheme.bodySmall),
+                if (full)
+                  Text(l.setFull, style: TextStyle(color: AppColors.coral)),
+              ])),
+          Expanded(
+              child: ListView(children: [
+            if (_picked.isNotEmpty) ...[
+              ExpansionTile(
+                initiallyExpanded: false,
+                maintainState: true,
+                title: Text('${l.setSelected} (${_picked.length})'),
+                children: [
+                  ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _picked.length,
+                    onReorderItem: (old, next) => setState(() {
+                      _picked.insert(next, _picked.removeAt(old));
+                    }),
+                    itemBuilder: (c, i) {
+                      final s = byId[_picked[i]]!;
+                      return ListTile(
+                        key: ValueKey(s.songId),
+                        leading: Text('${i + 1}'),
+                        title: Text(s.title,
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                        subtitle: Text(s.albumTitle ?? l.setSingles,
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                        trailing: Padding(
+                            padding: const EdgeInsets.only(right: 36),
+                            child: IconButton(
+                                tooltip: MaterialLocalizations.of(c)
+                                    .deleteButtonTooltip,
+                                icon: const Icon(Icons.remove_circle_outline),
+                                onPressed: () =>
+                                    setState(() => _picked.remove(s.songId)))),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const Divider(),
+            ],
+            for (final entry in groups.entries) ...[
+              ListTile(
+                  title: Text(
+                      _group
+                          ? entry.value.first.albumTitle ?? l.setSingles
+                          : l.setPopular,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  trailing: _group
+                      ? TextButton(
+                          onPressed: full ? null : () => _add(entry.value),
+                          child: Text(l.setAddAlbum))
+                      : null),
+              for (final s in entry.value)
+                ListTile(
+                  leading: Icon(_picked.contains(s.songId)
+                      ? Icons.check_circle
+                      : Icons.add_circle_outline),
+                  title: Text(s.title,
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                  subtitle: Text(l.earningsStreams(fmt.compact(s.streams))),
+                  enabled: !full || _picked.contains(s.songId),
+                  onTap: () => _picked.contains(s.songId)
+                      ? setState(() => _picked.remove(s.songId))
+                      : _add([s]),
+                ),
+            ],
             if (widget.options.isEmpty)
               Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(l.tourSetlistEmpty),
-              ),
-            for (final s in widget.options)
-              ListTile(
-                leading: _picked.contains(s.songId)
-                    ? CircleAvatar(
-                        radius: 14,
-                        backgroundColor: Theme.of(c).colorScheme.primary,
-                        child: Text('${_picked.indexOf(s.songId) + 1}',
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                                color: Theme.of(c).colorScheme.onPrimary)))
-                    : const Icon(Icons.radio_button_unchecked_rounded),
-                title:
-                    Text(s.title, maxLines: 1, overflow: TextOverflow.ellipsis),
-                subtitle: Text([
-                  if (s.albumTitle != null) s.albumTitle!,
-                  l.earningsStreams(fmt.compact(s.streams)),
-                ].join(' · ')),
-                enabled: _picked.contains(s.songId) || !full,
-                onTap: () => setState(() => _picked.contains(s.songId)
-                    ? _picked.remove(s.songId)
-                    : _picked.add(s.songId)),
-              ),
-          ]),
-        ),
-        SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: Row(children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, const <int>[]),
-                child: Text(l.tourSetlistDefault),
-              ),
-              const Spacer(),
-              FilledButton(
-                onPressed: _picked.isEmpty
-                    ? null
-                    : () => Navigator.pop(context, [..._picked]),
-                child: Text(l.done),
-              ),
-            ]),
-          ),
-        ),
-      ]),
-    );
+                  padding: const EdgeInsets.all(16),
+                  child: Text(l.tourSetlistEmpty)),
+          ])),
+          SafeArea(
+              top: false,
+              child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(children: [
+                    TextButton(
+                        onPressed: () => setState(() {
+                              _picked.clear();
+                              _picked.addAll(
+                                  widget.options.take(12).map((s) => s.songId));
+                            }),
+                        child: Text(l.tourSetlistDefault)),
+                    const Spacer(),
+                    FilledButton(
+                        onPressed: _picked.isEmpty
+                            ? null
+                            : () => Navigator.pop(context, [..._picked]),
+                        child: Text(l.done)),
+                  ]))),
+        ]));
   }
 }

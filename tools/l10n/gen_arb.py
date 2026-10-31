@@ -2532,6 +2532,28 @@ k('docTooSoon','One documentary every {years} years.','{years} yılda bir belges
 k('eventDocumentary','Your documentary “{title}” premiered: people are back on your songs.','Belgeselin “{title}” gösterime girdi: insanlar şarkılarına geri dönüyor.', title='String')
 k('errorNoDoc','A documentary is not possible now.','Şu an belgesel yapılamaz.')
 
+
+# Tour focus and setlist library.
+k('tourFocus', 'Tour focus', 'Turnenin odağı')
+k('tourIndependent', 'Independent tour', 'Bağımsız turne')
+k('tourGreatestHits', 'Greatest hits tour', 'En iyi şarkılar turnesi')
+k('tourAlbumProblem', 'Choose a released album by the headlining artist.', 'Turnedeki sanatçının yayınlanmış bir albümünü seç.')
+k('setSearch', 'Search songs or albums', 'Şarkı veya albüm ara')
+k('setHide', 'Hide selected', 'Seçilenleri gizle')
+k('setPopular', 'Popularity', 'Popülerlik')
+k('setAlbums', 'Albums', 'Albümler')
+k('setAlbumDraft', 'Album focused', 'Albüm ağırlıklı')
+k('setHitsDraft', 'Hit focused', 'Hit ağırlıklı')
+k('setFansDraft', 'Fan favorites', 'Fan favorileri')
+k('setAddAlbum', 'Add all', 'Tümünü ekle')
+k('setSelected', 'Selected · drag to reorder', 'Seçilenler · sıralamak için sürükle')
+k('setSingles', 'Standalone singles', 'Bağımsız single’lar')
+k('setFull', '40 songs selected. Remove a song to make room.', '40 şarkı seçildi. Yer açmak için bir şarkı çıkar.')
+k('setDraftHint', 'Drafts replace the selection with up to 20 songs. Fan favorites favor lasting fan appeal.', 'Taslaklar seçimi en fazla 20 şarkıyla değiştirir. Fan favorileri kalıcı hayran ilgisine öncelik verir.')
+k('tourRelated', 'Supporting tours', 'Albümü destekleyen turneler')
+k('tourActiveNow', 'In progress', 'Devam ediyor')
+k('tourAlbumEffect', 'Album support depends on its share of the setlist.', 'Albüm desteği, setlistteki şarkı payına bağlıdır.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

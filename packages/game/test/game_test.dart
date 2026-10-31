@@ -132,8 +132,8 @@ void main() {
           () => g.releaseAlbum('EP 2', [...more.take(2), ids.first],
               type: AlbumType.ep),
           _code('trackOnOtherRelease'));
-      final album = g.releaseAlbum('LP', [...more, ids.first],
-          campaign: Campaign.none);
+      final album =
+          g.releaseAlbum('LP', [...more, ids.first], campaign: Campaign.none);
       expect(g.song(ids.first).albumId, album.id);
       expect(g.album(ep.id).trackIds, contains(ids.first));
       // A single out on its own goes on the album's deluxe (K270).
@@ -604,7 +604,9 @@ void main() {
           break;
         }
       }
-      final answered = g.postDetail(fan.$1).comments
+      final answered = g
+          .postDetail(fan.$1)
+          .comments
           .firstWhere((c) => c.index == fan.$2.index);
       expect(answered.reply?.kind, ReplyKind.thanks);
       expect(answered.reply?.reaction, FanTopic.fanReplied);
@@ -620,7 +622,10 @@ void main() {
       var left = Comments.repliesPerWeek - used;
       for (final (k, c) in all) {
         if (left == 0) break;
-        if (g.postDetail(k).comments.firstWhere((x) => x.index == c.index)
+        if (g
+                .postDetail(k)
+                .comments
+                .firstWhere((x) => x.index == c.index)
                 .reply !=
             null) {
           continue;
@@ -631,7 +636,9 @@ void main() {
       }
       if (left == 0) {
         final rest = all.firstWhere((x) =>
-            g.postDetail(x.$1).comments
+            g
+                .postDetail(x.$1)
+                .comments
                 .firstWhere((c) => c.index == x.$2.index)
                 .reply ==
             null);
@@ -648,7 +655,9 @@ void main() {
       g.close();
       g = GameSession.resume(slots, id);
       expect(
-          g.postDetail(fan.$1).comments
+          g
+              .postDetail(fan.$1)
+              .comments
               .firstWhere((c) => c.index == fan.$2.index)
               .reply
               ?.kind,
@@ -656,7 +665,8 @@ void main() {
       g.close();
     });
 
-    test('rivals start beefs and fire back, posting it themselves (K229, K234)', () {
+    test('rivals start beefs and fire back, posting it themselves (K229, K234)',
+        () {
       final g = GameSession.start(
           slots,
           _setup(
@@ -804,8 +814,39 @@ void main() {
       g.close();
     });
 
-    test('a tour plays the cities, venues and set the player picks (K223)',
+    test('tour setlists keep forty unique eligible songs in requested order',
         () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final ids = <int>[];
+      for (var i = 0; i < 45; i++) {
+        g.world.player!
+          ..creativeEnergy = 100
+          ..burnoutUntilWeek = -1;
+        final song = g.writeSong(budget: BudgetTier.medium);
+        g.releaseSingle(song.id, campaign: Campaign.none);
+        ids.add(song.id);
+      }
+      final ordered = ids.reversed.toList();
+      final r = TourRequest(
+          legs: [TourLeg(TourMarket.usa, TourKind.club, 1)],
+          greatestHits: true,
+          setlist: [ordered.first, ...ordered, -1]);
+      expect(g.tourPreview(r).setlist.map((s) => s.songId), ordered.take(40));
+      g.startTour(r);
+      final slot = g.slotId;
+      g.close();
+      final resumed = GameSession.resume(slots, slot);
+      expect(resumed.world.player!.tour!.setlist, ordered.take(40).toList());
+      expect(resumed.world.player!.tour!.greatestHits, isTrue);
+      resumed.close();
+    });
+
+    test('a tour plays the cities, venues and set the player picks (K223)', () {
       var g = GameSession.start(
           slots,
           _setup(
@@ -831,8 +872,10 @@ void main() {
       final leg = TourLeg(TourMarket.usa, TourKind.theater, 4,
           stops: [TourStop(ny.city, 2), TourStop(chi.city, 1)]);
       // A set of two, the single first.
-      final request =
-          TourRequest(legs: [leg], setlist: [ids[3], ids[0], 999999]);
+      final request = TourRequest(
+          legs: [leg],
+          albumId: g.world.songs[ids[0]].albumId,
+          setlist: [ids[3], ids[0], 999999]);
       final plan = g.tourPreview(request);
       expect(plan.available, isTrue);
       expect(plan.legs.single.maxShows, 2 * TourKind.theater.maxNights);
@@ -846,15 +889,19 @@ void main() {
       expect(g.tourPreview(TourRequest(legs: [leg])).setlist, isNotEmpty);
       // Too many nights for two cities, or no city at all.
       expect(
-          g.tourPreview(TourRequest(legs: [
-            TourLeg(TourMarket.usa, TourKind.theater, 30,
-                stops: const [TourStop(0)])
-          ])).problems,
+          g
+              .tourPreview(TourRequest(legs: [
+                TourLeg(TourMarket.usa, TourKind.theater, 30,
+                    stops: const [TourStop(0)])
+              ]))
+              .problems,
           contains('tourShows'));
       expect(
-          g.tourPreview(const TourRequest(legs: [
-            TourLeg(TourMarket.usa, TourKind.theater, 2, stops: [])
-          ])).problems,
+          g
+              .tourPreview(const TourRequest(legs: [
+                TourLeg(TourMarket.usa, TourKind.theater, 2, stops: [])
+              ]))
+              .problems,
           contains('tourShows'));
 
       g.startTour(request);
@@ -862,6 +909,20 @@ void main() {
       g = GameSession.resume(slots, slot);
       final t = g.world.player!.tour!;
       expect(t.setlist, [ids[3], ids[0]]);
+      expect(t.albumId, g.world.songs[ids[0]].albumId);
+      expect(g.albumTours(t.albumId).single.active, isTrue);
+      final legacy = Map<String, Object?>.from(t.toJson())
+        ..remove('album')
+        ..remove('hits');
+      expect(Tour.fromJson(legacy).albumId, -1);
+      expect(Tour.fromJson(legacy).greatestHits, isFalse);
+      expect(g.tourPreview(TourRequest(legs: [leg], albumId: 999999)).problems,
+          contains('tourAlbum'));
+      final linkedLift = Tours.albumLifts(g.world)[t.albumId]!;
+      final unlinked = Tour.fromJson(legacy);
+      g.world.player!.tour = unlinked;
+      expect(Tours.albumLifts(g.world)[t.albumId]!, lessThan(linkedLift));
+      g.world.player!.tour = t;
       expect(t.legs.single.stops!.map((s) => s.venue), [2, 1]);
       // On stage this week: the set and its album gain.
       expect(Tours.songLifts(g.world).keys, unorderedEquals([ids[3], ids[0]]));
@@ -870,6 +931,8 @@ void main() {
       g.advanceWeeks(4, stop: SkipStop.never);
       expect(g.world.player!.tour, isNull);
       expect(Tours.songLifts(g.world), isEmpty);
+      expect(g.albumTours(t.albumId).single.active, isFalse);
+      expect(g.albumTours(t.albumId).single.gross, greaterThan(0));
       g.close();
     });
 
@@ -1079,8 +1142,8 @@ void main() {
       // The label puts up its biggest hits, the biggest for its genre's
       // song award too (K250).
       expect(v.submitted.count(AwardCategory.record), lessThanOrEqualTo(2));
-      expect(v.submitted.count(AwardCategory.genreSong, genre: v.playerGenre),
-          1);
+      expect(
+          v.submitted.count(AwardCategory.genreSong, genre: v.playerGenre), 1);
       expect(v.songs.first.genres.map((x) => x.$1), contains(v.playerGenre));
       // Only eligible records, and not too many in one category.
       expect(
@@ -1089,9 +1152,9 @@ void main() {
               newArtist: false),
           _code('badSubmission'));
       final album = v.albums.single;
-      final other = album.genres.map((x) => x.$1).firstWhere(
-          (x) => x != v.playerGenre,
-          orElse: () => v.playerGenre);
+      final other = album.genres
+          .map((x) => x.$1)
+          .firstWhere((x) => x != v.playerGenre, orElse: () => v.playerGenre);
       final picks = [
         AwardSubmission(AwardCategory.song, v.songs.first.songId),
         AwardSubmission(AwardCategory.genreAlbum, album.albumId, genre: other),
@@ -2082,8 +2145,7 @@ void main() {
           g.visitRadio(RadioMarket.us);
           expect(p.creativeEnergy, energy - RadioTools.visitEnergy);
           expect(g.radioVisits.markets.first.can, isFalse);
-          expect(() => g.visitRadio(RadioMarket.us),
-              _code('radioVisitLocked'));
+          expect(() => g.visitRadio(RadioMarket.us), _code('radioVisitLocked'));
         }
         var na = 0.0, eu = 0.0;
         for (var i = 0; i < 4; i++) {
@@ -2269,7 +2331,8 @@ void main() {
       expect(m.weeksToNext, inInclusiveRange(1, SongMarket.periodWeeks));
       // Only writers who would work with the player pitch.
       for (final x in m.pitches) {
-        final c = g.world.collaborators.firstWhere((c) => c.name == x.writerName);
+        final c =
+            g.world.collaborators.firstWhere((c) => c.name == x.writerName);
         expect(c.role, CollaboratorRole.songwriter);
         expect(Actions.collaboratorAvailable(c, p), isTrue);
         expect(x.gradeLow, lessThan(x.gradeHigh));
@@ -2474,8 +2537,8 @@ void main() {
       g.advanceWeeks(2, stop: SkipStop.never);
       final items = g.social.items;
       expect(items.where((i) => i.media == PostMedia.snippet), hasLength(1));
-      final pictured = items.where((i) =>
-          i.media != PostMedia.none && i.media != PostMedia.snippet);
+      final pictured = items.where(
+          (i) => i.media != PostMedia.none && i.media != PostMedia.snippet);
       expect(pictured, isNotEmpty);
       final kinds = <(int, int, int, PostMedia)>{};
       final covers = <(int, int, int)>{};
@@ -2496,10 +2559,8 @@ void main() {
       }
       // Posts with nothing to show stay text.
       expect(
-          items
-              .where((i) => i.songId < 0 && i.albumId < 0)
-              .every((i) => i.media == PostMedia.none ||
-                  i.media == PostMedia.snippet),
+          items.where((i) => i.songId < 0 && i.albumId < 0).every(
+              (i) => i.media == PostMedia.none || i.media == PostMedia.snippet),
           isTrue);
       g.close();
     });
@@ -2601,7 +2662,8 @@ void main() {
       final before = p.moneyCents;
       g.signToImprint(list[0].artistId);
       g.signToImprint(list[1].artistId);
-      expect(before - p.moneyCents, list[0].advanceCents + list[1].advanceCents);
+      expect(
+          before - p.moneyCents, list[0].advanceCents + list[1].advanceCents);
       expect(() => g.signToImprint(list[0].artistId), _code('notSignable'));
       g.advanceWeeks(16, stop: SkipStop.never);
       final v = g.imprint;
@@ -2644,7 +2706,9 @@ void main() {
       expect(g.world.songs[id].featuredArtistIds, contains(mate.artistId));
       // The label pushes the signee's newest single once it is out.
       expect(() => g.pushSignee(mate.artistId), _code('noPush'));
-      for (var i = 0; i < 20 && g.imprint.roster.single.pushTitle == null; i++) {
+      for (var i = 0;
+          i < 20 && g.imprint.roster.single.pushTitle == null;
+          i++) {
         g.advanceWeek();
       }
       final v = g.imprint.roster.single;
@@ -2687,8 +2751,7 @@ void main() {
       expect(money - p.moneyCents, FycTier.allOut.costCents);
       expect(g.fyc.running, FycTier.allOut);
       expect(() => g.runFyc(FycTier.small), _code('noFyc'));
-      expect(
-          AwardCampaigns.nominationLift(g.world, g.fyc.year, p.id),
+      expect(AwardCampaigns.nominationLift(g.world, g.fyc.year, p.id),
           FycTier.allOut.nominationLift);
       // Through the nominations to the voting.
       for (var i = 0; i < 12 && g.fyc.phase != FycPhase.voting; i++) {
@@ -2780,11 +2843,12 @@ void main() {
           _code('noDoc'));
       var premiere = <DocumentaryPremiere>[];
       var fans = 0.0;
-      for (var i = 0; i <= Documentaries.productionWeeks && premiere.isEmpty;
+      for (var i = 0;
+          i <= Documentaries.productionWeeks && premiere.isEmpty;
           i++) {
         fans = p.coreFans;
-        premiere = g.advanceWeek().events.whereType<DocumentaryPremiere>()
-            .toList();
+        premiere =
+            g.advanceWeek().events.whereType<DocumentaryPremiere>().toList();
       }
       expect(premiere.single.title, 'Behind the Lights');
       // People who watched become fans.
@@ -2928,8 +2992,8 @@ void main() {
       g.advanceWeek();
       expect(g.album(id).priceCutBlocks[PriceCut.ninetyNine],
           PriceCutBlock.chartRule);
-      expect(() => g.cutAlbumPrice(id, PriceCut.ninetyNine),
-          _code('noPriceCut'));
+      expect(
+          () => g.cutAlbumPrice(id, PriceCut.ninetyNine), _code('noPriceCut'));
       g.advanceWeeks(4, stop: SkipStop.never);
       final al = g.world.albums[id];
       final before = al.weekPure;
@@ -2944,8 +3008,8 @@ void main() {
       // Many more copies, each paying little.
       expect(al.weekPure, greaterThan(usual * 3));
       expect(al.weekPure, greaterThan(before));
-      expect((al.revenueCents - r2) / al.weekPure,
-          lessThan(usualMoney / usual));
+      expect(
+          (al.revenueCents - r2) / al.weekPure, lessThan(usualMoney / usual));
       final slot = g.slotId;
       g.close();
       g = GameSession.resume(slots, slot);
@@ -4160,8 +4224,8 @@ void main() {
       p.creativeEnergy = 100;
       expect(Rerecords.energyCost(g.world.albums[big.id]),
           lessThanOrEqualTo(Rerecords.maxEnergy));
-      expect(g.rerecordAlbum(big.id, "Long (Nova's Version)").songIds.length,
-          16);
+      expect(
+          g.rerecordAlbum(big.id, "Long (Nova's Version)").songIds.length, 16);
       final slot = g.slotId;
       g.close();
       g = GameSession.resume(slots, slot);
@@ -4304,8 +4368,7 @@ void main() {
       expect(onlySea, lessThan(openSea * 0.6));
     });
 
-    test('an album kept off streaming sells more, streams later (K174)',
-        () {
+    test('an album kept off streaming sells more, streams later (K174)', () {
       ({double pure, double sea, double after, int until}) run(int window) {
         var g = GameSession.start(
             slots,
@@ -4347,8 +4410,8 @@ void main() {
         g = GameSession.resume(slots, slot);
         final until = g.albums.firstWhere((a) => a.id == al.id).windowUntil;
         g.advanceWeek();
-        final after = songs.fold(
-            0.0, (sum, id) => sum + g.world.songs[id].weekStreams);
+        final after =
+            songs.fold(0.0, (sum, id) => sum + g.world.songs[id].weekStreams);
         g.close();
         return (pure: pure, sea: sea, after: after, until: until);
       }
@@ -4424,8 +4487,7 @@ void main() {
       ];
       expect(tourWeeks, isNotEmpty);
       // Half a year always holds some of the year's dates, in order.
-      expect(cal.expand((c) => c.entries).where((e) => e.isSeason),
-          isNotEmpty);
+      expect(cal.expand((c) => c.entries).where((e) => e.isSeason), isNotEmpty);
       for (var i = 1; i < cal.length; i++) {
         expect(cal[i].week, greaterThan(cal[i - 1].week));
       }
@@ -4442,8 +4504,7 @@ void main() {
       g.close();
     });
 
-    test('a Streamify Session: own song stripped back and a cover (K178)',
-        () {
+    test('a Streamify Session: own song stripped back and a cover (K178)', () {
       var g = GameSession.start(
           slots,
           _setup(
@@ -4471,8 +4532,8 @@ void main() {
       expect(v.block, isNull);
       expect(v.songs.map((s) => s.id), contains(id));
       expect(v.covers, isNotEmpty);
-      expect(() => g.releaseVersion(id, SongVersion.session),
-          _code('noSession'));
+      expect(
+          () => g.releaseVersion(id, SongVersion.session), _code('noSession'));
       final cover = v.covers.first;
       final casual = p.casual;
       final original = g.world.songs[cover.id].versionBoost;
@@ -4506,8 +4567,8 @@ void main() {
       g.world.player!.coreFans = 4e6;
       for (final kind in [TourKind.arena, TourKind.stadium]) {
         const m = TourMarket.usa;
-        final n = g.suggestTourShows(
-            TourRequest(legs: [TourLeg(m, kind, 1)]), m);
+        final n =
+            g.suggestTourShows(TourRequest(legs: [TourLeg(m, kind, 1)]), m);
         expect(n, inInclusiveRange(1, Tours.maxShows(m, kind)));
         double fill(int shows) => g
             .tourPreview(TourRequest(legs: [TourLeg(m, kind, shows)]))
@@ -4652,8 +4713,8 @@ void main() {
       expect(() => g.setArtistPick(PickKind.song, vault), _code('noPick'));
       final out = g.world.albums[now.id].songIds.first;
       g.setArtistPick(PickKind.song, out);
-      expect(ArtistPicks.lifts(g.world)[out],
-          closeTo(ArtistPicks.songLift, 1e-9));
+      expect(
+          ArtistPicks.lifts(g.world)[out], closeTo(ArtistPicks.songLift, 1e-9));
       final slot = g.slotId;
       g.close();
       final again = GameSession.resume(slots, slot);
@@ -4683,8 +4744,8 @@ void main() {
         }
         expect(g.song(id).canMood, isTrue);
         if (pitch) {
-          final best = g.moodOptions(id).reduce((a, b) =>
-              a.chance >= b.chance ? a : b);
+          final best =
+              g.moodOptions(id).reduce((a, b) => a.chance >= b.chance ? a : b);
           expect(best.fit, inInclusiveRange(0.0, 1.0));
           expect(best.chance, inInclusiveRange(0.1, 0.7));
           final inList = g.pitchMood(id, best.mood);
@@ -4851,7 +4912,7 @@ void main() {
       expect(w.songs[vault.first].lifetimeStreams, greaterThan(0));
       expect(
           w.albums.any((al) =>
-              al.artistId == group.id && al.releaseWeek > w.week - 20) ||
+                  al.artistId == group.id && al.releaseWeek > w.week - 20) ||
               w.songs.any((s) =>
                   s.primaryArtistId == group.id &&
                   s.releasedWeek > w.week - 20),
@@ -4869,8 +4930,7 @@ void main() {
       expect(g.world.formerGroupId, group.id);
       expect(g.world.playerSongIds, ids);
       expect(g.world.managedSongIds, isEmpty);
-      expect(g.world.playerCareerStreams,
-          closeTo(w.playerCareerStreams, 1));
+      expect(g.world.playerCareerStreams, closeTo(w.playerCareerStreams, 1));
       expect(g.artistPage(solo.id).listenerStreams, closeTo(listeners, 1));
       g.advanceWeek();
       g.close();
@@ -4901,7 +4961,8 @@ void main() {
       expect(ms.last.roles, contains(MemberRole.maknae));
       for (final m in ms) {
         expect(m.popularity, inInclusiveRange(0.0, 100.0));
-        expect(m.roles.every(MemberRole.forKind(ArtistKind.vocalGroup).contains),
+        expect(
+            m.roles.every(MemberRole.forKind(ArtistKind.vocalGroup).contains),
             isTrue);
       }
       expect(ms.fold(0.0, (t, m) => t + m.share), closeTo(1, 1e-9));
@@ -4916,7 +4977,8 @@ void main() {
 
       // The label pushes its least popular member for a year.
       final before = [for (final m in ms) m.popularity];
-      final low = ms.reduce((a, b) => a.popularity <= b.popularity ? a : b).index;
+      final low =
+          ms.reduce((a, b) => a.popularity <= b.popularity ? a : b).index;
       g.setMemberFocus(low);
       g.advanceWeeks(52, stop: SkipStop.never);
       ms = g.members;
@@ -4951,8 +5013,7 @@ void main() {
       g.close();
     });
 
-    test('the ace leaving sinks the group; a quiet member does not (K192)',
-        () {
+    test('the ace leaving sinks the group; a quiet member does not (K192)', () {
       // -1: the least popular member when they leave.
       (double, double) split(int leaving) {
         final g = GameSession.start(
@@ -5217,8 +5278,9 @@ void main() {
       ];
       final own = g.tourPreview(TourRequest(legs: long));
       // Not without a reunion on.
-      expect(g.tourPreview(const TourRequest(legs: legs, reunion: true))
-          .problems, contains('noReunion'));
+      expect(
+          g.tourPreview(const TourRequest(legs: legs, reunion: true)).problems,
+          contains('noReunion'));
       w.playerSinceWeek -= Reunions.gapWeeks + 5 * 52;
       g.startReunion();
       final reunion = g.tourPreview(TourRequest(legs: long, reunion: true));
@@ -5226,10 +5288,12 @@ void main() {
       expect(reunion.estimate.tickets, greaterThan(own.estimate.tickets));
       // It has to fit in the reunion's year.
       expect(
-          g.tourPreview(TourRequest(legs: [
-            for (final m in TourMarket.values)
-              TourLeg(m, TourKind.arena, Tours.maxShows(m, TourKind.arena))
-          ], reunion: true)).problems,
+          g
+              .tourPreview(TourRequest(legs: [
+                for (final m in TourMarket.values)
+                  TourLeg(m, TourKind.arena, Tours.maxShows(m, TourKind.arena))
+              ], reunion: true))
+              .problems,
           contains('reunionTourLong'));
 
       final money = solo.moneyCents;
@@ -5278,7 +5342,8 @@ void main() {
       final w = g.world;
       expect(w.rivalSplits, isNotEmpty);
       // A few a year at most.
-      expect(w.rivalSplits.length, lessThanOrEqualTo(8 * RivalSplits.maxPerYear));
+      expect(
+          w.rivalSplits.length, lessThanOrEqualTo(8 * RivalSplits.maxPerYear));
       for (final x in w.rivalSplits) {
         final group = w.artists[x.groupId];
         final solo = w.artists[x.soloId];
@@ -5356,12 +5421,14 @@ void main() {
       }
       // Sped-up versions once short videos made them a thing.
       expect(
-          versioned.any((s) => s.versions.any((x) => x.$1 == SongVersion.spedUp)),
+          versioned
+              .any((s) => s.versions.any((x) => x.$1 == SongVersion.spedUp)),
           isTrue);
       for (final e in events.whereType<RivalVersionOut>()) {
         expect(e.position, inInclusiveRange(1, 10));
         expect(e.playerPosition, inInclusiveRange(1, 10));
-        expect(w.songs[e.songId].versions.any((x) => x.$1 == e.version), isTrue);
+        expect(
+            w.songs[e.songId].versions.any((x) => x.$1 == e.version), isTrue);
       }
       final n = versioned.length;
       g.close();
@@ -5464,14 +5531,14 @@ void main() {
       expect(events.whereType<ThisIsMade>().single.songs, ThisIs.minSongs);
       expect(v.songs.map((s) => s.id).toSet(), ids.toSet());
       // The biggest song first, then the newest ones, the rest by streams.
-      final k = v.newIds.length < ThisIs.newSlots
-          ? v.newIds.length
-          : ThisIs.newSlots;
+      final k =
+          v.newIds.length < ThisIs.newSlots ? v.newIds.length : ThisIs.newSlots;
       final top = v.songs.sublist(1, 1 + k);
       for (var i = 0; i < k; i++) {
         expect(v.newIds, contains(top[i].id));
         if (i > 0) {
-          expect(top[i].releasedWeek, lessThanOrEqualTo(top[i - 1].releasedWeek));
+          expect(
+              top[i].releasedWeek, lessThanOrEqualTo(top[i - 1].releasedWeek));
         }
       }
       final rest = [v.songs.first, ...v.songs.skip(1 + k)];
@@ -5496,8 +5563,10 @@ void main() {
       for (final id in g.world.activeArtistIds.take(30)) {
         if (id == p.id) continue;
         final r = g.thisIs(id);
-        expect(r.made,
-            r.eligible >= ThisIs.minSongs && r.listeners >= ThisIs.minListeners);
+        expect(
+            r.made,
+            r.eligible >= ThisIs.minSongs &&
+                r.listeners >= ThisIs.minListeners);
         expect(r.lifts, isEmpty);
       }
       g.close();
@@ -5807,11 +5876,13 @@ void main() {
       expect(p.opportunity, isNull);
       m = g.moment!;
       expect(m.step, 1);
-      expect(m.scene, isIn(const [
-        MomentScene.pressSpreading,
-        MomentScene.pressFading,
-        MomentScene.pressSplit
-      ]));
+      expect(
+          m.scene,
+          isIn(const [
+            MomentScene.pressSpreading,
+            MomentScene.pressFading,
+            MomentScene.pressSplit
+          ]));
       g.answerMoment(2);
       expect(g.moment, isNull);
       expect(() => g.handleCrisis(), _code('noOffer'));
@@ -5972,8 +6043,7 @@ void main() {
       expect(w.social.feed.any((i) => i.topic == FanTopic.cashGrab), isTrue);
       expect(w.albums[album].weekPure, greaterThan(0));
       // Names are checked; bonus songs must be in the vault.
-      expect(
-          () => g.releaseAlbumVersion(album, name: 'x' * 41),
+      expect(() => g.releaseAlbumVersion(album, name: 'x' * 41),
           _code('invalidTitle'));
       expect(() => g.releaseAlbumVersion(album, name: 'Again', songIds: bonus),
           _code('notInVault'));
@@ -6039,8 +6109,8 @@ void main() {
       expect(v.trackIds.last, song);
       expect(old.status, AlbumStatus.active);
       g.advanceWeek();
-      expect(w.social.feed.any((i) => i.topic == FanTopic.anniversaryOut),
-          isTrue);
+      expect(
+          w.social.feed.any((i) => i.topic == FanTopic.anniversaryOut), isTrue);
       g.close();
     });
 

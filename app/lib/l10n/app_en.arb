@@ -9414,5 +9414,24 @@
       }
     }
   },
-  "errorNoDoc": "A documentary is not possible now."
+  "errorNoDoc": "A documentary is not possible now.",
+  "tourFocus": "Tour focus",
+  "tourIndependent": "Independent tour",
+  "tourGreatestHits": "Greatest hits tour",
+  "tourAlbumProblem": "Choose a released album by the headlining artist.",
+  "setSearch": "Search songs or albums",
+  "setHide": "Hide selected",
+  "setPopular": "Popularity",
+  "setAlbums": "Albums",
+  "setAlbumDraft": "Album focused",
+  "setHitsDraft": "Hit focused",
+  "setFansDraft": "Fan favorites",
+  "setAddAlbum": "Add all",
+  "setSelected": "Selected · drag to reorder",
+  "setSingles": "Standalone singles",
+  "setFull": "40 songs selected. Remove a song to make room.",
+  "setDraftHint": "Drafts replace the selection with up to 20 songs. Fan favorites favor lasting fan appeal.",
+  "tourRelated": "Supporting tours",
+  "tourActiveNow": "In progress",
+  "tourAlbumEffect": "Album support depends on its share of the setlist."
 }

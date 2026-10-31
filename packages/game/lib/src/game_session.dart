@@ -420,9 +420,8 @@ class GameSession {
 
   /// Singles out on their own, newest first: they can go on an album's
   /// new version (docs K270).
-  List<SongView> get looseSingles =>
-      songs.where((s) => s.looseSingle).toList()
-        ..sort((a, b) => b.singleWeek.compareTo(a.singleWeek));
+  List<SongView> get looseSingles => songs.where((s) => s.looseSingle).toList()
+    ..sort((a, b) => b.singleWeek.compareTo(a.singleWeek));
 
   /// The player's albums and EPs, newest first.
   List<AlbumView> get albums => [
@@ -510,9 +509,8 @@ class GameSession {
           0,
       worldRank: Platforms.worldRank(w, a),
       listenerHistory: artistId == _p.id ? _listenerHistory() : const [],
-      peakListeners: artistId == _p.id
-          ? math.max(0.0, world.playerPeakListeners)
-          : 0,
+      peakListeners:
+          artistId == _p.id ? math.max(0.0, world.playerPeakListeners) : 0,
       popular: [for (final s in popular.take(10)) SongView.of(w, s)],
       albums: [
         for (final al in w.albums.reversed)
@@ -682,8 +680,7 @@ class GameSession {
     final legs = [
       for (final l in r.legs)
         // A leg with no city left plays nothing (and cannot start).
-        TourLeg(l.market, l.kind,
-            l.shows.clamp(0, Tours.maxShowsOf(l)).toInt(),
+        TourLeg(l.market, l.kind, l.shows.clamp(0, Tours.maxShowsOf(l)).toInt(),
             stops: l.stops)
     ];
     final opener = r.openerId >= 0 ? world.artists[r.openerId] : null;
@@ -694,7 +691,9 @@ class GameSession {
         production: r.production,
         openerId: opener?.id ?? -1,
         reunionOf: _reunionOf(r),
-        setlist: _setlist(r));
+        setlist: _setlist(r),
+        albumId: r.albumId,
+        greatestHits: r.greatestHits);
     final (e, each) = Tours.estimate(world, _p, t);
     final legViews = <TourLegView>[];
     for (var i = 0; i < legs.length; i++) {
@@ -736,21 +735,22 @@ class GameSession {
 
   List<String> _tourProblems(TourRequest r) {
     final reunionOn = r.reunion && Reunions.active(world);
-    final fans =
-        reunionOn ? Reunions.group(world)!.coreFans : _p.coreFans;
+    final fans = reunionOn ? Reunions.group(world)!.coreFans : _p.coreFans;
     final fame = reunionOn ? Reunions.audience(world).fame : _p.fame;
-    final showsOk = r.legs.every(
-        (l) =>
-            l.shows >= 1 &&
-            l.shows <= Tours.maxShowsOf(l) &&
-            (l.stops == null ||
-                (l.stops!.isNotEmpty &&
-                    l.stops!.every((s) =>
-                        s.city >= 0 &&
-                        s.city < l.market.cities.length &&
-                        s.venue >= 0 &&
-                        s.venue < Tours.venueChoices))));
+    final showsOk = r.legs.every((l) =>
+        l.shows >= 1 &&
+        l.shows <= Tours.maxShowsOf(l) &&
+        (l.stops == null ||
+            (l.stops!.isNotEmpty &&
+                l.stops!.every((s) =>
+                    s.city >= 0 &&
+                    s.city < l.market.cities.length &&
+                    s.venue >= 0 &&
+                    s.venue < Tours.venueChoices))));
     return [
+      if (r.albumId >= 0 &&
+          (r.greatestHits || !tourAlbums(r).any((a) => a.id == r.albumId)))
+        'tourAlbum',
       if (_p.tour != null) 'onTour',
       if (r.reunion && !reunionOn) 'noReunion',
       if (r.legs.isEmpty ||
@@ -768,8 +768,30 @@ class GameSession {
     ];
   }
 
+  List<AlbumView> tourAlbums(TourRequest r) {
+    final who = _reunionOf(r) >= 0 ? _reunionOf(r) : _p.id;
+    return [
+      for (final a in world.albums)
+        if (a.artistId == who && a.releaseWeek <= world.week)
+          AlbumView.of(world, a)
+    ];
+  }
+
+  List<({String name, double gross, bool active, int startWeek})> albumTours(
+          int id) =>
+      [
+        for (final t in [...world.pastTours, if (_p.tour != null) _p.tour!])
+          if (t.albumId == id)
+            (
+              name: t.name,
+              gross: t.grossCents,
+              active: identical(t, _p.tour),
+              startWeek: t.startWeek
+            ),
+      ];
+
   /// Most songs a set can have (docs K223).
-  static const maxSetlist = 25;
+  static const maxSetlist = 40;
 
   /// Songs a tour of [r] could play: the released songs of whoever
   /// headlines it, the most played first (docs K223).
@@ -786,9 +808,8 @@ class GameSession {
             s.status != SongStatus.scrapped &&
             s.liveOf < 0)
           s
-    ]..sort((a, b) => world
-        .songLifetimeStreams(b)
-        .compareTo(world.songLifetimeStreams(a)));
+    ]..sort((a, b) =>
+        world.songLifetimeStreams(b).compareTo(world.songLifetimeStreams(a)));
     return [for (final s in songs) SetlistSong.of(world, s)];
   }
 
@@ -1078,8 +1099,7 @@ class GameSession {
       id: id,
       title: kind == EntityKind.song ? w.songs[id].title : w.albums[id].title,
       artistName: _p.name,
-      coverAlbumId:
-          kind == EntityKind.song ? coverAlbumOf(w, w.songs[id]) : id,
+      coverAlbumId: kind == EntityKind.song ? coverAlbumOf(w, w.songs[id]) : id,
       week: w.week - 1,
       rows: [for (final sid in songIds) row(sid)],
     );
@@ -1268,7 +1288,9 @@ class GameSession {
         production: r.production,
         openerId: r.openerId,
         reunionOf: reunionOf,
-        setlist: _setlist(r));
+        setlist: _setlist(r),
+        albumId: r.albumId,
+        greatestHits: r.greatestHits);
     Tours.start(world, _p, t);
     Milestone.firstTour.mark(world, _p);
     if (t.kind == TourKind.stadium) Milestone.stadiumTour.mark(world, _p);
@@ -2089,8 +2111,7 @@ class GameSession {
   /// Raises a released single's radio push (docs K128).
   void upgradeRadio(int songId, RadioPush to) {
     final s = _ownSong(songId);
-    if (!Actions.canUpgradeRadio(world, _p, s) ||
-        to.rank <= s.radioPush.rank) {
+    if (!Actions.canUpgradeRadio(world, _p, s) || to.rank <= s.radioPush.rank) {
       throw GameException('radioLocked', 'The stations have decided');
     }
     if (to.rank > Actions.maxRadioPush(_p.label).rank) {
@@ -2232,8 +2253,7 @@ class GameSession {
             0.1 * video +
             (growing ? 0.1 : 0),
         reasons: [
-          if (most > 0 && s.lastAttention == most)
-            SinglePickReason.mostPlayed,
+          if (most > 0 && s.lastAttention == most) SinglePickReason.mostPlayed,
           if (skip <= 0.25) SinglePickReason.fewSkips,
           if (s.radioAppeal >= 0.6) SinglePickReason.radio,
           if (video >= 0.6) SinglePickReason.shortVideo,
@@ -2629,10 +2649,8 @@ class GameSession {
 
   /// The player's five most played songs over a skip (docs K203): by
   /// streams, or by sales before streaming counted.
-  List<SkipSong> _skipSongs(
-      Map<int, (double, double)> before,
-      double Function(Song) streams,
-      double Function(Song) sales) {
+  List<SkipSong> _skipSongs(Map<int, (double, double)> before,
+      double Function(Song) streams, double Function(Song) sales) {
     final rows = [
       for (final id in world.playerSongIds)
         if (world.songs[id] case final s when s.releasedWeek >= 0)
@@ -2757,7 +2775,8 @@ class GameSession {
       });
     var rank = 0;
     return [
-      for (final (al, score) in albums.take(math.min(limit, YearEnd.criticsSize)))
+      for (final (al, score)
+          in albums.take(math.min(limit, YearEnd.criticsSize)))
         YearEndRow.of(w, EntityKind.album,
             rank: ++rank,
             entityId: al.id,
@@ -2790,9 +2809,7 @@ class GameSession {
     }
     final rival = world.artists[artistId];
     // Not oneself or a retired artist (K184).
-    if (rival.id == _p.id ||
-        rival.isRetired ||
-        !Songwriting.wants(rival, s)) {
+    if (rival.id == _p.id || rival.isRetired || !Songwriting.wants(rival, s)) {
       throw GameException('songRefused', 'Not for them');
     }
     Songwriting.sell(world, _p, s, rival);
@@ -3518,8 +3535,8 @@ class GameSession {
       throw GameException('campaignLocked', 'The label cannot run this');
     }
     _requireMoney(Credits.soloCostCents(world, _p, member, campaign));
-    final al = Credits.releaseMemberAlbum(world, _p, member, t,
-        [for (final id in songIds) world.songs[id]],
+    final al = Credits.releaseMemberAlbum(
+        world, _p, member, t, [for (final id in songIds) world.songs[id]],
         type: type, campaign: campaign);
     _saveNow();
     return AlbumView.of(world, al);
@@ -3658,8 +3675,8 @@ class GameSession {
       }
     }
     _requireMoney(_campaignCost(campaign));
-    final al = Compilations.release(world, _p, t, hitIds, newIds,
-        campaign: campaign);
+    final al =
+        Compilations.release(world, _p, t, hitIds, newIds, campaign: campaign);
     _saveNow();
     return AlbumView.of(world, al);
   }
@@ -3707,9 +3724,8 @@ class GameSession {
   }
 
   /// Finished tours a live album can come from, latest first (docs K146).
-  List<LiveTourView> get liveAlbumTours => [
-        for (final t in LiveAlbums.tours(world, _p)) LiveTourView.of(t)
-      ];
+  List<LiveTourView> get liveAlbumTours =>
+      [for (final t in LiveAlbums.tours(world, _p)) LiveTourView.of(t)];
 
   /// Puts out a live album of released songs [songIds] recorded on the
   /// tour that started in [tourStartWeek] (docs K146).
@@ -3735,12 +3751,13 @@ class GameSession {
         throw GameException('notReleased', 'Only released studio songs');
       }
     }
-    _requireMoney(_campaignCost(campaign) + LiveAlbums.costCents(songIds.length));
+    _requireMoney(
+        _campaignCost(campaign) + LiveAlbums.costCents(songIds.length));
     if (_p.creativeEnergy < LiveAlbums.energyPerTrack * songIds.length) {
       throw GameException('noEnergy', 'Not enough creativity');
     }
-    final al = LiveAlbums.release(world, _p, tour, t, songIds,
-        campaign: campaign);
+    final al =
+        LiveAlbums.release(world, _p, tour, t, songIds, campaign: campaign);
     _saveNow();
     return AlbumView.of(world, al);
   }
@@ -4702,11 +4719,15 @@ class GameSession {
       if (al.artistId == p.id) continue;
       final move = RivalMoves.of(w, al);
       if (move != null) {
-        events.add(RivalAlbumMove(al.id, al.artistId, move, switch (move) {
-          RivalMove.exclusive => al.exclusiveUntil - al.releaseWeek,
-          RivalMove.window => al.windowUntil - al.releaseWeek,
-          RivalMove.surprise => 0,
-        }));
+        events.add(RivalAlbumMove(
+            al.id,
+            al.artistId,
+            move,
+            switch (move) {
+              RivalMove.exclusive => al.exclusiveUntil - al.releaseWeek,
+              RivalMove.window => al.windowUntil - al.releaseWeek,
+              RivalMove.surprise => 0,
+            }));
       }
     }
     events.addAll(_recordsBroken(r));
@@ -4882,10 +4903,8 @@ class GameSession {
       final s = w.songs[id];
       events.add(s.primaryArtistId == p.id
           ? BotsCaught(id, s.botDelivered,
-              refundCents: (s.botDelivered *
-                      0.35 *
-                      Rerecords.songShare(p, s))
-                  .round())
+              refundCents:
+                  (s.botDelivered * 0.35 * Rerecords.songShare(p, s)).round())
           : RivalBotsCaught(id, s.primaryArtistId, s.botDelivered));
     }
     for (final id in w.playerSongIds) {
@@ -4953,8 +4972,8 @@ class GameSession {
             pos > 10) {
           continue;
         }
-        events.add(RivalVersionOut(s.id, s.primaryArtistId,
-            s.versions.last.$1, pos, myTop.id, myPos));
+        events.add(RivalVersionOut(
+            s.id, s.primaryArtistId, s.versions.last.$1, pos, myTop.id, myPos));
       }
     }
     // Chart battles: the player's release against the biggest rival one out
@@ -5089,7 +5108,8 @@ class _SkipRun {
         fame0 = g._p.fame,
         singles0 = g._singleSales() {
     for (final id in g.world.playerSongIds) {
-      before[id] = (songStreams(g.world.songs[id]), songSales(g.world.songs[id]));
+      before[id] =
+          (songStreams(g.world.songs[id]), songSales(g.world.songs[id]));
     }
   }
 

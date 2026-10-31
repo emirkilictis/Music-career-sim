@@ -121,8 +121,7 @@ abstract final class Cmd {
 
   /// Beefs (docs K229).
   static SessionCmd<BeefsView> beefs() => (s) => s.beefs;
-  static SessionCmd<List<DissTargetView>> dissTargets() =>
-      (s) => s.dissTargets;
+  static SessionCmd<List<DissTargetView>> dissTargets() => (s) => s.dissTargets;
   static SessionCmd<void> dissPost(int rivalId) => (s) => s.dissPost(rivalId);
   static SessionCmd<bool> dissHaters() => (s) => s.dissHaters();
   static SessionCmd<void> makePeace() => (s) => s.makePeace();
@@ -305,6 +304,16 @@ abstract final class Cmd {
   static SessionCmd<TourPlanView> tourPreview(TourRequest r) =>
       (s) => s.tourPreview(r);
   static SessionCmd<List<OpenerView>> tourOpeners() => (s) => s.tourOpeners;
+  static SessionCmd<List<AlbumView>> tourAlbums(TourRequest r) =>
+      (s) => s.tourAlbums(r);
+  static SessionCmd<
+          List<({String name, double gross, bool active, int startWeek})>>
+      albumTours(int id) => (s) => s.albumTours(id);
+  static SessionCmd<Map<int, (String, int)>> coverLabels() => (s) => {
+        for (final a in s.world.albums) a.id * 2 + 1: (a.title, a.artistId),
+        for (final id in s.world.playerSongIds)
+          id * 2: (s.world.songs[id].title, s.world.songs[id].primaryArtistId),
+      };
   static SessionCmd<void> startTour(TourRequest r) => (s) => s.startTour(r);
   static SessionCmd<List<SetlistSong>> setlistOptions(TourRequest r) =>
       (s) => s.setlistOptions(r);
