@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
 import '../core/career_state.dart';
@@ -6,6 +6,7 @@ import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import 'common.dart';
+import 'week_picker.dart';
 
 /// When a release comes out and when it is announced (docs K45).
 typedef ReleaseTiming = ({int releaseWeek, int announceWeek});
@@ -49,7 +50,7 @@ class _TimingSheet extends StatefulWidget {
 class _TimingSheetState extends State<_TimingSheet> {
   late int _in; // weeks until release
   late int _announce; // see _announceOffsets
-  late final List<int> _releaseChoices;
+  late List<int> _releaseChoices;
   List<int> _announceChoices = _announceOffsets;
 
   @override
@@ -98,6 +99,24 @@ class _TimingSheetState extends State<_TimingSheet> {
 
   bool _announceOk(int a) => a <= 0 || a < _in;
 
+  /// A date picked on the calendar (docs K268): any week up to the
+  /// furthest a release can be set.
+  Future<void> _pickDate() async {
+    final l = context.l10n;
+    final weeks = await pickWeeksAhead(context,
+        now: widget.week,
+        maxWeeks: Actions.maxScheduleWeeks,
+        initial: _in > 0 ? _in : 1,
+        title: l.releaseDateTitle,
+        go: l.releaseDatePick,
+        tooFar: l.releaseTooFar(Actions.maxScheduleWeeks));
+    if (weeks == null || !mounted) return;
+    if (!_releaseChoices.contains(weeks)) {
+      _releaseChoices = [..._releaseChoices, weeks]..sort();
+    }
+    _setRelease(weeks);
+  }
+
   void _setRelease(int x) => setState(() {
         _in = x;
         // A lead time longer than the wait is not possible: announce now.
@@ -137,6 +156,12 @@ class _TimingSheetState extends State<_TimingSheet> {
                     _ => l.inWeeks(x),
                   },
               _setRelease),
+          const SizedBox(height: 8),
+          ActionChip(
+            avatar: const Icon(Icons.calendar_month_rounded, size: 18),
+            label: Text(l.pickDate),
+            onPressed: _pickDate,
+          ),
           if (_clash.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(l.rivalSameWeek(_clash.map((r) => r.artistName).join(', ')),
@@ -149,7 +174,10 @@ class _TimingSheetState extends State<_TimingSheet> {
           ],
           if (later) ...[
             const SizedBox(height: 8),
-            Text(l.releaseDate(fmt.week(_releaseWeek)),
+            // How far off it is, too (docs K268).
+            Text(
+                '${l.releaseDate(fmt.week(_releaseWeek))} · '
+                '${l.skipToDateWeeks(_in)}',
                 style: TextStyle(
                     color: AppColors.lilac, fontWeight: FontWeight.w800)),
             const SizedBox(height: 18),
@@ -172,7 +200,11 @@ class _TimingSheetState extends State<_TimingSheet> {
                   enabled: _announceOk),
               const SizedBox(height: 8),
               if (_announce != 0)
-                Text(l.announceDate(fmt.week(_announceWeek)),
+                Text(
+                    _announceWeek > widget.week
+                        ? '${l.announceDate(fmt.week(_announceWeek))} · '
+                            '${l.skipToDateWeeks(_announceWeek - widget.week)}'
+                        : l.announceDate(fmt.week(_announceWeek)),
                     style: const TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(height: 6),
               Text(_announce == 0 ? l.surpriseHint : l.announceHint,

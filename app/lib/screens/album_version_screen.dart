@@ -9,6 +9,7 @@ import '../ui/palette.dart';
 import '../widgets/art.dart';
 import '../widgets/common.dart';
 import '../widgets/image_pickers.dart';
+import '../widgets/week_picker.dart';
 
 /// A new version of an album after it came out (docs K225): its name, its
 /// own cover, a format and bonus tracks from the vault. An [anniversary]
@@ -336,6 +337,28 @@ class _AlbumVersionScreenState extends State<AlbumVersionScreen> {
                             if (_lead > _weeks) _lead = _weeks;
                           }),
                         ),
+                        // Or on the calendar (docs K268).
+                        ActionChip(
+                          avatar: const Icon(Icons.calendar_month_rounded,
+                              size: 18),
+                          label: Text(l.pickDate),
+                          onPressed: () async {
+                            final weeks = await pickWeeksAhead(context,
+                                now: widget.state.week,
+                                maxWeeks: AlbumVersions.maxLeadWeeks,
+                                initial: _weeks,
+                                title: l.releaseDateTitle,
+                                go: l.releaseDatePick,
+                                tooFar: l.releaseTooFar(
+                                    AlbumVersions.maxLeadWeeks));
+                            if (weeks == null || !mounted) return;
+                            setState(() {
+                              _weeks = weeks;
+                              if (_lead > _weeks) _lead = _weeks;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 6),
                         Text(_lead == 0
                             ? l.versionSurprise
                             : l.versionAnnounceOn(

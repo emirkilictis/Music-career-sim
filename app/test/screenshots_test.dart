@@ -189,6 +189,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('Change date'));
     await shot(tester, '06b_release_timing');
+    // A release date on the calendar (K268).
+    await tester.tap(_ci('Pick a date'));
+    await shot(tester, '06e_release_date_pick');
+    await tester.tap(_ci('Choose'));
+    await shot(tester, '06f_release_date_set');
     await tester.tapAt(const Offset(200, 60));
     await tester.pumpAndSettle();
     // Album builder: extra editions with their own format (K46).

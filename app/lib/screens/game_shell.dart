@@ -4,7 +4,6 @@ import 'package:game/game.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/event_lines.dart';
-import '../core/format.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/anniversary_prompt.dart';
@@ -14,6 +13,7 @@ import 'award_night_screen.dart';
 import '../widgets/removal_alert.dart';
 import '../widgets/common.dart';
 import '../widgets/event_icon.dart';
+import '../widgets/week_picker.dart';
 import '../widgets/week_transition.dart';
 import 'career_tab.dart';
 import 'charts_tab.dart';
@@ -182,89 +182,12 @@ class _GameShellState extends State<GameShell> {
   /// until then, or null.
   Future<int?> _pickSkipDate() {
     final l = context.l10n;
-    final fmt = context.fmt;
-    final now = widget.state.week;
-    final year0 = GameTime.yearOf(now);
-    // A week from now by default.
-    final first = GameTime.weekOfYear(now + 1);
-    var (month, inMonth) = Fmt.monthWeek(first);
-    var year = GameTime.yearOf(now + 1);
-    int weeksIn(int m) {
-      var n = 0;
-      for (var w = 1; w <= GameTime.weeksPerYear; w++) {
-        if (Fmt.monthWeek(w).$1 == m) n++;
-      }
-      return n;
-    }
-
-    int target() {
-      var w = 1;
-      while (Fmt.monthWeek(w).$1 != month) {
-        w++;
-      }
-      return GameTime.firstWeekOf(year) + w - 1 + inMonth - 1;
-    }
-
-    return showDialog<int>(
-      context: context,
-      builder: (c) => StatefulBuilder(builder: (c, set) {
-        final t = target();
-        final weeks = t - now;
-        final ok = weeks >= 1 && weeks <= _maxSkipYears * GameTime.weeksPerYear;
-        return AlertDialog(
-          title: Text(l.skipToDateTitle),
-          content: Column(mainAxisSize: MainAxisSize.min, children: [
-            DropdownButtonFormField<int>(
-              initialValue: month,
-              decoration: InputDecoration(labelText: l.skipMonth),
-              items: [
-                for (var m = 1; m <= 12; m++)
-                  DropdownMenuItem(value: m, child: Text(fmt.monthName(m)))
-              ],
-              onChanged: (v) => set(() {
-                month = v ?? month;
-                inMonth = inMonth.clamp(1, weeksIn(month));
-              }),
-            ),
-            DropdownButtonFormField<int>(
-              key: ValueKey(month),
-              initialValue: inMonth.clamp(1, weeksIn(month)),
-              decoration: InputDecoration(labelText: l.skipWeek),
-              items: [
-                for (var w = 1; w <= weeksIn(month); w++)
-                  DropdownMenuItem(value: w, child: Text(l.skipWeekN(w)))
-              ],
-              onChanged: (v) => set(() => inMonth = v ?? inMonth),
-            ),
-            DropdownButtonFormField<int>(
-              initialValue: year,
-              decoration: InputDecoration(labelText: l.skipYear),
-              items: [
-                for (var y = year0; y <= year0 + _maxSkipYears; y++)
-                  DropdownMenuItem(value: y, child: Text('$y'))
-              ],
-              onChanged: (v) => set(() => year = v ?? year),
-            ),
-            const SizedBox(height: 14),
-            Text(
-                ok
-                    ? l.skipToDateWeeks(weeks)
-                    : weeks < 1
-                        ? l.skipToDatePast
-                        : l.skipToDateTooFar(_maxSkipYears),
-                style: TextStyle(
-                    color: ok ? AppColors.textMuted : AppColors.coral)),
-          ]),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(c), child: Text(l.cancel)),
-            FilledButton(
-                onPressed: ok ? () => Navigator.pop(c, weeks) : null,
-                child: Text(l.skipToDateGo)),
-          ],
-        );
-      }),
-    );
+    return pickWeeksAhead(context,
+        now: widget.state.week,
+        maxWeeks: _maxSkipYears * GameTime.weeksPerYear,
+        title: l.skipToDateTitle,
+        go: l.skipToDateGo,
+        tooFar: l.skipToDateTooFar(_maxSkipYears));
   }
 
   Future<void> _skip(int weeks) async {

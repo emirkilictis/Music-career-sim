@@ -831,6 +831,17 @@
       }
     }
   },
+  "pickDate": "Pick a date",
+  "releaseDateTitle": "Release date",
+  "releaseDatePick": "Choose",
+  "releaseTooFar": "At most {weeks} weeks ahead.",
+  "@releaseTooFar": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
   "announceTitle": "Announcement",
   "announceNow": "Now",
   "announceBefore": "{count} weeks before",
