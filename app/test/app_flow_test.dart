@@ -300,10 +300,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ChoiceChip, 'In 4 weeks'));
     await tester.pumpAndSettle();
-    expect(_ci('Out: January 2024, week 5'), findsOneWidget);
+    expect(_ci('Out: January 2024, week 5 · 4 weeks from now'), findsOneWidget);
     await tester.tap(_ci('2 weeks before'));
     await tester.pumpAndSettle();
-    expect(_ci('Announcement: January 2024, week 3'), findsOneWidget);
+    expect(_ci('Announcement: January 2024, week 3 · 2 weeks from now'), findsOneWidget);
     // Longer than the wait: not possible.
     expect(
         tester
