@@ -117,6 +117,35 @@ void main() {
           _code('trackOnOtherRelease'));
       expect(() => g.releaseAlbum('Short', ids.sublist(1), type: AlbumType.ep),
           _code('trackCount'));
+      // An album can take over the EP's tracks (K270): they count for the
+      // album from now on, the EP keeps them on its tracklist.
+      expect(g.song(ids.first).epTitle, 'EP');
+      g.world.player!.moneyCents += 100000000;
+      int write() {
+        g.world.player!.creativeEnergy = 100;
+        return g.writeSong(budget: BudgetTier.low).id;
+      }
+
+      final more = [for (var i = 0; i < 7; i++) write()];
+      // Not onto another EP.
+      expect(
+          () => g.releaseAlbum('EP 2', [...more.take(2), ids.first],
+              type: AlbumType.ep),
+          _code('trackOnOtherRelease'));
+      final album = g.releaseAlbum('LP', [...more, ids.first],
+          campaign: Campaign.none);
+      expect(g.song(ids.first).albumId, album.id);
+      expect(g.album(ep.id).trackIds, contains(ids.first));
+      // A single out on its own goes on the album's deluxe (K270).
+      final loose = write();
+      g.releaseSingle(loose, campaign: Campaign.none);
+      expect(g.song(loose).looseSingle, isTrue);
+      expect(g.looseSingles.map((s) => s.id), contains(loose));
+      g.advanceWeek();
+      g.releaseAlbumVersion(album.id, name: 'Deluxe', songIds: [loose]);
+      expect(g.song(loose).albumId, album.id);
+      expect(g.album(album.id).trackIds, contains(loose));
+      expect(g.song(loose).looseSingle, isFalse);
 
       for (var i = 0; i < 3; i++) {
         g.rewardAd();

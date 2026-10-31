@@ -717,6 +717,11 @@ abstract final class Cmd {
 
   static SessionCmd<List<SongView>> songs() => (s) => s.songs;
   static SessionCmd<List<SongView>> vault() => (s) => s.vault;
+
+  /// Vault songs and singles out on their own, for an album's new
+  /// version (docs K270).
+  static SessionCmd<List<SongView>> versionSongs() =>
+      (s) => [...s.vault, ...s.looseSingles];
   static SessionCmd<List<AlbumView>> albums() => (s) => s.albums;
 
   static SessionCmd<List<ScheduledView>> scheduled() => (s) => s.scheduled;

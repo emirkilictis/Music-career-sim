@@ -288,6 +288,13 @@ class SongView {
         singleWeek = s.singleWeek,
         albumId = s.albumId,
         coverAlbumId = coverAlbumOf(w, s),
+        epTitle = s.albumId >= 0 &&
+                w.albums[s.albumId].type == AlbumType.ep &&
+                Actions.canCarry(w, w.artists[s.primaryArtistId], s)
+            ? w.albums[s.albumId].title
+            : null,
+        looseSingle = Actions.canCarry(w, w.artists[s.primaryArtistId], s,
+            fromEp: false),
         estimatedGrade = s.estimatedGrade,
         gradeLow = math.max(1, s.estimatedGrade - s.gradeSpread),
         gradeHigh = math.min(100, s.estimatedGrade + s.gradeSpread),
@@ -677,6 +684,14 @@ class SongView {
   final int writtenWeek;
   final int releasedWeek;
   final int singleWeek;
+  /// An EP track an album can take over, with the EP's title (docs
+  /// K270); null otherwise.
+  final String? epTitle;
+
+  /// A single out on its own: it can go on an album or a deluxe (docs
+  /// K270).
+  final bool looseSingle;
+
   final int albumId;
 
   /// Album whose cover this song shows (see [coverAlbumOf]).

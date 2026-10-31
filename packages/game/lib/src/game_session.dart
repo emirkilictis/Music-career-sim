@@ -418,6 +418,12 @@ class GameSession {
   List<SongView> get vault => songs.where((s) => s.inVault).toList()
     ..sort((a, b) => b.estimatedGrade.compareTo(a.estimatedGrade));
 
+  /// Singles out on their own, newest first: they can go on an album's
+  /// new version (docs K270).
+  List<SongView> get looseSingles =>
+      songs.where((s) => s.looseSingle).toList()
+        ..sort((a, b) => b.singleWeek.compareTo(a.singleWeek));
+
   /// The player's albums and EPs, newest first.
   List<AlbumView> get albums => [
         for (final al in world.albums.reversed)
@@ -1730,7 +1736,12 @@ class GameSession {
       throw GameException('duplicateTracks', 'A song is listed twice');
     }
     for (final id in songIds) {
-      if (_ownSong(id).albumId >= 0 ||
+      final s = _ownSong(id);
+      // An album can take over its artist's EP tracks (docs K270).
+      final fromEp = type == AlbumType.album &&
+          s.albumId >= 0 &&
+          Actions.canCarry(world, _p, s);
+      if ((s.albumId >= 0 && !fromEp) ||
           _p.scheduled.any((sr) => sr.isAlbum && sr.songIds.contains(id))) {
         throw GameException('trackOnOtherRelease', 'Song $id is taken');
       }
@@ -2362,7 +2373,9 @@ class GameSession {
     }
     for (final id in songIds) {
       final s = _ownSong(id);
-      if (s.status != SongStatus.vault) {
+      // Or a single out on its own (docs K270).
+      if (s.status != SongStatus.vault &&
+          !Actions.canCarry(world, _p, s, fromEp: false)) {
         throw GameException('notInVault', 'Only unreleased songs');
       }
       if (_p.scheduled.any((sr) => sr.songIds.contains(id)) ||
@@ -2415,7 +2428,9 @@ class GameSession {
     }
     for (final id in songIds) {
       final s = _ownSong(id);
-      if (s.status != SongStatus.vault) {
+      // Or a single out on its own (docs K270).
+      if (s.status != SongStatus.vault &&
+          !Actions.canCarry(world, _p, s, fromEp: false)) {
         throw GameException('notInVault', 'Only unreleased songs');
       }
       if (_p.scheduled.any((sr) => sr.songIds.contains(id)) ||

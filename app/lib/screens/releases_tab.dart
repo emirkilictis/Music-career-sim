@@ -554,9 +554,12 @@ class _ReleasesTabState extends State<ReleasesTab> {
                       MaterialPageRoute(
                           builder: (_) => AlbumBuilderScreen(
                               state: career,
+                              // Unplaced songs, and EP tracks an album
+                              // can take over (docs K270).
                               songs: _songs
                                   .where((s) =>
-                                      s.albumId < 0 && s.scheduledAlbumWeek < 0)
+                                      (s.albumId < 0 || s.epTitle != null) &&
+                                      s.scheduledAlbumWeek < 0)
                                   .toList()))),
             ),
           ),
@@ -1207,8 +1210,11 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
     final (lo, hi) = GameSession.trackRange(_type);
     final n = _picked.length;
     final ok = n >= lo && n <= hi && _title.text.trim().isNotEmpty;
-    final songs = [...widget.songs]
-      ..sort((a, b) => b.estimatedGrade.compareTo(a.estimatedGrade));
+    // EP tracks only go on an album (docs K270).
+    final songs = [
+      for (final s in widget.songs)
+        if (s.epTitle == null || _type == AlbumType.album) s
+    ]..sort((a, b) => b.estimatedGrade.compareTo(a.estimatedGrade));
     final year = GameTime.yearOf(widget.state.week);
     return Scaffold(
       appBar: AppBar(title: Text(l.newAlbum)),
@@ -1242,6 +1248,10 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
             onSelectionChanged: (s) => setState(() {
               _type = s.first;
               if (_type == AlbumType.mixtape) _extras.clear();
+              if (_type != AlbumType.album) {
+                _picked.removeWhere((id) =>
+                    widget.songs.firstWhere((x) => x.id == id).epTitle != null);
+              }
             }),
           ),
           if (_type == AlbumType.mixtape)
@@ -1263,8 +1273,9 @@ class _AlbumBuilderScreenState extends State<AlbumBuilderScreen> {
                         onChanged: (on) => setState(() =>
                             on! ? _picked.add(s.id) : _picked.remove(s.id)),
                         title: Text(s.title),
-                        subtitle: Text(
-                            '${fmt.songGrade(s)} · ${fmt.songStatus(s)} · ${fmt.genres(s.genres)}'),
+                        subtitle: Text(s.epTitle != null
+                            ? '${fmt.songGrade(s)} · ${l.fromEp(s.epTitle!)}'
+                            : '${fmt.songGrade(s)} · ${fmt.songStatus(s)} · ${fmt.genres(s.genres)}'),
                       ),
                   ]),
           ),

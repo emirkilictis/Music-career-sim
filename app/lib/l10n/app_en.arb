@@ -7553,8 +7553,8 @@
       }
     }
   },
-  "versionTracksHint": "Unreleased songs from the vault come out with this version. You can also put it out with none.",
-  "versionTracksEmpty": "No unreleased songs in the vault. Write some in the studio first if you want new tracks.",
+  "versionTracksHint": "Unreleased songs from the vault, or singles already out on their own, go on this version. You can also put it out with none.",
+  "versionTracksEmpty": "No unreleased songs or loose singles. Write some in the studio first if you want new tracks.",
   "versionFormat": "Format",
   "versionFormatHint": "What fans can buy. Digital costs least; collectors pay for vinyl and signed copies.",
   "versionAnniversary": "{years}th anniversary edition",
@@ -9003,8 +9003,17 @@
     }
   },
   "rolloutLeadSingle": "Lead single a month ahead",
-  "rolloutSecondSingle": "A second single",
+  "rolloutSecondSingle": "A second single before release",
   "rolloutAnnounced": "Announced a month ahead",
+  "fromEp": "From the EP “{title}”: its plays count for the album from now on",
+  "@fromEp": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "versionSingleOut": "single already out",
   "rolloutVideo": "A music video",
   "rolloutTeaser": "A TikTak teaser",
   "rolloutPitch": "Pitched to the editors",

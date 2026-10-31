@@ -752,6 +752,38 @@ abstract final class Actions {
     return sum;
   }
 
+  /// A released song of [a] that can go on another record of theirs
+  /// (docs K270): a single out on its own (onto an album or a deluxe), or
+  /// a track of one of their EPs (onto an album).
+  static bool canCarry(World w, Artist a, Song s, {bool fromEp = true}) {
+    if (s.primaryArtistId != a.id ||
+        s.releasedWeek < 0 ||
+        (s.status != SongStatus.active && s.status != SongStatus.dormant) ||
+        s.cloudOnly ||
+        s.liveOf >= 0 ||
+        s.replacedWeek >= 0) {
+      return false;
+    }
+    if (s.albumId < 0) return s.isSingle;
+    final al = w.albums[s.albumId];
+    return fromEp &&
+        al.artistId == a.id &&
+        al.type == AlbumType.ep &&
+        al.hitIds.isEmpty &&
+        al.liveTour < 0;
+  }
+
+  /// Puts released song [s] on [al] (docs K270): back in rotation if it
+  /// was in the catalog (taken off its old record's catalog first), and
+  /// its plays count for [al] from now on. Its old record keeps it on its
+  /// tracklist.
+  static void carry(World w, Song s, Album al) {
+    if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
+    s.albumId = al.id;
+    s.weeksBelowCutoff = 0;
+    w.dirtySongs.add(s.id);
+  }
+
   static Album releaseAlbum(World w, Artist a, String title, List<int> songIds,
       {AlbumType type = AlbumType.album,
       List<int> variantWeeks = const [0],
@@ -835,8 +867,18 @@ abstract final class Actions {
       a.moneyCents -= editionsCostCents(variantWeeks.length, variantFormats);
     }
     w.albums.add(album);
+    // Tracks of an earlier EP the album takes over (docs K270): their
+    // plays count for the album from now on, not twice.
+    final moved = {
+      for (final id in songIds)
+        if (w.songs[id].albumId >= 0) id
+    };
     for (final id in songIds) {
       final s = w.songs[id];
+      if (moved.contains(id)) {
+        carry(w, s, album);
+        continue;
+      }
       s.albumId = album.id;
       Cloud.goOfficial(w, s);
       w.dirtySongs.add(s.id);
@@ -850,7 +892,7 @@ abstract final class Actions {
         Lifecycle.reactivateSong(w, s);
       }
     }
-    _creditPreSingles(w, a, album);
+    _creditPreSingles(w, a, album, skip: moved);
     World.insertSorted(w.activeAlbumIds, album.id);
     a.lastReleaseWeek = w.week;
     if (type == AlbumType.mixtape) _mixtapeBuzz(w, a);
@@ -945,8 +987,11 @@ abstract final class Actions {
     }
     for (final id in songIds) {
       final s = w.songs[id];
-      if (s.primaryArtistId != a.id || s.status != SongStatus.vault) {
-        throw ActionException('Only unreleased songs');
+      // Unreleased songs, or singles out on their own (docs K270).
+      if (s.primaryArtistId != a.id ||
+          (s.status != SongStatus.vault &&
+              !canCarry(w, a, s, fromEp: false))) {
+        throw ActionException('Only unreleased songs or loose singles');
       }
     }
     final due = Anniversaries.due(w, al);
@@ -968,12 +1013,16 @@ abstract final class Actions {
     al.weeksBelowCutoff = 0;
     for (final id in songIds) {
       final s = w.songs[id];
+      al.songIds.add(id);
+      if (s.status != SongStatus.vault) {
+        carry(w, s, al);
+        continue;
+      }
       s.albumId = al.id;
       s.releasedWeek = w.week;
       s.campaignPower = 1;
       Lifecycle.activateSong(w, s);
       _promote(w, s, Campaign.standard);
-      al.songIds.add(id);
     }
     if (anniversary) {
       al.anniversaries |= 1 << due;
@@ -1018,12 +1067,15 @@ abstract final class Actions {
   /// sales = 1 unit; streams from the units era): lifetime units only, kept
   /// apart from its weeks (docs K56). Their later weeks come in the weekly
   /// step.
-  static void _creditPreSingles(World w, Artist a, Album album) {
+  static void _creditPreSingles(World w, Artist a, Album album,
+      {Set<int> skip = const {}}) {
     final c = w.config;
     final streamsCount =
         Charts.songRules(ChartMarket.global, w.week).albumUsesUnits;
     for (final id in album.songIds) {
       final s = w.songs[id];
+      // Its plays so far are its EP's (docs K270).
+      if (skip.contains(id)) continue;
       if (!isPreSingle(s, album)) continue;
       for (var k = 0; k < regionCount; k++) {
         var units = (w.songLifetimeDownloads(s, k) +

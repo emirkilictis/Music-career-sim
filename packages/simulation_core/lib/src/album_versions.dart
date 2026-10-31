@@ -109,8 +109,11 @@ abstract final class AlbumVersions {
     }
     for (final id in songIds) {
       final s = w.songs[id];
-      if (s.primaryArtistId != a.id || s.status != SongStatus.vault) {
-        throw ActionException('Only unreleased songs');
+      // Unreleased songs, or singles out on their own (docs K270).
+      if (s.primaryArtistId != a.id ||
+          (s.status != SongStatus.vault &&
+              !Actions.canCarry(w, a, s, fromEp: false))) {
+        throw ActionException('Only unreleased songs or loose singles');
       }
       if (reserved(w, id)) throw ActionException('Song is set for a version');
     }
@@ -157,7 +160,9 @@ abstract final class AlbumVersions {
         al.planned = null;
         final songs = [
           for (final id in p.songIds)
-            if (w.songs[id].status == SongStatus.vault) id
+            if (w.songs[id].status == SongStatus.vault ||
+                Actions.canCarry(w, a, w.songs[id], fromEp: false))
+              id
         ];
         if (block(w, a, al) == null) {
           Actions.releaseAlbumVersion(w, a, al,

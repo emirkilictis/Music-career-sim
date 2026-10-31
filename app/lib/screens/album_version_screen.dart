@@ -77,7 +77,7 @@ class _AlbumVersionScreenState extends State<AlbumVersionScreen> {
   void initState() {
     super.initState();
     _name = TextEditingController();
-    widget.state.read(Cmd.vault()).then((v) {
+    widget.state.read(Cmd.versionSongs()).then((v) {
       if (mounted) setState(() => _vault = v);
     });
   }
@@ -299,7 +299,11 @@ class _AlbumVersionScreenState extends State<AlbumVersionScreen> {
                                   ? _picked.add(s.id)
                                   : _picked.remove(s.id)),
                           title: Text(s.title),
-                          subtitle: Text(fmt.songGrade(s)),
+                          // A single already out joins the new version
+                          // (docs K270).
+                          subtitle: Text(s.looseSingle
+                              ? '${fmt.songGrade(s)} · ${l.versionSingleOut}'
+                              : fmt.songGrade(s)),
                         ),
                   ]),
             ),

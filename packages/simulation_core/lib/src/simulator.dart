@@ -1028,6 +1028,9 @@ class Simulator {
         final i = activeIndex[sid];
         if (i == null) continue;
         final s = w.songs[sid];
+        // Taken over by a later record (docs K270): its plays are that
+        // record's.
+        if (s.albumId != al.id) continue;
         final pre = isPreSingle(s, al);
         reachAll += s.lastReach;
         if (!s.isSingle) reachCampaign += s.lastReach * s.campaignShareOfReach;
