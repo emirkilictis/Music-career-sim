@@ -117,7 +117,12 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: TourScreen(state: state)));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Edit the set'), 300);
+    await tester.scrollUntilVisible(find.text('Edit the set'), 300,
+        scrollable: find.byType(Scrollable).first);
+    // In the middle of the screen, clear of the pinned "Go on tour" bar.
+    await Scrollable.ensureVisible(tester.element(find.text('Edit the set')),
+        alignment: 0.5);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Edit the set'));
     await tester.pumpAndSettle();
     expect(find.textContaining('/40'), findsOneWidget);

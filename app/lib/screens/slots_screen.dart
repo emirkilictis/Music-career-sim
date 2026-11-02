@@ -4,7 +4,12 @@ import 'package:game/game.dart' show GameException;
 import 'package:file_selector/file_selector.dart' show openFile;
 
 import '../boot/boot.dart'
-    show dismissHomeScreenTip, homeScreenTipDue, inAppBrowser;
+    show
+        applyUpdate,
+        checkForUpdate,
+        dismissHomeScreenTip,
+        homeScreenTipDue,
+        inAppBrowser;
 import '../core/backup.dart';
 import '../core/platform_files.dart';
 import '../core/career_state.dart';
@@ -49,6 +54,10 @@ class _SlotsScreenState extends State<SlotsScreen> {
     _resumed = true;
     final last = context.settingsRead.openSlot;
     if (last != null && slots.any((s) => s['slotId'] == last)) {
+      // An older page the browser kept goes to the new release first: it
+      // could not read a save the new one wrote (docs K279).
+      if (await checkForUpdate()) return applyUpdate();
+      if (!mounted) return;
       await _open(last);
     }
   }
@@ -67,7 +76,11 @@ class _SlotsScreenState extends State<SlotsScreen> {
       context.settingsRead.setOpenSlot(null);
       if (e is GameException) {
         showError(context, e);
+      } else if (await checkForUpdate()) {
+        // Written by a newer release: open it in that one (docs K279).
+        return applyUpdate();
       } else {
+        if (!mounted) return;
         final where = st.toString().split('\n').take(6).join('\n');
         await _loadFailed('$e\n$where');
       }

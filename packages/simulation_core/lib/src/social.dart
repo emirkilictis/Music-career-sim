@@ -225,10 +225,16 @@ class SocialState {
   void decode(String? s) {
     if (s == null || s.isEmpty) return;
     final j = jsonDecode(s) as Map<String, dynamic>;
+    // A post of a kind this release does not know (a save from a newer
+    // one, opened by a page the browser kept) is left out, not a save
+    // that cannot open (docs K279).
     feed
       ..clear()
-      ..addAll(
-          [for (final x in j['f'] as List) SocialItem.fromJson(x as List)]);
+      ..addAll([
+        for (final x in j['f'] as List)
+          if (((x as List)[1] as int) < FanTopic.values.length)
+            SocialItem.fromJson(x)
+      ]);
     postWeek = j['pw'] as int;
     postsThisWeek = j['pc'] as int;
     engagement = (j['e'] as num).toDouble();
@@ -237,7 +243,8 @@ class SocialState {
       ..clear()
       ..addAll([
         for (final x in (j['r'] as List?) ?? const [])
-          CommentReply.fromJson(x as List)
+          if (((x as List)[2] as int) < ReplyKind.values.length)
+            CommentReply.fromJson(x)
       ]);
     replyWeek = (j['rw'] as int?) ?? -1;
     repliesThisWeek = (j['rc'] as int?) ?? 0;

@@ -30,3 +30,4 @@ void dismissHomeScreenTip() {}
 final updateReady = ValueNotifier<bool>(false);
 void watchForUpdates() {}
 Future<void> applyUpdate() async {}
+Future<bool> checkForUpdate() async => false;

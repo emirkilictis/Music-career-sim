@@ -167,7 +167,7 @@ abstract final class Codec {
       ..sumDormantRate = _d(r['sumDormantRate'])
       ..nextEraWeek = r['nextEraWeek'] as int
       ..pendingAlbumTitle = r['pendingAlbumTitle'] as String
-      ..pendingAlbumType = AlbumType.values[r['pendingAlbumType'] as int]
+      ..pendingAlbumType = _albumType(r['pendingAlbumType'] as int)
       ..pendingVariantWeeks = _parseInts(r['pendingVariants'] as String);
     a.plan.addAll(_decodePlan(r['plan'] as String));
     a.scheduled.addAll(_decodeSchedule(r['schedule'] as String?));
@@ -583,7 +583,7 @@ abstract final class Codec {
       id: r['id'] as int,
       title: r['title'] as String,
       artistId: r['artistId'] as int,
-      type: AlbumType.values[r['type'] as int],
+      type: _albumType(r['type'] as int),
       releaseWeek: r['releaseWeek'] as int,
       songIds: songIds,
       quality: _d(r['quality']),
@@ -665,6 +665,11 @@ abstract final class Codec {
       'VALUES (${List.filled(cols.length, '?').join(', ')})';
 
   static double _d(Object? v) => (v as num).toDouble();
+
+  /// A record type this release does not know (a save from a newer one,
+  /// opened by a page the browser kept; docs K279) reads as an album.
+  static AlbumType _albumType(int i) =>
+      i < AlbumType.values.length ? AlbumType.values[i] : AlbumType.album;
 
   static String _ints(List<int> v) => v.join(',');
 
@@ -753,7 +758,7 @@ abstract final class Codec {
               in (jsonDecode(json) as List).cast<Map<String, Object?>>())
             ScheduledRelease(
               id: m['id'] as int,
-              type: AlbumType.values[m['type'] as int],
+              type: _albumType(m['type'] as int),
               songIds: (m['songs'] as List).cast<int>(),
               title: m['title'] as String,
               variantWeeks: (m['variants'] as List).cast<int>(),

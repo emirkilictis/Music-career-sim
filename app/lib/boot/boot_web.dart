@@ -37,22 +37,30 @@ const _build = String.fromEnvironment('BUILD_ID');
 /// A newer release is on the site: the page should reload.
 final updateReady = ValueNotifier<bool>(false);
 
+/// Looks once for a newer release (docs K242); true when there is one.
+/// Before a career opens it is asked (docs K279): a page the browser kept
+/// from an older release cannot read a save a newer one wrote.
+Future<bool> checkForUpdate() async {
+  if (_build.isEmpty) return false;
+  if (updateReady.value) return true;
+  try {
+    final t = DateTime.now().millisecondsSinceEpoch;
+    final r = await web.window
+        .fetch('build.txt?t=$t'.toJS, web.RequestInit(cache: 'no-store'))
+        .toDart
+        .timeout(const Duration(seconds: 3));
+    if (!r.ok) return false;
+    final id = (await r.text().toDart).toDart.trim();
+    if (id.isNotEmpty && id != _build) updateReady.value = true;
+  } catch (_) {}
+  return updateReady.value;
+}
+
 /// Looks for a newer release now, every 10 minutes and whenever the page
 /// comes back into view (a Home Screen app stays open for days).
 void watchForUpdates() {
   if (_build.isEmpty) return;
-  Future<void> check() async {
-    if (updateReady.value) return;
-    try {
-      final t = DateTime.now().millisecondsSinceEpoch;
-      final r = await web.window
-          .fetch('build.txt?t=$t'.toJS, web.RequestInit(cache: 'no-store'))
-          .toDart;
-      if (!r.ok) return;
-      final id = (await r.text().toDart).toDart.trim();
-      if (id.isNotEmpty && id != _build) updateReady.value = true;
-    } catch (_) {}
-  }
+  Future<void> check() => checkForUpdate();
 
   check();
   Timer.periodic(const Duration(minutes: 10), (_) => check());
