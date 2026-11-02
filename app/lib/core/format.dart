@@ -2,6 +2,7 @@ import 'package:game/game.dart';
 import 'package:intl/intl.dart';
 
 import '../l10n/gen/app_localizations.dart';
+import 'action_errors.dart';
 import 'social_text.dart';
 import 'event_lines.dart';
 
@@ -1068,6 +1069,11 @@ class Fmt {
       s.grade >= 0 ? grade(s.grade) : gradeRange(s.gradeLow, s.gradeHigh);
 
   String error(Object e) {
+    // A rule's reason, shown in the player's language (docs K281).
+    String reason(String m) => m.isEmpty
+        ? l.errorGeneric
+        : actionError(m, turkish: _locale.startsWith('tr'));
+    if (e is ActionException) return reason(e.message);
     if (e is! GameException) return l.errorGeneric;
     return switch (e.code) {
       'notEnoughMoney' => l.errorNotEnoughMoney,
@@ -1175,7 +1181,7 @@ class Fmt {
       'invalidMembers' => l.errorInvalidMembers,
       'invalidSkills' => l.errorInvalidSkills,
       'weekFailed' => l.errorWeekFailed,
-      _ => l.errorGeneric,
+      _ => reason(e.message),
     };
   }
 

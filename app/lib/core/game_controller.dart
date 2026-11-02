@@ -114,6 +114,9 @@ class IsolateGameController extends GameController {
           reply.send((id, true, await command(host), null));
         } on GameException catch (e, st) {
           reply.send((id, false, e, st.toString()));
+        } on ActionException catch (e, st) {
+          // The rule's reason reaches the screen (docs K281).
+          reply.send((id, false, e, st.toString()));
         } catch (e, st) {
           reply.send((id, false, StateError('$e'), st.toString()));
         }
