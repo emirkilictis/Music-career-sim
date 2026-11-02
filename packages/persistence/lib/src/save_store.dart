@@ -156,6 +156,14 @@ class SaveStore {
     // A moment waiting for the player (docs K256).
     w.moment = Moment.decode(meta['moment'] as String?);
     // Radio station visits (docs K254).
+    if (meta['outsideRanks'] case final String s when s.isNotEmpty) {
+      for (final e in (jsonDecode(s) as Map<String, dynamic>).entries) {
+        w.outsideRanks[int.parse(e.key)] = {
+          for (final r in e.value as List)
+            (r as List)[0] as int: (r[1] as int, (r[2] as num).toDouble())
+        };
+      }
+    }
     if (meta['radioVisits'] case final String s when s.isNotEmpty) {
       w.radioVisits.addAll([
         for (final x in jsonDecode(s) as List)
@@ -452,6 +460,13 @@ class SaveStore {
       'songMarket': jsonEncode(w.boughtPitches.toList()..sort()),
       'pastTours': jsonEncode([for (final t in w.pastTours) t.toJson()]),
       'moment': w.moment?.encode() ?? '',
+      // Where the player's songs below the charts stand (docs K282).
+      'outsideRanks': jsonEncode({
+        for (final e in w.outsideRanks.entries)
+          '${e.key}': [
+            for (final r in e.value.entries) [r.key, r.value.$1, r.value.$2]
+          ]
+      }),
       'radioVisits': jsonEncode([
         for (final (week, m) in w.radioVisits) [week, m]
       ]),

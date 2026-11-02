@@ -273,6 +273,16 @@ int coverAlbumOf(World w, Song s) {
   return s.albumId;
 }
 
+/// A player's song below the main song charts (docs K282): on the chart
+/// it came closest to, its rank among all songs out this week and how many
+/// times its points the last charted song had.
+class OutsideRank {
+  const OutsideRank(this.chartId, this.rank, this.need);
+  final int chartId;
+  final int rank;
+  final double need;
+}
+
 class SongView {
   SongView._(World w, Song s)
       : id = s.id,

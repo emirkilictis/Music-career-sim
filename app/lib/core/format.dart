@@ -349,6 +349,10 @@ class Fmt {
 
   String genres(List<int> gs) => gs.map(genre).join(' · ');
 
+  /// How far below the chart a song is (docs K282): "1.3×", "15×".
+  String outsideNeed(double x) =>
+      x < 10 ? '${x.toStringAsFixed(1)}×' : '${x.round()}×';
+
   String chart(int id) => switch (id) {
         Charts.usSongs => l.chartUsSongs,
         Charts.ukSongs => l.chartUkSongs,

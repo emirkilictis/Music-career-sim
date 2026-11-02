@@ -42,6 +42,7 @@ abstract final class RngPurpose {
   static const comments = 52;
   static const moments = 54;
   static const catalogTrend = 56;
+  static const breakout = 58;
 }
 
 /// Numbers are JavaScript doubles: the web build's fallback for browsers

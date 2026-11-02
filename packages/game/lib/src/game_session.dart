@@ -2597,6 +2597,18 @@ class GameSession {
     }
   }
 
+  /// Where the player's song [id] stands below the charts last week, on
+  /// the chart it came closest to (docs K282); null when it charted or is
+  /// not out.
+  OutsideRank? outsideRank(int id) {
+    final ranks = world.outsideRanks[id];
+    if (ranks == null || ranks.isEmpty) return null;
+    final best = ranks.entries.reduce((a, b) => b.value.$2 < a.value.$2 ? b : a);
+    final size = Charts.all[best.key].size;
+    return OutsideRank(
+        best.key, math.max(size + 1, best.value.$1), best.value.$2);
+  }
+
   /// Plays one week, autosaves it and reports what happened.
   WeekReport advanceWeek() {
     _checkWhole();

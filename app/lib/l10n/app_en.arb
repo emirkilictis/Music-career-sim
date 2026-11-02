@@ -2169,6 +2169,23 @@
   "eraSmash": "Smash",
   "errorGeneric": "Something went wrong.",
   "errorNotEnoughMoney": "Not enough money.",
+  "outsideChart": "Not on the {chart} yet: #{rank} this week. The song at #{size} had {need} your points.",
+  "@outsideChart": {
+    "placeholders": {
+      "chart": {
+        "type": "String"
+      },
+      "rank": {
+        "type": "int"
+      },
+      "size": {
+        "type": "int"
+      },
+      "need": {
+        "type": "String"
+      }
+    }
+  },
   "errorWeekFailed": "This week could not be played. Close the career and open it again: it goes back to the last saved week.",
   "errorBadBackup": "This file is not a career backup, or it is from a newer version of the game.",
   "errorResting": "You are resting this week.",

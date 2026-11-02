@@ -219,6 +219,11 @@ class World {
   /// Last week's last-place points for every chart.
   final Float64List chartCutoff = Float64List(Charts.count);
 
+  /// Where the player's songs below a main song chart stood last week
+  /// (docs K282): song id → chart id → (rank among all active songs, the
+  /// last charted song's points over the song's own).
+  final Map<int, Map<int, (int, double)>> outsideRanks = {};
+
   /// Latest published charts, by chart id.
   List<List<ChartEntry>> charts =
       List.generate(Charts.count, (_) => const <ChartEntry>[]);

@@ -751,6 +751,10 @@ abstract final class Cmd {
 
   static SessionCmd<List<ScheduledView>> scheduled() => (s) => s.scheduled;
   static SessionCmd<SongView> song(int id) => (s) => s.song(id);
+
+  /// Where a song below the charts stands (docs K282).
+  static SessionCmd<OutsideRank?> outsideRank(int id) =>
+      (s) => s.outsideRank(id);
   static SessionCmd<AlbumView> album(int id) => (s) => s.album(id);
 
   /// An album with its tracks, for the Streamify album page (docs F23):

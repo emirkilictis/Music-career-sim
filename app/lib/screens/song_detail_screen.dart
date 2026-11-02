@@ -53,6 +53,9 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   /// The player's station visits (docs K254).
   RadioVisitsView? _visits;
 
+  /// Below the charts: the climb before the first entry (docs K282).
+  OutsideRank? _outside;
+
   Future<void> _load() async {
     final song = await widget.state.read(Cmd.song(widget.songId));
     final concept = await widget.state.read(Cmd.songConcept(widget.songId));
@@ -66,10 +69,14 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     final visits = song.isPlayer && song.isSingle && song.releasedWeek >= 0
         ? await widget.state.read(Cmd.radioVisits())
         : null;
+    final outside = song.isPlayer
+        ? await widget.state.read(Cmd.outsideRank(widget.songId))
+        : null;
     if (mounted) {
       setState(() {
         _income = income;
         _visits = visits;
+        _outside = outside;
         _song = song;
         _concept = concept;
         _history = history;
@@ -855,6 +862,15 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           if (!s.isPlayer)
             ArtistLink(
                 artistId: s.artistId, name: s.artistName, state: widget.state),
+          if (_outside case final o?) ...[
+            const SizedBox(height: 10),
+            Text(
+              l.outsideChart(fmt.chart(o.chartId), o.rank,
+                  Charts.all[o.chartId].size, fmt.outsideNeed(o.need)),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+            ),
+          ],
           if (s.usSingleUnits >= Certification.gold.units) ...[
             const SizedBox(height: 10),
             Center(child: CertificationTag(units: s.usSingleUnits)),

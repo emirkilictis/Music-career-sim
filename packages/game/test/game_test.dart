@@ -6613,4 +6613,35 @@ void main() {
       g.close();
     });
   });
+
+  group('newcomers (docs K282)', () {
+    test('a single below the charts shows how far it is', () {
+      var g = GameSession.start(slots, _setup());
+      final id = g.slotId;
+      final song = g.writeSong(budget: BudgetTier.low);
+      g.releaseSingle(song.id, campaign: Campaign.none);
+      g.advanceWeek();
+      final o = g.outsideRank(song.id)!;
+      expect(o.rank, greaterThan(Charts.all[o.chartId].size));
+      expect(o.need, greaterThan(1));
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.outsideRank(song.id)?.rank, o.rank);
+      g.close();
+    });
+
+    test("only a new artist's good new song can break out", () {
+      final c = SimConfig();
+      double at({double fame = 0, double q = 70, int age = 2, int year = 2019}) =>
+          c.breakoutChance(
+              fame: fame, quality: q, promoAge: age, year: year, released: true);
+      expect(at(), greaterThan(0));
+      expect(at(fame: 0.2), 0);
+      expect(at(q: 40), 0);
+      expect(at(age: SimConfig.breakoutWeeks), 0);
+      expect(at(year: 2003), 0);
+      expect(at(year: 2009), lessThan(at()));
+      expect(at(q: 80), greaterThan(at(q: 55)));
+    });
+  });
 }

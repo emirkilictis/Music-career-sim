@@ -444,6 +444,24 @@ class Simulator {
           s.creatorResult = CreatorResult.caughtOn;
         }
       }
+      // A newcomer's new song can break out online (docs K282): the
+      // usual trend needs an audience, so an unknown's good song almost
+      // never caught on and no first single ever charted.
+      final breakout = c.breakoutChance(
+          fame: p.fame,
+          quality: s.quality,
+          promoAge: promoAge,
+          year: year,
+          released: s.releasedWeek >= 0);
+      if (breakout > 0 &&
+          s.viralRamp == 0 &&
+          s.viralBoost < 0.01 &&
+          RandomStream.keyed(w.seed, w.week, s.id, RngPurpose.breakout)
+              .chance(breakout * p.kind.viral * videoViral)) {
+        _startViral(s, r, math.max(viralEra, SimConfig.breakoutEraFloor),
+            reach: SimConfig.breakoutReach, lift: SimConfig.breakoutLift);
+        virals.add(s.id);
+      }
       if (s.creatorResult == CreatorResult.running &&
           s.creatorWeek >= 0 &&
           w.week >= s.creatorWeek + CreatorCampaign.weeks - 1 &&
@@ -1240,6 +1258,7 @@ class Simulator {
           : _buildChart(def, albumIds, albumPts[def.id], newNo1[def.id]);
     }
     w.charts = published;
+    _rankOutside(ids, songPts);
 
     // 11. Lifecycle transitions.
     _songTransitions(songPts);
@@ -1553,6 +1572,29 @@ class Simulator {
     }
   }
 
+  /// Where the player's songs that missed a main song chart stand (docs
+  /// K282), so a new artist sees the climb before the first chart entry.
+  void _rankOutside(List<int> ids, List<Float64List> pts) {
+    final w = world;
+    w.outsideRanks.clear();
+    for (var i = 0; i < ids.length; i++) {
+      final s = w.songs[ids[i]];
+      if (s.primaryArtistId != w.playerArtistId) continue;
+      for (final ch in Charts.mainSongCharts) {
+        if (!Charts.all[ch].activeIn(w.week)) continue;
+        if ((s.statsOrNull(ch)?.lastPos ?? 0) > 0) continue;
+        final mine = pts[ch][i];
+        final cut = w.chartCutoff[ch];
+        if (mine <= 0 || cut <= 0) continue;
+        var above = 0;
+        for (final x in pts[ch]) {
+          if (x > mine) above++;
+        }
+        (w.outsideRanks[s.id] ??= {})[ch] = (above + 1, cut / mine);
+      }
+    }
+  }
+
   /// A song stays active while it is near the cut-off of any main chart.
   void _songTransitions(List<Float64List> pts) {
     final w = world;
@@ -1673,8 +1715,10 @@ class Simulator {
   static double _knownCampaign(double lift, double fame) =>
       lift <= 1 ? lift : 1 + (lift - 1) * (1 - 0.5 * fame.clamp(0.0, 1.0));
 
-  void _startViral(Song s, RandomStream r, double era, {double reach = 1}) {
-    var strength = r.range(0.02, 0.08) *
+  void _startViral(Song s, RandomStream r, double era,
+      {double reach = 1, double lift = 1}) {
+    var strength = lift *
+        r.range(0.02, 0.08) *
         (0.5 + s.virality) *
         (0.4 + 0.6 * math.min(1.0, reach));
     if (r.chance(world.config.megaViralChance)) strength *= r.range(3, 6);
