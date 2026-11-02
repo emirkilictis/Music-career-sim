@@ -202,18 +202,21 @@ class SimConfig {
   final double megaViralChance;
 
   /// A newcomer's breakout (docs K282): weekly chance that a new artist's
-  /// good new song catches on online in its first [breakoutWeeks] weeks.
-  /// Full for an unknown, gone at 15% fame; grows with quality from 45 to
-  /// 75. About one good first single in eight breaks out in the
-  /// short-video era, fewer on the early video sites, none before them.
+  /// (first three years) good new song catches on online in its first
+  /// [breakoutWeeks] weeks. Full for an unknown, gone at 15% fame; grows
+  /// with quality from 45 to 75. Fewer on the early video sites, none
+  /// before them.
   double breakoutChance({
     required double fame,
     required double quality,
     required int promoAge,
     required int year,
     required bool released,
+    required int careerWeeks,
   }) {
     if (!released || promoAge < 0 || promoAge >= breakoutWeeks) return 0;
+    // New artists only: a veteran whose fame faded is not one.
+    if (careerWeeks >= breakoutCareerWeeks) return 0;
     if (year < 2005 || fame >= 0.15) return 0;
     final q = ((quality - 45) / 30).clamp(0.0, 1.0);
     if (q <= 0) return 0;
@@ -222,6 +225,9 @@ class SimConfig {
   }
 
   static const breakoutWeeks = 10;
+
+  /// Only in an artist's first three years.
+  static const breakoutCareerWeeks = 156;
 
   /// A breakout spreads as if the song had a mid-sized audience, and on
   /// the early video sites as in the short-video years at their weakest.

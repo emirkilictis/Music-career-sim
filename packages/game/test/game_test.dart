@@ -6634,13 +6634,27 @@ void main() {
       final c = SimConfig();
       double at({double fame = 0, double q = 70, int age = 2, int year = 2019}) =>
           c.breakoutChance(
-              fame: fame, quality: q, promoAge: age, year: year, released: true);
+              fame: fame,
+              quality: q,
+              promoAge: age,
+              year: year,
+              released: true,
+              careerWeeks: 20);
       expect(at(), greaterThan(0));
       expect(at(fame: 0.2), 0);
       expect(at(q: 40), 0);
       expect(at(age: SimConfig.breakoutWeeks), 0);
       expect(at(year: 2003), 0);
       expect(at(year: 2009), lessThan(at()));
+      expect(
+          c.breakoutChance(
+              fame: 0,
+              quality: 70,
+              promoAge: 2,
+              year: 2019,
+              released: true,
+              careerWeeks: SimConfig.breakoutCareerWeeks),
+          0);
       expect(at(q: 80), greaterThan(at(q: 55)));
     });
   });

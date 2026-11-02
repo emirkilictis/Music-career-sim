@@ -452,7 +452,9 @@ class Simulator {
           quality: s.quality,
           promoAge: promoAge,
           year: year,
-          released: s.releasedWeek >= 0);
+          // A single: what a new artist puts in front of people.
+          released: s.releasedWeek >= 0 && s.isSingle,
+          careerWeeks: w.week - p.debutWeek);
       if (breakout > 0 &&
           s.viralRamp == 0 &&
           s.viralBoost < 0.01 &&

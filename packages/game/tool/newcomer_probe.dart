@@ -59,6 +59,7 @@ void main(List<String> args) {
     final us = Charts.all.indexWhere((c) => c.key == 'chart.us.songs');
     var best = 0.0, bestRank = 99999, cut = 0.0;
     var newcomers = 0, chartWeeks = 0;
+    final newVirals = <int>{};
     void watch(int weeks) {
       for (var i = 0; i < weeks; i++) {
         g.advanceWeek();
@@ -68,6 +69,15 @@ void main(List<String> args) {
           if (a.id != p.id && a.fame < 0.15) newcomers++;
         }
         chartWeeks++;
+        for (final id in w.activeSongIds) {
+          final x = w.songs[id];
+          final a = w.artists[x.primaryArtistId];
+          if (a.id != p.id && x.viralBoost >= 0.02 &&
+              w.week - x.releasedWeek < SimConfig.breakoutWeeks + 3 &&
+              w.week - a.debutWeek < SimConfig.breakoutCareerWeeks) {
+            newVirals.add(id);
+          }
+        }
         final mine = [for (final id in singles) w.songWeekStreamsIn(w.songs[id], ChartMarket.us)];
         if (mine.isEmpty) continue;
         if (Platform.environment['PROBE_VIRAL'] != null) {
@@ -85,7 +95,7 @@ void main(List<String> args) {
     watch(8);
     writeSome(4);
     watch(14);
-    final out = StringBuffer('rival newcomers on the US chart a week: ${(newcomers / chartWeeks).toStringAsFixed(1)}\n'
+    final out = StringBuffer('rival newcomers on the US chart a week: ${(newcomers / chartWeeks).toStringAsFixed(1)}, viral songs of new artists a year: ${(newVirals.length / chartWeeks * 52).round()}\n'
         'best US week ${(best / 1e3).round()}k streams, rank by streams $bestRank, #100 has ${(cut / 1e3).round()}k\n'
         'seed $seed fame ${(p.fame * 100).toStringAsFixed(1)}% '
         'fans ${(p.coreFans + p.casual).round()} money \$${p.moneyCents ~/ 100}\n');

@@ -413,8 +413,10 @@ class SongView {
               if (Languages.can(w, w.player!, s, v)) v
         ],
         snippetWeek = s.snippetWeek,
-        snippetReaction =
-            s.snippetWeek < 0 ? null : Snippets.reaction(s.snippetScore),
+        // From the score as shown: 29.6 shows as 30, lukewarm.
+        snippetReaction = s.snippetWeek < 0
+            ? null
+            : Snippets.reaction(s.snippetScore.roundToDouble()),
         snippetScore = s.snippetWeek < 0 ? 0 : s.snippetScore.round(),
         canSnippet = w.player != null && Snippets.can(w, w.player!, s),
         cloudWeek = s.cloudWeek,
