@@ -232,14 +232,19 @@ class TourLeg {
 
   /// The venue picked in [city].
   int venueIn(int city) =>
-      stops?.firstWhere((s) => s.city == city, orElse: () => const TourStop(0)).venue ??
+      stops
+          ?.firstWhere((s) => s.city == city, orElse: () => const TourStop(0))
+          .venue ??
       0;
 
   List<Object> toJson() => [
         market.index,
         kind.index,
         shows,
-        if (stops != null) [for (final s in stops!) [s.city, s.venue]],
+        if (stops != null)
+          [
+            for (final s in stops!) [s.city, s.venue]
+          ],
       ];
 
   static TourLeg fromJson(List<dynamic> l) => TourLeg(
@@ -330,6 +335,8 @@ class Tour {
     this.cut = Tours.artistCut,
     this.reunionOf = -1,
     this.setlist = const [],
+    this.albumId = -1,
+    this.greatestHits = false,
     List<TourShow>? shows,
     this.tickets = 0,
     this.grossCents = 0,
@@ -361,6 +368,8 @@ class Tour {
   /// The songs played each night, in order (docs K223): in show weeks
   /// they and their albums are streamed and bought more.
   final List<int> setlist;
+  final int albumId;
+  final bool greatestHits;
 
   /// Every night, in order.
   final List<TourShow> shows;
@@ -391,6 +400,8 @@ class Tour {
 
   Map<String, Object?> toJson() => {
         'v': 2,
+        'album': albumId,
+        'hits': greatestHits,
         'n': name,
         'legs': [for (final l in legs) l.toJson()],
         if (setlist.isNotEmpty) 'sl': setlist,
@@ -438,6 +449,8 @@ class Tour {
     }
     return Tour(
       name: j['n'] as String? ?? '',
+      albumId: j['album'] as int? ?? -1,
+      greatestHits: j['hits'] as bool? ?? false,
       legs: [for (final l in j['legs'] as List) TourLeg.fromJson(l as List)],
       setlist: [for (final id in j['sl'] as List? ?? const []) id as int],
       startWeek: j['w'] as int,
@@ -544,7 +557,8 @@ abstract final class Tours {
     if (nights == 0) return 0;
     final onRoad = w.week - t.startWeek;
     return nights * energyPerShow +
-        math.min(roadWearMax, math.max(0, onRoad - roadWeeks) * roadWearPerWeek);
+        math.min(
+            roadWearMax, math.max(0, onRoad - roadWeeks) * roadWearPerWeek);
   }
 
   /// A tired artist gives a flatter show (docs K249): fewer people won
@@ -782,6 +796,8 @@ abstract final class Tours {
     int openerId = -1,
     int reunionOf = -1,
     List<int> setlist = const [],
+    int albumId = -1,
+    bool greatestHits = false,
   }) {
     final pf = priceFactor.clamp(minPriceFactor, maxPriceFactor).toDouble();
     return Tour(
@@ -794,6 +810,8 @@ abstract final class Tours {
       cut: cutFor(a),
       reunionOf: reunionOf,
       setlist: setlist,
+      albumId: albumId,
+      greatestHits: greatestHits,
       shows: schedule(w, legs, w.week, pf),
     );
   }
@@ -818,7 +836,8 @@ abstract final class Tours {
   static double marketDemand(
       World w, Artist a, TourMarket m, double priceFactor, Artist? opener) {
     final share = a.regionShare[m.region.index] * m.share;
-    final hot = math.max(1 + a.hype + 0.5 * a.popularity, 1 + legacyHot * a.fame);
+    final hot =
+        math.max(1 + a.hype + 0.5 * a.popularity, 1 + legacyHot * a.fame);
     final live = 0.6 + 0.8 * a.skills.performance / 100;
     final core = Audience.engaged(a) *
         share *
@@ -1033,7 +1052,8 @@ abstract final class Tours {
   /// What an album gains in a week with shows: the merch stand and the
   /// fans who want the record of the night, more the more of it is in
   /// the set.
-  static const albumLiftBase = 0.08, albumLiftPerSong = 0.04,
+  static const albumLiftBase = 0.08,
+      albumLiftPerSong = 0.04,
       albumLiftMax = 0.35;
 
   /// The player's tour has nights this week.
@@ -1066,10 +1086,21 @@ abstract final class Tours {
       final al = w.songs[id].albumId;
       if (al >= 0) count[al] = (count[al] ?? 0) + 1;
     }
+    if (t.albumId >= 0 && t.albumId < w.albums.length) {
+      final album = w.albums[t.albumId];
+      final tracks = {...album.songIds, ...album.hitIds};
+      final played = t.setlist.where(tracks.contains).length;
+      if (played > 0) count[t.albumId] = played;
+    }
     return {
       for (final e in count.entries)
-        e.key: math.min(albumLiftMax,
-                albumLiftBase + albumLiftPerSong * e.value) *
+        e.key: math.min(
+                albumLiftMax,
+                albumLiftBase +
+                    albumLiftPerSong * e.value +
+                    (e.key == t.albumId
+                        ? 0.12 * e.value / t.setlist.length
+                        : 0)) *
             t.production.quality,
     };
   }

@@ -1,3 +1,4 @@
+import 'creative_studio.dart';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -49,6 +50,7 @@ class World {
   /// Current week (the next week to be simulated).
   int week;
 
+  CreativeStudio studio = CreativeStudio();
   final List<Artist> artists = [];
   final List<Song> songs = [];
   final List<Album> albums = [];

@@ -1,3 +1,4 @@
+import '../widgets/creative_brief.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
@@ -35,6 +36,7 @@ class SongDetailScreen extends StatefulWidget {
 
 class _SongDetailScreenState extends State<SongDetailScreen> {
   SongView? _song;
+  SongConcept? _concept;
   List<HistoryPoint> _history = const [];
   List<ChartWeek> _run = const [];
   List<EditorialPlacement> _playlists = const [];
@@ -53,6 +55,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
 
   Future<void> _load() async {
     final song = await widget.state.read(Cmd.song(widget.songId));
+    final concept = await widget.state.read(Cmd.songConcept(widget.songId));
     final history = await widget.state.read(Cmd.songHistory(widget.songId));
     final run =
         await widget.state.read(Cmd.chartRun(EntityKind.song, widget.songId));
@@ -68,6 +71,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         _income = income;
         _visits = visits;
         _song = song;
+        _concept = concept;
         _history = history;
         _run = run;
         _playlists = playlists;
@@ -699,8 +703,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             style: const TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 2),
         Text(
-            l.radioVisitHint(RadioTools.visitWeeks, v.energy,
-                RadioTools.visitGapWeeks),
+            l.radioVisitHint(
+                RadioTools.visitWeeks, v.energy, RadioTools.visitGapWeeks),
             style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
         const SizedBox(height: 6),
         Wrap(spacing: 8, runSpacing: 8, children: [
@@ -834,6 +838,9 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (_concept case final concept?)
+            CreativeBriefCard(
+                brief: concept.brief, direction: concept.direction),
           ReleaseHeader(
             coverSeed: songCoverSeed(s.id, s.coverAlbumId),
             songId: s.id,
@@ -952,8 +959,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   if (s.radioEdit) ...[
                     const SizedBox(height: 8),
                     Tag(l.radioEditTag,
-                        icon: Icons.content_cut_rounded,
-                        color: AppColors.mint),
+                        icon: Icons.content_cut_rounded, color: AppColors.mint),
                   ] else if (s.radioEditCost case final cost?) ...[
                     const SizedBox(height: 8),
                     Text(l.radioEditHint,
@@ -963,12 +969,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: ActionChip(
-                        avatar:
-                            const Icon(Icons.content_cut_rounded, size: 16),
+                        avatar: const Icon(Icons.content_cut_rounded, size: 16),
                         label: Text(l.radioEditButton(fmt.money(cost))),
                         onPressed: () async {
-                          if (await _tool(Cmd.cutRadioEdit(s.id)) &&
-                              mounted) {
+                          if (await _tool(Cmd.cutRadioEdit(s.id)) && mounted) {
                             showInfo(this.context, l.radioEditDone,
                                 icon: Icons.content_cut_rounded);
                           }
@@ -995,8 +999,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           avatar: Icon(radioIcon(e.key), size: 16),
                           label: Text(
                               'UK · ${fmt.radioPush(e.key)} · ${fmt.money(e.value)}'),
-                          onPressed: () =>
-                              _tool(Cmd.raiseUkRadio(s.id, e.key)),
+                          onPressed: () => _tool(Cmd.raiseUkRadio(s.id, e.key)),
                         ),
                     ]),
                   ],

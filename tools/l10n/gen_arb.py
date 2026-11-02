@@ -2532,6 +2532,53 @@ k('docTooSoon','One documentary every {years} years.','{years} yılda bir belges
 k('eventDocumentary','Your documentary “{title}” premiered: people are back on your songs.','Belgeselin “{title}” gösterime girdi: insanlar şarkılarına geri dönüyor.', title='String')
 k('errorNoDoc','A documentary is not possible now.','Şu an belgesel yapılamaz.')
 
+
+# Tour focus and setlist library.
+k('tourFocus', 'Tour focus', 'Turnenin odağı')
+k('tourIndependent', 'Independent tour', 'Bağımsız turne')
+k('tourGreatestHits', 'Greatest hits tour', 'En iyi şarkılar turnesi')
+k('tourAlbumProblem', 'Choose a released album by the headlining artist.', 'Turnedeki sanatçının yayınlanmış bir albümünü seç.')
+k('setSearch', 'Search songs or albums', 'Şarkı veya albüm ara')
+k('setHide', 'Hide selected', 'Seçilenleri gizle')
+k('setPopular', 'Popularity', 'Popülerlik')
+k('setAlbums', 'Albums', 'Albümler')
+k('setAlbumDraft', 'Album focused', 'Albüm ağırlıklı')
+k('setHitsDraft', 'Hit focused', 'Hit ağırlıklı')
+k('setFansDraft', 'Fan favorites', 'Fan favorileri')
+k('setAddAlbum', 'Add all', 'Tümünü ekle')
+k('setSelected', 'Selected · drag to reorder', 'Seçilenler · sıralamak için sürükle')
+k('setSingles', 'Standalone singles', 'Bağımsız single’lar')
+k('setFull', '40 songs selected. Remove a song to make room.', '40 şarkı seçildi. Yer açmak için bir şarkı çıkar.')
+k('setDraftHint', 'Drafts replace the selection with up to 20 songs. Fan favorites favor lasting fan appeal.', 'Taslaklar seçimi en fazla 20 şarkıyla değiştirir. Fan favorileri kalıcı hayran ilgisine öncelik verir.')
+k('tourRelated', 'Supporting tours', 'Albümü destekleyen turneler')
+k('tourActiveNow', 'In progress', 'Devam ediyor')
+k('tourAlbumEffect', 'Album support depends on its share of the setlist.', 'Albüm desteği, setlistteki şarkı payına bağlıdır.')
+
+
+# Creative studio and era briefs.
+k('creativeTitle','Era & creative direction','Era ve yaratıcı yön')
+k('creativeName','Era name (optional)','Era adı (isteğe bağlı)')
+k('creativeHint','A named era links new songs to a creative brief. Themes describe the record; sound and song direction trade strengths, without increasing overall quality. Your team is remembered, and can change for each song.','Adlandırdığın era yeni şarkıları bir yaratıcı plana bağlar. Temalar albümü anlatır; sound ve parça yönü genel kaliteyi artırmadan farklı güçlü yanlar yaratır. Ekibin hatırlanır; her şarkıda değiştirebilirsin.')
+k('creativeSave','Save creative brief','Yaratıcı planı kaydet')
+k('creativeSaved','Creative brief saved','Yaratıcı plan kaydedildi')
+k('creativeSound','Era sound','Era sound’u')
+k('creativeTheme','Main theme','Ana tema')
+k('creativeDirection','Song direction','Parça yönü')
+k('soundFamiliar','Signature sound · familiar to fans','İmza sound · hayranlara tanıdık')
+k('soundReinvention','Reinvention · broader appeal, less familiar','Yenilenme · daha geniş kitle, daha az tanıdık')
+k('soundExperimental','Experimental · lasting appeal over radio','Deneysel · radyodan çok kalıcılık')
+k('directionBalanced','Balanced · no trade-off','Dengeli · özel avantaj/dezavantaj yok')
+k('directionDance','Dance · radio & viral, less lasting','Dans · radyo ve viral, daha az kalıcı')
+k('directionBallad','Ballad · fans & longevity, slower reach','Ballad · hayranlar ve kalıcılık, daha yavaş erişim')
+k('directionVocal','Vocal showcase · fans & radio, less mainstream','Vokal gösterisi · hayranlar ve radyo, daha az ticari')
+k('directionExperimental','Experimental · longevity over mass appeal','Deneysel · kitlesel ilgiden çok kalıcılık')
+k('themeLove','Love','Aşk')
+k('themeHeartbreak','Heartbreak','Ayrılık')
+k('themeNightlife','Nightlife','Gece hayatı')
+k('themeAnger','Anger','Öfke')
+k('themeConfidence','Confidence','Özgüven')
+k('rolloutNowPreview','Rollout if released this week','Bu hafta yayınlarsan rollout durumu')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

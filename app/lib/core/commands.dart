@@ -98,6 +98,15 @@ abstract final class Cmd {
 
   // ------------------------------------------------------------- actions
 
+  static SessionCmd<RolloutStatus> rolloutPreview(List<int> ids) =>
+      (s) => Rollouts.status(s.world, s.world.player!, ids, s.world.week, -1);
+  static SessionCmd<EraBrief> creativeBrief() => (s) => s.world.studio.brief;
+  static SessionCmd<void> setCreativeBrief(EraBrief brief) =>
+      (s) => s.setCreativeBrief(brief);
+  static SessionCmd<SongConcept?> songConcept(int id) =>
+      (s) => s.world.studio.songs[id];
+  static SessionCmd<EraBrief?> albumBrief(int id) =>
+      (s) => s.world.studio.albums[id];
   static SessionCmd<SongView> writeSong({
     int? producerId,
     int? cowriterId,
@@ -106,6 +115,7 @@ abstract final class Cmd {
     String? title,
     bool holiday = false,
     int dissTarget = -1,
+    SongDirection direction = SongDirection.balanced,
   }) =>
       (s) => s.writeSong(
           producerId: producerId,
@@ -114,15 +124,15 @@ abstract final class Cmd {
           genres: genres,
           title: title,
           holiday: holiday,
-          dissTarget: dissTarget);
+          dissTarget: dissTarget,
+          direction: direction);
 
   /// The player's chart history (docs K232).
   static SessionCmd<ChartHistoryView> chartHistory() => (s) => s.chartHistory;
 
   /// Beefs (docs K229).
   static SessionCmd<BeefsView> beefs() => (s) => s.beefs;
-  static SessionCmd<List<DissTargetView>> dissTargets() =>
-      (s) => s.dissTargets;
+  static SessionCmd<List<DissTargetView>> dissTargets() => (s) => s.dissTargets;
   static SessionCmd<void> dissPost(int rivalId) => (s) => s.dissPost(rivalId);
   static SessionCmd<bool> dissHaters() => (s) => s.dissHaters();
   static SessionCmd<void> makePeace() => (s) => s.makePeace();
@@ -305,6 +315,16 @@ abstract final class Cmd {
   static SessionCmd<TourPlanView> tourPreview(TourRequest r) =>
       (s) => s.tourPreview(r);
   static SessionCmd<List<OpenerView>> tourOpeners() => (s) => s.tourOpeners;
+  static SessionCmd<List<AlbumView>> tourAlbums(TourRequest r) =>
+      (s) => s.tourAlbums(r);
+  static SessionCmd<
+          List<({String name, double gross, bool active, int startWeek})>>
+      albumTours(int id) => (s) => s.albumTours(id);
+  static SessionCmd<Map<int, (String, int)>> coverLabels() => (s) => {
+        for (final a in s.world.albums) a.id * 2 + 1: (a.title, a.artistId),
+        for (final id in s.world.playerSongIds)
+          id * 2: (s.world.songs[id].title, s.world.songs[id].primaryArtistId),
+      };
   static SessionCmd<void> startTour(TourRequest r) => (s) => s.startTour(r);
   static SessionCmd<List<SetlistSong>> setlistOptions(TourRequest r) =>
       (s) => s.setlistOptions(r);

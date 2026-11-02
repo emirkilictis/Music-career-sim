@@ -1,3 +1,4 @@
+import 'creative_studio.dart';
 import 'dart:math' as math;
 
 import 'album_versions.dart';
@@ -328,6 +329,8 @@ abstract final class Actions {
     String? title,
     List<int>? genres,
     bool holiday = false,
+    SongDirection direction = SongDirection.balanced,
+    EraBrief? brief,
   }) {
     final songGenres = genres ?? [a.genre];
     if (songGenres.isEmpty ||
@@ -413,15 +416,57 @@ abstract final class Actions {
     final q01 = quality / 100.0;
     double mix(double weight, double u) =>
         (weight * q01 + (1 - weight) * u).clamp(0.02, 1.0);
-    final commercial = mix(0.55, t.nextDouble());
-    final fanAppeal = mix(0.5, t.nextDouble());
-    final radioAppeal =
+    var commercial = mix(0.55, t.nextDouble());
+    var fanAppeal = mix(0.5, t.nextDouble());
+    var radioAppeal =
         (0.5 * commercial + 0.3 * a.skills.vocals / 100 + 0.2 * t.nextDouble())
             .clamp(0.02, 1.0);
-    final virality = (math.pow(t.nextDouble(), 1.6) * (0.5 + 0.5 * q01))
+    var virality = (math.pow(t.nextDouble(), 1.6) * (0.5 + 0.5 * q01))
         .toDouble()
         .clamp(0.0, 1.0);
-    final longevity = mix(0.6, t.nextDouble());
+    var longevity = mix(0.6, t.nextDouble());
+    // Creative choices redistribute strengths; no universal quality bonus.
+    if (!aiMode) {
+      switch (direction) {
+        case SongDirection.balanced:
+          break;
+        case SongDirection.dance:
+          radioAppeal += .08;
+          virality += .06;
+          longevity -= .08;
+          fanAppeal -= .06;
+        case SongDirection.ballad:
+          fanAppeal += .08;
+          longevity += .06;
+          virality -= .08;
+          commercial -= .06;
+        case SongDirection.vocal:
+          fanAppeal += .04;
+          radioAppeal += .04;
+          commercial -= .08;
+        case SongDirection.experimental:
+          longevity += .10;
+          commercial -= .10;
+      }
+      if (brief != null) {
+        switch (brief.sound) {
+          case EraSound.familiar:
+            fanAppeal += .03;
+            commercial -= .03;
+          case EraSound.reinvention:
+            commercial += .04;
+            fanAppeal -= .04;
+          case EraSound.experimental:
+            longevity += .08;
+            radioAppeal -= .08;
+        }
+      }
+      commercial = commercial.clamp(.02, 1.0);
+      fanAppeal = fanAppeal.clamp(.02, 1.0);
+      radioAppeal = radioAppeal.clamp(.02, 1.0);
+      virality = virality.clamp(0.0, 1.0);
+      longevity = longevity.clamp(.02, 1.0);
+    }
 
     // The team's estimate: better producers estimate better.
     final estimateNoise = math.max(3.0, 9.0 - prod / 20.0);
@@ -446,6 +491,10 @@ abstract final class Actions {
       longevity: longevity,
       estimatedGrade: grade,
     );
+    if (!aiMode && a.id == w.playerArtistId) {
+      w.studio.songs[song.id] =
+          SongConcept(brief ?? const EraBrief(), direction);
+    }
     song.gradeSpread = (1.5 * estimateNoise).round();
     // Holiday songs (docs K136): the player's choice; now and then a
     // rival records one too.
@@ -867,6 +916,22 @@ abstract final class Actions {
       a.moneyCents -= editionsCostCents(variantWeeks.length, variantFormats);
     }
     w.albums.add(album);
+    if (a.id == w.playerArtistId && liveTour < 0 && hits.isEmpty) {
+      // The most represented named brief defines the album, not the currently
+      // selected brief (which may already be for the next record).
+      final groups = <String, List<EraBrief>>{};
+      for (final id in songIds) {
+        final concept = w.studio.songs[id];
+        if (concept == null || concept.brief.name.isEmpty) continue;
+        groups.putIfAbsent(concept.brief.name, () => []).add(concept.brief);
+      }
+      if (groups.isNotEmpty) {
+        final entries = groups.values.toList()
+          ..sort((a, b) => b.length.compareTo(a.length));
+        w.studio.albums[album.id] = entries.first.first;
+      }
+    }
+
     // Tracks of an earlier EP the album takes over (docs K270): their
     // plays count for the album from now on, not twice.
     final moved = {
@@ -989,8 +1054,7 @@ abstract final class Actions {
       final s = w.songs[id];
       // Unreleased songs, or singles out on their own (docs K270).
       if (s.primaryArtistId != a.id ||
-          (s.status != SongStatus.vault &&
-              !canCarry(w, a, s, fromEp: false))) {
+          (s.status != SongStatus.vault && !canCarry(w, a, s, fromEp: false))) {
         throw ActionException('Only unreleased songs or loose singles');
       }
     }
@@ -1313,9 +1377,8 @@ abstract final class Eras {
     // album counts (K3: a comeback after years is judged afresh). Before,
     // the last era counted as its score against its own expectation, so
     // after a weak album any good one was a 5× smash.
-    final level = a.lastEraUnits > 0
-        ? (a.lastEraUnits / baseline).clamp(0.5, 8.0)
-        : 1.0;
+    final level =
+        a.lastEraUnits > 0 ? (a.lastEraUnits / baseline).clamp(0.5, 8.0) : 1.0;
     final gap = w.week - a.eraStartWeek;
     final weight = a.lastEraUnits <= 0
         ? 0.0

@@ -33,6 +33,11 @@ class TourDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               Text(
+                  t.albumTitle ??
+                      (t.greatestHits ? l.tourGreatestHits : l.tourIndependent),
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Text(
                   [
                     for (final leg in t.legs)
                       '${fmt.tourMarket(leg.market)} · ${fmt.tourKind(leg.kind)}'

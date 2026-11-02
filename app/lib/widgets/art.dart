@@ -83,6 +83,7 @@ class CoverArt extends StatelessWidget {
       this.songId,
       this.albumId,
       this.imageKey});
+  static Map<int, (String, int)> labels = const {};
   final int seed;
   final double size;
   final double? radius;
@@ -105,13 +106,58 @@ class CoverArt extends StatelessWidget {
     final path = store == null
         ? null
         : (imageKey == null ? null : store.path(imageKey!)) ?? own();
+    final identity =
+        albumId != null && albumId! >= 0 ? albumCoverSeed(albumId!) : seed;
+    final label =
+        labels[songId == null ? seed : songId! * 2] ?? labels[identity];
+    final title = label?.$1 ?? '';
+    final h = _hash(identity);
+    final variation = songId != null
+        ? _hash(songId! + 17)
+        : imageKey != null
+            ? _stableTextHash(imageKey!)
+            : 0;
+    final photo = label == null
+        ? null
+        : store?.artistPhoto(label.$2, ArtistPhoto.general);
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppShape.r(radius ?? size * 0.12)),
       child: SizedBox.square(
         dimension: size,
         child: path != null
             ? _Photo(path: path, size: size)
-            : CustomPaint(painter: _CoverPainter(_hash(seed))),
+            : Stack(fit: StackFit.expand, children: [
+                CustomPaint(painter: _CoverPainter(h, variation, title)),
+                if (h % 5 == 0 && photo != null) ...[
+                  for (var i = 0; i < 3; i++)
+                    Positioned(
+                      left: size * (.07 + i * .27),
+                      top: size * (.15 + (i == 1 ? -.03 : .06)),
+                      width: size * .38,
+                      height: size * .60,
+                      child: Transform.rotate(
+                          angle: (i - 1) * .09,
+                          child: Container(
+                              padding: EdgeInsets.all(size * .012),
+                              color: _paper,
+                              child: ClipRect(
+                                  child:
+                                      _Photo(path: photo, size: size * .6)))),
+                    ),
+                  Positioned(
+                      left: size * .08,
+                      right: size * .08,
+                      bottom: size * .07,
+                      child: Text(title.toUpperCase(),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontFamily: 'BarlowCondensed',
+                              fontWeight: FontWeight.w800,
+                              fontSize: size * .095,
+                              color: _paper))),
+                ],
+              ]),
       ),
     );
   }
@@ -140,223 +186,182 @@ class _Photo extends StatelessWidget {
   }
 }
 
+int _stableTextHash(String value) {
+  var h = 0;
+  for (final c in value.codeUnits) {
+    h = ((h * 31) + c) & 0x7fffffff;
+  }
+  return h;
+}
+
+/// Five distinct art directions. Album identity controls palette/direction;
+/// edition and single variations alter composition without changing the family.
 class _CoverPainter extends CustomPainter {
-  _CoverPainter(this.h);
-  final int h;
-
-  /// Number of motifs; picked from other bits of the hash than the colors
-  /// so any palette meets any motif (E5).
-  static const motifs = 14;
-
+  _CoverPainter(this.h, this.variation, this.title);
+  final int h, variation;
+  final String title;
   @override
   void paint(Canvas canvas, Size size) {
-    final r = math.Random(h);
-    final (bg, fg, ac) = _schemes[h % _schemes.length];
-    final rect = Offset.zero & size;
     final w = size.width;
+    final r = math.Random(h + variation);
+    final rect = Offset.zero & size;
+    const palettes = [
+      (Color(0xFF171B26), Color(0xFFF3DFC0), Color(0xFFBE684B)),
+      (Color(0xFFDEDAD0), Color(0xFF1E2928), Color(0xFF9A382B)),
+      (Color(0xFF1A232D), Color(0xFFCCDAE0), Color(0xFF6E8DB4)),
+      (Color(0xFF34232C), Color(0xFFF2D9B1), Color(0xFFE58A61)),
+      (Color(0xFFDFDBCA), Color(0xFF293C38), Color(0xFF6B8060)),
+      (Color(0xFF181519), Color(0xFFF0E2DE), Color(0xFF9D6484)),
+    ];
+    final (bg, ink, accent) = palettes[(h ~/ 7) % palettes.length];
     Paint fill(Color c) => Paint()..color = c;
-    Paint line(Color c, double width) => Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = width
-      ..color = c;
-    Offset at(double x, double y) => Offset(w * x, w * y);
-    double rnd(double lo, double hi) => lo + (hi - lo) * r.nextDouble();
+    void text(String value, double x, double y, double font, Color color,
+        {double width = .84, String family = 'BarlowCondensed'}) {
+      final p = TextPainter(
+          text: TextSpan(
+              text: value,
+              style: TextStyle(
+                  fontFamily: family,
+                  fontSize: w * font,
+                  height: .95,
+                  fontWeight: FontWeight.w800,
+                  color: color)),
+          textDirection: TextDirection.ltr,
+          maxLines: 3,
+          ellipsis: '…')
+        ..layout(maxWidth: w * width);
+      p.paint(canvas, Offset(w * x, w * y));
+    }
 
+    void landscape(Rect frame, int index) {
+      canvas.save();
+      canvas.clipRect(frame);
+      canvas.drawRect(
+          frame,
+          Paint()
+            ..shader = LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [bg, accent, ink]).createShader(frame));
+      canvas.drawCircle(
+          Offset(frame.center.dx + frame.width * .15,
+              frame.top + frame.height * .33),
+          frame.width * .15,
+          fill(ink.withValues(alpha: .7)));
+      for (var layer = 0; layer < 3; layer++) {
+        final path = Path()..moveTo(frame.left, frame.bottom);
+        for (var i = 0; i <= 12; i++) {
+          path.lineTo(
+              frame.left + frame.width * i / 12,
+              frame.top +
+                  frame.height *
+                      (.53 +
+                          layer * .13 +
+                          .10 * math.sin(i * .65 + index + layer)));
+        }
+        path
+          ..lineTo(frame.right, frame.bottom)
+          ..close();
+        canvas.drawPath(path, fill(Color.lerp(accent, bg, .4 + layer * .25)!));
+      }
+      canvas.restore();
+    }
+
+    canvas.save();
     canvas.clipRect(rect);
     canvas.drawRect(rect, fill(bg));
-
-    switch ((h >> 5) % motifs) {
-      case 0: // a big sun, often cropped by the edge, and a small moon
-        final c = at(rnd(0.2, 0.8), rnd(0.2, 0.7));
-        canvas.drawCircle(c, w * rnd(0.28, 0.42), fill(fg));
-        canvas.drawCircle(
-            at(rnd(0.15, 0.85), rnd(0.75, 0.88)), w * 0.06, fill(ac));
-      case 1: // target rings, solid, from a corner
-        final c = at(r.nextBool() ? 0.15 : 0.85, r.nextBool() ? 0.15 : 0.85);
-        final colors = [fg, bg, ac, bg];
-        for (var i = 7; i >= 1; i--) {
-          canvas.drawCircle(c, w * 0.15 * i, fill(colors[i % 4]));
-        }
-      case 2: // bands like a flag, across or down
-        canvas.save();
-        if (r.nextBool()) {
-          canvas.translate(w, 0);
-          canvas.rotate(math.pi / 2);
-        }
-        final n = 3 + r.nextInt(3);
-        final weights = [for (var i = 0; i < n; i++) rnd(0.5, 1.5)];
-        final total = weights.fold(0.0, (a, b) => a + b);
-        final colors = [bg, fg, ac, fg, bg];
-        var y = 0.0;
-        for (var i = 0; i < n; i++) {
-          final hgt = w * weights[i] / total;
-          canvas.drawRect(Rect.fromLTWH(0, y, w, hgt), fill(colors[i]));
-          y += hgt;
-        }
-        canvas.restore();
-      case 3: // a dot grid with one dot out of line
-        final n = 5 + r.nextInt(3);
-        final step = w / n;
-        final odd = r.nextInt(n * n);
-        for (var i = 0; i < n * n; i++) {
-          canvas.drawCircle(Offset(step * (i % n + 0.5), step * (i ~/ n + 0.5)),
-              step * (i == odd ? 0.46 : 0.3), fill(i == odd ? ac : fg));
-        }
-      case 4: // a diagonal split, the circle changing color across it
-        final half = Path()
-          ..moveTo(0, w * rnd(0.2, 0.8))
-          ..lineTo(w, w * rnd(0.2, 0.8))
-          ..lineTo(w, w)
-          ..lineTo(0, w)
-          ..close();
-        canvas.drawPath(half, fill(fg));
-        final c = at(rnd(0.35, 0.65), 0.5);
-        final rad = w * rnd(0.22, 0.32);
-        canvas.drawCircle(c, rad, fill(ac));
-        canvas.save();
-        canvas.clipPath(half);
-        canvas.drawCircle(c, rad, fill(bg));
-        canvas.restore();
-      case 5: // arches rising from the bottom
-        final cx = w * rnd(0.3, 0.7);
-        final colors = [fg, ac, bg, fg, ac];
-        for (var i = 0; i < 5; i++) {
-          canvas.drawCircle(
-              Offset(cx, w), w * (0.62 - 0.12 * i), fill(colors[i]));
-        }
-      case 6: // Bauhaus tiles: quarter circles in a 2×2 grid
-        final t = w / 2;
-        for (var i = 0; i < 4; i++) {
-          final o = Offset(t * (i % 2), t * (i ~/ 2));
-          final dark = (i + (h >> 13)) % 2 == 0;
-          canvas.drawRect(o & Size(t, t), fill(dark ? fg : bg));
-          final corner = o +
-              Offset(t * r.nextInt(2).toDouble(), t * r.nextInt(2).toDouble());
+    switch (h % 5) {
+      case 0: // Contact-sheet collage; replaced with artist photography if available.
+        for (var i = 0; i < 3; i++) {
           canvas.save();
-          canvas.clipRect(o & Size(t, t));
-          canvas.drawCircle(
-              corner, t, fill(r.nextInt(3) == 0 ? ac : (dark ? bg : fg)));
+          canvas.translate(
+              w * (.09 + i * .27), w * (.15 + r.nextDouble() * .08));
+          canvas.rotate((i - 1) * .09);
+          final frame = Rect.fromLTWH(0, 0, w * .38, w * .59);
+          canvas.drawRect(frame.inflate(w * .014), fill(ink));
+          landscape(frame, i);
           canvas.restore();
         }
-      case 7: // a thick frame with one small block
-        canvas.drawRect(Rect.fromLTWH(w * 0.12, w * 0.12, w * 0.76, w * 0.76),
-            line(fg, w * 0.07));
-        final s = w * rnd(0.12, 0.2);
+        text(title.toUpperCase(), .08, .80, .095, ink);
+      case 1: // Oversized editorial typography, deliberately cropped.
+        canvas.drawRect(Rect.fromLTWH(w * .67, 0, w * .33, w), fill(accent));
+        final words = title.trim().isEmpty
+            ? ['SIDE', 'A']
+            : title.toUpperCase().split(RegExp(r'\s+'));
+        for (var i = 0; i < math.min(words.length, 4); i++) {
+          text(words[i], .055, .08 + i * .19, .21, ink, width: .90);
+        }
+        canvas.drawLine(
+            Offset(w * .06, w * .90),
+            Offset(w * .93, w * .90),
+            Paint()
+              ..color = ink
+              ..strokeWidth = w * .006);
+      case 2: // Minimal still-life: one luminous sculptural object, much space.
+        final center = Offset(w * (.45 + (variation % 7) * .015), w * .43);
+        canvas.save();
+        canvas.translate(center.dx, center.dy);
+        canvas.rotate(-.4 + (h % 9) * .1);
+        final object = Rect.fromCenter(
+            center: Offset.zero, width: w * .27, height: w * .48);
+        canvas.drawOval(
+            object,
+            Paint()
+              ..shader = LinearGradient(
+                  colors: [accent, bg, ink, accent],
+                  stops: const [0, .35, .62, 1]).createShader(object));
+        canvas.restore();
+        text(title.toUpperCase(), .10, .79, .075, ink, width: .8);
+      case 3: // Analog landscape with a film border, light leaks, small serif title.
+        final frame = Rect.fromLTWH(w * .055, w * .055, w * .89, w * .77);
+        landscape(frame, variation % 5);
         canvas.drawRect(
-            Rect.fromLTWH(
-                w * rnd(0.22, 0.78) - s / 2, w * rnd(0.22, 0.78) - s / 2, s, s),
-            fill(ac));
-      case 8: // equalizer bars, the tallest in the accent
-        final n = 7 + r.nextInt(5);
-        final gap = w * 0.025;
-        final bw = (w * 0.84 - gap * (n - 1)) / n;
-        final heights = [for (var i = 0; i < n; i++) rnd(0.15, 0.75)];
-        final top = heights.indexOf(heights.reduce(math.max));
-        for (var i = 0; i < n; i++) {
-          canvas.drawRect(
-              Rect.fromLTWH(w * 0.08 + i * (bw + gap), w * (0.88 - heights[i]),
-                  bw, w * heights[i]),
-              fill(i == top ? ac : fg));
+            frame,
+            Paint()
+              ..shader = LinearGradient(colors: [
+                accent.withValues(alpha: .35),
+                Colors.transparent,
+                bg.withValues(alpha: .3)
+              ]).createShader(frame));
+        text(title, .075, .87, .065, ink, family: 'LibreBaskerville');
+      case _: // Fluid abstract fields, different from geometric poster covers.
+        for (var i = 0; i < 6; i++) {
+          final cx = w * (r.nextDouble() * 1.4 - .2), cy = w * r.nextDouble();
+          final oval = Rect.fromCenter(
+              center: Offset(cx, cy),
+              width: w * (.5 + r.nextDouble()),
+              height: w * (.25 + r.nextDouble() * .5));
+          canvas.save();
+          canvas.translate(cx, cy);
+          canvas.rotate(r.nextDouble() * 3);
+          canvas.translate(-cx, -cy);
+          canvas.drawOval(
+              oval,
+              Paint()
+                ..shader = RadialGradient(colors: [
+                  (i.isEven ? accent : ink).withValues(alpha: .85),
+                  bg.withValues(alpha: 0)
+                ]).createShader(oval));
+          canvas.restore();
         }
-      case 9: // thick waves
-        for (var i = 0; i < 4; i++) {
-          final p = line(i == 1 ? ac : fg, w * 0.07);
-          final y = w * (0.2 + 0.2 * i);
-          final phase = rnd(0, math.pi);
-          final path = Path()..moveTo(-w * 0.1, y);
-          for (var x = -w * 0.1; x <= w * 1.1; x += w / 24) {
-            path.lineTo(
-                x, y + math.sin(x / w * math.pi * 4 + phase) * w * 0.05);
-          }
-          canvas.drawPath(path, p);
-        }
-      case 10: // eclipse: a crescent and a thin ring
-        final c = at(rnd(0.35, 0.65), rnd(0.4, 0.6));
-        canvas.drawCircle(c, w * 0.4, line(fg, w * 0.012));
-        canvas.drawCircle(c, w * 0.3, fill(ac));
-        canvas.drawCircle(c + at(rnd(0.05, 0.1), -0.05), w * 0.27, fill(bg));
-      case 11: // a checkered strip under a disc
-        final n = 8;
-        final s = w / n;
-        final y = w * rnd(0.55, 0.7);
-        for (var row = 0; row < 2; row++) {
-          for (var col = 0; col < n; col++) {
-            if ((row + col).isEven) {
-              canvas.drawRect(
-                  Rect.fromLTWH(col * s, y + row * s, s, s), fill(fg));
-            }
-          }
-        }
-        canvas.drawCircle(at(rnd(0.3, 0.7), 0.3), w * 0.16, fill(ac));
-      case 12: // peaks in front of each other
-        canvas.drawCircle(at(rnd(0.6, 0.8), 0.25), w * 0.1, fill(ac));
-        final back = Path()
-          ..moveTo(-w * 0.1, w)
-          ..lineTo(w * rnd(0.3, 0.5), w * rnd(0.2, 0.35))
-          ..lineTo(w * 1.0, w)
-          ..close();
-        canvas.drawPath(back, fill(fg));
-        final front = Path()
-          ..moveTo(w * 0.35, w)
-          ..lineTo(w * rnd(0.65, 0.8), w * rnd(0.45, 0.6))
-          ..lineTo(w * 1.2, w)
-          ..close();
-        canvas.drawPath(front, fill(ac));
-      case _: // a record sliding out of its sleeve
-        final c = at(rnd(0.58, 0.68), 0.5);
-        canvas.drawCircle(c, w * 0.38, fill(fg));
-        for (var i = 1; i <= 3; i++) {
-          canvas.drawCircle(c, w * (0.18 + 0.06 * i),
-              line(bg.withValues(alpha: 0.25), w * 0.006));
-        }
-        canvas.drawCircle(c, w * 0.12, fill(bg));
-        canvas.drawCircle(c, w * 0.015, fill(fg));
-        canvas.drawRect(
-            Rect.fromLTWH(0, w * 0.08, w * 0.5, w * 0.84), fill(ac));
+        text(title.toUpperCase(), .08, .08, .11, ink);
     }
-
-    // A hairline edge so a black or paper cover keeps its shape on a
-    // background of the same color.
-    final dim = bg.computeLuminance() < 0.05;
-    final pale = bg.computeLuminance() > 0.7;
-    if (dim || pale) {
-      final edge = math.max(1.0, w / 160);
-      canvas.drawRect(
-          rect.deflate(edge / 2),
-          line(
-              dim
-                  ? Colors.white.withValues(alpha: 0.12)
-                  : Colors.black.withValues(alpha: 0.1),
-              edge));
-    }
-
-    // A light print grain so the flat inks don't look rendered.
-    if (w >= 40) {
-      final count = math.min(3000, (w * w / 28).round());
-      final dark = <Offset>[];
-      final light = <Offset>[];
-      for (var i = 0; i < count; i++) {
-        (i.isEven ? dark : light)
-            .add(Offset(r.nextDouble() * w, r.nextDouble() * w));
-      }
-      final dot = math.max(1.0, w / 180);
-      canvas.drawPoints(
-          PointMode.points,
-          dark,
-          Paint()
-            ..color = Colors.black.withValues(alpha: 0.08)
-            ..strokeWidth = dot);
-      canvas.drawPoints(
-          PointMode.points,
-          light,
-          Paint()
-            ..color = Colors.white.withValues(alpha: 0.08)
-            ..strokeWidth = dot);
-    }
+    final points = <Offset>[
+      for (var i = 0; i < 600; i++)
+        Offset(r.nextDouble() * w, r.nextDouble() * w)
+    ];
+    canvas.drawPoints(
+        PointMode.points,
+        points,
+        Paint()
+          ..color = ink.withValues(alpha: .10)
+          ..strokeWidth = math.max(.5, w / 350));
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(_CoverPainter old) => old.h != h;
+  bool shouldRepaint(_CoverPainter old) =>
+      old.h != h || old.variation != variation || old.title != title;
 }
 
 /// Round flat-color avatar with initials, or the artist's uploaded photo when

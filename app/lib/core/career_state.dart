@@ -65,6 +65,7 @@ class CareerState extends ChangeNotifier {
     _player = p;
     week = w;
     difficulty = d;
+    CoverArt.labels = await controller.run(Cmd.coverLabels());
     revision++;
     notifyListeners();
   }
