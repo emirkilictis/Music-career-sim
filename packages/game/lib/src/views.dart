@@ -3117,6 +3117,8 @@ class SocialItemView {
 
   static PostMedia _mediaOf(SocialItem i) {
     if (i.topic == FanTopic.postTeaser) return PostMedia.snippet;
+    // A meme is its picture (docs K277).
+    if (memeTopics.contains(i.topic)) return PostMedia.meme;
     if (i.songId < 0 && i.albumId < 0) return PostMedia.none;
     return switch (i.topic) {
       FanTopic.numberOne || FanTopic.topTen || FanTopic.yearEndHit =>
@@ -3242,7 +3244,7 @@ class ReplyView {
 /// What a feed post shows under its text (docs K211), as posts on real
 /// networks carry a picture: the cover, a chart graphic, a big number,
 /// a review score, or a sound clip for a teaser.
-enum PostMedia { none, release, chart, stat, score, snippet }
+enum PostMedia { none, release, chart, stat, score, snippet, meme }
 
 /// The player's social media page (docs K93).
 class SocialView {
@@ -3280,9 +3282,11 @@ class SocialView {
     final pictured = <(int, int, int)>{};
     for (final i in items) {
       final m = i.media;
+      // A meme is its picture: always kept (docs K277).
       if (m == PostMedia.none ||
           m == PostMedia.snippet ||
-          m == PostMedia.release) {
+          m == PostMedia.release ||
+          m == PostMedia.meme) {
         continue;
       }
       if (shown.add((i.week, i.songId, i.albumId, m))) {

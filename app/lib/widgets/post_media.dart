@@ -40,6 +40,7 @@ class PostMediaCard extends StatelessWidget {
       PostMedia.stat => _stat(context),
       PostMedia.score => _score(context),
       PostMedia.snippet => _snippet(context),
+      PostMedia.meme => _meme(context),
     };
     if (child == null) return const SizedBox.shrink();
     return Container(
@@ -58,6 +59,56 @@ class PostMediaCard extends StatelessWidget {
       albumId: item.coverAlbumId >= 0 ? item.coverAlbumId : null,
       size: size,
       radius: 0);
+
+  /// A meme (docs K277): the release's cover or a dark card, a top line
+  /// and a bottom line in white capitals with a black outline.
+  Widget _meme(BuildContext context) {
+    final lines = context.fmt.social(item, artistName).split('\n');
+    final top = lines.first.toUpperCase();
+    final bottom = lines.length > 1 ? lines.sublist(1).join(' ').toUpperCase() : '';
+    const outline = [
+      Shadow(offset: Offset(-1.5, -1.5)),
+      Shadow(offset: Offset(1.5, -1.5)),
+      Shadow(offset: Offset(-1.5, 1.5)),
+      Shadow(offset: Offset(1.5, 1.5)),
+    ];
+    Widget caption(String t) => Text(t,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.w900,
+            height: 1.1,
+            letterSpacing: 0.5,
+            shadows: outline));
+    final hasCover = item.songId >= 0 || item.albumId >= 0;
+    return AspectRatio(
+      aspectRatio: 1.15,
+      child: LayoutBuilder(
+        builder: (context, box) => Stack(fit: StackFit.expand, children: [
+          if (hasCover)
+            _cover(box.maxWidth)
+          else
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF3A3D46), Color(0xFF15161A)]),
+              ),
+              child: Center(
+                  child: Text('💀', style: TextStyle(fontSize: 72))),
+            ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [caption(top), caption(bottom)]),
+          ),
+        ]),
+      ),
+    );
+  }
 
   Color get _text => dark ? const Color(0xFFE7E9EA) : const Color(0xFF111111);
   Color get _muted => dark ? const Color(0xFF71767B) : const Color(0xFF666666);

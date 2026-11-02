@@ -2451,6 +2451,31 @@ void main() {
       g.close();
     });
 
+    test('fans post memes, shown as their picture (K277)', () {
+      final g = GameSession.start(slots, _setup(startYear: 2019));
+      final w = g.world;
+      final rival = w.artists.firstWhere((a) => a.id != w.playerArtistId);
+      for (final t in memeTopics) {
+        Social.add(
+            w,
+            SocialItem(
+                week: w.week,
+                topic: t,
+                variant: 0,
+                fan: 7,
+                artistId: t == FanTopic.memeBlocked ? rival.id : -1));
+      }
+      final memes = [
+        for (final i in g.social.items)
+          if (memeTopics.contains(i.topic)) i
+      ];
+      expect(memes, hasLength(memeTopics.length));
+      expect(memes.every((i) => i.media == PostMedia.meme), isTrue);
+      expect(memes.firstWhere((i) => i.topic == FanTopic.memeBlocked).rivalName,
+          rival.name);
+      g.close();
+    });
+
     test('feed posts carry pictures, one of each per release a week (K211)',
         () {
       final g = GameSession.start(
@@ -2474,8 +2499,11 @@ void main() {
       g.advanceWeeks(2, stop: SkipStop.never);
       final items = g.social.items;
       expect(items.where((i) => i.media == PostMedia.snippet), hasLength(1));
+      // Memes are pictures of their own (K277).
       final pictured = items.where((i) =>
-          i.media != PostMedia.none && i.media != PostMedia.snippet);
+          i.media != PostMedia.none &&
+          i.media != PostMedia.snippet &&
+          i.media != PostMedia.meme);
       expect(pictured, isNotEmpty);
       final kinds = <(int, int, int, PostMedia)>{};
       final covers = <(int, int, int)>{};

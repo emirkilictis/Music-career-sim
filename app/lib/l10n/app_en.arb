@@ -4941,6 +4941,127 @@
     }
   },
   "smTopArtistNo12": "Number one artist. We built this together.",
+  "smMemeBlocked0": "{title} trying to get to #1\n{rival}: 🧱 blocked",
+  "@smMemeBlocked0": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeBlocked1": "Nobody:\n{rival}: keeping {title} from #1 for fun",
+  "@smMemeBlocked1": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeBlocked2": "{rival} blocked you\n— {title}, probably",
+  "@smMemeBlocked2": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeHit0": "Me: I'll sleep early tonight\n{title} at #1:",
+  "@smMemeHit0": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeHit1": "{name} fans right now\n🕺🕺🕺 number one 🕺🕺🕺",
+  "@smMemeHit1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeHit2": "The charts before {title}\nThe charts after {title} 👑",
+  "@smMemeHit2": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeFlop0": "{name}'s label looking at the numbers\n😐",
+  "@smMemeFlop0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeFlop1": "It did not flop\nIt's just… understood by few",
+  "smMemeFlop2": "The plan: era of the year\nThe reality: 📉",
+  "smMemeSilence0": "{name} fans waiting for new music\n💀🪑",
+  "@smMemeSilence0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeSilence1": "Me checking if {name} dropped\nfor the 400th time today",
+  "@smMemeSilence1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeSilence2": "{name}: new era soon\nSoon:",
+  "@smMemeSilence2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeDrop0": "{name} at midnight\nSurprise, here's {title}",
+  "@smMemeDrop0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeDrop1": "My sleep schedule\n{title}: 🗡️",
+  "@smMemeDrop1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smMemeDrop2": "Nobody:\n{name}: drops {title} with zero warning",
+  "@smMemeDrop2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "networkForum": "Fan forum",
   "networkMyPlace": "MyPlace",
   "networkChirper": "Chirper",

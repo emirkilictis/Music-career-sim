@@ -108,7 +108,22 @@ enum FanTopic {
   haterComeback,
   haterSoftened,
   haterRoasted,
+  // Memes (docs K277): a top line and a bottom line on a picture.
+  memeBlocked,
+  memeHit,
+  memeFlop,
+  memeSilence,
+  memeDrop,
 }
+
+/// Fans' memes (docs K277), from the Chirper years.
+const memeTopics = {
+  FanTopic.memeBlocked,
+  FanTopic.memeHit,
+  FanTopic.memeFlop,
+  FanTopic.memeSilence,
+  FanTopic.memeDrop,
+};
 
 /// One post in the feed: the player's ([fan] = -1) or a fan's.
 class SocialItem {

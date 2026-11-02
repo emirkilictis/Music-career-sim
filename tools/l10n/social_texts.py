@@ -407,4 +407,30 @@ TOPICS = {
   ("Biggest artist on the planet: {name}. Facts.", "Gezegendeki en büyük sanatçı: {name}. Gerçek bu."),
   ("Number one artist. We built this together.", "Bir numaralı sanatçı. Bunu birlikte kurduk."),
  ],
+ # Memes (docs K277): top line, a line break, bottom line.
+ 'memeBlocked': [
+  ("{title} trying to get to #1\n{rival}: 🧱 blocked", "{title} #1'e çıkmaya çalışırken\n{rival}: 🧱 engellendi"),
+  ("Nobody:\n{rival}: keeping {title} from #1 for fun", "Kimse:\n{rival}: sırf eğlencesine {title} şarkısını #1'den uzak tutuyor"),
+  ("{rival} blocked you\n— {title}, probably", "{rival} seni engelledi\n— {title}, muhtemelen"),
+ ],
+ 'memeHit': [
+  ("Me: I'll sleep early tonight\n{title} at #1:", "Ben: bu gece erken yatacağım\n{title} #1'de:"),
+  ("{name} fans right now\n🕺🕺🕺 number one 🕺🕺🕺", "Şu an {name} hayranları\n🕺🕺🕺 bir numara 🕺🕺🕺"),
+  ("The charts before {title}\nThe charts after {title} 👑", "{title} öncesi listeler\n{title} sonrası listeler 👑"),
+ ],
+ 'memeFlop': [
+  ("{name}'s label looking at the numbers\n😐", "{name}'in plak şirketi rakamlara bakarken\n😐"),
+  ("It did not flop\nIt's just… understood by few", "Flop olmadı\nSadece… az kişi anladı"),
+  ("The plan: era of the year\nThe reality: 📉", "Plan: yılın dönemi\nGerçek: 📉"),
+ ],
+ 'memeSilence': [
+  ("{name} fans waiting for new music\n💀🪑", "Yeni müzik bekleyen {name} hayranları\n💀🪑"),
+  ("Me checking if {name} dropped\nfor the 400th time today", "{name} bir şey çıkardı mı diye bakarken\nbugün 400. kez"),
+  ("{name}: new era soon\nSoon:", "{name}: yeni dönem yakında\nYakında:"),
+ ],
+ 'memeDrop': [
+  ("{name} at midnight\nSurprise, here's {title}", "Gece yarısı {name}\nSürpriz, işte {title}"),
+  ("My sleep schedule\n{title}: 🗡️", "Uyku düzenim\n{title}: 🗡️"),
+  ("Nobody:\n{name}: drops {title} with zero warning", "Kimse:\n{name}: hiç haber vermeden {title} çıkarıyor"),
+ ],
 }

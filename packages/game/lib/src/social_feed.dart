@@ -32,6 +32,16 @@ abstract final class SocialFeed {
       ));
     }
 
+    // Memes (docs K277): the Chirper years' jokes, on about half the
+    // moments that call for one.
+    final memes = Social.networkIn(GameTime.yearOf(week)) == SocialNetwork.chirper;
+    void meme(FanTopic topic,
+        {int songId = -1, int albumId = -1, int artistId = -1}) {
+      if (memes && r.chance(0.5)) {
+        fan(topic, songId: songId, albumId: albumId, artistId: artistId);
+      }
+    }
+
     // How a release lands: its quality (an album's reviews count too).
     void release(double quality, {int songId = -1, int albumId = -1}) {
       if (quality >= 72) {
@@ -97,6 +107,9 @@ abstract final class SocialFeed {
           fan(FanTopic.numberOne,
               songId: kind == EntityKind.song ? entityId : -1,
               albumId: kind == EntityKind.album ? entityId : -1);
+          meme(FanTopic.memeHit,
+              songId: kind == EntityKind.song ? entityId : -1,
+              albumId: kind == EntityKind.album ? entityId : -1);
         case ChartDebut(kind: EntityKind.song, :final entityId, :final position)
             when position <= 10 && position > 1:
           fan(FanTopic.topTen, songId: entityId, number: position);
@@ -144,11 +157,22 @@ abstract final class SocialFeed {
         case EraClosed(:final result)
             when result == EraResult.flop || result == EraResult.disappointing:
           fan(FanTopic.flopEra);
-        case ChartBattle(:final won, :final kind, :final playerEntityId)
+          meme(FanTopic.memeFlop);
+        case ChartBattle(
+                :final won,
+                :final kind,
+                :final playerEntityId,
+                :final rivalArtistId
+              )
             when !won:
           fan(FanTopic.battleLost,
               songId: kind == EntityKind.song ? playerEntityId : -1,
               albumId: kind == EntityKind.album ? playerEntityId : -1);
+          // "{rival} blocked you" (docs K277).
+          meme(FanTopic.memeBlocked,
+              songId: kind == EntityKind.song ? playerEntityId : -1,
+              albumId: kind == EntityKind.album ? playerEntityId : -1,
+              artistId: rivalArtistId);
         case BotsCaught(:final songId):
           fan(FanTopic.botsCaught, songId: songId);
           fan(FanTopic.botsCaught, songId: songId);
@@ -175,6 +199,7 @@ abstract final class SocialFeed {
         case SurpriseDrop(:final albumId):
           fan(FanTopic.surpriseDrop, albumId: albumId);
           fan(FanTopic.surpriseDrop, albumId: albumId);
+          meme(FanTopic.memeDrop, albumId: albumId);
         case StreamMilestone(:final songId, :final plays)
             when plays >= Platforms.billionsClub:
           fan(FanTopic.billionsClub, songId: songId);
@@ -203,6 +228,7 @@ abstract final class SocialFeed {
         week - st.lastHiatusWeek >= 8) {
       st.lastHiatusWeek = week;
       fan(FanTopic.hiatus, number: (week - p.lastReleaseWeek) * 7);
+      meme(FanTopic.memeSilence);
     }
     for (final item in items.take(maxPerWeek)) {
       Social.add(w, item);

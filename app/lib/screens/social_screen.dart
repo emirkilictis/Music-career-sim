@@ -1003,7 +1003,9 @@ class FeedPost extends StatelessWidget {
                       fontSize: 11,
                       fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
-              Text(text, style: TextStyle(color: skin.text, height: 1.3)),
+              // A meme is its picture (docs K277).
+              if (item.media != PostMedia.meme)
+                Text(text, style: TextStyle(color: skin.text, height: 1.3)),
               // Forums before social media show no pictures (docs K211).
               if (skin == SocialSkin.myPlace)
                 PostMediaCard(
@@ -1066,8 +1068,10 @@ class FeedPost extends StatelessWidget {
               ),
             ]),
             const SizedBox(height: 2),
-            Text(text,
-                style: TextStyle(color: skin.text, fontSize: 15, height: 1.3)),
+            if (item.media != PostMedia.meme)
+              Text(text,
+                  style:
+                      TextStyle(color: skin.text, fontSize: 15, height: 1.3)),
             PostMediaCard(item: item, artistName: p.name, week: state.week),
             const SizedBox(height: 10),
             Row(children: [
