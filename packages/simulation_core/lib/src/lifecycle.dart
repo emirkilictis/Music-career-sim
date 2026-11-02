@@ -167,7 +167,9 @@ abstract final class Lifecycle {
             rate * a.catalogFactor * a.regionShare[r];
       }
     }
-    a.dormantSongIds.add(s.id);
+    // In id order, as a loaded save has them: sums over the catalog then
+    // come out the same to the last digit after a reload (docs K282).
+    World.insertSorted(a.dormantSongIds, s.id);
     w.dormantSongCount++;
     w.dirtySongs.add(s.id);
     w.dirtyArtists.add(a.id);
