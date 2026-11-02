@@ -2169,6 +2169,7 @@
   "eraSmash": "Smash",
   "errorGeneric": "Something went wrong.",
   "errorNotEnoughMoney": "Not enough money.",
+  "errorWeekFailed": "This week could not be played. Close the career and open it again: it goes back to the last saved week.",
   "errorBadBackup": "This file is not a career backup, or it is from a newer version of the game.",
   "errorResting": "You are resting this week.",
   "errorNoSkillPoints": "No skill points left. You get one every week.",

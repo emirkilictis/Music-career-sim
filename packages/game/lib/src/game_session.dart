@@ -379,10 +379,12 @@ class GameSession {
   /// the background or the player leaves the career.
   void close() {
     if (_closed) return;
-    _store.flushActive(world);
-    // The career list shows what changed since the last week (money, a new
-    // album).
-    slots.writeSummary(slotId, world);
+    if (!_halfPlayed) {
+      _store.flushActive(world);
+      // The career list shows what changed since the last week (money, a
+      // new album).
+      slots.writeSummary(slotId, world);
+    }
     _store.close();
     _closed = true;
   }
@@ -2584,8 +2586,29 @@ class GameSession {
 
   // ----------------------------------------------------------------- weeks
 
+  /// A week that failed part way left the world half played (docs K280):
+  /// nothing more is played or saved until the career is opened again,
+  /// which goes back to the last saved week.
+  bool _halfPlayed = false;
+
+  void _checkWhole() {
+    if (_halfPlayed) {
+      throw GameException('weekFailed', 'Open the career again');
+    }
+  }
+
   /// Plays one week, autosaves it and reports what happened.
   WeekReport advanceWeek() {
+    _checkWhole();
+    try {
+      return _advanceWeek();
+    } catch (_) {
+      _halfPlayed = true;
+      rethrow;
+    }
+  }
+
+  WeekReport _advanceWeek() {
     final p = _p;
     final before = _Snapshot(world, p);
     // Dated album versions due this week (docs K255).
@@ -4468,7 +4491,10 @@ class GameSession {
 
   // ---------------------------------------------------------------- helpers
 
-  void _saveNow() => _store.saveState(world);
+  void _saveNow() {
+    _checkWhole();
+    _store.saveState(world);
+  }
 
   double _singleSales() => world.playerSongIds.fold(
       0.0,

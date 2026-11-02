@@ -134,8 +134,8 @@ class WebSaveFs extends SaveFs {
   @override
   Future<void> prepare(String path) async {
     if (_memory.fileData.containsKey(path) || !_stored.contains(path)) return;
-    Future<JSAny?> read() async => _done(
-        (await _txAsync('readonly')).objectStore(_store).get(path.toJS));
+    Future<JSAny?> read() async =>
+        _done((await _txAsync('readonly')).objectStore(_store).get(path.toJS));
     JSAny? value;
     try {
       value = await read();
@@ -248,6 +248,9 @@ class WebSaveFs extends SaveFs {
     db.execute('PRAGMA foreign_keys = OFF');
     return db;
   }
+
+  @override
+  bool get doublesAsText => true;
 
   /// Every loaded file may have changed: store them at most a moment
   /// after the first unstored save. (Waiting for the saves to pause never

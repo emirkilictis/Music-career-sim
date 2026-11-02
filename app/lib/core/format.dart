@@ -1174,6 +1174,7 @@ class Fmt {
       'invalidName' => l.errorInvalidName,
       'invalidMembers' => l.errorInvalidMembers,
       'invalidSkills' => l.errorInvalidSkills,
+      'weekFailed' => l.errorWeekFailed,
       _ => l.errorGeneric,
     };
   }

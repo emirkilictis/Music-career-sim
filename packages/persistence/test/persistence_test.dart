@@ -1,10 +1,17 @@
 import 'dart:io';
 
 import 'package:persistence/persistence.dart';
+import 'package:persistence/src/save_fs_io.dart';
 import 'package:simulation_core/simulation_core.dart';
 import 'package:test/test.dart';
 
 late Directory tmp;
+
+/// The web's way of saving: doubles bound as text (docs K280).
+class _TextDoublesFs extends IoSaveFs {
+  @override
+  bool get doublesAsText => true;
+}
 
 World _newWorld(int seed, {Difficulty difficulty = Difficulty.normal}) {
   final w =
@@ -176,6 +183,44 @@ void main() {
     store.close();
     expect(worldHash(b), worldHash(a));
     expect(b.player!.lifetimeStreams, a.player!.lifetimeStreams);
+  });
+
+  test('doubles saved as text (the web) load back as numbers', () {
+    // A browser passed doubles to SQLite as the low 32 bits of the
+    // number (docs K280); text takes another path.
+    final fs = _TextDoublesFs();
+    final w = _newWorld(42);
+    final sim = Simulator(w);
+    final path = '${tmp.path}/text.sqlite';
+    final store = SaveStore.create(path, w, fs: fs);
+    for (var i = 0; i < 14; i++) {
+      store.commitWeek(w, sim.step());
+    }
+    expect(
+        store.db
+            .select("SELECT count(*) n FROM song WHERE typeof(quality) != 'real'")
+            .first['n'],
+        0);
+    store.close();
+    final back = SaveStore.open(path, fs: fs).load();
+    // SQLite reads text into the nearest double, or one step off on
+    // older native builds: equal within a hair.
+    void near(double a, double b) =>
+        expect(a, closeTo(b, 1e-12 * (1 + b.abs())));
+    for (var i = 0; i < 3; i++) {
+      near(back.emaAttention[i], w.emaAttention[i]);
+      near(back.spaIndex[i], w.spaIndex[i]);
+      near(back.lastSpa[i], w.lastSpa[i]);
+    }
+    expect(w.emaAttention[0], greaterThan(0));
+    expect(back.songs.length, w.songs.length);
+    for (var i = 0; i < w.songs.length; i++) {
+      near(back.songs[i].quality, w.songs[i].quality);
+      near(back.songs[i].lifetimeStreams, w.songs[i].lifetimeStreams);
+    }
+    for (var i = 0; i < w.artists.length; i++) {
+      near(back.artists[i].fame, w.artists[i].fame);
+    }
   });
 
   test('a crash during save keeps the previous week', () {

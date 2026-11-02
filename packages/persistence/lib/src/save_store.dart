@@ -125,13 +125,13 @@ class SaveStore {
     // The player's Streamify Sessions (docs K178).
     w.streamifySessions
         .addAll(StreamifySession.decode(meta['sessions'] as String?));
-    w.playerPeakListeners = (meta['listenersPeak'] as num?)?.toDouble() ?? -1;
+    w.playerPeakListeners = _num(meta['listenersPeak'])?.toDouble() ?? -1;
     // The player's This Is list (docs K189).
     w.thisIsWeek = (meta['thisIs'] as num?)?.toInt() ?? -1;
     // Going solo (docs K191).
     w.formerGroupId = (meta['formerGroup'] as num?)?.toInt() ?? -1;
     w.playerSinceWeek = (meta['playerSince'] as num?)?.toInt() ?? 0;
-    w.careerStreamsBase = (meta['careerBase'] as num?)?.toDouble() ?? 0;
+    w.careerStreamsBase = _num(meta['careerBase'])?.toDouble() ?? 0;
     // The reunion (docs K194).
     Reunions.decode(w, meta['reunion'] as String?);
     w.rivalSplits.addAll(RivalSplit.decode(meta['rivalSplits'] as String?));
@@ -179,7 +179,9 @@ class SaveStore {
     // keeps the defaults for the entries it lacks.
     for (final (key, arr) in _metaArrays(w)) {
       for (var i = 0; i < arr.length; i++) {
-        if (meta['$key$i'] case final num v) arr[i] = v.toDouble();
+        if (_num(meta['$key$i']) case final num v when v.isFinite) {
+          arr[i] = v.toDouble();
+        }
       }
     }
 
@@ -212,6 +214,9 @@ class SaveStore {
     }
     for (final r in db.select('SELECT * FROM song ORDER BY id')) {
       final id = r['id'] as int;
+      // Songs are numbered in order. Rows after a gap came from a week
+      // that never finished saving (docs K280): drop them.
+      if (id != w.songs.length) break;
       final s = Codec.songFrom(hot.songs[id] ?? r, featured[id] ?? []);
       w.songs.add(s);
       if (s.primaryArtistId == w.playerArtistId) w.playerSongIds.add(s.id);
@@ -234,7 +239,10 @@ class SaveStore {
     final tracks = <int, List<int>>{};
     for (final r in db.select(
         'SELECT albumId, songId FROM albumTrack ORDER BY albumId, position')) {
-      (tracks[r['albumId'] as int] ??= []).add(r['songId'] as int);
+      final songId = r['songId'] as int;
+      if (songId < w.songs.length) {
+        (tracks[r['albumId'] as int] ??= []).add(songId);
+      }
     }
     for (final r in db.select('SELECT * FROM album ORDER BY id')) {
       final id = r['id'] as int;
@@ -454,16 +462,32 @@ class SaveStore {
         for (var i = 0; i < arr.length; i++) '$key$i': arr[i],
     };
     for (final e in values.entries) {
-      st.execute([e.key, e.value]);
+      st.execute(_b([e.key, e.value]));
     }
     st.dispose();
   }
+
+  /// Row values as bound: on the web, doubles go in as text, which a
+  /// REAL column stores as the same number (docs K280). Some browsers
+  /// passed doubles to SQLite as garbage (the low 32 bits of the
+  /// number), wrecking every saved stat; text never takes that path.
+  List<Object?> _b(List<Object?> row) {
+    if (!fs.doublesAsText) return row;
+    return [
+      for (final v in row)
+        if (v is double && v is! int) (v.isFinite ? v.toString() : null) else v
+    ];
+  }
+
+  /// A number read back from the untyped meta table (text on the web).
+  static num? _num(Object? v) =>
+      v is num ? v : (v is String ? num.tryParse(v) : null);
 
   void _writeCollaborators(World w) {
     final st = db.prepare(
         'INSERT OR REPLACE INTO collaborator VALUES (?, ?, ?, ?, ?, ?, ?)');
     for (final c in w.collaborators) {
-      st.execute([
+      st.execute(_b([
         c.id,
         c.name,
         c.role.index,
@@ -471,7 +495,7 @@ class SaveStore {
         c.genre,
         c.feeCents,
         c.minFame
-      ]);
+      ]));
     }
     st.dispose();
   }
@@ -479,7 +503,7 @@ class SaveStore {
   void _writeArtists(World w, Iterable<Artist> artists) {
     final st = db.prepare(Codec.insertSql('artist', Codec.artistColumns));
     for (final a in artists) {
-      st.execute(Codec.artistRow(a));
+      st.execute(_b(Codec.artistRow(a)));
     }
     st.dispose();
   }
@@ -487,7 +511,7 @@ class SaveStore {
   void _writeSongs(World w, Iterable<Song> songs, {bool withCredits = false}) {
     final st = db.prepare(Codec.insertSql('song', Codec.songColumns));
     for (final s in songs) {
-      st.execute(Codec.songRow(s));
+      st.execute(_b(Codec.songRow(s)));
     }
     st.dispose();
     if (withCredits) _writeCredits(songs);
@@ -508,7 +532,7 @@ class SaveStore {
       {bool withTracks = false}) {
     final st = db.prepare(Codec.insertSql('album', Codec.albumColumns));
     for (final al in albums) {
-      st.execute(Codec.albumRow(al));
+      st.execute(_b(Codec.albumRow(al)));
     }
     st.dispose();
     if (withTracks) _writeTracks(albums);
@@ -550,7 +574,7 @@ class SaveStore {
       final market = Charts.all[id].market;
       for (final e in charts[id]) {
         final s = main ? w.songs[e.entityId] : null;
-        chart.execute([
+        chart.execute(_b([
           id,
           week,
           e.position,
@@ -561,7 +585,7 @@ class SaveStore {
           e.weeksOn,
           s == null ? null : w.songWeekSalesIn(s, market),
           s == null ? null : w.songWeekStreamsIn(s, market),
-        ]);
+        ]));
       }
     }
     chart.dispose();
@@ -592,7 +616,7 @@ class SaveStore {
       ];
       final total = wr[0] + wr[1] + wr[2];
       final active = s.status == SongStatus.active;
-      sw.execute([
+      sw.execute(_b([
         id,
         r.week,
         total,
@@ -603,7 +627,7 @@ class SaveStore {
         wr[0],
         wr[1],
         wr[2],
-      ]);
+      ]));
     }
     sw.dispose();
 
@@ -617,27 +641,28 @@ class SaveStore {
         'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     for (final id in albumIds) {
       final al = w.albums[id];
-      aw.execute([
+      aw.execute(_b([
         id, r.week, al.weekPure, al.weekTea, al.weekSea, al.weekUnits, //
         ...al.weekRegion,
-      ]);
+      ]));
     }
     aw.dispose();
 
     final p = w.player;
     if (p != null) {
       db.execute(
-          'INSERT OR REPLACE INTO playerWeek VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [
-        r.week,
-        p.fame,
-        p.popularity,
-        p.coreFans,
-        p.casual,
-        p.devotion,
-        p.moneyCents,
-        // Runs on across going solo (docs K191).
-        w.playerCareerStreams,
-      ]);
+          'INSERT OR REPLACE INTO playerWeek VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          _b([
+            r.week,
+            p.fame,
+            p.popularity,
+            p.coreFans,
+            p.casual,
+            p.devotion,
+            p.moneyCents,
+            // Runs on across going solo (docs K191).
+            w.playerCareerStreams,
+          ]));
     }
   }
 

@@ -779,6 +779,7 @@
   "eraSmash": "Dev başarı",
   "errorGeneric": "Bir şeyler ters gitti.",
   "errorNotEnoughMoney": "Yeterli para yok.",
+  "errorWeekFailed": "Bu hafta oynanamadı. Kariyeri kapatıp yeniden aç: son kaydedilen haftaya döner.",
   "errorBadBackup": "Bu dosya bir kariyer yedeği değil ya da oyunun daha yeni bir sürümünden.",
   "errorResting": "Bu hafta dinleniyorsun.",
   "errorNoSkillPoints": "Yetenek puanın kalmadı. Her hafta bir tane kazanırsın.",

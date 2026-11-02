@@ -798,6 +798,7 @@ k('eraSmash','Smash','Dev başarı')
 # errors
 k('errorGeneric','Something went wrong.','Bir şeyler ters gitti.')
 k('errorNotEnoughMoney','Not enough money.','Yeterli para yok.')
+k('errorWeekFailed','This week could not be played. Close the career and open it again: it goes back to the last saved week.','Bu hafta oynanamadı. Kariyeri kapatıp yeniden aç: son kaydedilen haftaya döner.')
 k('errorBadBackup','This file is not a career backup, or it is from a newer version of the game.','Bu dosya bir kariyer yedeği değil ya da oyunun daha yeni bir sürümünden.')
 k('errorResting','You are resting this week.','Bu hafta dinleniyorsun.')
 k('errorNoSkillPoints','No skill points left. You get one every week.','Yetenek puanın kalmadı. Her hafta bir tane kazanırsın.')
