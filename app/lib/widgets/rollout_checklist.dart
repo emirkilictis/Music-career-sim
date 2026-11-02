@@ -41,7 +41,9 @@ class RolloutChecklist extends StatelessWidget {
                   size: 14,
                   color: status.has(s) ? AppColors.mint : AppColors.textMuted),
               const SizedBox(width: 4),
-              Text(label(s), style: const TextStyle(fontSize: 12)),
+              // A long step wraps instead of running off a narrow phone.
+              Flexible(
+                  child: Text(label(s), style: const TextStyle(fontSize: 12))),
             ]),
           ),
     ]);
