@@ -444,7 +444,7 @@ class _TourScreenState extends State<TourScreen> {
             _ScheduleCard(shows: plan.schedule),
           ],
           const SizedBox(height: 8),
-          Text(l.tourHint(Tours.energyPerShow.round()),
+          Text(l.tourHint(Tours.energyPerShow.round(), Tours.maxShowEnergy.round()),
               style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
         ],
       ),

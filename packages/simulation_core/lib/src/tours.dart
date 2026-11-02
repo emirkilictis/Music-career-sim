@@ -541,9 +541,12 @@ abstract final class Tours {
     return net > 0 ? a.manager.net(net) : net;
   }
 
-  /// Energy a night on stage takes (docs K249): three nights a week cost
-  /// more than an idle week gives back.
-  static const energyPerShow = 9.0;
+  /// Energy a night on stage takes (docs K249), and the most the nights
+  /// of one week take (docs K278): before, four or five nights took more
+  /// than a week gives back and nothing could be written on the road. Now
+  /// a tour still tires (more the longer it runs, below) and a song every
+  /// few weeks fits, at the cost of a flatter show.
+  static const energyPerShow = 9.0, maxShowEnergy = 12.0;
 
   /// Weeks on the road before it starts to wear the artist down, and
   /// what each week after adds (docs K249).
@@ -556,7 +559,7 @@ abstract final class Tours {
     final nights = t.showsIn(w.week).length;
     if (nights == 0) return 0;
     final onRoad = w.week - t.startWeek;
-    return nights * energyPerShow +
+    return math.min(maxShowEnergy, nights * energyPerShow) +
         math.min(
             roadWearMax, math.max(0, onRoad - roadWeeks) * roadWearPerWeek);
   }

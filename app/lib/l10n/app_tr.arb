@@ -550,7 +550,7 @@
   "tourOnRoad": "Turnede: {week}. hafta / {weeks}",
   "tourNow": "Bu hafta: {region}",
   "tourSoFar": "Şimdiye kadar {tickets} bilet, {money}",
-  "tourHint": "Her gece {energy} enerji harcar, yolda iki aydan sonra daha fazla; yorgun sanatçı daha az hayran kazanır. Yakın zamanda turne yaptığın pazar daha az bilet alır; bir buçuk yıldan uzun ara verirsen hayranlar seni bekliyor olur. Boş koltukların da prodüksiyon masrafı var.",
+  "tourHint": "Her gece {energy} enerji harcar (haftada en çok {weekMax}), yolda iki aydan sonra daha fazla; yorgun sanatçı daha az hayran kazanır, yolda şarkı yazmak da yorar. Yakın zamanda turne yaptığın pazar daha az bilet alır; bir buçuk yıldan uzun ara verirsen hayranlar seni bekliyor olur. Boş koltukların da prodüksiyon masrafı var.",
   "tourMarketTired": "Yakın zamanda burada turne yaptın: %{pct} daha az bilet",
   "tourMarketWaited": "Hayranlar bekliyordu: %{pct} daha çok bilet",
   "tourName": "Turne adı",

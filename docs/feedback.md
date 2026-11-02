@@ -251,6 +251,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F149 | Emir: "EP'ye konan şarkılar albümlere de konabilsin." / "Yayınladığım single'ları bir albümün deluxe'üne koyabileyim." shine: "Birden fazla single çıkardım ama ikinci single maddesi işaretlenmiyor." | ✅ K270 |
 | F150 | Emir: "Compilation albüm de ekle, 20/20 Complete falan yayınlarım." | ✅ K271 |
 | F151 | Emir: "Birde meme eklesene biraz." Lisa: "No meme “TTPD blocked you”." | ✅ K277 |
+| F152 | Emir: "Turnedeyken şarkı yazamıyor millet, sürekli enerji gidiyor, onu çöz lütfen." | ✅ K278 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

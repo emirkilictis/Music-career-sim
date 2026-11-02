@@ -1446,10 +1446,13 @@
       }
     }
   },
-  "tourHint": "Each night takes {energy} energy, more after two months on the road; a tired artist wins fewer fans. A market you toured lately buys fewer tickets; after a year and a half away the fans have waited. Empty seats still cost the production.",
+  "tourHint": "Each night takes {energy} energy (at most {weekMax} a week), more after two months on the road; a tired artist wins fewer fans, and a song written on the road leaves you more tired. A market you toured lately buys fewer tickets; after a year and a half away the fans have waited. Empty seats still cost the production.",
   "@tourHint": {
     "placeholders": {
       "energy": {
+        "type": "int"
+      },
+      "weekMax": {
         "type": "int"
       }
     }
