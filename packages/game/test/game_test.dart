@@ -6170,6 +6170,49 @@ void main() {
       g.close();
     });
 
+    test('first and fifth anniversaries too (K283)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final w = g.world;
+      final p = w.player!;
+      p.moneyCents = 1 << 40;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      Album aged(int years) => Album(
+          id: w.albums.length,
+          title: 'Aged $years',
+          artistId: p.id,
+          type: AlbumType.album,
+          releaseWeek: g.week - years * GameTime.weeksPerYear,
+          songIds: List.of(ids),
+          quality: 70)
+        ..status = AlbumStatus.dormant;
+      final one = aged(1);
+      w.albums.add(one);
+      expect(g.album(one.id).anniversaryDue, 1);
+      expect(g.anniversaryPrompt?.years, 1);
+      g.reissueAnniversary(one.id);
+      expect(g.album(one.id).anniversariesMarked, [1]);
+      final five = aged(5);
+      w.albums.add(five);
+      expect(g.album(five.id).anniversaryDue, 5);
+      // Marked ones come in order of years.
+      five.anniversaries = (1 << Anniversaries.years.indexOf(5)) |
+          (1 << Anniversaries.years.indexOf(1));
+      expect(g.album(five.id).anniversariesMarked, [1, 5]);
+      for (final y in [15, 40, 50]) {
+        expect(Anniversaries.years, contains(y));
+      }
+      g.close();
+    });
+
     test('an anniversary asks once; the detailed edition adds songs (K226)',
         () {
       final g = GameSession.start(

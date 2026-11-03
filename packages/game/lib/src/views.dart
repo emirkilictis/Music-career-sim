@@ -822,7 +822,7 @@ class AlbumView {
             ? Anniversaries.years[Anniversaries.due(w, al)]
             : 0,
         anniversariesMarked = [
-          for (var i = 0; i < Anniversaries.years.length; i++)
+          for (final i in Anniversaries.inOrder)
             if (al.anniversaries & (1 << i) != 0) Anniversaries.years[i]
         ],
         marqueeCostCents = StreamingTools.canMarqueeAlbum(w, al)

@@ -4,12 +4,19 @@ import 'model.dart';
 import 'time.dart';
 import 'world.dart';
 
-/// Anniversary reissues (docs K149): ten, twenty, twenty-five and thirty
-/// years on, an album can come out again remastered, with a collector's
-/// vinyl. Old fans buy it again and its songs are played again.
+/// Anniversary reissues (docs K149, K283): one, five, ten, fifteen,
+/// twenty, twenty-five, thirty, forty and fifty years on, an album can
+/// come out again remastered, with a collector's vinyl. Old fans buy it
+/// again and its songs are played again.
 abstract final class Anniversaries {
-  /// The anniversaries, in years; each has a year to be marked.
-  static const years = [10, 20, 25, 30];
+  /// The anniversaries, in years; each has a year to be marked. A save
+  /// keeps a bit per entry, so new ones go at the end (docs K283).
+  static const years = [10, 20, 25, 30, 1, 5, 15, 40, 50];
+
+  /// [years] indices from the first anniversary to the last.
+  static final inOrder = [
+    for (final y in [...years]..sort()) years.indexOf(y)
+  ];
 
   /// The remaster's wave for each track (a remix brings 0.35).
   static const remasterBoost = 0.08;
