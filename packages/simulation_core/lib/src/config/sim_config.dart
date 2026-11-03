@@ -221,7 +221,7 @@ class SimConfig {
     final q = ((quality - 45) / 30).clamp(0.0, 1.0);
     if (q <= 0) return 0;
     final era = year < 2013 ? 0.4 : 1.0;
-    return 0.015 * era * (1 - fame / 0.15) * (0.3 + 0.7 * q);
+    return 0.01 * era * (1 - fame / 0.15) * (0.3 + 0.7 * q);
   }
 
   static const breakoutWeeks = 10;
