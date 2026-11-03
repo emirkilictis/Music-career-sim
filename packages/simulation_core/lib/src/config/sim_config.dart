@@ -221,7 +221,7 @@ class SimConfig {
     final q = ((quality - 45) / 30).clamp(0.0, 1.0);
     if (q <= 0) return 0;
     final era = year < 2013 ? 0.4 : 1.0;
-    return 0.02 * era * (1 - fame / 0.15) * (0.3 + 0.7 * q);
+    return 0.015 * era * (1 - fame / 0.15) * (0.3 + 0.7 * q);
   }
 
   static const breakoutWeeks = 10;
@@ -236,7 +236,7 @@ class SimConfig {
 
   /// A breakout is a trend big enough to chart: the ordinary first trend
   /// of an unknown peaked near #230 in the US.
-  static const breakoutLift = 9.0;
+  static const breakoutLift = 6.0;
 
   /// Strength of online virality by year: nothing before video sites
   /// (2005; a pre-internet hit grows on radio instead), a little on video

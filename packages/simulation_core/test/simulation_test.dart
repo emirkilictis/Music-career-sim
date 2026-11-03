@@ -1118,8 +1118,10 @@ void megaDebutTests() {
     printOnFailure('US first week pure: $usPure');
     // Reference: 2025 record debut ≈ 4.0M US units / 3.5M pure; since
     // docs K127 the record takes more than the right moves (a career
-    // as big as hers), these alone give a TTPD-size week.
-    expect(usPure, greaterThan(2.2e6));
+    // as big as hers), these alone give a TTPD-size week. Newcomers'
+    // breakouts (docs K282) take some of the market: ~9% less on average
+    // over four worlds, 2.0–2.6M.
+    expect(usPure, greaterThan(2.0e6));
     expect(r.album.statsOrNull(Charts.usAlbums)?.debutPos, 1);
     // Worldwide it sells more than in the US alone.
     expect(r.album.firstWeekPure, greaterThan(usPure * 1.3));
