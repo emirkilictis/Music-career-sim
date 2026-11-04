@@ -38,6 +38,34 @@ void main() {
     });
   });
 
+  group('old songs on the charts (K284)', () {
+    test('catalog songs played as much as the charted ones chart too', () {
+      final w = _run(seed: 7, years: 2, start: 2020);
+      final old = <int>{};
+      for (final ch in [Charts.platformGlobal, Charts.globalSongs]) {
+        for (final e in w.charts[ch]) {
+          final s = w.songs[e.entityId];
+          if (s.status != SongStatus.dormant) continue;
+          old.add(s.id);
+          // Its run is kept, and its streams are this week's.
+          expect(s.statsOrNull(ch)!.lastPos, e.position);
+          expect(w.songWeekStreamsIn(s, ChartMarket.global), greaterThan(0));
+        }
+      }
+      expect(old, isNotEmpty);
+      // An old song off the charts this week shows no position.
+      for (final a in w.artists) {
+        for (final id in a.dormantSongIds) {
+          final s = w.songs[id];
+          final st = s.statsOrNull(Charts.globalSongs);
+          if (st == null || st.lastPos == 0) continue;
+          expect(
+              w.charts[Charts.globalSongs].any((e) => e.entityId == id), isTrue);
+        }
+      }
+    });
+  });
+
   group('lazy catalog accrual', () {
     test(
         'artist lifetime streams equal the sum of their songs (active + dormant)',

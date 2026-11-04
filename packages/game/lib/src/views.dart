@@ -1255,12 +1255,14 @@ class ChartView {
     double streams = 0, sales = 0, radio = 0, pure = 0, sea = 0, tea = 0;
     if (kind == EntityKind.song) {
       final s = w.songs[id];
-      final wr = s.weekRegion;
       streams = w.songWeekStreamsIn(s, market);
+      // A catalog song on the chart (docs K284): this week's catalog
+      // plays and downloads, no radio.
+      final active = s.status == SongStatus.active;
       sales = inMarket((r) =>
-          (wr == null ? 0 : wr[regionCount + r]) +
-          s.weekPhysical * artist.regionShare[r]);
-      radio = inMarket((r) => s.weekRadio * artist.regionShare[r]);
+          w.songWeekDownloadsRegion(s, r) +
+          (active ? s.weekPhysical * artist.regionShare[r] : 0));
+      radio = active ? inMarket((r) => s.weekRadio * artist.regionShare[r]) : 0;
     } else {
       final al = w.albums[id];
       final wr = al.weekRegion;

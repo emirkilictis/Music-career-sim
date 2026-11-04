@@ -450,6 +450,22 @@ class World {
         catalogDrift(s);
   }
 
+  /// A catalog song's downloads this week in region [r] (docs K284): its
+  /// share of the artist's catalog downloads, as the charts count it.
+  double songWeekDownloadsRegion(Song s, int r) {
+    if (s.status == SongStatus.active) {
+      return s.weekRegion?[regionCount + r] ?? 0;
+    }
+    if (s.status != SongStatus.dormant) return 0;
+    final a = primaryOf(s);
+    return s.dormantRate *
+        a.catalogFactor *
+        a.regionShare[r] *
+        0.1 *
+        lastDpa[r] *
+        catalogDrift(s);
+  }
+
   /// How far a catalog song's week strays from its catalog level (docs
   /// K224): people drift to one old song for a few months and away from
   /// another, and no two weeks are alike, so an album's tracks never rise
@@ -505,18 +521,20 @@ class World {
   /// in [market]'s song chart territory (docs K266): the US or UK share
   /// of its region, or the world.
   double songWeekSalesIn(Song s, ChartMarket market) {
-    if (s.status != SongStatus.active) return 0;
-    final wr = s.weekRegion;
+    if (s.status != SongStatus.active && s.status != SongStatus.dormant) {
+      return 0;
+    }
     final a = primaryOf(s);
+    // A catalog song sells downloads only (docs K284).
+    final physical = s.status == SongStatus.active ? s.weekPhysical : 0.0;
     double region(int r) =>
-        (wr == null ? 0.0 : wr[regionCount + r]) +
-        s.weekPhysical * a.regionShare[r];
+        songWeekDownloadsRegion(s, r) + physical * a.regionShare[r];
     return switch (market) {
       ChartMarket.us => CountryShares.usOfNorthAmerica(a.homeCountry) *
           region(Region.northAmerica.index),
       ChartMarket.uk =>
         CountryShares.ukOfEurope(a.homeCountry) * region(Region.europe.index),
-      _ => s.weekDownloads + s.weekPhysical,
+      _ => region(0) + region(1) + region(2),
     };
   }
 

@@ -1250,16 +1250,168 @@ class Simulator {
       }
     }
 
+    // 9b. Old songs on the song charts (docs K284): a catalog song played
+    // as much as the songs on a chart competes for a place that week, as
+    // old hits do on the real charts (every platform counts, not only the
+    // one that had brought it back). It stays in the catalog: only its
+    // chart run changes. Before, one came back only at a quarter's catalog
+    // update, past the Streamify chart's cut-off, and never a retired
+    // artist's.
+    final oldIds = <int>[];
+    final oldPts = List.generate(Charts.count, (_) => <double>[]);
+    {
+      final year = GameTime.yearOf(w.week);
+      final songCharts = [
+        for (final def in Charts.all)
+          if (def.kind == ChartKind.songs &&
+              def.activeIn(w.week) &&
+              w.chartCutoff[def.id] > 0)
+            def.id
+      ];
+      final na = Region.northAmerica.index, eu = Region.europe.index;
+      final cs = Float64List(_r), cd = Float64List(_r);
+      final row = Float64List(Charts.count);
+      // A chart's points from a week's streams and downloads by region.
+      void points(Artist a, Song s, double drift) {
+        var tS = 0.0, tD = 0.0;
+        for (var k = 0; k < _r; k++) {
+          final f = s.dormantRate *
+              a.catalogFactor *
+              _cap(a.id, k) *
+              a.regionShare[k] *
+              drift;
+          cs[k] = f * spa[k];
+          cd[k] = f * 0.1 * dpa[k];
+          tS += cs[k];
+          tD += cd[k];
+        }
+        final us = CountryShares.usOfNorthAmerica(a.homeCountry);
+        final uk = CountryShares.ukOfEurope(a.homeCountry);
+        row.fillRange(0, row.length, 0);
+        row[Charts.usSongs] = us * pts(rulesUs, 0, cd[na], cs[na], 0);
+        final ukStreams = rulesUk.streamFactor > 0 &&
+                year >= 2017 &&
+                s.weeksOnChart(Charts.ukSongs) >= 10
+            ? cs[eu] * 0.5
+            : cs[eu];
+        row[Charts.ukSongs] = uk * pts(rulesUk, 0, cd[eu], ukStreams, 0);
+        row[Charts.globalSongs] =
+            pts(rulesGlobal, 0, tD, tS, 0, radioCounts: false);
+        row[Charts.platformGlobal] = tS;
+        row[Charts.platformNorthAmerica] = cs[na];
+        row[Charts.platformEurope] = cs[eu];
+        row[Charts.usStreaming] = us * cs[na];
+        row[Charts.usDigital] = us * cd[na];
+      }
+
+      bool near(double margin) {
+        for (final ch in songCharts) {
+          if (row[ch] * margin >= w.chartCutoff[ch]) return true;
+        }
+        return false;
+      }
+
+      if (songCharts.isNotEmpty) {
+        for (final a in w.artists) {
+          if (a.dormantSongIds.isEmpty) continue;
+          // A song's chart points per unit of catalog rate, before the
+          // week's drift: the lowest rate that can make any chart.
+          for (var k = 0; k < _r; k++) {
+            cs[k] = a.catalogFactor * _cap(a.id, k) * a.regionShare[k];
+          }
+          var perBest = 0.0;
+          {
+            var tS = 0.0, tD = 0.0;
+            final us = CountryShares.usOfNorthAmerica(a.homeCountry);
+            final uk = CountryShares.ukOfEurope(a.homeCountry);
+            for (var k = 0; k < _r; k++) {
+              tS += cs[k] * spa[k];
+              tD += cs[k] * 0.1 * dpa[k];
+            }
+            for (final ch in songCharts) {
+              final v = switch (ch) {
+                Charts.usSongs => us *
+                    pts(rulesUs, 0, cs[na] * 0.1 * dpa[na], cs[na] * spa[na],
+                        0),
+                Charts.ukSongs => uk *
+                    pts(rulesUk, 0, cs[eu] * 0.1 * dpa[eu], cs[eu] * spa[eu],
+                        0),
+                Charts.globalSongs =>
+                  pts(rulesGlobal, 0, tD, tS, 0, radioCounts: false),
+                Charts.platformGlobal => tS,
+                Charts.platformNorthAmerica => cs[na] * spa[na],
+                Charts.platformEurope => cs[eu] * spa[eu],
+                Charts.usStreaming => us * cs[na] * spa[na],
+                Charts.usDigital => us * cs[na] * 0.1 * dpa[na],
+                _ => 0.0,
+              };
+              perBest = math.max(perBest, v / w.chartCutoff[ch]);
+            }
+          }
+          // The week's drift moves a song a few percent either way.
+          perBest *= 1.25;
+          if (perBest <= 0) continue;
+          final minRate = 1 / perBest;
+          // No song of theirs can make it if all of them together cannot.
+          if (a.sumDormantRate < minRate) continue;
+          for (final id in a.dormantSongIds) {
+            final s = w.songs[id];
+            if (s.dormantRate < minRate || s.dormantRate <= 0) continue;
+            points(a, s, w.catalogDrift(s));
+            if (!near(1)) continue;
+            oldIds.add(id);
+            for (final ch in songCharts) {
+              oldPts[ch].add(row[ch]);
+            }
+          }
+        }
+      }
+    }
+
     // 10. Charts.
     final newNo1 = List.generate(Charts.count, (_) => <int>[]);
     final published = List.generate(Charts.count, (_) => const <ChartEntry>[]);
+    final withOld = oldIds.isEmpty ? ids : [...ids, ...oldIds];
+    final previous = w.charts;
     for (final def in Charts.all) {
       if (!def.activeIn(w.week)) continue;
-      published[def.id] = def.kind == ChartKind.songs
-          ? _buildChart(def, ids, songPts[def.id], newNo1[def.id])
-          : _buildChart(def, albumIds, albumPts[def.id], newNo1[def.id]);
+      if (def.kind == ChartKind.songs) {
+        var p = songPts[def.id];
+        if (oldIds.isNotEmpty) {
+          final all = Float64List(n + oldIds.length)..setRange(0, n, p);
+          final extra = oldPts[def.id];
+          for (var j = 0; j < extra.length; j++) {
+            all[n + j] = extra[j];
+          }
+          p = all;
+        }
+        published[def.id] = _buildChart(def, withOld, p, newNo1[def.id]);
+      } else {
+        published[def.id] =
+            _buildChart(def, albumIds, albumPts[def.id], newNo1[def.id]);
+      }
     }
     w.charts = published;
+    // Catalog songs' chart runs (docs K284): saved with them, and one that
+    // fell off without being a candidate this week is off the chart.
+    final candidates = oldIds.toSet();
+    for (final id in oldIds) {
+      w.dirtySongs.add(id);
+    }
+    for (final def in Charts.all) {
+      if (def.kind != ChartKind.songs || def.id >= previous.length) continue;
+      for (final e in previous[def.id]) {
+        final s = w.songs[e.entityId];
+        if (s.status == SongStatus.active || candidates.contains(s.id)) {
+          continue;
+        }
+        final st = s.statsOrNull(def.id);
+        if (st != null && st.lastPos != 0) {
+          st.lastPos = 0;
+          w.dirtySongs.add(s.id);
+        }
+      }
+    }
     _rankOutside(ids, songPts);
 
     // 11. Lifecycle transitions.
