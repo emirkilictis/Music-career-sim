@@ -6,6 +6,7 @@ import 'audience.dart';
 import 'comments.dart';
 import 'lifecycle.dart';
 import 'model.dart';
+import 'practice.dart';
 import 'rng.dart';
 import 'time.dart';
 import 'world.dart';
@@ -420,6 +421,8 @@ abstract final class Social {
               songId: songId,
               likes: (likes * r.range(0.005, 0.05)).round()));
     }
+    // Facing the fans online, a little more at ease (docs K285).
+    Practice.learn(a, SkillKind.charisma, 0.1);
     return PostOutcome(
         kind: kind,
         hype: hype,

@@ -733,6 +733,11 @@ abstract final class Cmd {
 
   static SessionCmd<int> spreadSkillPoints() => (s) => s.spreadSkillPoints();
 
+  /// This week's practice and living costs (docs K285).
+  static SessionCmd<PracticeView> practice() => (s) => s.practice;
+  static SessionCmd<double> practise(SkillKind kind, PracticeTier tier) =>
+      (s) => s.practise(kind, tier);
+
   static SessionCmd<void> rewardAd() => (s) => s.rewardAd();
 
   static SessionCmd<bool> dailyBonus(bool premium) =>

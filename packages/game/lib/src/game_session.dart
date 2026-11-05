@@ -1847,6 +1847,53 @@ class GameSession {
     return n;
   }
 
+  /// This week's practice (docs K285): the lessons on offer and what each
+  /// would bring, and the living costs paid every week.
+  PracticeView get practice {
+    final p = _p;
+    final w = world;
+    return PracticeView(
+      doneThisWeek: w.practiceWeek == w.week,
+      options: [
+        for (final t in PracticeTier.values)
+          PracticeOption(
+            tier: t,
+            costCents: Practice.costCents(p, t),
+            energy: Practice.energy(t),
+            locked: t == PracticeTier.starCoach &&
+                p.fame < Practice.starCoachFame,
+            gains: {
+              for (final k in SkillKind.values) k: Practice.gain(p, k, t)
+            },
+          ),
+      ],
+      livingCostCents: LivingCosts.weeklyCents(p),
+      livingPaidCents: w.livingPaidCents,
+    );
+  }
+
+  /// Takes a lesson in [kind] with [tier] (docs K285); returns the points
+  /// gained.
+  double practise(SkillKind kind, PracticeTier tier) {
+    final double gained;
+    try {
+      gained = Practice.practise(world, _p, kind, tier);
+    } on ActionException catch (e) {
+      throw GameException(
+          switch (e.message) {
+            'Already practised this week' => 'practiceDone',
+            'Not enough money' => 'notEnoughMoney',
+            'Not enough creativity' => 'noEnergy',
+            'Resting' => 'resting',
+            'Skill is maxed' => 'skillMaxed',
+            _ => 'practiceLocked',
+          },
+          e.message);
+    }
+    _saveNow();
+    return gained;
+  }
+
   /// Shoots a music video for one of the player's songs (docs K52); it
   /// promotes the song from its release on.
   void shootVideo(int songId, VideoBudget budget) {

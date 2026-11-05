@@ -1185,6 +1185,8 @@ class Fmt {
       'invalidMembers' => l.errorInvalidMembers,
       'invalidSkills' => l.errorInvalidSkills,
       'weekFailed' => l.errorWeekFailed,
+      'practiceDone' => l.errorPracticeDone,
+      'practiceLocked' => l.errorPracticeLocked,
       _ => reason(e.message),
     };
   }

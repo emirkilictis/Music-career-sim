@@ -128,6 +128,8 @@ class SaveStore {
     w.playerPeakListeners = _num(meta['listenersPeak'])?.toDouble() ?? -1;
     // The player's This Is list (docs K189).
     w.thisIsWeek = (meta['thisIs'] as num?)?.toInt() ?? -1;
+    w.practiceWeek = (meta['practiceWeek'] as num?)?.toInt() ?? -1;
+    w.livingPaidCents = (meta['livingPaid'] as num?)?.toInt() ?? 0;
     // Going solo (docs K191).
     w.formerGroupId = (meta['formerGroup'] as num?)?.toInt() ?? -1;
     w.playerSinceWeek = (meta['playerSince'] as num?)?.toInt() ?? 0;
@@ -452,6 +454,9 @@ class SaveStore {
       'sessions': StreamifySession.encode(w.streamifySessions),
       'listenersPeak': w.playerPeakListeners,
       'thisIs': w.thisIsWeek,
+      // Practice and living costs (docs K285).
+      'practiceWeek': w.practiceWeek,
+      'livingPaid': w.livingPaidCents,
       'formerGroup': w.formerGroupId,
       'playerSince': w.playerSinceWeek,
       'careerBase': w.careerStreamsBase,

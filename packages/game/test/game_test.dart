@@ -1410,7 +1410,8 @@ void main() {
       g.close();
     });
 
-    test('skill points every week, spent up to 100, kept on reopening', () {
+    test('no free weekly points; milestone points spent up to 100, kept',
+        () {
       var g = GameSession.start(slots, _setup());
       final id = g.slotId;
       final vocals = g.player.skills[SkillKind.vocals]!;
@@ -1421,7 +1422,9 @@ void main() {
         g.advanceWeek();
         fame.add(g.player.fame);
       }
-      expect(g.player.skillPoints, 4 * Actions.skillPointsPerWeek);
+      // No points come by themselves since docs K285.
+      expect(g.player.skillPoints, 0);
+      g.world.artists[g.player.id].skillPoints = 12; // from milestones
       // Near the cap (as after years of practice): the last point fills it.
       g.world.artists[g.player.id].skills.songwriting = 99.5;
       g.spendSkillPoint(SkillKind.songwriting);
@@ -1429,11 +1432,11 @@ void main() {
       expect(
           () => g.spendSkillPoint(SkillKind.songwriting), _code('skillMaxed'));
       g.spendSkillPoint(SkillKind.vocals);
-      expect(g.player.skillPoints, 4 * Actions.skillPointsPerWeek - 2);
+      expect(g.player.skillPoints, 10);
       g.close();
 
       g = GameSession.resume(slots, id);
-      expect(g.player.skillPoints, 4 * Actions.skillPointsPerWeek - 2);
+      expect(g.player.skillPoints, 10);
       expect(g.player.skills[SkillKind.vocals], vocals + 1);
       // Fame never goes down (docs K44).
       for (var i = 1; i < fame.length; i++) {
@@ -6653,6 +6656,68 @@ void main() {
       final launches = y.events.whereType<PlatformLaunched>().toList();
       expect(launches.map((e) => e.chartId), [Charts.platformGlobal]);
       expect(GameTime.yearOf(g.week), 2009);
+      g.close();
+    });
+  });
+
+  group('practice and living costs (docs K285)', () {
+    test('a lesson a week: alone takes creativity, a coach money', () {
+      var g = GameSession.start(slots, _setup());
+      final id = g.slotId;
+      final p = g.world.player!;
+      p.creativeEnergy = 100;
+      final v = g.practice;
+      expect(v.doneThisWeek, isFalse);
+      final star = v.options.firstWhere((o) => o.tier == PracticeTier.starCoach);
+      expect(star.locked, isTrue);
+      expect(() => g.practise(SkillKind.vocals, PracticeTier.starCoach),
+          _code('practiceLocked'));
+      final before = p.skills.vocals;
+      final gain = g.practise(SkillKind.vocals, PracticeTier.self);
+      expect(gain, greaterThan(1));
+      expect(p.skills.vocals, closeTo(before + gain, 1e-9));
+      expect(p.creativeEnergy, 100 - Practice.energy(PracticeTier.self));
+      expect(g.practice.doneThisWeek, isTrue);
+      expect(() => g.practise(SkillKind.vocals, PracticeTier.coach),
+          _code('practiceDone'));
+      // Kept on reopening.
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.practice.doneThisWeek, isTrue);
+      // Next week: a coach, for money.
+      g.advanceWeek();
+      final money = g.player.moneyCents;
+      final cost = Practice.costCents(g.world.player!, PracticeTier.coach);
+      g.practise(SkillKind.songwriting, PracticeTier.coach);
+      expect(money - g.player.moneyCents, cost);
+      g.close();
+    });
+
+    test('lessons add less near the top', () {
+      final a = WorldGen.create(seed: 1, startYear: 2010).artists.first;
+      a.skills.vocals = 30;
+      final low = Practice.gain(a, SkillKind.vocals, PracticeTier.coach);
+      a.skills.vocals = 85;
+      final high = Practice.gain(a, SkillKind.vocals, PracticeTier.coach);
+      expect(low, greaterThan(3 * high));
+      a.skills.vocals = 99.5;
+      expect(Practice.gain(a, SkillKind.vocals, PracticeTier.starCoach), 0.5);
+    });
+
+    test('living costs come off every week, more once famous', () {
+      final g = GameSession.start(slots, _setup());
+      final p = g.world.player!;
+      final cost = LivingCosts.weeklyCents(p);
+      expect(cost, greaterThan(0));
+      expect(g.player.livingCostCents, cost);
+      g.advanceWeek();
+      expect(g.world.livingPaidCents, cost);
+      p.fame = 1;
+      expect(LivingCosts.weeklyCents(p), greaterThan(50 * cost));
+      // Never below nothing.
+      p.moneyCents = 100;
+      expect(LivingCosts.pay(p), 100);
+      expect(p.moneyCents, 0);
       g.close();
     });
   });

@@ -13,7 +13,7 @@ void main(List<String> args) {
     sim.step();
   }
   print(
-      'artists ${w.artists.length} dormant ${w.dormantSongCount} presim ${sw.elapsed.inSeconds}s 9b ${Simulator.zz9b ~/ 1000}ms candidates ${Simulator.zzN} prefilter ${Simulator.zzP}');
+      'artists ${w.artists.length} dormant ${w.dormantSongCount} presim ${sw.elapsed.inSeconds}s');
   for (var k = 0; k < 4; k++) {
     sim.step();
     for (final ch in [

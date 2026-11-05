@@ -687,7 +687,7 @@ void main() {
       expect(p.skills[k], Actions.maxSkill);
     }
     // Nothing left to learn: no more points.
-    Actions.grantSkillPoints(p, Actions.skillPointsPerWeek);
+    Actions.grantSkillPoints(p, 5);
     expect(p.skillPoints, 0);
   });
 

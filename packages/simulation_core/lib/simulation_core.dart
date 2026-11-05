@@ -79,5 +79,6 @@ export 'src/world.dart';
 export 'src/world_gen.dart';
 export 'src/word_of_mouth.dart';
 export 'src/world_hash.dart';
+export 'src/practice.dart';
 
 export 'src/creative_studio.dart';

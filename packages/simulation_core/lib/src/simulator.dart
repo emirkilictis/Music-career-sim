@@ -35,6 +35,7 @@ import 'mood_playlists.dart';
 import 'music_show.dart';
 import 'opportunities.dart';
 import 'own_playlist.dart';
+import 'practice.dart';
 import 'price_cuts.dart';
 import 'radio_tools.dart';
 import 'rerecords.dart';
@@ -2509,7 +2510,9 @@ class Simulator {
         p.manager.net(Contracts.recoup(p, cents)).round();
     // The label takes no cut of the day job.
     p.moneyCents += p.job.wageCents;
-    Actions.grantSkillPoints(p, Actions.skillPointsPerWeek);
+    // Skills grow by practice and by doing, not by a free weekly allowance
+    // (docs K285); rent and living are paid every week.
+    world.livingPaidCents = LivingCosts.pay(p);
     // Side benefits of some jobs (docs K36).
     final s = p.skills;
     switch (p.job) {

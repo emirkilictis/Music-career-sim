@@ -102,6 +102,8 @@ class ArtistView {
         adsLeftThisWeek = Actions.adsLeftThisWeek(w, a),
         job = a.job,
         skillPoints = a.skillPoints,
+        livingCostCents = LivingCosts.weeklyCents(a),
+        practisedThisWeek = w.practiceWeek == w.week,
         label = a.label,
         distributor = a.distributor,
         maxCampaign = Distribution.maxCampaign(a),
@@ -241,6 +243,11 @@ class ArtistView {
 
   /// Unspent skill points and the current skills (0–100).
   final int skillPoints;
+
+  /// Rent and living each week (docs K285), and whether the week's lesson
+  /// was taken.
+  final int livingCostCents;
+  final bool practisedThisWeek;
   final Map<SkillKind, double> skills;
 
   /// Week of the last single or album (-1 = never released anything).
@@ -4414,4 +4421,38 @@ class DistributionView {
   final int dealAdvanceCents;
   final int unrecoupedCents;
   final int year;
+}
+
+/// A lesson on offer this week (docs K285).
+class PracticeOption {
+  const PracticeOption({
+    required this.tier,
+    required this.costCents,
+    required this.energy,
+    required this.locked,
+    required this.gains,
+  });
+  final PracticeTier tier;
+  final int costCents;
+  final double energy;
+
+  /// A star coach for the famous only.
+  final bool locked;
+
+  /// Points a lesson in each skill would add now.
+  final Map<SkillKind, double> gains;
+}
+
+/// This week's practice and the weekly living costs (docs K285).
+class PracticeView {
+  const PracticeView({
+    required this.doneThisWeek,
+    required this.options,
+    required this.livingCostCents,
+    required this.livingPaidCents,
+  });
+  final bool doneThisWeek;
+  final List<PracticeOption> options;
+  final int livingCostCents;
+  final int livingPaidCents;
 }

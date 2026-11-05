@@ -1098,6 +1098,8 @@ class _CareerScreenState extends State<CareerScreen> {
         ..._on(_CareerPage.me, [
           const SkillsSection(),
           const SizedBox(height: 12),
+          const PracticeSection(),
+          const SizedBox(height: 12),
           const MilestonesSection(),
           const SizedBox(height: 12),
           const SizedBox(height: 12),
@@ -1694,6 +1696,128 @@ class _CareerScreenState extends State<CareerScreen> {
   }
 }
 
+/// This week's lesson (docs K285): who with, and a + per skill showing
+/// what it would add now.
+class PracticeSection extends StatefulWidget {
+  const PracticeSection({super.key});
+
+  @override
+  State<PracticeSection> createState() => _PracticeSectionState();
+}
+
+class _PracticeSectionState extends State<PracticeSection> {
+  PracticeView? _view;
+  PracticeTier _tier = PracticeTier.self;
+  int _loadedWeek = -1;
+  bool _loading = false;
+
+  Future<void> _load() async {
+    if (_loading) return;
+    _loading = true;
+    final career = context.career;
+    final week = career.week;
+    try {
+      final v = await career.read(Cmd.practice());
+      if (!mounted) return;
+      setState(() {
+        _view = v;
+        _loadedWeek = week;
+      });
+    } finally {
+      _loading = false;
+    }
+  }
+
+  Future<void> _practise(SkillKind k, String name) async {
+    final l = context.l10n;
+    final career = context.career;
+    try {
+      final gained = await career.act(Cmd.practise(k, _tier));
+      if (!mounted) return;
+      showInfo(context, l.practiceGained(name, gained.toStringAsFixed(1)),
+          icon: Icons.school_rounded);
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+    _loadedWeek = -1;
+    await _load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final career = context.career;
+    if (_loadedWeek != career.week || _view == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _load();
+      });
+    }
+    final v = _view;
+    if (v == null) return const SizedBox.shrink();
+    final p = career.player;
+    final names = {
+      SkillKind.songwriting: l.statSongwriting,
+      SkillKind.vocals: l.statVocals,
+      SkillKind.production: l.statProduction,
+      SkillKind.performance: l.statPerformance,
+      SkillKind.charisma: l.statCharisma,
+    };
+    String tierName(PracticeTier t) => switch (t) {
+          PracticeTier.self => l.practiceSelf,
+          PracticeTier.coach => l.practiceCoach,
+          PracticeTier.starCoach => l.practiceStarCoach,
+        };
+    final opt = v.options.firstWhere((o) => o.tier == _tier);
+    final done = v.doneThisWeek || p.practisedThisWeek;
+    return Section(
+      title: l.practiceTitle,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(done ? l.practiceDoneHint : l.practiceHint,
+            style: TextStyle(color: AppColors.textMuted)),
+        if (!done) ...[
+          const SizedBox(height: 10),
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            for (final o in v.options)
+              ChoiceChip(
+                label: Text(tierName(o.tier)),
+                selected: _tier == o.tier,
+                onSelected: o.locked
+                    ? null
+                    : (_) => setState(() => _tier = o.tier),
+              ),
+          ]),
+          const SizedBox(height: 6),
+          Text(
+            opt.locked
+                ? l.practiceLocked((Practice.starCoachFame * 100).round())
+                : opt.costCents == 0
+                    ? l.practiceFree(opt.energy.round())
+                    : l.practiceCost(
+                        fmt.money(opt.costCents), opt.energy.round()),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+          ),
+          const SizedBox(height: 6),
+          for (final k in SkillKind.values)
+            Row(children: [
+              Expanded(child: Text(names[k]!)),
+              TextButton(
+                onPressed: career.busy ||
+                        opt.locked ||
+                        (opt.gains[k] ?? 0) <= 0
+                    ? null
+                    : () => _practise(k, names[k]!),
+                child: Text(
+                    l.practiceButton((opt.gains[k] ?? 0).toStringAsFixed(1)),
+                    semanticsLabel: l.practiceRaise(names[k]!)),
+              ),
+            ]),
+        ],
+      ]),
+    );
+  }
+}
+
 /// The five skills with a + button each while skill points are left
 /// (docs K43: one point a week, each skill up to 100).
 class SkillsSection extends StatelessWidget {
@@ -1732,7 +1856,7 @@ class SkillsSection extends StatelessWidget {
                   ? l.skillPointsLeft(p.skillPoints)
                   : maxed
                       ? l.skillsMaxed
-                      : l.skillPointsHint(Actions.skillPointsPerWeek),
+                      : l.skillPointsHint,
               style: TextStyle(
                   color:
                       p.skillPoints > 0 ? AppColors.lilac : AppColors.textMuted,

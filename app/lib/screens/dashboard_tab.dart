@@ -912,6 +912,13 @@ class _MoreSection extends StatelessWidget {
             : l.jobPerkNone,
         career.busy ? null : () => pickJob(context),
       ),
+      // Rent and living (docs K285).
+      row(
+        Icons.home_outlined,
+        l.livingCosts,
+        l.livingCostsTerms(fmt.money(p.livingCostCents)),
+        null,
+      ),
       row(
         Icons.play_circle_outline_rounded,
         l.watchAd(fmt.money(Actions.adRewardCents), p.adsLeftThisWeek,

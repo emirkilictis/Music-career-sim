@@ -2589,11 +2589,75 @@
       }
     }
   },
-  "skillPointsHint": "You get {count} skill points every week and more from milestones. Each skill goes up to 100.",
-  "@skillPointsHint": {
+  "skillPointsHint": "Skills grow with practice and with what you do: songs, shows, interviews, posts. Milestones give skill points. Each skill goes up to 100.",
+  "practiceTitle": "This week’s practice",
+  "practiceDoneHint": "You practised this week. The next lesson is next week.",
+  "practiceHint": "One lesson a week, in one skill. The better a skill already is, the less a lesson adds.",
+  "practiceSelf": "Alone",
+  "practiceCoach": "Coach",
+  "practiceStarCoach": "Star coach",
+  "practiceFree": "Free · {energy} creativity",
+  "@practiceFree": {
     "placeholders": {
-      "count": {
+      "energy": {
         "type": "int"
+      }
+    }
+  },
+  "practiceCost": "{cost} · {energy} creativity",
+  "@practiceCost": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      },
+      "energy": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceLocked": "From {fame}% fame",
+  "@practiceLocked": {
+    "placeholders": {
+      "fame": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceButton": "+{gain}",
+  "@practiceButton": {
+    "placeholders": {
+      "gain": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceRaise": "Practise {skill}",
+  "@practiceRaise": {
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      }
+    }
+  },
+  "practiceGained": "{skill} +{gain}",
+  "@practiceGained": {
+    "placeholders": {
+      "skill": {
+        "type": "String"
+      },
+      "gain": {
+        "type": "String"
+      }
+    }
+  },
+  "errorPracticeDone": "You already practised this week.",
+  "errorPracticeLocked": "A star coach works only with better-known artists.",
+  "livingCosts": "Living costs",
+  "livingCostsTerms": "{cost} a week: rent and living, then a team, stylists and security as you get famous.",
+  "@livingCostsTerms": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
       }
     }
   },

@@ -6,6 +6,7 @@ import 'audience.dart';
 import 'beefs.dart';
 import 'model.dart';
 import 'opportunities.dart';
+import 'practice.dart';
 import 'rng.dart';
 import 'world.dart';
 
@@ -424,6 +425,9 @@ abstract final class Moments {
     a.devotion = (a.devotion + devotion).clamp(0.0, 1.0);
     a.popularity = math.max(0.0, a.popularity + popularity);
     w.dirtyArtists.add(a.id);
+    // An interview, a stage moment, a crisis faced in public: the artist
+    // learns to carry a room (docs K285).
+    Practice.learn(a, SkillKind.charisma, 0.4);
     m.step++;
     if (m.step >= m.scenes.length) w.moment = null;
     return MomentOutcome(

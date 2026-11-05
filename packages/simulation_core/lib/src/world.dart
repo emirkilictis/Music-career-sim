@@ -132,6 +132,12 @@ class World {
   /// K189).
   int thisIsWeek = -1;
 
+  /// The week the player last practised (docs K285; -1: never).
+  int practiceWeek = -1;
+
+  /// What the player paid to live last week (docs K285).
+  int livingPaidCents = 0;
+
   /// After the player went solo (docs K191): the group they left (-1:
   /// never did), the week they became the player's artist, and what the
   /// career had streamed before them, so the career's streams run on.

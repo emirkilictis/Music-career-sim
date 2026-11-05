@@ -61,8 +61,8 @@ abstract final class Actions {
   /// energy cost taken at the end of each week.
   static void setJob(World w, Artist a, Job job) => a.job = job;
 
-  /// Skill points the player earns each week, and the skill ceiling.
-  static const skillPointsPerWeek = 3;
+  /// The skill ceiling. Points come from milestones only since docs K285
+  /// (3 a week before); practice and doing raise skills directly.
   static const maxSkill = 100.0;
 
   /// Spends one skill point: +1 on [kind], up to [maxSkill].
