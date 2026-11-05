@@ -7637,7 +7637,7 @@
     }
   },
   "errorNoAnniversary": "Not an anniversary now: 1, 5, 10, 15, 20, 25, 30, 40 or 50 years on, once each.",
-  "anniversaryButton": "{years, plural, =1{1st} =2{2nd} =3{3rd} other{{years}th}} anniversary edition · {cost}",
+  "anniversaryButton": "{years, plural, =1{1st} other{{years}th}} anniversary edition · {cost}",
   "@anniversaryButton": {
     "placeholders": {
       "years": {
@@ -7649,7 +7649,7 @@
     }
   },
   "anniversaryHint": "Remastered, with a collector's vinyl: old fans buy it again and its songs are played again for a while.",
-  "anniversaryDone": "The {years, plural, =1{1st} =2{2nd} =3{3rd} other{{years}th}} anniversary edition of {title} is out.",
+  "anniversaryDone": "The {years, plural, =1{1st} other{{years}th}} anniversary edition of {title} is out.",
   "@anniversaryDone": {
     "placeholders": {
       "years": {
@@ -7660,7 +7660,7 @@
       }
     }
   },
-  "anniversaryLine": "{years, plural, =1{1st} =2{2nd} =3{3rd} other{{years}th}} anniversary edition out",
+  "anniversaryLine": "{years, plural, =1{1st} other{{years}th}} anniversary edition out",
   "@anniversaryLine": {
     "placeholders": {
       "years": {
@@ -7699,7 +7699,7 @@
   "versionTracksEmpty": "No unreleased songs or loose singles. Write some in the studio first if you want new tracks.",
   "versionFormat": "Format",
   "versionFormatHint": "What fans can buy. Digital costs least; collectors pay for vinyl and signed copies.",
-  "versionAnniversary": "{years, plural, =1{1st} =2{2nd} =3{3rd} other{{years}th}} anniversary edition",
+  "versionAnniversary": "{years, plural, =1{1st} other{{years}th}} anniversary edition",
   "@versionAnniversary": {
     "placeholders": {
       "years": {
@@ -7715,7 +7715,7 @@
       }
     }
   },
-  "versionAnniversaryName": "{years, plural, =1{1st} =2{2nd} =3{3rd} other{{years}th}} Anniversary Edition",
+  "versionAnniversaryName": "{years, plural, =1{1st} other{{years}th}} Anniversary Edition",
   "@versionAnniversaryName": {
     "placeholders": {
       "years": {
