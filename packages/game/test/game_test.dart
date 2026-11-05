@@ -5112,7 +5112,9 @@ void main() {
           greaterThan(g.goSoloPreview(other).importance));
 
       // A solo single gets a member noticed.
-      final p = g.world.player!..creativeEnergy = 100;
+      final p = g.world.player!
+        ..creativeEnergy = 100
+        ..moneyCents += 1000000;
       final song = g.writeSong(budget: BudgetTier.high).id;
       final pop3 = p.memberPop[3];
       g.releaseMemberSolo(3, song);

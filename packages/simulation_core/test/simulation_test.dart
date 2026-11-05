@@ -885,12 +885,15 @@ void main() {
       final money2 = p.moneyCents;
       Brands.sign(w, p, burger, 2000000);
       final broken = <DealOutcome>[];
+      var living = 0;
       for (var i = 0; i < 4; i++) {
         broken.addAll(sim.step().brandDealsBroken);
+        living += w.livingPaidCents;
       }
       expect(broken.single.deal.brand, burger);
       expect(w.brandDeals.last.status, DealStatus.broken);
-      expect(p.moneyCents, greaterThanOrEqualTo(money2 + 1000000 - 1));
+      expect(p.moneyCents + living,
+          greaterThanOrEqualTo(money2 + 1000000 - 1));
       // Saved and loaded as is.
       final back = BrandDeal.decode(BrandDeal.encode(w.brandDeals));
       expect(back.map((d) => d.status), w.brandDeals.map((d) => d.status));
@@ -1415,7 +1418,8 @@ void sideIncomeTests() {
       streams += w.songWeekStreamsRegion(s, r);
     }
     expect(streams, greaterThan(0));
-    expect(p.moneyCents - m0, (streams * 0.35 * p.artistShare).round());
+    expect(p.moneyCents - m0 + w.livingPaidCents,
+        (streams * 0.35 * p.artistShare).round());
   });
 
   test('collaborators want fans: none at skill 45, more for better ones', () {
@@ -1441,6 +1445,7 @@ void sideIncomeTests() {
   });
 
   test('ads are always available, at most three per week', () {
+    var living = 0;
     for (var week = 0; week < 3; week++) {
       expect(Actions.adsLeftThisWeek(w, p), Actions.maxAdsPerWeek);
       for (var i = 0; i < Actions.maxAdsPerWeek; i++) {
@@ -1449,8 +1454,9 @@ void sideIncomeTests() {
       expect(
           () => Actions.claimAdReward(w, p), throwsA(isA<ActionException>()));
       sim.step();
+      living += w.livingPaidCents;
     }
-    expect(p.moneyCents, 500000 + 9 * Actions.adRewardCents);
+    expect(p.moneyCents, 500000 + 9 * Actions.adRewardCents - living);
   });
 }
 
