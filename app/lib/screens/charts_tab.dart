@@ -32,6 +32,9 @@ const _magazineCharts = [
   // Radio airplay (docs K248).
   Charts.usRadio,
   Charts.ukRadio,
+  // Digital song sales and pure album sales (docs K287).
+  Charts.usDigital,
+  Charts.usAlbumSales,
 ];
 
 /// The box-office board in the chart tabs (docs K77).

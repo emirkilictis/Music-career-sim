@@ -4609,11 +4609,14 @@ class GameSession {
     // Debuts and #1s on the radio (docs K248); no news for each new peak.
     Charts.usRadio,
     Charts.ukRadio,
+    // ...and on digital sales (docs K287).
+    Charts.usDigital,
   ];
   static const _albumCharts = [
     Charts.usAlbums,
     Charts.ukAlbums,
     Charts.globalAlbums,
+    Charts.usAlbumSales,
   ];
 
   List<GameEvent> _events(WeekResult r, _Snapshot before) {
