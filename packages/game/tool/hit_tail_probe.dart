@@ -47,7 +47,10 @@ void main(List<String> args) {
       print('seed $seed year ${y + 1}: ${(weekly / 7 / 1e3).round()}K a day, '
           'total ${(total / 1e9).toStringAsFixed(2)}B, '
           'daily/total ${(weekly / 7 / total * 1e4).toStringAsFixed(2)} per 10k '
-          '(${s.status.name}, peak #${s.statsOrNull(Charts.usSongs)?.peak ?? 0})');
+          '(${s.status.name}, peak #${s.statsOrNull(Charts.usSongs)?.peak ?? 0}, '
+          'rate ${s.dormantRate.toStringAsExponential(2)}, '
+          'plays/rate ${Lifecycle.playsPerRate(w, p).toStringAsExponential(2)}, '
+          'fame ${p.fame.toStringAsFixed(2)})');
     }
     print('  each quarter, K a day: ${quarters.join(' ')}');
     g.close();

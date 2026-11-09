@@ -2111,6 +2111,43 @@ void main() {
       expect(firstWeeks(true), greaterThanOrEqualTo(firstWeeks(false)));
     });
 
+    test('a single out before its album rises with it (K286)', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2018,
+              premium: true,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire));
+      final w = g.world;
+      final p = w.player!;
+      p.skills
+        ..songwriting = 85
+        ..vocals = 85
+        ..production = 85
+        ..performance = 85;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final single = w.songs[ids.first], cut = w.songs[ids[4]];
+      g.releaseSingle(single.id, campaign: Campaign.standard);
+      g.advanceWeeks(8, stop: SkipStop.never);
+      final before = w.songWeekStreamsIn(single, ChartMarket.global);
+      g.releaseAlbum('Later', ids, campaign: Campaign.standard);
+      g.advanceWeek();
+      final albumWeek = w.songWeekStreamsIn(single, ChartMarket.global);
+      // Well up on the week before, and above the album's deep cuts.
+      expect(albumWeek, greaterThan(1.8 * before));
+      expect(albumWeek, greaterThan(w.songWeekStreamsIn(cut, ChartMarket.global)));
+      // The lift is the album's first weeks only.
+      g.advanceWeeks(12, stop: SkipStop.never);
+      expect(w.songWeekStreamsIn(single, ChartMarket.global),
+          lessThan(albumWeek / 2));
+      g.close();
+    });
+
     test('radio edit, a UK push, station visits, most added (K254)', () {
       // The same single with nothing, with an edit, a UK push and a US
       // station visit: its radio in each region over four weeks.
@@ -2290,15 +2327,14 @@ void main() {
       g.close();
     });
 
-    test('the side charts are gone, the radio ones back (K202, K248)', () {
+    test('the side charts are gone; radio, digital, album sales back (K202, '
+        'K248, K287)', () {
       const gone = [
         Charts.usStreaming,
-        Charts.usDigital,
-        Charts.usAlbumSales,
         Charts.usStreamingAlbums,
         Charts.usRingtones,
       ];
-      final g = GameSession.start(slots, _setup(startYear: 2008));
+      final g = GameSession.start(slots, _setup(startYear: 2016));
       g.advanceWeeks(3, stop: SkipStop.never);
       final ids = [for (final c in g.activeCharts) c.id];
       for (final c in gone) {
@@ -2308,7 +2344,15 @@ void main() {
       // The main charts are all still there.
       expect(ids, containsAll(const [Charts.usSongs, Charts.usAlbums]));
       expect(ids, containsAll(const [Charts.usRadio, Charts.ukRadio]));
-      // Nothing charts on them any more.
+      // Digital song sales and pure album sales are kept again.
+      expect(ids, containsAll(const [Charts.usDigital, Charts.usAlbumSales]));
+      final digital = g.chart(Charts.usDigital).rows;
+      expect(digital, hasLength(50));
+      for (var i = 1; i < digital.length; i++) {
+        expect(digital[i].points, lessThanOrEqualTo(digital[i - 1].points));
+      }
+      expect(g.chart(Charts.usAlbumSales).rows, isNotEmpty);
+      // Nothing charts on the gone ones any more.
       for (final s in g.world.songs) {
         for (final c in gone) {
           expect(s.statsOrNull(c), isNull);

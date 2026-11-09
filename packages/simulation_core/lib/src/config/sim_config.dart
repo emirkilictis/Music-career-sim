@@ -184,6 +184,17 @@ class SimConfig {
   final double albumEventFanBoost;
   final double albumEventWeeks;
 
+  /// A single out before its album, in the album's first weeks (docs
+  /// K286): fans play it at least as a fresh track of the album and this
+  /// much more (the songs they know), and new listeners who come for the
+  /// album find its singles first (lift [albumSingleReach], fading over
+  /// [albumSingleReachWeeks]). Only for the album's first
+  /// [albumSingleWeeks].
+  static const albumSingleFanLift = 1.15;
+  static const albumSingleReach = 0.4;
+  static const albumSingleReachWeeks = 3.0;
+  static const albumSingleWeeks = 8;
+
   /// Long-term catalog level as a fraction of a song's peak-period audience.
   final double catalogTail;
   final double viralWeeklyChance;
@@ -521,16 +532,22 @@ class SimConfig {
   final double catalogLevel;
 
   /// Share of a catalog song's listeners lost per year (docs K85), by its
-  /// catalog weight (see Lifecycle.catalogWeight): top-10 singles 8% in
-  /// their first decade, then 2%; other singles and charting album tracks
-  /// 18% for five years, then 6%; the rest 30%, then 10%. Old songs
-  /// settle on the listeners who keep them instead of fading to nothing
-  /// (docs K247: 12%/3%, 25% and 45% before, which left a twenty-year-old
-  /// catalog almost silent).
+  /// catalog weight (see Lifecycle.catalogWeight): top-10 singles 14% for
+  /// five years, 7% to ten, then 3%; other singles and charting album
+  /// tracks 20% for five years, then 7%; the rest 30%, then 10%. Old
+  /// songs settle on the listeners who keep them instead of fading to
+  /// nothing (docs K247: 12%/3%, 25% and 45% before, which left a
+  /// twenty-year-old catalog almost silent), but a big hit no longer
+  /// plays near its peak for a decade (docs K286: 8% then 2% for the
+  /// top-10 singles, 18%/6% for the others).
   double catalogFadePerYear(double weight, double years) => weight >= 1.8
-      ? (years < 10 ? 0.08 : 0.02)
+      ? (years < 5
+          ? 0.14
+          : years < 10
+              ? 0.07
+              : 0.03)
       : weight >= 0.5
-          ? (years < 5 ? 0.18 : 0.06)
+          ? (years < 5 ? 0.20 : 0.07)
           : (years < 5 ? 0.30 : 0.10);
   final double streamEquivalentAlbum;
   final double songChartStreamDivisor;

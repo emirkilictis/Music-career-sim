@@ -337,8 +337,8 @@ void main() {
     }
     expect(base, greaterThan(0));
     expect(s.catalogBase, base);
-    // Its class's yearly fade (K85, K247): a top-10 single loses 8% a
-    // year in its first decade, other songs faster.
+    // Its class's yearly fade (K85, K247, K286): a top-10 single loses
+    // 14% a year in its first five years, other songs faster.
     final perYear = w.config.catalogFadePerYear(Lifecycle.catalogWeight(s), 1);
     expect(s.dormantRate / trend(s) / rate0,
         closeTo((1 - perYear) * (1 - perYear), 0.03));
@@ -358,6 +358,24 @@ void main() {
     final age = (w.week - rival.releasedWeek) / GameTime.weeksPerYear - 0.5;
     expect(rival.dormantRate / trend(rival) / before,
         closeTo(1 - w.config.catalogFadePerYear(0.25, age), 0.05));
+  });
+
+  test('old hits go down over the years; a giant one is held lower (K286)',
+      () {
+    // The floor's share of its total eases after five years.
+    const hit = 1.8;
+    expect(Simulator.catalogFloorShare(hit, 3), 0.003);
+    expect(Simulator.catalogFloorShare(hit, 12) / 0.003, closeTo(0.59, 0.01));
+    expect(Simulator.catalogFloorShare(hit, 20) / 0.003, closeTo(0.44, 0.01));
+    // A top-10 single fades faster while young, then slower.
+    expect(SimConfig().catalogFadePerYear(hit, 2), 0.14);
+    expect(SimConfig().catalogFadePerYear(hit, 7), 0.07);
+    expect(SimConfig().catalogFadePerYear(hit, 12), 0.03);
+    // Up to ten million plays a week the floor is as it was; above, it
+    // grows with the square root: 40M becomes 20M.
+    expect(Simulator.softFloor(5e6, 1), 5e6);
+    expect(Simulator.softFloor(4e7, 1), closeTo(2e7, 1));
+    expect(Simulator.softFloor(2e7, 2) * 2, closeTo(2e7, 1));
   });
 
   test('a mixtape is free: streams, buzz, no sales, charts or era (K62)', () {

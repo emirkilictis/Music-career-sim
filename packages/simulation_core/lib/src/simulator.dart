@@ -596,14 +596,37 @@ class Simulator {
                       c.playlistShare(year) *
                       math.exp(-albumAge / c.albumEventWeeks);
       final asTrack = c.albumTrackFanShare * albumEvent * p.kind.albumAffinity;
+      // A single out before its album (docs K286): in the album's weeks
+      // fans play it as a fresh track of the record and more (it is the
+      // song they know), and the album's new listeners find it first. It
+      // used to get only its own faded fan curve, below the deep cuts.
+      final preSingle = s.isSingle &&
+          albumAge >= 0 &&
+          albumAge < SimConfig.albumSingleWeeks &&
+          s.albumId >= 0 &&
+          s.singleWeek >= 0 &&
+          s.singleWeek < w.albums[s.albumId].releaseWeek;
+      final singleCurve =
+          preSingle ? math.max(fanCurve, _fanCurve(c, albumAge)) : fanCurve;
+      final preReach = preSingle
+          ? 1 +
+              SimConfig.albumSingleReach *
+                  c.playlistShare(year) *
+                  math.exp(-albumAge / SimConfig.albumSingleReachWeeks)
+          : 1.0;
       final fanPart = fans *
           s.fanAppeal *
-          fanCurve *
+          singleCurve *
           fanShare *
           position *
           (1 + p.hype) *
           (s.isSingle
-              ? (albumEvent > 1 ? math.max(1.0, asTrack) : 1.0)
+              ? (albumEvent > 1
+                  ? math.max(
+                      1.0,
+                      asTrack *
+                          (preSingle ? SimConfig.albumSingleFanLift : 1.0))
+                  : 1.0)
               : asTrack) *
           Rerecords.fanFactor(s) *
           // Fans who have the leak already (docs K140).
@@ -620,13 +643,15 @@ class Simulator {
           s.commercial *
           life *
           (0.05 + 0.15 * promo) *
-          StreamingTools.marqueeFactor(s, w.week);
+          StreamingTools.marqueeFactor(s, w.week) *
+          preReach;
       final pubPart = c.publicPool *
           s.commercial *
           life *
           exposure *
           share(promoLoad, s, promoAge) *
-          gapOf(s);
+          gapOf(s) *
+          preReach;
       // A viral trend reaches people regardless of the song's age.
       final viralPart =
           c.publicPool * (0.5 + 0.5 * s.commercial) * s.viralBoost * 0.1;
@@ -2142,9 +2167,10 @@ class Simulator {
   /// (docs K258, K260), by its catalog weight: on Spotify an old hit plays
   /// 0.02–0.06% of its total a day however old (The Hills: 3.2B, 1.05M a
   /// day; Mirrors: 1.68B, 1.04M; Rock Your Body, 2003: 1.16B, 609K; Can't
-  /// Stop the Feeling: 2.14B, 430K). Over ten years old it eases very
-  /// slowly (a 40-year-old hit keeps half), or a floor that grows with the
-  /// total would grow without end.
+  /// Stop the Feeling: 2.14B, 430K). Over five years old it eases (docs
+  /// K286: at twelve 59%, at twenty 44%; before, it eased only after ten
+  /// and a twelve-year-old hit still kept 91%, so old hits never really
+  /// went down).
   static double catalogFloorShare(double weight, double years) =>
       (weight >= 1.8
           ? 0.003
@@ -2153,7 +2179,19 @@ class Simulator {
               : weight >= 0.5
                   ? 0.001
                   : 0.0) *
-      math.min(1.0, math.sqrt(10 / math.max(1.0, years)));
+      math.min(
+          1.0,
+          math.pow(catalogFloorAgeYears / math.max(1.0, years), 0.6)
+              .toDouble());
+
+  /// The floor eases after this many years (docs K286).
+  static const catalogFloorAgeYears = 5.0;
+
+  /// A floor above this many plays a week grows only with the square root
+  /// of the rest (docs K286): a share of a total of many billions kept a
+  /// giant hit at millions a day for good, where the biggest old songs on
+  /// the real apps play about a million (Streamify sees 60%).
+  static const catalogFloorSoftPlays = 10e6;
 
   /// The dormant rate that keeps [s] at its floor (0: none): a share of
   /// its plays up to the catalog, in rate (docs K265; K258 took all its
@@ -2168,7 +2206,15 @@ class Simulator {
           Lifecycle.oldCatalogBase(weight) * s.lastAttention / a.catalogFactor;
       world.dirtySongs.add(s.id);
     }
-    return share * s.catalogBase;
+    return softFloor(share * s.catalogBase, Lifecycle.playsPerRate(world, a));
+  }
+
+  /// [floor] (in rate) eased above [catalogFloorSoftPlays] a week, at
+  /// [perRate] plays per unit of rate (docs K286).
+  static double softFloor(double floor, double perRate) {
+    final plays = floor * perRate;
+    if (plays <= catalogFloorSoftPlays) return floor;
+    return floor * math.sqrt(catalogFloorSoftPlays / plays);
   }
 
   /// No artist reaches more than a few per cent of a market (docs K105):

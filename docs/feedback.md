@@ -254,6 +254,8 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F152 | Emir: "Turnedeyken şarkı yazamıyor millet, sürekli enerji gidiyor, onu çöz lütfen." | ✅ K278 |
 | F153 | shine: bir oyuncuda "This save did not open — IndexError", "kaydım düzelmeli". | ✅ K279 |
 | F154 | Bir oyuncu hafta atlayamıyor, kaydını (Nicki Minaj, .mcsave) gönderdi. | ✅ K280 |
+| F155 | LosingMyWayStan: "Albüm çıkınca önceden çıkan single'lar daha çok yükselsin"; "Şarkılar zamanla daha çok düşsün: 12 yıl sonra hâlâ günde 3M yapan şarkılarım var (13B, Streamify)." | ✅ K286 |
+| F156 | Emir: "Digital sales chartı ekler misin? Radio chart yoksa onu da ekle. Bir de pure album sales." | ✅ K287 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

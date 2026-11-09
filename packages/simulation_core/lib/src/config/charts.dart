@@ -62,7 +62,8 @@ class ChartDef {
   final int endYear;
 
   /// No longer kept (docs K202): too many charts, and nobody follows the
-  /// side ones. The id stays so old saves still read.
+  /// side ones. The id stays so old saves still read. Digital sales and
+  /// album sales are back (docs K287).
   final bool retired;
 
   bool get isPlatform =>
@@ -186,16 +187,14 @@ abstract final class Charts {
         kind: ChartKind.songs,
         market: ChartMarket.usDigital,
         size: 50,
-        startYear: 2005,
-        retired: true),
+        startYear: 2005),
     ChartDef(
         id: usAlbumSales,
         key: 'chart.us.albumSales',
         kind: ChartKind.albums,
         market: ChartMarket.usAlbumSales,
         size: 50,
-        startYear: 2015,
-        retired: true),
+        startYear: 2015),
     ChartDef(
         id: usStreamingAlbums,
         key: 'chart.us.streamingAlbums',
