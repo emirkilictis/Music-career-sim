@@ -1187,9 +1187,24 @@ class Fmt {
       'weekFailed' => l.errorWeekFailed,
       'practiceDone' => l.errorPracticeDone,
       'practiceLocked' => l.errorPracticeLocked,
+      'retired' => l.errorRetired,
+      'releaseScheduled' => l.errorReleaseScheduled,
+      'notRetired' => l.errorNotRetired,
       _ => reason(e.message),
     };
   }
+
+  /// The name a career earns (docs K288).
+  String legacyTitle(LegacyTitle t) => switch (t) {
+        LegacyTitle.legend => l.legacyTitleLegend,
+        LegacyTitle.icon => l.legacyTitleIcon,
+        LegacyTitle.star => l.legacyTitleStar,
+        LegacyTitle.hitmaker => l.legacyTitleHitmaker,
+        LegacyTitle.oneHitWonder => l.legacyTitleOneHitWonder,
+        LegacyTitle.cultFavourite => l.legacyTitleCult,
+        LegacyTitle.rising => l.legacyTitleRising,
+        LegacyTitle.working => l.legacyTitleWorking,
+      };
 
   /// The sentence for one piece of news.
   String event(EventLine line) {
@@ -1232,6 +1247,12 @@ class Fmt {
       AdvanceRecouped(:final label) => l.eventAdvanceRecouped(labelName(label)),
       TopArtist(:final rank) =>
         rank == 1 ? l.eventTopArtistNo1 : l.eventTopArtist(rank),
+      // Legacy and the Hall of Fame (docs K288).
+      LegacyRankUp(:final rank) =>
+        rank == 1 ? l.eventLegacyRankTop : l.eventLegacyRank(rank),
+      HallOfFameInducted(:final year) => l.eventHallOfFame(year),
+      HallOfFameMissed(:final place) => l.eventHallOfFameMissed(place),
+      HallOfFameClass(:final year) => l.eventHallOfFameClass(year, t),
       RecordBroken(:final kind, :final value) => switch (kind) {
           RecordKind.weeksAtNo1Song ||
           RecordKind.weeksAtNo1Album =>

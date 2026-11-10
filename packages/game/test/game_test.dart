@@ -6812,4 +6812,120 @@ void main() {
       expect(at(q: 80), greaterThan(at(q: 55)));
     });
   });
+  group('legacy and the Hall of Fame (docs K288)', () {
+    test('ending a career stops new work; the catalog plays on; back again',
+        () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final id = g.slotId;
+      var p = g.world.player!..creativeEnergy = 100;
+      final hit = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(hit, campaign: Campaign.standard);
+      p.creativeEnergy = 100;
+      final spare = g.writeSong(budget: BudgetTier.high).id;
+      g.advanceWeeks(3, stop: SkipStop.never);
+      // Not with a release scheduled.
+      g.scheduleSingle(spare,
+          releaseWeek: g.world.week + 4, announceWeek: g.world.week);
+      expect(g.legacy.canRetire, isFalse);
+      expect(() => g.retire(), _code('releaseScheduled'));
+      g.cancelScheduled(g.world.player!.scheduled.single.id);
+      expect(g.legacy.canRetire, isTrue);
+      g.retire();
+      expect(g.isRetired, isTrue);
+      expect(g.player.retiredYear, GameTime.yearOf(g.world.week));
+      p.creativeEnergy = 100;
+      expect(() => g.writeSong(budget: BudgetTier.low), _code('retired'));
+      expect(() => g.releaseSingle(spare), _code('retired'));
+      expect(() => g.retire(), _code('retired'));
+      // The songs keep playing.
+      final before = g.world.songLifetimeStreams(g.world.songs[hit]);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      expect(g.world.songLifetimeStreams(g.world.songs[hit]),
+          greaterThan(before));
+      final v = g.legacy;
+      expect(v.retired, isTrue);
+      expect(v.lastYear, g.player.retiredYear);
+      expect(v.topSongs.first.id, hit);
+      g.close();
+      // Kept on reopening, and back from it.
+      g = GameSession.resume(slots, id);
+      expect(g.isRetired, isTrue);
+      g.comeBack();
+      expect(g.isRetired, isFalse);
+      expect(() => g.comeBack(), _code('notRetired'));
+      p = g.world.player!..creativeEnergy = 100;
+      expect(g.writeSong(budget: BudgetTier.low).id, greaterThan(spare));
+      g.close();
+    });
+
+    test('the all-time list ranks every artist by legacy score', () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final rows = g.legacyList();
+      expect(rows, hasLength(LegacyViews.listSize));
+      for (var i = 1; i < rows.length; i++) {
+        expect(rows[i].score, lessThanOrEqualTo(rows[i - 1].score));
+        expect(rows[i].rank, i + 1);
+      }
+      // The legends of the world's history lead it.
+      expect(rows.first.score, greaterThan(HallOfFame.minScore));
+      final v = g.legacy;
+      expect(v.score,
+          closeTo(v.sales + v.hits + v.numberOnes + v.awards + v.longevity, 1e-9));
+      expect(v.yearsToEligible, HallOfFame.eligibleYears);
+      expect(v.hallOfFameYear, 0);
+      g.close();
+    });
+
+    test('each spring the Hall of Fame takes the biggest eligible legacies',
+        () {
+      var g = GameSession.start(slots, _setup(startYear: 2016));
+      final id = g.slotId;
+      final w = g.world;
+      final classes = <HallOfFameClass>[];
+      while (classes.length < 2) {
+        classes.addAll(g
+            .advanceWeeks(13, stop: SkipStop.never)
+            .events
+            .whereType<HallOfFameClass>());
+      }
+      // The first class is up to ten, the next ones up to five.
+      expect(classes[0].artistIds.length,
+          inInclusiveRange(1, HallOfFame.firstClass));
+      expect(classes[1].artistIds.length,
+          inInclusiveRange(1, HallOfFame.perYear));
+      expect(classes[1].year, classes[0].year + 1);
+      for (final h in w.hallOfFame) {
+        final a = w.artists[h.artistId];
+        expect(h.year - GameTime.yearOf(a.debutWeek),
+            greaterThanOrEqualTo(HallOfFame.eligibleYears));
+        expect(h.score, greaterThanOrEqualTo(HallOfFame.minScore));
+      }
+      // Nobody goes in twice.
+      expect({for (final h in w.hallOfFame) h.artistId}.length,
+          w.hallOfFame.length);
+      final rows = g.hallOfFame;
+      expect(rows.first.year, classes[1].year);
+      g.close();
+      g = GameSession.resume(slots, id);
+      expect(g.hallOfFame.length, rows.length);
+      expect(
+          g.legacyList(limit: 500)
+              .where((r) => r.hallOfFameYear > 0)
+              .length,
+          rows.length);
+      g.close();
+    });
+  });
 }

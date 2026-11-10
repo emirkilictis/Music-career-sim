@@ -123,6 +123,12 @@ List<EventLine> describeEvents(GameSession s, List<GameEvent> events) {
                 artistName:
                     w.artists[w.songs[e.topSongId].primaryArtistId].name),
         TopArtist() => EventLine(e),
+        LegacyRankUp() => EventLine(e),
+        HallOfFameInducted() => EventLine(e),
+        HallOfFameMissed() => EventLine(e),
+        HallOfFameClass() => EventLine(e,
+            title: [for (final id in e.artistIds) w.artists[id].name]
+                .join(', ')),
         DiscoverPick() => release(e, EntityKind.song, e.songId),
         AdvanceRecouped() => EventLine(e),
         VideoMilestone() => release(e, EntityKind.song, e.songId),
@@ -270,6 +276,10 @@ List<EventLine> sortLines(List<EventLine> lines) {
         SurpriseDrop() => 0,
         RecordBroken() => 0,
         TopArtist() => 1,
+        LegacyRankUp() => 1,
+        HallOfFameInducted() => 0,
+        HallOfFameMissed() => 3,
+        HallOfFameClass() => 4,
         DiscoverPick() => 6,
         AdvanceRecouped() => 2,
         VideoMilestone() => 3,

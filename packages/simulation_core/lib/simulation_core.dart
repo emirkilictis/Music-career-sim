@@ -46,6 +46,7 @@ export 'src/holidays.dart';
 export 'src/joint_albums.dart';
 export 'src/leaks.dart';
 export 'src/languages.dart';
+export 'src/legacy.dart';
 export 'src/lifecycle.dart';
 export 'src/lineups.dart';
 export 'src/member_morale.dart';

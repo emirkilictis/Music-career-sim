@@ -9,6 +9,7 @@ import '../widgets/art.dart';
 import '../widgets/common.dart';
 import 'album_detail_screen.dart';
 import 'best_sellers_board.dart';
+import 'legends_board.dart';
 import 'game_shell.dart' show pushInCareer;
 import 'song_detail_screen.dart';
 import 'streamify/artist_page.dart';
@@ -54,6 +55,9 @@ const _musicShowChart = -5;
 
 /// Best sellers (docs K141).
 const _bestSellersChart = -6;
+
+/// The greatest of all time and the Hall of Fame (docs K288).
+const _legendsChart = -7;
 
 /// Saturday of a game week, for "Week of …" dates.
 DateTime chartDate(int week) {
@@ -115,7 +119,7 @@ class _ChartsTabState extends State<ChartsTab> {
       if (mounted) setState(() => _artists = rows);
       return;
     }
-    if (_chart == _bestSellersChart) return;
+    if (_chart == _bestSellersChart || _chart == _legendsChart) return;
     if (_chart == _recordsChart) {
       final (boards, since) = await career.read(Cmd.records());
       if (mounted) {
@@ -219,6 +223,8 @@ class _ChartsTabState extends State<ChartsTab> {
                                   : _yearEndOf == YearEnd.critics
                                       ? l.criticsList
                                       : '${l.chartYearEnd} · ${fmt.chartShort(_yearEndOf)}')
+                              : _chart == _legendsChart
+                                  ? l.chartLegends
                               : _chart == _bestSellersChart
                                   ? l.chartBestSellers
                                   : _chart == _recordsChart
@@ -240,6 +246,8 @@ class _ChartsTabState extends State<ChartsTab> {
                           ? (_tourYear == null ? l.toursAllTime : '$_tourYear')
                           : _chart == _yearEndChart
                               ? (_yearEndYear == null ? '' : '$_yearEndYear')
+                              : _chart == _legendsChart
+                                  ? l.legendsSub
                               : _chart == _bestSellersChart
                                   ? l.bestSellersSub
                                   : _chart == _recordsChart
@@ -303,6 +311,11 @@ class _ChartsTabState extends State<ChartsTab> {
                       onTap: () => _select(_recordsChart),
                     ),
                     _ChartTab(
+                      label: l.chartLegends,
+                      selected: _chart == _legendsChart,
+                      onTap: () => _select(_legendsChart),
+                    ),
+                    _ChartTab(
                       label: l.chartShortTours,
                       selected: _chart == _toursChart,
                       onTap: () => _select(_toursChart),
@@ -334,6 +347,8 @@ class _ChartsTabState extends State<ChartsTab> {
           )
         else if (_chart == _bestSellersChart)
           const Expanded(child: BestSellersBoard())
+        else if (_chart == _legendsChart)
+          const Expanded(child: LegendsBoard())
         else if (_chart == _recordsChart)
           Expanded(
             child: _RecordsBoard(

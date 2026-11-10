@@ -11,6 +11,7 @@ import 'career_setup.dart';
 import 'events.dart';
 import 'feature_news.dart';
 import 'income.dart';
+import 'legacy_views.dart';
 import 'social_feed.dart';
 import 'milestones.dart';
 import 'platforms.dart';
@@ -568,6 +569,7 @@ class GameSession {
     SongDirection direction = SongDirection.balanced,
   }) {
     final p = _p;
+    _requireActive();
     // A diss track goes at a rival or the haters (docs K229).
     if (dissTarget != -1 &&
         dissTarget != Beefs.haters &&
@@ -760,6 +762,8 @@ class GameSession {
   }
 
   List<String> _tourProblems(TourRequest r) {
+    // A career that ended plays no shows (docs K288).
+    if (isRetired) return const ['retired'];
     final reunionOn = r.reunion && Reunions.active(world);
     final fans = reunionOn ? Reunions.group(world)!.coreFans : _p.coreFans;
     final fame = reunionOn ? Reunions.audience(world).fame : _p.fame;
@@ -1412,6 +1416,7 @@ class GameSession {
   }
 
   Song _checkSingle(int songId) {
+    _requireActive();
     final s = _ownSong(songId);
     if (s.isSingle) throw GameException('alreadySingle', 'Already a single');
     if (_p.scheduled.any((sr) => !sr.isAlbum && sr.songIds.contains(s.id))) {
@@ -1766,6 +1771,7 @@ class GameSession {
   String _checkAlbum(
       String title, List<int> songIds, AlbumType type, List<int> variantWeeks,
       [List<EditionFormat?> variantFormats = const []]) {
+    _requireActive();
     final t = title.trim();
     if (t.isEmpty || t.length > 60) {
       throw GameException('invalidTitle', 'Title must be 1–60 chars');
@@ -3927,6 +3933,102 @@ class GameSession {
     _saveNow();
   }
 
+  // ---------------------------------------------------------------- legacy
+
+  /// Every artist's legacy, worked out at most once a week (docs K288).
+  Map<int, LegacyParts>? _legacyParts;
+  List<(int, double)>? _legacyRanking;
+  int _legacyWeek = -1;
+
+  (Map<int, LegacyParts>, List<(int, double)>) _legacy() {
+    if (_legacyParts == null || _legacyWeek != world.week) {
+      _legacyParts = Legacy.all(world);
+      _legacyRanking = Legacy.ranking(_legacyParts!);
+      _legacyWeek = world.week;
+    }
+    return (_legacyParts!, _legacyRanking!);
+  }
+
+  /// The player's legacy page and career summary (docs K288).
+  LegacyView get legacy {
+    final (parts, ranking) = _legacy();
+    return LegacyViews.of(world, parts, ranking);
+  }
+
+  /// The greatest artists of all time (docs K288).
+  List<LegacyRow> legacyList({int limit = LegacyViews.listSize}) {
+    final (parts, ranking) = _legacy();
+    return LegacyViews.list(world, parts, ranking, limit: limit);
+  }
+
+  /// The Hall of Fame, latest class first (docs K288).
+  List<HallOfFameRow> get hallOfFame => LegacyViews.hallOfFame(world);
+
+  /// Whether the player has ended their career (docs K288).
+  bool get isRetired => world.playerRetiredWeek >= 0;
+
+  void _requireActive() {
+    if (isRetired) throw GameException('retired', 'The career has ended');
+  }
+
+  /// Ends the career (docs K288): nothing new is made, the catalog plays
+  /// on, and the player can come back any time. Not while on tour or with
+  /// a release scheduled.
+  void retire() {
+    _requireActive();
+    if (_p.tour != null) throw GameException('onTour', 'On tour');
+    if (_p.scheduled.isNotEmpty) {
+      throw GameException('releaseScheduled', 'A release is scheduled');
+    }
+    world.playerRetiredWeek = world.week;
+    _saveNow();
+  }
+
+  /// Back from retirement (docs K288): the first record after the break
+  /// is a comeback, with the waiting fans' hype.
+  void comeBack() {
+    if (!isRetired) throw GameException('notRetired', 'Still working');
+    world.playerRetiredWeek = -1;
+    _saveNow();
+  }
+
+  /// Marks on the all-time list that make news (docs K288).
+  static const legacyMarks = [100, 50, 25, 10, 1];
+
+  /// The Hall of Fame class each spring, and the player's climb on the
+  /// all-time list once a year (docs K288).
+  List<GameEvent> _legacyNews() {
+    final w = world;
+    final out = <GameEvent>[];
+    final (inducted, place) = HallOfFame.induct(w);
+    if (inducted.isNotEmpty) {
+      _legacyParts = null;
+      final year = inducted.first.year;
+      if (inducted.any((h) => h.artistId == w.playerArtistId)) {
+        out.add(HallOfFameInducted(year));
+      } else if (place > 0) {
+        out.add(HallOfFameMissed(year, place));
+      }
+      out.add(HallOfFameClass(year, [for (final h in inducted) h.artistId]));
+    }
+    if (GameTime.weekOfYear(w.week) == 1 &&
+        w.week - w.playerSinceWeek >= GameTime.weeksPerYear) {
+      final (_, ranking) = _legacy();
+      final rank = LegacyViews.rankOf(w, ranking);
+      final was = w.legacyRank;
+      if (rank > 0) {
+        for (final m in legacyMarks) {
+          if (rank <= m && (was == 0 || was > m)) {
+            out.add(LegacyRankUp(rank));
+            break;
+          }
+        }
+      }
+      w.legacyRank = rank;
+    }
+    return out;
+  }
+
   /// The all-time best sellers of [kind] by [measure] (docs K141).
   List<BestSellerRow> bestSellers(BestSellerKind kind,
           {SalesMeasure measure = SalesMeasure.units,
@@ -4844,6 +4946,7 @@ class GameSession {
     }
     events.addAll(_recordsBroken(r));
     events.addAll(_bestSellerNews());
+    events.addAll(_legacyNews());
     events.addAll(_writtenHits(r));
     // A documentary premiered (docs K172).
     for (final d in world.documentaries) {

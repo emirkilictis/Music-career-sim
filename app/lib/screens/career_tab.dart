@@ -20,6 +20,7 @@ import 'chart_history_screen.dart';
 import 'discography_screen.dart';
 import 'album_detail_screen.dart';
 import 'labels_screen.dart';
+import 'legacy_screen.dart';
 import 'member_album_screen.dart';
 import 'rival_editor_screen.dart';
 import 'releases_tab.dart';
@@ -1349,6 +1350,33 @@ class _CareerScreenState extends State<CareerScreen> {
           ],
         ]),
         ..._on(_CareerPage.records, [
+          const SizedBox(height: 12),
+          // The player's place in music history (docs K288).
+          Section(
+            title: l.legacyTitle,
+            icon: Icons.account_balance_outlined,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                      p.retiredYear > 0
+                          ? l.legacyRetiredBanner(p.retiredYear)
+                          : l.legacyCardHint,
+                      style: TextStyle(color: AppColors.textMuted)),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilledButton.icon(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => LegacyScreen(state: career))),
+                      icon: const Icon(Icons.auto_graph_rounded),
+                      label: Text(l.legacySummary),
+                    ),
+                  ),
+                ]),
+          ),
           const SizedBox(height: 12),
           Section(
             title: l.careerTotals,

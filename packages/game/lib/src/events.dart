@@ -216,6 +216,44 @@ class TopArtist extends GameEvent {
   bool get isMajor => rank == 1;
 }
 
+/// The player climbed the all-time legacy list (docs K288): now #[rank],
+/// past a mark (100, 50, 25, 10 or the top).
+class LegacyRankUp extends GameEvent {
+  const LegacyRankUp(this.rank);
+  final int rank;
+  @override
+  bool get isMajor => rank <= 10;
+}
+
+/// The player went into the Hall of Fame (docs K288).
+class HallOfFameInducted extends GameEvent {
+  const HallOfFameInducted(this.year);
+  final int year;
+  @override
+  bool get isMajor => true;
+}
+
+/// The player was on the Hall of Fame ballot, #[place], and not voted in
+/// this year (docs K288).
+class HallOfFameMissed extends GameEvent {
+  const HallOfFameMissed(this.year, this.place);
+  final int year;
+  final int place;
+  @override
+  bool get isMajor => false;
+}
+
+/// The year's Hall of Fame class (docs K288): the artists who went in.
+class HallOfFameClass extends GameEvent {
+  const HallOfFameClass(this.year, this.artistIds);
+  final int year;
+  final List<int> artistIds;
+  @override
+  bool get isMajor => false;
+  @override
+  bool get isIndustry => true;
+}
+
 /// The player set an all-time record (docs K111): [value] is weeks,
 /// units or streams, by [kind].
 class RecordBroken extends GameEvent {

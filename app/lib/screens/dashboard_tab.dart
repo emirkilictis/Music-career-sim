@@ -9,6 +9,7 @@ import '../core/commands.dart';
 import '../core/scope.dart';
 import '../ui/palette.dart';
 import '../widgets/platforms_list.dart';
+import 'legacy_screen.dart';
 import 'moment_screen.dart';
 import 'social_screen.dart';
 import '../widgets/tour_section.dart';
@@ -31,6 +32,34 @@ class DashboardTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       children: [
+        // A career that ended (docs K288): the catalog plays on.
+        if (context.career.player.retiredYear > 0) ...[
+          Section(
+            title: context.l10n
+                .legacyRetiredBanner(context.career.player.retiredYear),
+            icon: Icons.flag_outlined,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(context.l10n.legacyRetiredHint,
+                      style: TextStyle(color: AppColors.textMuted)),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) =>
+                                  LegacyScreen(state: context.careerRead))),
+                      icon: const Icon(Icons.auto_graph_rounded),
+                      label: Text(context.l10n.legacySummary),
+                    ),
+                  ),
+                ]),
+          ),
+          const SizedBox(height: 12),
+        ],
         // An interview, a stage moment or a crisis to play through (docs
         // K256).
         if (context.career.player.moment case final m?) ...[
@@ -47,7 +76,9 @@ class DashboardTab extends StatelessWidget {
         ],
         const _WeekCard(),
         const SizedBox(height: 12),
-        _NextStepCard(onOpenTab: onOpenTab, onNextWeek: onNextWeek),
+        // Nothing new to make while retired (docs K288).
+        if (context.career.player.retiredYear == 0)
+          _NextStepCard(onOpenTab: onOpenTab, onNextWeek: onNextWeek),
         const SizedBox(height: 12),
         const _StatusRow(),
         const SizedBox(height: 12),

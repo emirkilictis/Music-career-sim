@@ -740,6 +740,15 @@ abstract final class Cmd {
 
   static SessionCmd<void> rewardAd() => (s) => s.rewardAd();
 
+  /// The player's legacy page (docs K288).
+  static SessionCmd<LegacyView> legacy() => (s) => s.legacy;
+
+  /// The greatest artists of all time and the Hall of Fame (docs K288).
+  static SessionCmd<(List<LegacyRow>, List<HallOfFameRow>)> legends() =>
+      (s) => (s.legacyList(), s.hallOfFame);
+  static SessionCmd<void> retire() => (s) => s.retire();
+  static SessionCmd<void> comeBack() => (s) => s.comeBack();
+
   static SessionCmd<bool> dailyBonus(bool premium) =>
       (s) => s.claimDailyBonus(premium: premium);
 

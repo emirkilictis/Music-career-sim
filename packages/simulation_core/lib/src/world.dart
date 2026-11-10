@@ -11,6 +11,7 @@ import 'config/difficulty.dart';
 import 'config/regions.dart';
 import 'config/sim_config.dart';
 import 'festivals.dart';
+import 'legacy.dart';
 import 'model.dart';
 import 'moments.dart';
 import 'rng.dart';
@@ -137,6 +138,17 @@ class World {
 
   /// What the player paid to live last week (docs K285).
   int livingPaidCents = 0;
+
+  /// The Hall of Fame (docs K288), in the order the artists went in.
+  final List<HallOfFamer> hallOfFame = [];
+
+  /// The player's all-time legacy rank at the last yearly look (docs
+  /// K288; 0: none yet), for the news when it climbs.
+  int legacyRank = 0;
+
+  /// The week the player ended their career (docs K288; -1: still at it).
+  /// The catalog plays on; nothing new is made until they come back.
+  int playerRetiredWeek = -1;
 
   /// After the player went solo (docs K191): the group they left (-1:
   /// never did), the week they became the player's artist, and what the

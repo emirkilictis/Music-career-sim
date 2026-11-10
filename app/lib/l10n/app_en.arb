@@ -9661,5 +9661,171 @@
   "themeNightlife": "Nightlife",
   "themeAnger": "Anger",
   "themeConfidence": "Confidence",
-  "rolloutNowPreview": "Rollout if released this week"
+  "rolloutNowPreview": "Rollout if released this week",
+  "chartLegends": "Legends",
+  "legendsSub": "The greatest artists of all time",
+  "legendsAllTime": "All time",
+  "legendsHallOfFame": "Hall of Fame",
+  "legendsPoints": "{points} pts",
+  "@legendsPoints": {
+    "placeholders": {
+      "points": {
+        "type": "String"
+      }
+    }
+  },
+  "legendsInducted": "Hall of Fame {year}",
+  "@legendsInducted": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "legendsRetired": "Retired",
+  "legendsEmpty": "No one is in the Hall of Fame yet. An artist can go in 25 years after their first record; the voters meet each spring.",
+  "legendsNote": "The score counts what this world has seen: sales, hits, number ones, awards and the years with hits. Careers from before it count only from then.",
+  "hallOfFameClass": "Class of {year}",
+  "@hallOfFameClass": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "legacyTitleLegend": "Legend of all time",
+  "legacyTitleIcon": "Icon",
+  "legacyTitleStar": "Star",
+  "legacyTitleHitmaker": "Hitmaker",
+  "legacyTitleOneHitWonder": "One-hit wonder",
+  "legacyTitleCult": "Cult favourite",
+  "legacyTitleRising": "Rising artist",
+  "legacyTitleWorking": "Working musician",
+  "legacyTitle": "Legacy",
+  "legacyCardHint": "Your place in music history",
+  "legacyScore": "Legacy score",
+  "legacyRank": "All-time #{rank}",
+  "@legacyRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "legacyRankOf": "#{rank} of {count} artists",
+  "@legacyRankOf": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "legacyUnranked": "Not on the all-time list yet",
+  "legacyPartSales": "Sales",
+  "legacyPartHits": "Hits",
+  "legacyPartNo1": "Number ones",
+  "legacyPartAwards": "Awards",
+  "legacyPartLongevity": "Longevity",
+  "legacyUnits": "Units",
+  "legacyRecordsSold": "Records sold",
+  "legacyStreams": "Streams",
+  "legacyNo1Singles": "#1 singles",
+  "legacyNo1Albums": "#1 albums",
+  "legacyTop10": "Top 10 hits",
+  "legacyAwardWins": "Awards won",
+  "legacyHitYears": "Years with a hit",
+  "legacyTopSongs": "Biggest songs",
+  "legacyTopAlbums": "Biggest albums",
+  "legacyHofIn": "In the Hall of Fame · class of {year}",
+  "@legacyHofIn": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "legacyHofEligible": "On the Hall of Fame ballot: the voters meet each spring.",
+  "legacyHofYears": "Eligible for the Hall of Fame in {years, plural, =1{1 year} other{{years} years}}",
+  "@legacyHofYears": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "legacyShareText": "{name}: {title}, {points} legacy points. {app}",
+  "@legacyShareText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "points": {
+        "type": "String"
+      },
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "legacyRetire": "End my career",
+  "legacyRetireConfirmTitle": "End your career?",
+  "legacyRetireConfirm": "Your songs keep playing and paying. You make nothing new until you come back, which you can do any time from this page.",
+  "legacyRetireBlocked": "Finish your tour and scheduled releases first.",
+  "legacyComeBack": "Come back",
+  "legacyComeBackDone": "You are back. Your first record will be a comeback.",
+  "legacyRetiredBanner": "Retired since {year}",
+  "@legacyRetiredBanner": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "legacyRetiredHint": "Your catalog plays on. Come back any time from Career → Track record → Legacy.",
+  "legacySummary": "Career summary",
+  "errorRetired": "Your career has ended. Come back from Career → Track record → Legacy first.",
+  "errorReleaseScheduled": "A release is still scheduled.",
+  "errorNotRetired": "You have not retired.",
+  "eventLegacyRankTop": "You are the greatest artist of all time on the legacy list.",
+  "eventLegacyRank": "You are now #{rank} among the greatest artists of all time.",
+  "@eventLegacyRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "eventHallOfFame": "You are in the Hall of Fame: class of {year}.",
+  "@eventHallOfFame": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      }
+    }
+  },
+  "eventHallOfFameMissed": "Not voted into the Hall of Fame this year: #{place} on the ballot.",
+  "@eventHallOfFameMissed": {
+    "placeholders": {
+      "place": {
+        "type": "int"
+      }
+    }
+  },
+  "eventHallOfFameClass": "Hall of Fame class of {year}: {names}.",
+  "@eventHallOfFameClass": {
+    "placeholders": {
+      "year": {
+        "type": "int"
+      },
+      "names": {
+        "type": "String"
+      }
+    }
+  }
 }

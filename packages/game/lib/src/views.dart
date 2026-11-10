@@ -104,6 +104,9 @@ class ArtistView {
         skillPoints = a.skillPoints,
         livingCostCents = LivingCosts.weeklyCents(a),
         practisedThisWeek = w.practiceWeek == w.week,
+        retiredYear = w.playerRetiredWeek >= 0
+            ? GameTime.yearOf(w.playerRetiredWeek)
+            : 0,
         label = a.label,
         distributor = a.distributor,
         maxCampaign = Distribution.maxCampaign(a),
@@ -248,6 +251,9 @@ class ArtistView {
   /// was taken.
   final int livingCostCents;
   final bool practisedThisWeek;
+
+  /// The year the player ended their career (docs K288; 0: still at it).
+  final int retiredYear;
   final Map<SkillKind, double> skills;
 
   /// Week of the last single or album (-1 = never released anything).

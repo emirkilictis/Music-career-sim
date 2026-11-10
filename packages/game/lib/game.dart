@@ -15,6 +15,7 @@ export 'src/events.dart';
 export 'src/feature_news.dart';
 export 'src/game_session.dart';
 export 'src/income.dart';
+export 'src/legacy_views.dart';
 export 'src/milestones.dart';
 export 'src/platforms.dart';
 export 'src/social_feed.dart';
