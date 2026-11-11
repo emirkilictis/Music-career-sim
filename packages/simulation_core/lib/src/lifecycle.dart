@@ -52,6 +52,36 @@ abstract final class Lifecycle {
     w.dirtyArtists.add(a.id);
   }
 
+  /// Gives dormant [s] its catalog listening [rate] back (docs K293): what
+  /// it played so far is kept and nothing accrues for the weeks it had
+  /// none.
+  static void restoreDormant(World w, Song s, double rate) {
+    if (s.status != SongStatus.dormant || rate <= 0) return;
+    final a = w.primaryOf(s);
+    w.settleRetired(a);
+    for (var r = 0; r < regionCount; r++) {
+      s.reg[SongReg.lifeStreams + r] = w.songLifetimeStreams(s, r);
+      s.reg[SongReg.lifeDownloads + r] = w.songLifetimeDownloads(s, r);
+      s.reg[SongReg.indexStreams + r] = w.artistIndexStreams(a, r);
+      s.reg[SongReg.indexDownloads + r] = w.artistIndexDownloads(a, r);
+    }
+    a.sumDormantRate += rate;
+    if (a.isRetired) {
+      for (var r = 0; r < regionCount; r++) {
+        w.retiredDormantAttention[r] +=
+            rate * a.catalogFactor * a.regionShare[r];
+      }
+    }
+    if (s.albumId >= 0) {
+      final al = w.albums[s.albumId];
+      settleAlbum(w, al);
+      al.sumDormantRate += rate;
+    }
+    s.dormantRate = rate;
+    w.dirtySongs.add(s.id);
+    w.dirtyArtists.add(a.id);
+  }
+
   /// How much of its last listening a song keeps in the catalog (docs
   /// K85): people come back to the hits, not to an album's other tracks.
   /// Top-10 singles keep far more than deep cuts that never charted; the
@@ -85,14 +115,15 @@ abstract final class Lifecycle {
 
   /// An old song's trend for quarter [quarter] (docs K261): mostly its
   /// usual level; now and then found again (a film, a show, a nostalgia
-  /// wave: 1.4–3×) or out of fashion (0.55–0.8×) for that quarter.
+  /// wave: 1.4–3×) or out of fashion (0.4–0.8×, docs K291: 0.55–0.8×
+  /// before) for that quarter.
   static double catalogTrend(int seed, int quarter, int songId) {
     final u = keyedUnit(seed, quarter, songId, RngPurpose.catalogTrend);
     if (u < resurgenceChance) {
       return 1.4 + 1.6 * (u / resurgenceChance);
     }
     if (u < resurgenceChance + slumpChance) {
-      return 0.55 + 0.25 * ((u - resurgenceChance) / slumpChance);
+      return 0.4 + 0.4 * ((u - resurgenceChance) / slumpChance);
     }
     return 1;
   }
@@ -106,8 +137,9 @@ abstract final class Lifecycle {
       week - (week - artistId) % fadeWeeks;
 
   /// A quarter's chances of an old song being found again, or out of
-  /// fashion (docs K261).
-  static const resurgenceChance = 0.06, slumpChance = 0.06;
+  /// fashion (docs K261; docs K291: a slump 15% a quarter, 6% before, so
+  /// old songs are less steady).
+  static const resurgenceChance = 0.06, slumpChance = 0.15;
 
   /// The floor's yardstick for a song without one (out before streaming,
   /// or from a save before it; docs K265): against its last active week's
@@ -183,6 +215,8 @@ abstract final class Lifecycle {
 
   static void reactivateSong(World w, Song s) {
     if (s.status != SongStatus.dormant) return;
+    // Its album is off the market (docs K293): nothing brings it back.
+    if (s.albumId >= 0 && w.albums[s.albumId].isOff) return;
     final a = w.primaryOf(s);
     w.settleRetired(a);
     for (var r = 0; r < regionCount; r++) {

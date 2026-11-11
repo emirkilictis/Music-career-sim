@@ -27,6 +27,7 @@ class EventIcon extends StatelessWidget {
       RecordBroken() => (Icons.military_tech_rounded, AppColors.gold),
       TopArtist() => (Icons.public_rounded, AppColors.gold),
       LegacyRankUp() => (Icons.auto_graph_rounded, AppColors.gold),
+      FollowUpFlop() => (Icons.trending_down_rounded, AppColors.coral),
       HallOfFameInducted() => (Icons.account_balance_rounded, AppColors.gold),
       HallOfFameMissed() => (Icons.account_balance_rounded, AppColors.lilac),
       HallOfFameClass() => (Icons.account_balance_rounded, AppColors.lilac),

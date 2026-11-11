@@ -1190,6 +1190,9 @@ class Fmt {
       'practiceLocked' => l.errorPracticeLocked,
       'retired' => l.errorRetired,
       'genreNotYet' => l.errorGenreNotYet,
+      'albumOff' => l.errorAlbumOff,
+      'albumLocked' => l.errorAlbumLocked,
+      'albumNotOff' => l.errorAlbumNotOff,
       'formatNotYet' => l.errorFormatNotYet,
       'releaseScheduled' => l.errorReleaseScheduled,
       'notRetired' => l.errorNotRetired,
@@ -1251,6 +1254,9 @@ class Fmt {
       TopArtist(:final rank) =>
         rank == 1 ? l.eventTopArtistNo1 : l.eventTopArtist(rank),
       // Legacy and the Hall of Fame (docs K288).
+      FollowUpFlop() => line.title2.isEmpty
+          ? l.eventFollowUpFlopNew(t)
+          : l.eventFollowUpFlop(t, line.title2),
       LegacyRankUp(:final rank) =>
         rank == 1 ? l.eventLegacyRankTop : l.eventLegacyRank(rank),
       HallOfFameInducted(:final year) => l.eventHallOfFame(year),

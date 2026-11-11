@@ -957,7 +957,20 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         ),
                     ]),
                   ],
-                  if (s.radioUpgradeCosts.isNotEmpty) ...[
+                  // The radio budget, any time after release (docs K290);
+                  // it takes the place of the release's push tiers.
+                  if (s.radioMaxLevel > 0) ...[
+                    const SizedBox(height: 10),
+                    _RadioBudget(
+                        song: s,
+                        onSet: (level) async {
+                          if (await _tool(Cmd.setRadioLevel(s.id, level)) &&
+                              mounted) {
+                            showInfo(this.context, l.radioBudgetSet(level),
+                                icon: Icons.radio_rounded);
+                          }
+                        }),
+                  ] else if (s.radioUpgradeCosts.isNotEmpty) ...[
                     const SizedBox(height: 8),
                     Text(l.radioUpgradeHint,
                         style: TextStyle(
@@ -1005,7 +1018,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     Text(l.radioUkLine(fmt.radioPush(s.ukRadioPush)),
                         style: TextStyle(color: AppColors.textMuted)),
                   ],
-                  if (s.ukRadioOptions.isNotEmpty) ...[
+                  if (s.ukRadioOptions.isNotEmpty && !s.radioBudget) ...[
                     const SizedBox(height: 8),
                     Text(l.radioUkHint,
                         style: TextStyle(
@@ -2047,5 +2060,75 @@ class _ToolGroup extends StatelessWidget {
         children: children,
       ),
     );
+  }
+}
+
+/// A single's radio budget (docs K290): a level from 0 to 100, set any
+/// time after release and paid each week it runs.
+class _RadioBudget extends StatefulWidget {
+  const _RadioBudget({required this.song, required this.onSet});
+  final SongView song;
+  final Future<void> Function(int level) onSet;
+
+  @override
+  State<_RadioBudget> createState() => _RadioBudgetState();
+}
+
+class _RadioBudgetState extends State<_RadioBudget> {
+  late double _level = widget.song.radioLevel
+      .clamp(0, widget.song.radioMaxLevel)
+      .toDouble();
+
+  @override
+  void didUpdateWidget(_RadioBudget old) {
+    super.didUpdateWidget(old);
+    if (old.song.radioLevel != widget.song.radioLevel) {
+      _level = widget.song.radioLevel
+          .clamp(0, widget.song.radioMaxLevel)
+          .toDouble();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final fmt = context.fmt;
+    final s = widget.song;
+    final level = _level.round();
+    final cost =
+        level < s.radioLevelCosts.length ? s.radioLevelCosts[level] : 0;
+    final changed = level != s.radioLevel || !s.radioBudget;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Text(l.radioBudgetTitle,
+          style: const TextStyle(fontWeight: FontWeight.w700)),
+      const SizedBox(height: 2),
+      Text(s.radioRerun ? l.radioBudgetRerun : l.radioBudgetHint,
+          style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+      Slider(
+        value: _level,
+        max: s.radioMaxLevel.toDouble(),
+        divisions: s.radioMaxLevel,
+        label: '$level',
+        onChanged: (v) => setState(() => _level = v),
+      ),
+      Row(children: [
+        Expanded(
+          child: Text(
+              cost > 0
+                  ? l.radioBudgetLevel(level, fmt.money(cost))
+                  : l.radioBudgetFree(level),
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+        ),
+        FilledButton.tonal(
+          onPressed: changed ? () => widget.onSet(level) : null,
+          child: Text(l.radioBudgetApply),
+        ),
+      ]),
+      if (s.radioMaxLevel < 100) ...[
+        const SizedBox(height: 4),
+        Text(l.radioBudgetMax(s.radioMaxLevel),
+            style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+      ],
+    ]);
   }
 }

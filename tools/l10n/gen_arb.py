@@ -2671,6 +2671,32 @@ k('eraHint1970s','The 1970s: albums sell millions, the cassette arrives; disco, 
 k('eraHint1980s','The 1980s: music TV makes videos matter, then the CD arrives; hip-hop and metal grow.','1980’ler: müzik televizyonu klipleri önemli kılıyor, sonra CD geliyor; hip-hop ve metal büyüyor.')
 k('eraHint1990s','The 1990s: the CD boom; the web arrives near the end.','1990’lar: CD patlaması; internet on yılın sonuna doğru geliyor.')
 
+# The radio budget (docs K290).
+k('radioBudgets','Radio budgets','Radyo bütçeleri')
+k('radioBudgetTitle','Radio budget','Radyo bütçesi')
+k('radioBudgetHint','How hard the stations are worked, changed any time; paid every week it runs. At 0 the song gets only what it earns on its own.','İstasyonların ne kadar çalışılacağı; istediğin zaman değişir, çalıştığı her hafta ödenir. 0’da şarkı yalnız kendi kazandığını alır.')
+k('radioBudgetRerun','The stations let this song go: raising the budget works it to them again, as a new run.','İstasyonlar bu şarkıyı bıraktı: bütçeyi yükseltmek onu yeniden istasyonlara götürür, yeni bir koşu olarak.')
+k('radioBudgetLevel','Level {level} · {cost} a week','Seviye {level} · haftada {cost}', level='int', cost='String')
+k('radioBudgetFree','Level {level} · no paid push','Seviye {level} · ücretli tanıtım yok', level='int')
+k('radioBudgetApply','Set','Uygula')
+k('radioBudgetMax','Your label can run up to level {level}.','Şirketin en çok {level}. seviyeye kadar çalışabilir.', level='int')
+k('radioBudgetSet','Radio budget set: level {level}.','Radyo bütçesi ayarlandı: seviye {level}.', level='int')
+
+# A follow-up that falls flat (docs K292), records off the market (docs K293).
+k('eventFollowUpFlop','The public moved on: “{title}” opened far below what “{previous}” did.','Halk başka yere baktı: “{title}”, “{previous}” albümünün çok altında açıldı.', title='String', previous='String')
+k('eventFollowUpFlopNew','The public did not take to “{title}”: it opened far below what was expected.','Halk “{title}” albümünü benimsemedi: beklenenin çok altında açıldı.', title='String')
+k('offMarketButton','Take off the market','Yayından kaldır')
+k('offMarketPutBack','Put back on the market','Yeniden yayınla')
+k('offMarketConfirmTitle','Take “{title}” off the market?','“{title}” yayından kaldırılsın mı?', title='String')
+k('offMarketConfirm','It leaves the streaming services and the shops: its songs stop playing and selling. Its streams, sales and chart runs are kept, and you can put it back any time.','Streaming servislerinden ve mağazalardan çekilir: şarkıları dinlenmez ve satılmaz. Dinlenmeleri, satışları ve liste geçmişi korunur; istediğin zaman geri koyabilirsin.')
+k('offMarketDone','“{title}” is off the market.','“{title}” yayından kaldırıldı.', title='String')
+k('offMarketBack','“{title}” is back on the market.','“{title}” yeniden yayında.', title='String')
+k('offMarketTag','Off the market since {date}','{date} tarihinden beri yayında değil', date='String')
+k('offMarketHint','Not on the services or in the shops: its numbers stay where they were until it comes back.','Servislerde ve mağazalarda yok: geri gelene kadar sayıları olduğu yerde kalır.')
+k('errorAlbumOff','That record is off the market.','Bu kayıt yayından kaldırılmış.')
+k('errorAlbumLocked','It cannot be taken off the market now.','Şu an yayından kaldırılamaz.')
+k('errorAlbumNotOff','That record is on the market.','Bu kayıt zaten yayında.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

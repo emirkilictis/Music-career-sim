@@ -95,10 +95,12 @@ class EraTable {
       final a = keyframes[i], b = keyframes[i + 1];
       if (year <= b.year) return a.lerp(b, (year - a.year) / (b.year - a.year));
     }
-    // Projection: +1.5%/year streaming growth, saturating at +40%.
+    // Projection: streaming grows a little more, saturating at +20%
+    // (docs K291: +40% before, which kept every catalog rising for
+    // decades).
     final last = keyframes.last;
     final yearsAfter = year - last.year;
-    final growth = 1.0 + 0.4 * (1.0 - _pow(0.965, yearsAfter));
+    final growth = 1.0 + 0.2 * (1.0 - _pow(0.965, yearsAfter));
     return EraValues(
       year: year,
       streamsWeekly: last.streamsWeekly * growth,

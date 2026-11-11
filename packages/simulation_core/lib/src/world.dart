@@ -140,6 +140,9 @@ class World {
   /// What the player paid to live last week (docs K285).
   int livingPaidCents = 0;
 
+  /// What the player's radio budgets cost last week (docs K290).
+  int radioPaidCents = 0;
+
   /// The year of this world's week 0 (docs K289): [GameTime.baseYear] when
   /// it was made or loaded.
   final int baseYear = GameTime.baseYear;

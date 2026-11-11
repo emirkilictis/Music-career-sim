@@ -213,6 +213,41 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
     );
   }
 
+  /// Off the market and back (docs K293).
+  Future<void> _offMarket(AlbumView a) async {
+    final l = context.l10n;
+    if (!a.isOff) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (d) => AlertDialog(
+          title: Text(l.offMarketConfirmTitle(a.title)),
+          content: Text(l.offMarketConfirm),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(d, false),
+                child: Text(l.cancel)),
+            FilledButton(
+                onPressed: () => Navigator.pop(d, true),
+                child: Text(l.offMarketButton)),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
+    try {
+      await widget.state
+          .act(a.isOff ? Cmd.putAlbumBack(a.id) : Cmd.takeAlbumOff(a.id));
+      if (mounted) {
+        showInfo(context,
+            a.isOff ? l.offMarketBack(a.title) : l.offMarketDone(a.title),
+            icon: a.isOff ? Icons.album_rounded : Icons.block_rounded);
+      }
+      _load();
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   Future<void> _newVersion(AlbumView a, {bool anniversary = false}) async {
     if (await AlbumVersionScreen.open(context, widget.state, a,
         anniversary: anniversary)) {
@@ -377,6 +412,24 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
               ]),
             ),
           if (_brief case final brief?) CreativeBriefCard(brief: brief),
+          // Off the market and back (docs K293).
+          if (a.isPlayer && a.isOff) ...[
+            const SizedBox(height: 10),
+            Tag(l.offMarketTag(fmt.date(a.offWeek)),
+                icon: Icons.block_rounded, color: AppColors.coral),
+            const SizedBox(height: 4),
+            Text(l.offMarketHint,
+                style: TextStyle(color: AppColors.textMuted, fontSize: 12.5)),
+          ],
+          if (a.isPlayer && (a.isOff || a.canTakeOff)) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => _offMarket(a),
+              icon: Icon(
+                  a.isOff ? Icons.replay_rounded : Icons.block_rounded),
+              label: Text(a.isOff ? l.offMarketPutBack : l.offMarketButton),
+            ),
+          ],
           // A dated version on its way (docs K255).
           if (a.isPlayer && a.planned != null) _plannedCard(a, a.planned!),
           // New versions after it came out (docs K225).

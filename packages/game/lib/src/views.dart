@@ -103,6 +103,7 @@ class ArtistView {
         job = a.job,
         skillPoints = a.skillPoints,
         livingCostCents = LivingCosts.weeklyCents(a),
+        radioPaidCents = w.player?.id == a.id ? w.radioPaidCents : 0,
         practisedThisWeek = w.practiceWeek == w.week,
         retiredYear = w.playerRetiredWeek >= 0
             ? GameTime.yearOf(w.playerRetiredWeek)
@@ -252,6 +253,9 @@ class ArtistView {
   final int livingCostCents;
   final bool practisedThisWeek;
 
+  /// What the singles' radio budgets cost last week (docs K290).
+  final int radioPaidCents;
+
   /// The year the player ended their career (docs K288; 0: still at it).
   final int retiredYear;
   final Map<SkillKind, double> skills;
@@ -376,6 +380,22 @@ class SongView {
               },
         canPullRadio = s.primaryArtistId == w.playerArtistId &&
             Actions.canPullRadio(w, w.player!, s),
+        radioLevel = RadioTools.levelOf(s),
+        radioBudget = s.radioLevel >= 0,
+        radioMaxLevel = s.primaryArtistId == w.playerArtistId &&
+                RadioTools.canSetLevel(w, w.player!, s)
+            ? RadioTools.maxLevel(w.player!)
+            : 0,
+        radioLevelCosts = s.primaryArtistId == w.playerArtistId &&
+                RadioTools.canSetLevel(w, w.player!, s)
+            ? [
+                for (var l = 0; l <= RadioTools.maxLevelValue; l++)
+                  RadioTools.levelWeeklyCents(w.player!, l)
+              ]
+            : const [],
+        radioRerun = s.status == SongStatus.dormant ||
+            (s.isSingle &&
+                RadioTools.radioAge(w, s) >= RadioTools.radioRunWeeks),
         radioEdit = s.radioEditWeek >= 0,
         radioEditCost = s.primaryArtistId == w.playerArtistId &&
                 RadioTools.canEdit(w, w.player!, s)
@@ -738,6 +758,16 @@ class SongView {
   /// It can be taken off the radio for another single (docs K253).
   final bool canPullRadio;
 
+  /// The radio budget (docs K290): its level (0–100; the release's push
+  /// as a level until one is set), whether one was set, the highest the
+  /// label can run (0: cannot be set), each level's weekly cost, and
+  /// whether raising it now works it to the stations again as a new run.
+  final int radioLevel;
+  final bool radioBudget;
+  final int radioMaxLevel;
+  final List<int> radioLevelCosts;
+  final bool radioRerun;
+
   /// A radio edit was cut; what one costs now (null: not possible; docs
   /// K254).
   final bool radioEdit;
@@ -794,6 +824,10 @@ class AlbumView {
         artistName = w.artists[al.artistId].name,
         type = al.type,
         releaseWeek = al.releaseWeek,
+        offWeek = al.offWeek,
+        canTakeOff =
+            w.player != null && OffMarket.canTakeOff(w, w.player!, al),
+        reception = al.reception,
         trackIds = List.unmodifiable(al.songIds),
         variantWeeks = List.unmodifiable(al.variantWeeks),
         variantFormats = [
@@ -926,6 +960,16 @@ class AlbumView {
         lifetimeUnits = _regional((r) => w.albumLifetimeUnits(al, r));
 
   factory AlbumView.of(World w, Album al) => AlbumView._(w, al);
+
+  /// Off the market since this week (docs K293; -1: on sale), and
+  /// whether the player can take it off now.
+  final int offWeek;
+  bool get isOff => offWeek >= 0;
+  final bool canTakeOff;
+
+  /// How the public took it (docs K292): below 1, a follow-up that fell
+  /// flat.
+  final double reception;
 
   static int _originalAlbum(World w, Album al) {
     for (final id in al.songIds) {

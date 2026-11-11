@@ -28,6 +28,8 @@ abstract final class Anniversaries {
 
   /// The anniversary [al] can mark now (index into [years]), or -1.
   static int due(World w, Album al) {
+    // Not for a record off the market (docs K293).
+    if (al.isOff) return -1;
     final age = w.week - al.releaseWeek;
     for (var i = 0; i < years.length; i++) {
       final from = years[i] * GameTime.weeksPerYear;

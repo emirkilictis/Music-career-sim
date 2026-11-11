@@ -975,6 +975,18 @@ class Song with Charted {
   /// The week a radio edit was cut (-1: none; docs K254).
   int radioEditWeek = -1;
 
+  /// The radio push as a weekly budget (docs K290): 0–100, set any time
+  /// after release (-1: the push bought at release, [radioPush]).
+  int radioLevel = -1;
+
+  /// The week the stations were worked again (docs K290; -1: only at
+  /// release): its radio run counts from then.
+  int radioPushWeek = -1;
+
+  /// Its catalog listening while its album is off the market (docs K293;
+  /// 0: none held).
+  double heldRate = 0;
+
   /// The artist's share of what it earns, fixed by the deal it came out
   /// under (docs K139): a label owns the masters for good. Null until
   /// it first earns.
@@ -1119,6 +1131,14 @@ class Album with Charted {
   /// Kept off the streaming services until this week (docs K174; -1:
   /// streaming from the start).
   int windowUntil = -1;
+
+  /// The week the player took it off the market (docs K293; -1: on sale).
+  int offWeek = -1;
+  bool get isOff => offWeek >= 0;
+
+  /// How the public took it (docs K292): 1, or less for a follow-up the
+  /// public did not take to after a blockbuster.
+  double reception = 1;
 
   /// What it came bundled with and the copies that added to its first
   /// week (docs K144).

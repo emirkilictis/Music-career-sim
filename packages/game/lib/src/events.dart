@@ -216,6 +216,16 @@ class TopArtist extends GameEvent {
   bool get isMajor => rank == 1;
 }
 
+/// The player's new album fell flat after a blockbuster (docs K292): the
+/// public moved on. [previousId] is the album before it (-1: none).
+class FollowUpFlop extends GameEvent {
+  const FollowUpFlop(this.albumId, this.previousId);
+  final int albumId;
+  final int previousId;
+  @override
+  bool get isMajor => true;
+}
+
 /// The player climbed the all-time legacy list (docs K288): now #[rank],
 /// past a mark (100, 50, 25, 10 or the top).
 class LegacyRankUp extends GameEvent {

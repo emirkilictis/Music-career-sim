@@ -950,6 +950,14 @@ class _MoreSection extends StatelessWidget {
         l.livingCostsTerms(fmt.money(p.livingCostCents)),
         null,
       ),
+      // The singles' radio budgets (docs K290).
+      if (p.radioPaidCents > 0)
+        row(
+          Icons.radio_outlined,
+          l.radioBudgets,
+          l.livingCostsTerms(fmt.money(p.radioPaidCents)),
+          null,
+        ),
       row(
         Icons.play_circle_outline_rounded,
         l.watchAd(fmt.money(Actions.adRewardCents), p.adsLeftThisWeek,

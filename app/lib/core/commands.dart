@@ -743,6 +743,16 @@ abstract final class Cmd {
 
   static SessionCmd<void> rewardAd() => (s) => s.rewardAd();
 
+  /// Off the market and back (docs K293).
+  static SessionCmd<void> takeAlbumOff(int albumId) =>
+      (s) => s.takeAlbumOff(albumId);
+  static SessionCmd<void> putAlbumBack(int albumId) =>
+      (s) => s.putAlbumBack(albumId);
+
+  /// A single's radio budget (docs K290).
+  static SessionCmd<void> setRadioLevel(int songId, int level) =>
+      (s) => s.setRadioLevel(songId, level);
+
   /// The player's legacy page (docs K288).
   static SessionCmd<LegacyView> legacy() => (s) => s.legacy;
 

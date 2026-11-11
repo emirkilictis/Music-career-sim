@@ -243,7 +243,8 @@ class Simulator {
     // Radio comes from the paid push; the campaign adds a little (K84).
     double radioOf(Song s) =>
         campaignRadio[s.campaign.index] *
-        s.radioPush.factorFor(w.artists[s.primaryArtistId].fame) *
+        // A weekly budget once set (docs K290), else the release's push.
+        RadioTools.pushFactor(s, w.artists[s.primaryArtistId].fame) *
         (s.radioFormat == null
             ? 1.0
             : RadioFormat.factor(s.onFormat, s.genre, s.genres));
@@ -282,16 +283,20 @@ class Simulator {
     final radioLoad = <int, double>{}, promoLoad = <int, double>{};
     for (var i = 0; i < n; i++) {
       final s = w.songs[ids[i]];
-      final promoAge = w.week - s.singleWeek;
-      if (!s.isSingle || promoAge >= 26) continue;
-      final ageRel = w.week - s.releasedWeek;
+      if (!s.isSingle) continue;
       final id = s.primaryArtistId;
+      // A single worked to the stations again (docs K290) takes radio
+      // slots from its new run.
+      final radioAge = RadioTools.radioAge(w, s);
+      if (radioAge < 26 && !s.radioPush.isPulled) {
+        // A single taken off the radio frees its slots (docs K253).
+        radioLoad[id] = (radioLoad[id] ?? 0) + _radioLife(s, radioAge);
+      }
+      final promoAge = w.week - s.singleWeek;
+      if (promoAge >= 26) continue;
+      final ageRel = w.week - s.releasedWeek;
       singleLoad[id] =
           (singleLoad[id] ?? 0) + _singleFanCurve(c, ageRel, promoAge);
-      // A single taken off the radio frees its slots (docs K253).
-      if (!s.radioPush.isPulled) {
-        radioLoad[id] = (radioLoad[id] ?? 0) + _radioLife(s, promoAge);
-      }
       promoLoad[id] = (promoLoad[id] ?? 0) +
           _promoLife(s, promoAge, fastStart(w.artists[id]));
     }
@@ -595,7 +600,13 @@ class Simulator {
                   c.albumEventFanBoost *
                       c.playlistShare(year) *
                       math.exp(-albumAge / c.albumEventWeeks);
-      final asTrack = c.albumTrackFanShare * albumEvent * p.kind.albumAffinity;
+      final asTrack = c.albumTrackFanShare *
+          albumEvent *
+          p.kind.albumAffinity *
+          // Fewer play a follow-up that fell flat (docs K292).
+          (s.albumId >= 0 && !s.isSingle
+              ? w.albums[s.albumId].reception
+              : 1.0);
       // A single out before its album (docs K286): in the album's weeks
       // fans play it as a fresh track of the record and more (it is the
       // song they know), and the album's new listeners find it first. It
@@ -760,9 +771,12 @@ class Simulator {
           w.albums[s.albumId].type == AlbumType.mixtape;
       final d =
           free ? 0.0 : a * (0.25 + fresh) * (s.isSingle ? 1.0 : albumCutDl);
+      // The radio run counts from the last time the stations were worked
+      // (docs K290).
+      final radioAge = s.isSingle ? RadioTools.radioAge(w, s) : promoAge;
       final rd = s.radioAppeal *
-          _radioLife(s, promoAge) *
-          share(radioLoad, s, promoAge) *
+          _radioLife(s, radioAge) *
+          share(radioLoad, s, radioAge) *
           gapOf(s, radio: true) *
           (s.isSingle ? 1.0 : 0.03) *
           (0.2 + p.fame) *
@@ -1196,6 +1210,8 @@ class Simulator {
         final pure = al.isMixtape
             ? 0.0
             : bought *
+                    // A follow-up that fell flat (docs K292).
+                    al.reception *
                     noise *
                     tracklist *
                     demand *
@@ -1785,6 +1801,11 @@ class Simulator {
       final s = w.songs[ids[i]];
       final promoAge = w.week - (s.isSingle ? s.singleWeek : s.releasedWeek);
       if (promoAge < c.activeMinAgeWeeks) continue;
+      // Worked to the stations again: given its weeks (docs K290).
+      if (s.radioPushWeek >= 0 &&
+          w.week - s.radioPushWeek < c.activeMinAgeWeeks) {
+        continue;
+      }
       // A holiday song stays out for its whole season (docs K136).
       if (s.holiday && Holidays.inSeason(GameTime.weekOfYear(w.week))) {
         continue;
@@ -2559,6 +2580,8 @@ class Simulator {
     // Skills grow by practice and by doing, not by a free weekly allowance
     // (docs K285); rent and living are paid every week.
     world.livingPaidCents = LivingCosts.pay(p);
+    // The singles' radio budgets (docs K290).
+    world.radioPaidCents = RadioTools.bill(world, p);
     // Side benefits of some jobs (docs K36).
     final s = p.skills;
     switch (p.job) {

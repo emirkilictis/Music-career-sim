@@ -263,6 +263,8 @@ abstract final class Codec {
     'ringtones', 'weekRingtones', 'mood', 'canvas', 'bought',
     // Added in schema v55, v56, v57.
     'diss', 'radio', 'catalogBase',
+    // Added in schema v59.
+    'held',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -349,10 +351,23 @@ abstract final class Codec {
         s.canvasWeek < 0 ? null : s.canvasWeek,
         s.boughtFrom < 0 ? null : s.boughtFrom,
         s.dissTarget == -1 ? null : s.dissTarget,
-        s.ukRadioPush == null && s.radioEditWeek < 0
+        s.ukRadioPush == null &&
+                s.radioEditWeek < 0 &&
+                s.radioLevel < 0 &&
+                s.radioPushWeek < 0
             ? null
-            : jsonEncode([s.ukRadioPush?.index ?? -1, s.radioEditWeek]),
+            : jsonEncode([
+                s.ukRadioPush?.index ?? -1,
+                s.radioEditWeek,
+                // The radio budget (docs K290).
+                if (s.radioLevel >= 0 || s.radioPushWeek >= 0) ...[
+                  s.radioLevel,
+                  s.radioPushWeek
+                ],
+              ]),
         s.catalogBase == 0 ? null : s.catalogBase,
+        // Held while its album is off the market (docs K293).
+        s.heldRate == 0 ? null : s.heldRate,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -421,12 +436,18 @@ abstract final class Codec {
     s.boughtFrom = r['bought'] as int? ?? -1;
     s.dissTarget = r['diss'] as int? ?? -1;
     s.catalogBase = (r['catalogBase'] as num?)?.toDouble() ?? 0;
+    s.heldRate = (r['held'] as num?)?.toDouble() ?? 0;
     if (r['radio'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       final uk = j[0] as int;
       s
         ..ukRadioPush = uk < 0 ? null : RadioPush.values[uk]
         ..radioEditWeek = j[1] as int;
+      if (j.length > 3) {
+        s
+          ..radioLevel = j[2] as int
+          ..radioPushWeek = j[3] as int;
+      }
     }
     if (r['mood'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
@@ -532,6 +553,8 @@ abstract final class Codec {
     'rollout', 'windowUntil',
     // Added in schema v54.
     'versions',
+    // Added in schema v59.
+    'offWeek', 'reception',
   ];
 
   static List<Object?> albumRow(Album al) => [
@@ -576,6 +599,9 @@ abstract final class Codec {
                 if (al.anniversariesAsked != 0) 'q': al.anniversariesAsked,
                 if (al.planned case final p?) 'p': p.toJson(),
               }),
+        // Off the market, and how it was taken (docs K293, K292).
+        al.offWeek < 0 ? null : al.offWeek,
+        al.reception == 1 ? null : al.reception,
       ];
 
   static Album albumFrom(Map<String, Object?> r, List<int> songIds) {
@@ -635,7 +661,9 @@ abstract final class Codec {
       ..weeksBelowCutoff = r['weeksBelowCutoff'] as int
       ..firstWeekUnits = _d(r['firstWeekUnits'])
       ..firstWeekPure = _d(r['firstWeekPure'])
-      ..sumDormantRate = _d(r['sumDormantRate']);
+      ..sumDormantRate = _d(r['sumDormantRate'])
+      ..offWeek = r['offWeek'] as int? ?? -1
+      ..reception = (r['reception'] as num?)?.toDouble() ?? 1;
     _readReg(r, albumRegColumns, al.reg);
     _decodeCharts(r['charts'] as String, al);
     if (r['versions'] case final String x when x.isNotEmpty) {

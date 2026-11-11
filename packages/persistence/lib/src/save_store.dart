@@ -134,6 +134,7 @@ class SaveStore {
     w.thisIsWeek = (meta['thisIs'] as num?)?.toInt() ?? -1;
     w.practiceWeek = (meta['practiceWeek'] as num?)?.toInt() ?? -1;
     w.livingPaidCents = (meta['livingPaid'] as num?)?.toInt() ?? 0;
+    w.radioPaidCents = (meta['radioPaid'] as num?)?.toInt() ?? 0;
     // The Hall of Fame and the player's legacy (docs K288).
     w.hallOfFame.addAll(HallOfFame.decode(meta['hallOfFame'] as String?));
     w.legacyRank = (meta['legacyRank'] as num?)?.toInt() ?? 0;
@@ -466,6 +467,7 @@ class SaveStore {
       // Practice and living costs (docs K285).
       'practiceWeek': w.practiceWeek,
       'livingPaid': w.livingPaidCents,
+      'radioPaid': w.radioPaidCents,
       // The Hall of Fame and the player's legacy (docs K288).
       'hallOfFame': HallOfFame.encode(w.hallOfFame),
       'legacyRank': w.legacyRank,

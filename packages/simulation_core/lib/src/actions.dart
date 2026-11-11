@@ -1005,6 +1005,10 @@ abstract final class Actions {
     if (studio) {
       if (a.contractAlbumsLeft > 0) a.contractAlbumsLeft--;
       Eras.open(w, a, album);
+      // After a blockbuster the next one may not land (docs K292).
+      if (a.tier == ArtistTier.player) {
+        album.reception = FollowUps.reception(w, a, album);
+      }
     }
     return album;
   }
@@ -1346,6 +1350,64 @@ abstract final class Actions {
 }
 
 /// Era scoring and anticipation (docs/game-design.md §5–§6).
+/// The follow-up (docs K292): after an album that blew up, the next one
+/// can fall flat, as many have in real life. The public moved on, the
+/// sound wore thin, the hype outran the record. The chance grows with how
+/// big the last one was, how much weaker the new one is and how soon it
+/// came; a record that lands this way sells and plays a fraction of what
+/// it would have, all its run.
+abstract final class FollowUps {
+  /// Chances after a smash and after a success.
+  static const smashChance = 0.30, successChance = 0.15;
+
+  /// Out within a year of the last album.
+  static const rushedWeeks = 52, rushedChance = 0.10;
+  static const maxChance = 0.6;
+
+  /// What a record that falls flat keeps.
+  static const keepLow = 0.35, keepHigh = 0.7;
+
+  /// [a]'s last studio album before [al], or null.
+  static Album? previous(World w, Artist a, Album al) {
+    for (var i = al.id - 1; i >= 0; i--) {
+      final x = w.albums[i];
+      if (x.artistId == a.id &&
+          x.type == AlbumType.album &&
+          x.liveTour < 0 &&
+          x.hitIds.isEmpty) {
+        return x;
+      }
+    }
+    return null;
+  }
+
+  /// The chance [al] falls flat, given how the last era went.
+  static double chance(World w, Artist a, Album al) {
+    final prev = previous(w, a, al);
+    if (prev == null) return 0;
+    var p = switch (a.lastEraResult) {
+      EraResult.smash => smashChance,
+      EraResult.success => successChance,
+      _ => 0.0,
+    };
+    if (p == 0) return 0;
+    // Each 10 points weaker than the last one adds 10%; a better one
+    // takes some off.
+    p += ((prev.quality - al.quality) / 100).clamp(-0.15, 0.25);
+    if (al.releaseWeek - prev.releaseWeek < rushedWeeks) p += rushedChance;
+    return p.clamp(0.0, maxChance).toDouble();
+  }
+
+  /// Draws how the public takes [al]: 1, or what it keeps.
+  static double reception(World w, Artist a, Album al) {
+    final p = chance(w, a, al);
+    if (p <= 0) return 1;
+    final r = RandomStream.keyed(w.seed, w.week, al.id, RngPurpose.followUp);
+    if (!r.chance(p)) return 1;
+    return r.range(keepLow, keepHigh);
+  }
+}
+
 abstract final class Eras {
   static void open(World w, Artist a, Album album) {
     if (a.eraOpen) close(w, a);

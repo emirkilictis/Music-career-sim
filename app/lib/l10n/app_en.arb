@@ -9843,5 +9843,103 @@
   "eraHint1960s": "The 1960s: the LP grows up; soul and folk join rock and pop. Singles still sell millions.",
   "eraHint1970s": "The 1970s: albums sell millions, the cassette arrives; disco, punk, funk and stadium rock.",
   "eraHint1980s": "The 1980s: music TV makes videos matter, then the CD arrives; hip-hop and metal grow.",
-  "eraHint1990s": "The 1990s: the CD boom; the web arrives near the end."
+  "eraHint1990s": "The 1990s: the CD boom; the web arrives near the end.",
+  "radioBudgets": "Radio budgets",
+  "radioBudgetTitle": "Radio budget",
+  "radioBudgetHint": "How hard the stations are worked, changed any time; paid every week it runs. At 0 the song gets only what it earns on its own.",
+  "radioBudgetRerun": "The stations let this song go: raising the budget works it to them again, as a new run.",
+  "radioBudgetLevel": "Level {level} · {cost} a week",
+  "@radioBudgetLevel": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      },
+      "cost": {
+        "type": "String"
+      }
+    }
+  },
+  "radioBudgetFree": "Level {level} · no paid push",
+  "@radioBudgetFree": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "radioBudgetApply": "Set",
+  "radioBudgetMax": "Your label can run up to level {level}.",
+  "@radioBudgetMax": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "radioBudgetSet": "Radio budget set: level {level}.",
+  "@radioBudgetSet": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "eventFollowUpFlop": "The public moved on: “{title}” opened far below what “{previous}” did.",
+  "@eventFollowUpFlop": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "previous": {
+        "type": "String"
+      }
+    }
+  },
+  "eventFollowUpFlopNew": "The public did not take to “{title}”: it opened far below what was expected.",
+  "@eventFollowUpFlopNew": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "offMarketButton": "Take off the market",
+  "offMarketPutBack": "Put back on the market",
+  "offMarketConfirmTitle": "Take “{title}” off the market?",
+  "@offMarketConfirmTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "offMarketConfirm": "It leaves the streaming services and the shops: its songs stop playing and selling. Its streams, sales and chart runs are kept, and you can put it back any time.",
+  "offMarketDone": "“{title}” is off the market.",
+  "@offMarketDone": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "offMarketBack": "“{title}” is back on the market.",
+  "@offMarketBack": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "offMarketTag": "Off the market since {date}",
+  "@offMarketTag": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "offMarketHint": "Not on the services or in the shops: its numbers stay where they were until it comes back.",
+  "errorAlbumOff": "That record is off the market.",
+  "errorAlbumLocked": "It cannot be taken off the market now.",
+  "errorAlbumNotOff": "That record is on the market."
 }

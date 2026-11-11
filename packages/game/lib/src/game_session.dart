@@ -1423,6 +1423,9 @@ class GameSession {
   Song _checkSingle(int songId) {
     _requireActive();
     final s = _ownSong(songId);
+    if (s.albumId >= 0 && world.albums[s.albumId].isOff) {
+      throw GameException('albumOff', 'Its album is off the market');
+    }
     if (s.isSingle) throw GameException('alreadySingle', 'Already a single');
     if (_p.scheduled.any((sr) => !sr.isAlbum && sr.songIds.contains(s.id))) {
       throw GameException('alreadyScheduled', 'Already scheduled as a single');
@@ -2197,6 +2200,50 @@ class GameSession {
     _saveNow();
   }
 
+  /// Takes one of the player's records off the market (docs K293): off
+  /// the services and out of the shops, its numbers and chart runs kept.
+  void takeAlbumOff(int albumId) {
+    final al = _ownAlbum(albumId);
+    if (!OffMarket.canTakeOff(world, _p, al)) {
+      throw GameException('albumLocked', 'Cannot take it off now');
+    }
+    OffMarket.takeOff(world, _p, al);
+    _saveNow();
+  }
+
+  /// Puts a record taken off the market back (docs K293): it plays again
+  /// from where it was.
+  void putAlbumBack(int albumId) {
+    final al = _ownAlbum(albumId);
+    if (!al.isOff) throw GameException('albumNotOff', 'It is on sale');
+    _requireActive();
+    OffMarket.putBack(world, _p, al);
+    _saveNow();
+  }
+
+  Album _ownAlbum(int albumId) {
+    if (albumId < 0 || albumId >= world.albums.length) {
+      throw GameException('noAlbum', 'No such album');
+    }
+    final al = world.albums[albumId];
+    if (al.artistId != _p.id) throw GameException('notYours', 'Not yours');
+    return al;
+  }
+
+  /// Sets a released single's radio budget, 0–100, any time (docs K290):
+  /// paid each week it runs; an old single goes back to the stations.
+  void setRadioLevel(int songId, int level) {
+    final s = _ownSong(songId);
+    if (!RadioTools.canSetLevel(world, _p, s)) {
+      throw GameException('radioLocked', 'Not a released single');
+    }
+    if (level < 0 || level > RadioTools.maxLevel(_p)) {
+      throw GameException('campaignLocked', 'The label cannot run this');
+    }
+    RadioTools.setLevel(world, _p, s, level);
+    _saveNow();
+  }
+
   /// Raises a released single's radio push (docs K128).
   void upgradeRadio(int songId, RadioPush to) {
     final s = _ownSong(songId);
@@ -2473,6 +2520,7 @@ class GameSession {
       throw GameException('noAlbum', 'No such album');
     }
     final al = world.albums[albumId];
+    if (al.isOff) throw GameException('albumOff', 'Off the market');
     final why = AlbumVersions.block(world, _p, al);
     if (why != null) throw GameException('noVersion', why.name);
     final n = name.trim();
@@ -4961,6 +5009,14 @@ class GameSession {
     }
     events.addAll(_recordsBroken(r));
     events.addAll(_bestSellerNews());
+    // A follow-up the public did not take to (docs K292).
+    for (final id in w.activeAlbumIds) {
+      final al = w.albums[id];
+      if (al.artistId == p.id && al.releaseWeek == r.week && al.reception < 1) {
+        events.add(
+            FollowUpFlop(al.id, FollowUps.previous(w, p, al)?.id ?? -1));
+      }
+    }
     events.addAll(_legacyNews());
     events.addAll(_writtenHits(r));
     // A documentary premiered (docs K172).

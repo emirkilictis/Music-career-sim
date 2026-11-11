@@ -6997,4 +6997,153 @@ void main() {
       g.close();
     });
   });
+  group('radio budget, follow-ups, records off the market (docs K290–K293)',
+      () {
+    GameSession star() => GameSession.start(
+        slots,
+        _setup(
+            startYear: 2016,
+            tier: StartTier.superstar,
+            money: StartMoney.millionaire,
+            premium: true));
+
+    test('a radio budget any time, paid weekly; old singles go back', () {
+      double radioAfter(bool budget) {
+        final g = star();
+        final p = g.world.player!..creativeEnergy = 100;
+        final id = g.writeSong(budget: BudgetTier.high).id;
+        g.releaseSingle(id, campaign: Campaign.standard);
+        g.advanceWeek();
+        if (budget) {
+          final v = g.song(id);
+          expect(v.radioMaxLevel, RadioTools.maxLevel(p));
+          expect(v.radioLevelCosts[50], greaterThan(v.radioLevelCosts[25]));
+          expect(() => g.setRadioLevel(id, v.radioMaxLevel + 1),
+              _code('campaignLocked'));
+          g.setRadioLevel(id, v.radioMaxLevel);
+          expect(g.song(id).radioLevel, v.radioMaxLevel);
+          expect(g.song(id).radioBudget, isTrue);
+        }
+        g.advanceWeek();
+        if (budget) {
+          expect(g.world.radioPaidCents,
+              RadioTools.levelWeeklyCents(p, RadioTools.maxLevel(p)));
+          expect(g.player.radioPaidCents, g.world.radioPaidCents);
+        }
+        g.advanceWeeks(3, stop: SkipStop.never);
+        final radio = g.world.songs[id].weekRadio;
+        g.close();
+        return radio;
+      }
+
+      expect(radioAfter(true), greaterThan(1.3 * radioAfter(false)));
+
+      // Years later, back to the stations as a new run.
+      final g = star();
+      final p = g.world.player!..creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id, campaign: Campaign.standard);
+      final vault = g.writeSong(budget: BudgetTier.low).id;
+      expect(() => g.setRadioLevel(vault, 10), _code('radioLocked'));
+      final s = g.world.songs[id];
+      while (s.status != SongStatus.dormant) {
+        g.advanceWeeks(13, stop: SkipStop.never);
+      }
+      expect(g.song(id).radioRerun, isTrue);
+      final radioSoFar = s.lifetimeRadio;
+      g.setRadioLevel(id, 25);
+      expect(s.status, SongStatus.active);
+      expect(s.radioPushWeek, g.world.week);
+      g.advanceWeeks(3, stop: SkipStop.never);
+      expect(s.lifetimeRadio, greaterThan(radioSoFar));
+      expect(s.status, SongStatus.active);
+      // Out of money, the budget stops.
+      p.moneyCents = 0;
+      g.advanceWeek();
+      expect(s.radioLevel, 0);
+      g.close();
+    });
+
+    test('a record off the market keeps its numbers and comes back', () {
+      var g = star();
+      final slot = g.slotId;
+      final p = g.world.player!;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final al = g.releaseAlbum('Gone', ids, campaign: Campaign.standard).id;
+      g.advanceWeeks(4, stop: SkipStop.never);
+      final album = g.world.albums[al];
+      final peak = album.statsOrNull(Charts.usAlbums)?.peak ?? 0;
+      expect(g.album(al).canTakeOff, isTrue);
+      g.takeAlbumOff(al);
+      expect(g.album(al).isOff, isTrue);
+      expect(album.status, AlbumStatus.dormant);
+      double streams() => [
+            for (final id in ids) g.world.songLifetimeStreams(g.world.songs[id])
+          ].fold(0.0, (a, b) => a + b);
+      final units = g.world.albumLifetimeUnits(album);
+      final before = streams();
+      for (final id in ids) {
+        expect(g.world.songs[id].dormantRate, 0);
+      }
+      expect(() => g.releaseSingle(ids[1]), _code('albumOff'));
+      expect(() => g.takeAlbumOff(al), _code('albumLocked'));
+      g.advanceWeeks(6, stop: SkipStop.never);
+      expect(streams(), closeTo(before, 1e-6 * before));
+      expect(g.world.albumLifetimeUnits(album), closeTo(units, 1e-6 * units));
+      expect(album.statsOrNull(Charts.usAlbums)?.peak ?? 0, peak);
+      g.close();
+      // Kept off on reopening, and back on.
+      g = GameSession.resume(slots, slot);
+      expect(g.album(al).isOff, isTrue);
+      expect(streams(), closeTo(before, 1e-6 * before));
+      g.putAlbumBack(al);
+      expect(g.album(al).isOff, isFalse);
+      expect(() => g.putAlbumBack(al), _code('albumNotOff'));
+      g.advanceWeeks(4, stop: SkipStop.never);
+      expect(streams(), greaterThan(before));
+      g.close();
+    });
+
+    test('after a smash the next album can fall flat', () {
+      final g = star();
+      final p = g.world.player!;
+      List<int> songs(double skill) => [
+            for (var i = 0; i < 8; i++)
+              (() {
+                p.creativeEnergy = 100;
+                p.skills
+                  ..songwriting = skill
+                  ..vocals = skill
+                  ..production = skill;
+                return g.writeSong(budget: BudgetTier.high).id;
+              })()
+          ];
+      final first =
+          g.releaseAlbum('Smash', songs(90), campaign: Campaign.standard).id;
+      g.advanceWeeks(10, stop: SkipStop.never);
+      // The era goes down as a smash.
+      p.eraUnits = 100 * p.eraExpected;
+      final weaker = songs(40);
+      final second = g.world.albums.length;
+      final events = <GameEvent>[];
+      g.releaseAlbum('Next', weaker, campaign: Campaign.standard);
+      expect(p.lastEraResult, EraResult.smash);
+      final al = g.world.albums[second];
+      expect(FollowUps.previous(g.world, p, al)!.id, first);
+      // A smash, a weaker record within the year: the most it can be.
+      expect(FollowUps.chance(g.world, p, al), FollowUps.maxChance);
+      expect(
+          al.reception == 1 ||
+              (al.reception >= FollowUps.keepLow &&
+                  al.reception <= FollowUps.keepHigh),
+          isTrue);
+      events.addAll(g.advanceWeek().events);
+      expect(events.whereType<FollowUpFlop>().isNotEmpty, al.reception < 1);
+      g.close();
+    });
+  });
 }
