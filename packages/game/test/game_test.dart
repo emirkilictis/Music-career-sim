@@ -57,7 +57,7 @@ void main() {
     test('names, members, years and stats are checked', () {
       expect(() => _setup(name: '  ').validate(), _code('invalidName'));
       expect(
-          () => _setup(startYear: 1995).validate(), _code('invalidStartYear'));
+          () => _setup(startYear: 1949).validate(), _code('invalidStartYear'));
       expect(() => _setup(kind: ArtistKind.band, members: ['A']).validate(),
           _code('invalidMembers'));
       expect(() => _setup(members: ['A', 'B']).validate(),

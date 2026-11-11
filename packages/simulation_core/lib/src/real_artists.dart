@@ -600,14 +600,28 @@ final Map<String, int> _stars = {
 
 /// Every real artist, in breakthrough-year order.
 final List<RealArtist> realArtists = () {
-  final out = <RealArtist>[];
+  final out = <RealArtist>[], early = <RealArtist>[];
   for (final line in _data.split('\n')) {
     if (line.trim().isEmpty) continue;
     final f = line.split('|');
-    out.add(RealArtist(f[0], _genres[f[1]]!, _homes[f[2]]!, _kinds[f[3]]!,
+    final a = RealArtist(f[0], _genres[f[1]]!, _homes[f[2]]!, _kinds[f[3]]!,
         int.parse(f[4]), int.parse(f[5]),
-        earlyOnly: f.length > 6 && f[6] == 'e'));
+        earlyOnly: f.length > 6 && f[6] == 'e');
+    (a.earlyOnly ? early : out).add(a);
   }
+  // The sort is not stable: the earlier names are sorted on their own, as
+  // they always were, so the same worlds come out (docs K289), and the
+  // legends of the 1950s merged in after them, year by year.
   out.sort((a, b) => a.debut.compareTo(b.debut));
-  return List<RealArtist>.unmodifiable(out);
+  early.sort((a, b) => a.debut.compareTo(b.debut));
+  final all = <RealArtist>[];
+  var j = 0;
+  for (final a in out) {
+    while (j < early.length && early[j].debut < a.debut) {
+      all.add(early[j++]);
+    }
+    all.add(a);
+  }
+  all.addAll(early.skip(j));
+  return List<RealArtist>.unmodifiable(all);
 }();
