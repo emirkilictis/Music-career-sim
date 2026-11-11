@@ -538,23 +538,22 @@ class SimConfig {
   final double catalogLevel;
 
   /// Share of a catalog song's listeners lost per year (docs K85), by its
-  /// catalog weight (see Lifecycle.catalogWeight): top-10 singles 14% for
-  /// five years, 7% to ten, then 3%; other singles and charting album
-  /// tracks 20% for five years, then 7%; the rest 30%, then 10%. Old
-  /// songs settle on the listeners who keep them instead of fading to
-  /// nothing (docs K247: 12%/3%, 25% and 45% before, which left a
-  /// twenty-year-old catalog almost silent), but a big hit no longer
-  /// plays near its peak for a decade (docs K286: 8% then 2% for the
-  /// top-10 singles, 18%/6% for the others).
+  /// catalog weight (see Lifecycle.catalogWeight), before a song's own
+  /// staying power (docs K295): top-10 singles 20% for five years, 12% to
+  /// ten, then 6%; other singles and charting album tracks 25% for five
+  /// years, then 12%; the rest 35%, then 15%. Old songs settle on the
+  /// listeners who keep them instead of fading to nothing (docs K247), but
+  /// a catalog no longer holds its level for a decade while the market
+  /// grows (docs K286: 14/7/3%, 20/7% and 30/10%; before that 8/2%).
   double catalogFadePerYear(double weight, double years) => weight >= 1.8
       ? (years < 5
-          ? 0.14
+          ? 0.20
           : years < 10
-              ? 0.07
-              : 0.03)
+              ? 0.12
+              : 0.06)
       : weight >= 0.5
-          ? (years < 5 ? 0.20 : 0.07)
-          : (years < 5 ? 0.30 : 0.10);
+          ? (years < 5 ? 0.25 : 0.12)
+          : (years < 5 ? 0.35 : 0.15);
   final double streamEquivalentAlbum;
   final double songChartStreamDivisor;
   final double songChartRadioDivisor;

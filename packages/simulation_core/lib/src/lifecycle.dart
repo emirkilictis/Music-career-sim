@@ -113,19 +113,44 @@ abstract final class Lifecycle {
       ? 1.0
       : math.pow(c.catalogSongs / songs, c.catalogShareExponent).toDouble();
 
-  /// An old song's trend for quarter [quarter] (docs K261): mostly its
-  /// usual level; now and then found again (a film, a show, a nostalgia
-  /// wave: 1.4–3×) or out of fashion (0.4–0.8×, docs K291: 0.55–0.8×
-  /// before) for that quarter.
+  /// An old song's trend for quarter [quarter] (docs K261, K295): mostly
+  /// its usual level; now and then a wave starts: found again (a film, a
+  /// show, a nostalgia wave: 1.4–3×) or out of fashion (0.4–0.8×), for
+  /// one to four quarters, strongest at first. Waves that overlap
+  /// multiply. Before K295 each lasted one quarter, so a year came out
+  /// the same as the last one.
   static double catalogTrend(int seed, int quarter, int songId) {
-    final u = keyedUnit(seed, quarter, songId, RngPurpose.catalogTrend);
-    if (u < resurgenceChance) {
-      return 1.4 + 1.6 * (u / resurgenceChance);
+    var f = 1.0;
+    for (var k = 0; k < maxWaveQuarters; k++) {
+      final start = quarter - k;
+      final u = keyedUnit(seed, start, songId, RngPurpose.catalogTrend);
+      if (u >= resurgenceChance + slumpChance) continue;
+      final length = 1 +
+          (keyedUnit(seed, start, songId, RngPurpose.catalogWave) *
+                  maxWaveQuarters)
+              .floor();
+      if (k >= length) continue;
+      final left = 1 - k / length;
+      if (u < resurgenceChance) {
+        f *= 1 + (0.4 + 1.6 * (u / resurgenceChance)) * left;
+      } else {
+        f *= 1 - (0.2 + 0.4 * ((u - resurgenceChance) / slumpChance)) * left;
+      }
     }
-    if (u < resurgenceChance + slumpChance) {
-      return 0.4 + 0.4 * ((u - resurgenceChance) / slumpChance);
-    }
-    return 1;
+    return f;
+  }
+
+  /// The longest a wave lasts, in quarters (docs K295).
+  static const maxWaveQuarters = 4;
+
+  /// How well [songId] lasts in the catalog (docs K295), drawn once and
+  /// hidden: around 1, from 0.35 (soon forgotten) to 2.5 (it lasts). It
+  /// sets how fast the song fades and how high its floor is, so a
+  /// catalog's order changes over the years instead of keeping the order
+  /// it left the charts in.
+  static double catalogLegs(int seed, int songId) {
+    final r = RandomStream.keyed(seed, 0, songId, RngPurpose.catalogLegs);
+    return (0.9 * r.logNormal(0.5)).clamp(0.35, 2.5).toDouble();
   }
 
   /// Weeks between an artist's catalog updates ([Simulator]'s fade).
@@ -136,10 +161,10 @@ abstract final class Lifecycle {
   static int lastCatalogUpdate(int week, int artistId) =>
       week - (week - artistId) % fadeWeeks;
 
-  /// A quarter's chances of an old song being found again, or out of
-  /// fashion (docs K261; docs K291: a slump 15% a quarter, 6% before, so
-  /// old songs are less steady).
-  static const resurgenceChance = 0.06, slumpChance = 0.15;
+  /// A quarter's chances of a wave starting for an old song: found again,
+  /// or out of fashion (docs K261, K291, K295). A wave lasts 2.5 quarters
+  /// on average, so about 10% and 20% of quarters are touched.
+  static const resurgenceChance = 0.04, slumpChance = 0.08;
 
   /// The floor's yardstick for a song without one (out before streaming,
   /// or from a save before it; docs K265): against its last active week's

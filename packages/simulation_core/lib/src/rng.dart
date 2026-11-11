@@ -44,6 +44,8 @@ abstract final class RngPurpose {
   static const catalogTrend = 56;
   static const breakout = 58;
   static const followUp = 60;
+  static const catalogWave = 62;
+  static const catalogLegs = 64;
 }
 
 /// Numbers are JavaScript doubles: the web build's fallback for browsers

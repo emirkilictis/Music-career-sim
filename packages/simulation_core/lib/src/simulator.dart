@@ -2105,7 +2105,12 @@ class Simulator {
       if (s.dormantRate <= 0) continue;
       if (repair && s.catalogBase > 0) continue;
       final years = (w.week - s.releasedWeek) / GameTime.weeksPerYear;
-      final perYear = c.catalogFadePerYear(Lifecycle.catalogWeight(s), years);
+      // Some songs last, others are soon forgotten (docs K295).
+      final legs = Lifecycle.catalogLegs(w.seed, id);
+      final perYear =
+          (c.catalogFadePerYear(Lifecycle.catalogWeight(s), years) / legs)
+              .clamp(0.0, 0.6)
+              .toDouble();
       // This quarter's trend (docs K261) comes off before the fade and
       // the floor, the next one goes on after: an old song is found
       // again or forgotten for a while, then goes back to its level.
@@ -2134,7 +2139,7 @@ class Simulator {
       // a week (docs K258, K265): old hits stay in people's lives, as on
       // the real apps, and a catalog faded by older rules is brought
       // back up.
-      final floor = _catalogFloor(s, a, years);
+      final floor = _catalogFloor(s, a, years) * math.min(legs, maxFloorLegs);
       if (rate < floor) rate = floor;
       rate *= now;
       // The player's own songs keep a few listeners however old (docs
@@ -2189,10 +2194,10 @@ class Simulator {
   /// (docs K258, K260), by its catalog weight: on Spotify an old hit plays
   /// 0.02–0.06% of its total a day however old (The Hills: 3.2B, 1.05M a
   /// day; Mirrors: 1.68B, 1.04M; Rock Your Body, 2003: 1.16B, 609K; Can't
-  /// Stop the Feeling: 2.14B, 430K). Over five years old it eases (docs
-  /// K286: at twelve 59%, at twenty 44%; before, it eased only after ten
-  /// and a twelve-year-old hit still kept 91%, so old hits never really
-  /// went down).
+  /// Stop the Feeling: 2.14B, 430K). Over three years old it eases (docs
+  /// K295: at eight 48%, at twelve 35%, at twenty 24%; K286 from five,
+  /// 59% at twelve, held a catalog level for a decade; before K286 it
+  /// eased only after ten).
   static double catalogFloorShare(double weight, double years) =>
       (weight >= 1.8
           ? 0.003
@@ -2203,11 +2208,16 @@ class Simulator {
                   : 0.0) *
       math.min(
           1.0,
-          math.pow(catalogFloorAgeYears / math.max(1.0, years), 0.6)
+          math.pow(catalogFloorAgeYears / math.max(1.0, years),
+                  catalogFloorAgeExponent)
               .toDouble());
 
-  /// The floor eases after this many years (docs K286).
-  static const catalogFloorAgeYears = 5.0;
+  /// The floor eases after this many years (docs K286; 3 from K295, 5
+  /// before), with this exponent (0.75 from K295, 0.6 before).
+  static const catalogFloorAgeYears = 3.0, catalogFloorAgeExponent = 0.75;
+
+  /// A lasting song's floor is at most this much higher (docs K295).
+  static const maxFloorLegs = 1.5;
 
   /// A floor above this many plays a week grows only with the square root
   /// of the rest (docs K286): a share of a total of many billions kept a

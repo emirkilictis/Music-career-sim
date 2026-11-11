@@ -337,11 +337,16 @@ void main() {
     }
     expect(base, greaterThan(0));
     expect(s.catalogBase, base);
-    // Its class's yearly fade (K85, K247, K286): a top-10 single loses
-    // 14% a year in its first five years, other songs faster.
-    final perYear = w.config.catalogFadePerYear(Lifecycle.catalogWeight(s), 1);
+    // Its class's yearly fade (K85, K247, K286, K295), as fast as the
+    // song's own staying power has it, held up by its floor.
+    double fade(Song x, double years) =>
+        (w.config.catalogFadePerYear(Lifecycle.catalogWeight(x), years) /
+                Lifecycle.catalogLegs(w.seed, x.id))
+            .clamp(0.0, 0.6);
+    final perYear = fade(s, 1);
     expect(s.dormantRate / trend(s) / rate0,
-        closeTo((1 - perYear) * (1 - perYear), 0.03));
+        greaterThanOrEqualTo((1 - perYear) * (1 - perYear) - 0.03));
+    expect(s.dormantRate / trend(s) / rate0, lessThan(1));
     // Rivals' catalogs fade too, a forgotten album track fastest (30% a
     // year while new, then 10%; K247).
     final rival = w.songs.firstWhere((x) =>
@@ -357,20 +362,25 @@ void main() {
     }
     final age = (w.week - rival.releasedWeek) / GameTime.weeksPerYear - 0.5;
     expect(rival.dormantRate / trend(rival) / before,
-        closeTo(1 - w.config.catalogFadePerYear(0.25, age), 0.05));
+        closeTo(1 - fade(rival, age), 0.05));
   });
 
   test('old hits go down over the years; a giant one is held lower (K286)',
       () {
-    // The floor's share of its total eases after five years.
+    // The floor's share of its total eases after three years (K295).
     const hit = 1.8;
     expect(Simulator.catalogFloorShare(hit, 3), 0.003);
-    expect(Simulator.catalogFloorShare(hit, 12) / 0.003, closeTo(0.59, 0.01));
-    expect(Simulator.catalogFloorShare(hit, 20) / 0.003, closeTo(0.44, 0.01));
-    // A top-10 single fades faster while young, then slower.
-    expect(SimConfig().catalogFadePerYear(hit, 2), 0.14);
-    expect(SimConfig().catalogFadePerYear(hit, 7), 0.07);
-    expect(SimConfig().catalogFadePerYear(hit, 12), 0.03);
+    expect(Simulator.catalogFloorShare(hit, 12) / 0.003, closeTo(0.354, 0.01));
+    expect(Simulator.catalogFloorShare(hit, 20) / 0.003, closeTo(0.241, 0.01));
+    // A top-10 single fades faster while young, then slower (K295).
+    expect(SimConfig().catalogFadePerYear(hit, 2), 0.20);
+    expect(SimConfig().catalogFadePerYear(hit, 7), 0.12);
+    expect(SimConfig().catalogFadePerYear(hit, 12), 0.06);
+    // Songs last differently (K295): from soon forgotten to lasting.
+    final legs = [for (var i = 0; i < 2000; i++) Lifecycle.catalogLegs(5, i)];
+    expect(legs.reduce((a, b) => a < b ? a : b), closeTo(0.35, 0.01));
+    expect(legs.where((x) => x > 1.3).length, greaterThan(200));
+    expect(legs.where((x) => x < 0.6).length, greaterThan(200));
     // Up to ten million plays a week the floor is as it was; above, it
     // grows with the square root: 40M becomes 20M.
     expect(Simulator.softFloor(5e6, 1), 5e6);
