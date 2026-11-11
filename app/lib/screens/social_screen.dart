@@ -75,7 +75,7 @@ class SocialSkin {
   static SocialSkin of(SocialNetwork n) => switch (n) {
         SocialNetwork.chirper => chirper,
         SocialNetwork.myPlace => myPlace,
-        SocialNetwork.forum => forum,
+        SocialNetwork.forum || SocialNetwork.fanMail => forum,
       };
 
   static const like = Color(0xFFF91880);
@@ -320,9 +320,11 @@ class _SocialScreenState extends State<SocialScreen> {
             else
               _BoxTitle(
                   skin: skin,
-                  text: v.network == SocialNetwork.forum
-                      ? context.l10n.forumTitle(widget.state.player.name)
-                      : context.l10n.fanComments),
+                  text: v.network == SocialNetwork.fanMail
+                      ? context.l10n.fanMailTitle(widget.state.player.name)
+                      : v.network == SocialNetwork.forum
+                          ? context.l10n.forumTitle(widget.state.player.name)
+                          : context.l10n.fanComments),
             if (!v.canPost)
               Padding(
                 padding: const EdgeInsets.all(16),

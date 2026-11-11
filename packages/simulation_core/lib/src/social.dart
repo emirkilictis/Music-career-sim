@@ -13,7 +13,9 @@ import 'world.dart';
 
 /// Where fans talk in a year (docs K93): a fan forum before social media
 /// (read only), then MyPlace, then Chirper.
-enum SocialNetwork { forum, myPlace, chirper }
+/// Index order is stored: append only. [fanMail]: letters and the fan
+/// club's newsletter before the web (docs K289).
+enum SocialNetwork { forum, myPlace, chirper, fanMail }
 
 /// What the player can post (docs K93). Posting costs no energy (docs
 /// K98: writing songs takes enough); three posts a week at most.
@@ -284,11 +286,13 @@ abstract final class Social {
   /// Items kept in the feed.
   static const feedSize = 120;
 
-  static SocialNetwork networkIn(int year) => year < 2004
-      ? SocialNetwork.forum
-      : year < 2009
-          ? SocialNetwork.myPlace
-          : SocialNetwork.chirper;
+  static SocialNetwork networkIn(int year) => year < 1996
+      ? SocialNetwork.fanMail
+      : year < 2004
+          ? SocialNetwork.forum
+          : year < 2009
+              ? SocialNetwork.myPlace
+              : SocialNetwork.chirper;
 
   static bool canPostIn(int year) => year >= 2004;
 

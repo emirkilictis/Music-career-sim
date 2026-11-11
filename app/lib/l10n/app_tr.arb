@@ -2727,5 +2727,14 @@
   "eventLegacyRank": "Artık tüm zamanların en büyük sanatçıları arasında #{rank} sıradasın.",
   "eventHallOfFame": "Şöhretler Salonu’ndasın: {year} sınıfı.",
   "eventHallOfFameMissed": "Bu yıl Şöhretler Salonu’na seçilmedin: oylamada #{place} sıradaydın.",
-  "eventHallOfFameClass": "Şöhretler Salonu {year} sınıfı: {names}."
+  "eventHallOfFameClass": "Şöhretler Salonu {year} sınıfı: {names}.",
+  "networkFanMail": "Hayran mektupları",
+  "fanMailTitle": "{name} için gelen mektuplar",
+  "errorGenreNotYet": "Bu tür henüz yok.",
+  "errorFormatNotYet": "Bu format henüz icat edilmedi.",
+  "eraHint1950s": "1950’ler: rock and roll doğuyor. Hitleri 45’likler, LP’ler ve radyo yapıyor; caz, blues, country ve gospel her yerde.",
+  "eraHint1960s": "1960’lar: LP olgunlaşıyor; soul ve folk, rock ve pop’a katılıyor. Single’lar hâlâ milyonlarca satıyor.",
+  "eraHint1970s": "1970’ler: albümler milyonlarca satıyor, kaset geliyor; disko, punk, funk ve stadyum rock’ı.",
+  "eraHint1980s": "1980’ler: müzik televizyonu klipleri önemli kılıyor, sonra CD geliyor; hip-hop ve metal büyüyor.",
+  "eraHint1990s": "1990’lar: CD patlaması; internet on yılın sonuna doğru geliyor."
 }

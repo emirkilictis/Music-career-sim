@@ -1666,7 +1666,9 @@ class _EditionEditor extends StatelessWidget {
         const SizedBox(height: 8),
         Wrap(spacing: 6, runSpacing: 6, children: [
           for (final f in EditionFormat.values)
-            if (f != EditionFormat.digital)
+            // Only the formats of the day (docs K289).
+            if (f != EditionFormat.digital &&
+                f.availableIn(context.career.year))
               ChoiceChip(
                 label: Text(fmt.editionFormat(f)),
                 selected: f == edition.format,

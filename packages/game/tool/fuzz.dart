@@ -39,6 +39,11 @@ void main(List<String> args) {
   final weeks = args.isNotEmpty ? int.parse(args[0]) : 104;
   final seed = args.length > 1 ? int.parse(args[1]) : 1;
   final configs = [
+    // From the 1950s (docs K289): jazz, a rock band, a disco group, rap.
+    (1952, StartTier.unknown, ArtistKind.solo, 13),
+    (1963, StartTier.risingStar, ArtistKind.band, 3),
+    (1975, StartTier.superstar, ArtistKind.vocalGroup, 12),
+    (1988, StartTier.localBuzz, ArtistKind.solo, 1),
     (2003, StartTier.unknown, ArtistKind.solo, 1),
     (2007, StartTier.risingStar, ArtistKind.band, 3),
     (2013, StartTier.superstar, ArtistKind.solo, 0),

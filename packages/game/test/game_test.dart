@@ -19,10 +19,11 @@ CareerSetup _setup({
   Skills? skills,
   CareerPath path = CareerPath.independent,
   int seed = 4242,
+  int genre = 0,
 }) =>
     CareerSetup(
       name: name,
-      genre: 0,
+      genre: genre,
       startYear: startYear,
       premium: premium,
       tier: tier,
@@ -6925,6 +6926,74 @@ void main() {
               .where((r) => r.hallOfFameYear > 0)
               .length,
           rows.length);
+      g.close();
+    });
+  });
+  group('from the 1950s (docs K289)', () {
+    tearDown(() => GameTime.baseYear = GameTime.defaultBaseYear);
+
+    test('a 1955 career plays, saves and opens on its own calendar', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 1955,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final id = g.slotId;
+      expect(g.world.baseYear, GameTime.earlyBaseYear);
+      expect(GameTime.yearOf(g.world.week), 1955);
+      final p = g.world.player!..creativeEnergy = 100;
+      final song = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(song, campaign: Campaign.standard);
+      g.advanceWeeks(8, stop: SkipStop.never);
+      final week = g.world.week;
+      expect(g.world.songs[song].lifetimePhysical, greaterThan(0));
+      // Nothing of the internet age.
+      expect(Social.networkIn(GameTime.yearOf(week)), SocialNetwork.fanMail);
+      expect(g.world.songs[song].weekStreams, 0);
+      g.close();
+      // Another world in between: each keeps its own calendar.
+      final other = GameSession.start(slots, _setup(startYear: 2016));
+      expect(GameTime.baseYear, GameTime.defaultBaseYear);
+      expect(GameTime.yearOf(other.world.week), 2016);
+      other.close();
+      g = GameSession.resume(slots, id);
+      expect(GameTime.baseYear, GameTime.earlyBaseYear);
+      expect(g.world.week, week);
+      expect(GameTime.yearOf(g.world.week), 1955);
+      expect(g.world.player!.coreFans, closeTo(p.coreFans, 1));
+      g.advanceWeek();
+      g.close();
+    });
+
+    test('no hip-hop, no CD and no cassette before their time', () {
+      expect(
+          () => GameSession.start(
+              slots, _setup(startYear: 1960, genre: 1)), // hip-hop
+          _code('genreNotYet'));
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 1960, premium: true, money: StartMoney.millionaire));
+      final p = g.world.player!..creativeEnergy = 100;
+      expect(() => g.writeSong(genres: [p.genre, 1]), _code('genreNotYet'));
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(genres: [p.genre, 13]).id); // with jazz
+      }
+      expect(
+          () => g.releaseAlbum('Too Soon', ids,
+              variantWeeks: const [0, 0],
+              variantFormats: const [null, EditionFormat.cd]),
+          _code('formatNotYet'));
+      g.releaseAlbum('Long Player', ids,
+          variantWeeks: const [0, 0],
+          variantFormats: const [null, EditionFormat.vinyl]);
+      g.releaseSingle(ids.first);
+      expect(() => g.releaseVariant(ids.first, SingleFormat.cd),
+          _code('formatNotYet'));
       g.close();
     });
   });

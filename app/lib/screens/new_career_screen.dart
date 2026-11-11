@@ -258,8 +258,10 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
                             border: const OutlineInputBorder()),
                         items: [
                           for (var g = 0; g < genreNames.length; g++)
-                            DropdownMenuItem(
-                                value: g, child: Text(fmt.genre(g))),
+                            // The sounds of the start year (docs K289).
+                            if (genreExistsIn(g, _startYear))
+                              DropdownMenuItem(
+                                  value: g, child: Text(fmt.genre(g))),
                         ],
                         onChanged: (g) => setState(() => _genre = g!),
                       ),
@@ -312,8 +314,28 @@ class _NewCareerScreenState extends State<NewCareerScreen> {
                           y--)
                         DropdownMenuItem(value: y, child: Text('$y')),
                     ],
-                    onChanged: (y) => setState(() => _startYear = y!),
+                    onChanged: (y) => setState(() {
+                      _startYear = y!;
+                      // A genre that did not exist yet goes back to pop.
+                      if (!genreExistsIn(_genre, _startYear)) _genre = 0;
+                    }),
                   ),
+                  // What the decade was like (docs K289).
+                  if (_startYear < 2000) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                        _startYear < 1960
+                            ? l.eraHint1950s
+                            : _startYear < 1970
+                                ? l.eraHint1960s
+                                : _startYear < 1980
+                                    ? l.eraHint1970s
+                                    : _startYear < 1990
+                                        ? l.eraHint1980s
+                                        : l.eraHint1990s,
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                  ],
                   const SizedBox(height: 12),
                   Text(l.difficulty, style: t.labelLarge),
                   const SizedBox(height: 6),

@@ -13,6 +13,7 @@ import 'config/sim_config.dart';
 import 'festivals.dart';
 import 'legacy.dart';
 import 'model.dart';
+import 'time.dart';
 import 'moments.dart';
 import 'rng.dart';
 import 'award_campaigns.dart';
@@ -138,6 +139,10 @@ class World {
 
   /// What the player paid to live last week (docs K285).
   int livingPaidCents = 0;
+
+  /// The year of this world's week 0 (docs K289): [GameTime.baseYear] when
+  /// it was made or loaded.
+  final int baseYear = GameTime.baseYear;
 
   /// The Hall of Fame (docs K288), in the order the artists went in.
   final List<HallOfFamer> hallOfFame = [];

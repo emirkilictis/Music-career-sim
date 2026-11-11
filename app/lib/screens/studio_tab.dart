@@ -175,17 +175,23 @@ class _StudioTabState extends State<StudioTab> {
                 const SizedBox(height: 12),
                 Wrap(spacing: 6, runSpacing: 2, children: [
                   for (var g = 0; g < genreNames.length; g++)
-                    FilterChip(
-                      label: Text(picked.contains(g)
-                          ? '${picked.indexOf(g) + 1}. ${fmt.genre(g)}'
-                          : fmt.genre(g)),
-                      selected: picked.contains(g),
-                      onSelected: (on) => set(() {
-                        if (on && picked.length < maxSongGenres) picked.add(g);
-                        if (!on && picked.length > 1) picked.remove(g);
-                        picked = [...picked];
-                      }),
-                    ),
+                    // The sounds of the day and the artist's own (docs
+                    // K289).
+                    if (g == context.career.player.genre ||
+                        genreExistsIn(g, context.career.year))
+                      FilterChip(
+                        label: Text(picked.contains(g)
+                            ? '${picked.indexOf(g) + 1}. ${fmt.genre(g)}'
+                            : fmt.genre(g)),
+                        selected: picked.contains(g),
+                        onSelected: (on) => set(() {
+                          if (on && picked.length < maxSongGenres) {
+                            picked.add(g);
+                          }
+                          if (!on && picked.length > 1) picked.remove(g);
+                          picked = [...picked];
+                        }),
+                      ),
                 ]),
                 const SizedBox(height: 14),
                 FilledButton(

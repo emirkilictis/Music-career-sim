@@ -420,6 +420,16 @@ enum SingleFormat {
   const SingleFormat(this.costCents);
   final int costCents;
 
+  /// The first year the format is pressed (docs K289): the CD single from
+  /// 1985, the cassette single from 1987.
+  int get fromYear => switch (this) {
+        cd => 1985,
+        cassette => 1987,
+        _ => 0,
+      };
+
+  bool availableIn(int year) => year >= fromYear;
+
   /// Collector demand in [year] (1 = a CD single in the CD era).
   double appeal(int year) => switch (this) {
         cd => year < 2008
@@ -427,11 +437,14 @@ enum SingleFormat {
             : year < 2019
                 ? 0.35
                 : 0.8,
-        vinyl => year < 2008
-            ? 0.3
-            : year < 2015
-                ? 0.5
-                : 1.0,
+        // The 45 everyone bought before the CD single (docs K289).
+        vinyl => year < 1990
+            ? 1.0
+            : year < 2008
+                ? 0.3
+                : year < 2015
+                    ? 0.5
+                    : 1.0,
         cassette => year < 2003
             ? 0.8
             : year < 2018
@@ -1323,6 +1336,53 @@ const List<double> genreAiWeights = [
   0.5, // Classical
 ];
 
+/// The year each genre is there to play (docs K289; index-aligned with
+/// [genreNames]): rock and roll from 1954, soul from 1959, funk from 1965,
+/// reggae from 1968, metal from 1969, disco from 1974, punk from 1975,
+/// dance from 1977, hip-hop and indie from 1979, Afrobeats from 1990,
+/// K-pop from 1992; the rest always.
+const List<int> genreFromYear = [
+  0, 1979, 0, 1954, 0, 1977, 0, 1979, 1969, 1975, //
+  1959, 1965, 1974, 0, 0, 0, 1968, 1990, 1992, 0, 0,
+];
+
+bool genreExistsIn(int genre, int year) => year >= genreFromYear[genre];
+
+/// How common each genre was among artists by decade before 1990 (docs
+/// K289): 1950s, 1960s, 1970s, 1980s, as a factor on [genreAiWeights].
+/// From 1990 the weights are as they always were.
+const List<List<double>> _genreDecades = [
+  [1, 1, 1, 1], // Pop
+  [0, 0, 0.3, 0.5], // Hip-Hop
+  [1.5, 1.2, 1, 1], // R&B
+  [1, 2, 2.2, 2], // Rock
+  [1.6, 1.4, 1.3, 1.2], // Country
+  [0, 0, 0.5, 0.8], // Dance/Electronic
+  [1, 1, 1, 1], // Latin
+  [0, 0, 0.3, 0.8], // Indie/Alternative
+  [0, 0, 1.5, 2.5], // Metal
+  [0, 0, 2, 2], // Punk
+  [0, 6, 4, 1.5], // Soul
+  [0, 4, 5, 1.5], // Funk
+  [0, 0, 10, 1], // Disco
+  [10, 5, 2.5, 1.5], // Jazz
+  [8, 5, 2, 1], // Blues
+  [2, 5, 3, 1], // Folk
+  [0, 1, 1.5, 1.5], // Reggae
+  [0, 0, 0, 0], // Afrobeats
+  [0, 0, 0, 0], // K-Pop
+  [5, 3, 2, 1.5], // Gospel
+  [5, 3, 2, 1.5], // Classical
+];
+
+/// A genre's share of new AI artists in [year] (docs K289).
+double genreAiWeight(int genre, int year) {
+  if (!genreExistsIn(genre, year)) return 0;
+  if (year >= 1990) return genreAiWeights[genre];
+  final decade = ((year - 1950) ~/ 10).clamp(0, 3);
+  return genreAiWeights[genre] * _genreDecades[genre][decade];
+}
+
 /// A song has a primary genre and up to this many genres in total.
 const maxSongGenres = 3;
 
@@ -1540,6 +1600,17 @@ enum EditionFormat {
   /// Manufacturing and setup cost for the player.
   final int costCents;
 
+  /// The first year the format can be pressed (docs K289): the CD from
+  /// 1983, the cassette from 1968, a digital edition from 2004.
+  int get fromYear => switch (this) {
+        cd => 1983,
+        cassette => 1968,
+        digital => 2004,
+        _ => 0,
+      };
+
+  bool availableIn(int year) => year >= fromYear;
+
   /// Collector demand relative to a classic edition (1.0) in [year].
   double appeal(int year) => switch (this) {
         cd => year < 2008
@@ -1547,11 +1618,14 @@ enum EditionFormat {
             : year < 2015
                 ? 0.85
                 : 0.75,
-        vinyl => year < 2008
-            ? 0.4
-            : year < 2015
-                ? 0.8
-                : 1.3,
+        // The record everyone bought until the CD took over (docs K289).
+        vinyl => year < 1986
+            ? 1.0
+            : year < 2008
+                ? 0.4
+                : year < 2015
+                    ? 0.8
+                    : 1.3,
         cassette => year < 2004
             ? 0.6
             : year < 2018

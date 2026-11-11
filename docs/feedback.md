@@ -257,6 +257,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F155 | LosingMyWayStan: "Albüm çıkınca önceden çıkan single'lar daha çok yükselsin"; "Şarkılar zamanla daha çok düşsün: 12 yıl sonra hâlâ günde 3M yapan şarkılarım var (13B, Streamify)." | ✅ K286 |
 | F156 | Emir: "Digital sales chartı ekler misin? Radio chart yoksa onu da ekle. Bir de pure album sales." | ✅ K287 |
 | F157 | Emir: "Miras derken?" → "Yap hepsini" (miras puanı, tüm zamanların en büyükleri, Şöhretler Salonu, emeklilik ve kariyer özeti). | ✅ K288 |
+| F158 | Emir: "1950'leri falan da ekleyebilir misin? O yıllardan da başlanabilsin artık." | ✅ K289 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

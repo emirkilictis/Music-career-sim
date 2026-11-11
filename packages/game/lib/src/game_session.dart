@@ -596,6 +596,11 @@ class GameSession {
         g.any((x) => x < 0 || x >= genreNames.length)) {
       throw GameException('invalidGenres', 'A song has 1–3 distinct genres');
     }
+    // Only the sounds of the day, besides the artist's own (docs K289).
+    final year = GameTime.yearOf(world.week);
+    if (g.any((x) => x != p.genre && !genreExistsIn(x, year))) {
+      throw GameException('genreNotYet', 'This genre does not exist yet');
+    }
     final t = title?.trim();
     if (t != null && (t.isEmpty || t.length > 60)) {
       throw GameException('invalidTitle', 'Title must be 1–60 chars');
@@ -1772,6 +1777,11 @@ class GameSession {
       String title, List<int> songIds, AlbumType type, List<int> variantWeeks,
       [List<EditionFormat?> variantFormats = const []]) {
     _requireActive();
+    // No CD before 1983, no cassette before 1968 (docs K289).
+    final year = GameTime.yearOf(world.week);
+    if (variantFormats.any((f) => f != null && !f.availableIn(year))) {
+      throw GameException('formatNotYet', 'Format not invented yet');
+    }
     final t = title.trim();
     if (t.isEmpty || t.length > 60) {
       throw GameException('invalidTitle', 'Title must be 1–60 chars');
@@ -2236,6 +2246,9 @@ class GameSession {
     if (s.variants.any((x) => x.$1 == f)) {
       throw GameException('variantOut', 'That edition is already out');
     }
+    if (!f.availableIn(GameTime.yearOf(world.week))) {
+      throw GameException('formatNotYet', 'Format not invented yet');
+    }
     _requireMoney(f.costCents);
     Actions.releaseVariant(world, _p, s, f);
     _saveNow();
@@ -2674,6 +2687,8 @@ class GameSession {
   }
 
   WeekReport _advanceWeek() {
+    // This world's calendar (docs K289), should another have been opened.
+    GameTime.baseYear = world.baseYear;
     final p = _p;
     final before = _Snapshot(world, p);
     // Dated album versions due this week (docs K255).

@@ -7,19 +7,93 @@ import 'model.dart';
 /// only the name, genre, home and starting craft come from here.
 class RealArtist {
   const RealArtist(
-      this.name, this.genre, this.home, this.kind, this.debut, this.star);
+      this.name, this.genre, this.home, this.kind, this.debut, this.star,
+      {this.earlyOnly = false});
   final String name;
   final int genre;
   final HomeCountry home;
   final ArtistKind kind;
   final int debut;
   final int star;
+
+  /// Added with the 1950s (docs K289; a trailing `|e`): only in worlds
+  /// that begin before 1980, so the worlds of later starts stay as they
+  /// were.
+  final bool earlyOnly;
 }
 
 /// Living artists only (no one who has died: their "new albums" would be
 /// tasteless), and none with serious criminal convictions or charges.
+/// From the 1950s (docs K289): the legends of the day who are still with
+/// us; the rest of the early field has made-up names.
 /// One line each: name | genre | home | kind | breakthrough year | size.
 const _data = '''
+Pat Boone|pop|us|s|1955|1|e
+Wanda Jackson|country|us|s|1956|1|e
+Sonny Rollins|jazz|us|s|1956|1|e
+Johnny Mathis|pop|us|s|1957|2|e
+Paul Anka|pop|ca|s|1957|1|e
+Brenda Lee|pop|us|s|1957|1|e
+Cliff Richard|pop|uk|s|1958|2|e
+Shirley Caesar|gospel|us|s|1958|1|e
+Neil Sedaka|pop|us|s|1959|1|e
+The Isley Brothers|soul|us|g|1959|1|e
+Smokey Robinson|soul|us|s|1960|1|e
+Joan Baez|folk|us|s|1960|1|e
+Gladys Knight|soul|us|s|1961|1|e
+Judy Collins|folk|us|s|1961|1|e
+Willie Nelson|country|us|s|1962|2|e
+Dionne Warwick|pop|us|s|1962|2|e
+Frankie Valli|pop|us|s|1962|1|e
+Patti LaBelle|soul|us|s|1962|1|e
+Raphael|latin|eu|s|1962|1|e
+Barbra Streisand|pop|us|s|1963|3|e
+Stevie Wonder|soul|us|s|1963|3|e
+The Rolling Stones|rock|uk|b|1964|3|e
+Petula Clark|pop|uk|s|1964|1|e
+Tom Jones|pop|uk|s|1965|2|e
+Cher|pop|us|s|1965|2|e
+Simon & Garfunkel|folk|us|b|1965|2|e
+The Who|rock|uk|b|1965|2|e
+Donovan|folk|uk|s|1965|1|e
+Neil Diamond|pop|us|s|1966|2|e
+Dolly Parton|country|us|s|1967|3|e
+Engelbert Humperdinck|pop|uk|s|1967|1|e
+Cat Stevens|folk|uk|s|1967|1|e
+José Feliciano|latin|other|s|1968|1|e
+Joni Mitchell|folk|ca|s|1968|2|e
+Neil Young|rock|ca|s|1969|2|e
+Santana|rock|us|b|1969|2|e
+Iggy Pop|punk|us|s|1969|1|e
+Elton John|pop|uk|s|1970|3|e
+Paul McCartney|rock|uk|s|1970|3|e
+Ringo Starr|rock|uk|s|1970|1|e
+Diana Ross|soul|us|s|1970|2|e
+Al Green|soul|us|s|1970|1|e
+James Taylor|folk|us|s|1970|1|e
+Julio Iglesias|latin|eu|s|1970|2|e
+Anne Murray|country|ca|s|1970|1|e
+George Clinton|funk|us|s|1970|1|e
+Rod Stewart|rock|uk|s|1971|2|e
+Carole King|pop|us|s|1971|2|e
+Carly Simon|pop|us|s|1971|1|e
+Don McLean|folk|us|s|1971|1|e
+Alice Cooper|rock|us|s|1971|1|e
+Bette Midler|pop|us|s|1972|1|e
+Billy Joel|pop|us|s|1973|3|e
+Aerosmith|rock|us|b|1973|2|e
+ABBA|pop|eu|g|1974|3|e
+Barry Manilow|pop|us|s|1974|1|e
+Chaka Khan|funk|us|s|1974|1|e
+Judas Priest|metal|uk|b|1974|1|e
+Linda Ronstadt|rock|us|s|1974|1|e
+Bruce Springsteen|rock|us|s|1975|3|e
+Emmylou Harris|country|us|s|1975|1|e
+Patti Smith|punk|us|s|1975|1|e
+Hall & Oates|pop|us|b|1976|1|e
+Blondie|punk|us|b|1976|1|e
+Crystal Gayle|country|us|s|1977|1|e
+The Police|rock|uk|b|1978|2|e
 Madonna|pop|us|s|1983|3
 U2|rock|eu|b|1980|3
 Metallica|metal|us|b|1983|3
@@ -531,7 +605,8 @@ final List<RealArtist> realArtists = () {
     if (line.trim().isEmpty) continue;
     final f = line.split('|');
     out.add(RealArtist(f[0], _genres[f[1]]!, _homes[f[2]]!, _kinds[f[3]]!,
-        int.parse(f[4]), int.parse(f[5])));
+        int.parse(f[4]), int.parse(f[5]),
+        earlyOnly: f.length > 6 && f[6] == 'e'));
   }
   out.sort((a, b) => a.debut.compareTo(b.debut));
   return List<RealArtist>.unmodifiable(out);

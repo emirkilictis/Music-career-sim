@@ -83,6 +83,7 @@ abstract final class WorldGen {
     bool realNames = false,
   }) {
     final cfg = config ?? SimConfig();
+    GameTime.baseYear = GameTime.baseFor(cfg.worldStartYear(startYear));
     final w = World(
       config: cfg,
       seed: seed,
@@ -161,7 +162,8 @@ abstract final class WorldGen {
             ArtistKind.band => 3 + m.nextInt(3),
             ArtistKind.vocalGroup => 4 + m.nextInt(4),
           };
-    final genreRoll = _weightedGenre(r.nextDouble());
+    final genreRoll =
+        _weightedGenre(r.nextDouble(), GameTime.yearOf(w.week));
     // Drawn only for founding rivals, as before (keeps made-up worlds the
     // same).
     final debutRoll = newcomer ? 0 : r.nextInt(GameTime.weeksPerYear * 12);
@@ -211,6 +213,7 @@ abstract final class WorldGen {
     final pool = [
       for (final ra in realArtists)
         if (!used.contains(ra.name.toLowerCase()) &&
+            (!ra.earlyOnly || w.baseYear < GameTime.defaultBaseYear) &&
             ra.debut <= year &&
             (!newcomer || ra.debut >= year - 2) &&
             ra.home == home &&
@@ -253,15 +256,25 @@ abstract final class WorldGen {
     return HomeCountry.other;
   }
 
-  /// Picks an AI artist's genre from [genreAiWeights] with one uniform draw.
-  static int _weightedGenre(double u) {
-    final total = genreAiWeights.fold(0.0, (a, x) => a + x);
+  /// Picks an AI artist's genre for [year] (docs K289: by decade before
+  /// 1990, [genreAiWeights] after) with one uniform draw.
+  static int _weightedGenre(double u, int year) {
+    final n = genreAiWeights.length;
+    var total = 0.0;
+    for (var i = 0; i < n; i++) {
+      total += genreAiWeight(i, year);
+    }
     var x = u * total;
-    for (var i = 0; i < genreAiWeights.length; i++) {
-      x -= genreAiWeights[i];
+    for (var i = 0; i < n; i++) {
+      final g = genreAiWeight(i, year);
+      if (g <= 0) continue;
+      x -= g;
       if (x < 0) return i;
     }
-    return genreAiWeights.length - 1;
+    for (var i = n - 1; i >= 0; i--) {
+      if (genreAiWeight(i, year) > 0) return i;
+    }
+    return 0;
   }
 
   static void _addCollaborators(World w) {
@@ -276,7 +289,7 @@ abstract final class WorldGen {
         role:
             i.isEven ? CollaboratorRole.producer : CollaboratorRole.songwriter,
         skill: skill,
-        genre: _weightedGenre(r.nextDouble()),
+        genre: _weightedGenre(r.nextDouble(), GameTime.yearOf(w.week)),
         feeCents: (20000 * math.pow(skill / 20, 2.6)).round(),
         minFame: math.max(0, (skill - 45) / 60),
       ));

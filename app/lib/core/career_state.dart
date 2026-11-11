@@ -52,7 +52,12 @@ class CareerState extends ChangeNotifier {
   int _groupsWeek = -1;
 
   Future<void> refresh() async {
-    slotId ??= await controller.run(Cmd.slotId());
+    if (slotId == null) {
+      slotId = await controller.run(Cmd.slotId());
+      // The world's calendar on this side too (docs K289): weeks become
+      // dates here.
+      GameTime.baseYear = await controller.run(Cmd.baseYear());
+    }
     final (p, w, d) = await controller.run(Cmd.snapshot());
     // Bands' drawn avatars (docs K212): new groups debut now and then.
     if (_groupsWeek < 0 || w - _groupsWeek >= 4 || w < _groupsWeek) {

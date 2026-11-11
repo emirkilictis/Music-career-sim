@@ -63,6 +63,9 @@ abstract final class Cmd {
 
   static SessionCmd<String> slotId() => (s) => s.slotId;
 
+  /// The open world's calendar (docs K289).
+  static SessionCmd<int> baseYear() => (s) => s.world.baseYear;
+
   static HostCmd<void> closeCareer() => (h) {
         h.session?.close();
         h.session = null;

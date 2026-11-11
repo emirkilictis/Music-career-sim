@@ -266,11 +266,17 @@ class SimConfig {
 
   /// How much a music video does by year: music TV (2000–04), music TV
   /// plus video sites (2005–12), then video sites in the streaming era.
-  double videoEraFactor(int year) => year < 2005
-      ? 1.0
-      : year < 2013
-          ? 1.15
-          : 0.9;
+  /// Before music TV (1981) a film for a song mattered little: a TV spot
+  /// at most (docs K289).
+  double videoEraFactor(int year) => year < 1975
+      ? 0.2
+      : year < 1981
+          ? 0.4
+          : year < 2005
+              ? 1.0
+              : year < 2013
+                  ? 1.15
+                  : 0.9;
 
   /// Album sales after the first week (docs K79): in the CD years an
   /// album sold for months, so later weeks hold up more (×1.15 to 2006,

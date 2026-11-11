@@ -114,6 +114,7 @@ class Fmt {
 
   String network(SocialNetwork n) => switch (n) {
         SocialNetwork.forum => l.networkForum,
+        SocialNetwork.fanMail => l.networkFanMail,
         SocialNetwork.myPlace => l.networkMyPlace,
         SocialNetwork.chirper => l.networkChirper,
       };
@@ -1188,6 +1189,8 @@ class Fmt {
       'practiceDone' => l.errorPracticeDone,
       'practiceLocked' => l.errorPracticeLocked,
       'retired' => l.errorRetired,
+      'genreNotYet' => l.errorGenreNotYet,
+      'formatNotYet' => l.errorFormatNotYet,
       'releaseScheduled' => l.errorReleaseScheduled,
       'notRetired' => l.errorNotRetired,
       _ => reason(e.message),

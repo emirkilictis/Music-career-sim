@@ -2660,6 +2660,17 @@ k('eventHallOfFame','You are in the Hall of Fame: class of {year}.','Şöhretler
 k('eventHallOfFameMissed','Not voted into the Hall of Fame this year: #{place} on the ballot.','Bu yıl Şöhretler Salonu’na seçilmedin: oylamada #{place} sıradaydın.', place='int')
 k('eventHallOfFameClass','Hall of Fame class of {year}: {names}.','Şöhretler Salonu {year} sınıfı: {names}.', year='int', names='String')
 
+# From the 1950s (docs K289).
+k('networkFanMail','Fan mail','Hayran mektupları')
+k('fanMailTitle','Letters to {name}','{name} için gelen mektuplar', name='String')
+k('errorGenreNotYet','That sound does not exist yet.','Bu tür henüz yok.')
+k('errorFormatNotYet','That format has not been invented yet.','Bu format henüz icat edilmedi.')
+k('eraHint1950s','The 1950s: rock and roll is born. 45s, LPs and the radio make the hits; jazz, blues, country and gospel are everywhere.','1950’ler: rock and roll doğuyor. Hitleri 45’likler, LP’ler ve radyo yapıyor; caz, blues, country ve gospel her yerde.')
+k('eraHint1960s','The 1960s: the LP grows up; soul and folk join rock and pop. Singles still sell millions.','1960’lar: LP olgunlaşıyor; soul ve folk, rock ve pop’a katılıyor. Single’lar hâlâ milyonlarca satıyor.')
+k('eraHint1970s','The 1970s: albums sell millions, the cassette arrives; disco, punk, funk and stadium rock.','1970’ler: albümler milyonlarca satıyor, kaset geliyor; disko, punk, funk ve stadyum rock’ı.')
+k('eraHint1980s','The 1980s: music TV makes videos matter, then the CD arrives; hip-hop and metal grow.','1980’ler: müzik televizyonu klipleri önemli kılıyor, sonra CD geliyor; hip-hop ve metal büyüyor.')
+k('eraHint1990s','The 1990s: the CD boom; the web arrives near the end.','1990’lar: CD patlaması; internet on yılın sonuna doğru geliyor.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

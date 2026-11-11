@@ -129,8 +129,120 @@ class EraTable {
     );
   }
 
-  /// First-pass US keyframes, 2000 → 2026.
+  /// First-pass US keyframes, 1950 → 2026. Before 2000 (docs K289): the
+  /// 45 and the LP, then the cassette and the CD; singles sold millions a
+  /// week until the 1980s, albums grew from a small LP market in the 1950s
+  /// to the CD boom; radio carried the hits.
   static EraTable usDefault() => EraTable(const [
+        EraValues(
+            year: 1950,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 2.6e6,
+            radioWeekly: 4.5e9,
+            casualPurchaseRate: 0.08,
+            superfanFactor: 0.80,
+            collectorFactor: 0.10),
+        EraValues(
+            year: 1955,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 3.0e6,
+            radioWeekly: 4.6e9,
+            casualPurchaseRate: 0.10,
+            superfanFactor: 0.82,
+            collectorFactor: 0.10),
+        EraValues(
+            year: 1960,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 3.8e6,
+            radioWeekly: 4.8e9,
+            casualPurchaseRate: 0.14,
+            superfanFactor: 0.86,
+            collectorFactor: 0.10),
+        EraValues(
+            year: 1965,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 4.0e6,
+            radioWeekly: 5.0e9,
+            casualPurchaseRate: 0.20,
+            superfanFactor: 0.90,
+            collectorFactor: 0.10),
+        EraValues(
+            year: 1970,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 3.8e6,
+            radioWeekly: 5.2e9,
+            casualPurchaseRate: 0.27,
+            superfanFactor: 0.95,
+            collectorFactor: 0.10),
+        EraValues(
+            year: 1975,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 3.2e6,
+            radioWeekly: 5.5e9,
+            casualPurchaseRate: 0.34,
+            superfanFactor: 1.00,
+            collectorFactor: 0.10),
+        EraValues(
+            year: 1978,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 3.2e6,
+            radioWeekly: 5.6e9,
+            casualPurchaseRate: 0.40,
+            superfanFactor: 1.00,
+            collectorFactor: 0.10),
+        EraValues(
+            year: 1981,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 3.0e6,
+            radioWeekly: 5.8e9,
+            casualPurchaseRate: 0.36,
+            superfanFactor: 1.00,
+            collectorFactor: 0.10),
+        EraValues(
+            year: 1985,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 2.4e6,
+            radioWeekly: 6.0e9,
+            casualPurchaseRate: 0.40,
+            superfanFactor: 1.00,
+            collectorFactor: 0.12),
+        EraValues(
+            year: 1990,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 2.0e6,
+            radioWeekly: 6.0e9,
+            casualPurchaseRate: 0.50,
+            superfanFactor: 1.00,
+            collectorFactor: 0.12),
+        EraValues(
+            year: 1995,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 2.0e6,
+            radioWeekly: 6.0e9,
+            casualPurchaseRate: 0.60,
+            superfanFactor: 1.00,
+            collectorFactor: 0.14),
+        // The same as 2000: worlds from 1997 on are as they always were.
+        EraValues(
+            year: 1997,
+            streamsWeekly: 0,
+            downloadsWeekly: 0,
+            physicalSinglesWeekly: 1.0e6,
+            radioWeekly: 6.0e9,
+            casualPurchaseRate: 0.62,
+            superfanFactor: 1.00,
+            collectorFactor: 0.15),
         EraValues(
             year: 2000,
             streamsWeekly: 0,

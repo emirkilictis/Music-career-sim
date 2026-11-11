@@ -84,6 +84,10 @@ class SaveStore {
     if (version > simulationVersion) {
       throw StateError('Save made by a newer game version ($version)');
     }
+    // The world's calendar (docs K289): 1940 for one that began before
+    // 1980, 1980 otherwise and for every save from before.
+    GameTime.baseYear =
+        (meta['baseYear'] as num?)?.toInt() ?? GameTime.defaultBaseYear;
     final w = World(
       config: config ?? SimConfig(),
       seed: meta['seed'] as int,
@@ -428,6 +432,7 @@ class SaveStore {
         db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)');
     final values = <String, Object>{
       'simulationVersion': simulationVersion,
+      'baseYear': w.baseYear,
       'seed': w.seed,
       'week': w.week,
       'playerArtistId': w.playerArtistId,

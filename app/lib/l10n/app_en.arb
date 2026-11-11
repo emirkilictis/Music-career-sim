@@ -9827,5 +9827,21 @@
         "type": "String"
       }
     }
-  }
+  },
+  "networkFanMail": "Fan mail",
+  "fanMailTitle": "Letters to {name}",
+  "@fanMailTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "errorGenreNotYet": "That sound does not exist yet.",
+  "errorFormatNotYet": "That format has not been invented yet.",
+  "eraHint1950s": "The 1950s: rock and roll is born. 45s, LPs and the radio make the hits; jazz, blues, country and gospel are everywhere.",
+  "eraHint1960s": "The 1960s: the LP grows up; soul and folk join rock and pop. Singles still sell millions.",
+  "eraHint1970s": "The 1970s: albums sell millions, the cassette arrives; disco, punk, funk and stadium rock.",
+  "eraHint1980s": "The 1980s: music TV makes videos matter, then the CD arrives; hip-hop and metal grow.",
+  "eraHint1990s": "The 1990s: the CD boom; the web arrives near the end."
 }

@@ -56,7 +56,8 @@ class CareerSetup {
   final int? seed;
 
   /// Content is calibrated from 2000 to today (docs/README.md, Faz 1).
-  static const minStartYear = 2000;
+  /// From the 1950s (docs K289; 2000 before).
+  static const minStartYear = 1950;
   static const maxStartYear = 2026;
   static const maxNameLength = 40;
 
@@ -90,6 +91,12 @@ class CareerSetup {
     if (startYear < minStartYear || startYear > maxStartYear) {
       throw GameException(
           'invalidStartYear', 'Start year must be $minStartYear–$maxStartYear');
+    }
+    // No hip-hop in 1955 (docs K289).
+    if (genre < 0 ||
+        genre >= genreNames.length ||
+        !genreExistsIn(genre, startYear)) {
+      throw GameException('genreNotYet', 'This genre does not exist yet');
     }
     if (!premium && (isPremiumTier(tier) || isPremiumMoney(money))) {
       throw GameException('premiumRequired', 'This start needs Premium');

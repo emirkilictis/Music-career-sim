@@ -666,24 +666,26 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             child: Text(l.newEdition, style: Theme.of(c).textTheme.titleLarge),
           ),
           for (final f in SingleFormat.values)
-            ListTile(
-              enabled:
-                  f.costCents <= money && !s.variants.any((x) => x.$1 == f),
-              leading: Icon(switch (f) {
-                SingleFormat.cd => Icons.album_rounded,
-                SingleFormat.vinyl => Icons.radio_button_checked_rounded,
-                SingleFormat.cassette => Icons.cable_rounded,
-                SingleFormat.signed => Icons.draw_rounded,
-              }),
-              title: Text(fmt.singleFormat(f)),
-              subtitle: Text(switch (f.appeal(year)) {
-                >= 0.9 => l.collectorsHigh,
-                >= 0.45 => l.collectorsMid,
-                _ => l.collectorsLow,
-              }),
-              trailing: Text(fmt.money(f.costCents)),
-              onTap: () => Navigator.pop(c, f),
-            ),
+            // Only the formats of the day (docs K289).
+            if (f.availableIn(year))
+              ListTile(
+                enabled:
+                    f.costCents <= money && !s.variants.any((x) => x.$1 == f),
+                leading: Icon(switch (f) {
+                  SingleFormat.cd => Icons.album_rounded,
+                  SingleFormat.vinyl => Icons.radio_button_checked_rounded,
+                  SingleFormat.cassette => Icons.cable_rounded,
+                  SingleFormat.signed => Icons.draw_rounded,
+                }),
+                title: Text(fmt.singleFormat(f)),
+                subtitle: Text(switch (f.appeal(year)) {
+                  >= 0.9 => l.collectorsHigh,
+                  >= 0.45 => l.collectorsMid,
+                  _ => l.collectorsLow,
+                }),
+                trailing: Text(fmt.money(f.costCents)),
+                onTap: () => Navigator.pop(c, f),
+              ),
           const SizedBox(height: 8),
         ]),
       ),
