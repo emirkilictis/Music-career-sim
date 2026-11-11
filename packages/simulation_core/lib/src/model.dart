@@ -983,9 +983,17 @@ class Song with Charted {
   /// release): its radio run counts from then.
   int radioPushWeek = -1;
 
-  /// Its catalog listening while its album is off the market (docs K293;
-  /// 0: none held).
+  /// Its catalog listening while it is off the market (docs K293; 0:
+  /// none held).
   double heldRate = 0;
+
+  /// The week the player took this single off the market on its own (docs
+  /// K294; -1: on sale, or off only with its album).
+  int offWeek = -1;
+
+  /// The week its radio budget was cut to nothing (docs K294; -1: not
+  /// cut): the stations drop it over the next weeks.
+  int radioCutWeek = -1;
 
   /// The artist's share of what it earns, fixed by the deal it came out
   /// under (docs K139): a label owns the masters for good. Null until

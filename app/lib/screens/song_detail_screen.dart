@@ -749,6 +749,36 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   }
 
   /// Takes the single off the radio after asking (docs K253).
+  /// Off the market and back, a single on its own (docs K294).
+  Future<void> _songOffMarket(SongView s) async {
+    final l = context.l10n;
+    final back = s.offWeek >= 0;
+    if (!back) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (d) => AlertDialog(
+          title: Text(l.offMarketConfirmTitle(s.title)),
+          content: Text(l.offMarketSongConfirm),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(d, false),
+                child: Text(l.cancel)),
+            FilledButton(
+                onPressed: () => Navigator.pop(d, true),
+                child: Text(l.offMarketSongButton)),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
+    if (await _tool(back ? Cmd.putSongBack(s.id) : Cmd.takeSongOff(s.id)) &&
+        mounted) {
+      showInfo(context,
+          back ? l.offMarketBack(s.title) : l.offMarketDone(s.title),
+          icon: back ? Icons.music_note_rounded : Icons.block_rounded);
+    }
+  }
+
   Future<void> _pullRadio(SongView s) async {
     final l = context.l10n;
     final ok = await showDialog<bool>(
@@ -1035,6 +1065,29 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     ]),
                   ],
                   if (_visits case final v?) _visitCard(v),
+                  // A single off the market on its own (docs K294).
+                  if (s.isOff) ...[
+                    const SizedBox(height: 8),
+                    Tag(l.offMarketSongTag,
+                        icon: Icons.block_rounded, color: AppColors.coral),
+                  ],
+                  if (s.canTakeOff || s.offWeek >= 0) ...[
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => _songOffMarket(s),
+                        icon: Icon(
+                            s.offWeek >= 0
+                                ? Icons.replay_rounded
+                                : Icons.block_rounded,
+                            size: 18),
+                        label: Text(s.offWeek >= 0
+                            ? l.offMarketPutBack
+                            : l.offMarketSongButton),
+                      ),
+                    ),
+                  ],
                   // Off the radio for another single (docs K253).
                   if (s.canPullRadio) ...[
                     const SizedBox(height: 6),

@@ -2751,12 +2751,15 @@
   "offMarketButton": "Yayından kaldır",
   "offMarketPutBack": "Yeniden yayınla",
   "offMarketConfirmTitle": "“{title}” yayından kaldırılsın mı?",
-  "offMarketConfirm": "Streaming servislerinden ve mağazalardan çekilir: şarkıları dinlenmez ve satılmaz. Dinlenmeleri, satışları ve liste geçmişi korunur; istediğin zaman geri koyabilirsin.",
+  "offMarketConfirm": "Streaming servislerinden, video sitesinden, profillerden ve mağazalardan çekilir: albüm şarkıları dinlenmez ve satılmaz. Single’ları yayında kalır (her biri kendi sayfasından ayrıca kaldırılabilir). Dinlenmeleri, satışları ve liste geçmişi korunur; istediğin zaman geri koyabilirsin.",
   "offMarketDone": "“{title}” yayından kaldırıldı.",
   "offMarketBack": "“{title}” yeniden yayında.",
   "offMarketTag": "{date} tarihinden beri yayında değil",
   "offMarketHint": "Servislerde ve mağazalarda yok: geri gelene kadar sayıları olduğu yerde kalır.",
   "errorAlbumOff": "Bu kayıt yayından kaldırılmış.",
   "errorAlbumLocked": "Şu an yayından kaldırılamaz.",
-  "errorAlbumNotOff": "Bu kayıt zaten yayında."
+  "errorAlbumNotOff": "Bu kayıt zaten yayında.",
+  "offMarketSongButton": "Bu single’ı yayından kaldır",
+  "offMarketSongConfirm": "Streaming servislerinden, video sitesinden ve mağazalardan çekilir. Sayıları ve liste geçmişi korunur; istediğin zaman geri koyabilirsin.",
+  "offMarketSongTag": "Yayında değil"
 }

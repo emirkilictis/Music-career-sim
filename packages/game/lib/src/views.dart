@@ -380,6 +380,10 @@ class SongView {
               },
         canPullRadio = s.primaryArtistId == w.playerArtistId &&
             Actions.canPullRadio(w, w.player!, s),
+        offWeek = s.offWeek,
+        isOff = OffMarket.songOff(w, s),
+        canTakeOff = w.player != null &&
+            OffMarket.canTakeSongOff(w, w.player!, s),
         radioLevel = RadioTools.levelOf(s),
         radioBudget = s.radioLevel >= 0,
         radioMaxLevel = s.primaryArtistId == w.playerArtistId &&
@@ -757,6 +761,13 @@ class SongView {
 
   /// It can be taken off the radio for another single (docs K253).
   final bool canPullRadio;
+
+  /// Off the market (docs K293, K294): since when on its own (-1: not on
+  /// its own), whether it is off at all, and whether the player can take
+  /// this single off now.
+  final int offWeek;
+  final bool isOff;
+  final bool canTakeOff;
 
   /// The radio budget (docs K290): its level (0–100; the release's push
   /// as a level until one is set), whether one was set, the highest the

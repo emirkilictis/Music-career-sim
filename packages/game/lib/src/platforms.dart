@@ -539,6 +539,8 @@ class ChannelView {
     for (final id in w.playerSongIds) {
       final s = w.songs[id];
       if (s.releasedWeek < 0 || s.videoBudget < 0) continue;
+      // Off the market, off the channel (docs K294).
+      if (OffMarket.songOff(w, s)) continue;
       final views = Platforms.videoViews(w, s);
       total += views;
       rows.add(ChannelVideoRow(
@@ -551,9 +553,10 @@ class ChannelView {
     }
     final made = <int, Set<VideoKind>>{};
     for (final v in w.channelVideos) {
+      final s = v.songId >= 0 ? w.songs[v.songId] : null;
+      if (s != null && OffMarket.songOff(w, s)) continue;
       final views = v.viewsAt(w.week - 1);
       total += views;
-      final s = v.songId >= 0 ? w.songs[v.songId] : null;
       if (s != null) (made[s.id] ??= {}).add(v.kind);
       rows.add(ChannelVideoRow(
           kind: v.kind,
@@ -567,7 +570,8 @@ class ChannelView {
     final songs = [
       for (final id in w.playerSongIds)
         if (w.songs[id].releasedWeek >= 0 &&
-            w.songs[id].status != SongStatus.scrapped)
+            w.songs[id].status != SongStatus.scrapped &&
+            !OffMarket.songOff(w, w.songs[id]))
           w.songs[id]
     ]..sort((a, b) => b.releasedWeek.compareTo(a.releasedWeek));
     return ChannelView(

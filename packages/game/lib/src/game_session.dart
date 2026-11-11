@@ -491,9 +491,13 @@ class GameSession {
   ArtistPageView artistPage(int artistId) {
     final w = world;
     final a = w.artists[artistId];
+    // Records off the market are not on the profile (docs K294).
     final songs = [
       for (final s in w.songs)
-        if (s.primaryArtistId == artistId && s.releasedWeek >= 0) s,
+        if (s.primaryArtistId == artistId &&
+            s.releasedWeek >= 0 &&
+            !OffMarket.songOff(w, s))
+          s,
     ];
     final weekly = {
       for (final s in songs) s.id: w.songWeekStreamsIn(s, ChartMarket.global),
@@ -517,7 +521,7 @@ class GameSession {
       popular: [for (final s in popular.take(10)) SongView.of(w, s)],
       albums: [
         for (final al in w.albums.reversed)
-          if (al.artistId == artistId) AlbumView.of(w, al),
+          if (al.artistId == artistId && !al.isOff) AlbumView.of(w, al),
       ],
       singles: [
         for (final s in songs.reversed)
@@ -1423,8 +1427,9 @@ class GameSession {
   Song _checkSingle(int songId) {
     _requireActive();
     final s = _ownSong(songId);
-    if (s.albumId >= 0 && world.albums[s.albumId].isOff) {
-      throw GameException('albumOff', 'Its album is off the market');
+    if (OffMarket.songOff(world, s) ||
+        (s.albumId >= 0 && world.albums[s.albumId].isOff)) {
+      throw GameException('albumOff', 'Off the market');
     }
     if (s.isSingle) throw GameException('alreadySingle', 'Already a single');
     if (_p.scheduled.any((sr) => !sr.isAlbum && sr.songIds.contains(s.id))) {
@@ -2218,6 +2223,25 @@ class GameSession {
     if (!al.isOff) throw GameException('albumNotOff', 'It is on sale');
     _requireActive();
     OffMarket.putBack(world, _p, al);
+    _saveNow();
+  }
+
+  /// Takes one of the player's singles off the market on its own (docs
+  /// K294).
+  void takeSongOff(int songId) {
+    final s = _ownSong(songId);
+    if (!OffMarket.canTakeSongOff(world, _p, s)) {
+      throw GameException('albumLocked', 'Cannot take it off now');
+    }
+    OffMarket.takeSongOff(world, _p, s);
+    _saveNow();
+  }
+
+  void putSongBack(int songId) {
+    final s = _ownSong(songId);
+    if (s.offWeek < 0) throw GameException('albumNotOff', 'It is on sale');
+    _requireActive();
+    OffMarket.putSongBack(world, _p, s);
     _saveNow();
   }
 

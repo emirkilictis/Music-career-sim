@@ -2688,7 +2688,7 @@ k('eventFollowUpFlopNew','The public did not take to “{title}”: it opened fa
 k('offMarketButton','Take off the market','Yayından kaldır')
 k('offMarketPutBack','Put back on the market','Yeniden yayınla')
 k('offMarketConfirmTitle','Take “{title}” off the market?','“{title}” yayından kaldırılsın mı?', title='String')
-k('offMarketConfirm','It leaves the streaming services and the shops: its songs stop playing and selling. Its streams, sales and chart runs are kept, and you can put it back any time.','Streaming servislerinden ve mağazalardan çekilir: şarkıları dinlenmez ve satılmaz. Dinlenmeleri, satışları ve liste geçmişi korunur; istediğin zaman geri koyabilirsin.')
+k('offMarketConfirm','It leaves the streaming services, the video site, the profiles and the shops: its album tracks stop playing and selling. Its singles stay out (each can be taken off on its own page). Its streams, sales and chart runs are kept, and you can put it back any time.','Streaming servislerinden, video sitesinden, profillerden ve mağazalardan çekilir: albüm şarkıları dinlenmez ve satılmaz. Single’ları yayında kalır (her biri kendi sayfasından ayrıca kaldırılabilir). Dinlenmeleri, satışları ve liste geçmişi korunur; istediğin zaman geri koyabilirsin.')
 k('offMarketDone','“{title}” is off the market.','“{title}” yayından kaldırıldı.', title='String')
 k('offMarketBack','“{title}” is back on the market.','“{title}” yeniden yayında.', title='String')
 k('offMarketTag','Off the market since {date}','{date} tarihinden beri yayında değil', date='String')
@@ -2696,6 +2696,11 @@ k('offMarketHint','Not on the services or in the shops: its numbers stay where t
 k('errorAlbumOff','That record is off the market.','Bu kayıt yayından kaldırılmış.')
 k('errorAlbumLocked','It cannot be taken off the market now.','Şu an yayından kaldırılamaz.')
 k('errorAlbumNotOff','That record is on the market.','Bu kayıt zaten yayında.')
+
+# A single off the market on its own (docs K294).
+k('offMarketSongButton','Take this single off the market','Bu single’ı yayından kaldır')
+k('offMarketSongConfirm','It leaves the streaming services, the video site and the shops. Its numbers and chart runs are kept, and you can put it back any time.','Streaming servislerinden, video sitesinden ve mağazalardan çekilir. Sayıları ve liste geçmişi korunur; istediğin zaman geri koyabilirsin.')
+k('offMarketSongTag','Off the market','Yayında değil')
 
 def write(lang, idx):
     out = {'@@locale': lang}

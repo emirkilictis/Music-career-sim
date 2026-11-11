@@ -215,8 +215,13 @@ abstract final class Lifecycle {
 
   static void reactivateSong(World w, Song s) {
     if (s.status != SongStatus.dormant) return;
-    // Its album is off the market (docs K293): nothing brings it back.
-    if (s.albumId >= 0 && w.albums[s.albumId].isOff) return;
+    // Off the market (docs K293, K294): nothing brings it back.
+    if (s.offWeek >= 0) return;
+    if (s.albumId >= 0 &&
+        w.albums[s.albumId].isOff &&
+        (!s.isSingle || s.heldRate > 0)) {
+      return;
+    }
     final a = w.primaryOf(s);
     w.settleRetired(a);
     for (var r = 0; r < regionCount; r++) {

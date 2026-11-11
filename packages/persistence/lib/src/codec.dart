@@ -263,8 +263,8 @@ abstract final class Codec {
     'ringtones', 'weekRingtones', 'mood', 'canvas', 'bought',
     // Added in schema v55, v56, v57.
     'diss', 'radio', 'catalogBase',
-    // Added in schema v59.
-    'held',
+    // Added in schema v59, v60.
+    'held', 'offWeek',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -354,20 +354,25 @@ abstract final class Codec {
         s.ukRadioPush == null &&
                 s.radioEditWeek < 0 &&
                 s.radioLevel < 0 &&
-                s.radioPushWeek < 0
+                s.radioPushWeek < 0 &&
+                s.radioCutWeek < 0
             ? null
             : jsonEncode([
                 s.ukRadioPush?.index ?? -1,
                 s.radioEditWeek,
-                // The radio budget (docs K290).
-                if (s.radioLevel >= 0 || s.radioPushWeek >= 0) ...[
+                // The radio budget (docs K290, K294).
+                if (s.radioLevel >= 0 ||
+                    s.radioPushWeek >= 0 ||
+                    s.radioCutWeek >= 0) ...[
                   s.radioLevel,
-                  s.radioPushWeek
+                  s.radioPushWeek,
+                  s.radioCutWeek,
                 ],
               ]),
         s.catalogBase == 0 ? null : s.catalogBase,
-        // Held while its album is off the market (docs K293).
+        // Held while it is off the market (docs K293, K294).
         s.heldRate == 0 ? null : s.heldRate,
+        s.offWeek < 0 ? null : s.offWeek,
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -437,6 +442,7 @@ abstract final class Codec {
     s.dissTarget = r['diss'] as int? ?? -1;
     s.catalogBase = (r['catalogBase'] as num?)?.toDouble() ?? 0;
     s.heldRate = (r['held'] as num?)?.toDouble() ?? 0;
+    s.offWeek = r['offWeek'] as int? ?? -1;
     if (r['radio'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       final uk = j[0] as int;
@@ -448,6 +454,7 @@ abstract final class Codec {
           ..radioLevel = j[2] as int
           ..radioPushWeek = j[3] as int;
       }
+      if (j.length > 4) s.radioCutWeek = j[4] as int;
     }
     if (r['mood'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;

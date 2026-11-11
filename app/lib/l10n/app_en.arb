@@ -9913,7 +9913,7 @@
       }
     }
   },
-  "offMarketConfirm": "It leaves the streaming services and the shops: its songs stop playing and selling. Its streams, sales and chart runs are kept, and you can put it back any time.",
+  "offMarketConfirm": "It leaves the streaming services, the video site, the profiles and the shops: its album tracks stop playing and selling. Its singles stay out (each can be taken off on its own page). Its streams, sales and chart runs are kept, and you can put it back any time.",
   "offMarketDone": "“{title}” is off the market.",
   "@offMarketDone": {
     "placeholders": {
@@ -9941,5 +9941,8 @@
   "offMarketHint": "Not on the services or in the shops: its numbers stay where they were until it comes back.",
   "errorAlbumOff": "That record is off the market.",
   "errorAlbumLocked": "It cannot be taken off the market now.",
-  "errorAlbumNotOff": "That record is on the market."
+  "errorAlbumNotOff": "That record is on the market.",
+  "offMarketSongButton": "Take this single off the market",
+  "offMarketSongConfirm": "It leaves the streaming services, the video site and the shops. Its numbers and chart runs are kept, and you can put it back any time.",
+  "offMarketSongTag": "Off the market"
 }

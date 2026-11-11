@@ -7146,4 +7146,79 @@ void main() {
       g.close();
     });
   });
+  group('off the market and the radio, again (docs K294)', () {
+    GameSession star() => GameSession.start(
+        slots,
+        _setup(
+            startYear: 2016,
+            tier: StartTier.superstar,
+            money: StartMoney.millionaire,
+            premium: true));
+
+    test('an album goes, its singles stay; a single goes on its own', () {
+      final g = star();
+      final p = g.world.player!;
+      final ids = <int>[];
+      for (var i = 0; i < 8; i++) {
+        p.creativeEnergy = 100;
+        ids.add(g.writeSong(budget: BudgetTier.high).id);
+      }
+      final single = ids.first;
+      g.releaseSingle(single, campaign: Campaign.standard);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      final al = g.releaseAlbum('Both', ids, campaign: Campaign.standard).id;
+      g.advanceWeeks(4, stop: SkipStop.never);
+      g.takeAlbumOff(al);
+      // The single plays on; the album and its other tracks are gone from
+      // the profiles.
+      final w = g.world;
+      expect(g.song(single).isOff, isFalse);
+      expect(g.song(ids[2]).isOff, isTrue);
+      var page = g.artistPage(p.id);
+      expect(page.albums.map((a) => a.id), isNot(contains(al)));
+      expect(page.popular.map((s) => s.id), isNot(contains(ids[2])));
+      expect(g.channel.songs.map((x) => x.$1), isNot(contains(ids[2])));
+      final before = w.songLifetimeStreams(w.songs[single]);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      expect(w.songLifetimeStreams(w.songs[single]), greaterThan(before));
+      // Then the single on its own.
+      expect(g.song(single).canTakeOff, isTrue);
+      g.takeSongOff(single);
+      expect(g.song(single).isOff, isTrue);
+      page = g.artistPage(p.id);
+      expect(page.popular.map((s) => s.id), isNot(contains(single)));
+      final frozen = w.songLifetimeStreams(w.songs[single]);
+      g.advanceWeeks(3, stop: SkipStop.never);
+      expect(w.songLifetimeStreams(w.songs[single]),
+          closeTo(frozen, 1e-6 * frozen));
+      // The album back does not bring back a single taken off on its own.
+      g.putAlbumBack(al);
+      expect(g.song(single).isOff, isTrue);
+      expect(g.song(ids[2]).isOff, isFalse);
+      g.putSongBack(single);
+      expect(g.song(single).isOff, isFalse);
+      g.advanceWeeks(2, stop: SkipStop.never);
+      expect(w.songLifetimeStreams(w.songs[single]), greaterThan(frozen));
+      g.close();
+    });
+
+    test('a radio budget cut to nothing: the stations let it go', () {
+      final g = star();
+      final p = g.world.player!..creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id, campaign: Campaign.standard);
+      g.setRadioLevel(id, RadioTools.maxLevel(p));
+      g.advanceWeeks(6, stop: SkipStop.never);
+      final s = g.world.songs[id];
+      final pushed = s.weekRadio;
+      g.setRadioLevel(id, 0);
+      expect(s.radioCutWeek, g.world.week);
+      g.advanceWeeks(5, stop: SkipStop.never);
+      expect(s.weekRadio, lessThan(0.3 * pushed));
+      // Worked again, it is back.
+      g.setRadioLevel(id, RadioTools.maxLevel(p));
+      expect(s.radioCutWeek, -1);
+      g.close();
+    });
+  });
 }

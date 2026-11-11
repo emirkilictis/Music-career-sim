@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'actions.dart';
 import 'config/regions.dart';
 import 'lifecycle.dart';
+import 'off_market.dart';
 import 'model.dart';
 import 'world.dart';
 
@@ -185,11 +186,20 @@ abstract final class RadioTools {
   static int radioAge(World w, Song s) =>
       w.week - (s.radioPushWeek >= 0 ? s.radioPushWeek : s.singleWeek);
 
-  /// The play [s] gets from its push: its budget once set, else the push
-  /// bought at release.
-  static double pushFactor(Song s, double fame) => s.radioLevel >= 0
-      ? levelFactor(s.radioLevel, fame)
-      : s.radioPush.factorFor(fame);
+  /// Weeks over which stations drop a song whose budget was cut to
+  /// nothing (docs K294), and what they keep playing of a song left alone.
+  static const cutWeeks = 2.5, cutFloor = 0.15;
+
+  /// The play [s] gets from its push in [week]: its budget once set, else
+  /// the push bought at release. A budget cut to nothing fades out in a
+  /// few weeks: the stations played it because they were worked.
+  static double pushFactor(Song s, double fame, int week) {
+    if (s.radioLevel < 0) return s.radioPush.factorFor(fame);
+    final f = levelFactor(s.radioLevel, fame);
+    if (s.radioLevel > 0 || s.radioCutWeek < 0) return f;
+    return f *
+        math.max(cutFloor, math.exp(-(week - s.radioCutWeek) / cutWeeks));
+  }
 
   /// The level [s] runs at (the release push's place if none was set).
   static int levelOf(Song s) => s.radioLevel >= 0
@@ -205,7 +215,7 @@ abstract final class RadioTools {
       s.releasedWeek >= 0 &&
       s.releasedWeek <= w.week &&
       s.primaryArtistId == a.id &&
-      (s.albumId < 0 || !w.albums[s.albumId].isOff);
+      !OffMarket.songOff(w, s);
 
   /// Sets [s]'s radio budget. A song the stations let go long ago, or one
   /// in the catalog, is worked to them again from this week (docs K290).
@@ -222,6 +232,12 @@ abstract final class RadioTools {
     if (s.radioPush.isPulled) s.radioPush = RadioPush.none;
     // One budget everywhere: a UK push of its own ends.
     s.ukRadioPush = null;
+    // Cut to nothing, the stations let it go (docs K294).
+    if (level > 0) {
+      s.radioCutWeek = -1;
+    } else if (levelOf(s) > 0) {
+      s.radioCutWeek = w.week;
+    }
     s.radioLevel = level;
     w.dirtySongs.add(s.id);
   }
@@ -236,6 +252,7 @@ abstract final class RadioTools {
       final cost = levelWeeklyCents(a, s.radioLevel);
       if (cost > a.moneyCents) {
         s.radioLevel = 0;
+        s.radioCutWeek = w.week;
         w.dirtySongs.add(s.id);
         continue;
       }

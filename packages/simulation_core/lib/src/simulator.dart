@@ -244,7 +244,8 @@ class Simulator {
     double radioOf(Song s) =>
         campaignRadio[s.campaign.index] *
         // A weekly budget once set (docs K290), else the release's push.
-        RadioTools.pushFactor(s, w.artists[s.primaryArtistId].fame) *
+        RadioTools.pushFactor(
+            s, w.artists[s.primaryArtistId].fame, w.week) *
         (s.radioFormat == null
             ? 1.0
             : RadioFormat.factor(s.onFormat, s.genre, s.genres));

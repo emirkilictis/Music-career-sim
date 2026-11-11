@@ -2001,8 +2001,10 @@ void streamingToolTests() {
   });
 
   test('autoplay: more listening, less royalty per stream (K96)', () {
-    final off = _newcomerSingle(96, weeks: 3);
-    final on = _newcomerSingle(96,
+    // A world where the song is not already at the app tools' ceiling
+    // (docs K216; world 96 is since K291's catalog trends).
+    final off = _newcomerSingle(97, weeks: 3);
+    final on = _newcomerSingle(97,
         extra: (w, p, s) => StreamingTools.setAutoplay(w, s, true), weeks: 3);
     expect(on.s.weekStreams, greaterThan(off.s.weekStreams * 1.1));
     final perStreamOff = off.s.revenueCents / off.s.lifetimeStreams;

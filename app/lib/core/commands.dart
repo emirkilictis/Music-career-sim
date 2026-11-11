@@ -748,6 +748,10 @@ abstract final class Cmd {
       (s) => s.takeAlbumOff(albumId);
   static SessionCmd<void> putAlbumBack(int albumId) =>
       (s) => s.putAlbumBack(albumId);
+  static SessionCmd<void> takeSongOff(int songId) =>
+      (s) => s.takeSongOff(songId);
+  static SessionCmd<void> putSongBack(int songId) =>
+      (s) => s.putSongBack(songId);
 
   /// A single's radio budget (docs K290).
   static SessionCmd<void> setRadioLevel(int songId, int level) =>
