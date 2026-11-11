@@ -4,6 +4,8 @@ import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
 import 'album_detail_screen.dart';
+import 'award_submissions_screen.dart';
+import 'song_detail_screen.dart';
 import '../core/career_state.dart';
 import '../core/commands.dart';
 import '../core/scope.dart';
@@ -60,6 +62,9 @@ class DashboardTab extends StatelessWidget {
           ),
           const SizedBox(height: 12),
         ],
+        // The first career's guide, step by step (docs K297).
+        if (context.career.player.retiredYear == 0)
+          _GuideCard(onOpenTab: onOpenTab),
         // An interview, a stage moment or a crisis to play through (docs
         // K256).
         if (context.career.player.moment case final m?) ...[
@@ -79,6 +84,9 @@ class DashboardTab extends StatelessWidget {
         // Nothing new to make while retired (docs K288).
         if (context.career.player.retiredYear == 0)
           _NextStepCard(onOpenTab: onOpenTab, onNextWeek: onNextWeek),
+        // What can be done this week, closing windows first (docs K298).
+        if (context.career.player.retiredYear == 0)
+          _WeekTodoCard(onOpenTab: onOpenTab),
         const SizedBox(height: 12),
         const _StatusRow(),
         const SizedBox(height: 12),
@@ -1111,6 +1119,218 @@ class _AdDialogState extends State<_AdDialog> {
             onPressed: _left <= 0 ? () => Navigator.pop(context, true) : null,
             child: Text(_left > 0 ? '$_left' : l.collectReward)),
       ],
+    );
+  }
+}
+
+/// This week's to-dos (docs K298): the windows about to close and what
+/// waits on the player, each a tap from its page.
+class _WeekTodoCard extends StatefulWidget {
+  const _WeekTodoCard({this.onOpenTab});
+  final void Function(int tab)? onOpenTab;
+
+  @override
+  State<_WeekTodoCard> createState() => _WeekTodoCardState();
+}
+
+class _WeekTodoCardState extends State<_WeekTodoCard> {
+  List<TodoItem> _items = const [];
+  int _loadedRevision = -1;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final career = context.career;
+    if (career.revision != _loadedRevision) {
+      _loadedRevision = career.revision;
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    final items = await context.careerRead.read(Cmd.weekTodo());
+    if (mounted) setState(() => _items = items);
+  }
+
+  void _open(TodoItem t) {
+    final career = context.careerRead;
+    void push(Widget w) =>
+        Navigator.push(context, MaterialPageRoute(builder: (_) => w));
+    switch (t.kind) {
+      case TodoKind.radioDecide:
+        push(SongDetailScreen(songId: t.songId, state: career, initialTab: 2));
+      case TodoKind.pitch || TodoKind.leak:
+        push(SongDetailScreen(songId: t.songId, state: career, initialTab: 1));
+      case TodoKind.anniversary:
+        push(AlbumDetailScreen(
+            albumId: t.albumId, state: career, initialTab: 1));
+      case TodoKind.awards:
+        push(AwardSubmissionsScreen(state: career));
+      case TodoKind.practice:
+        widget.onOpenTab?.call(4);
+      case TodoKind.releaseSoon:
+        widget.onOpenTab?.call(2);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    if (_items.isEmpty) return const SizedBox.shrink();
+    String text(TodoItem t) => switch (t.kind) {
+          TodoKind.radioDecide => l.todoRadio(t.title),
+          TodoKind.pitch => t.more > 0
+              ? l.todoPitchMore(t.title, t.more)
+              : l.todoPitch(t.title),
+          TodoKind.leak => l.todoLeak(t.title),
+          TodoKind.anniversary => l.todoAnniversary(t.title),
+          TodoKind.awards => l.todoAwards,
+          TodoKind.practice => l.todoPractice,
+          TodoKind.releaseSoon => l.todoReleaseSoon(t.title),
+        };
+    IconData icon(TodoKind k) => switch (k) {
+          TodoKind.radioDecide => Icons.radio_rounded,
+          TodoKind.pitch => Icons.playlist_add_rounded,
+          TodoKind.leak => Icons.water_drop_rounded,
+          TodoKind.anniversary => Icons.cake_rounded,
+          TodoKind.awards => Icons.emoji_events_outlined,
+          TodoKind.practice => Icons.fitness_center_rounded,
+          TodoKind.releaseSoon => Icons.event_rounded,
+        };
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Section(
+        title: l.todoTitle,
+        icon: Icons.checklist_rounded,
+        padding: const EdgeInsets.fromLTRB(18, 16, 10, 8),
+        child: Column(children: [
+          for (final t in _items)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              leading: Icon(icon(t.kind), color: AppColors.textMuted),
+              title: Text(text(t)),
+              trailing: t.weeksLeft == null
+                  ? const Icon(Icons.chevron_right_rounded)
+                  : Text(
+                      t.weeksLeft! <= 0
+                          ? l.todoLastWeek
+                          : l.todoWeeksLeft(t.weeksLeft!),
+                      style: TextStyle(
+                          color: t.weeksLeft! <= 1
+                              ? AppColors.coral
+                              : AppColors.textMuted,
+                          fontSize: 12.5)),
+              onTap: () => _open(t),
+            ),
+        ]),
+      ),
+    );
+  }
+}
+
+/// The first career's guide (docs K297): the next step of a career, with
+/// a way to it, until every step is done or the player puts it away.
+class _GuideCard extends StatefulWidget {
+  const _GuideCard({this.onOpenTab});
+  final void Function(int tab)? onOpenTab;
+
+  @override
+  State<_GuideCard> createState() => _GuideCardState();
+}
+
+class _GuideCardState extends State<_GuideCard> {
+  GuideView? _guide;
+  int _loadedRevision = -1;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final career = context.career;
+    if (career.revision != _loadedRevision) {
+      _loadedRevision = career.revision;
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    final g = await context.careerRead.read(Cmd.guide());
+    if (mounted) setState(() => _guide = g);
+  }
+
+  void _show(GuideStep step) {
+    final career = context.careerRead;
+    switch (step) {
+      case GuideStep.writeSong:
+        widget.onOpenTab?.call(1);
+      case GuideStep.releaseSingle || GuideStep.album:
+        widget.onOpenTab?.call(2);
+      case GuideStep.radio:
+        final id = _guide?.latestSingle ?? -1;
+        if (id < 0) {
+          widget.onOpenTab?.call(2);
+        } else {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => SongDetailScreen(
+                      songId: id, state: career, initialTab: 2)));
+        }
+      case GuideStep.charts:
+        widget.onOpenTab?.call(3);
+      case GuideStep.practice || GuideStep.tour:
+        widget.onOpenTab?.call(4);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final g = _guide;
+    final slot = context.career.slotId;
+    final settings = context.settings;
+    if (g == null || g.finished || slot == null) {
+      return const SizedBox.shrink();
+    }
+    if (settings.guideHidden.contains(slot)) return const SizedBox.shrink();
+    final step = g.next!;
+    final (title, body) = switch (step) {
+      GuideStep.writeSong => (l.guideWriteTitle, l.guideWriteBody),
+      GuideStep.releaseSingle => (l.guideSingleTitle, l.guideSingleBody),
+      GuideStep.radio => (l.guideRadioTitle, l.guideRadioBody),
+      GuideStep.charts => (l.guideChartsTitle, l.guideChartsBody),
+      GuideStep.album => (l.guideAlbumTitle, l.guideAlbumBody),
+      GuideStep.practice => (l.guidePracticeTitle, l.guidePracticeBody),
+      GuideStep.tour => (l.guideTourTitle, l.guideTourBody),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Section(
+        title: l.guideHeader(step.index + 1, g.done.length),
+        icon: Icons.school_outlined,
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 4),
+          Text(body, style: TextStyle(color: AppColors.textMuted)),
+          const SizedBox(height: 10),
+          LinearProgressIndicator(
+              value: g.doneCount / g.done.length,
+              minHeight: 4,
+              backgroundColor: AppColors.surfaceHigh),
+          const SizedBox(height: 6),
+          Row(children: [
+            FilledButton.tonal(
+                onPressed: () => _show(step), child: Text(l.guideShow)),
+            const Spacer(),
+            TextButton(
+                onPressed: () => settings.hideGuide(slot),
+                child: Text(l.guideHide)),
+          ]),
+        ]),
+      ),
     );
   }
 }

@@ -9944,5 +9944,99 @@
   "errorAlbumNotOff": "That record is on the market.",
   "offMarketSongButton": "Take this single off the market",
   "offMarketSongConfirm": "It leaves the streaming services, the video site and the shops. Its numbers and chart runs are kept, and you can put it back any time.",
-  "offMarketSongTag": "Off the market"
+  "offMarketSongTag": "Off the market",
+  "songTabOverview": "Overview",
+  "songTabPromote": "Promote",
+  "songTabRadio": "Radio",
+  "albumTabTools": "What to do",
+  "todoTitle": "This week",
+  "todoRadio": "Radio: the stations are deciding on “{title}”",
+  "@todoRadio": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "todoPitch": "Pitch “{title}” to the playlist editors",
+  "@todoPitch": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "todoPitchMore": "Pitch “{title}” and {count, plural, =1{1 more single} other{{count} more singles}} to the playlist editors",
+  "@todoPitchMore": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todoLeak": "“{title}” leaked: answer it",
+  "@todoLeak": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "todoAnniversary": "“{title}” has an anniversary: a reissue?",
+  "@todoAnniversary": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "todoAwards": "Award submissions are open",
+  "todoPractice": "This week’s practice is not done",
+  "todoReleaseSoon": "“{title}” comes out soon",
+  "@todoReleaseSoon": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "todoWeeksLeft": "{weeks, plural, =1{1 week left} other{{weeks} weeks left}}",
+  "@todoWeeksLeft": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      }
+    }
+  },
+  "todoLastWeek": "Last week",
+  "guideHeader": "Guide · step {step} of {count}",
+  "@guideHeader": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "guideShow": "Show me",
+  "guideHide": "Hide the guide",
+  "guideWriteTitle": "Write your first song",
+  "guideWriteBody": "In the Studio: pick a genre and a budget. Every song takes creativity, which comes back each week; better skills make better songs.",
+  "guideSingleTitle": "Release a single",
+  "guideSingleBody": "In Releases: put your best song out on its own with a campaign. A single is how people hear of you.",
+  "guideRadioTitle": "Work it on the radio",
+  "guideRadioBody": "On the song’s Radio tab: set a radio budget. Radio carries a hit, more so before streaming; it is paid every week it runs.",
+  "guideChartsTitle": "Watch the charts",
+  "guideChartsBody": "Play a few weeks with Next week and see where your single lands. A song that misses the chart shows how far it is from it.",
+  "guideAlbumTitle": "Make an album",
+  "guideAlbumBody": "In Releases: eight songs or more make an album, fewer an EP. Singles out before it lift its first week.",
+  "guidePracticeTitle": "Practise",
+  "guidePracticeBody": "In Career: once a week take a lesson, alone or with a coach. Skills grow by working on them.",
+  "guideTourTitle": "Go on tour",
+  "guideTourBody": "In Career, on the Stage page: plan a tour once people know you. Shows pay, and fans play the setlist."
 }

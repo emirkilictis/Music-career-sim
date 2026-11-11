@@ -2702,6 +2702,44 @@ k('offMarketSongButton','Take this single off the market','Bu single’ı yayın
 k('offMarketSongConfirm','It leaves the streaming services, the video site and the shops. Its numbers and chart runs are kept, and you can put it back any time.','Streaming servislerinden, video sitesinden ve mağazalardan çekilir. Sayıları ve liste geçmişi korunur; istediğin zaman geri koyabilirsin.')
 k('offMarketSongTag','Off the market','Yayında değil')
 
+# The song's page in tabs (docs K296).
+k('songTabOverview','Overview','Genel')
+k('songTabPromote','Promote','Tanıtım')
+k('songTabRadio','Radio','Radyo')
+k('albumTabTools','What to do','Yapılacaklar')
+
+# This week (docs K298).
+k('todoTitle','This week','Bu hafta')
+k('todoRadio','Radio: the stations are deciding on “{title}”','Radyo: istasyonlar “{title}” için karar veriyor', title='String')
+k('todoPitch','Pitch “{title}” to the playlist editors','“{title}” şarkısını playlist editörlerine öner', title='String')
+k('todoPitchMore','Pitch “{title}” and {count, plural, =1{1 more single} other{{count} more singles}} to the playlist editors','“{title}” ve {count} single daha playlist editörlerine önerilebilir', title='String', count='int')
+k('todoLeak','“{title}” leaked: answer it','“{title}” sızdı: cevap ver', title='String')
+k('todoAnniversary','“{title}” has an anniversary: a reissue?','“{title}” yıl dönümünde: yeniden baskı?', title='String')
+k('todoAwards','Award submissions are open','Ödül başvuruları açık')
+k('todoPractice','This week’s practice is not done','Bu haftanın çalışması yapılmadı')
+k('todoReleaseSoon','“{title}” comes out soon','“{title}” yakında çıkıyor', title='String')
+k('todoWeeksLeft','{weeks, plural, =1{1 week left} other{{weeks} weeks left}}','{weeks} hafta kaldı', weeks='int')
+k('todoLastWeek','Last week','Son hafta')
+
+# The first career's guide (docs K297).
+k('guideHeader','Guide · step {step} of {count}','Rehber · {count} adımdan {step}.', step='int', count='int')
+k('guideShow','Show me','Göster')
+k('guideHide','Hide the guide','Rehberi gizle')
+k('guideWriteTitle','Write your first song','İlk şarkını yaz')
+k('guideWriteBody','In the Studio: pick a genre and a budget. Every song takes creativity, which comes back each week; better skills make better songs.','Stüdyoda: bir tür ve bütçe seç. Her şarkı yaratıcılık harcar, yaratıcılık her hafta geri gelir; yetenekler arttıkça şarkılar iyileşir.')
+k('guideSingleTitle','Release a single','Bir single çıkar')
+k('guideSingleBody','In Releases: put your best song out on its own with a campaign. A single is how people hear of you.','Yayınlar’da: en iyi şarkını bir kampanyayla tek başına çıkar. İnsanlar seni single’larla tanır.')
+k('guideRadioTitle','Work it on the radio','Radyoya tanıt')
+k('guideRadioBody','On the song’s Radio tab: set a radio budget. Radio carries a hit, more so before streaming; it is paid every week it runs.','Şarkının Radyo sekmesinde: bir radyo bütçesi ayarla. Radyo hitleri taşır, streaming’den önce daha da çok; çalıştığı her hafta ödenir.')
+k('guideChartsTitle','Watch the charts','Listeleri izle')
+k('guideChartsBody','Play a few weeks with Next week and see where your single lands. A song that misses the chart shows how far it is from it.','“Sonraki hafta” ile birkaç hafta oyna ve single’ının nereye geldiğine bak. Listeye giremeyen şarkının sayfası listeye ne kadar uzak olduğunu gösterir.')
+k('guideAlbumTitle','Make an album','Albüm yap')
+k('guideAlbumBody','In Releases: eight songs or more make an album, fewer an EP. Singles out before it lift its first week.','Yayınlar’da: sekiz ya da daha fazla şarkı albüm, daha azı EP olur. Önceden çıkan single’lar albümün ilk haftasını büyütür.')
+k('guidePracticeTitle','Practise','Çalış')
+k('guidePracticeBody','In Career: once a week take a lesson, alone or with a coach. Skills grow by working on them.','Kariyer’de: haftada bir kez, tek başına ya da hocayla ders al. Yetenekler çalıştıkça gelişir.')
+k('guideTourTitle','Go on tour','Turneye çık')
+k('guideTourBody','In Career, on the Stage page: plan a tour once people know you. Shows pay, and fans play the setlist.','Kariyer’in Sahne bölümünde: tanınmaya başlayınca bir turne planla. Konserler kazandırır, hayranlar şarkı listesini dinler.')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

@@ -7221,4 +7221,47 @@ void main() {
       g.close();
     });
   });
+  group('the guide and this week (docs K297, K298)', () {
+    test('the guide follows what the player does; the week lists windows',
+        () {
+      final g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2016,
+              tier: StartTier.risingStar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final p = g.world.player!..creativeEnergy = 100;
+      expect(g.guide.next, GuideStep.writeSong);
+      expect(g.guide.doneCount, 0);
+      expect(g.weekTodo.map((t) => t.kind), contains(TodoKind.practice));
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      expect(g.guide.next, GuideStep.releaseSingle);
+      g.releaseSingle(id, campaign: Campaign.standard);
+      expect(g.guide.next, GuideStep.radio);
+      final todo = g.weekTodo;
+      final radio = todo.firstWhere((t) => t.kind == TodoKind.radioDecide);
+      expect(radio.songId, id);
+      expect(radio.weeksLeft, Actions.radioUpgradeWeeks);
+      final pitch = todo.firstWhere((t) => t.kind == TodoKind.pitch);
+      expect(pitch.more, 0);
+      // Closing windows first.
+      for (var i = 1; i < todo.length; i++) {
+        expect(todo[i].weeksLeft ?? 1 << 20,
+            greaterThanOrEqualTo(todo[i - 1].weeksLeft ?? 1 << 20));
+      }
+      expect(g.guide.latestSingle, id);
+      g.setRadioLevel(id, 25);
+      expect(g.guide.done[GuideStep.radio.index], isTrue);
+      expect(g.weekTodo.map((t) => t.kind), isNot(contains(TodoKind.radioDecide)));
+      g.practise(SkillKind.vocals, PracticeTier.self);
+      expect(g.guide.done[GuideStep.practice.index], isTrue);
+      expect(g.weekTodo.map((t) => t.kind), isNot(contains(TodoKind.practice)));
+      g.advanceWeeks(8, stop: SkipStop.never);
+      expect(g.guide.done[GuideStep.charts.index], isTrue);
+      expect(g.guide.next, GuideStep.album);
+      p.creativeEnergy = 100;
+      g.close();
+    });
+  });
 }

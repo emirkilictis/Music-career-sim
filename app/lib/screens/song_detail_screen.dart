@@ -26,9 +26,15 @@ import 'streamify/editorial_page.dart';
 /// One song: numbers, chart records, weekly history.
 class SongDetailScreen extends StatefulWidget {
   const SongDetailScreen(
-      {super.key, required this.songId, required this.state});
+      {super.key,
+      required this.songId,
+      required this.state,
+      this.initialTab = -1});
   final int songId;
   final CareerState state;
+
+  /// The tab to open on (docs K298; -1: the page's own choice).
+  final int initialTab;
 
   @override
   State<SongDetailScreen> createState() => _SongDetailScreenState();
@@ -872,927 +878,983 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     final usPos = [
       for (final h in _history) h.positions[Charts.usSongs]?.toDouble()
     ];
-    return Scaffold(
-      appBar: AppBar(title: Text(s.title)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          if (_concept case final concept?)
-            CreativeBriefCard(
-                brief: concept.brief, direction: concept.direction),
-          ReleaseHeader(
-            coverSeed: songCoverSeed(s.id, s.coverAlbumId),
-            songId: s.id,
-            albumId: s.coverAlbumId,
-            onCoverTap: s.isPlayer
-                ? () => editImage(context, ImageStore.songKey(s.id))
-                : null,
-            title: s.title,
-            subtitle: '${s.artistName} · ${fmt.songStatus(s)}',
-            trailing: s.isPlayer ? GradeTag(fmt.songGrade(s)) : null,
+    // The song's page in tabs (docs K296): its numbers, what can be done
+    // for it, and the radio; a rival's song keeps one page.
+    final header = <Widget>[
+      if (_concept case final concept?)
+        CreativeBriefCard(
+            brief: concept.brief, direction: concept.direction),
+      ReleaseHeader(
+        coverSeed: songCoverSeed(s.id, s.coverAlbumId),
+        songId: s.id,
+        albumId: s.coverAlbumId,
+        onCoverTap: s.isPlayer
+            ? () => editImage(context, ImageStore.songKey(s.id))
+            : null,
+        title: s.title,
+        subtitle: '${s.artistName} · ${fmt.songStatus(s)}',
+        trailing: s.isPlayer ? GradeTag(fmt.songGrade(s)) : null,
+      ),
+      if (!s.isPlayer)
+        ArtistLink(
+            artistId: s.artistId, name: s.artistName, state: widget.state),
+      if (_outside case final o?) ...[
+        const SizedBox(height: 10),
+        Text(
+          l.outsideChart(fmt.chart(o.chartId), o.rank,
+              Charts.all[o.chartId].size, fmt.outsideNeed(o.need)),
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+        ),
+      ],
+      if (s.usSingleUnits >= Certification.gold.units) ...[
+        const SizedBox(height: 10),
+        Center(child: CertificationTag(units: s.usSingleUnits)),
+      ],
+      // The fan-account style counter (docs K210).
+      if (s.isPlayer &&
+          s.releasedWeek >= 0 &&
+          MusicPlatform.streamify
+              .openIn(GameTime.yearOf(widget.state.week)))
+        Center(
+          child: TextButton.icon(
+            onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => StreamCounterScreen(
+                        state: widget.state,
+                        kind: EntityKind.song,
+                        id: s.id))),
+            icon: const Icon(Icons.table_chart_outlined),
+            label: Text(l.counterButton),
           ),
-          if (!s.isPlayer)
-            ArtistLink(
-                artistId: s.artistId, name: s.artistName, state: widget.state),
-          if (_outside case final o?) ...[
-            const SizedBox(height: 10),
-            Text(
-              l.outsideChart(fmt.chart(o.chartId), o.rank,
-                  Charts.all[o.chartId].size, fmt.outsideNeed(o.need)),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+        ),
+      const SizedBox(height: 14),
+    ];
+    final radio = <Widget>[
+      // The radio budget, any time after release (docs K290);
+      // it takes the place of the release's push tiers.
+      if (s.radioMaxLevel > 0) ...[
+        const SizedBox(height: 10),
+        _RadioBudget(
+            song: s,
+            onSet: (level) async {
+              if (await _tool(Cmd.setRadioLevel(s.id, level)) &&
+                  mounted) {
+                showInfo(this.context, l.radioBudgetSet(level),
+                    icon: Icons.radio_rounded);
+              }
+            }),
+      ] else if (s.radioUpgradeCosts.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        Text(l.radioUpgradeHint,
+            style: TextStyle(
+                color: AppColors.textMuted, fontSize: 12.5)),
+        const SizedBox(height: 6),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final e in s.radioUpgradeCosts.entries)
+            ActionChip(
+              avatar: Icon(radioIcon(e.key), size: 16),
+              label: Text(
+                  '${fmt.radioPush(e.key)} · ${fmt.money(e.value)}'),
+              onPressed: () => _tool(Cmd.upgradeRadio(s.id, e.key)),
             ),
-          ],
-          if (s.usSingleUnits >= Certification.gold.units) ...[
-            const SizedBox(height: 10),
-            Center(child: CertificationTag(units: s.usSingleUnits)),
-          ],
-          // The fan-account style counter (docs K210).
-          if (s.isPlayer &&
-              s.releasedWeek >= 0 &&
-              MusicPlatform.streamify
-                  .openIn(GameTime.yearOf(widget.state.week)))
-            Center(
-              child: TextButton.icon(
-                onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => StreamCounterScreen(
-                            state: widget.state,
-                            kind: EntityKind.song,
-                            id: s.id))),
-                icon: const Icon(Icons.table_chart_outlined),
-                label: Text(l.counterButton),
-              ),
+        ]),
+      ],
+      // On the radio (docs K128).
+      if (s.isSingle &&
+          s.releasedWeek >= 0 &&
+          s.radioSpins >= 1) ...[
+        const SizedBox(height: 8),
+        Row(children: [
+          Icon(radioIcon(s.radioPush),
+              size: 18, color: AppColors.textMuted),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+                l.radioWeekLine(
+                    fmt.compact(s.radioSpins), s.radioStations),
+                style: TextStyle(color: AppColors.textMuted)),
+          ),
+        ]),
+      ],
+      // The format it is worked to (docs K134).
+      if (s.isSingle && s.releasedWeek >= 0) ...[
+        const SizedBox(height: 8),
+        Text(l.radioFormatLine(fmt.radioFormat(s.radioFormat)),
+            style: TextStyle(color: AppColors.textMuted)),
+      ],
+      if (s.radioFormatOptions.isNotEmpty) ...[
+        const SizedBox(height: 6),
+        Text(l.radioFormatHint,
+            style: TextStyle(
+                color: AppColors.textMuted, fontSize: 12.5)),
+        const SizedBox(height: 6),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final e in s.radioFormatOptions.entries)
+            ChoiceChip(
+              label: Text(l.radioFormatOption(
+                  fmt.radioFormat(e.key),
+                  (e.value.$1 * 100).round(),
+                  (e.value.$2 * 100).round())),
+              selected: e.key == s.radioFormat,
+              onSelected: (_) =>
+                  _tool(Cmd.setRadioFormat(s.id, e.key)),
             ),
-          const SizedBox(height: 14),
-          Section(
-            title: fmt.genres(s.genres),
-            icon: Icons.sell_outlined,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 4),
+        ]),
+      ],
+      // The radio edit, the UK push, station visits (docs K254).
+      if (s.radioEdit) ...[
+        const SizedBox(height: 8),
+        Tag(l.radioEditTag,
+            icon: Icons.content_cut_rounded, color: AppColors.mint),
+      ] else if (s.radioEditCost case final cost?) ...[
+        const SizedBox(height: 8),
+        Text(l.radioEditHint,
+            style: TextStyle(
+                color: AppColors.textMuted, fontSize: 12.5)),
+        const SizedBox(height: 6),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ActionChip(
+            avatar: const Icon(Icons.content_cut_rounded, size: 16),
+            label: Text(l.radioEditButton(fmt.money(cost))),
+            onPressed: () async {
+              if (await _tool(Cmd.cutRadioEdit(s.id)) && mounted) {
+                showInfo(this.context, l.radioEditDone,
+                    icon: Icons.content_cut_rounded);
+              }
+            },
+          ),
+        ),
+      ],
+      if (s.isSingle &&
+          s.releasedWeek >= 0 &&
+          s.ukRadioPush != s.radioPush) ...[
+        const SizedBox(height: 6),
+        Text(l.radioUkLine(fmt.radioPush(s.ukRadioPush)),
+            style: TextStyle(color: AppColors.textMuted)),
+      ],
+      if (s.ukRadioOptions.isNotEmpty && !s.radioBudget) ...[
+        const SizedBox(height: 8),
+        Text(l.radioUkHint,
+            style: TextStyle(
+                color: AppColors.textMuted, fontSize: 12.5)),
+        const SizedBox(height: 6),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (final e in s.ukRadioOptions.entries)
+            ActionChip(
+              avatar: Icon(radioIcon(e.key), size: 16),
+              label: Text(
+                  'UK · ${fmt.radioPush(e.key)} · ${fmt.money(e.value)}'),
+              onPressed: () => _tool(Cmd.raiseUkRadio(s.id, e.key)),
+            ),
+        ]),
+      ],
+      if (_visits case final v?) _visitCard(v),
+      // Off the radio for another single (docs K253).
+      if (s.canPullRadio) ...[
+        const SizedBox(height: 6),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => _pullRadio(s),
+            icon: const Icon(Icons.radio_button_unchecked_rounded,
+                size: 18),
+            label: Text(l.radioPullButton),
+          ),
+        ),
+      ],
+    ];
+    final offMarket = <Widget>[
+      // A single off the market on its own (docs K294).
+      if (s.isOff) ...[
+        const SizedBox(height: 8),
+        Tag(l.offMarketSongTag,
+            icon: Icons.block_rounded, color: AppColors.coral),
+      ],
+      if (s.canTakeOff || s.offWeek >= 0) ...[
+        const SizedBox(height: 6),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: () => _songOffMarket(s),
+            icon: Icon(
+                s.offWeek >= 0
+                    ? Icons.replay_rounded
+                    : Icons.block_rounded,
+                size: 18),
+            label: Text(s.offWeek >= 0
+                ? l.offMarketPutBack
+                : l.offMarketSongButton),
+          ),
+        ),
+      ],
+    ];
+    Widget info({required bool withRadio}) =>
+        Section(
+          title: fmt.genres(s.genres),
+          icon: Icons.sell_outlined,
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 4),
+                Text(
+                  [
+                    if (s.releasedWeek >= 0)
+                      l.releasedOn(fmt.week(s.releasedWeek)),
+                    if (s.releasedWeek >= 0) fmt.campaign(s.campaign),
+                    if (s.isSingle && s.releasedWeek >= 0)
+                      fmt.radioPush(s.radioPush),
+                    if (s.playlistAdd != PlaylistAdd.none) l.onPlaylist,
+                  ].join(' · '),
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.outline),
+                ),
+                  if (withRadio) ...radio,
+                  if (withRadio) ...offMarket,
+                // A leak (docs K140).
+                if (s.inVault && s.leakedWeek >= 0) ...[
+                  const SizedBox(height: 12),
+                  Tag(l.leakedTag,
+                      icon: Icons.water_drop_rounded, color: AppColors.coral),
+                  const SizedBox(height: 6),
                   Text(
-                    [
-                      if (s.releasedWeek >= 0)
-                        l.releasedOn(fmt.week(s.releasedWeek)),
-                      if (s.releasedWeek >= 0) fmt.campaign(s.campaign),
-                      if (s.isSingle && s.releasedWeek >= 0)
-                        fmt.radioPush(s.radioPush),
-                      if (s.playlistAdd != PlaylistAdd.none) l.onPlaylist,
-                    ].join(' · '),
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.outline),
+                      s.canAnswerLeak
+                          ? l.leakAnswerHint(
+                              fmt.week(s.leakedWeek + Leaks.answerWeeks))
+                          : l.leakLateHint,
+                      style: TextStyle(
+                          color: AppColors.textMuted, fontSize: 12.5)),
+                ],
+                if (s.scheduledSingleWeek >= 0) ...[
+                  const SizedBox(height: 12),
+                  Tag(l.scheduledSingleTag(fmt.week(s.scheduledSingleWeek)),
+                      icon: Icons.event_rounded),
+                ] else if (s.isPlayer &&
+                    (s.inVault ||
+                        s.cloudOnly ||
+                        (!s.isSingle && s.albumId >= 0))) ...[
+                  const SizedBox(height: 12),
+                  GradientButton(
+                    onPressed: () => _release(s),
+                    icon: Icons.music_note_rounded,
+                    label: l.releaseAsSingle,
                   ),
-                  // On the radio (docs K128).
-                  if (s.isSingle &&
-                      s.releasedWeek >= 0 &&
-                      s.radioSpins >= 1) ...[
-                    const SizedBox(height: 8),
-                    Row(children: [
-                      Icon(radioIcon(s.radioPush),
-                          size: 18, color: AppColors.textMuted),
+                ],
+                if (s.isPlayer && s.video == null) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => _shootVideo(s),
+                    icon: const Icon(Icons.videocam_rounded),
+                    label: Text(l.shootVideo),
+                  ),
+                ] else if (s.video != null) ...[
+                  const SizedBox(height: 8),
+                  Row(children: [
+                    Tag(l.hasVideo(fmt.videoBudget(s.video!)),
+                        icon: Icons.videocam_rounded),
+                    // The video's own thumbnail (docs K246).
+                    if (s.isPlayer) ...[
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                            l.radioWeekLine(
-                                fmt.compact(s.radioSpins), s.radioStations),
-                            style: TextStyle(color: AppColors.textMuted)),
+                      TextButton.icon(
+                        onPressed: () => editImage(
+                            context, ImageStore.videoKey(s.id),
+                            aspect: 16 / 9),
+                        icon: const Icon(Icons.wallpaper_rounded, size: 18),
+                        label: Text(l.videoThumbnail),
                       ),
-                    ]),
-                  ],
-                  // The format it is worked to (docs K134).
-                  if (s.isSingle && s.releasedWeek >= 0) ...[
-                    const SizedBox(height: 8),
-                    Text(l.radioFormatLine(fmt.radioFormat(s.radioFormat)),
-                        style: TextStyle(color: AppColors.textMuted)),
-                  ],
-                  if (s.radioFormatOptions.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Text(l.radioFormatHint,
-                        style: TextStyle(
-                            color: AppColors.textMuted, fontSize: 12.5)),
-                    const SizedBox(height: 6),
-                    Wrap(spacing: 8, runSpacing: 8, children: [
-                      for (final e in s.radioFormatOptions.entries)
-                        ChoiceChip(
-                          label: Text(l.radioFormatOption(
-                              fmt.radioFormat(e.key),
-                              (e.value.$1 * 100).round(),
-                              (e.value.$2 * 100).round())),
-                          selected: e.key == s.radioFormat,
-                          onSelected: (_) =>
-                              _tool(Cmd.setRadioFormat(s.id, e.key)),
-                        ),
-                    ]),
-                  ],
-                  // The radio budget, any time after release (docs K290);
-                  // it takes the place of the release's push tiers.
-                  if (s.radioMaxLevel > 0) ...[
-                    const SizedBox(height: 10),
-                    _RadioBudget(
-                        song: s,
-                        onSet: (level) async {
-                          if (await _tool(Cmd.setRadioLevel(s.id, level)) &&
-                              mounted) {
-                            showInfo(this.context, l.radioBudgetSet(level),
-                                icon: Icons.radio_rounded);
-                          }
-                        }),
-                  ] else if (s.radioUpgradeCosts.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(l.radioUpgradeHint,
-                        style: TextStyle(
-                            color: AppColors.textMuted, fontSize: 12.5)),
-                    const SizedBox(height: 6),
-                    Wrap(spacing: 8, runSpacing: 8, children: [
-                      for (final e in s.radioUpgradeCosts.entries)
-                        ActionChip(
-                          avatar: Icon(radioIcon(e.key), size: 16),
-                          label: Text(
-                              '${fmt.radioPush(e.key)} · ${fmt.money(e.value)}'),
-                          onPressed: () => _tool(Cmd.upgradeRadio(s.id, e.key)),
-                        ),
-                    ]),
-                  ],
-                  // The radio edit, the UK push, station visits (docs K254).
-                  if (s.radioEdit) ...[
-                    const SizedBox(height: 8),
-                    Tag(l.radioEditTag,
-                        icon: Icons.content_cut_rounded, color: AppColors.mint),
-                  ] else if (s.radioEditCost case final cost?) ...[
-                    const SizedBox(height: 8),
-                    Text(l.radioEditHint,
-                        style: TextStyle(
-                            color: AppColors.textMuted, fontSize: 12.5)),
-                    const SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: ActionChip(
-                        avatar: const Icon(Icons.content_cut_rounded, size: 16),
-                        label: Text(l.radioEditButton(fmt.money(cost))),
-                        onPressed: () async {
-                          if (await _tool(Cmd.cutRadioEdit(s.id)) && mounted) {
-                            showInfo(this.context, l.radioEditDone,
-                                icon: Icons.content_cut_rounded);
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                  if (s.isSingle &&
-                      s.releasedWeek >= 0 &&
-                      s.ukRadioPush != s.radioPush) ...[
-                    const SizedBox(height: 6),
-                    Text(l.radioUkLine(fmt.radioPush(s.ukRadioPush)),
-                        style: TextStyle(color: AppColors.textMuted)),
-                  ],
-                  if (s.ukRadioOptions.isNotEmpty && !s.radioBudget) ...[
-                    const SizedBox(height: 8),
-                    Text(l.radioUkHint,
-                        style: TextStyle(
-                            color: AppColors.textMuted, fontSize: 12.5)),
-                    const SizedBox(height: 6),
-                    Wrap(spacing: 8, runSpacing: 8, children: [
-                      for (final e in s.ukRadioOptions.entries)
-                        ActionChip(
-                          avatar: Icon(radioIcon(e.key), size: 16),
-                          label: Text(
-                              'UK · ${fmt.radioPush(e.key)} · ${fmt.money(e.value)}'),
-                          onPressed: () => _tool(Cmd.raiseUkRadio(s.id, e.key)),
-                        ),
-                    ]),
-                  ],
-                  if (_visits case final v?) _visitCard(v),
-                  // A single off the market on its own (docs K294).
-                  if (s.isOff) ...[
-                    const SizedBox(height: 8),
-                    Tag(l.offMarketSongTag,
-                        icon: Icons.block_rounded, color: AppColors.coral),
-                  ],
-                  if (s.canTakeOff || s.offWeek >= 0) ...[
-                    const SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: () => _songOffMarket(s),
-                        icon: Icon(
-                            s.offWeek >= 0
-                                ? Icons.replay_rounded
-                                : Icons.block_rounded,
-                            size: 18),
-                        label: Text(s.offWeek >= 0
-                            ? l.offMarketPutBack
-                            : l.offMarketSongButton),
-                      ),
-                    ),
-                  ],
-                  // Off the radio for another single (docs K253).
-                  if (s.canPullRadio) ...[
-                    const SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: () => _pullRadio(s),
-                        icon: const Icon(Icons.radio_button_unchecked_rounded,
-                            size: 18),
-                        label: Text(l.radioPullButton),
-                      ),
-                    ),
-                  ],
-                  // A leak (docs K140).
-                  if (s.inVault && s.leakedWeek >= 0) ...[
-                    const SizedBox(height: 12),
-                    Tag(l.leakedTag,
-                        icon: Icons.water_drop_rounded, color: AppColors.coral),
-                    const SizedBox(height: 6),
-                    Text(
-                        s.canAnswerLeak
-                            ? l.leakAnswerHint(
-                                fmt.week(s.leakedWeek + Leaks.answerWeeks))
-                            : l.leakLateHint,
-                        style: TextStyle(
-                            color: AppColors.textMuted, fontSize: 12.5)),
-                  ],
-                  if (s.scheduledSingleWeek >= 0) ...[
-                    const SizedBox(height: 12),
-                    Tag(l.scheduledSingleTag(fmt.week(s.scheduledSingleWeek)),
-                        icon: Icons.event_rounded),
-                  ] else if (s.isPlayer &&
-                      (s.inVault ||
-                          s.cloudOnly ||
-                          (!s.isSingle && s.albumId >= 0))) ...[
-                    const SizedBox(height: 12),
-                    GradientButton(
-                      onPressed: () => _release(s),
-                      icon: Icons.music_note_rounded,
-                      label: l.releaseAsSingle,
-                    ),
-                  ],
-                  if (s.isPlayer && s.video == null) ...[
-                    const SizedBox(height: 8),
+                    ],
+                  ]),
+                ],
+                // A sleeper hit in the making (docs K108).
+                if (s.catchingOn) ...[
+                  const SizedBox(height: 8),
+                  Tag(l.tagWordOfMouth,
+                      icon: Icons.trending_up_rounded, color: AppColors.mint),
+                ],
+                // A rival on the song (docs K117).
+                if (s.isPlayer &&
+                    (s.inVault || s.releasedWeek >= 0) &&
+                    s.featuredArtistIds.length < 2) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => _feature(s),
+                    icon: const Icon(Icons.group_add_rounded),
+                    label: Text(
+                        s.inVault ? l.featureButton : l.remixFeatureButton),
+                  ),
+                ],
+                // A snippet test on the short-video app (docs K152).
+                if (s.snippetReaction case final r?) ...[
+                  const SizedBox(height: 8),
+                  Tag(l.snippetTag(fmt.snippetReaction(r), s.snippetScore),
+                      icon: Icons.music_video_outlined,
+                      color: switch (r) {
+                        SnippetReaction.hot => AppColors.mint,
+                        SnippetReaction.good => AppColors.sky,
+                        SnippetReaction.lukewarm => AppColors.peach,
+                        SnippetReaction.cold => AppColors.coral,
+                      }),
+                ],
+                if (s.canSnippet)
+                  TextButton.icon(
+                    onPressed: () => _tool(Cmd.teaseSnippet(s.id)),
+                    icon: const Icon(Icons.music_video_outlined),
+                    label: Text(l.snippetButton(Snippets.energy.round())),
+                  ),
+                if (s.canSnippet)
+                  Text(l.snippetHint(Snippets.waitWeeks),
+                      style: TextStyle(
+                          color: AppColors.textMuted, fontSize: 12.5)),
+                // A free upload to the audio site (docs K148).
+                if (s.cloudOnly) ...[
+                  const SizedBox(height: 8),
+                  Tag(l.cloudOnlyTag(fmt.compact(s.cloudPlays)),
+                      icon: Icons.cloud_rounded,
+                      color: platformColor(MusicPlatform.noiseCloud)),
+                  const SizedBox(height: 4),
+                  Text(l.cloudOfficialHint,
+                      style: TextStyle(
+                          color: AppColors.textMuted, fontSize: 12.5)),
+                ] else if (s.cloudWeek >= 0 && s.cloudPlays >= 1) ...[
+                  const SizedBox(height: 8),
+                  Tag(l.cloudFromTag(fmt.compact(s.cloudPlays)),
+                      icon: Icons.cloud_done_rounded,
+                      color: platformColor(MusicPlatform.noiseCloud)),
+                ],
+                // The player's own playlist (docs K159).
+                if (s.onOwnPlaylist || s.canOwnPlaylist)
+                  TextButton.icon(
+                    onPressed: () => _ownPlaylist(s),
+                    icon: Icon(s.onOwnPlaylist
+                        ? Icons.playlist_remove_rounded
+                        : Icons.playlist_add_rounded),
+                    label: Text(
+                        s.onOwnPlaylist ? l.ownPlSongRemove : l.ownPlSongAdd),
+                  ),
+                if (s.canCloud)
+                  TextButton.icon(
+                    onPressed: () => _cloud(s),
+                    icon: const Icon(Icons.cloud_upload_outlined),
+                    label: Text(l.cloudButton),
+                  ),
+                // Writing for others (docs K143).
+                if (s.isPlayer &&
+                    s.inVault &&
+                    s.rerecordOf < 0 &&
+                    s.scheduledSingleWeek < 0 &&
+                    s.scheduledAlbumWeek < 0)
+                  TextButton.icon(
+                    onPressed: () => _sell(s),
+                    icon: const Icon(Icons.handshake_outlined),
+                    label: Text(l.sellButton),
+                  ),
+                // A group member's solo single (docs K158).
+                if (s.isPlayer &&
+                    s.inVault &&
+                    widget.state.player.kind.isGroup &&
+                    s.rerecordOf < 0 &&
+                    s.scheduledSingleWeek < 0 &&
+                    s.scheduledAlbumWeek < 0)
+                  TextButton.icon(
+                    onPressed: () => _memberSolo(s),
+                    icon: const Icon(Icons.person_outline_rounded),
+                    label: Text(l.memberSoloButton),
+                  ),
+                if (s.credit == ChartCredit.imprint) ...[
+                  const SizedBox(height: 8),
+                  Tag(l.creditImprint,
+                      icon: Icons.business_rounded, color: AppColors.lilac),
+                ] else if (s.credit != ChartCredit.none) ...[
+                  const SizedBox(height: 8),
+                  Tag(
+                      s.credit == ChartCredit.member
+                          ? l.memberSoloTag(fmt.money(s.revenueCents))
+                          : l.guestTag(fmt.money(s.guestCents.round())),
+                      icon: s.credit == ChartCredit.member
+                          ? Icons.person_outline_rounded
+                          : Icons.mic_external_on_outlined,
+                      color: AppColors.lilac),
+                ],
+                if (s.writerName.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Tag(
+                      s.writtenByPlayer
+                          ? l.writtenByYou(fmt.money(s.writerCents.round()))
+                          : l.writtenBy(s.writerName),
+                      icon: Icons.edit_note_rounded,
+                      color: AppColors.mint),
+                ],
+                if (s.isPlayer &&
+                    s.inVault &&
+                    s.scheduledSingleWeek < 0 &&
+                    s.scheduledAlbumWeek < 0)
+                  TextButton.icon(
+                    onPressed: () => _scrap(s),
+                    style: TextButton.styleFrom(
+                        foregroundColor: AppColors.coral),
+                    icon: const Icon(Icons.delete_outline_rounded),
+                    label: Text(l.scrapSong),
+                  ),
+              ]),
+        );
+    final money = <Widget>[
+      // Record money by source (docs K145).
+      if (_income case final income? when income.total >= 100) ...[
+        const SizedBox(height: 12),
+        IncomeCard(income: income, title: l.incomeSongTitle),
+      ],
+      // What a rival's team did for the song (docs K201).
+      if (!s.isPlayer && (s.versions.isNotEmpty || s.canvas)) ...[
+        const SizedBox(height: 12),
+        Section(
+          title: l.rivalToolsSection,
+          icon: Icons.graphic_eq_rounded,
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(l.rivalToolsHint,
+                    style: TextStyle(color: AppColors.textMuted)),
+                const SizedBox(height: 8),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  for (final (v, wk) in s.versions)
+                    Tag('${fmt.songVersion(v)} · ${fmt.weekInMonth(wk)}',
+                        icon: Icons.graphic_eq_rounded),
+                  if (s.canvas)
+                    Tag(l.rivalCanvas,
+                        icon: Icons.motion_photos_on_rounded),
+                ]),
+              ]),
+        ),
+      ],
+    ];
+    final tools = <Widget>[
+      if (s.isPlayer && s.releasedWeek >= 0) ...[
+        const SizedBox(height: 12),
+        Section(
+          title: l.versionsSection,
+          icon: Icons.library_add_rounded,
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (s.versions.isEmpty && s.variants.isEmpty)
+                  Text(l.versionsHint,
+                      style: TextStyle(color: AppColors.textMuted))
+                else
+                  Wrap(spacing: 8, runSpacing: 8, children: [
+                    for (final (v, wk) in s.versions)
+                      Tag('${fmt.songVersion(v)} · ${fmt.weekInMonth(wk)}',
+                          icon: Icons.graphic_eq_rounded),
+                    for (final (f, wk) in s.variants)
+                      Tag('${fmt.singleFormat(f)} · ${fmt.weekInMonth(wk)}',
+                          icon: Icons.album_rounded, color: AppColors.gold),
+                  ]),
+                const SizedBox(height: 10),
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  OutlinedButton.icon(
+                    onPressed: () => _newVersion(s),
+                    icon: const Icon(Icons.graphic_eq_rounded),
+                    label: Text(l.newVersion),
+                  ),
+                  if (s.isSingle)
                     OutlinedButton.icon(
-                      onPressed: () => _shootVideo(s),
-                      icon: const Icon(Icons.videocam_rounded),
-                      label: Text(l.shootVideo),
-                    ),
-                  ] else if (s.video != null) ...[
-                    const SizedBox(height: 8),
-                    Row(children: [
-                      Tag(l.hasVideo(fmt.videoBudget(s.video!)),
-                          icon: Icons.videocam_rounded),
-                      // The video's own thumbnail (docs K246).
-                      if (s.isPlayer) ...[
-                        const SizedBox(width: 8),
-                        TextButton.icon(
-                          onPressed: () => editImage(
-                              context, ImageStore.videoKey(s.id),
-                              aspect: 16 / 9),
-                          icon: const Icon(Icons.wallpaper_rounded, size: 18),
-                          label: Text(l.videoThumbnail),
-                        ),
-                      ],
-                    ]),
-                  ],
-                  // A sleeper hit in the making (docs K108).
-                  if (s.catchingOn) ...[
-                    const SizedBox(height: 8),
-                    Tag(l.tagWordOfMouth,
-                        icon: Icons.trending_up_rounded, color: AppColors.mint),
-                  ],
-                  // A rival on the song (docs K117).
-                  if (s.isPlayer &&
-                      (s.inVault || s.releasedWeek >= 0) &&
-                      s.featuredArtistIds.length < 2) ...[
-                    const SizedBox(height: 8),
-                    OutlinedButton.icon(
-                      onPressed: () => _feature(s),
-                      icon: const Icon(Icons.group_add_rounded),
-                      label: Text(
-                          s.inVault ? l.featureButton : l.remixFeatureButton),
-                    ),
-                  ],
-                  // A snippet test on the short-video app (docs K152).
-                  if (s.snippetReaction case final r?) ...[
-                    const SizedBox(height: 8),
-                    Tag(l.snippetTag(fmt.snippetReaction(r), s.snippetScore),
-                        icon: Icons.music_video_outlined,
-                        color: switch (r) {
-                          SnippetReaction.hot => AppColors.mint,
-                          SnippetReaction.good => AppColors.sky,
-                          SnippetReaction.lukewarm => AppColors.peach,
-                          SnippetReaction.cold => AppColors.coral,
-                        }),
-                  ],
-                  if (s.canSnippet)
-                    TextButton.icon(
-                      onPressed: () => _tool(Cmd.teaseSnippet(s.id)),
-                      icon: const Icon(Icons.music_video_outlined),
-                      label: Text(l.snippetButton(Snippets.energy.round())),
-                    ),
-                  if (s.canSnippet)
-                    Text(l.snippetHint(Snippets.waitWeeks),
-                        style: TextStyle(
-                            color: AppColors.textMuted, fontSize: 12.5)),
-                  // A free upload to the audio site (docs K148).
-                  if (s.cloudOnly) ...[
-                    const SizedBox(height: 8),
-                    Tag(l.cloudOnlyTag(fmt.compact(s.cloudPlays)),
-                        icon: Icons.cloud_rounded,
-                        color: platformColor(MusicPlatform.noiseCloud)),
-                    const SizedBox(height: 4),
-                    Text(l.cloudOfficialHint,
-                        style: TextStyle(
-                            color: AppColors.textMuted, fontSize: 12.5)),
-                  ] else if (s.cloudWeek >= 0 && s.cloudPlays >= 1) ...[
-                    const SizedBox(height: 8),
-                    Tag(l.cloudFromTag(fmt.compact(s.cloudPlays)),
-                        icon: Icons.cloud_done_rounded,
-                        color: platformColor(MusicPlatform.noiseCloud)),
-                  ],
-                  // The player's own playlist (docs K159).
-                  if (s.onOwnPlaylist || s.canOwnPlaylist)
-                    TextButton.icon(
-                      onPressed: () => _ownPlaylist(s),
-                      icon: Icon(s.onOwnPlaylist
-                          ? Icons.playlist_remove_rounded
-                          : Icons.playlist_add_rounded),
-                      label: Text(
-                          s.onOwnPlaylist ? l.ownPlSongRemove : l.ownPlSongAdd),
-                    ),
-                  if (s.canCloud)
-                    TextButton.icon(
-                      onPressed: () => _cloud(s),
-                      icon: const Icon(Icons.cloud_upload_outlined),
-                      label: Text(l.cloudButton),
-                    ),
-                  // Writing for others (docs K143).
-                  if (s.isPlayer &&
-                      s.inVault &&
-                      s.rerecordOf < 0 &&
-                      s.scheduledSingleWeek < 0 &&
-                      s.scheduledAlbumWeek < 0)
-                    TextButton.icon(
-                      onPressed: () => _sell(s),
-                      icon: const Icon(Icons.handshake_outlined),
-                      label: Text(l.sellButton),
-                    ),
-                  // A group member's solo single (docs K158).
-                  if (s.isPlayer &&
-                      s.inVault &&
-                      widget.state.player.kind.isGroup &&
-                      s.rerecordOf < 0 &&
-                      s.scheduledSingleWeek < 0 &&
-                      s.scheduledAlbumWeek < 0)
-                    TextButton.icon(
-                      onPressed: () => _memberSolo(s),
-                      icon: const Icon(Icons.person_outline_rounded),
-                      label: Text(l.memberSoloButton),
-                    ),
-                  if (s.credit == ChartCredit.imprint) ...[
-                    const SizedBox(height: 8),
-                    Tag(l.creditImprint,
-                        icon: Icons.business_rounded, color: AppColors.lilac),
-                  ] else if (s.credit != ChartCredit.none) ...[
-                    const SizedBox(height: 8),
-                    Tag(
-                        s.credit == ChartCredit.member
-                            ? l.memberSoloTag(fmt.money(s.revenueCents))
-                            : l.guestTag(fmt.money(s.guestCents.round())),
-                        icon: s.credit == ChartCredit.member
-                            ? Icons.person_outline_rounded
-                            : Icons.mic_external_on_outlined,
-                        color: AppColors.lilac),
-                  ],
-                  if (s.writerName.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Tag(
-                        s.writtenByPlayer
-                            ? l.writtenByYou(fmt.money(s.writerCents.round()))
-                            : l.writtenBy(s.writerName),
-                        icon: Icons.edit_note_rounded,
-                        color: AppColors.mint),
-                  ],
-                  if (s.isPlayer &&
-                      s.inVault &&
-                      s.scheduledSingleWeek < 0 &&
-                      s.scheduledAlbumWeek < 0)
-                    TextButton.icon(
-                      onPressed: () => _scrap(s),
-                      style: TextButton.styleFrom(
-                          foregroundColor: AppColors.coral),
-                      icon: const Icon(Icons.delete_outline_rounded),
-                      label: Text(l.scrapSong),
+                      onPressed: () => _newEdition(s),
+                      icon: const Icon(Icons.album_rounded),
+                      label: Text(l.newEdition),
                     ),
                 ]),
-          ),
-          // Record money by source (docs K145).
-          if (_income case final income? when income.total >= 100) ...[
-            const SizedBox(height: 12),
-            IncomeCard(income: income, title: l.incomeSongTitle),
-          ],
-          // What a rival's team did for the song (docs K201).
-          if (!s.isPlayer && (s.versions.isNotEmpty || s.canvas)) ...[
-            const SizedBox(height: 12),
-            Section(
-              title: l.rivalToolsSection,
-              icon: Icons.graphic_eq_rounded,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(l.rivalToolsHint,
-                        style: TextStyle(color: AppColors.textMuted)),
-                    const SizedBox(height: 8),
-                    Wrap(spacing: 8, runSpacing: 8, children: [
-                      for (final (v, wk) in s.versions)
-                        Tag('${fmt.songVersion(v)} · ${fmt.weekInMonth(wk)}',
-                            icon: Icons.graphic_eq_rounded),
-                      if (s.canvas)
-                        Tag(l.rivalCanvas,
-                            icon: Icons.motion_photos_on_rounded),
-                    ]),
+                // Versions in other languages (docs K155).
+                if (s.languageVersions.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Wrap(spacing: 8, runSpacing: 8, children: [
+                    for (final v in s.languageVersions)
+                      Tag(fmt.languageVersion(v),
+                          icon: Icons.translate_rounded,
+                          color: AppColors.sky),
                   ]),
-            ),
-          ],
-          if (s.isPlayer && s.releasedWeek >= 0) ...[
-            const SizedBox(height: 12),
-            Section(
-              title: l.versionsSection,
-              icon: Icons.library_add_rounded,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (s.versions.isEmpty && s.variants.isEmpty)
-                      Text(l.versionsHint,
-                          style: TextStyle(color: AppColors.textMuted))
-                    else
-                      Wrap(spacing: 8, runSpacing: 8, children: [
-                        for (final (v, wk) in s.versions)
-                          Tag('${fmt.songVersion(v)} · ${fmt.weekInMonth(wk)}',
-                              icon: Icons.graphic_eq_rounded),
-                        for (final (f, wk) in s.variants)
-                          Tag('${fmt.singleFormat(f)} · ${fmt.weekInMonth(wk)}',
-                              icon: Icons.album_rounded, color: AppColors.gold),
-                      ]),
-                    const SizedBox(height: 10),
-                    Wrap(spacing: 8, runSpacing: 8, children: [
-                      OutlinedButton.icon(
-                        onPressed: () => _newVersion(s),
-                        icon: const Icon(Icons.graphic_eq_rounded),
-                        label: Text(l.newVersion),
+                ],
+                if (s.languageOptions.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                      l.languageHint(fmt.money(Languages.costCents),
+                          Languages.energy.round()),
+                      style: TextStyle(
+                          color: AppColors.textMuted, fontSize: 12.5)),
+                  const SizedBox(height: 6),
+                  Wrap(spacing: 8, runSpacing: 8, children: [
+                    for (final v in s.languageOptions)
+                      ActionChip(
+                        avatar:
+                            const Icon(Icons.translate_rounded, size: 16),
+                        label: Text(fmt.languageVersion(v)),
+                        onPressed: () =>
+                            _tool(Cmd.releaseLanguageVersion(s.id, v)),
                       ),
-                      if (s.isSingle)
-                        OutlinedButton.icon(
-                          onPressed: () => _newEdition(s),
-                          icon: const Icon(Icons.album_rounded),
-                          label: Text(l.newEdition),
-                        ),
-                    ]),
-                    // Versions in other languages (docs K155).
-                    if (s.languageVersions.isNotEmpty) ...[
-                      const SizedBox(height: 8),
+                  ]),
+                ],
+              ]),
+        ),
+      ],
+      if (s.isPlayer &&
+          (s.releasedWeek >= 0 || s.inVault) &&
+          (s.streamingOpen || s.autoplayOpen)) ...[
+        const SizedBox(height: 12),
+        Section(
+          title: l.streamingSection,
+          icon: Icons.graphic_eq_rounded,
+          child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Wrap(spacing: 8, runSpacing: 8, children: [
+                  if (s.holiday)
+                    Tag(l.holidayTag,
+                        icon: Icons.ac_unit_rounded, color: AppColors.sky),
+                  if (s.leakHurts)
+                    Tag(l.leakedTag,
+                        icon: Icons.water_drop_outlined,
+                        color: AppColors.coral),
+                  if (s.liveOf >= 0)
+                    Tag(l.liveTag,
+                        icon: Icons.mic_external_on_outlined,
+                        color: AppColors.lilac),
+                  if (s.rerecordOf >= 0)
+                    Tag(l.rerecordTag,
+                        icon: Icons.replay_rounded, color: AppColors.peach),
+                  if (s.masterShare < 1)
+                    Tag(l.mastersTag((s.masterShare * 100).round()),
+                        icon: Icons.copyright_rounded,
+                        color: AppColors.textMuted),
+                  if (s.botStatus == BotStatus.running &&
+                      s.botWeeksLeft > 0)
+                    Tag(l.botsRunning(s.botWeeksLeft),
+                        icon: Icons.smart_toy_outlined,
+                        color: AppColors.peach),
+                  if (s.botStatus == BotStatus.caught)
+                    Tag(l.botsCaughtTag(fmt.compact(s.botRemoved)),
+                        icon: Icons.gpp_bad_rounded,
+                        color: AppColors.coral),
+                  if (s.chartFiltered)
+                    Tag(l.chartFilteredTag,
+                        icon: Icons.filter_alt_rounded,
+                        color: AppColors.coral),
+                  if (s.pitchWeek >= 0 && s.pitchLanded)
+                    Tag(l.pitchLandedTag,
+                        icon: Icons.playlist_add_check_rounded,
+                        color: AppColors.mint)
+                  else if (s.pitchWeek >= 0 &&
+                      (s.pitchAnswerWeek < 0 ||
+                          s.pitchAnswerWeek >= widget.state.week))
+                    Tag(
+                        s.pitchAnswerWeek < 0
+                            ? l.pitchPendingRelease
+                            : l.pitchPending,
+                        icon: Icons.schedule_rounded)
+                  else if (s.pitchWeek >= 0)
+                    Tag(l.pitchDeclinedTag,
+                        icon: Icons.playlist_remove_rounded),
+                  // The algorithm (docs K119).
+                  if (s.inDiscover)
+                    Tag(l.tagDiscover,
+                        icon: Icons.auto_awesome_rounded,
+                        color: AppColors.mint),
+                  if (s.inReleaseRadar)
+                    Tag(l.tagReleaseRadar,
+                        icon: Icons.radar_rounded, color: AppColors.mint),
+                ]),
+                // Buying a loose single's master back (docs K162).
+                if (s.masterBuyCents case final price?)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      onPressed: widget.state.busy
+                          ? null
+                          : () => buyMastersFlow(
+                              context,
+                              widget.state,
+                              s.title,
+                              price,
+                              Cmd.buySongMaster(s.id),
+                              _load),
+                      icon: const Icon(Icons.copyright_rounded),
+                      label: Text(l.mastersBuyButton(fmt.money(price))),
+                    ),
+                  ),
+                if (s.preSaves >= 1)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(l.preSavesHint(fmt.compact(s.preSaves)),
+                        style: TextStyle(
+                            color: AppColors.textMuted, fontSize: 12.5)),
+                  ),
+                // Where the listening came from (docs K120).
+                if (s.streamSources.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  _SourcesBar(shares: s.streamSources),
+                  const SizedBox(height: 8),
+                ],
+                if (s.autoplayOpen)
+                  Text(
+                      l.skipRateLine((s.skipRate * 100).round(),
+                          (s.autoplayLift * 100).round()),
+                      style: TextStyle(
+                          color: AppColors.textMuted, fontSize: 12.5)),
+                // Grouped so the page is not one long list (docs K198).
+                _ToolGroup(
+                  title: l.toolsPlaylists,
+                  icon: Icons.queue_music_rounded,
+                  children: [
+                    // On the editorial playlists (docs K125).
+                    if (_playlists.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(l.edOnPlaylists,
+                          style:
+                              const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 6),
                       Wrap(spacing: 8, runSpacing: 8, children: [
-                        for (final v in s.languageVersions)
-                          Tag(fmt.languageVersion(v),
-                              icon: Icons.translate_rounded,
-                              color: AppColors.sky),
+                        for (final pl in _playlists)
+                          ActionChip(
+                            avatar: Container(
+                                width: 14,
+                                height: 14,
+                                color: editorialColor(pl.playlist)),
+                            label: Text(
+                                '${pl.playlist.displayName} #${pl.position}'),
+                            onPressed: () => pushInCareer(context,
+                                EditorialPage(playlist: pl.playlist)),
+                          ),
                       ]),
                     ],
-                    if (s.languageOptions.isNotEmpty) ...[
+                    if (s.canPitch) ...[
+                      const SizedBox(height: 8),
+                      Text(l.pitchHint,
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 13)),
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _tool(Cmd.pitchSong(s.id)),
+                          icon: const Icon(Icons.playlist_add_rounded),
+                          label: Text(l.pitchSong),
+                        ),
+                      ),
+                    ],
+                    // Mood playlists for songs already out (docs K186).
+                    if (s.canMood) ...[
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _pitchMood(s),
+                          icon: const Icon(Icons.queue_music_rounded),
+                          label: Text(l.moodButton),
+                        ),
+                      ),
+                    ] else if (s.mood case final m?) ...[
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Tag(s.moodIn
+                            ? l.moodOnList(_moodName(m))
+                            : l.moodPassed(_moodName(m))),
+                      ),
+                    ],
+                    // Independent curators (docs K160).
+                    if (s.curatorWeek >= 0) ...[
+                      const SizedBox(height: 10),
+                      if (!s.curatorAnswered)
+                        Tag(l.curatorsPending(s.curatorSent),
+                            icon: Icons.schedule_rounded)
+                      else ...[
+                        Text(
+                            l.curatorsResult(s.curatorAdds, s.curatorSent,
+                                fmt.compact(s.curatorReach)),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700)),
+                        if (s.curatorStreams >= 1)
+                          Text(
+                              l.curatorsPlays(
+                                  fmt.compact(s.curatorStreams)),
+                              style: TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 13)),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: () => _curatorAnswers(s),
+                            icon: const Icon(Icons.forum_outlined),
+                            label: Text(l.curatorsSeeAnswers),
+                          ),
+                        ),
+                      ],
+                    ],
+                    if (s.canCurators) ...[
+                      const SizedBox(height: 8),
+                      Text(l.curatorsHint,
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 13)),
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _curators(s),
+                          icon: const Icon(Icons.queue_music_rounded),
+                          label: Text(l.curatorsButton),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                // Grouped so the page is not one long list (docs K198).
+                _ToolGroup(
+                  title: l.toolsAlgorithm,
+                  icon: Icons.auto_awesome_rounded,
+                  children: [
+                    // A looping visual in the app (docs K190).
+                    if (s.canvas) ...[
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Tag(
+                            l.canvasOn((SongCanvas.skipCut * 100).round()),
+                            icon: Icons.slow_motion_video_rounded,
+                            color: AppColors.mint),
+                      ),
+                    ] else if (s.canCanvas) ...[
+                      const SizedBox(height: 10),
+                      Text(l.canvasHint,
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 13)),
+                      const SizedBox(height: 6),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: widget.state.busy
+                              ? null
+                              : () => _tool(Cmd.addCanvas(s.id)),
+                          icon: const Icon(Icons.slow_motion_video_rounded),
+                          label: Text(l.canvasButton(
+                              fmt.money(SongCanvas.costCents))),
+                        ),
+                      ),
+                    ],
+                    if (s.autoplayOpen) ...[
+                      const SizedBox(height: 10),
+                      AutoplayLevelPicker(
+                          value: s.autoplayLevel,
+                          onChanged: (a) =>
+                              _tool(Cmd.setAutoplayLevel(s.id, a))),
+                    ],
+                  ],
+                ),
+                // Grouped so the page is not one long list (docs K198).
+                _ToolGroup(
+                  title: l.toolsPromotion,
+                  icon: Icons.campaign_rounded,
+                  children: [
+                    // Creators on the short-video app (docs K131).
+                    if (s.creatorWeek >= 0) ...[
                       const SizedBox(height: 10),
                       Text(
-                          l.languageHint(fmt.money(Languages.costCents),
-                              Languages.energy.round()),
+                          switch (s.creatorResult) {
+                            CreatorResult.running => l.creatorsRunning(
+                                s.creatorTier.creators,
+                                widget.state.week - s.creatorWeek + 1,
+                                CreatorCampaign.weeks),
+                            CreatorResult.caughtOn => l.creatorsCaughtOn,
+                            CreatorResult.flopped => l.creatorsFlopped,
+                          },
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color:
+                                  s.creatorResult == CreatorResult.caughtOn
+                                      ? AppColors.mint
+                                      : null)),
+                    ] else if (s.creatorCosts.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(l.creatorsTitle,
+                          style:
+                              const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text(l.creatorsHint,
                           style: TextStyle(
                               color: AppColors.textMuted, fontSize: 12.5)),
                       const SizedBox(height: 6),
                       Wrap(spacing: 8, runSpacing: 8, children: [
-                        for (final v in s.languageOptions)
+                        for (final e in s.creatorCosts.entries)
                           ActionChip(
-                            avatar:
-                                const Icon(Icons.translate_rounded, size: 16),
-                            label: Text(fmt.languageVersion(v)),
-                            onPressed: () =>
-                                _tool(Cmd.releaseLanguageVersion(s.id, v)),
+                            avatar: const Icon(Icons.videocam_outlined,
+                                size: 16),
+                            label: Text(
+                                '${l.creatorsCount(e.key.creators)} · ${fmt.money(e.value)}'),
+                            onPressed: e.value >
+                                    widget.state.player.moneyCents
+                                ? null
+                                : () => _tool(Cmd.runCreators(s.id, e.key)),
                           ),
                       ]),
                     ],
-                  ]),
-            ),
-          ],
-          if (s.isPlayer &&
-              (s.releasedWeek >= 0 || s.inVault) &&
-              (s.streamingOpen || s.autoplayOpen)) ...[
-            const SizedBox(height: 12),
-            Section(
-              title: l.streamingSection,
-              icon: Icons.graphic_eq_rounded,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Wrap(spacing: 8, runSpacing: 8, children: [
-                      if (s.holiday)
-                        Tag(l.holidayTag,
-                            icon: Icons.ac_unit_rounded, color: AppColors.sky),
-                      if (s.leakHurts)
-                        Tag(l.leakedTag,
-                            icon: Icons.water_drop_outlined,
-                            color: AppColors.coral),
-                      if (s.liveOf >= 0)
-                        Tag(l.liveTag,
-                            icon: Icons.mic_external_on_outlined,
-                            color: AppColors.lilac),
-                      if (s.rerecordOf >= 0)
-                        Tag(l.rerecordTag,
-                            icon: Icons.replay_rounded, color: AppColors.peach),
-                      if (s.masterShare < 1)
-                        Tag(l.mastersTag((s.masterShare * 100).round()),
-                            icon: Icons.copyright_rounded,
-                            color: AppColors.textMuted),
-                      if (s.botStatus == BotStatus.running &&
-                          s.botWeeksLeft > 0)
-                        Tag(l.botsRunning(s.botWeeksLeft),
-                            icon: Icons.smart_toy_outlined,
-                            color: AppColors.peach),
-                      if (s.botStatus == BotStatus.caught)
-                        Tag(l.botsCaughtTag(fmt.compact(s.botRemoved)),
-                            icon: Icons.gpp_bad_rounded,
-                            color: AppColors.coral),
-                      if (s.chartFiltered)
-                        Tag(l.chartFilteredTag,
-                            icon: Icons.filter_alt_rounded,
-                            color: AppColors.coral),
-                      if (s.pitchWeek >= 0 && s.pitchLanded)
-                        Tag(l.pitchLandedTag,
-                            icon: Icons.playlist_add_check_rounded,
-                            color: AppColors.mint)
-                      else if (s.pitchWeek >= 0 &&
-                          (s.pitchAnswerWeek < 0 ||
-                              s.pitchAnswerWeek >= widget.state.week))
-                        Tag(
-                            s.pitchAnswerWeek < 0
-                                ? l.pitchPendingRelease
-                                : l.pitchPending,
-                            icon: Icons.schedule_rounded)
-                      else if (s.pitchWeek >= 0)
-                        Tag(l.pitchDeclinedTag,
-                            icon: Icons.playlist_remove_rounded),
-                      // The algorithm (docs K119).
-                      if (s.inDiscover)
-                        Tag(l.tagDiscover,
-                            icon: Icons.auto_awesome_rounded,
-                            color: AppColors.mint),
-                      if (s.inReleaseRadar)
-                        Tag(l.tagReleaseRadar,
-                            icon: Icons.radar_rounded, color: AppColors.mint),
-                    ]),
-                    // Buying a loose single's master back (docs K162).
-                    if (s.masterBuyCents case final price?)
+                    // The app's Marquee and Showcase (docs K147).
+                    if (s.marqueeCostCents case final cost?) ...[
+                      const SizedBox(height: 10),
+                      Text(l.marqueeTitle,
+                          style:
+                              const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text(l.marqueeHint(StreamingTools.marqueeWeeks),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5)),
+                      const SizedBox(height: 6),
+                      ActionChip(
+                        avatar:
+                            const Icon(Icons.campaign_outlined, size: 16),
+                        label: Text('${l.marqueeRun} · ${fmt.money(cost)}'),
+                        onPressed: cost > widget.state.player.moneyCents
+                            ? null
+                            : () => _tool(Cmd.runMarquee(s.id)),
+                      ),
+                    ] else if (s.marqueeWeek >= 0) ...[
+                      const SizedBox(height: 10),
+                      Text(l.marqueeRan(fmt.week(s.marqueeWeek)),
+                          style: TextStyle(color: AppColors.textMuted)),
+                    ],
+                    if (s.showcaseCostCents case final cost?) ...[
+                      const SizedBox(height: 10),
+                      Text(l.showcaseTitle,
+                          style:
+                              const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text(l.showcaseHint,
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12.5)),
+                      const SizedBox(height: 6),
+                      ActionChip(
+                        avatar: const Icon(Icons.history_rounded, size: 16),
+                        label:
+                            Text('${l.showcaseRun} · ${fmt.money(cost)}'),
+                        onPressed: cost > widget.state.player.moneyCents
+                            ? null
+                            : () => _tool(Cmd.runShowcase(s.id)),
+                      ),
+                    ],
+                    if (s.streamingOpen &&
+                        s.releasedWeek >= 0 &&
+                        s.botStatus != BotStatus.caught &&
+                        s.botWeeksLeft == 0)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: TextButton.icon(
-                          onPressed: widget.state.busy
-                              ? null
-                              : () => buyMastersFlow(
-                                  context,
-                                  widget.state,
-                                  s.title,
-                                  price,
-                                  Cmd.buySongMaster(s.id),
-                                  _load),
-                          icon: const Icon(Icons.copyright_rounded),
-                          label: Text(l.mastersBuyButton(fmt.money(price))),
+                          style: TextButton.styleFrom(
+                              foregroundColor: AppColors.coral),
+                          onPressed: () => _buyStreams(s),
+                          icon: const Icon(Icons.smart_toy_outlined),
+                          label: Text(l.buyStreams),
                         ),
                       ),
-                    if (s.preSaves >= 1)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(l.preSavesHint(fmt.compact(s.preSaves)),
-                            style: TextStyle(
-                                color: AppColors.textMuted, fontSize: 12.5)),
-                      ),
-                    // Where the listening came from (docs K120).
-                    if (s.streamSources.isNotEmpty) ...[
-                      const SizedBox(height: 10),
-                      _SourcesBar(shares: s.streamSources),
-                      const SizedBox(height: 8),
-                    ],
-                    if (s.autoplayOpen)
-                      Text(
-                          l.skipRateLine((s.skipRate * 100).round(),
-                              (s.autoplayLift * 100).round()),
-                          style: TextStyle(
-                              color: AppColors.textMuted, fontSize: 12.5)),
-                    // Grouped so the page is not one long list (docs K198).
-                    _ToolGroup(
-                      title: l.toolsPlaylists,
-                      icon: Icons.queue_music_rounded,
-                      children: [
-                        // On the editorial playlists (docs K125).
-                        if (_playlists.isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          Text(l.edOnPlaylists,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 6),
-                          Wrap(spacing: 8, runSpacing: 8, children: [
-                            for (final pl in _playlists)
-                              ActionChip(
-                                avatar: Container(
-                                    width: 14,
-                                    height: 14,
-                                    color: editorialColor(pl.playlist)),
-                                label: Text(
-                                    '${pl.playlist.displayName} #${pl.position}'),
-                                onPressed: () => pushInCareer(context,
-                                    EditorialPage(playlist: pl.playlist)),
-                              ),
-                          ]),
-                        ],
-                        if (s.canPitch) ...[
-                          const SizedBox(height: 8),
-                          Text(l.pitchHint,
-                              style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 13)),
-                          const SizedBox(height: 6),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: OutlinedButton.icon(
-                              onPressed: () => _tool(Cmd.pitchSong(s.id)),
-                              icon: const Icon(Icons.playlist_add_rounded),
-                              label: Text(l.pitchSong),
-                            ),
-                          ),
-                        ],
-                        // Mood playlists for songs already out (docs K186).
-                        if (s.canMood) ...[
-                          const SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: OutlinedButton.icon(
-                              onPressed: () => _pitchMood(s),
-                              icon: const Icon(Icons.queue_music_rounded),
-                              label: Text(l.moodButton),
-                            ),
-                          ),
-                        ] else if (s.mood case final m?) ...[
-                          const SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Tag(s.moodIn
-                                ? l.moodOnList(_moodName(m))
-                                : l.moodPassed(_moodName(m))),
-                          ),
-                        ],
-                        // Independent curators (docs K160).
-                        if (s.curatorWeek >= 0) ...[
-                          const SizedBox(height: 10),
-                          if (!s.curatorAnswered)
-                            Tag(l.curatorsPending(s.curatorSent),
-                                icon: Icons.schedule_rounded)
-                          else ...[
-                            Text(
-                                l.curatorsResult(s.curatorAdds, s.curatorSent,
-                                    fmt.compact(s.curatorReach)),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700)),
-                            if (s.curatorStreams >= 1)
-                              Text(
-                                  l.curatorsPlays(
-                                      fmt.compact(s.curatorStreams)),
-                                  style: TextStyle(
-                                      color: AppColors.textMuted,
-                                      fontSize: 13)),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: TextButton.icon(
-                                onPressed: () => _curatorAnswers(s),
-                                icon: const Icon(Icons.forum_outlined),
-                                label: Text(l.curatorsSeeAnswers),
-                              ),
-                            ),
-                          ],
-                        ],
-                        if (s.canCurators) ...[
-                          const SizedBox(height: 8),
-                          Text(l.curatorsHint,
-                              style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 13)),
-                          const SizedBox(height: 6),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: OutlinedButton.icon(
-                              onPressed: () => _curators(s),
-                              icon: const Icon(Icons.queue_music_rounded),
-                              label: Text(l.curatorsButton),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    // Grouped so the page is not one long list (docs K198).
-                    _ToolGroup(
-                      title: l.toolsAlgorithm,
-                      icon: Icons.auto_awesome_rounded,
-                      children: [
-                        // A looping visual in the app (docs K190).
-                        if (s.canvas) ...[
-                          const SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Tag(
-                                l.canvasOn((SongCanvas.skipCut * 100).round()),
-                                icon: Icons.slow_motion_video_rounded,
-                                color: AppColors.mint),
-                          ),
-                        ] else if (s.canCanvas) ...[
-                          const SizedBox(height: 10),
-                          Text(l.canvasHint,
-                              style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 13)),
-                          const SizedBox(height: 6),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: OutlinedButton.icon(
-                              onPressed: widget.state.busy
-                                  ? null
-                                  : () => _tool(Cmd.addCanvas(s.id)),
-                              icon: const Icon(Icons.slow_motion_video_rounded),
-                              label: Text(l.canvasButton(
-                                  fmt.money(SongCanvas.costCents))),
-                            ),
-                          ),
-                        ],
-                        if (s.autoplayOpen) ...[
-                          const SizedBox(height: 10),
-                          AutoplayLevelPicker(
-                              value: s.autoplayLevel,
-                              onChanged: (a) =>
-                                  _tool(Cmd.setAutoplayLevel(s.id, a))),
-                        ],
-                      ],
-                    ),
-                    // Grouped so the page is not one long list (docs K198).
-                    _ToolGroup(
-                      title: l.toolsPromotion,
-                      icon: Icons.campaign_rounded,
-                      children: [
-                        // Creators on the short-video app (docs K131).
-                        if (s.creatorWeek >= 0) ...[
-                          const SizedBox(height: 10),
-                          Text(
-                              switch (s.creatorResult) {
-                                CreatorResult.running => l.creatorsRunning(
-                                    s.creatorTier.creators,
-                                    widget.state.week - s.creatorWeek + 1,
-                                    CreatorCampaign.weeks),
-                                CreatorResult.caughtOn => l.creatorsCaughtOn,
-                                CreatorResult.flopped => l.creatorsFlopped,
-                              },
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color:
-                                      s.creatorResult == CreatorResult.caughtOn
-                                          ? AppColors.mint
-                                          : null)),
-                        ] else if (s.creatorCosts.isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          Text(l.creatorsTitle,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 4),
-                          Text(l.creatorsHint,
-                              style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 12.5)),
-                          const SizedBox(height: 6),
-                          Wrap(spacing: 8, runSpacing: 8, children: [
-                            for (final e in s.creatorCosts.entries)
-                              ActionChip(
-                                avatar: const Icon(Icons.videocam_outlined,
-                                    size: 16),
-                                label: Text(
-                                    '${l.creatorsCount(e.key.creators)} · ${fmt.money(e.value)}'),
-                                onPressed: e.value >
-                                        widget.state.player.moneyCents
-                                    ? null
-                                    : () => _tool(Cmd.runCreators(s.id, e.key)),
-                              ),
-                          ]),
-                        ],
-                        // The app's Marquee and Showcase (docs K147).
-                        if (s.marqueeCostCents case final cost?) ...[
-                          const SizedBox(height: 10),
-                          Text(l.marqueeTitle,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 4),
-                          Text(l.marqueeHint(StreamingTools.marqueeWeeks),
-                              style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 12.5)),
-                          const SizedBox(height: 6),
-                          ActionChip(
-                            avatar:
-                                const Icon(Icons.campaign_outlined, size: 16),
-                            label: Text('${l.marqueeRun} · ${fmt.money(cost)}'),
-                            onPressed: cost > widget.state.player.moneyCents
-                                ? null
-                                : () => _tool(Cmd.runMarquee(s.id)),
-                          ),
-                        ] else if (s.marqueeWeek >= 0) ...[
-                          const SizedBox(height: 10),
-                          Text(l.marqueeRan(fmt.week(s.marqueeWeek)),
-                              style: TextStyle(color: AppColors.textMuted)),
-                        ],
-                        if (s.showcaseCostCents case final cost?) ...[
-                          const SizedBox(height: 10),
-                          Text(l.showcaseTitle,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700)),
-                          const SizedBox(height: 4),
-                          Text(l.showcaseHint,
-                              style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 12.5)),
-                          const SizedBox(height: 6),
-                          ActionChip(
-                            avatar: const Icon(Icons.history_rounded, size: 16),
-                            label:
-                                Text('${l.showcaseRun} · ${fmt.money(cost)}'),
-                            onPressed: cost > widget.state.player.moneyCents
-                                ? null
-                                : () => _tool(Cmd.runShowcase(s.id)),
-                          ),
-                        ],
-                        if (s.streamingOpen &&
-                            s.releasedWeek >= 0 &&
-                            s.botStatus != BotStatus.caught &&
-                            s.botWeeksLeft == 0)
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextButton.icon(
-                              style: TextButton.styleFrom(
-                                  foregroundColor: AppColors.coral),
-                              onPressed: () => _buyStreams(s),
-                              icon: const Icon(Icons.smart_toy_outlined),
-                              label: Text(l.buyStreams),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ]),
-            ),
-          ],
-          if (!s.inVault) ...[
-            const SizedBox(height: 12),
-            _SongNumbers(song: s, salesFirst: salesFirst),
-            if (s.isPlayer) ...[
-              const SizedBox(height: 12),
-              ProfitCard(
-                revenueCents: s.revenueCents,
-                costsCents: s.costsCents,
-                sold: s.singleUnits,
-                globalPeak: s.charts
-                    .where((c) => c.chartId == Charts.globalSongs)
-                    .firstOrNull
-                    ?.peak,
-              ),
-            ],
-            if (s.isPlayer &&
-                (s.campaignCostCents > 0 || s.campaignReturnCents > 0)) ...[
-              const SizedBox(height: 12),
-              CampaignResult(
-                  campaign: s.campaign,
-                  costCents: s.campaignCostCents,
-                  returnCents: s.campaignReturnCents),
-            ],
-            const SizedBox(height: 12),
-            _ChartRecords(records: s.charts),
-            const SizedBox(height: 12),
-            Section(
-              title: l.chartRunTitle,
-              icon: Icons.timeline_rounded,
-              child: ChartRunTable(run: _run),
-            ),
-            ...[
-              if (salesFirst) salesChart,
-              streamChart,
-              if (!salesFirst) salesChart,
-            ].whereType<Widget>(),
-            if (usPos.whereType<double>().length > 1) ...[
-              const SizedBox(height: 12),
-              Section(
-                title: l.positionOn(fmt.chart(Charts.usSongs)),
-                child: LineChart(
-                  values: usPos,
-                  invert: true,
-                  color: Theme.of(context).colorScheme.tertiary,
-                  topLabel:
-                      '#${usPos.whereType<double>().reduce((a, b) => a < b ? a : b).round()}',
+                  ],
                 ),
-              ),
-            ],
-          ],
+              ]),
+        ),
+      ],
+    ];
+    final numbers = <Widget>[
+      if (!s.inVault) ...[
+        const SizedBox(height: 12),
+        _SongNumbers(song: s, salesFirst: salesFirst),
+        if (s.isPlayer) ...[
+          const SizedBox(height: 12),
+          ProfitCard(
+            revenueCents: s.revenueCents,
+            costsCents: s.costsCents,
+            sold: s.singleUnits,
+            globalPeak: s.charts
+                .where((c) => c.chartId == Charts.globalSongs)
+                .firstOrNull
+                ?.peak,
+          ),
         ],
+        if (s.isPlayer &&
+            (s.campaignCostCents > 0 || s.campaignReturnCents > 0)) ...[
+          const SizedBox(height: 12),
+          CampaignResult(
+              campaign: s.campaign,
+              costCents: s.campaignCostCents,
+              returnCents: s.campaignReturnCents),
+        ],
+        const SizedBox(height: 12),
+        _ChartRecords(records: s.charts),
+        const SizedBox(height: 12),
+        Section(
+          title: l.chartRunTitle,
+          icon: Icons.timeline_rounded,
+          child: ChartRunTable(run: _run),
+        ),
+        ...[
+          if (salesFirst) salesChart,
+          streamChart,
+          if (!salesFirst) salesChart,
+        ].whereType<Widget>(),
+        if (usPos.whereType<double>().length > 1) ...[
+          const SizedBox(height: 12),
+          Section(
+            title: l.positionOn(fmt.chart(Charts.usSongs)),
+            child: LineChart(
+              values: usPos,
+              invert: true,
+              color: Theme.of(context).colorScheme.tertiary,
+              topLabel:
+                  '#${usPos.whereType<double>().reduce((a, b) => a < b ? a : b).round()}',
+            ),
+          ),
+        ],
+      ],
+    ];
+    ListView page(List<Widget> children) =>
+        ListView(padding: const EdgeInsets.all(16), children: children);
+    if (!s.isPlayer) {
+      return Scaffold(
+        appBar: AppBar(title: Text(s.title)),
+        body: page([
+          ...header,
+          info(withRadio: true),
+          ...money,
+          ...numbers,
+        ]),
+      );
+    }
+    final onRadio = s.isSingle && s.releasedWeek >= 0;
+    return DefaultTabController(
+      length: onRadio ? 3 : 2,
+      // A song in the vault opens on what can be done with it.
+      initialIndex: widget.initialTab >= 0
+          ? widget.initialTab.clamp(0, onRadio ? 2 : 1)
+          : s.inVault
+              ? 1
+              : 0,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(s.title),
+          bottom: TabBar(tabs: [
+            Tab(text: l.songTabOverview),
+            Tab(text: l.songTabPromote),
+            if (onRadio) Tab(text: l.songTabRadio),
+          ]),
+        ),
+        body: TabBarView(children: [
+          page([...header, ...numbers, ...money]),
+          page([info(withRadio: false), ...tools, ...offMarket]),
+          if (onRadio)
+            page([
+              Section(
+                title: l.songTabRadio,
+                icon: Icons.radio_rounded,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: radio),
+              ),
+            ]),
+        ]),
       ),
     );
   }

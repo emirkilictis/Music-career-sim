@@ -16,6 +16,7 @@ import 'social_feed.dart';
 import 'milestones.dart';
 import 'platforms.dart';
 import 'views.dart';
+import 'week_todo.dart';
 
 /// Result of one played week.
 class WeekReport {
@@ -4050,6 +4051,12 @@ class GameSession {
 
   /// The Hall of Fame, latest class first (docs K288).
   List<HallOfFameRow> get hallOfFame => LegacyViews.hallOfFame(world);
+
+  /// Things worth doing this week, closing windows first (docs K298).
+  List<TodoItem> get weekTodo => WeekTodo.of(world);
+
+  /// The first career's guide (docs K297).
+  GuideView get guide => GuideView.of(world);
 
   /// Whether the player has ended their career (docs K288).
   bool get isRetired => world.playerRetiredWeek >= 0;

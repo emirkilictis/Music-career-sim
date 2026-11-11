@@ -757,6 +757,12 @@ abstract final class Cmd {
   static SessionCmd<void> setRadioLevel(int songId, int level) =>
       (s) => s.setRadioLevel(songId, level);
 
+  /// The first career's guide (docs K297).
+  static SessionCmd<GuideView> guide() => (s) => s.guide;
+
+  /// Things worth doing this week (docs K298).
+  static SessionCmd<List<TodoItem>> weekTodo() => (s) => s.weekTodo;
+
   /// The player's legacy page (docs K288).
   static SessionCmd<LegacyView> legacy() => (s) => s.legacy;
 

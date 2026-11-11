@@ -20,3 +20,4 @@ export 'src/milestones.dart';
 export 'src/platforms.dart';
 export 'src/social_feed.dart';
 export 'src/views.dart';
+export 'src/week_todo.dart';

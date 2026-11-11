@@ -59,6 +59,14 @@ class AppSettings extends ChangeNotifier {
   /// leave it themselves.
   String? openSlot;
 
+  /// Careers whose first-career guide was put away (docs K297).
+  final Set<String> guideHidden = {};
+
+  void hideGuide(String slotId) {
+    guideHidden.add(slotId);
+    _save();
+  }
+
   Locale? get locale => languageCode == null ? null : Locale(languageCode!);
 
   static Future<AppSettings> load(SettingsStore? store) async {
@@ -76,6 +84,8 @@ class AppSettings extends ChangeNotifier {
         s.sharpCorners = m['cornerStyle'] != 'soft';
         s.avatarFaces = m['avatars'] != 'initials';
         s.openSlot = m['openSlot'] as String?;
+        s.guideHidden.addAll(
+            [for (final x in m['guideHidden'] as List? ?? const []) '$x']);
       } on FormatException {
         // A broken settings file falls back to defaults.
       }
@@ -135,6 +145,7 @@ class AppSettings extends ChangeNotifier {
       'cornerStyle': sharpCorners ? 'sharp' : 'soft',
       'avatars': avatarFaces ? 'faces' : 'initials',
       if (openSlot != null) 'openSlot': openSlot,
+      if (guideHidden.isNotEmpty) 'guideHidden': guideHidden.toList(),
     }));
   }
 }
