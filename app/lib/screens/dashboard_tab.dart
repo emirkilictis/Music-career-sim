@@ -1321,14 +1321,19 @@ class _GuideCardState extends State<_GuideCard> {
               minHeight: 4,
               backgroundColor: AppColors.surfaceHigh),
           const SizedBox(height: 6),
-          Row(children: [
-            FilledButton.tonal(
-                onPressed: () => _show(step), child: Text(l.guideShow)),
-            const Spacer(),
-            TextButton(
-                onPressed: () => settings.hideGuide(slot),
-                child: Text(l.guideHide)),
-          ]),
+          // Side by side where they fit, one under the other where not.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            children: [
+              FilledButton.tonal(
+                  onPressed: () => _show(step), child: Text(l.guideShow)),
+              TextButton(
+                  onPressed: () => settings.hideGuide(slot),
+                  child: Text(l.guideHide)),
+            ],
+          ),
         ]),
       ),
     );
