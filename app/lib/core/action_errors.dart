@@ -294,6 +294,16 @@ const _exact = <String, (String, String)>{
     'Şu an içerik üretici kampanyası yok.'
   ),
   'Not on the radio': ('Not on the radio.', 'Radyoda değil.'),
+  // The radio budget and records off the market (docs K290, K293).
+  'The label cannot run this': (
+    'Your label cannot run this.',
+    'Şirketin bunu yapamaz.'
+  ),
+  'Not on sale': ('It is not on sale.', 'Satışta değil.'),
+  'Not off the market': (
+    'It is not off the market.',
+    'Yayından kaldırılmış değil.'
+  ),
   'Radio format not possible': (
     'That radio format is not possible.',
     'Bu radyo formatı olmaz.'
