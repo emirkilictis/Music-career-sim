@@ -2476,7 +2476,8 @@ class GameSession {
                 al.variantFormats[k] != EditionFormat.deluxe.index))
           k
     ];
-    final songs = Rerecords.record(world, _p, al);
+    final songs =
+        Rerecords.record(world, _p, al, mark: Rerecords.mark(al, _p, t));
     return _schedule(ScheduledRelease(
       id: _nextScheduleId(),
       type: al.type,

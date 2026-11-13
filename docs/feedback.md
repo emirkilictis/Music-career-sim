@@ -263,6 +263,9 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F161 | LosingMyWayStan: şarkıların neredeyse hepsi 8 yıl boyunca aynı yıllık dinlenmeyi yapıyor, çok stabil; çok daha fazla düşmeli; en çok dinlenen şarkılarımın sırası hep aynı, dalgalar olsun, sıralama değişsin. | ✅ K295 |
 | F162 | Emir: "1, 2 ve 3 yap" (ilk kariyer rehberi, şarkı ve albüm sayfasını bölmek, ana sayfada "bu hafta" listesi). | ✅ K296–K298 |
 | F163 | Emir (ekran görüntüsüyle): "Bu tarz bir Billboard kariyer özet ekranı yapsak efsane olur." (büyük sanatçı fotoğrafı, #1 hit / toplam giriş / ilk 10 hit, liste seçici, zirveli şarkı kartları) | ✅ K299 |
+| F164 | Emir: "Albüm re-record olunca şarkılarda da (your version) olsun." | ✅ K300 |
+| F165 | Emir: "Bir şarkının satışı hesaplanırken satış hesabına tüm versiyonlardan gelecek satış ve stream dahil olsun ama streamler birleşmesin." (remix, sped up vb.) | ✅ K300 |
+| F166 | Emir: "Bir şarkının live versiyonu çok stream almasın, live versionlar çok tutmasın." | ✅ K300 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

@@ -348,6 +348,10 @@ class SongView {
         isPlayer = s.primaryArtistId == w.playerArtistId,
         video = s.videoBudget < 0 ? null : VideoBudget.values[s.videoBudget],
         versions = List.unmodifiable(s.versions),
+        versionPlays = VersionStreams.of(w, s),
+        originalStreams = s.versions.isEmpty
+            ? w.songLifetimeStreams(s)
+            : VersionStreams.original(w, s),
         botStatus = s.botStatus,
         botWeeksLeft = s.botWeeksLeft,
         botRemoved = s.botStatus == BotStatus.caught ? s.botDelivered : 0,
@@ -535,6 +539,12 @@ class SongView {
   /// Versions out and the single's physical editions, with their weeks
   /// (docs K92, F26).
   final List<(SongVersion, int)> versions;
+
+  /// Each version's own plays, in the order of [versions], and the
+  /// original's (docs K300): they are counted apart on the apps, and
+  /// added up for sales, certifications and the charts.
+  final List<double> versionPlays;
+  final double originalStreams;
 
   /// Bought streams (docs K95): status, weeks still coming, and what the
   /// platform removed if caught; filtered from the charts right now.

@@ -22,8 +22,13 @@ abstract final class LiveAlbums {
   /// buyers it draws.
   static const fanBuy = 0.25;
 
-  /// Fans' listening a live version gets against a studio song.
-  static const fanListen = 0.3;
+  /// Fans' listening a live version gets against a studio song (docs
+  /// K300: 0.3 before; people play the studio recording).
+  static const fanListen = 0.1;
+
+  /// New listeners, playlists and trends a live version gets against a
+  /// studio song (docs K300; 1 before).
+  static const reach = 0.25;
   static const eventBuy = 0.1;
 
   static const minTracks = 8;

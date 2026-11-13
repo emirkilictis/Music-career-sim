@@ -263,8 +263,8 @@ abstract final class Codec {
     'ringtones', 'weekRingtones', 'mood', 'canvas', 'bought',
     // Added in schema v55, v56, v57.
     'diss', 'radio', 'catalogBase',
-    // Added in schema v59, v60.
-    'held', 'offWeek',
+    // Added in schema v59, v60, v61.
+    'held', 'offWeek', 'versionPlays',
   ];
 
   static List<Object?> songRow(Song s) => [
@@ -373,6 +373,10 @@ abstract final class Codec {
         // Held while it is off the market (docs K293, K294).
         s.heldRate == 0 ? null : s.heldRate,
         s.offWeek < 0 ? null : s.offWeek,
+        // Each version's own plays (docs K300).
+        s.versionSettled <= 0
+            ? null
+            : jsonEncode([s.versionSettled, ...s.versionStreams]),
       ];
 
   static Song songFrom(Map<String, Object?> r, List<int> featured) {
@@ -443,6 +447,12 @@ abstract final class Codec {
     s.catalogBase = (r['catalogBase'] as num?)?.toDouble() ?? 0;
     s.heldRate = (r['held'] as num?)?.toDouble() ?? 0;
     s.offWeek = r['offWeek'] as int? ?? -1;
+    if (r['versionPlays'] case final String x when x.isNotEmpty) {
+      final j = jsonDecode(x) as List;
+      s.versionSettled = (j.first as num).toDouble();
+      s.versionStreams
+          .addAll([for (final v in j.skip(1)) (v as num).toDouble()]);
+    }
     if (r['radio'] case final String x when x.isNotEmpty) {
       final j = jsonDecode(x) as List;
       final uk = j[0] as int;

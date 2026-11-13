@@ -25,6 +25,7 @@ import 'stream_windows.dart';
 import 'streaming_tools.dart';
 import 'time.dart';
 import 'tours.dart';
+import 'version_streams.dart';
 import 'world.dart';
 
 class ActionException implements Exception {
@@ -167,6 +168,8 @@ abstract final class Actions {
       s.versionBoost += v.boost(year) * math.pow(0.5, recent);
     }
     s.versions.add((v, w.week));
+    // Its own play count from now (docs K300).
+    VersionStreams.added(w, s);
     if (v.trendy) {
       final r = RandomStream.keyed(w.seed, w.week, s.id, RngPurpose.viral + 50);
       final era = w.config.viralEraFactor(year);

@@ -3977,6 +3977,14 @@ void main() {
       expect(first.firstWeekUnits, greaterThan(0));
       // Fans buy it; it is no new studio record.
       expect(first.firstWeekUnits, lessThan(g.album(studio.id).firstWeekUnits));
+      // People play the studio recordings, not the live ones (docs K300).
+      g.advanceWeeks(3, stop: SkipStop.never);
+      double plays(List<int> songs) =>
+          songs.fold(0.0, (t, id) => t + g.world.songs[id].weekStreams);
+      final livePlays = plays(live.trackIds);
+      printOnFailure('live $livePlays, studio ${plays(ids)}');
+      expect(livePlays, lessThan(0.25 * plays(ids)));
+      expect(Lifecycle.catalogWeight(g.world.songs[live.trackIds.first]), 0.25);
       g.close();
     });
 
@@ -4349,7 +4357,7 @@ void main() {
       expect(g.album(album.id).rerecordBlock, RerecordBlock.done);
       final copy = g.song(draft.songIds.first);
       expect(copy.rerecordOf, ids.first);
-      expect(copy.title, g.song(ids.first).title);
+      expect(copy.title, "${g.song(ids.first).title} (Nova's Version)");
       double oldStreams() => ids.fold(
           0.0, (x, id) => x + g.world.songLifetimeStreams(g.world.songs[id]));
       g.advanceWeek();
@@ -4366,6 +4374,13 @@ void main() {
       // Most listeners moved to the new versions, which pay in full.
       expect(oldStreams() - at, lessThan(weekBefore * 0.6));
       final newIds = out.trackIds;
+      // Each song carries the new album's mark (docs K300).
+      expect(g.world.songs[newIds.first].title,
+          '${g.world.songs[ids.first].title} (Nova\'s Version)');
+      final fearless = g.world.albums[album.id];
+      expect(Rerecords.mark(fearless, p, 'Fearless (Nova Versiyonu)'),
+          '(Nova Versiyonu)');
+      expect(Rerecords.mark(fearless, p, 'Brave'), "(Nova's Version)");
       final newStreams =
           newIds.fold(0.0, (x, id) => x + g.world.songs[id].weekStreams);
       expect(newStreams, greaterThan(oldStreams() - at));
@@ -7267,6 +7282,40 @@ void main() {
       expect(g.guide.done[GuideStep.charts.index], isTrue);
       expect(g.guide.next, GuideStep.album);
       p.creativeEnergy = 100;
+      g.close();
+    });
+  });
+  group('versions count apart, sell together (docs K300)', () {
+    test('a version has its own plays; the song keeps the sum', () {
+      var g = GameSession.start(
+          slots,
+          _setup(
+              startYear: 2022,
+              tier: StartTier.superstar,
+              money: StartMoney.millionaire,
+              premium: true));
+      final slot = g.slotId;
+      final p = g.world.player!..creativeEnergy = 100;
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      g.releaseSingle(id, campaign: Campaign.standard);
+      g.advanceWeeks(3, stop: SkipStop.never);
+      g.releaseVersion(id, SongVersion.spedUp);
+      g.advanceWeeks(4, stop: SkipStop.never);
+      var v = g.song(id);
+      expect(v.versionPlays, hasLength(1));
+      expect(v.versionPlays.first, greaterThan(0));
+      // The original keeps most; together they are all the song's plays.
+      expect(v.originalStreams, greaterThan(v.versionPlays.first));
+      expect(v.originalStreams + v.versionPlays.first,
+          closeTo(v.lifetimeStreams.total, 1e-6 * v.lifetimeStreams.total));
+      final plays = v.versionPlays.first;
+      g.close();
+      g = GameSession.resume(slots, slot);
+      v = g.song(id);
+      expect(v.versionPlays.first, closeTo(plays, 1e-6 * plays));
+      g.advanceWeek();
+      expect(g.song(id).versionPlays.first, greaterThan(plays));
+      expect(p.id, g.world.player!.id);
       g.close();
     });
   });

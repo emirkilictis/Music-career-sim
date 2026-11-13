@@ -870,6 +870,11 @@ class Song with Charted {
   final List<(SongVersion, int)> versions = [];
   final List<(SingleFormat, int)> variants = [];
 
+  /// Each version's own plays so far, in the order of [versions], and the
+  /// song's plays when they were last counted (docs K300; 0: not yet).
+  final List<double> versionStreams = [];
+  double versionSettled = 0;
+
   /// Extra exposure from new versions; fades week by week.
   double versionBoost = 0;
 

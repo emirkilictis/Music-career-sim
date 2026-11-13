@@ -221,7 +221,7 @@ class _StreamifyAlbumPageState extends State<StreamifyAlbumPage> {
         itemCount: tracks.length,
         itemBuilder: (context, i) {
           final s = tracks[i];
-          return InkWell(
+          final row = InkWell(
             onTap: () => openSong(s),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -253,7 +253,7 @@ class _StreamifyAlbumPageState extends State<StreamifyAlbumPage> {
                       ]),
                 ),
                 const SizedBox(width: 12),
-                Text(count(s.lifetimeStreams.total),
+                Text(count(s.originalStreams),
                     style: const TextStyle(
                         color: StreamifyColors.muted,
                         fontSize: 13,
@@ -264,6 +264,37 @@ class _StreamifyAlbumPageState extends State<StreamifyAlbumPage> {
               ]),
             ),
           );
+          if (s.versions.isEmpty) return row;
+          // Each version is a track of its own, with its own plays
+          // (docs K300).
+          return Column(children: [
+            row,
+            for (final (k, (v, _)) in s.versions.indexed)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(44, 0, 16, 8),
+                child: Row(children: [
+                  const Icon(Icons.subdirectory_arrow_right_rounded,
+                      color: StreamifyColors.muted, size: 16),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text('${s.title} (${fmt.songVersion(v)})',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: StreamifyColors.muted, fontSize: 13.5)),
+                  ),
+                  Text(
+                      count(k < s.versionPlays.length
+                          ? s.versionPlays[k]
+                          : 0),
+                      style: const TextStyle(
+                          color: StreamifyColors.muted,
+                          fontSize: 12.5,
+                          fontFeatures: [FontFeature.tabularFigures()])),
+                  const SizedBox(width: 30),
+                ]),
+              ),
+          ]);
         },
       ),
       SliverToBoxAdapter(

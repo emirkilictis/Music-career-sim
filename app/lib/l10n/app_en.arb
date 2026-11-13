@@ -10073,5 +10073,21 @@
         "type": "String"
       }
     }
+  },
+  "versionPlays": "{plays} plays",
+  "@versionPlays": {
+    "placeholders": {
+      "plays": {
+        "type": "String"
+      }
+    }
+  },
+  "versionOriginalPlays": "Original: {plays} plays. Each version counts its own on the apps; sales, certifications and the charts add them all up.",
+  "@versionOriginalPlays": {
+    "placeholders": {
+      "plays": {
+        "type": "String"
+      }
+    }
   }
 }

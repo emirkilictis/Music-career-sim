@@ -6,6 +6,7 @@ import 'model.dart';
 import 'imprints.dart';
 import 'own_playlist.dart';
 import 'time.dart';
+import 'version_streams.dart';
 import 'world.dart';
 
 /// The player asking a rival to feature on a song (docs K117). The
@@ -105,6 +106,7 @@ abstract final class Features {
         math.pow(0.7, recent);
     if (!s.versions.any((x) => x.$1 == SongVersion.remix)) {
       s.versions.add((SongVersion.remix, w.week));
+      VersionStreams.added(w, s);
     }
     w.dirtySongs.add(s.id);
     w.dirtyArtists.add(a.id);

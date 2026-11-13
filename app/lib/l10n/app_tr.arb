@@ -2801,5 +2801,7 @@
   "historyPeakLabel": "Zirve",
   "historyWeeksOnLine": "listede {count} hafta",
   "historyWeeksAt1Line": "#1’de {count} hafta",
-  "historyShareText": "{name}, {chart} listesinde. {app}"
+  "historyShareText": "{name}, {chart} listesinde. {app}",
+  "versionPlays": "{plays} dinlenme",
+  "versionOriginalPlays": "Orijinal: {plays} dinlenme. Her versiyonun uygulamalarda kendi sayacı var; satış, sertifika ve listeler hepsini birlikte sayar."
 }

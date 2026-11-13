@@ -87,6 +87,9 @@ abstract final class Lifecycle {
   /// Top-10 singles keep far more than deep cuts that never charted; the
   /// overall level is [SimConfig.catalogLevel].
   static double catalogWeight(Song s) {
+    // A live recording is no hit in the catalog, however it charted
+    // (docs K300): it fades as a deep cut does, with no floor.
+    if (s.liveOf >= 0) return 0.25;
     var best = 999;
     for (final ch in Charts.mainSongCharts) {
       final peak = s.statsOrNull(ch)?.peak ?? 0;

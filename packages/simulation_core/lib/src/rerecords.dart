@@ -80,10 +80,24 @@ abstract final class Rerecords {
   /// What re-recording [al] costs.
   static int costCents(Album al) => costPerTrackCents * al.songIds.length;
 
+  /// The mark a re-recorded song carries (docs K300): the one the new
+  /// album's [title] puts after the old title ("Red (Nova's Version)"
+  /// gives "(Nova's Version)"), else "(Artist's Version)".
+  static String mark(Album al, Artist a, String title) {
+    final t = title.trim();
+    final old = al.title.trim();
+    if (t.startsWith(old) && t.endsWith(')')) {
+      final rest = t.substring(old.length).trim();
+      if (rest.startsWith('(') && rest.length > 2) return rest;
+    }
+    return "(${a.name}'s Version)";
+  }
+
   /// Records [al]'s songs again into the vault, same songs and order,
-  /// and returns them. They come out like any song, usually as the
+  /// and returns them, each title marked with [mark] (docs K300: the old
+  /// title alone before). They come out like any song, usually as the
   /// album's new version.
-  static List<Song> record(World w, Artist a, Album al) {
+  static List<Song> record(World w, Artist a, Album al, {String mark = ''}) {
     final why = block(w, a, al);
     if (why != null) throw ActionException('Cannot re-record: ${why.name}');
     final cost = costCents(al);
@@ -98,7 +112,7 @@ abstract final class Rerecords {
       final old = w.songs[id];
       final s = Song(
         id: w.songs.length,
-        title: old.title,
+        title: mark.isEmpty ? old.title : '${old.title} $mark',
         genre: old.genre,
         extraGenres: List.of(old.extraGenres),
         primaryArtistId: a.id,

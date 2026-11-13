@@ -50,6 +50,7 @@ import 'this_is.dart';
 import 'time.dart';
 import 'tours.dart';
 import 'word_of_mouth.dart';
+import 'version_streams.dart';
 import 'world.dart';
 
 /// Summary of one simulated week (what the UI/CLI needs; not the whole world).
@@ -676,7 +677,10 @@ class Simulator {
       // a song travels is partly luck, drawn once and hidden.
       // A re-recording is a song people know: fewer new listeners find
       // it (docs K139).
-      final hit = resonance(w, s) * Rerecords.reachFactor(s);
+      final hit = resonance(w, s) *
+          Rerecords.reachFactor(s) *
+          // Few go out of their way for a live recording (docs K300).
+          (s.liveOf >= 0 ? LiveAlbums.reach : 1.0);
       // An exclusive album plays on one service only (docs K135).
       final exclusive = !s.isSingle &&
               s.albumId >= 0 &&
@@ -935,6 +939,8 @@ class Simulator {
         wr[_r + k] = dw[k];
       }
       s.weekStreams = tS;
+      // Its versions' own play counts (docs K300).
+      if (s.versions.isNotEmpty) VersionStreams.settle(w, s, weekPlays: tS);
       if (bots > 0 && StreamingTools.settleBots(w, s, bots)) {
         botsCaught.add(s.id);
       }

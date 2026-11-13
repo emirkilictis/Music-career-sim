@@ -2750,6 +2750,10 @@ k('historyWeeksOnLine','{count, plural, =1{1 week on the chart} other{{count} we
 k('historyWeeksAt1Line','{count, plural, =1{1 week at #1} other{{count} weeks at #1}}','#1’de {count} hafta', count='int')
 k('historyShareText','{name} on the {chart}. {app}','{name}, {chart} listesinde. {app}', name='String', chart='String', app='String')
 
+# Each version's own plays (docs K300).
+k('versionPlays','{plays} plays','{plays} dinlenme', plays='String')
+k('versionOriginalPlays','Original: {plays} plays. Each version counts its own on the apps; sales, certifications and the charts add them all up.','Orijinal: {plays} dinlenme. Her versiyonun uygulamalarda kendi sayacı var; satış, sertifika ve listeler hepsini birlikte sayar.', plays='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

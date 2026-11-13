@@ -1341,15 +1341,28 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                 if (s.versions.isEmpty && s.variants.isEmpty)
                   Text(l.versionsHint,
                       style: TextStyle(color: AppColors.textMuted))
-                else
+                else ...[
+                  if (s.versions.isNotEmpty) ...[
+                    Text(l.versionOriginalPlays(fmt.compact(s.originalStreams)),
+                        style: TextStyle(color: AppColors.textMuted)),
+                    const SizedBox(height: 6),
+                  ],
                   Wrap(spacing: 8, runSpacing: 8, children: [
-                    for (final (v, wk) in s.versions)
-                      Tag('${fmt.songVersion(v)} · ${fmt.weekInMonth(wk)}',
+                    // Each with its own plays (docs K300).
+                    for (final (k, (v, wk)) in s.versions.indexed)
+                      Tag(
+                          [
+                            fmt.songVersion(v),
+                            fmt.weekInMonth(wk),
+                            if (k < s.versionPlays.length)
+                              l.versionPlays(fmt.compact(s.versionPlays[k])),
+                          ].join(' · '),
                           icon: Icons.graphic_eq_rounded),
                     for (final (f, wk) in s.variants)
                       Tag('${fmt.singleFormat(f)} · ${fmt.weekInMonth(wk)}',
                           icon: Icons.album_rounded, color: AppColors.gold),
                   ]),
+                ],
                 const SizedBox(height: 10),
                 Wrap(spacing: 8, runSpacing: 8, children: [
                   OutlinedButton.icon(
