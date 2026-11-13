@@ -60,9 +60,17 @@ class _CropScreenState extends State<_CropScreen> {
   final _view = TransformationController();
   ui.Image? _image;
   double _side = 0;
+  double _frameH = 0;
+
+  /// The photo's size on screen at scale 1: covering the frame.
   double _fit = 1;
+
+  /// The scale at which the whole photo fits in the frame (docs K301).
+  double _whole = 1;
   bool _placed = false;
   bool _busy = false;
+
+  static const _maxScale = 6.0;
 
   @override
   void initState() {
@@ -73,40 +81,85 @@ class _CropScreenState extends State<_CropScreen> {
     }, onError: (_) {
       if (mounted) Navigator.pop(context);
     });
+    _view.addListener(_changed);
+  }
+
+  void _changed() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
+    _view.removeListener(_changed);
     _view.dispose();
     _image?.dispose();
     super.dispose();
+  }
+
+  double get _scale => _view.value.getMaxScaleOnAxis();
+
+  /// Zooms to [scale] about the frame's middle, or with [centre] puts the
+  /// photo's middle there.
+  void _zoom(double scale, {bool centre = false}) {
+    final img = _image;
+    if (img == null) return;
+    final s = scale.clamp(_whole, _maxScale).toDouble();
+    final mid = Offset(_side / 2, _frameH / 2);
+    final at = centre
+        ? Offset(img.width * _fit / 2, img.height * _fit / 2)
+        : MatrixUtils.transformPoint(Matrix4.inverted(_view.value), mid);
+    _view.value = Matrix4.identity()
+      ..translateByDouble(mid.dx - at.dx * s, mid.dy - at.dy * s, 0, 1)
+      ..scaleByDouble(s, s, s, 1);
   }
 
   Future<void> _use() async {
     final img = _image;
     if (img == null || _busy) return;
     setState(() => _busy = true);
-    // The square on screen, back in the photo's pixels.
+    // The frame on screen, back in the photo's pixels (it may reach past
+    // the photo when zoomed out: that part is filled, docs K301).
     final inverse = Matrix4.inverted(_view.value);
     final a = MatrixUtils.transformPoint(inverse, Offset.zero) / _fit;
-    final b = MatrixUtils.transformPoint(
-            inverse, Offset(_side, _side / widget.aspect)) /
-        _fit;
+    final b =
+        MatrixUtils.transformPoint(inverse, Offset(_side, _frameH)) / _fit;
+    final frame = Rect.fromPoints(a, b);
     final bounds =
         Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble());
-    final src = Rect.fromPoints(a, b).intersect(bounds);
+    final src = frame.intersect(bounds);
     final cap = widget.aspect == 1 ? 1024 : 1280;
-    final out = math.min(cap, src.width.round()).clamp(1, cap);
+    final out = math.min(cap, math.max(frame.width, 1).round()).clamp(1, cap);
     final outH = math.max(1, (out / widget.aspect).round());
+    final k = out / frame.width;
+    final whole = Rect.fromLTWH(0, 0, out.toDouble(), outH.toDouble());
     final rec = ui.PictureRecorder();
-    Canvas(rec).drawImageRect(
-        img,
-        src,
-        Rect.fromLTWH(0, 0, out.toDouble(), outH.toDouble()),
-        Paint()..filterQuality = FilterQuality.high);
-    final square = await rec.endRecording().toImage(out, outH);
-    final png = await square.toByteData(format: ui.ImageByteFormat.png);
-    square.dispose();
+    final canvas = Canvas(rec);
+    if (src.width < frame.width - 0.5 || src.height < frame.height - 0.5) {
+      // The edges the photo does not reach: the photo itself, blurred and
+      // spread over the frame, as phones show it.
+      canvas.saveLayer(whole,
+          Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: 40, sigmaY: 40));
+      final cover = math.max(out / img.width, outH / img.height);
+      final cw = img.width * cover, ch = img.height * cover;
+      canvas.drawImageRect(
+          img,
+          bounds,
+          Rect.fromLTWH((out - cw) / 2, (outH - ch) / 2, cw, ch),
+          Paint()..filterQuality = FilterQuality.low);
+      canvas.restore();
+      canvas.drawRect(whole, Paint()..color = const Color(0x33000000));
+    }
+    if (!src.isEmpty) {
+      canvas.drawImageRect(
+          img,
+          src,
+          Rect.fromLTWH((src.left - frame.left) * k, (src.top - frame.top) * k,
+              src.width * k, src.height * k),
+          Paint()..filterQuality = FilterQuality.high);
+    }
+    final shot = await rec.endRecording().toImage(out, outH);
+    final png = await shot.toByteData(format: ui.ImageByteFormat.png);
+    shot.dispose();
     if (mounted) Navigator.pop(context, png?.buffer.asUint8List());
   }
 
@@ -127,18 +180,25 @@ class _CropScreenState extends State<_CropScreen> {
           ? const Center(child: CircularProgressIndicator())
           : LayoutBuilder(builder: (context, box) {
               final aspect = widget.aspect;
-              _side = math.min(box.maxWidth - 32,
-                  (box.maxHeight - 112) * aspect);
-              final frameH = _side / aspect;
-              // The photo covers the frame at first, centred.
-              _fit = math.max(_side / img.width, frameH / img.height);
+              _side = math.min(
+                  box.maxWidth - 32, (box.maxHeight - 220) * aspect);
+              _frameH = _side / aspect;
+              // At scale 1 the photo covers the frame; zoomed out to
+              // [_whole] all of it shows (docs K301).
+              _fit = math.max(_side / img.width, _frameH / img.height);
+              _whole =
+                  math.min(_side / img.width, _frameH / img.height) / _fit;
               final w = img.width * _fit, h = img.height * _fit;
               if (!_placed) {
+                // Placed during the build: no rebuild for it.
+                _view.removeListener(_changed);
                 _view.value = Matrix4.translationValues(
-                    -(w - _side) / 2, -(h - frameH) / 2, 0);
+                    -(w - _side) / 2, -(h - _frameH) / 2, 0);
+                _view.addListener(_changed);
                 _placed = true;
               }
-              return Column(children: [
+              final scale = _scale.clamp(_whole, _maxScale).toDouble();
+              return ListView(children: [
                 const SizedBox(height: 16),
                 Center(
                   child: Container(
@@ -146,21 +206,60 @@ class _CropScreenState extends State<_CropScreen> {
                         border: Border.all(color: AppColors.text, width: 2)),
                     child: SizedBox(
                       width: _side,
-                      height: _side / aspect,
+                      height: _frameH,
                       child: ClipRect(
-                        child: InteractiveViewer(
-                          transformationController: _view,
-                          constrained: false,
-                          minScale: 1,
-                          maxScale: 6,
-                          child: SizedBox(
-                              width: w,
-                              height: h,
-                              child: RawImage(image: img, fit: BoxFit.fill)),
+                        child: ColoredBox(
+                          color: Colors.black,
+                          child: InteractiveViewer(
+                            transformationController: _view,
+                            constrained: false,
+                            minScale: _whole,
+                            maxScale: _maxScale,
+                            boundaryMargin:
+                                const EdgeInsets.all(double.infinity),
+                            child: SizedBox(
+                                width: w,
+                                height: h,
+                                child: RawImage(image: img, fit: BoxFit.fill)),
+                          ),
                         ),
                       ),
                     ),
                   ),
+                ),
+                // Zoom without pinching: a slider and two shortcuts (docs
+                // K301; pinching zoomed the page on the web).
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: Row(children: [
+                    const Icon(Icons.zoom_out_rounded),
+                    Expanded(
+                      child: Slider(
+                        value: scale,
+                        min: _whole,
+                        max: _maxScale,
+                        onChanged: (v) => _zoom(v),
+                      ),
+                    ),
+                    const Icon(Icons.zoom_in_rounded),
+                  ]),
+                ),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: () => _zoom(_whole, centre: true),
+                      icon: const Icon(Icons.fit_screen_rounded),
+                      label: Text(l.cropWhole),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: () => _zoom(1, centre: true),
+                      icon: const Icon(Icons.crop_square_rounded),
+                      label: Text(l.cropFill),
+                    ),
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16),
