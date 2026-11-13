@@ -2793,5 +2793,13 @@
   "guidePracticeTitle": "Çalış",
   "guidePracticeBody": "Kariyer’de: haftada bir kez, tek başına ya da hocayla ders al. Yetenekler çalıştıkça gelişir.",
   "guideTourTitle": "Turneye çık",
-  "guideTourBody": "Kariyer’in Sahne bölümünde: tanınmaya başlayınca bir turne planla. Konserler kazandırır, hayranlar şarkı listesini dinler."
+  "guideTourBody": "Kariyer’in Sahne bölümünde: tanınmaya başlayınca bir turne planla. Konserler kazandırır, hayranlar şarkı listesini dinler.",
+  "historySort": "Sıralama",
+  "historyNo1Hits": "#1 hit",
+  "historyTotalEntries": "Toplam giriş",
+  "historyTop10Hits": "İlk 10 hit",
+  "historyPeakLabel": "Zirve",
+  "historyWeeksOnLine": "listede {count} hafta",
+  "historyWeeksAt1Line": "#1’de {count} hafta",
+  "historyShareText": "{name}, {chart} listesinde. {app}"
 }

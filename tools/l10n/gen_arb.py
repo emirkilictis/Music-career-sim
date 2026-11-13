@@ -2740,6 +2740,16 @@ k('guidePracticeBody','In Career: once a week take a lesson, alone or with a coa
 k('guideTourTitle','Go on tour','Turneye çık')
 k('guideTourBody','In Career, on the Stage page: plan a tour once people know you. Shows pay, and fans play the setlist.','Kariyer’in Sahne bölümünde: tanınmaya başlayınca bir turne planla. Konserler kazandırır, hayranlar şarkı listesini dinler.')
 
+# The chart career page (docs K299).
+k('historySort','Order','Sıralama')
+k('historyNo1Hits','No. 1 hits','#1 hit')
+k('historyTotalEntries','Total entries','Toplam giriş')
+k('historyTop10Hits','Top 10 hits','İlk 10 hit')
+k('historyPeakLabel','Peak','Zirve')
+k('historyWeeksOnLine','{count, plural, =1{1 week on the chart} other{{count} weeks on the chart}}','listede {count} hafta', count='int')
+k('historyWeeksAt1Line','{count, plural, =1{1 week at #1} other{{count} weeks at #1}}','#1’de {count} hafta', count='int')
+k('historyShareText','{name} on the {chart}. {app}','{name}, {chart} listesinde. {app}', name='String', chart='String', app='String')
+
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

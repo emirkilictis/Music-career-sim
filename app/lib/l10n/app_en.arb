@@ -10038,5 +10038,40 @@
   "guidePracticeTitle": "Practise",
   "guidePracticeBody": "In Career: once a week take a lesson, alone or with a coach. Skills grow by working on them.",
   "guideTourTitle": "Go on tour",
-  "guideTourBody": "In Career, on the Stage page: plan a tour once people know you. Shows pay, and fans play the setlist."
+  "guideTourBody": "In Career, on the Stage page: plan a tour once people know you. Shows pay, and fans play the setlist.",
+  "historySort": "Order",
+  "historyNo1Hits": "No. 1 hits",
+  "historyTotalEntries": "Total entries",
+  "historyTop10Hits": "Top 10 hits",
+  "historyPeakLabel": "Peak",
+  "historyWeeksOnLine": "{count, plural, =1{1 week on the chart} other{{count} weeks on the chart}}",
+  "@historyWeeksOnLine": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyWeeksAt1Line": "{count, plural, =1{1 week at #1} other{{count} weeks at #1}}",
+  "@historyWeeksAt1Line": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyShareText": "{name} on the {chart}. {app}",
+  "@historyShareText": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "chart": {
+        "type": "String"
+      },
+      "app": {
+        "type": "String"
+      }
+    }
+  }
 }

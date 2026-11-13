@@ -262,6 +262,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F160 | LosingMyWayStan: kaldırılan albüm Spotify ve YouTube profillerinden de kaybolsun; albüm kaldırılınca single'lar yayında kalsın ve ayrıca kaldırılabilsin; radyo tanıtımı kesilince şarkı radyoda çok uzun süre sabit kalıyor. | ✅ K294 |
 | F161 | LosingMyWayStan: şarkıların neredeyse hepsi 8 yıl boyunca aynı yıllık dinlenmeyi yapıyor, çok stabil; çok daha fazla düşmeli; en çok dinlenen şarkılarımın sırası hep aynı, dalgalar olsun, sıralama değişsin. | ✅ K295 |
 | F162 | Emir: "1, 2 ve 3 yap" (ilk kariyer rehberi, şarkı ve albüm sayfasını bölmek, ana sayfada "bu hafta" listesi). | ✅ K296–K298 |
+| F163 | Emir (ekran görüntüsüyle): "Bu tarz bir Billboard kariyer özet ekranı yapsak efsane olur." (büyük sanatçı fotoğrafı, #1 hit / toplam giriş / ilk 10 hit, liste seçici, zirveli şarkı kartları) | ✅ K299 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
