@@ -35,23 +35,31 @@ Future<void> editImage(BuildContext context, String key,
     ),
   );
   if (choice == true) {
-    final picked = await store.source.pick();
-    if (picked == null || !context.mounted) return;
-    // A square photo goes in as it is; any other is cropped by the player
-    // (docs K221: the middle square cut off what they wanted).
-    final bytes = await readPicked(picked);
-    final size = imageSize(bytes);
-    if (size != null &&
-        (size.$1 - size.$2 * aspect).abs() <= size.$1 * 0.02) {
-      store.save(key, picked);
-      return;
-    }
     if (!context.mounted) return;
-    final square = await cropTo(context, bytes, aspect: aspect);
-    if (square != null) store.saveBytes(key, square);
+    final picked = await pickCropped(context, aspect: aspect);
+    if (picked != null) store.save(key, picked);
   } else if (choice == false) {
     store.remove(key);
   }
+}
+
+/// A photo from the player's library in the shape [aspect] (width over
+/// height): a photo of that shape as it is, any other through the crop
+/// screen (docs K221: the middle square cut off what they wanted; K302:
+/// covers chosen in the album builder were not cropped at all). Returns
+/// a path [ImageStore.save] takes, or null if they cancelled.
+Future<String?> pickCropped(BuildContext context, {double aspect = 1}) async {
+  final store = context.imagesRead;
+  final picked = await store.source.pick();
+  if (picked == null || !context.mounted) return null;
+  final bytes = await readPicked(picked);
+  final size = imageSize(bytes);
+  if (size != null && (size.$1 - size.$2 * aspect).abs() <= size.$1 * 0.02) {
+    return picked;
+  }
+  if (!context.mounted) return null;
+  final cropped = await cropTo(context, bytes, aspect: aspect);
+  return cropped == null ? null : store.stage(cropped);
 }
 
 /// Cover row for release flows: the current cover and "Add / Change cover".
@@ -133,7 +141,7 @@ class PendingCoverRow extends StatelessWidget {
             onChanged(null);
             return;
           }
-          final picked = await context.imagesRead.source.pick();
+          final picked = await pickCropped(context);
           if (picked != null) onChanged(picked);
         },
         child: Text(p == null ? l.addCover : l.useGeneratedImage),

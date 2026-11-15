@@ -1618,7 +1618,7 @@ class _EditionEditor extends StatelessWidget {
           InkWell(
             borderRadius: BorderRadius.circular(AppShape.r(8)),
             onTap: () async {
-              final picked = await context.imagesRead.source.pick();
+              final picked = await pickCropped(context);
               if (picked != null) {
                 edition.cover = picked;
                 onChanged();

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../core/scope.dart';
 import '../ui/palette.dart';
+import 'photo_render.dart';
 
 /// Lets the player choose the square of a photo that becomes a cover or an
 /// artist photo (docs K221): drag and pinch, then use it. Returns the
@@ -124,43 +125,11 @@ class _CropScreenState extends State<_CropScreen> {
     final b =
         MatrixUtils.transformPoint(inverse, Offset(_side, _frameH)) / _fit;
     final frame = Rect.fromPoints(a, b);
-    final bounds =
-        Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble());
-    final src = frame.intersect(bounds);
     final cap = widget.aspect == 1 ? 1024 : 1280;
     final out = math.min(cap, math.max(frame.width, 1).round()).clamp(1, cap);
     final outH = math.max(1, (out / widget.aspect).round());
-    final k = out / frame.width;
-    final whole = Rect.fromLTWH(0, 0, out.toDouble(), outH.toDouble());
-    final rec = ui.PictureRecorder();
-    final canvas = Canvas(rec);
-    if (src.width < frame.width - 0.5 || src.height < frame.height - 0.5) {
-      // The edges the photo does not reach: the photo itself, blurred and
-      // spread over the frame, as phones show it.
-      canvas.saveLayer(whole,
-          Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: 40, sigmaY: 40));
-      final cover = math.max(out / img.width, outH / img.height);
-      final cw = img.width * cover, ch = img.height * cover;
-      canvas.drawImageRect(
-          img,
-          bounds,
-          Rect.fromLTWH((out - cw) / 2, (outH - ch) / 2, cw, ch),
-          Paint()..filterQuality = FilterQuality.low);
-      canvas.restore();
-      canvas.drawRect(whole, Paint()..color = const Color(0x33000000));
-    }
-    if (!src.isEmpty) {
-      canvas.drawImageRect(
-          img,
-          src,
-          Rect.fromLTWH((src.left - frame.left) * k, (src.top - frame.top) * k,
-              src.width * k, src.height * k),
-          Paint()..filterQuality = FilterQuality.high);
-    }
-    final shot = await rec.endRecording().toImage(out, outH);
-    final png = await shot.toByteData(format: ui.ImageByteFormat.png);
-    shot.dispose();
-    if (mounted) Navigator.pop(context, png?.buffer.asUint8List());
+    final picture = await renderPhoto(widget.bytes, img, frame, out, outH);
+    if (mounted) Navigator.pop(context, picture);
   }
 
   @override

@@ -40,7 +40,7 @@ void main() {
 
   group('old songs on the charts (K284)', () {
     test('catalog songs played as much as the charted ones chart too', () {
-      final w = _run(seed: 7, years: 2, start: 2020);
+      final w = _run(seed: 9, years: 2, start: 2020);
       final old = <int>{};
       for (final ch in [Charts.platformGlobal, Charts.globalSongs]) {
         for (final e in w.charts[ch]) {

@@ -52,6 +52,11 @@ class WebImageStore extends ImageStore {
     });
   }
 
+  /// On the web a data URL, which [save] reads like a picked file.
+  @override
+  String stage(Uint8List bytes) =>
+      'data:${ImageStore.mimeOf(bytes)};base64,${base64Encode(bytes)}';
+
   @override
   void saveBytes(String key, Uint8List bytes) {
     final slot = openSlot;

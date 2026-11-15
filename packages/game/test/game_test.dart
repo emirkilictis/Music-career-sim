@@ -1382,8 +1382,11 @@ void main() {
       final song = g.writeSong(budget: BudgetTier.low).id;
       g.releaseSingle(song);
       for (var i = 0; i < 5; i++) {
+        final living = g.player.livingCostCents;
         final r = g.advanceWeek();
-        expect(r.moneyDeltaCents, greaterThanOrEqualTo(Job.cafe.wageCents));
+        // The wage comes in; living costs go out (docs K285).
+        expect(r.moneyDeltaCents,
+            greaterThanOrEqualTo(Job.cafe.wageCents - living));
       }
       // The first release is a milestone, paid in skill points (K61).
       final first =

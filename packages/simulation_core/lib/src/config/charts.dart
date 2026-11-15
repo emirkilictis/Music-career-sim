@@ -227,6 +227,39 @@ abstract final class Charts {
   static const mainSongCharts = [usSongs, ukSongs, globalSongs];
   static const mainAlbumCharts = [usAlbums, ukAlbums, globalAlbums];
 
+  /// When an old song drops off [def] (docs K302): each rule is (weeks on
+  /// the chart, the place it must stay at or above); a song with that many
+  /// weeks below that place goes, unless it climbed. The US song chart
+  /// follows its real rule as it changed: from the chart of 5 December
+  /// 2015 also after a year outside the top 25; from 25 October 2025 four
+  /// steps. The first rule (20 weeks, top 50; really from 1991) holds in
+  /// every year, as on the UK chart.
+  static List<(int, int)> recurrentRules(ChartDef def, int week) {
+    if (!def.recurrent) return const [];
+    if (def.id != usSongs) return const [(20, 50)];
+    final y = GameTime.yearOf(week), w = GameTime.weekOfYear(week);
+    if (y > 2025 || (y == 2025 && w >= recurrentTiersWeek)) {
+      return const [(20, 50), (26, 25), (52, 10), (78, 5)];
+    }
+    if (y > 2015 || (y == 2015 && w >= recurrentYearWeek)) {
+      return const [(20, 50), (52, 25)];
+    }
+    return const [(20, 50)];
+  }
+
+  /// The weeks of the year the US rule changed (the charts of 5 December
+  /// 2015 and 25 October 2025).
+  static const recurrentYearWeek = 49, recurrentTiersWeek = 43;
+
+  /// Whether a song [weeksOn] weeks on the chart at [place] goes under
+  /// [rules].
+  static bool isRecurrent(List<(int, int)> rules, int weeksOn, int place) {
+    for (final (weeks, line) in rules) {
+      if (weeksOn >= weeks && place > line) return true;
+    }
+    return false;
+  }
+
   /// Song chart rules per market (docs/simulation.md §4).
   static ChartRules songRules(ChartMarket m, int week) {
     final y = GameTime.yearOf(week);

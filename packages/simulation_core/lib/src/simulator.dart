@@ -1633,18 +1633,18 @@ class Simulator {
   List<ChartEntry> _buildChart(
       ChartDef def, List<int> entityIds, Float64List points, List<int> newNo1) {
     final w = world;
-    final c = w.config;
     // Recurrent rules can skip entries, so keep a margin of candidates.
+    final rules = Charts.recurrentRules(def, w.week);
     final need = def.recurrent ? def.size * 2 : def.size;
     var order = _topOrder(points, entityIds, need);
-    if (def.recurrent && order.length < entityIds.length) {
+    if (rules.isNotEmpty && order.length < entityIds.length) {
       // Fall back to a full ranking if skipped entries could leave gaps.
       var skippable = 0;
       for (final i in order) {
         final Charted e = def.kind == ChartKind.songs
             ? w.songs[entityIds[i]]
             : w.albums[entityIds[i]];
-        if (e.weeksOnChart(def.id) >= c.recurrentWeeks) skippable++;
+        if (e.weeksOnChart(def.id) >= rules.first.$1) skippable++;
       }
       if (order.length - skippable < def.size) {
         order = _topOrder(points, entityIds, entityIds.length);
@@ -1660,13 +1660,15 @@ class Simulator {
       final id = entityIds[i];
       final Charted e = isSongs ? w.songs[id] : w.albums[id];
       final pos = chart.length + 1;
-      if (def.recurrent &&
-          e.weeksOnChart(def.id) >= c.recurrentWeeks &&
-          pos > c.recurrentPosition) {
+      final last = e.statsOrNull(def.id)?.lastPos ?? 0;
+      // An old song low on the chart drops off, unless it climbed (docs
+      // K302: Billboard keeps a gaining song).
+      if (rules.isNotEmpty &&
+          Charts.isRecurrent(rules, e.weeksOnChart(def.id), pos) &&
+          !(last > 0 && pos < last)) {
         continue;
       }
       final st = e.stats(def.id);
-      final last = st.lastPos;
       st.weeksOn++;
       if (st.peak == 0 || pos < st.peak) st.peak = pos;
       if (st.weeksOn == 1) st.debutPos = pos;

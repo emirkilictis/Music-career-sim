@@ -137,6 +137,15 @@ class ImageStore extends ChangeNotifier {
       files[artistKey(artistId, kind)] ??
       files[artistKey(artistId, ArtistPhoto.general)];
 
+  /// Keeps [bytes] (a cropped photo) where [save] can take it from later:
+  /// a temporary file (docs K302: covers chosen before the album exists).
+  String stage(Uint8List bytes) {
+    final f = File('${Directory.systemTemp.path}/cover_'
+        '${DateTime.now().microsecondsSinceEpoch}.${mimeOf(bytes).split('/').last}');
+    f.writeAsBytesSync(bytes);
+    return f.path;
+  }
+
   /// Stores [bytes] (a cropped photo) as the image for [key] (docs K221).
   void saveBytes(String key, Uint8List bytes) {
     final dir = _dir;

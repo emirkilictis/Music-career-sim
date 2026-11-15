@@ -87,8 +87,6 @@ class SimConfig {
     this.songChartRadioDivisor = 450,
     this.songChartSize = 100,
     this.albumChartSize = 200,
-    this.recurrentWeeks = 20,
-    this.recurrentPosition = 50,
     this.activeMinAgeWeeks = 26,
     this.dormantShareOfCutoff = 0.75,
     this.albumDormantShareOfCutoff = 0.8,
@@ -559,8 +557,6 @@ class SimConfig {
   final double songChartRadioDivisor;
   final int songChartSize;
   final int albumChartSize;
-  final int recurrentWeeks;
-  final int recurrentPosition;
 
   /// Songs younger than this stay active regardless of performance.
   final int activeMinAgeWeeks;

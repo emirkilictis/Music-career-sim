@@ -267,6 +267,8 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F165 | Emir: "Bir şarkının satışı hesaplanırken satış hesabına tüm versiyonlardan gelecek satış ve stream dahil olsun ama streamler birleşmesin." (remix, sped up vb.) | ✅ K300 |
 | F166 | Emir: "Bir şarkının live versiyonu çok stream almasın, live versionlar çok tutmasın." | ✅ K300 |
 | F167 | LosingMyWayStan: "There's still a bug that when I add an image to a cover or profile pic in the game it cuts it and takes only like a quarter of the image." Emir: "Bunu çöz! Fotonun ne kadarı sığacak onu ayarlasınlar o karede." | ✅ K301 |
+| F168 | LosingMyWayStan: "There's still the bug of the images cutting, but not on phone, but on every other device." | ✅ K302 |
+| F169 | LosingMyWayStan: "Add the recurrent rule just to USA songs chart, just look up how it works on Billboard, but only as an option." Emir: "Recurrent rule düşünelim ama ben hep olmasından yanayım." | ✅ K302 (hep açık) |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).
