@@ -4,11 +4,13 @@ import 'package:game/game.dart';
 import '../l10n/gen/app_localizations.dart';
 
 /// The words of a social feed item ([title]: its song or album, [name]:
-/// the player, [n]: its number, formatted, [rival]: a beef's rival).
+/// the player, [n]: its number, formatted, [m]: a second one, [rival]: a
+/// beef's rival, or whose record a chart post is about).
 String socialText(AppLocalizations l, FanTopic topic, int variant,
         {required String title,
         required String name,
         required String n,
+        String m = '',
         String rival = ''}) =>
     switch ((topic, variant % socialVariants(topic))) {
       (FanTopic.releaseLove, 0) => l.smReleaseLove0(title),
@@ -289,6 +291,30 @@ String socialText(AppLocalizations l, FanTopic topic, int variant,
       (FanTopic.memeDrop, 0) => l.smMemeDrop0(name, title),
       (FanTopic.memeDrop, 1) => l.smMemeDrop1(title),
       (FanTopic.memeDrop, 2) => l.smMemeDrop2(name, title),
+      (FanTopic.chartAlbumDebut, 0) => l.smChartAlbumDebut0(m, n, name, title),
+      (FanTopic.chartAlbumDebut, 1) => l.smChartAlbumDebut1(m, n, name, title),
+      (FanTopic.chartAlbumDebut, 2) => l.smChartAlbumDebut2(m, n, name, title),
+      (FanTopic.chartSongDebut, 0) => l.smChartSongDebut0(m, name, title),
+      (FanTopic.chartSongDebut, 1) => l.smChartSongDebut1(m, name, title),
+      (FanTopic.chartSongDebut, 2) => l.smChartSongDebut2(m, name, title),
+      (FanTopic.chartNo1, 0) => l.smChartNo10(m, name, title),
+      (FanTopic.chartNo1, 1) => l.smChartNo11(m, name, title),
+      (FanTopic.chartNo1, 2) => l.smChartNo12(m, name, title),
+      (FanTopic.rivalAlbumDebut, 0) => l.smRivalAlbumDebut0(n, rival, title),
+      (FanTopic.rivalAlbumDebut, 1) => l.smRivalAlbumDebut1(n, rival, title),
+      (FanTopic.rivalAlbumDebut, 2) => l.smRivalAlbumDebut2(n, rival, title),
+      (FanTopic.rivalNo1, 0) => l.smRivalNo10(rival, title),
+      (FanTopic.rivalNo1, 1) => l.smRivalNo11(rival, title),
+      (FanTopic.rivalNo1, 2) => l.smRivalNo12(rival, title),
+      (FanTopic.statFirstWeek, 0) => l.smStatFirstWeek0(m, n, name, title),
+      (FanTopic.statFirstWeek, 1) => l.smStatFirstWeek1(m, n, name, title),
+      (FanTopic.statFirstWeek, 2) => l.smStatFirstWeek2(m, n, name, title),
+      (FanTopic.statStreams, 0) => l.smStatStreams0(n, name, title),
+      (FanTopic.statStreams, 1) => l.smStatStreams1(n, name, title),
+      (FanTopic.statStreams, 2) => l.smStatStreams2(n, name, title),
+      (FanTopic.statSales, 0) => l.smStatSales0(n, name),
+      (FanTopic.statSales, 1) => l.smStatSales1(n, name),
+      (FanTopic.statSales, 2) => l.smStatSales2(n, name),
       _ => '',
     };
 

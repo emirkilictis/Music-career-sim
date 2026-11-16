@@ -19,11 +19,13 @@ import 'package:game/game.dart';
 import '../l10n/gen/app_localizations.dart';
 
 /// The words of a social feed item ([title]: its song or album, [name]:
-/// the player, [n]: its number, formatted, [rival]: a beef's rival).
+/// the player, [n]: its number, formatted, [m]: a second one, [rival]: a
+/// beef's rival, or whose record a chart post is about).
 String socialText(AppLocalizations l, FanTopic topic, int variant,
         {required String title,
         required String name,
         required String n,
+        String m = '',
         String rival = ''}) =>
     switch ((topic, variant % socialVariants(topic))) {
 ''' + '\n'.join(lines) + '''

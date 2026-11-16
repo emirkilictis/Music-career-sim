@@ -22,6 +22,11 @@ class PostMediaCard extends StatelessWidget {
   final SocialItemView item;
   final String artistName;
 
+  /// Whose record the card shows: a rival's in a chart post about theirs
+  /// (docs K303).
+  String get _artist =>
+      item.isAccount && item.rivalId >= 0 ? item.rivalName : artistName;
+
   /// The game's week now (whether Streamify is open).
   final int week;
   final bool dark, round;
@@ -132,8 +137,8 @@ class PostMediaCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
                 item.isAlbum
-                    ? l.postMediaAlbum(artistName)
-                    : l.postMediaSingle(artistName),
+                    ? l.postMediaAlbum(_artist)
+                    : l.postMediaSingle(_artist),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: _muted, fontSize: 13)),
@@ -213,7 +218,7 @@ class PostMediaCard extends StatelessWidget {
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
                     fontSize: 14)),
-            Text(artistName,
+            Text(_artist,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: Colors.white70, fontSize: 12.5)),
@@ -230,8 +235,10 @@ class PostMediaCard extends StatelessWidget {
     final i = item;
     final billions = i.topic == FanTopic.billionsClub;
     final value = billions ? '${fmt.number(1e9)}+' : fmt.number(i.number);
-    final caption =
-        billions ? l.postMediaBillions(platformName) : l.postMediaFirstWeek;
+    // A stat account's streams count (docs K303) reads like the club's.
+    final caption = billions || i.topic == FanTopic.statStreams
+        ? l.postMediaBillions(platformName)
+        : l.postMediaFirstWeek;
     return Container(
       color: const Color(0xFF111114),
       padding: const EdgeInsets.all(12),
@@ -262,7 +269,7 @@ class PostMediaCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                     fontSize: 12.5)),
             const SizedBox(height: 4),
-            Text('${i.title} · $artistName',
+            Text('${i.title} · $_artist',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: Colors.white, fontSize: 12.5)),
@@ -303,7 +310,7 @@ class PostMediaCard extends StatelessWidget {
                     color: Color(0xFF111111),
                     fontStyle: FontStyle.italic,
                     fontSize: 14)),
-            Text(artistName,
+            Text(_artist,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: Color(0xFF555555), fontSize: 12)),

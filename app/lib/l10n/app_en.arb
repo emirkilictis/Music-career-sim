@@ -5149,6 +5149,342 @@
       }
     }
   },
+  "smChartAlbumDebut0": "{title} by {name} debuts at No. {m} on this week's Top 100 Albums, with {n} equivalent album units.",
+  "@smChartAlbumDebut0": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smChartAlbumDebut1": "Debut: {name} – {title} enters the Top 100 Albums at No. {m} ({n} units in its first week).",
+  "@smChartAlbumDebut1": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smChartAlbumDebut2": "This week's Top 100 Albums: {title} by {name} arrives at No. {m} with {n} units.",
+  "@smChartAlbumDebut2": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smChartSongDebut0": "{title} by {name} debuts at No. {m} on the Top 100 Songs.",
+  "@smChartSongDebut0": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smChartSongDebut1": "New on the Top 100 Songs: {name} – \"{title}\" enters at No. {m}.",
+  "@smChartSongDebut1": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smChartSongDebut2": "Hot debut: {title} by {name} lands at No. {m} on the Top 100 Songs.",
+  "@smChartSongDebut2": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smChartNo10": "{title} by {name} is No. 1 this week. Week {m} at the top.",
+  "@smChartNo10": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smChartNo11": "No. 1: {name} – {title} (week {m} at No. 1)",
+  "@smChartNo11": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smChartNo12": "{name} – {title}: No. 1, week {m}",
+  "@smChartNo12": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalAlbumDebut0": "{title} by {rival} debuts at No. 1 on the Top 100 Albums with {n} units.",
+  "@smRivalAlbumDebut0": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalAlbumDebut1": "No. 1 debut: {rival} – {title} ({n} first-week units)",
+  "@smRivalAlbumDebut1": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalAlbumDebut2": "{rival} opens at the top: {title} debuts at No. 1 with {n} units.",
+  "@smRivalAlbumDebut2": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalNo10": "{title} by {rival} is the new No. 1.",
+  "@smRivalNo10": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalNo11": "New No. 1: {rival} – {title}",
+  "@smRivalNo11": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalNo12": "{rival} takes the top spot with {title} this week.",
+  "@smRivalNo12": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smStatFirstWeek0": "{name} – \"{title}\" first week in the US: {n} units ({m} pure sales).",
+  "@smStatFirstWeek0": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smStatFirstWeek1": "📊 {title} – {name}\nUS week one: {n} units\nPure sales: {m}",
+  "@smStatFirstWeek1": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smStatFirstWeek2": "{title} by {name} sold {m} copies and earned {n} total units in its first US week.",
+  "@smStatFirstWeek2": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smStatStreams0": "{title} by {name} has now surpassed {n} streams on Streamify.",
+  "@smStatStreams0": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smStatStreams1": "📈 {name} – \"{title}\" passes {n} Streamify streams.",
+  "@smStatStreams1": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smStatStreams2": "Milestone: {title} by {name} crosses {n} streams.",
+  "@smStatStreams2": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smStatSales0": "{name} has now sold {n} records worldwide.",
+  "@smStatSales0": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smStatSales1": "📀 {name} career sales: {n} records.",
+  "@smStatSales1": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "smStatSales2": "{name} passes {n} records sold.",
+  "@smStatSales2": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "networkForum": "Fan forum",
   "networkMyPlace": "MyPlace",
   "networkChirper": "Chirper",

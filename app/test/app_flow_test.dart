@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:music_career_sim/widgets/post_media.dart';
 import 'package:music_career_sim/widgets/art.dart';
 
 import 'support.dart';
@@ -114,10 +115,15 @@ void main() {
     // Platforms live on Home, not in the tab bar.
     await tester.tap(_ci('Home'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(_ci('Streamify'), 300,
+    // The platform's tile, not a post's play button (docs K303).
+    final streamify = find.byElementPredicate((e) =>
+        e.widget is Text &&
+        (e.widget as Text).data?.toLowerCase() == 'streamify' &&
+        e.findAncestorWidgetOfExactType<PostMediaCard>() == null);
+    await tester.scrollUntilVisible(streamify, 300,
         scrollable: find.byType(Scrollable).first);
     await tester.pumpAndSettle();
-    await tester.tap(_ci('Streamify'));
+    await tester.tap(streamify);
     await tester.pumpAndSettle();
     expect(_ci('Your artist profile'), findsOneWidget);
     await tester.tap(_ci('Top 50 – Global'));

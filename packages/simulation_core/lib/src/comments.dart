@@ -157,6 +157,9 @@ abstract final class Comments {
   /// The comments under [post], most liked first.
   static List<Comment> of(World w, Artist p, SocialItem post) {
     if (post.fan == SocialItem.byRival) return const [];
+    // Under a chart post about a rival, the player's fans have nothing to
+    // say (docs K303).
+    if (post.byAccount && post.artistId >= 0) return const [];
     final key = keyOf(post);
     final r = RandomStream.keyed(w.seed, post.week, key, RngPurpose.comments);
     final n = math

@@ -196,6 +196,11 @@ String _grade(int g) => g >= 90
 String _event(GameSession s, GameEvent e) => switch (e) {
       NumberOne() => '#1 on ${Charts.all[e.chartId].key} (${e.weeksAtNo1} wk)',
       CriticReview() => 'review ${e.score}',
+      FollowUpFlop() => 'follow-up flop: album ${e.albumId}',
+      LegacyRankUp() => 'all-time list #${e.rank}',
+      HallOfFameInducted() => 'Hall of Fame ${e.year}',
+      HallOfFameMissed() => 'Hall of Fame ballot #${e.place} (${e.year})',
+      HallOfFameClass() => 'Hall of Fame class ${e.year}',
       LabelOffer() => 'label offer: ${e.label.name}',
       LabelDropped() => 'dropped by ${e.label.name}',
       StillNumberOne() =>

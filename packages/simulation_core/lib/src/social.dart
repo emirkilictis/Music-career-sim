@@ -117,7 +117,28 @@ enum FanTopic {
   memeFlop,
   memeSilence,
   memeDrop,
+  // The chart's own account and the stat accounts (docs K303).
+  chartAlbumDebut,
+  chartSongDebut,
+  chartNo1,
+  rivalAlbumDebut,
+  rivalNo1,
+  statFirstWeek,
+  statStreams,
+  statSales,
 }
+
+/// Posts by the chart's account and the stat accounts (docs K303).
+const accountTopics = {
+  FanTopic.chartAlbumDebut,
+  FanTopic.chartSongDebut,
+  FanTopic.chartNo1,
+  FanTopic.rivalAlbumDebut,
+  FanTopic.rivalNo1,
+  FanTopic.statFirstWeek,
+  FanTopic.statStreams,
+  FanTopic.statSales,
+};
 
 /// Fans' memes (docs K277), from the Chirper years.
 const memeTopics = {
@@ -141,6 +162,7 @@ class SocialItem {
     this.number = 0,
     this.brand = -1,
     this.artistId = -1,
+    this.extra = 0,
   });
   final int week;
   final FanTopic topic;
@@ -152,6 +174,15 @@ class SocialItem {
 
   /// [fan] of a rival's own post.
   static const byRival = -2;
+
+  /// [fan] of the chart's own account (docs K303).
+  static const byChart = -3;
+
+  /// [fan] of the stat accounts: [byStats] down to [byStats] - 2.
+  static const byStats = -4, statAccounts = 3;
+
+  /// The chart's account or a stat account.
+  bool get byAccount => fan <= byChart && fan > byStats - statAccounts;
   final int songId;
   final int albumId;
   final int likes;
@@ -162,8 +193,12 @@ class SocialItem {
   /// The brand of a sponsored post ([Brands.all] index; docs K102).
   final int brand;
 
-  /// The rival a beef post is about (docs K229).
+  /// The rival a beef post is about (docs K229), or whose record a chart
+  /// post is about (docs K303).
   final int artistId;
+
+  /// A second number the text uses (a chart place, pure sales; docs K303).
+  final int extra;
 
   bool get byPlayer => fan == -1;
 
@@ -177,7 +212,8 @@ class SocialItem {
         likes,
         number,
         brand,
-        if (artistId >= 0) artistId
+        if (artistId >= 0 || extra != 0) artistId,
+        if (extra != 0) extra,
       ];
 
   static SocialItem fromJson(List<dynamic> j) => SocialItem(
@@ -191,6 +227,7 @@ class SocialItem {
         number: j[7] as int,
         brand: j.length > 8 ? j[8] as int : -1,
         artistId: j.length > 9 ? j[9] as int : -1,
+        extra: j.length > 10 ? j[10] as int : 0,
       );
 }
 

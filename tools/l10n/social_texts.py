@@ -433,4 +433,47 @@ TOPICS = {
   ("My sleep schedule\n{title}: 🗡️", "Uyku düzenim\n{title}: 🗡️"),
   ("Nobody:\n{name}: drops {title} with zero warning", "Kimse:\n{name}: hiç haber vermeden {title} çıkarıyor"),
  ],
+ # The chart's own account and the stat accounts (docs K303). {m}: a
+ # second number (a chart place, weeks at No. 1, pure sales); {rival}:
+ # whose record it is when not the player's.
+ 'chartAlbumDebut': [
+  ("{title} by {name} debuts at No. {m} on this week's Top 100 Albums, with {n} equivalent album units.", "{name} – {title}, bu haftaki Top 100 Albüm listesine {m}. sıradan giriş yaptı: {n} eşdeğer albüm ünitesi."),
+  ("Debut: {name} – {title} enters the Top 100 Albums at No. {m} ({n} units in its first week).", "Yeni giriş: {name} – {title}, Top 100 Albüm listesine {m}. sıradan girdi (ilk haftada {n} ünite)."),
+  ("This week's Top 100 Albums: {title} by {name} arrives at No. {m} with {n} units.", "Bu haftanın Top 100 Albüm listesi: {name} imzalı {title}, {n} ünite ile {m}. sırada."),
+ ],
+ 'chartSongDebut': [
+  ("{title} by {name} debuts at No. {m} on the Top 100 Songs.", "{name} – {title}, Top 100 Şarkı listesine {m}. sıradan giriş yaptı."),
+  ("New on the Top 100 Songs: {name} – \"{title}\" enters at No. {m}.", "Top 100 Şarkı listesinde yeni: {name} imzalı “{title}” {m}. sıradan girdi."),
+  ("Hot debut: {title} by {name} lands at No. {m} on the Top 100 Songs.", "Güçlü giriş: {name} – {title}, Top 100 Şarkı listesinde {m}. sırada."),
+ ],
+ 'chartNo1': [
+  ("{title} by {name} is No. 1 this week. Week {m} at the top.", "{name} – {title} bu hafta 1 numarada. Zirvede {m}. haftası."),
+  ("No. 1: {name} – {title} (week {m} at No. 1)", "1 numara: {name} – {title} (1 numarada {m}. hafta)"),
+  ("{name} – {title}: No. 1, week {m}", "{name} – {title}: 1 numara, {m}. hafta"),
+ ],
+ 'rivalAlbumDebut': [
+  ("{title} by {rival} debuts at No. 1 on the Top 100 Albums with {n} units.", "{rival} – {title}, {n} ünite ile Top 100 Albüm listesine 1 numaradan giriş yaptı."),
+  ("No. 1 debut: {rival} – {title} ({n} first-week units)", "1 numaradan giriş: {rival} – {title} (ilk haftada {n} ünite)"),
+  ("{rival} opens at the top: {title} debuts at No. 1 with {n} units.", "{rival} zirveden açılış yaptı: {title}, {n} ünite ile 1 numaradan girdi."),
+ ],
+ 'rivalNo1': [
+  ("{title} by {rival} is the new No. 1.", "{rival} – {title} yeni 1 numara."),
+  ("New No. 1: {rival} – {title}", "Yeni 1 numara: {rival} – {title}"),
+  ("{rival} takes the top spot with {title} this week.", "{rival}, {title} ile bu hafta zirveye yerleşti."),
+ ],
+ 'statFirstWeek': [
+  ("{name} – \"{title}\" first week in the US: {n} units ({m} pure sales).", "{name} – “{title}” ABD ilk hafta: {n} ünite ({m} saf satış)."),
+  ("📊 {title} – {name}\nUS week one: {n} units\nPure sales: {m}", "📊 {title} – {name}\nABD ilk hafta: {n} ünite\nSaf satış: {m}"),
+  ("{title} by {name} sold {m} copies and earned {n} total units in its first US week.", "{name} – {title}, ABD'deki ilk haftasında {m} kopya sattı ve toplam {n} ünite topladı."),
+ ],
+ 'statStreams': [
+  ("{title} by {name} has now surpassed {n} streams on Streamify.", "{name} – {title}, Streamify'da {n} dinlenmeyi geçti."),
+  ("📈 {name} – \"{title}\" passes {n} Streamify streams.", "📈 {name} – “{title}” Streamify'da {n} dinlenmeyi aştı."),
+  ("Milestone: {title} by {name} crosses {n} streams.", "Dönüm noktası: {name} – {title} {n} dinlenmeyi geçti."),
+ ],
+ 'statSales': [
+  ("{name} has now sold {n} records worldwide.", "{name} dünya genelinde {n} satışı geçti."),
+  ("📀 {name} career sales: {n} records.", "📀 {name} kariyer satışları: {n} kayıt."),
+  ("{name} passes {n} records sold.", "{name}, {n} satış barajını geçti."),
+ ],
 }

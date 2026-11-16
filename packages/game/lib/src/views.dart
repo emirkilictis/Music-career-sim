@@ -3154,6 +3154,7 @@ class SocialItemView {
                     : '',
         likes = i.likes,
         number = i.number,
+        extra = i.extra,
         songId = i.songId,
         albumId = i.albumId,
         rivalName = i.artistId >= 0 ? w.artists[i.artistId].name : '',
@@ -3187,6 +3188,15 @@ class SocialItemView {
   /// The rival posting it themself (docs K234).
   bool get isRival => fan == SocialItem.byRival;
 
+  /// The chart's account or a stat account (docs K303).
+  bool get isAccount =>
+      fan <= SocialItem.byChart &&
+      fan > SocialItem.byStats - SocialItem.statAccounts;
+  bool get isChartAccount => fan == SocialItem.byChart;
+
+  /// Which stat account (0–2; docs K303).
+  int get statAccount => SocialItem.byStats - fan;
+
   /// The rival a beef post is about ('' and -1 for none; docs K229).
   final String rivalName;
   final int rivalId;
@@ -3207,6 +3217,9 @@ class SocialItemView {
   final int likes;
   final int number;
 
+  /// A second number (a chart place, pure sales; docs K303).
+  final int extra;
+
   /// The song or album it talks about (-1: none); the cover it shows.
   final int songId, albumId, coverAlbumId;
   bool get isAlbum => albumId >= 0;
@@ -3225,7 +3238,18 @@ class SocialItemView {
       FanTopic.topTen ||
       FanTopic.yearEndHit =>
         PostMedia.chart,
-      FanTopic.bigWeek || FanTopic.billionsClub => PostMedia.stat,
+      FanTopic.bigWeek ||
+      FanTopic.billionsClub ||
+      FanTopic.statFirstWeek ||
+      FanTopic.statStreams =>
+        PostMedia.stat,
+      // The chart's posts show the record (docs K303).
+      FanTopic.chartAlbumDebut ||
+      FanTopic.chartSongDebut ||
+      FanTopic.chartNo1 ||
+      FanTopic.rivalAlbumDebut ||
+      FanTopic.rivalNo1 =>
+        PostMedia.release,
       FanTopic.criticHigh || FanTopic.criticLow => PostMedia.score,
       FanTopic.releaseLove ||
       FanTopic.releaseMixed ||

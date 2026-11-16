@@ -233,5 +233,153 @@ abstract final class SocialFeed {
     for (final item in items.take(maxPerWeek)) {
       Social.add(w, item);
     }
+    accounts(w, p, events, week);
+  }
+
+  /// Account posts in one week at most (docs K303).
+  static const maxAccountPosts = 4;
+
+  /// The chart's account posts from the Chirper years; the stat accounts
+  /// from a few years in.
+  static const chartsFrom = 2009, statsFrom = 2012;
+
+  /// A rival's #1 album debut is posted from these first-week US units, or
+  /// for a star this famous.
+  static const rivalDebutUnits = 150000.0, rivalDebutFame = 0.6;
+
+  /// Share of other rivals' new #1 songs posted.
+  static const rivalNo1Share = 0.4;
+
+  /// The chart's own account and the stat accounts (docs K303): a debut
+  /// and its first-week numbers, a #1, streams and sales passing a mark;
+  /// a rival's #1 too.
+  static void accounts(World w, Artist p, List<GameEvent> events, int week) {
+    final year = GameTime.yearOf(week);
+    if (year < chartsFrom) return;
+    final stats = year >= statsFrom;
+    final r = RandomStream.keyed(
+        w.seed, week, p.id + (1 << 24), RngPurpose.social + 1);
+    final followers = Social.followers(w, p);
+    final items = <SocialItem>[];
+    final used = <FanTopic, int>{};
+    final base = r.nextInt(Social.variants);
+    void post(int by, FanTopic topic,
+        {int songId = -1,
+        int albumId = -1,
+        int number = 0,
+        int extra = 0,
+        int artistId = -1}) {
+      // Their own audience, and the player's fans who share it.
+      final fame = artistId >= 0 ? w.artists[artistId].fame : p.fame;
+      final likes = (2e4 * (0.2 + fame) +
+              (artistId >= 0 ? 0 : followers * 0.01)) *
+          r.range(0.6, 1.4);
+      items.add(SocialItem(
+        week: week,
+        topic: topic,
+        variant:
+            (base + (used[topic] = (used[topic] ?? -1) + 1)) % Social.variants,
+        fan: by,
+        songId: songId,
+        albumId: albumId,
+        number: number,
+        likes: likes.round(),
+        artistId: artistId,
+        extra: extra,
+      ));
+    }
+
+    var rivalPosted = false;
+    int statAccount() => SocialItem.byStats - r.nextInt(SocialItem.statAccounts);
+    bool debutWeek(Album al) => al.releaseWeek == week - 1 || al.releaseWeek == week;
+    for (final e in events) {
+      switch (e) {
+        case AlbumFirstWeek(
+                :final albumId,
+                :final usUnits,
+                :final usPure,
+                :final usPosition
+              )
+            when usPosition > 0:
+          post(SocialItem.byChart, FanTopic.chartAlbumDebut,
+              albumId: albumId, number: usUnits.round(), extra: usPosition);
+          if (stats) {
+            post(statAccount(), FanTopic.statFirstWeek,
+                albumId: albumId,
+                number: usUnits.round(),
+                extra: usPure.round());
+          }
+        // A #1 debut is the #1 post's news.
+        case ChartDebut(
+                chartId: Charts.usSongs,
+                kind: EntityKind.song,
+                :final entityId,
+                :final position
+              )
+            when position > 1 && position <= 40:
+          post(SocialItem.byChart, FanTopic.chartSongDebut,
+              songId: entityId, extra: position);
+        case NumberOne(:final chartId, :final kind, :final entityId,
+                :final weeksAtNo1)
+            when chartId == Charts.usSongs || chartId == Charts.usAlbums:
+          // An album's #1 debut is in its debut post.
+          if (kind == EntityKind.album &&
+              weeksAtNo1 == 1 &&
+              debutWeek(w.albums[entityId])) {
+            break;
+          }
+          post(SocialItem.byChart, FanTopic.chartNo1,
+              songId: kind == EntityKind.song ? entityId : -1,
+              albumId: kind == EntityKind.album ? entityId : -1,
+              extra: weeksAtNo1);
+        case StillNumberOne(:final chartId, :final kind, :final entityId,
+                :final weeksAtNo1)
+            when chartId == Charts.usSongs || chartId == Charts.usAlbums:
+          post(SocialItem.byChart, FanTopic.chartNo1,
+              songId: kind == EntityKind.song ? entityId : -1,
+              albumId: kind == EntityKind.album ? entityId : -1,
+              extra: weeksAtNo1);
+        case RivalNumberOne(
+              :final chartId,
+              :final kind,
+              :final entityId,
+              :final artistId
+            ):
+          // One rival's record a week, and only a big album's debut, so
+          // the player's own news keeps the feed.
+          if (rivalPosted) break;
+          if (kind == EntityKind.album && debutWeek(w.albums[entityId])) {
+            final al = w.albums[entityId];
+            final units = w.albumFirstWeekIn(al, ChartMarket.us);
+            if (units < rivalDebutUnits &&
+                w.artists[artistId].fame < rivalDebutFame) {
+              break;
+            }
+            rivalPosted = true;
+            post(SocialItem.byChart, FanTopic.rivalAlbumDebut,
+                albumId: entityId, artistId: artistId, number: units.round());
+          } else if (kind == EntityKind.song &&
+              (w.artists[artistId].fame >= rivalDebutFame ||
+                  r.chance(rivalNo1Share))) {
+            // A new #1 song, a star's always (an album back at the top is
+            // not news).
+            rivalPosted = true;
+            post(SocialItem.byChart, FanTopic.rivalNo1,
+                songId: kind == EntityKind.song ? entityId : -1,
+                albumId: kind == EntityKind.album ? entityId : -1,
+                artistId: artistId);
+          }
+        case StreamMilestone(:final songId, :final plays) when stats:
+          post(statAccount(), FanTopic.statStreams,
+              songId: songId, number: plays.round());
+        case SalesMilestone(:final copies) when stats:
+          post(statAccount(), FanTopic.statSales, number: copies.round());
+        default:
+          break;
+      }
+    }
+    for (final item in items.take(maxAccountPosts)) {
+      Social.add(w, item);
+    }
   }
 }

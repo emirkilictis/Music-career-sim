@@ -144,12 +144,23 @@ class Fmt {
         name: playerName,
         rival: i.rivalName,
         n: switch (i.topic) {
-          FanTopic.bigWeek => compact(i.number.toDouble()),
+          FanTopic.bigWeek ||
+          FanTopic.statStreams ||
+          FanTopic.statSales =>
+            compact(i.number.toDouble()),
           FanTopic.criticHigh ||
           FanTopic.criticLow =>
             (i.number / 10).toStringAsFixed(1),
+          // The chart's and the stat accounts' exact numbers (docs K303).
+          FanTopic.chartAlbumDebut ||
+          FanTopic.rivalAlbumDebut ||
+          FanTopic.statFirstWeek =>
+            number(i.number),
           _ => '${i.number}',
         },
+        m: i.topic == FanTopic.statFirstWeek
+            ? number(i.extra)
+            : '${i.extra}',
       );
 
   /// "this week", "3 wk ago".

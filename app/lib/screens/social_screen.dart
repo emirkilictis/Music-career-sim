@@ -510,6 +510,51 @@ String fanHandle(int seed, String artist) {
   };
 }
 
+/// The chart's own account and the stat accounts (docs K303): name,
+/// handle, colour and badge.
+const _chartAccount = ('Top 100 Charts', '@top100charts', Color(0xFF111111));
+const _statAccounts = [
+  ('Chart Pulse', '@chartpulse', Color(0xFF1D4ED8)),
+  ('Pop Tally', '@poptally', Color(0xFFDB2777)),
+  ('Stream Ledger', '@streamledger', Color(0xFF059669)),
+];
+
+(String, String, Color) _account(SocialItemView i) => i.isChartAccount
+    ? _chartAccount
+    : _statAccounts[i.statAccount.clamp(0, _statAccounts.length - 1)];
+
+/// An account's picture: its colour and a badge.
+class AccountAvatar extends StatelessWidget {
+  const AccountAvatar(
+      {super.key, required this.item, required this.size, required this.square});
+  final SocialItemView item;
+  final double size;
+  final bool square;
+
+  @override
+  Widget build(BuildContext context) {
+    final (_, _, color) = _account(item);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: square ? BoxShape.rectangle : BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: item.isChartAccount
+          ? Text('100',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: AppFonts.condensed,
+                  fontWeight: FontWeight.w800,
+                  fontSize: size * 0.36))
+          : Icon(Icons.bar_chart_rounded,
+              color: Colors.white, size: size * 0.6),
+    );
+  }
+}
+
 /// The name a fan shows above their handle.
 String fanName(int seed, String artist) => switch (seed % 12) {
       0 || 1 => '${_fanNames[(seed >> 6) % _fanNames.length]} | $artist',
@@ -919,18 +964,25 @@ class FeedPost extends StatelessWidget {
     final fmt = context.fmt;
     final p = state.player;
     final rival = item.isRival;
+    final account = item.isAccount;
     final handle = item.isPlayer
         ? playerHandle(p.name)
         : rival
             ? playerHandle(item.rivalName)
-            : fanHandle(item.fan, p.name);
+            : account
+                ? _account(item).$2
+                : fanHandle(item.fan, p.name);
     final name = item.isPlayer
         ? p.name
         : rival
             ? item.rivalName
-            : fanName(item.fan, p.name);
+            : account
+                ? _account(item).$1
+                : fanName(item.fan, p.name);
     final square = !skin.round;
-    final avatar = item.isPlayer
+    final avatar = account
+        ? AccountAvatar(item: item, size: square ? 48 : 40, square: square)
+        : item.isPlayer
         ? ArtistAvatar(
             name: p.name,
             seed: p.id,
@@ -984,7 +1036,7 @@ class FeedPost extends StatelessWidget {
             child: Column(children: [
               avatar,
               const SizedBox(height: 4),
-              Text(item.isPlayer || rival ? name : handle.substring(1),
+              Text(item.isPlayer || rival || account ? name : handle.substring(1),
                   maxLines: 1,
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
@@ -1058,7 +1110,7 @@ class FeedPost extends StatelessWidget {
               Flexible(
                 child: NameLine(
                     name: name,
-                    verified: item.isPlayer && verified || rival,
+                    verified: item.isPlayer && verified || rival || account,
                     skin: skin),
               ),
               const SizedBox(width: 4),

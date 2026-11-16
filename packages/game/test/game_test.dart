@@ -7322,4 +7322,68 @@ void main() {
       g.close();
     });
   });
+
+  // docs K303: the chart's account and the stat accounts post the
+  // numbers.
+  test('the chart account posts a debut and its first week; stats too', () {
+    final g = GameSession.start(
+        slots,
+        _setup(
+            premium: true,
+            tier: StartTier.superstar,
+            money: StartMoney.millionaire,
+            startYear: 2018));
+    g.world.player!.moneyCents = 1 << 40;
+    final songs = <int>[];
+    while (songs.length < 8) {
+      if (!g.player.canWrite || g.player.creativeEnergy < 30) {
+        g.advanceWeek();
+        continue;
+      }
+      songs.add(g.writeSong(budget: BudgetTier.high).id);
+    }
+    g.scheduleAlbum('Big', songs,
+        releaseWeek: g.week + 4, announceWeek: g.week);
+    AlbumFirstWeek? fw;
+    while (fw == null) {
+      fw = g.advanceWeek().events.whereType<AlbumFirstWeek>().firstOrNull;
+    }
+    final w = g.world;
+    final mine = [
+      for (final i in w.social.feed)
+        if (i.week == w.week - 1 || i.week == w.week)
+          if (i.byAccount) i
+    ];
+    final debut =
+        mine.firstWhere((i) => i.topic == FanTopic.chartAlbumDebut);
+    expect(debut.fan, SocialItem.byChart);
+    expect(debut.albumId, fw.albumId);
+    expect(debut.extra, fw.usPosition);
+    expect(debut.number, fw.usUnits.round());
+    expect(debut.artistId, -1);
+    final stat = mine.firstWhere((i) => i.topic == FanTopic.statFirstWeek);
+    expect(stat.fan, inInclusiveRange(
+        SocialItem.byStats - SocialItem.statAccounts + 1, SocialItem.byStats));
+    expect(stat.extra, fw.usPure.round());
+    // Kept with the save, numbers and all.
+    final again = SocialItem.fromJson(debut.toJson());
+    expect((again.fan, again.extra, again.number, again.artistId),
+        (debut.fan, debut.extra, debut.number, debut.artistId));
+    // A year on, rivals' number ones are posted too, as theirs.
+    for (var i = 0; i < 52; i++) {
+      g.advanceWeek();
+    }
+    final rivals = [
+      for (final i in w.social.feed)
+        if (i.topic == FanTopic.rivalNo1 || i.topic == FanTopic.rivalAlbumDebut)
+          i
+    ];
+    expect(rivals, isNotEmpty);
+    for (final i in rivals) {
+      expect(i.fan, SocialItem.byChart);
+      expect(i.artistId, isNot(w.playerArtistId));
+      expect(Comments.of(w, w.player!, i), isEmpty);
+    }
+    g.close();
+  });
 }
