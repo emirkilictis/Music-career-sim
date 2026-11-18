@@ -385,6 +385,20 @@ void main() {
       await tester.tap(find.byWidget(box.widget));
       await tester.pumpAndSettle();
     }
+    // An extra edition opens its card (docs K304: it was a gray box).
+    await tester.scrollUntilVisible(_ci('Edition 2'), 300,
+        scrollable: find.byType(Scrollable).first);
+    // Clear of the buttons at the bottom.
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -300));
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('Edition 2'));
+    await tester.pumpAndSettle();
+    final remove = find.byTooltip('Delete');
+    await tester.scrollUntilVisible(remove, 200,
+        scrollable: find.byType(Scrollable).first);
+    expect(find.byType(ChoiceChip), findsWidgets);
+    await tester.tap(remove);
+    await tester.pumpAndSettle();
     await tester.tap(_ci('Keep in vault'));
     await tester.pumpAndSettle();
     expect(find.textContaining('is waiting in your vault'), findsOneWidget);

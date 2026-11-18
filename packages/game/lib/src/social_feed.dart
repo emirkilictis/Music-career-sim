@@ -340,7 +340,6 @@ abstract final class SocialFeed {
               albumId: kind == EntityKind.album ? entityId : -1,
               extra: weeksAtNo1);
         case RivalNumberOne(
-              :final chartId,
               :final kind,
               :final entityId,
               :final artistId

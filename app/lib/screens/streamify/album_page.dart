@@ -78,6 +78,10 @@ class _StreamifyAlbumPageState extends State<StreamifyAlbumPage> {
     final total = tracks.fold(0.0, (sum, s) => sum + s.lifetimeStreams.total);
     String count(double streams) =>
         plays.format((streams * Streamify.share).round());
+    // Versions under their songs, or the page clean (docs K304).
+    final settings = context.settings;
+    final showVersions = settings.showVersions;
+    final hasVersions = tracks.any((s) => s.versions.isNotEmpty);
     void openSong(SongView s) => Navigator.push(
         context,
         MaterialPageRoute(
@@ -199,6 +203,18 @@ class _StreamifyAlbumPageState extends State<StreamifyAlbumPage> {
                                 kind: EntityKind.album,
                                 id: al.id))),
                   ),
+                if (hasVersions)
+                  IconButton(
+                    tooltip: showVersions ? l.versionsHide : l.versionsShow,
+                    icon: Icon(
+                        showVersions
+                            ? Icons.layers_rounded
+                            : Icons.layers_outlined,
+                        color: showVersions
+                            ? StreamifyColors.accent
+                            : StreamifyColors.muted),
+                    onPressed: () => settings.setShowVersions(!showVersions),
+                  ),
                 const Spacer(),
                 const Icon(Icons.shuffle_rounded,
                     color: StreamifyColors.muted, size: 26),
@@ -264,7 +280,7 @@ class _StreamifyAlbumPageState extends State<StreamifyAlbumPage> {
               ]),
             ),
           );
-          if (s.versions.isEmpty) return row;
+          if (s.versions.isEmpty || !showVersions) return row;
           // Each version is a track of its own, with its own plays
           // (docs K300).
           return Column(children: [

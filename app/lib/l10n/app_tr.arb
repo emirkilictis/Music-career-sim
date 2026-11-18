@@ -2829,5 +2829,7 @@
   "historyWeeksAt1Line": "#1’de {count} hafta",
   "historyShareText": "{name}, {chart} listesinde. {app}",
   "versionPlays": "{plays} dinlenme",
-  "versionOriginalPlays": "Orijinal: {plays} dinlenme. Her versiyonun uygulamalarda kendi sayacı var; satış, sertifika ve listeler hepsini birlikte sayar."
+  "versionOriginalPlays": "Orijinal: {plays} dinlenme. Her versiyonun uygulamalarda kendi sayacı var; satış, sertifika ve listeler hepsini birlikte sayar.",
+  "versionsShow": "Remix ve diğer versiyonları göster",
+  "versionsHide": "Versiyonları gizle"
 }

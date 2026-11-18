@@ -1668,7 +1668,7 @@ class _EditionEditor extends StatelessWidget {
           for (final f in EditionFormat.values)
             // Only the formats of the day (docs K289).
             if (f != EditionFormat.digital &&
-                f.availableIn(context.career.year))
+                f.availableIn(year))
               ChoiceChip(
                 label: Text(fmt.editionFormat(f)),
                 selected: f == edition.format,

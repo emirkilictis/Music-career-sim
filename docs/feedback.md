@@ -270,6 +270,10 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F168 | LosingMyWayStan: "There's still the bug of the images cutting, but not on phone, but on every other device." | ✅ K302 |
 | F169 | LosingMyWayStan: "Add the recurrent rule just to USA songs chart, just look up how it works on Billboard, but only as an option." Emir: "Recurrent rule düşünelim ama ben hep olmasından yanayım." | ✅ K302 (hep açık) |
 | F170 | Emir: "Sahte Twitter'da chart ve stat hesapları da olsun, postlar atsınlar. Albümümüz debut olunca resmi bir hesap ilk hafta sayılarını atsın falan." | ✅ K303 |
+| F171 | Federico22Swiftie: "When I plan the release of an album and add versions like variants, a big gray screen appears and it doesn't let me add." | ✅ K304 |
+| F172 | Federico22Swiftie: "Make an option to hide the variants here and maybe see them separately for the single, the clean page with only song and streams for Spotify was a bit better." | ✅ K304 |
+| F173 | Federico22Swiftie: "A song declines by like 0.20% a week every week after release until you release a new song, the same for every song; songs randomly going at 0 streams; every single debuts with the same amount of streams." | 🔍 K304: yeniden üretilemedi, ayrıntı bekleniyor |
+| F174 | Federico22Swiftie: "The bugs of images cutting." | ✅ K302 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

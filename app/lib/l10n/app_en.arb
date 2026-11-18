@@ -10427,5 +10427,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "versionsShow": "Show remixes and other versions",
+  "versionsHide": "Hide the versions"
 }

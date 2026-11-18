@@ -2756,6 +2756,8 @@ k('historyShareText','{name} on the {chart}. {app}','{name}, {chart} listesinde.
 k('versionPlays','{plays} plays','{plays} dinlenme', plays='String')
 k('versionOriginalPlays','Original: {plays} plays. Each version counts its own on the apps; sales, certifications and the charts add them all up.','Orijinal: {plays} dinlenme. Her versiyonun uygulamalarda kendi sayacı var; satış, sertifika ve listeler hepsini birlikte sayar.', plays='String')
 
+k('versionsShow','Show remixes and other versions','Remix ve diğer versiyonları göster')
+k('versionsHide','Hide the versions','Versiyonları gizle')
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

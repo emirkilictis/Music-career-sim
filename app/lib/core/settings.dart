@@ -59,6 +59,15 @@ class AppSettings extends ChangeNotifier {
   /// leave it themselves.
   String? openSlot;
 
+  /// Remixes, sped-up and other versions under their songs on Streamify's
+  /// album pages (docs K304; off: only the songs, the page clean).
+  bool showVersions = false;
+
+  void setShowVersions(bool on) {
+    showVersions = on;
+    _save();
+  }
+
   /// Careers whose first-career guide was put away (docs K297).
   final Set<String> guideHidden = {};
 
@@ -84,6 +93,7 @@ class AppSettings extends ChangeNotifier {
         s.sharpCorners = m['cornerStyle'] != 'soft';
         s.avatarFaces = m['avatars'] != 'initials';
         s.openSlot = m['openSlot'] as String?;
+        s.showVersions = m['showVersions'] as bool? ?? false;
         s.guideHidden.addAll(
             [for (final x in m['guideHidden'] as List? ?? const []) '$x']);
       } on FormatException {
@@ -145,6 +155,7 @@ class AppSettings extends ChangeNotifier {
       'cornerStyle': sharpCorners ? 'sharp' : 'soft',
       'avatars': avatarFaces ? 'faces' : 'initials',
       if (openSlot != null) 'openSlot': openSlot,
+      if (showVersions) 'showVersions': true,
       if (guideHidden.isNotEmpty) 'guideHidden': guideHidden.toList(),
     }));
   }
