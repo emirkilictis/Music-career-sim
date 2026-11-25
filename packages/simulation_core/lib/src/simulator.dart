@@ -297,8 +297,8 @@ class Simulator {
       final promoAge = w.week - s.singleWeek;
       if (promoAge >= 26) continue;
       final ageRel = w.week - s.releasedWeek;
-      singleLoad[id] =
-          (singleLoad[id] ?? 0) + _singleFanCurve(c, ageRel, promoAge);
+      singleLoad[id] = (singleLoad[id] ?? 0) +
+          _singleFanCurve(c, ageRel, promoAge, _replay(s));
       promoLoad[id] = (promoLoad[id] ?? 0) +
           _promoLife(s, promoAge, fastStart(w.artists[id]));
     }
@@ -369,8 +369,8 @@ class Simulator {
       final ageRel = w.week - s.releasedWeek;
       final promoAge = s.isSingle ? w.week - s.singleWeek : ageRel;
       final fanCurve = s.isSingle
-          ? _singleFanCurve(c, ageRel, promoAge)
-          : _fanCurve(c, ageRel);
+          ? _singleFanCurve(c, ageRel, promoAge, _replay(s))
+          : _fanCurve(c, ageRel, _replay(s));
       // Fans' time is shared between the artist's fresh singles: a new
       // single every few weeks gets less of it each (docs K83).
       final load = s.isSingle && promoAge < 26
@@ -620,7 +620,9 @@ class Simulator {
           s.singleWeek >= 0 &&
           s.singleWeek < w.albums[s.albumId].releaseWeek;
       final singleCurve =
-          preSingle ? math.max(fanCurve, _fanCurve(c, albumAge)) : fanCurve;
+          preSingle
+              ? math.max(fanCurve, _fanCurve(c, albumAge, _replay(s)))
+              : fanCurve;
       final preReach = preSingle
           ? 1 +
               SimConfig.albumSingleReach *
@@ -1612,9 +1614,12 @@ class Simulator {
       final age = w.week - week;
       if (age < 0 || age > 3) continue;
       final k = sameWeek[week] = (sameWeek[week] ?? -1) + 1;
+      // Pre-orders ship in the single's first week (docs K305).
+      final preOrdered = age == 0 && week == s.singleWeek ? s.preOrderLift : 0;
       sum += f.appeal(year) *
           math.pow(w.config.variantDecay, k) *
-          const [1.0, 0.3, 0.1, 0.03][age];
+          const [1.0, 0.3, 0.1, 0.03][age] *
+          (1 + preOrdered);
     }
     if (sum == 0) return;
     for (var k = 0; k < _r; k++) {
@@ -1908,17 +1913,27 @@ class Simulator {
   /// An older song made a single (docs K247): fans come back to it
   /// almost as to a new one, though they have heard it. Before, a single
   /// cut from a years-old album got no fan run at all.
-  static double _singleFanCurve(SimConfig c, int ageRel, int promoAge) {
-    final own = _fanCurve(c, ageRel);
+  static double _singleFanCurve(SimConfig c, int ageRel, int promoAge,
+      [double replay = 1]) {
+    final own = _fanCurve(c, ageRel, replay);
     if (promoAge >= ageRel || promoAge < 0) return own;
-    return math.max(own, 0.7 * _fanCurve(c, promoAge));
+    return math.max(own, 0.7 * _fanCurve(c, promoAge, replay));
   }
 
-  static double _fanCurve(SimConfig c, int ageRel) {
-    final floor = c.fanCurveFloor * math.exp(-ageRel / 104.0);
+  /// [replay]: how long this song's fans keep at it (docs K305,
+  /// [Lifecycle.fanReplay]); the half-life and the floor stretch with it.
+  static double _fanCurve(SimConfig c, int ageRel, [double replay = 1]) {
+    final floor =
+        c.fanCurveFloor * math.sqrt(replay) * math.exp(-ageRel / 104.0);
     return floor +
-        (1 - floor) * math.pow(0.5, ageRel / c.fanCurveHalfLifeWeeks);
+        (1 - floor) *
+            math.pow(0.5, ageRel / (c.fanCurveHalfLifeWeeks * replay));
   }
+
+  /// [Lifecycle.fanReplay] of [s], worked out once.
+  double _replay(Song s) =>
+      _replays[s.id] ??= Lifecycle.fanReplay(world.seed, s);
+  final _replays = <int, double>{};
 
   /// A campaign's lift on exposure for an artist this famous: the lift
   /// above no campaign shrinks to half at full fame (docs K81).

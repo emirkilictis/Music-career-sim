@@ -2758,6 +2758,11 @@ k('versionOriginalPlays','Original: {plays} plays. Each version counts its own o
 
 k('versionsShow','Show remixes and other versions','Remix ve diğer versiyonları göster')
 k('versionsHide','Hide the versions','Versiyonları gizle')
+k('preOrderTitle','Physical editions on pre-order','Ön siparişli fiziksel baskılar')
+k('preOrderHint','Fans can order them for the {weeks} weeks until it comes out; they ship in its first week and count on the charts: about {lift}% more edition sales that week. Paid now.','Çıkışına kadarki {weeks} hafta boyunca hayranlar sipariş verebilir; ilk haftasında gönderilir ve listelerde sayılır: o hafta yaklaşık %{lift} daha fazla baskı satışı. Ücreti şimdi ödenir.', weeks='int', lift='int')
+k('preOrderSurprise','A surprise single has no pre-order weeks: the editions only come out with it.','Sürpriz single’ın ön sipariş haftası yok: baskılar sadece onunla birlikte çıkar.')
+k('preOrderNone','No editions','Baskısız')
+k('preOrderConfirm','Put on pre-order · {cost}','Ön siparişe aç · {cost}', cost='String')
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

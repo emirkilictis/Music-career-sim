@@ -2831,5 +2831,10 @@
   "versionPlays": "{plays} dinlenme",
   "versionOriginalPlays": "Orijinal: {plays} dinlenme. Her versiyonun uygulamalarda kendi sayacı var; satış, sertifika ve listeler hepsini birlikte sayar.",
   "versionsShow": "Remix ve diğer versiyonları göster",
-  "versionsHide": "Versiyonları gizle"
+  "versionsHide": "Versiyonları gizle",
+  "preOrderTitle": "Ön siparişli fiziksel baskılar",
+  "preOrderHint": "Çıkışına kadarki {weeks} hafta boyunca hayranlar sipariş verebilir; ilk haftasında gönderilir ve listelerde sayılır: o hafta yaklaşık %{lift} daha fazla baskı satışı. Ücreti şimdi ödenir.",
+  "preOrderSurprise": "Sürpriz single’ın ön sipariş haftası yok: baskılar sadece onunla birlikte çıkar.",
+  "preOrderNone": "Baskısız",
+  "preOrderConfirm": "Ön siparişe aç · {cost}"
 }

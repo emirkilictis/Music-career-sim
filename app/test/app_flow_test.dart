@@ -325,6 +325,12 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(_ci('No radio push'));
     await tester.pumpAndSettle();
+    // Editions on pre-order for the two weeks of orders (docs K305).
+    expect(_ci('Physical editions on pre-order'), findsOneWidget);
+    expect(find.textContaining('the 2 weeks until it comes out'),
+        findsOneWidget);
+    await tester.tap(_ci('No editions'));
+    await tester.pumpAndSettle();
     // Then pitch and autoplay, in the streaming era (K101).
     if (_ci('Streaming tools').evaluate().isNotEmpty) {
       await tester.tap(_ci('Continue').last);

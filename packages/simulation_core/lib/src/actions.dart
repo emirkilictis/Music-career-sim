@@ -186,7 +186,8 @@ abstract final class Actions {
   /// Puts out a physical edition of a single (docs K92, F26): a CD, a 7"
   /// vinyl, a cassette or a signed CD. Fans buy it mostly in its week; the
   /// sales count on the charts.
-  static void releaseVariant(World w, Artist a, Song s, SingleFormat f) {
+  static void releaseVariant(World w, Artist a, Song s, SingleFormat f,
+      {bool prepaid = false}) {
     if (!s.isSingle || s.releasedWeek < 0) {
       throw ActionException('Only singles get physical editions');
     }
@@ -194,8 +195,12 @@ abstract final class Actions {
       throw ActionException('That edition is already out');
     }
     if (a.tier == ArtistTier.player) {
-      if (f.costCents > a.moneyCents) throw ActionException('Not enough money');
-      a.moneyCents -= f.costCents;
+      if (!prepaid) {
+        if (f.costCents > a.moneyCents) {
+          throw ActionException('Not enough money');
+        }
+        a.moneyCents -= f.costCents;
+      }
       s.productionCostCents += f.costCents;
     }
     if (s.status == SongStatus.dormant) Lifecycle.reactivateSong(w, s);
@@ -1218,17 +1223,36 @@ abstract final class Actions {
         final s = w.songs[sr.songIds.single];
         if (s.isSingle) continue;
         s.preSaves = sr.preSaves;
+        final editions = [
+          for (final i in sr.variantFormats)
+            if (i >= 0 && i < SingleFormat.values.length) SingleFormat.values[i]
+        ];
         releaseSingle(w, a, s,
             campaign: sr.campaign,
             radio: sr.radioPush,
             prepaid: true,
-            paidCents: sr.paidCents,
+            paidCents: sr.paidCents -
+                editions.fold<int>(0, (t, f) => t + f.costCents),
             buzz: sr.buzz);
+        // Its pre-ordered editions ship in its first week (docs K305).
+        for (final f in editions) {
+          releaseVariant(w, a, s, f, prepaid: true);
+        }
+        if (editions.isNotEmpty) {
+          s.preOrderLift = preOrderLift(
+              sr.isSurprise ? 0 : sr.releaseWeek - sr.announceWeek);
+        }
         out.add((scheduleId: sr.id, isAlbum: false, id: s.id));
       }
     }
     return out;
   }
+
+  /// How many more of a single's editions sell in its first week for
+  /// being on pre-order [weeks] weeks (docs K305): 15% a week, up to 60%.
+  static double preOrderLift(int weeks) =>
+      preOrderPerWeek * weeks.clamp(0, preOrderWeeks);
+  static const preOrderPerWeek = 0.15, preOrderWeeks = 4;
 
   /// Years before another surprise drop shocks as much as the first.
   static const surpriseMemoryWeeks = 3 * GameTime.weeksPerYear;

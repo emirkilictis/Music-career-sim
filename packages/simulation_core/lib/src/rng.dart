@@ -46,6 +46,7 @@ abstract final class RngPurpose {
   static const followUp = 60;
   static const catalogWave = 62;
   static const catalogLegs = 64;
+  static const fanReplay = 66;
 }
 
 /// Numbers are JavaScript doubles: the web build's fallback for browsers

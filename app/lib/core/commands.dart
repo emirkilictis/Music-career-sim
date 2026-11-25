@@ -187,10 +187,12 @@ abstract final class Cmd {
 
   static SessionCmd<ScheduledView> scheduleSingle(
           int songId, Campaign campaign, int releaseWeek, int announceWeek,
-          [RadioPush radio = RadioPush.none]) =>
+          [RadioPush radio = RadioPush.none,
+          List<SingleFormat> editions = const []]) =>
       (s) => s.scheduleSingle(songId,
           campaign: campaign,
           radio: radio,
+          editions: editions,
           releaseWeek: releaseWeek,
           announceWeek: announceWeek);
 

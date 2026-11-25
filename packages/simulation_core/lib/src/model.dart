@@ -1015,6 +1015,11 @@ class Song with Charted {
   /// weeks.
   double preSaves = 0;
 
+  /// Physical editions ordered ahead of a scheduled single (docs K305):
+  /// the share more its editions sell in the week it comes out. Set when
+  /// it comes out and used in that same week, so it is not saved.
+  double preOrderLift = 0;
+
   /// Last week's listening by where it came from, in [StreamSource]
   /// order (player songs; not saved; docs K120).
   Float64List? streamSources;

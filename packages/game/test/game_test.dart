@@ -7386,4 +7386,46 @@ void main() {
     }
     g.close();
   });
+
+  // docs K305: a scheduled single's physical editions on pre-order ship
+  // in its first week, more of them for the weeks of orders.
+  test('pre-ordered single editions sell in the first week', () {
+    (double, GameSession) firstWeek(List<SingleFormat> editions) {
+      final dir = Directory('${tmp.path}/po${editions.length}');
+      final g = GameSession.start(
+          SaveSlots(dir),
+          _setup(
+              premium: true,
+              tier: StartTier.risingStar,
+              money: StartMoney.millionaire,
+              startYear: 2018));
+      final id = g.writeSong(budget: BudgetTier.high).id;
+      final money = g.world.player!.moneyCents;
+      final sv = g.scheduleSingle(id,
+          editions: editions,
+          releaseWeek: g.week + 4,
+          announceWeek: g.week);
+      expect(sv, isNotNull);
+      final paid = money - g.world.player!.moneyCents;
+      expect(paid,
+          greaterThanOrEqualTo(editions.fold<int>(0, (t, f) => t + f.costCents)));
+      final s = g.world.songs[id];
+      while (!s.isSingle) {
+        g.advanceWeek();
+      }
+      expect([for (final v in s.variants) v.$1], editions);
+      expect(s.variants.every((v) => v.$2 == s.singleWeek), isTrue);
+      return (s.lifetimePhysical, g);
+    }
+
+    final (none, g0) = firstWeek(const []);
+    final (some, g1) = firstWeek(const [SingleFormat.cd, SingleFormat.vinyl]);
+    // Same world, same song: the editions and their orders on top.
+    expect(some, greaterThan(none));
+    expect(Actions.preOrderLift(4), closeTo(0.6, 1e-9));
+    expect(Actions.preOrderLift(9), closeTo(0.6, 1e-9));
+    expect(Actions.preOrderLift(0), 0);
+    g0.close();
+    g1.close();
+  });
 }

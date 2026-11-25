@@ -156,6 +156,17 @@ abstract final class Lifecycle {
     return (0.9 * r.logNormal(0.5)).clamp(0.35, 2.5).toDouble();
   }
 
+  /// How long a song's fans keep playing it (docs K305), fixed per song:
+  /// around 1, from 0.45 (heard enough after a week or two) to 2.6 (on
+  /// repeat for months), a little longer for a better song. It stretches
+  /// the fans' curve, so two singles no longer fall by the same share
+  /// week after week.
+  static double fanReplay(int seed, Song s) {
+    final r = RandomStream.keyed(seed, 0, s.id, RngPurpose.fanReplay);
+    final q = (s.quality / 100).clamp(0.0, 1.0);
+    return (r.logNormal(0.4) * (0.8 + 0.4 * q)).clamp(0.45, 2.6).toDouble();
+  }
+
   /// Weeks between an artist's catalog updates ([Simulator]'s fade).
   static const fadeWeeks = 13;
 

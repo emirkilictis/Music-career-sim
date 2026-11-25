@@ -1459,11 +1459,23 @@ class GameSession {
   ScheduledView scheduleSingle(int songId,
       {Campaign campaign = Campaign.standard,
       RadioPush radio = RadioPush.none,
+      List<SingleFormat> editions = const [],
       required int releaseWeek,
       required int announceWeek}) {
     final s = _checkSingle(songId);
     _checkDates(releaseWeek, announceWeek);
-    final cost = _campaignCost(campaign) + _radioCost(radio);
+    // Physical editions on pre-order (docs K305): paid now, out with it.
+    if (editions.toSet().length != editions.length) {
+      throw GameException('variantOut', 'That edition is already out');
+    }
+    for (final f in editions) {
+      if (!f.availableIn(GameTime.yearOf(releaseWeek))) {
+        throw GameException('formatNotYet', 'Format not invented yet');
+      }
+    }
+    final cost = _campaignCost(campaign) +
+        _radioCost(radio) +
+        editions.fold<int>(0, (t, f) => t + f.costCents);
     _requireMoney(cost);
     return _schedule(ScheduledRelease(
       id: _nextScheduleId(),
@@ -1474,6 +1486,7 @@ class GameSession {
       createdWeek: world.week,
       campaign: campaign,
       radioPush: radio,
+      variantFormats: [for (final f in editions) f.index],
       paidCents: cost,
     ));
   }

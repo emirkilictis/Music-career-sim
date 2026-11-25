@@ -894,6 +894,21 @@ Future<bool> releaseSingleFlow(
   final radio = await pickRadioPush(context, career,
       extraCents: career.player.campaignCosts[campaign.index]);
   if (radio == null || !context.mounted) return false;
+  // Physical editions on pre-order for a single set for later (docs K305).
+  var editions = <SingleFormat>[];
+  final releaseYear = GameTime.yearOf(when.releaseWeek);
+  if (when.releaseWeek > career.week &&
+      SingleFormat.values.any((f) => f.availableIn(releaseYear))) {
+    final picked = await pickPreOrderEditions(context, career,
+        year: releaseYear,
+        weeks: when.announceWeek < when.releaseWeek
+            ? when.releaseWeek - when.announceWeek
+            : 0,
+        extraCents: career.player.campaignCosts[campaign.index] +
+            career.player.radioPushCosts[radio.index]);
+    if (picked == null || !context.mounted) return false;
+    editions = picked;
+  }
   // Playlist pitch and autoplay before it comes out (docs K101).
   var pitch = false, autoplay = song.autoplayLevel;
   if (song.canPitch || song.autoplayOpen) {
@@ -910,8 +925,8 @@ Future<bool> releaseSingleFlow(
       await career.act(Cmd.releaseSingle(song.id, campaign, radio));
       if (context.mounted) showInfo(context, l.singleReleased(song.title));
     } else {
-      await career.act(Cmd.scheduleSingle(
-          song.id, campaign, when.releaseWeek, when.announceWeek, radio));
+      await career.act(Cmd.scheduleSingle(song.id, campaign, when.releaseWeek,
+          when.announceWeek, radio, editions));
       if (context.mounted) {
         showInfo(context,
             l.releaseScheduled(song.title, fmt.week(when.releaseWeek)));
@@ -1066,6 +1081,72 @@ Future<RadioPush?> pickRadioPush(BuildContext context, CareerState career,
           ),
         const SizedBox(height: 8),
       ])),
+    ),
+  );
+}
+
+/// A single's physical editions to put on pre-order (docs K305): they are
+/// paid now and ship in its first week, where the weeks of orders count
+/// on the charts. Null when cancelled; empty for none.
+Future<List<SingleFormat>?> pickPreOrderEditions(
+    BuildContext context, CareerState career,
+    {required int year, required int weeks, int extraCents = 0}) {
+  final l = context.l10n;
+  final fmt = context.fmt;
+  final picked = <SingleFormat>{};
+  final lift = (Actions.preOrderLift(weeks) * 100).round();
+  return showModalBottomSheet<List<SingleFormat>>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (c) => StatefulBuilder(
+      builder: (c, set) {
+        final cost = picked.fold<int>(0, (t, f) => t + f.costCents);
+        final money = career.player.moneyCents - extraCents;
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(l.preOrderTitle,
+                      style: Theme.of(c).textTheme.titleLarge),
+                  const SizedBox(height: 4),
+                  Text(
+                      weeks > 0
+                          ? l.preOrderHint(weeks, lift)
+                          : l.preOrderSurprise,
+                      style: Theme.of(c).textTheme.bodySmall),
+                  const SizedBox(height: 8),
+                  for (final f in SingleFormat.values)
+                    if (f.availableIn(year))
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: picked.contains(f),
+                        onChanged: picked.contains(f) ||
+                                cost + f.costCents <= money
+                            ? (v) => set(() =>
+                                v == true ? picked.add(f) : picked.remove(f))
+                            : null,
+                        title: Text(fmt.singleFormat(f)),
+                        subtitle: Text(fmt.formatAppealSingle(f, year)),
+                        secondary: Text(fmt.money(f.costCents)),
+                      ),
+                  const SizedBox(height: 8),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(c, [
+                      for (final f in SingleFormat.values)
+                        if (picked.contains(f)) f
+                    ]),
+                    child: Text(picked.isEmpty
+                        ? l.preOrderNone
+                        : l.preOrderConfirm(fmt.money(cost))),
+                  ),
+                ]),
+          ),
+        );
+      },
     ),
   );
 }

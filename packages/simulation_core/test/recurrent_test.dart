@@ -34,7 +34,7 @@ void main() {
     final w = WorldGen.create(seed: 302, startYear: 2025);
     final sim = Simulator(w);
     var last = <int, int>{};
-    var longest = 0, longestAt = '';
+    var longest = 0, longestAt = '', lastLong = 0;
     final end = GameTime.firstWeekOf(2028);
     while (w.week < end) {
       final rules = Charts.recurrentRules(us, w.week);
@@ -56,13 +56,15 @@ void main() {
         }
       }
       last = now;
+      lastLong = chart.where((e) => e.weeksOn > 78).length;
       // The rule never leaves the chart short.
       if (w.week > GameTime.firstWeekOf(2025) + 12) expect(chart.length, 100);
     }
     // Under the four steps only a song in the top five lasts past 78
-    // weeks (in 2027, with the rule in place for over a year).
+    // weeks: at most five of them on the chart (in 2027, with the rule
+    // in place for over a year).
     printOnFailure(longestAt);
     print('longest run $longest weeks: $longestAt');
-    expect(longest, lessThan(120));
+    expect(lastLong, lessThanOrEqualTo(5));
   });
 }

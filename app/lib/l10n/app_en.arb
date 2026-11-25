@@ -10429,5 +10429,27 @@
     }
   },
   "versionsShow": "Show remixes and other versions",
-  "versionsHide": "Hide the versions"
+  "versionsHide": "Hide the versions",
+  "preOrderTitle": "Physical editions on pre-order",
+  "preOrderHint": "Fans can order them for the {weeks} weeks until it comes out; they ship in its first week and count on the charts: about {lift}% more edition sales that week. Paid now.",
+  "@preOrderHint": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      },
+      "lift": {
+        "type": "int"
+      }
+    }
+  },
+  "preOrderSurprise": "A surprise single has no pre-order weeks: the editions only come out with it.",
+  "preOrderNone": "No editions",
+  "preOrderConfirm": "Put on pre-order · {cost}",
+  "@preOrderConfirm": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      }
+    }
+  }
 }

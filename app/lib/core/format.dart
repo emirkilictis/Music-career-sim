@@ -1014,6 +1014,16 @@ class Fmt {
             : l.formatAppealLow;
   }
 
+  /// [formatAppeal] for a single's edition (docs K305).
+  String formatAppealSingle(SingleFormat f, int year) {
+    final a = f.appeal(year);
+    return a >= 1.0
+        ? l.formatAppealHigh
+        : a >= 0.7
+            ? l.formatAppealMid
+            : l.formatAppealLow;
+  }
+
   String albumType(AlbumType t) => switch (t) {
         AlbumType.single => l.typeSingle,
         AlbumType.ep => l.typeEp,
