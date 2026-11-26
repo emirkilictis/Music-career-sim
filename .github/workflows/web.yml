@@ -5,6 +5,11 @@ on:
   push:
     branches: [claude/nifty-archimedes-pceuh4]
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Publish without running the tests (emergencies only)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -16,7 +21,68 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The tests run first (docs K309): a change that breaks the game does
+  # not reach the players. The three run side by side.
+  test-sim:
+    if: ${{ !inputs.skip_tests }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.7
+          cache: true
+      - name: Simulation and saves
+        run: |
+          sudo apt-get install -y libsqlite3-dev
+          flutter pub get
+          (cd packages/simulation_core && dart analyze && dart test -r failures-only)
+          (cd packages/persistence && dart test -r failures-only)
+
+  test-game:
+    if: ${{ !inputs.skip_tests }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.7
+          cache: true
+      - name: Game sessions
+        run: |
+          sudo apt-get install -y libsqlite3-dev
+          flutter pub get
+          cd packages/game
+          dart analyze
+          dart test -r failures-only
+
+  test-app:
+    if: ${{ !inputs.skip_tests }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.7
+          cache: true
+      - name: App
+        working-directory: app
+        run: |
+          sudo apt-get install -y libsqlite3-dev
+          flutter pub get
+          flutter analyze
+          flutter test
+
   build:
+    needs: [test-sim, test-game, test-app]
+    # Skipped tests (the emergency switch) let it through; failed ones not.
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +110,7 @@ jobs:
 
   deploy:
     needs: build
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
