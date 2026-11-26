@@ -27,8 +27,8 @@ abstract final class LiveAlbums {
   static const fanListen = 0.1;
 
   /// New listeners, playlists and trends a live version gets against a
-  /// studio song (docs K300; 1 before).
-  static const reach = 0.25;
+  /// studio song (docs K300; 1 before, 0.25 until K306).
+  static const reach = 0.2;
   static const eventBuy = 0.1;
 
   static const minTracks = 8;

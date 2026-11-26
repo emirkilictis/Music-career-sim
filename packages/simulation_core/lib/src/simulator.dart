@@ -712,7 +712,9 @@ class Simulator {
       // the listeners it had in the catalog on top (docs K262): before,
       // coming back could leave it with fewer plays than it had. The
       // scene or the new version sends them back to it too (docs K265).
-      final a = fresh0 +
+      // Its last weeks before the catalog ease it down to its catalog
+      // level (docs K306); the catalog takes its rate from fresh0.
+      final a = fresh0 * Lifecycle.handover(w, s, p) +
           (s.dormantRate > 0
               ? s.dormantRate * p.catalogFactor * keep * (1 + versionLift)
               : 0);
@@ -1834,7 +1836,9 @@ class Simulator {
       }
       if (!near) {
         s.weeksBelowCutoff++;
-        if (s.weeksBelowCutoff >= 4) toDormant.add(ids[i]);
+        if (s.weeksBelowCutoff >= Lifecycle.handoverWeeks) {
+          toDormant.add(ids[i]);
+        }
       } else {
         s.weeksBelowCutoff = 0;
       }

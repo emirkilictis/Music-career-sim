@@ -199,18 +199,37 @@ abstract final class Lifecycle {
     return perRate;
   }
 
+  /// The share of its last active listening a song keeps in the catalog
+  /// ([makeSongDormant]'s rate against it).
+  static double catalogKeep(World w, Song s, Artist a) =>
+      catalogWeight(s) *
+      w.config.catalogLevel *
+      catalogShare(w.config, a.dormantSongIds.length + 1) *
+      // The trend the artist's next catalog update takes off (docs
+      // K261): the quarter of its last one.
+      catalogTrend(
+          w.seed, lastCatalogUpdate(w.week, a.id) ~/ fadeWeeks, s.id);
+
+  /// How much of its listening a song plays out with in its weeks below
+  /// the charts before it goes to the catalog (docs K306): a quarter of
+  /// the way to its catalog level a week, so it eases in instead of
+  /// losing a third in one week. Only on the way down, and only the first
+  /// time (a song back from the catalog keeps its catalog listening).
+  static double handover(World w, Song s, Artist a) {
+    final weeks = s.weeksBelowCutoff;
+    if (weeks <= 0 || s.dormantRate > 0) return 1;
+    final keep = catalogKeep(w, s, a);
+    if (keep >= 1) return 1;
+    return 1 - (1 - keep) * math.min(weeks, handoverWeeks - 1) / handoverWeeks;
+  }
+
+  /// Weeks below the charts before a song goes to the catalog.
+  static const handoverWeeks = 4;
+
   static void makeSongDormant(World w, Song s) {
     final a = w.primaryOf(s);
     w.settleRetired(a);
-    final fresh = s.lastAttention /
-        a.catalogFactor *
-        catalogWeight(s) *
-        w.config.catalogLevel *
-        catalogShare(w.config, a.dormantSongIds.length + 1) *
-        // The trend the artist's next catalog update takes off (docs
-        // K261): the quarter of its last one.
-        catalogTrend(w.seed, lastCatalogUpdate(w.week, a.id) ~/ fadeWeeks,
-            s.id);
+    final fresh = s.lastAttention / a.catalogFactor * catalogKeep(w, s, a);
     // Back in the catalog after a comeback: at least where it was.
     final rate = math.max(fresh, s.dormantRate);
     s.dormantRate = rate;
