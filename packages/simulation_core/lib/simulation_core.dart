@@ -6,6 +6,7 @@ export 'src/album_versions.dart';
 export 'src/anniversaries.dart';
 export 'src/award_submissions.dart';
 export 'src/beefs.dart';
+export 'src/rival_feuds.dart';
 export 'src/moments.dart';
 export 'src/radio_tools.dart';
 export 'src/comments.dart';

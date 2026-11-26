@@ -117,6 +117,11 @@ class EventIcon extends StatelessWidget {
       RenewalDone() => (Icons.assignment_turned_in_rounded, AppColors.mint),
       ReunionOver() => (Icons.groups_rounded, AppColors.lilac),
       RivalGroupSplit() => (Icons.call_split_rounded, AppColors.sky),
+      RivalFeudStarted() =>
+        (Icons.local_fire_department_rounded, AppColors.coral),
+      RivalDissTrack() => (Icons.mic_external_on_rounded, AppColors.coral),
+      RivalFeudEnded() => (Icons.sports_kabaddi_rounded, AppColors.peach),
+      RivalAlbumBattle() => (Icons.compare_arrows_rounded, AppColors.sky),
       RivalVersionOut() => (Icons.graphic_eq_rounded, AppColors.coral),
       FeatureOpened() => (Icons.new_releases_rounded, AppColors.gold),
       ThisIsMade() =>

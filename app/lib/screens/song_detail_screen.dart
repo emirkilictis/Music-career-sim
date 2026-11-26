@@ -1796,7 +1796,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
               returnCents: s.campaignReturnCents),
         ],
         const SizedBox(height: 12),
-        _ChartRecords(records: s.charts),
+        _ChartRecords(records: s.charts, week: widget.state.week),
         const SizedBox(height: 12),
         Section(
           title: l.chartRunTitle,
@@ -1998,16 +1998,36 @@ class _SongNumbersState extends State<_SongNumbers> {
 
 /// Peak, weeks and #1 weeks per chart.
 class _ChartRecords extends StatelessWidget {
-  const _ChartRecords({required this.records});
+  const _ChartRecords({required this.records, this.week = -1});
   final List<ChartRecord> records;
+  final int week;
 
   @override
-  Widget build(BuildContext context) => ChartRecords(records: records);
+  Widget build(BuildContext context) =>
+      ChartRecords(records: records, week: week);
 }
 
 class ChartRecords extends StatelessWidget {
-  const ChartRecords({super.key, required this.records});
+  const ChartRecords({super.key, required this.records, this.week = -1});
   final List<ChartRecord> records;
+
+  /// This week, to tell a song the recurrent rule took off (docs K312;
+  /// -1: don't).
+  final int week;
+
+  /// Why [r] is off its chart though it was on it long (docs K302, K312):
+  /// the recurrent rule it fell under, or null.
+  String? _recurrent(BuildContext context, ChartRecord r) {
+    if (week < 0 || r.lastPos > 0) return null;
+    final rules = Charts.recurrentRules(Charts.all[r.chartId], week);
+    (int, int)? rule;
+    for (final x in rules) {
+      if (r.weeksOn >= x.$1 && (rule == null || x.$1 > rule.$1)) rule = x;
+    }
+    return rule == null
+        ? null
+        : context.l10n.recurrentOff(rule.$1, rule.$2);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -2024,8 +2044,11 @@ class ChartRecords extends StatelessWidget {
                   contentPadding: EdgeInsets.zero,
                   leading: PosBadge(r.peak, highlight: true),
                   title: Text(fmt.chart(r.chartId)),
-                  subtitle: Text(l.chartRecordLine(
-                      r.debutPos, r.weeksOn, r.weeksAtNo1, r.lastPos)),
+                  subtitle: Text([
+                    l.chartRecordLine(
+                        r.debutPos, r.weeksOn, r.weeksAtNo1, r.lastPos),
+                    if (_recurrent(context, r) case final why?) why,
+                  ].join('\n')),
                 ),
             ]),
     );

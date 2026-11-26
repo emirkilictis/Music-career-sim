@@ -476,4 +476,36 @@ TOPICS = {
   ("📀 {name} career sales: {n} records.", "📀 {name} kariyer satışları: {n} kayıt."),
   ("{name} passes {n} records sold.", "{name}, {n} satış barajını geçti."),
  ],
+ # Rivals at war with each other (docs K311). {rival}: the one posting
+ # or named first; {rival2}: the other (the album battle's loser).
+ 'feudStart': [
+  ("Funny how {rival2} only gets attention when they say my name.", "{rival2} ancak benim adımı anınca ilgi görüyor, ne tuhaf."),
+  ("Not everybody gets to sit at this table, {rival2}.", "Herkes bu masaya oturamaz, {rival2}."),
+  ("{rival2} knows what they did. That's all I'll say.", "{rival2} ne yaptığını biliyor. Söyleyeceklerim bu kadar."),
+ ],
+ 'feudStans': [
+  ("{rival} vs {rival2} is the beef of the year and I have popcorn ready 🍿", "{rival} – {rival2} kavgası yılın olayı, patlamış mısırım hazır 🍿"),
+  ("{rival2} fans are so pressed right now. {rival} already won this.", "{rival2} hayranları şu an çok gergin. Bunu {rival} çoktan kazandı."),
+  ("Can {rival} and {rival2} just make a song together and end this", "{rival} ve {rival2} birlikte bir şarkı yapsa da bu iş bitse"),
+ ],
+ 'feudDissTrack': [
+  ("{title} out now. {rival2}, this one's for you.", "{title} çıktı. {rival2}, bu sana gelsin."),
+  ("Some songs write themselves. {title}.", "Bazı şarkılar kendini yazar. {title}."),
+  ("Listen closely to {title}. Very closely, {rival2}.", "{title} şarkısını dikkatle dinleyin. Çok dikkatle, {rival2}."),
+ ],
+ 'feudWon': [
+  ("{rival} won the {rival2} beef and it's not even close", "{rival}, {rival2} kavgasını açık ara kazandı"),
+  ("The numbers don't lie: {rival} on top, {rival2} behind.", "Rakamlar yalan söylemez: {rival} önde, {rival2} geride."),
+  ("Thoughts and prayers to {rival2} after that {rival} beef", "{rival} kavgasından sonra {rival2} için geçmiş olsun"),
+ ],
+ 'feudDraw': [
+  ("{rival} and {rival2} both lost that beef tbh", "Açıkçası o kavgayı {rival} de {rival2} de kaybetti"),
+  ("So {rival} and {rival2} just… stopped? Okay.", "{rival} ile {rival2}… öylece bıraktı mı? Peki."),
+  ("Nobody won {rival} vs {rival2}, but the streams did", "{rival}–{rival2} kavgasını kimse kazanmadı, dinlenmeler kazandı"),
+ ],
+ 'rivalBattle': [
+  ("Album battle: {title} by {rival} debuts at No. {n}; {rival2} lands at No. {m}.", "Albüm savaşı: {rival} – {title} {n}. sıradan girdi; {rival2} {m}. sırada kaldı."),
+  ("Same week, two stars: {rival} takes No. {n}, {rival2} No. {m} on the Top 100 Albums.", "Aynı hafta, iki yıldız: Top 100 Albüm listesinde {rival} {n}. sırada, {rival2} {m}. sırada."),
+  ("{rival} wins this week's album showdown over {rival2} (No. {n} vs No. {m}).", "{rival}, bu haftaki albüm kapışmasını {rival2} karşısında kazandı ({n}. ve {m}. sıra)."),
+ ],
 }

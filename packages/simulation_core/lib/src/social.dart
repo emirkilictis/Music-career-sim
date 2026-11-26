@@ -126,7 +126,27 @@ enum FanTopic {
   statFirstWeek,
   statStreams,
   statSales,
+  // Rivals at war with each other (docs K311): [SocialItem.artistId] the
+  // one posting or the first named, [SocialItem.extra] the other (for
+  // rivalBattle the losing album).
+  feudStart,
+  feudStans,
+  feudDissTrack,
+  feudWon,
+  feudDraw,
+  rivalBattle,
 }
+
+/// Posts about rivals' feuds with each other (docs K311): nothing of the
+/// player's, so no comments or replies from their fans.
+const feudTopics = {
+  FanTopic.feudStart,
+  FanTopic.feudStans,
+  FanTopic.feudDissTrack,
+  FanTopic.feudWon,
+  FanTopic.feudDraw,
+  FanTopic.rivalBattle,
+};
 
 /// Posts by the chart's account and the stat accounts (docs K303).
 const accountTopics = {
@@ -138,6 +158,7 @@ const accountTopics = {
   FanTopic.statFirstWeek,
   FanTopic.statStreams,
   FanTopic.statSales,
+  FanTopic.rivalBattle,
 };
 
 /// Fans' memes (docs K277), from the Chirper years.

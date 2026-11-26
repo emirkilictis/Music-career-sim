@@ -519,6 +519,9 @@ class GameSession {
       listenerHistory: artistId == _p.id ? _listenerHistory() : const [],
       peakListeners:
           artistId == _p.id ? math.max(0.0, world.playerPeakListeners) : 0,
+      feuds: [
+        for (final f in RivalFeuds.of(w, artistId)) FeudView.of(w, f, artistId)
+      ],
       popular: [for (final s in popular.take(10)) SongView.of(w, s)],
       albums: [
         for (final al in w.albums.reversed)
@@ -3530,6 +3533,9 @@ class GameSession {
   /// How known a rival group must be for its split to make the news.
   static const rivalSplitNewsFame = 0.3;
 
+  /// Rival stars whose same-week albums make a battle (docs K311).
+  static const rivalBattleFame = 0.35;
+
   /// The week's news from the player's group's members (docs K195) and
   /// the end of a reunion (docs K194).
   List<GameEvent> _groupNews() {
@@ -5100,6 +5106,36 @@ class GameSession {
       if (g.fame >= rivalSplitNewsFame || g.tier == ArtistTier.a) {
         events.add(RivalGroupSplit(x.groupId, x.soloId, x.ended));
       }
+    }
+    // Rivals at war with each other (docs K311).
+    RivalFeuds.weekly(w, r.week);
+    for (final f in w.rivalFeuds) {
+      if (f.startWeek == r.week) events.add(RivalFeudStarted(f.a, f.b));
+      for (final m in f.moves) {
+        if (m.week == r.week && m.isTrack) {
+          events.add(RivalDissTrack(
+              m.byA ? f.a : f.b, m.byA ? f.b : f.a, m.songId));
+        }
+      }
+      if (f.endWeek == r.week) {
+        events.add(RivalFeudEnded(f.a, f.b, f.winner));
+      }
+    }
+    // Two rival stars' albums the same week (docs K311): the player's
+    // own clash is the chart battle (docs K69).
+    final debuts = [
+      for (final al in w.albums)
+        if (al.releaseWeek == r.week &&
+            al.artistId != p.id &&
+            w.artists[al.artistId].fame >= rivalBattleFame &&
+            al.lastPosOn(Charts.usAlbums) > 0)
+          al
+    ]..sort((x, y) =>
+        x.lastPosOn(Charts.usAlbums).compareTo(y.lastPosOn(Charts.usAlbums)));
+    if (debuts.length >= 2) {
+      events.add(RivalAlbumBattle(debuts[0].id, debuts[1].id,
+          debuts[0].lastPosOn(Charts.usAlbums),
+          debuts[1].lastPosOn(Charts.usAlbums)));
     }
     // The discovery mixes (docs K119).
     for (final id in w.playerSongIds) {

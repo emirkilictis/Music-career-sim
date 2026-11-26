@@ -160,6 +160,8 @@ abstract final class Comments {
     // Under a chart post about a rival, the player's fans have nothing to
     // say (docs K303).
     if (post.byAccount && post.artistId >= 0) return const [];
+    // Nor under rivals' feuds with each other (docs K311).
+    if (feudTopics.contains(post.topic)) return const [];
     final key = keyOf(post);
     final r = RandomStream.keyed(w.seed, post.week, key, RngPurpose.comments);
     final n = math

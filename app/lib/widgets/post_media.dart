@@ -23,9 +23,10 @@ class PostMediaCard extends StatelessWidget {
   final String artistName;
 
   /// Whose record the card shows: a rival's in a chart post about theirs
-  /// (docs K303).
-  String get _artist =>
-      item.isAccount && item.rivalId >= 0 ? item.rivalName : artistName;
+  /// (docs K303) or in their own post (docs K311).
+  String get _artist => (item.isAccount || item.isRival) && item.rivalId >= 0
+      ? item.rivalName
+      : artistName;
 
   /// The game's week now (whether Streamify is open).
   final int week;

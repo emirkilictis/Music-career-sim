@@ -7434,4 +7434,60 @@ void main() {
     g0.close();
     g1.close();
   });
+
+  // docs K311: rivals feud with each other, and it shows.
+  test('rivals feud with each other: news, posts, the artist page', () {
+    var g = GameSession.start(
+        slots,
+        _setup(
+            premium: true,
+            tier: StartTier.risingStar,
+            money: StartMoney.millionaire,
+            startYear: 2018));
+    final id = g.slotId;
+    final seen = <Type, int>{};
+    for (var i = 0; i < 104; i++) {
+      for (final e in g.advanceWeek().events) {
+        if (e is RivalFeudStarted ||
+            e is RivalDissTrack ||
+            e is RivalFeudEnded ||
+            e is RivalAlbumBattle) {
+          seen[e.runtimeType] = (seen[e.runtimeType] ?? 0) + 1;
+        }
+      }
+    }
+    print('feud news over two years: $seen');
+    final w = g.world;
+    expect(w.rivalFeuds, isNotEmpty);
+    expect(seen[RivalFeudStarted], greaterThan(0));
+    expect(seen[RivalAlbumBattle], greaterThan(0));
+    for (final f in w.rivalFeuds) {
+      final a = w.artists[f.a], b = w.artists[f.b];
+      expect(a.genre, b.genre);
+      expect(a.tier, isNot(ArtistTier.player));
+      expect(b.tier, isNot(ArtistTier.player));
+      if (!f.isOn) expect(f.winner, anyOf(-1, f.a, f.b));
+    }
+    // On Chirper, with no comments from the player's fans.
+    final posts = [
+      for (final i in w.social.feed)
+        if (feudTopics.contains(i.topic)) i
+    ];
+    expect(posts, isNotEmpty);
+    for (final i in posts) {
+      expect(Comments.of(w, w.player!, i), isEmpty);
+    }
+    // Both sides' artist pages list it.
+    final f = w.rivalFeuds.first;
+    final page = g.artistPage(f.a);
+    expect(page.feuds.map((x) => x.otherId), contains(f.b));
+    // Kept with the save.
+    final count = w.rivalFeuds.length;
+    final moves = w.rivalFeuds.fold<int>(0, (t, x) => t + x.moves.length);
+    g.close();
+    g = GameSession.resume(slots, id);
+    expect(g.world.rivalFeuds.length, count);
+    expect(g.world.rivalFeuds.fold<int>(0, (t, x) => t + x.moves.length), moves);
+    g.close();
+  });
 }

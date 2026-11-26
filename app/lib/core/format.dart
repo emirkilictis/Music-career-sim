@@ -161,6 +161,7 @@ class Fmt {
         m: i.topic == FanTopic.statFirstWeek
             ? number(i.extra)
             : '${i.extra}',
+        rival2: i.rival2Name,
       );
 
   /// "this week", "3 wk ago".
@@ -1014,6 +1015,30 @@ class Fmt {
             : l.formatAppealLow;
   }
 
+  /// A country's name from its code (docs K313).
+  String country(String code) =>
+      (_locale.startsWith('tr') ? _countriesTr : _countriesEn)[code] ?? code;
+
+  static const _countriesEn = {
+    'us': 'United States', 'ca': 'Canada', 'mx': 'Mexico',
+    'gb': 'United Kingdom', 'de': 'Germany', 'fr': 'France', 'es': 'Spain',
+    'it': 'Italy', 'nl': 'Netherlands', 'se': 'Sweden', 'pl': 'Poland',
+    'tr': 'Türkiye', 'br': 'Brazil', 'id': 'Indonesia',
+    'ph': 'Philippines', 'au': 'Australia', 'jp': 'Japan',
+    'kr': 'South Korea', 'in': 'India', 'ng': 'Nigeria',
+    'za': 'South Africa', 'ar': 'Argentina', 'co': 'Colombia',
+    'cl': 'Chile',
+  };
+  static const _countriesTr = {
+    'us': 'ABD', 'ca': 'Kanada', 'mx': 'Meksika', 'gb': 'Birleşik Krallık',
+    'de': 'Almanya', 'fr': 'Fransa', 'es': 'İspanya', 'it': 'İtalya',
+    'nl': 'Hollanda', 'se': 'İsveç', 'pl': 'Polonya', 'tr': 'Türkiye',
+    'br': 'Brezilya', 'id': 'Endonezya', 'ph': 'Filipinler',
+    'au': 'Avustralya', 'jp': 'Japonya', 'kr': 'Güney Kore',
+    'in': 'Hindistan', 'ng': 'Nijerya', 'za': 'Güney Afrika',
+    'ar': 'Arjantin', 'co': 'Kolombiya', 'cl': 'Şili',
+  };
+
   /// [formatAppeal] for a single's edition (docs K305).
   String formatAppealSingle(SingleFormat f, int year) {
     final a = f.appeal(year);
@@ -1412,6 +1437,16 @@ class Fmt {
       RivalVersionOut(:final version, :final position, :final playerPosition) =>
         l.eventRivalVersion(line.artistName, t, songVersion(version), position,
             line.title2, playerPosition),
+      RivalFeudStarted() =>
+        l.eventFeudStarted(line.artistName, line.artistName2),
+      RivalDissTrack() =>
+        l.eventDissTrack(line.artistName, t, line.artistName2),
+      RivalFeudEnded(:final winnerId) => winnerId >= 0
+          ? l.eventFeudWon(line.artistName, line.artistName2)
+          : l.eventFeudDraw(line.artistName, line.artistName2),
+      RivalAlbumBattle(:final winnerPos, :final loserPos) =>
+        l.eventAlbumBattle(line.artistName, t, winnerPos, line.artistName2,
+            line.title2, loserPos),
       RivalGroupSplit(:final ended) => ended
           ? l.eventRivalSplitEnded(line.artistName, t)
           : l.eventRivalSplit(line.artistName, t),
@@ -1454,3 +1489,8 @@ class Fmt {
     };
   }
 }
+
+/// A country's flag from its two-letter code (docs K313).
+String flagEmoji(String code) => String.fromCharCodes([
+      for (final c in code.toUpperCase().codeUnits) 0x1F1E6 + c - 0x41,
+    ]);

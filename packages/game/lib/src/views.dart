@@ -1986,6 +1986,104 @@ class _City {
   final double genreBoost;
 }
 
+/// Where an artist is popular, country by country (docs K313, F102): the
+/// world's three regions split among the countries in them as the
+/// charts split them (the US's and the UK's share of their region by the
+/// artist's home), the rest by market size, the artist's sound and home.
+abstract final class Countries {
+  static List<CountryListeners> top(List<double> regionShare,
+      HomeCountry home, int genre, double monthly,
+      {int limit = 10}) {
+    if (monthly <= 0) return const [];
+    double weight(_Country c) {
+      var x = c.size;
+      if (c.genres.contains(genre)) x *= c.genreBoost;
+      if (c.home == home) x *= 2.5;
+      return x;
+    }
+
+    final out = <CountryListeners>[];
+    for (final r in Region.values) {
+      final inRegion = monthly * regionShare[r.index];
+      // The chart countries keep their measured share of the region.
+      final fixed = switch (r) {
+        Region.northAmerica => ('us', CountryShares.usOfNorthAmerica(home)),
+        Region.europe => ('gb', CountryShares.ukOfEurope(home)),
+        Region.other => (null, 0.0),
+      };
+      final rest = [
+        for (final c in _countries)
+          if (c.region == r && c.code != fixed.$1) c
+      ];
+      if (fixed.$1 case final code?) {
+        final c = _countries.firstWhere((x) => x.code == code);
+        out.add(CountryListeners(c.code, inRegion * fixed.$2));
+      }
+      final sum = rest.fold(0.0, (t, c) => t + weight(c));
+      for (final c in rest) {
+        out.add(CountryListeners(
+            c.code, inRegion * (1 - fixed.$2) * weight(c) / sum));
+      }
+    }
+    final total = out.fold(0.0, (t, c) => t + c.listeners);
+    out.sort((a, b) => b.listeners.compareTo(a.listeners));
+    return [
+      for (final c in out.take(limit))
+        CountryListeners(c.code, c.listeners, share: c.listeners / total)
+    ];
+  }
+
+  static const _latin = [6, 16];
+  static const _countries = [
+    _Country('us', Region.northAmerica, 1.0, home: HomeCountry.us),
+    _Country('ca', Region.northAmerica, 0.25, home: HomeCountry.canada),
+    _Country('mx', Region.northAmerica, 0.3, genres: _latin, genreBoost: 3),
+    _Country('gb', Region.europe, 1.0, home: HomeCountry.uk),
+    _Country('de', Region.europe, 0.9, genres: [5], genreBoost: 1.5),
+    _Country('fr', Region.europe, 0.7, home: HomeCountry.europe),
+    _Country('es', Region.europe, 0.45, genres: _latin, genreBoost: 2),
+    _Country('it', Region.europe, 0.4),
+    _Country('nl', Region.europe, 0.3, genres: [5], genreBoost: 1.5),
+    _Country('se', Region.europe, 0.25),
+    _Country('pl', Region.europe, 0.25),
+    _Country('tr', Region.europe, 0.3),
+    _Country('br', Region.other, 1.0, genres: _latin, genreBoost: 1.5),
+    _Country('id', Region.other, 0.6, genres: [18], genreBoost: 2),
+    _Country('ph', Region.other, 0.5, genres: [18], genreBoost: 2),
+    _Country('au', Region.other, 0.55),
+    _Country('jp', Region.other, 0.6, genres: [18], genreBoost: 1.5),
+    _Country('kr', Region.other, 0.35, genres: [18], genreBoost: 4),
+    _Country('in', Region.other, 0.6),
+    _Country('ng', Region.other, 0.25, genres: [17], genreBoost: 4),
+    _Country('za', Region.other, 0.2, genres: [17], genreBoost: 2),
+    _Country('ar', Region.other, 0.3, genres: _latin, genreBoost: 2),
+    _Country('co', Region.other, 0.25, genres: _latin, genreBoost: 2),
+    _Country('cl', Region.other, 0.2, genres: _latin, genreBoost: 2),
+  ];
+}
+
+class _Country {
+  const _Country(this.code, this.region, this.size,
+      {this.home, this.genres = const [], this.genreBoost = 1});
+
+  /// ISO country code; the app names it.
+  final String code;
+  final Region region;
+  final double size;
+  final HomeCountry? home;
+  final List<int> genres;
+  final double genreBoost;
+}
+
+/// A country and its monthly listeners (docs K313); [share] of the
+/// artist's total.
+class CountryListeners {
+  const CountryListeners(this.code, this.listeners, {this.share = 0});
+  final String code;
+  final double listeners;
+  final double share;
+}
+
 /// A city and its monthly listeners (docs K130).
 class CityListeners {
   const CityListeners(this.name, this.listeners);
@@ -2005,7 +2103,11 @@ class ArtistPageView {
     this.worldRank = 0,
     this.listenerHistory = const [],
     this.peakListeners = 0,
+    this.feuds = const [],
   }) : listenerStreams = listenerStreams ?? weeklyStreams;
+
+  /// Their feuds with other rivals, latest first (docs K311).
+  final List<FeudView> feuds;
 
   /// The player's most monthly listeners so far (docs K156; 0 for others).
   final double peakListeners;
@@ -2016,6 +2118,10 @@ class ArtistPageView {
 
   /// Where the listeners are: the five biggest cities (docs K130).
   List<CityListeners> get topCities => Streamify.topCities(
+      artist.regionShare, artist.home, artist.genre, monthlyListeners);
+
+  /// The countries they are biggest in (docs K313).
+  List<CountryListeners> get topCountries => Countries.top(
       artist.regionShare, artist.home, artist.genre, monthlyListeners);
 
   /// Place in the world by listeners (docs K113; 0: below the top 500).
@@ -2043,6 +2149,36 @@ class ArtistPageView {
   final double listenerStreams;
 
   double get monthlyListeners => Streamify.monthlyListeners(listenerStreams);
+}
+
+/// One of an artist's feuds with another rival (docs K311), from their
+/// side.
+class FeudView {
+  FeudView.of(World w, RivalFeud f, int artistId)
+      : otherId = f.other(artistId),
+        otherName = w.artists[f.other(artistId)].name,
+        year = GameTime.yearOf(f.startWeek),
+        on = f.isOn,
+        result = f.isOn || f.winner < 0
+            ? 0
+            : f.winner == artistId
+                ? 1
+                : -1,
+        dissTracks = f.moves
+            .where((m) => m.isTrack && (m.byA ? f.a : f.b) == artistId)
+            .length;
+  final int otherId;
+  final String otherName;
+  final int year;
+
+  /// Still going.
+  final bool on;
+
+  /// 1 won, -1 lost, 0 no winner (or still on).
+  final int result;
+
+  /// Their own diss tracks in it.
+  final int dissTracks;
 }
 
 /// Which number best tells a song's success in a given year (docs K38):
@@ -3154,15 +3290,21 @@ class SocialItemView {
                     : '',
         likes = i.likes,
         number = i.number,
-        extra = i.extra,
+        extra = i.topic == FanTopic.rivalBattle
+            ? (w.albums[i.extra].statsOrNull(Charts.usAlbums)?.debutPos ?? 0)
+            : i.extra,
         songId = i.songId,
         albumId = i.albumId,
         rivalName = i.artistId >= 0 ? w.artists[i.artistId].name : '',
         rivalId = i.artistId,
+        rival2Name = _rival2(w, i),
         key = Comments.keyOf(i),
-        authorMood = i.fan >= 0 ? Comments.authorMood(i) : null,
-        answered =
-            i.fan >= 0 ? Comments.replyTo(w, i, Comments.author)?.kind : null,
+        authorMood = i.fan >= 0 && !feudTopics.contains(i.topic)
+            ? Comments.authorMood(i)
+            : null,
+        answered = i.fan >= 0 && !feudTopics.contains(i.topic)
+            ? Comments.replyTo(w, i, Comments.author)?.kind
+            : null,
         haters = i.byPlayer && w.player != null
             ? Comments.of(w, w.player!, i)
                 .where((c) =>
@@ -3200,6 +3342,19 @@ class SocialItemView {
   /// The rival a beef post is about ('' and -1 for none; docs K229).
   final String rivalName;
   final int rivalId;
+
+  /// The other rival in a feud post, or the album battle's loser (docs
+  /// K311; '' otherwise).
+  final String rival2Name;
+
+  static String _rival2(World w, SocialItem i) {
+    if (i.topic == FanTopic.rivalBattle) {
+      return w.artists[w.albums[i.extra].artistId].name;
+    }
+    return feudTopics.contains(i.topic) && i.extra >= 0
+        ? w.artists[i.extra].name
+        : '';
+  }
 
   /// Opens the post with its comments (docs K238).
   final int key;
@@ -3248,7 +3403,9 @@ class SocialItemView {
       FanTopic.chartSongDebut ||
       FanTopic.chartNo1 ||
       FanTopic.rivalAlbumDebut ||
-      FanTopic.rivalNo1 =>
+      FanTopic.rivalNo1 ||
+      FanTopic.rivalBattle ||
+      FanTopic.feudDissTrack =>
         PostMedia.release,
       FanTopic.criticHigh || FanTopic.criticLow => PostMedia.score,
       FanTopic.releaseLove ||
@@ -3279,9 +3436,12 @@ class PostDetailView {
         network = Social.networkIn(GameTime.yearOf(w.week)),
         verified = p.fame >= 0.1 || Social.followers(w, p) >= 1e5,
         canReply = Social.canPostIn(GameTime.yearOf(w.week)) &&
-            (i.byPlayer || i.fan >= 0),
+            (i.byPlayer || i.fan >= 0) &&
+            !feudTopics.contains(i.topic),
         repliesLeft = Comments.repliesLeft(w),
-        authorMood = i.fan >= 0 ? Comments.authorMood(i) : null,
+        authorMood = i.fan >= 0 && !feudTopics.contains(i.topic)
+            ? Comments.authorMood(i)
+            : null,
         authorReply = switch (Comments.replyTo(w, i, Comments.author)) {
           final r? => ReplyView.of(r),
           null => null,

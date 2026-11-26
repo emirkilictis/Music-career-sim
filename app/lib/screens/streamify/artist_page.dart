@@ -3,6 +3,7 @@ import 'package:game/game.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/commands.dart';
+import '../../core/format.dart' show flagEmoji;
 import '../../core/images.dart';
 import '../../core/scope.dart';
 import '../../ui/palette.dart';
@@ -541,6 +542,58 @@ class _ArtistPageState extends State<ArtistPage> {
       // The editors' This Is list (docs K189).
       if (_thisIs case final t? when t.open && (t.made || t.isPlayer))
         SliverToBoxAdapter(child: _thisIsTile(context, t, a.id)),
+      // Their feuds with other rivals (docs K311).
+      if (page.feuds.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l.feudsTitle,
+                      style: const TextStyle(
+                          fontSize: 19, fontWeight: FontWeight.w900)),
+                  const SizedBox(height: 6),
+                  for (final f in page.feuds.take(5))
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      leading: Icon(
+                          f.on
+                              ? Icons.local_fire_department_rounded
+                              : f.result > 0
+                                  ? Icons.emoji_events_rounded
+                                  : f.result < 0
+                                      ? Icons.thumb_down_alt_outlined
+                                      : Icons.handshake_outlined,
+                          color: f.on
+                              ? AppColors.coral
+                              : f.result > 0
+                                  ? AppColors.gold
+                                  : StreamifyColors.muted),
+                      title: Text(l.feudWith(f.otherName),
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      subtitle: Text(
+                          [
+                            '${f.year}',
+                            f.on
+                                ? l.feudOn
+                                : f.result > 0
+                                    ? l.feudWonShort
+                                    : f.result < 0
+                                        ? l.feudLostShort
+                                        : l.feudNoWinner,
+                            if (f.dissTracks > 0)
+                              l.feudDissTracks(f.dissTracks),
+                          ].join(' · '),
+                          style:
+                              const TextStyle(color: StreamifyColors.muted)),
+                      onTap: () => pushInCareer(
+                          context, ArtistPage(artistId: f.otherId)),
+                    ),
+                ]),
+          ),
+        ),
       SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
@@ -603,6 +656,46 @@ class _ArtistPageState extends State<ArtistPage> {
                       Text(l.cityListeners(plays.format(c.listeners.round())),
                           style: const TextStyle(color: StreamifyColors.muted)),
                     ]),
+                  ),
+              ],
+              // Country by country (docs K313).
+              if (page.topCountries.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                Text(l.topCountries,
+                    style: const TextStyle(
+                        color: StreamifyColors.muted,
+                        fontWeight: FontWeight.w700)),
+                const SizedBox(height: 6),
+                for (final c in page.topCountries.take(8))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(children: [
+                            Text(flagEmoji(c.code)),
+                            const SizedBox(width: 8),
+                            Expanded(
+                                child: Text(fmt.country(c.code),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w700))),
+                            Text(fmt.percent(c.share),
+                                style: const TextStyle(
+                                    color: StreamifyColors.muted)),
+                          ]),
+                          const SizedBox(height: 4),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(2),
+                            child: LinearProgressIndicator(
+                              value: page.topCountries.first.share <= 0
+                                  ? 0
+                                  : c.share / page.topCountries.first.share,
+                              minHeight: 4,
+                              color: StreamifyColors.accent,
+                              backgroundColor: StreamifyColors.surface,
+                            ),
+                          ),
+                        ]),
                   ),
               ],
               const SizedBox(height: 14),

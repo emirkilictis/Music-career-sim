@@ -146,6 +146,7 @@ class SaveStore {
     // The reunion (docs K194).
     Reunions.decode(w, meta['reunion'] as String?);
     w.rivalSplits.addAll(RivalSplit.decode(meta['rivalSplits'] as String?));
+    w.rivalFeuds.addAll(RivalFeuds.decode(meta['rivalFeuds'] as String?));
     // The player's certifications (docs K209).
     if (meta['certs'] case final String s) {
       w.certsTracked = true;
@@ -477,6 +478,7 @@ class SaveStore {
       'careerBase': w.careerStreamsBase,
       'reunion': Reunions.encode(w),
       'rivalSplits': RivalSplit.encode(w.rivalSplits),
+      'rivalFeuds': RivalFeuds.encode(w.rivalFeuds),
       'songMarket': jsonEncode(w.boughtPitches.toList()..sort()),
       'pastTours': jsonEncode([for (final t in w.pastTours) t.toJson()]),
       'moment': w.moment?.encode() ?? '',

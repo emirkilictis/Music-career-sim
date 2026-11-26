@@ -368,6 +368,33 @@ abstract final class SocialFeed {
                 albumId: kind == EntityKind.album ? entityId : -1,
                 artistId: artistId);
           }
+        // Rivals at war with each other (docs K311).
+        case RivalFeudStarted(:final aId, :final bId):
+          post(SocialItem.byRival, FanTopic.feudStart,
+              artistId: aId, extra: bId);
+          post(r.nextInt(1 << 20), FanTopic.feudStans,
+              artistId: aId, extra: bId);
+        case RivalDissTrack(:final byId, :final targetId, :final songId):
+          post(SocialItem.byRival, FanTopic.feudDissTrack,
+              songId: songId, artistId: byId, extra: targetId);
+        case RivalFeudEnded(:final aId, :final bId, :final winnerId):
+          if (winnerId >= 0) {
+            post(r.nextInt(1 << 20), FanTopic.feudWon,
+                artistId: winnerId, extra: winnerId == aId ? bId : aId);
+          } else {
+            post(r.nextInt(1 << 20), FanTopic.feudDraw,
+                artistId: aId, extra: bId);
+          }
+        case RivalAlbumBattle(
+            :final winnerAlbumId,
+            :final loserAlbumId,
+            :final winnerPos
+          ):
+          post(SocialItem.byChart, FanTopic.rivalBattle,
+              albumId: winnerAlbumId,
+              artistId: w.albums[winnerAlbumId].artistId,
+              number: winnerPos,
+              extra: loserAlbumId);
         case StreamMilestone(:final songId, :final plays) when stats:
           post(statAccount(), FanTopic.statStreams,
               songId: songId, number: plays.round());

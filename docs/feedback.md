@@ -201,7 +201,7 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F99 | Oyuncu: "Ünlülük nasıl artıyor çözemedim." | ✅ K220: Ünlülük ekranı şu an yükselip yükselmediğini ve neyin yükselttiğini (küresel listede #1'e göre puan, aynı anda birden çok şarkı, ödüller; hiç düşmez) madde madde söylüyor. |
 | F100 | Oyuncu: "Yazdığımız şarkılardan aldığımız geliri gösteren bir pencere olabilir." | ✅ K220: Kariyer → gelir kartı → "Şarkı şarkı kazançlar": her şarkının kazancı, kampanyası düşülmüş kârı, başkalarına yazılan şarkıların telifi; en çok kazandıran önce. |
 | F101 | Oyuncu: "Turne şu an sadece tıklıyorsun gibi; şehir seçme, hangi arena olacağı, adı, koyacağımız şarkılar gelmeli. Turneye çıkınca albümün satışında ufak da olsa artış olmalı; seçilen şarkılar ve albümleri artmalı." | ✅ K223: Turne planında şehirler ve her şehirde 3 mekân seçeneği; setlist (en çok 25 şarkı, sırasıyla); konser haftalarında setlistteki şarkılar daha çok dinlenir, albümleri %8–35 daha çok satar. |
-| F102 | Oyuncu: "Ülkelere göre popülerlik olayı da gelebilir." | ⏳ Sırada. |
+| F102 | Oyuncu: "Ülkelere göre popülerlik olayı da gelebilir." | ✅ K313 |
 | F103 | Oyuncu: "Versiyon olayı iyi olmuş." | 👍 |
 | F104 | Emir ve oyuncu: "Oyun mass-release'e itiyor; biraz hızlı dopamin, daha yavaş ve detaylı olmalı, daha zorlaması lazım, şu an çok basit." | ✅ K222: Sık single çıkarmanın 20 katlık ödülü kalktı: taze single'lar dinleyiciyi paylaşıyor, önceki çıkıştan 6 haftadan önce gelen single daha az destek alıyor, katalog paylaşılıyor; oyun genel olarak zorlaştı. |
 | F105 | Emir: "Streaming çok OP, ben 400M falan görüyordum weekly streams, nerflenmeli." Oyuncu: "Bir şarkı için haftada 200M abartı, biraz düşürebilirsin." | ✅ K222: Stream hacmi yarıya indi: haftanın 1 numarası 80–105M (önce 120–207M); gelir ve stream sertifikaları da düştü. |
@@ -276,6 +276,8 @@ bütçesi yerine Milyoner başlangıcı, gerçek takvim (single → albüm → s
 | F174 | Federico22Swiftie: "The bugs of images cutting." | ✅ K302 |
 | F175 | Federico22Swiftie: "When I release a single, it stays stable at the same streams, and they decline more later, and every single declines the same exact percentage as the others." | ✅ K305 |
 | F176 | Federico22Swiftie: "Add the possibility to release physical variants of a single in pre-order to boost first week points." | ✅ K305 |
+| F177 | Federico22Swiftie: "…getting lots more streams and sales than another one but it ain't charting, and the other one is." (mesajın başı görünmüyor) | ✅ K312 (recurrent kuralı; şarkı sayfasında açıklanıyor) |
+| F178 | Emir: "Diğer oyuncuların birbirleriyle rekabet etmesini istiyorum." | ✅ K311 |
 | Suit & Tie / Mirrors satış | ~5M | 9,5M | 15,7M / 15,8M |
 
 Ayrıntılı döküm: [playtests/jt_2002.md](playtests/jt_2002.md).

@@ -411,6 +411,42 @@ class RivalGroupSplit extends GameEvent {
   bool get isMajor => ended;
 }
 
+/// Two rivals started a feud (docs K311).
+class RivalFeudStarted extends GameEvent {
+  const RivalFeudStarted(this.aId, this.bId);
+  final int aId, bId;
+  @override
+  bool get isMajor => false;
+}
+
+/// A rival answered another with a single while their feud is on: a
+/// diss track (docs K311).
+class RivalDissTrack extends GameEvent {
+  const RivalDissTrack(this.byId, this.targetId, this.songId);
+  final int byId, targetId, songId;
+  @override
+  bool get isMajor => false;
+}
+
+/// Two rivals' feud is over (docs K311); [winnerId] -1: no winner.
+class RivalFeudEnded extends GameEvent {
+  const RivalFeudEnded(this.aId, this.bId, this.winnerId);
+  final int aId, bId, winnerId;
+  @override
+  bool get isMajor => false;
+}
+
+/// Two rival stars' albums came out the same week (docs K311): who
+/// debuted higher on the US album chart.
+class RivalAlbumBattle extends GameEvent {
+  const RivalAlbumBattle(
+      this.winnerAlbumId, this.loserAlbumId, this.winnerPos, this.loserPos);
+  final int winnerAlbumId, loserAlbumId;
+  final int winnerPos, loserPos;
+  @override
+  bool get isMajor => false;
+}
+
 /// A rival put out [version] of their hit [songId], at [position] on the
 /// US chart, while the player's [playerSongId] is up there at
 /// [playerPosition] (docs K201).

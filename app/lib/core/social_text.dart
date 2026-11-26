@@ -5,13 +5,15 @@ import '../l10n/gen/app_localizations.dart';
 
 /// The words of a social feed item ([title]: its song or album, [name]:
 /// the player, [n]: its number, formatted, [m]: a second one, [rival]: a
-/// beef's rival, or whose record a chart post is about).
+/// beef's rival, or whose record a chart post is about, [rival2]: the
+/// other rival in a feud).
 String socialText(AppLocalizations l, FanTopic topic, int variant,
         {required String title,
         required String name,
         required String n,
         String m = '',
-        String rival = ''}) =>
+        String rival = '',
+        String rival2 = ''}) =>
     switch ((topic, variant % socialVariants(topic))) {
       (FanTopic.releaseLove, 0) => l.smReleaseLove0(title),
       (FanTopic.releaseLove, 1) => l.smReleaseLove1(name, title),
@@ -315,6 +317,24 @@ String socialText(AppLocalizations l, FanTopic topic, int variant,
       (FanTopic.statSales, 0) => l.smStatSales0(n, name),
       (FanTopic.statSales, 1) => l.smStatSales1(n, name),
       (FanTopic.statSales, 2) => l.smStatSales2(n, name),
+      (FanTopic.feudStart, 0) => l.smFeudStart0(rival2),
+      (FanTopic.feudStart, 1) => l.smFeudStart1(rival2),
+      (FanTopic.feudStart, 2) => l.smFeudStart2(rival2),
+      (FanTopic.feudStans, 0) => l.smFeudStans0(rival, rival2),
+      (FanTopic.feudStans, 1) => l.smFeudStans1(rival, rival2),
+      (FanTopic.feudStans, 2) => l.smFeudStans2(rival, rival2),
+      (FanTopic.feudDissTrack, 0) => l.smFeudDissTrack0(rival2, title),
+      (FanTopic.feudDissTrack, 1) => l.smFeudDissTrack1(title),
+      (FanTopic.feudDissTrack, 2) => l.smFeudDissTrack2(rival2, title),
+      (FanTopic.feudWon, 0) => l.smFeudWon0(rival, rival2),
+      (FanTopic.feudWon, 1) => l.smFeudWon1(rival, rival2),
+      (FanTopic.feudWon, 2) => l.smFeudWon2(rival, rival2),
+      (FanTopic.feudDraw, 0) => l.smFeudDraw0(rival, rival2),
+      (FanTopic.feudDraw, 1) => l.smFeudDraw1(rival, rival2),
+      (FanTopic.feudDraw, 2) => l.smFeudDraw2(rival, rival2),
+      (FanTopic.rivalBattle, 0) => l.smRivalBattle0(m, n, rival, rival2, title),
+      (FanTopic.rivalBattle, 1) => l.smRivalBattle1(m, n, rival, rival2),
+      (FanTopic.rivalBattle, 2) => l.smRivalBattle2(m, n, rival, rival2),
       _ => '',
     };
 

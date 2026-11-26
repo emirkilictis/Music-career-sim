@@ -965,20 +965,24 @@ class FeedPost extends StatelessWidget {
     final p = state.player;
     final rival = item.isRival;
     final account = item.isAccount;
+    // A fan in a rivals' feud is that rival's stan (docs K311).
+    final stanOf = feudTopics.contains(item.topic) && item.rivalName.isNotEmpty
+        ? item.rivalName
+        : p.name;
     final handle = item.isPlayer
         ? playerHandle(p.name)
         : rival
             ? playerHandle(item.rivalName)
             : account
                 ? _account(item).$2
-                : fanHandle(item.fan, p.name);
+                : fanHandle(item.fan, stanOf);
     final name = item.isPlayer
         ? p.name
         : rival
             ? item.rivalName
             : account
                 ? _account(item).$1
-                : fanName(item.fan, p.name);
+                : fanName(item.fan, stanOf);
     final square = !skin.round;
     final avatar = account
         ? AccountAvatar(item: item, size: square ? 48 : 40, square: square)

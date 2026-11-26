@@ -26,6 +26,7 @@ import 'fan_club.dart';
 import 'imprints.dart';
 import 'own_playlist.dart';
 import 'music_show.dart';
+import 'rival_feuds.dart';
 import 'rival_splits.dart';
 import 'tours.dart';
 
@@ -175,6 +176,9 @@ class World {
 
   /// Rival groups' members who went solo (docs K199).
   final List<RivalSplit> rivalSplits = [];
+
+  /// Rivals' feuds with each other (docs K311), oldest first.
+  final List<RivalFeud> rivalFeuds = [];
 
   /// The K-pop music show's record (docs K114).
   final MusicShowState musicShow = MusicShowState();

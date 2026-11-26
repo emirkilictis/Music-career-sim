@@ -5485,6 +5485,213 @@
       }
     }
   },
+  "smFeudStart0": "Funny how {rival2} only gets attention when they say my name.",
+  "@smFeudStart0": {
+    "placeholders": {
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudStart1": "Not everybody gets to sit at this table, {rival2}.",
+  "@smFeudStart1": {
+    "placeholders": {
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudStart2": "{rival2} knows what they did. That's all I'll say.",
+  "@smFeudStart2": {
+    "placeholders": {
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudStans0": "{rival} vs {rival2} is the beef of the year and I have popcorn ready 🍿",
+  "@smFeudStans0": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudStans1": "{rival2} fans are so pressed right now. {rival} already won this.",
+  "@smFeudStans1": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudStans2": "Can {rival} and {rival2} just make a song together and end this",
+  "@smFeudStans2": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudDissTrack0": "{title} out now. {rival2}, this one's for you.",
+  "@smFeudDissTrack0": {
+    "placeholders": {
+      "rival2": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudDissTrack1": "Some songs write themselves. {title}.",
+  "@smFeudDissTrack1": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudDissTrack2": "Listen closely to {title}. Very closely, {rival2}.",
+  "@smFeudDissTrack2": {
+    "placeholders": {
+      "rival2": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudWon0": "{rival} won the {rival2} beef and it's not even close",
+  "@smFeudWon0": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudWon1": "The numbers don't lie: {rival} on top, {rival2} behind.",
+  "@smFeudWon1": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudWon2": "Thoughts and prayers to {rival2} after that {rival} beef",
+  "@smFeudWon2": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudDraw0": "{rival} and {rival2} both lost that beef tbh",
+  "@smFeudDraw0": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudDraw1": "So {rival} and {rival2} just… stopped? Okay.",
+  "@smFeudDraw1": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smFeudDraw2": "Nobody won {rival} vs {rival2}, but the streams did",
+  "@smFeudDraw2": {
+    "placeholders": {
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalBattle0": "Album battle: {title} by {rival} debuts at No. {n}; {rival2} lands at No. {m}.",
+  "@smRivalBattle0": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalBattle1": "Same week, two stars: {rival} takes No. {n}, {rival2} No. {m} on the Top 100 Albums.",
+  "@smRivalBattle1": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
+  "smRivalBattle2": "{rival} wins this week's album showdown over {rival2} (No. {n} vs No. {m}).",
+  "@smRivalBattle2": {
+    "placeholders": {
+      "m": {
+        "type": "String"
+      },
+      "n": {
+        "type": "String"
+      },
+      "rival": {
+        "type": "String"
+      },
+      "rival2": {
+        "type": "String"
+      }
+    }
+  },
   "networkForum": "Fan forum",
   "networkMyPlace": "MyPlace",
   "networkChirper": "Chirper",
@@ -10460,5 +10667,108 @@
   "bugReportReady": "The report is ready",
   "bugReportSend": "Save the file and send it to the developer (a DM is fine). It opens as a career with “Restore a backup”.",
   "bugReportCopy": "Copy the text",
-  "bugReportCopied": "Copied"
+  "bugReportCopied": "Copied",
+  "eventFeudStarted": "Feud: {a} and {b} are at war",
+  "@eventFeudStarted": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "eventDissTrack": "{by} answers {target} with “{title}”",
+  "@eventDissTrack": {
+    "placeholders": {
+      "by": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "eventFeudWon": "{winner} comes out on top of the feud with {loser}",
+  "@eventFeudWon": {
+    "placeholders": {
+      "winner": {
+        "type": "String"
+      },
+      "loser": {
+        "type": "String"
+      }
+    }
+  },
+  "eventFeudDraw": "The {a}–{b} feud dies down with no winner",
+  "@eventFeudDraw": {
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "eventAlbumBattle": "Album battle: {winner} – “{title}” debuts at #{wPos}, {loser} – “{title2}” at #{lPos}",
+  "@eventAlbumBattle": {
+    "placeholders": {
+      "winner": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      },
+      "wPos": {
+        "type": "int"
+      },
+      "loser": {
+        "type": "String"
+      },
+      "title2": {
+        "type": "String"
+      },
+      "lPos": {
+        "type": "int"
+      }
+    }
+  },
+  "feudsTitle": "Feuds",
+  "feudWith": "vs {name}",
+  "@feudWith": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "feudOn": "going on",
+  "feudWonShort": "won",
+  "feudLostShort": "lost",
+  "feudNoWinner": "no winner",
+  "feudDissTracks": "{n} diss tracks",
+  "@feudDissTracks": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "recurrentOff": "Off the chart as a recurrent: after {weeks} weeks, a song below #{line} drops off even with more plays than newer ones.",
+  "@recurrentOff": {
+    "placeholders": {
+      "weeks": {
+        "type": "int"
+      },
+      "line": {
+        "type": "int"
+      }
+    }
+  },
+  "topCountries": "Top countries"
 }
