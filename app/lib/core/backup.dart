@@ -7,9 +7,13 @@ import 'platform_files.dart';
 /// player's own images (covers, photos), gzipped. The same file restores
 /// on the phone app and in the browser.
 class CareerBackup {
-  CareerBackup(this.database, this.images);
+  CareerBackup(this.database, this.images, {this.report});
 
   final Uint8List database;
+
+  /// A bug report's words (docs K307): what the player says happened and
+  /// what the game knows; null in a plain backup. Older releases skip it.
+  final String? report;
 
   /// Image key (ImageStore) → the image file's bytes.
   final Map<String, Uint8List> images;
@@ -18,6 +22,7 @@ class CareerBackup {
   static const _magic = 'MCS1';
   static const _database = 'career.sqlite';
   static const _image = 'image/';
+  static const _report = 'report.txt';
 
   /// The file: "MCS1", then per entry a name and its bytes, each after
   /// its length (2 and 4 bytes), all gzipped.
@@ -25,6 +30,7 @@ class CareerBackup {
     final entries = <(List<int>, Uint8List)>[
       (utf8.encode(_database), database),
       for (final e in images.entries) (utf8.encode('$_image${e.key}'), e.value),
+      if (report case final r?) (utf8.encode(_report), utf8.encode(r)),
     ];
     var size = _magic.length;
     for (final (name, data) in entries) {
@@ -65,6 +71,7 @@ class CareerBackup {
     final view = ByteData.sublistView(raw);
     Uint8List? database;
     final images = <String, Uint8List>{};
+    String? report;
     var at = 4;
     try {
       while (at < raw.length) {
@@ -81,13 +88,15 @@ class CareerBackup {
           database = data;
         } else if (name.startsWith(_image)) {
           images[name.substring(_image.length)] = data;
+        } else if (name == _report) {
+          report = utf8.decode(data, allowMalformed: true);
         }
       }
     } on RangeError {
       throw const FormatException('A damaged career backup');
     }
     if (database == null) throw const FormatException('No career inside');
-    return CareerBackup(database, images);
+    return CareerBackup(database, images, report: report);
   }
 
   /// A file name from the artist's name: "Nova Sky.mcsave".

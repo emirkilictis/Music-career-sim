@@ -1,3 +1,5 @@
+import '../core/error_log.dart';
+import '../widgets/bug_report.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:game/game.dart';
 
@@ -54,6 +56,8 @@ class _GameShellState extends State<GameShell> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _dailyBonus());
+    // A part that fails to draw offers a bug report (docs K307, K308).
+    ErrorLog.reporter = (context) => reportBug(context, widget.state);
   }
 
   /// Premium daily login bonus, once per calendar day (docs §20.2).
@@ -70,6 +74,7 @@ class _GameShellState extends State<GameShell> {
 
   @override
   void dispose() {
+    ErrorLog.reporter = null;
     widget.state.dispose();
     super.dispose();
   }
@@ -312,6 +317,14 @@ class _GameShellState extends State<GameShell> {
                       ),
                     ),
                     MoneyPill(text: fmt.money(p.moneyCents)),
+                    // Report a bug, with the save (docs K307).
+                    IconButton(
+                      tooltip: l.bugReportTitle,
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(Icons.bug_report_outlined,
+                          color: AppColors.textFaint, size: 20),
+                      onPressed: () => reportBug(context, career),
+                    ),
                   ]),
                 ),
               Expanded(

@@ -10451,5 +10451,14 @@
         "type": "String"
       }
     }
-  }
+  },
+  "bugReportTitle": "Report a bug",
+  "bugReportHow": "Say what happened. The report takes this career's save with it, so the bug can be played again and fixed.",
+  "bugReportHint": "Which screen, what you tapped, what you expected and what you saw",
+  "bugReportMake": "Make the report",
+  "bugReportMaking": "Making the report…",
+  "bugReportReady": "The report is ready",
+  "bugReportSend": "Save the file and send it to the developer (a DM is fine). It opens as a career with “Restore a backup”.",
+  "bugReportCopy": "Copy the text",
+  "bugReportCopied": "Copied"
 }

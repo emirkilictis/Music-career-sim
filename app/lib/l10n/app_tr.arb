@@ -2836,5 +2836,14 @@
   "preOrderHint": "Çıkışına kadarki {weeks} hafta boyunca hayranlar sipariş verebilir; ilk haftasında gönderilir ve listelerde sayılır: o hafta yaklaşık %{lift} daha fazla baskı satışı. Ücreti şimdi ödenir.",
   "preOrderSurprise": "Sürpriz single’ın ön sipariş haftası yok: baskılar sadece onunla birlikte çıkar.",
   "preOrderNone": "Baskısız",
-  "preOrderConfirm": "Ön siparişe aç · {cost}"
+  "preOrderConfirm": "Ön siparişe aç · {cost}",
+  "bugReportTitle": "Hata bildir",
+  "bugReportHow": "Ne olduğunu yaz. Bildirim bu kariyerin kaydını da içerir; böylece hata yeniden oynanıp düzeltilebilir.",
+  "bugReportHint": "Hangi ekran, neye dokundun, ne bekliyordun, ne gördün",
+  "bugReportMake": "Bildirimi hazırla",
+  "bugReportMaking": "Bildirim hazırlanıyor…",
+  "bugReportReady": "Bildirim hazır",
+  "bugReportSend": "Dosyayı kaydet ve geliştiriciye gönder (DM yeterli). Dosya “Yedekten geri yükle” ile kariyer olarak açılır.",
+  "bugReportCopy": "Metni kopyala",
+  "bugReportCopied": "Kopyalandı"
 }

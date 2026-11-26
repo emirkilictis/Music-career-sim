@@ -2763,6 +2763,15 @@ k('preOrderHint','Fans can order them for the {weeks} weeks until it comes out; 
 k('preOrderSurprise','A surprise single has no pre-order weeks: the editions only come out with it.','Sürpriz single’ın ön sipariş haftası yok: baskılar sadece onunla birlikte çıkar.')
 k('preOrderNone','No editions','Baskısız')
 k('preOrderConfirm','Put on pre-order · {cost}','Ön siparişe aç · {cost}', cost='String')
+k('bugReportTitle','Report a bug','Hata bildir')
+k('bugReportHow','Say what happened. The report takes this career\'s save with it, so the bug can be played again and fixed.','Ne olduğunu yaz. Bildirim bu kariyerin kaydını da içerir; böylece hata yeniden oynanıp düzeltilebilir.')
+k('bugReportHint','Which screen, what you tapped, what you expected and what you saw','Hangi ekran, neye dokundun, ne bekliyordun, ne gördün')
+k('bugReportMake','Make the report','Bildirimi hazırla')
+k('bugReportMaking','Making the report…','Bildirim hazırlanıyor…')
+k('bugReportReady','The report is ready','Bildirim hazır')
+k('bugReportSend','Save the file and send it to the developer (a DM is fine). It opens as a career with “Restore a backup”.','Dosyayı kaydet ve geliştiriciye gönder (DM yeterli). Dosya “Yedekten geri yükle” ile kariyer olarak açılır.')
+k('bugReportCopy','Copy the text','Metni kopyala')
+k('bugReportCopied','Copied','Kopyalandı')
 def write(lang, idx):
     out = {'@@locale': lang}
     for key,(en,tr,ph) in S.items():

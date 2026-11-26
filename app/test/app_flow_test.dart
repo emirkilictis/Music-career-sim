@@ -423,6 +423,34 @@ void main() {
     expect(_ci('“Someday” is out!'), findsOneWidget);
     expect(_ci('Drafts in your vault'), findsNothing);
   });
+
+  // docs K307: a bug report from inside a career, with its save.
+  testWidgets('a bug report is made from the career', (tester) async {
+    phoneView(tester);
+    final app = TestApp.create();
+    addTearDown(app.dispose);
+    await tester.pumpWidget(app.widget);
+    await tester.pumpAndSettle();
+    await tester.tap(_ci('New career'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Luna Vale');
+    await tester.tap(_ci('Start career'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Report a bug'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+        find.byType(TextField).last, 'The charts tab froze');
+    await tester.tap(_ci('Make the report'));
+    for (var i = 0; i < 60 && _ci('The report is ready').evaluate().isEmpty;
+        i++) {
+      await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 100)));
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await tester.pumpAndSettle();
+    expect(_ci('The report is ready'), findsOneWidget);
+    expect(_ci('Copy the text'), findsOneWidget);
+  });
 }
 
 /// A text in any letter case (labels are set in capitals in the default
